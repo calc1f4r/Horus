@@ -411,7 +411,7 @@ Pattern: Missing Staleness Check
 **→ Consensus: MEDIUM**
 
 ### References Verified
-- [x] All file paths exist in DB/reports/
+- [x] All file paths exist in reports/
 - [x] Severity ratings match source reports
 - [x] Code examples extracted from actual reports
 - [x] No hallucinated protocols or findings

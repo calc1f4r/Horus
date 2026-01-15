@@ -18,11 +18,11 @@ vuln-database/
 │   │   └── twap/               # TWAP oracle issues
 │   ├── economic/               # Economic attack patterns
 │   ├── logic/                  # Business logic vulnerabilities
-│   ├── reports/                # Raw audit reports (source data)
-│   │   ├── pyth_findings/      # 198 raw Pyth vulnerability reports
-│   │   ├── chainlink_findings/ # Raw Chainlink audit reports
-│   │   └── [topic]_findings/   # Other raw findings
 │   └── [category]/             # Other vulnerability categories
+├── reports/                     # Raw audit reports (source data)
+│   ├── pyth_findings/          # 198 raw Pyth vulnerability reports
+│   ├── chainlink_findings/     # Raw Chainlink audit reports
+│   └── [topic]_findings/       # Other raw findings
 ├── Variant-analysis/            # Variant analysis methodology & tools
 │   ├── Methodology.md          # Variant analysis guide
 │   ├── Skills.md               # Required skills documentation
@@ -56,7 +56,7 @@ vuln-database/
 
 **Usage:**
 ```bash
-python solodit_fetcher.py --keyword "pyth" --output "./DB/reports/pyth_findings/"
+python solodit_fetcher.py --keyword "pyth" --output "./reports/pyth_findings/"
 ```
 
 ### Agents.md
@@ -68,20 +68,26 @@ python solodit_fetcher.py --keyword "pyth" --output "./DB/reports/pyth_findings/
 ## Raw Findings Folders
 
 ### Structure
-The `DB/` directory contains raw audit report folders alongside categorized vulnerability entries:
+The `reports/` directory at root level contains raw audit report folders, while `DB/` contains categorized vulnerability entries:
 
 ```
-DB/
+vuln-database/
 ├── reports/                    # Raw audit reports from various sources
 │   ├── pyth_findings/          # 198 raw Pyth vulnerability reports
 │   │   ├── m-01-missing-staleness-check-in-pythoracle-can-lead-to-forced-liquidations-and-th.md
 │   │   ├── m-03-confidence-interval-of-pyth-price-is-not-validated.md
 │   │   └── [190+ more reports].md
-│   └── chainlink_findings/     # Raw Chainlink audit reports
+│   └── chainlink_findings/     # 564 raw Chainlink audit reports
 │       └── [individual reports].md
-└── oracle/                     # Aggregated vulnerability patterns
-    └── pyth/
-        └── PYTH_ORACLE_VULNERABILITIES.md
+└── DB/
+    └── oracle/                 # Aggregated vulnerability patterns
+        ├── pyth/
+        │   └── PYTH_ORACLE_VULNERABILITIES.md
+        └── chainlink/
+            ├── CHAINLINK_PRICE_FEED_VULNERABILITIES.md
+            ├── CHAINLINK_VRF_VULNERABILITIES.md
+            ├── CHAINLINK_CCIP_VULNERABILITIES.md
+            └── CHAINLINK_AUTOMATION_VULNERABILITIES.md
 ```
 
 ### Purpose
@@ -150,7 +156,7 @@ Variant analysis is the process of identifying recurring vulnerability patterns 
 ```
 1. Fetch Findings
    ↓ (solodit_fetcher.py)
-2. Store Raw Reports (DB/reports/[topic]_findings/)
+2. Store Raw Reports (reports/[topic]_findings/)
    ↓
 3. Analyze Patterns (Agent reads all reports)
    ↓

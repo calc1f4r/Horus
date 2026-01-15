@@ -56,53 +56,53 @@ version: all
 ### Staleness Vulnerabilities
 | Report | Path | Severity | Audit Firm |
 |--------|------|----------|------------|
-| Mach Finance - Missing Staleness Check | `DB/reports/pyth_findings/m-1-missing-staleness-check-in-pythoracle-can-lead-to-forced-liquidations-and-th.md` | MEDIUM | Sherlock |
-| Astrolab - Using Stale Price | `DB/reports/pyth_findings/m-07-using-stale-price-in-pyth-network.md` | MEDIUM | Pashov Audit Group |
-| Oku Protocol - Incorrect Freshness Logic | `DB/reports/pyth_findings/m-2-incorrect-freshness-logic-validation-in-pythoracle-breaking-the-entire-mecha.md` | MEDIUM | Sherlock |
+| Mach Finance - Missing Staleness Check | `reports/pyth_findings/m-1-missing-staleness-check-in-pythoracle-can-lead-to-forced-liquidations-and-th.md` | MEDIUM | Sherlock |
+| Astrolab - Using Stale Price | `reports/pyth_findings/m-07-using-stale-price-in-pyth-network.md` | MEDIUM | Pashov Audit Group |
+| Oku Protocol - Incorrect Freshness Logic | `reports/pyth_findings/m-2-incorrect-freshness-logic-validation-in-pythoracle-breaking-the-entire-mecha.md` | MEDIUM | Sherlock |
 
 ### Confidence Interval Vulnerabilities
 | Report | Path | Severity | Audit Firm |
 |--------|------|----------|------------|
-| Hedge Vault - Missing Confidence Check | `DB/reports/pyth_findings/missing-pyth-oracle-confidence-interval-check.md` | LOW | OtterSec |
-| Tsunami GMX - Dangerous Confidence Use | `DB/reports/pyth_findings/dangerous-use-of-confidence-interval.md` | LOW | OtterSec |
-| Reya Network - Confidence Not Validated | `DB/reports/pyth_findings/m-03-confidence-interval-of-pyth-price-is-not-validated.md` | MEDIUM | Pashov Audit Group |
+| Hedge Vault - Missing Confidence Check | `reports/pyth_findings/missing-pyth-oracle-confidence-interval-check.md` | LOW | OtterSec |
+| Tsunami GMX - Dangerous Confidence Use | `reports/pyth_findings/dangerous-use-of-confidence-interval.md` | LOW | OtterSec |
+| Reya Network - Confidence Not Validated | `reports/pyth_findings/m-03-confidence-interval-of-pyth-price-is-not-validated.md` | MEDIUM | Pashov Audit Group |
 
 ### Exponent Handling Vulnerabilities
 | Report | Path | Severity | Audit Firm |
 |--------|------|----------|------------|
-| Radiant Riz - Exponent Unchecked | `DB/reports/pyth_findings/pyth-feeds-exponent-unchecked.md` | LOW | OpenZeppelin |
-| Euler Oracle - Positive Exponent | `DB/reports/pyth_findings/the-pythoracle-wont-work-with-positive-expparameter.md` | LOW | Spearbit |
-| Folks Finance - Unsafe Casting | `DB/reports/pyth_findings/unsafe-casting-will-lead-to-break-of-pythnode-oracle.md` | LOW | Immunefi |
+| Radiant Riz - Exponent Unchecked | `reports/pyth_findings/pyth-feeds-exponent-unchecked.md` | LOW | OpenZeppelin |
+| Euler Oracle - Positive Exponent | `reports/pyth_findings/the-pythoracle-wont-work-with-positive-expparameter.md` | LOW | Spearbit |
+| Folks Finance - Unsafe Casting | `reports/pyth_findings/unsafe-casting-will-lead-to-break-of-pythnode-oracle.md` | LOW | Immunefi |
 
 ### Same-Transaction Price Manipulation
 | Report | Path | Severity | Audit Firm |
 |--------|------|----------|------------|
-| Perpetual V3 - Two Prices Same TX | `DB/reports/pyth_findings/h-1-two-pyth-prices-can-be-used-in-the-same-transaction-to-attack-the-lp-pools.md` | HIGH | Sherlock |
-| FlatMoney - Different Prices Same TX | `DB/reports/pyth_findings/m-8-oracle-can-return-different-prices-in-same-transaction.md` | MEDIUM | Sherlock |
-| Nabla - Arbitrage Same Block | `DB/reports/pyth_findings/m-10-arbitrage-opportunity-using-different-prices-in-the-same-block.md` | MEDIUM | Pashov Audit Group |
+| Perpetual V3 - Two Prices Same TX | `reports/pyth_findings/h-1-two-pyth-prices-can-be-used-in-the-same-transaction-to-attack-the-lp-pools.md` | HIGH | Sherlock |
+| FlatMoney - Different Prices Same TX | `reports/pyth_findings/m-8-oracle-can-return-different-prices-in-same-transaction.md` | MEDIUM | Sherlock |
+| Nabla - Arbitrage Same Block | `reports/pyth_findings/m-10-arbitrage-opportunity-using-different-prices-in-the-same-block.md` | MEDIUM | Pashov Audit Group |
 
 ### Pull-Based Oracle Exploitation
 | Report | Path | Severity | Audit Firm |
 |--------|------|----------|------------|
-| Prodigy - Empty Price Update | `DB/reports/pyth_findings/price-manipulation-vulnerability-in-vault-execution-due-to-unchecked-pyth-oracle.md` | HIGH | Halborn |
-| Perennial V2 - Out-of-Order Commits | `DB/reports/pyth_findings/m-2-pythoracle-commit-function-doesnt-require-nor-stores-pyth-price-publish-time.md` | MEDIUM | Sherlock |
+| Prodigy - Empty Price Update | `reports/pyth_findings/price-manipulation-vulnerability-in-vault-execution-due-to-unchecked-pyth-oracle.md` | HIGH | Halborn |
+| Perennial V2 - Out-of-Order Commits | `reports/pyth_findings/m-2-pythoracle-commit-function-doesnt-require-nor-stores-pyth-price-publish-time.md` | MEDIUM | Sherlock |
 
 ### Price Update Fee Vulnerabilities
 | Report | Path | Severity | Audit Firm |
 |--------|------|----------|------------|
-| Prodigy - Excess ETH Not Refunded | `DB/reports/pyth_findings/excess-eth-not-refunded-in-price-update-transactions.md` | MEDIUM | Halborn |
+| Prodigy - Excess ETH Not Refunded | `reports/pyth_findings/excess-eth-not-refunded-in-price-update-transactions.md` | MEDIUM | Halborn |
 
 ### Self-Liquidation Attacks
 | Report | Path | Severity | Audit Firm |
 |--------|------|----------|------------|
-| Euler EVK - Self-Liquidation Profit | `DB/reports/pyth_findings/self-liquidations-of-leveraged-positions-can-be-profitable.md` | HIGH | Spearbit |
-| Apollon - Pull Oracle Self-Liquidation | `DB/reports/pyth_findings/m-12-pull-based-oracle-may-allow-for-profitable-self-liquidations.md` | MEDIUM | Recon Audits |
+| Euler EVK - Self-Liquidation Profit | `reports/pyth_findings/self-liquidations-of-leveraged-positions-can-be-profitable.md` | HIGH | Spearbit |
+| Apollon - Pull Oracle Self-Liquidation | `reports/pyth_findings/m-12-pull-based-oracle-may-allow-for-profitable-self-liquidations.md` | MEDIUM | Recon Audits |
 
 ### Pyth Entropy (VRF) Vulnerabilities
 | Report | Path | Severity | Audit Firm |
 |--------|------|----------|------------|
-| Pyth Entropy - Seed Not Bound | `DB/reports/pyth_findings/fortuna-entropy-seed-does-not-bind-provider-identity.md` | LOW | Trail of Bits |
-| Megapot - Provider Change Attack | `DB/reports/pyth_findings/m-06-changes-to-pyth-entropy-provider-used-by-scaledentropyprovider-allow-attack.md` | MEDIUM | Code4rena |
+| Pyth Entropy - Seed Not Bound | `reports/pyth_findings/fortuna-entropy-seed-does-not-bind-provider-identity.md` | LOW | Trail of Bits |
+| Megapot - Provider Change Attack | `reports/pyth_findings/m-06-changes-to-pyth-entropy-provider-used-by-scaledentropyprovider-allow-attack.md` | MEDIUM | Code4rena |
 
 ### External Links
 - [Pyth Network Documentation](https://docs.pyth.network/)
@@ -140,9 +140,9 @@ version: all
 Pyth Network is a pull-based oracle where consumers must provide signed price updates. Unlike push-based oracles (Chainlink), prices are NOT automatically updated on-chain. This creates critical staleness risks when protocols fail to validate price freshness.
 
 > **📚 Source Reports for Deep Dive:**
-> - `DB/reports/pyth_findings/m-1-missing-staleness-check-in-pythoracle-can-lead-to-forced-liquidations-and-th.md` (Mach Finance - Sherlock)
-> - `DB/reports/pyth_findings/m-07-using-stale-price-in-pyth-network.md` (Astrolab - Pashov)
-> - `DB/reports/pyth_findings/m-2-incorrect-freshness-logic-validation-in-pythoracle-breaking-the-entire-mecha.md` (Oku - Sherlock)
+> - `reports/pyth_findings/m-1-missing-staleness-check-in-pythoracle-can-lead-to-forced-liquidations-and-th.md` (Mach Finance - Sherlock)
+> - `reports/pyth_findings/m-07-using-stale-price-in-pyth-network.md` (Astrolab - Pashov)
+> - `reports/pyth_findings/m-2-incorrect-freshness-logic-validation-in-pythoracle-breaking-the-entire-mecha.md` (Oku - Sherlock)
 
 ### Vulnerability Description
 
@@ -160,7 +160,7 @@ Protocols use `getPriceUnsafe()` or fail to enforce proper staleness checks with
 ### Vulnerable Pattern Examples
 
 **Example 1: Using getPriceUnsafe Without Staleness Check** [MEDIUM]
-> 📖 Reference: `DB/reports/pyth_findings/m-1-missing-staleness-check-in-pythoracle-can-lead-to-forced-liquidations-and-th.md`
+> 📖 Reference: `reports/pyth_findings/m-1-missing-staleness-check-in-pythoracle-can-lead-to-forced-liquidations-and-th.md`
 ```solidity
 // ❌ VULNERABLE: No staleness validation at all
 function getPrice(bytes32 priceId) public view returns (int64) {
@@ -191,7 +191,7 @@ function getPrice(bytes32 priceId) public view returns (int64) {
 ```
 
 **Example 4: Incorrect Freshness Logic (Inverted Condition)** [MEDIUM]
-> 📖 Reference: `DB/reports/pyth_findings/m-2-incorrect-freshness-logic-validation-in-pythoracle-breaking-the-entire-mecha.md`
+> 📖 Reference: `reports/pyth_findings/m-2-incorrect-freshness-logic-validation-in-pythoracle-breaking-the-entire-mecha.md`
 ```solidity
 // ❌ VULNERABLE: Logic is inverted - always considers prices stale
 function checkInRange(bytes32 priceId, uint256 noOlderThan) public view {
@@ -203,7 +203,7 @@ function checkInRange(bytes32 priceId, uint256 noOlderThan) public view {
 ```
 
 **Example 5: No Staleness Check in View Function** [LOW]
-> 📖 Reference: `DB/reports/pyth_findings/m-07-using-stale-price-in-pyth-network.md`
+> 📖 Reference: `reports/pyth_findings/m-07-using-stale-price-in-pyth-network.md`
 ```solidity
 // ❌ VULNERABLE: Exchange rate calculation with potentially stale price
 function assetExchangeRate(uint8 inputId) public view returns (uint256) {
@@ -311,8 +311,8 @@ function getSafePriceWithUpdate(
 Pyth prices include a confidence interval (`conf`) representing price uncertainty. High confidence means uncertain/unreliable price data. Ignoring this field can lead to accepting manipulated or unreliable prices.
 
 > **📚 Source Reports for Deep Dive:**
-> - `DB/reports/pyth_findings/m-03-confidence-interval-of-pyth-price-is-not-validated.md` (Velar - Pashov)
-> - `DB/reports/pyth_findings/dangerous-price-spread-for-users.md` (LoopFi - Pashov)
+> - `reports/pyth_findings/m-03-confidence-interval-of-pyth-price-is-not-validated.md` (Velar - Pashov)
+> - `reports/pyth_findings/dangerous-price-spread-for-users.md` (LoopFi - Pashov)
 
 ### Vulnerability Description
 
@@ -330,7 +330,7 @@ Protocols ignore the `price.conf` field or use arbitrary constant thresholds ins
 ### Vulnerable Pattern Examples
 
 **Example 1: Completely Ignoring Confidence Interval** [LOW]
-> 📖 Reference: `DB/reports/pyth_findings/m-03-confidence-interval-of-pyth-price-is-not-validated.md`
+> 📖 Reference: `reports/pyth_findings/m-03-confidence-interval-of-pyth-price-is-not-validated.md`
 ```solidity
 // ❌ VULNERABLE: No confidence check at all
 function getPrice(bytes32 priceId) public view returns (int64) {
@@ -443,9 +443,9 @@ function validateAndGetPrice(bytes32 priceId) public view returns (int64, uint64
 Pyth prices include an `expo` (exponent) field for decimal normalization. The actual price is `price * 10^expo`. Incorrect handling of this field leads to severely mispriced assets.
 
 > **📚 Source Reports for Deep Dive:**
-> - `DB/reports/pyth_findings/pyth-feeds-exponent-unchecked.md` (Thala - OpenZeppelin)
-> - `DB/reports/pyth_findings/the-pythoracle-wont-work-with-positive-expparameter.md` (Perennial - Spearbit)
-> - `DB/reports/pyth_findings/unsafe-casting-will-lead-to-break-of-pythnode-oracle.md` (Synthetix - Immunefi)
+> - `reports/pyth_findings/pyth-feeds-exponent-unchecked.md` (Thala - OpenZeppelin)
+> - `reports/pyth_findings/the-pythoracle-wont-work-with-positive-expparameter.md` (Perennial - Spearbit)
+> - `reports/pyth_findings/unsafe-casting-will-lead-to-break-of-pythnode-oracle.md` (Synthetix - Immunefi)
 
 ### Vulnerability Description
 
@@ -602,9 +602,9 @@ function getValidatedPrice(bytes32 priceId) public view returns (uint256) {
 Pyth's pull-based model allows multiple price updates within a single transaction. An attacker can submit different prices to enter and exit positions at favorable rates, creating risk-free arbitrage.
 
 > **📚 Source Reports for Deep Dive:**
-> - `DB/reports/pyth_findings/m-8-oracle-can-return-different-prices-in-same-transaction.md` (FlatMoney - Sherlock)
-> - `DB/reports/pyth_findings/m-10-arbitrage-opportunity-using-different-prices-in-the-same-block.md` (Nabla - Pashov)
-> - `DB/reports/pyth_findings/lp-deposits-and-withdrawals-can-be-arbitraged.md` (Perpetual V3 - OtterSec)
+> - `reports/pyth_findings/m-8-oracle-can-return-different-prices-in-same-transaction.md` (FlatMoney - Sherlock)
+> - `reports/pyth_findings/m-10-arbitrage-opportunity-using-different-prices-in-the-same-block.md` (Nabla - Pashov)
+> - `reports/pyth_findings/lp-deposits-and-withdrawals-can-be-arbitraged.md` (Perpetual V3 - OtterSec)
 
 ### Vulnerability Description
 
@@ -803,9 +803,9 @@ contract TrustedLPPool {
 Unlike push-based oracles (Chainlink) where keepers update prices, Pyth requires users to submit price updates. This creates unique attack vectors where users can strategically withhold or submit favorable prices.
 
 > **📚 Source Reports for Deep Dive:**
-> - `DB/reports/pyth_findings/price-manipulation-vulnerability-in-vault-execution-due-to-unchecked-pyth-oracle.md` (Pear Protocol - Halborn)
-> - `DB/reports/pyth_findings/m-2-pythoracle-commit-function-doesnt-require-nor-stores-pyth-price-publish-time.md` (Perennial - Sherlock)
-> - `DB/reports/pyth_findings/attacker-can-bypass-price-update-with-empty-priceupdatedata.md` (Cega - Pashov)
+> - `reports/pyth_findings/price-manipulation-vulnerability-in-vault-execution-due-to-unchecked-pyth-oracle.md` (Pear Protocol - Halborn)
+> - `reports/pyth_findings/m-2-pythoracle-commit-function-doesnt-require-nor-stores-pyth-price-publish-time.md` (Perennial - Sherlock)
+> - `reports/pyth_findings/attacker-can-bypass-price-update-with-empty-priceupdatedata.md` (Cega - Pashov)
 
 ### Vulnerability Description
 
@@ -959,8 +959,8 @@ contract TrustedPriceUpdater {
 Pyth requires a fee (in native token) to update prices. Mishandling of this fee can lead to stuck funds, DoS conditions, or loss of user ETH.
 
 > **📚 Source Reports for Deep Dive:**
-> - `DB/reports/pyth_findings/excess-eth-not-refunded-in-price-update-transactions.md` (Pear Protocol - Halborn)
-> - `DB/reports/pyth_findings/pyth-oracle-update-fee-is-lost-when-price-does-not-need-updating.md` (Cega - Pashov)
+> - `reports/pyth_findings/excess-eth-not-refunded-in-price-update-transactions.md` (Pear Protocol - Halborn)
+> - `reports/pyth_findings/pyth-oracle-update-fee-is-lost-when-price-does-not-need-updating.md` (Cega - Pashov)
 
 ### Vulnerability Description
 
@@ -1063,7 +1063,7 @@ function executeWithOracle(bytes[] calldata priceData) external payable {
 Pull-based oracles enable attackers to open positions and liquidate themselves in the same transaction by sandwiching price updates, extracting value from the protocol.
 
 > **📚 Source Reports for Deep Dive:**
-> - `DB/reports/pyth_findings/self-liquidations-of-leveraged-positions-can-be-profitable.md` (Euler - Spearbit)
+> - `reports/pyth_findings/self-liquidations-of-leveraged-positions-can-be-profitable.md` (Euler - Spearbit)
 
 ### Vulnerability Description
 
@@ -1170,8 +1170,8 @@ function getBlockLockedPrice(bytes32 feedId) internal returns (uint256) {
 Proper validation of Pyth's `publishTime` is crucial. Incorrect comparisons or missing validations can allow manipulation or break functionality.
 
 > **📚 Source Reports for Deep Dive:**
-> - `DB/reports/pyth_findings/m-2-pythoracle-commit-function-doesnt-require-nor-stores-pyth-price-publish-time.md` (Perennial - Sherlock)
-> - `DB/reports/pyth_findings/m-2-incorrect-freshness-logic-validation-in-pythoracle-breaking-the-entire-mecha.md` (Oku - Sherlock)
+> - `reports/pyth_findings/m-2-pythoracle-commit-function-doesnt-require-nor-stores-pyth-price-publish-time.md` (Perennial - Sherlock)
+> - `reports/pyth_findings/m-2-incorrect-freshness-logic-validation-in-pythoracle-breaking-the-entire-mecha.md` (Oku - Sherlock)
 
 ### Vulnerable Pattern Examples
 
@@ -1247,8 +1247,8 @@ function getValidatedPrice(bytes32 priceId, uint256 maxAge) public view returns 
 Pyth Entropy provides verifiable randomness. Vulnerabilities include sequence number collisions, callback manipulation, and entropy seed binding issues.
 
 > **📚 Source Reports for Deep Dive:**
-> - `DB/reports/pyth_findings/fortuna-entropy-seed-does-not-bind-provider-identity.md` (Pyth Network - Trail of Bits)
-> - `DB/reports/pyth_findings/m-06-changes-to-pyth-entropy-provider-used-by-scaledentropyprovider-allow-attack.md` (Megapot - Code4rena)
+> - `reports/pyth_findings/fortuna-entropy-seed-does-not-bind-provider-identity.md` (Pyth Network - Trail of Bits)
+> - `reports/pyth_findings/m-06-changes-to-pyth-entropy-provider-used-by-scaledentropyprovider-allow-attack.md` (Megapot - Code4rena)
 
 ### Vulnerable Pattern Examples
 
@@ -1345,8 +1345,8 @@ function _entropyCallback(uint64 sequence, bytes32 randomNumber) internal {
 Misconfiguration of Pyth integration parameters, hardcoded addresses, and improper setup can cause protocol failures.
 
 > **📚 Source Reports for Deep Dive:**
-> - `DB/reports/pyth_findings/pyth-price-feed-doesnt-use-latest-hermes-api-endpoint.md` (Cega - Pashov)
-> - `DB/reports/pyth_findings/using-deprecated-hermes-api-endpoints.md` (Truflation - Pashov)
+> - `reports/pyth_findings/pyth-price-feed-doesnt-use-latest-hermes-api-endpoint.md` (Cega - Pashov)
+> - `reports/pyth_findings/using-deprecated-hermes-api-endpoints.md` (Truflation - Pashov)
 
 ### Vulnerable Pattern Examples
 
