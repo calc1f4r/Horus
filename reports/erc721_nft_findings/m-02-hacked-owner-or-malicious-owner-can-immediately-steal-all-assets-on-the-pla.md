@@ -1,0 +1,176 @@
+---
+# Core Classification
+protocol: Blur Exchange
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 19851
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2022-11-non-fungible
+source_link: https://code4rena.com/reports/2022-11-non-fungible
+github_link: https://github.com/code-423n4/2022-11-non-fungible-findings/issues/179
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - dexes
+  - cdp
+  - services
+  - launchpad
+  - synthetics
+
+# Audit Details
+report_date: unknown
+finders_count: 0
+finders:
+---
+
+## Vulnerability Title
+
+[M-02] Hacked owner or malicious owner can immediately steal all assets on the platform
+
+### Overview
+
+
+This bug report is about the security model of Non-Fungible, a platform that allows users to approve their ERC20/ERC721/ERC1155 tokens to the ExecutionDelegate contract, which accepts transfer requests from Exchange.sol. The bug is that Exchange.sol is an immediately upgradeable ERC1967Proxy, meaning that a malicious owner or hacked owner can upgrade the contract to one that steals all the assets approved to Non-Fungible. If this were to happen, the owner or hacker would be able to steal all the assets on the platform.
+
+The recommended mitigation step is for Exchange contract proxy to implement a timelock, giving users enough time to withdraw their approvals before any malicious action can take place. The judge for this bug report has deemed it to be of Medium severity, to warn users of the protocol of this category of risks. The submission has been acknowledged by the Blur team.
+
+### Original Finding Content
+
+[Exchange.sol#L639](https://github.com/code-423n4/2022-11-non-fungible/blob/323b7cbf607425dd81da96c0777c8b12e800305d/contracts/Exchange.sol#L639):br
+[Exchange.sol#L30](https://github.com/code-423n4/2022-11-non-fungible/blob/323b7cbf607425dd81da96c0777c8b12e800305d/contracts/Exchange.sol#L30):br
+
+In Non-Fungible's security model, users approve their ERC20 / ERC721 / ERC1155 tokens to the ExecutionDelegate contract, which accepts transfer requests from Exchange.
+
+The requests are made here:
+```
+function _transferTo(
+address paymentToken,
+address from,
+address to,
+uint256 amount
+) internal {
+if (amount == 0) {
+return;
+}
+if (paymentToken == address(0)) {
+/* Transfer funds in ETH. */
+require(to != address(0), "Transfer to zero address");
+(bool success,) = payable(to).call{value: amount}("");
+require(success, "ETH transfer failed");
+} else if (paymentToken == POOL) {
+/* Transfer Pool funds. */
+bool success = IPool(POOL).transferFrom(from, to, amount);
+require(success, "Pool transfer failed");
+} else if (paymentToken == WETH) {
+/* Transfer funds in WETH. */
+executionDelegate.transferERC20(WETH, from, to, amount);
+} else {
+revert("Invalid payment token");
+}
+}
+```
+
+```
+function _executeTokenTransfer(
+address collection,
+address from,
+address to,
+uint256 tokenId,
+uint256 amount,
+AssetType assetType
+) internal {
+/* Call execution delegate. */
+if (assetType == AssetType.ERC721) {
+executionDelegate.transferERC721(collection, from, to, tokenId);
+} else if (assetType == AssetType.ERC1155) {
+executionDelegate.transferERC1155(collection, from, to, tokenId, amount);
+}
+}
+```
+
+The issue is that there is a significant centralization risk trusting Exchange.sol contract to behave well, because it is an immediately upgradeable ERC1967Proxy. All it takes for a malicious owner or hacked owner to upgrade to the following contract:
+
+```
+function _stealTokens(
+address token,
+address from,
+address to,
+uint256 tokenId,
+uint256 amount,
+AssetType assetType
+) external onlyOwner {
+/* Call execution delegate. */
+if (assetType == AssetType.ERC721) {
+executionDelegate.transferERC721(token, from, to, tokenId);
+} else if (assetType == AssetType.ERC1155) {
+executionDelegate.transferERC1155(token, from, to, tokenId, amount);
+} else if (assetType == AssetType.ERC20) {
+executionDelegate.transferERC20(token, from, to, amount);
+}
+```
+
+At this point hacker or owner can steal all the assets approved to Non-Fungible.
+
+### Impact
+
+Hacked owner or malicious owner can immediately steal all assets on the platform.
+
+### Recommended Mitigation Steps
+
+Exchange contract proxy should implement a timelock, to give users enough time to withdraw their approvals before some malicious action becomes possible.
+
+### Judging Note from Warden
+
+The status quo regarding significant centralization vectors has always been to award Medium severity, in order to warn users of the protocol of this category of risks. See [here](https://gist.github.com/GalloDaSballo/881e7a45ac14481519fb88f34fdb8837) for list of centralization issues previously judged.
+
+**[berndartmuller (judge) commented](https://github.com/code-423n4/2022-11-non-fungible-findings/issues/179#issuecomment-1318420859):**
+> Using this submission as the primary issue for centralization risks.
+
+**[nonfungible47 (Blur) acknowledged](https://github.com/code-423n4/2022-11-non-fungible-findings/issues/179#issuecomment-1324222401)**
+
+
+
+***
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Blur Exchange |
+| Report Date | N/A |
+| Finders | N/A |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2022-11-non-fungible
+- **GitHub**: https://github.com/code-423n4/2022-11-non-fungible-findings/issues/179
+- **Contest**: https://code4rena.com/reports/2022-11-non-fungible
+
+### Keywords for Search
+
+`vulnerability`
+

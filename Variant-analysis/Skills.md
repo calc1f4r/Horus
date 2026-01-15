@@ -6,7 +6,7 @@ Your role is to:
 1. **Read** multiple vulnerability reports from `reports/<topic>/` folder
 2. **Identify** common patterns, root causes, and variants across different reports
 3. **Synthesize** comprehensive vulnerability entries following [TEMPLATE.md](../TEMPLATE.md)
-4. **Optimize** entries for semantic search and vector database indexing 
+4. **Optimize** When a generic vulnerability (e.g., off-by-one, missing bounds checks, whitelisting bypass, pause/unpause and various others) is found, ensure db/general/ exists, then create or update an entry using [Template.md](../TEMPLATE.md) under the preferred structure db/general/<vulnerability_class>/generaldb.md; if the class folder does not exist, create it, and if restructuring is needed, migrate all existing data without deleting or losing any prior entries.
 
 ## The Five-Step Analysis Process
 
