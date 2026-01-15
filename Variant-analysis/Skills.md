@@ -6,7 +6,7 @@ Your role is to:
 1. **Read** multiple vulnerability reports from `DB/reports/<topic>/` folder
 2. **Identify** common patterns, root causes, and variants across different reports
 3. **Synthesize** comprehensive vulnerability entries following [TEMPLATE.md](../TEMPLATE.md)
-4. **Optimize** entries for semantic search and vector database indexing
+4. **Optimize** entries for semantic search and vector database indexing 
 
 ## The Five-Step Analysis Process
 
