@@ -1,0 +1,152 @@
+---
+# Core Classification
+protocol: Cosmos Module
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 51417
+audit_firm: Halborn
+contest_link: https://www.halborn.com/audits/elys-network/cosmos-module
+source_link: https://www.halborn.com/audits/elys-network/cosmos-module
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - Halborn
+---
+
+## Vulnerability Title
+
+Misleading Error Messages and Comments in msgClaimRewards and performMsgClaimRewards Functions
+
+### Overview
+
+
+This bug report highlights several instances of misleading error messages and comments in the provided code snippet. These inaccuracies can cause confusion and difficulty in understanding the code's purpose and behavior. The report recommends updating the messages and comments to accurately reflect the code's functionality. The Elys Network team has solved the issue by implementing the suggested changes. 
+
+### Original Finding Content
+
+##### Description
+
+The code snippet provided contains several instances of misleading error messages and comments that do not accurately reflect the functionality of the code. This can lead to confusion and difficulty in understanding the purpose and behavior of the functions.
+
+  
+
+In the `msgClaimRewards` function:
+
+1. The error message "failed to serialize stake" is incorrect. The function is actually serializing the response, not a [stake.In](http://stake.In) the `performMsgClaimRewards` function:
+
+1. The error message "invalid address" is not descriptive enough. It should specify that the error occurs when parsing the sender address.  
+2. The error message "failed validating msgMsgDelegate" is incorrect. The function is validating `msgMsgClaimRewards`, not `msgMsgDelegate`.  
+3. The error message "elys redelegation msg" is incorrect. The function is performing a claim rewards operation, not a redelegation.  
+4. The response message "Redelegation succeed!" is incorrect. It should indicate that the claim rewards operation succeeded. These misleading error messages and comments can make it difficult for developers to understand the purpose and behavior of the code, leading to confusion and potential misinterpretation.
+
+  
+
+```
+func performMsgClaimRewards(f *masterchefkeeper.Keeper, ctx sdk.Context, contractAddr sdk.AccAddress, msgClaimRewards *types.MsgClaimRewards) (*wasmbindingstypes.RequestResponse, error) {
+	if msgClaimRewards == nil {
+		return nil, wasmvmtypes.InvalidRequest{Err: "Invalid claim rewards parameter"}
+	}
+
+	msgServer := masterchefkeeper.NewMsgServerImpl(*f)
+	_, err := sdk.AccAddressFromBech32(msgClaimRewards.Sender)
+	if err != nil {
+		return nil, errorsmod.Wrap(err, "invalid address")
+	}
+
+	msgMsgClaimRewards := &types.MsgClaimRewards{
+		Sender:  msgClaimRewards.Sender,
+		PoolIds: msgClaimRewards.PoolIds,
+	}
+
+	if err := msgMsgClaimRewards.ValidateBasic(); err != nil {
+		return nil, errorsmod.Wrap(err, "failed validating msgMsgDelegate")
+	}
+
+	_, err = msgServer.ClaimRewards(sdk.WrapSDKContext(ctx), msgMsgClaimRewards) // Discard the response because it's empty
+	if err != nil {
+		return nil, errorsmod.Wrap(err, "elys redelegation msg")
+	}
+
+	resp := &wasmbindingstypes.RequestResponse{
+		Code:   paramtypes.RES_OK,
+		Result: "Redelegation succeed!",
+	}
+
+	return resp, nil
+}
+```
+
+##### BVSS
+
+[AO:A/AC:L/AX:L/C:N/I:M/A:N/D:N/Y:N/R:N/S:C (6.3)](/bvss?q=AO:A/AC:L/AX:L/C:N/I:M/A:N/D:N/Y:N/R:N/S:C)
+
+##### Recommendation
+
+To improve the clarity and maintainability of the code, it is recommended to update the error messages and comments to accurately reflect the functionality of the code. Here are the suggested changes:1. In the `msgClaimRewards` function:  
+   - Update the error message to: "failed to serialize response"2. In the `performMsgClaimRewards` function:  
+   - Update the error message to: "invalid sender address"  
+   - Update the error message to: "failed validating msgMsgClaimRewards"  
+   - Update the error message to: "failed to process claim rewards"  
+   - Update the response message to: "Claim rewards succeeded!"
+
+  
+
+Remediation Plan
+----------------
+
+**SOLVED:** The **Elys Network team** solved this issue by implementing the suggested recommendation.
+
+##### Remediation Hash
+
+<https://github.com/elys-network/elys/pull/572/commits/335ed95d2075b720dc5497b14e7a0c103dcf03ba>
+
+##### References
+
+[elys-network/elys/x/masterchef/client/wasm/msg\_claim\_rewards.go#L56-L57](https://github.com/elys-network/elys/blob/930e03dabbf7ee463934be2ad37422baa0964319/x/masterchef/client/wasm/msg_claim_rewards.go#L56-L57)
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Halborn |
+| Protocol | Cosmos Module |
+| Report Date | N/A |
+| Finders | Halborn |
+
+### Source Links
+
+- **Source**: https://www.halborn.com/audits/elys-network/cosmos-module
+- **GitHub**: N/A
+- **Contest**: https://www.halborn.com/audits/elys-network/cosmos-module
+
+### Keywords for Search
+
+`vulnerability`
+

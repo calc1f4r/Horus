@@ -1,0 +1,138 @@
+---
+# Core Classification
+protocol: Babylonchain
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 40478
+audit_firm: Cantina
+contest_link: https://cantina.xyz/portfolio/3cdcca63-f15d-4cbe-96b2-fa52aa777737
+source_link: https://cdn.cantina.xyz/reports/cantina_competition_babylon_may2024.pdf
+github_link: none
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - n4nika
+  - zigtur
+---
+
+## Vulnerability Title
+
+Spending multiple Unbonding transactions is not supported by the Staking indexer 
+
+### Overview
+
+
+The report discusses a bug in the getSpentUnbondingTx function, which is used to determine if a transaction has spent an Unbonding transaction. However, the function is unable to retrieve multiple Unbonding transactions spent within a single Bitcoin transaction, causing incorrect data in the offchain database. This bug is likely to occur when stakers are unbonding multiple stakes at once. The impact is medium and the likelihood is high. The bug has been identified in the getSpentUnbondingTx function and has been fixed in staking-indexer PR 124. The recommendation is to update the logic in HandleConfirmedBlock to handle the spending of multiple Unbonding transactions.
+
+### Original Finding Content
+
+## Context
+**File:** `indexer.go#L683-L691`
+
+## Description
+The `getSpentUnbondingTx` function is used to define if a transaction spent an Unbonding transaction. If so, this Unbonding transaction is returned and specific operations are done with this transaction (see `HandleConfirmedBlock`). 
+
+However, multiple Unbonding transactions can be spent within a single Bitcoin transaction. `getSpentUnbondingTx` will be able to retrieve only the first Unbonding transaction spent; the rest will not be retrieved. This will break the offchain database that is supposed to follow the staking state.
+
+## Impact
+**Severity:** Medium  
+The offchain database following unbonding transactions will be incorrect, and spent Unbonding transactions will keep the status unspent.
+
+## Likelihood
+**Likelihood:** High  
+Stakers can spend multiple Unbonding transactions, especially when they are unbonding multiple stakes through the Timelock path at once.
+
+## Proof of Concept
+The issue lies in the `getSpentUnbondingTx`. It can't handle the spending of multiple unbonding transactions (UTXO) within a single Bitcoin transaction.
+
+```go
+func (si *StakingIndexer) getSpentUnbondingTx(tx *wire.MsgTx) (*indexerstore.StoredUnbondingTransaction, int) {
+    for i, txIn := range tx.TxIn {
+        // @POC: loop through input transactions
+        maybeUnbondingTxHash := txIn.PreviousOutPoint.Hash
+        unbondingTx, err := si.GetUnbondingTxByHash(&maybeUnbondingTxHash)
+        if err != nil || unbondingTx == nil {
+            continue
+        }
+        return unbondingTx, i // @POC: return only one unbonding transaction, but multiple can be used
+    }
+    return nil, -1
+}
+```
+
+## Impact on HandleConfirmedBlock
+The processing of confirmed blocks in `HandleConfirmedBlock` will not be able to modify the state of the Unbonding transactions spent in this transaction.
+
+```go
+func (si *StakingIndexer) HandleConfirmedBlock(b *types.IndexedBlock) error {
+    // ...
+    for _, tx := range b.Txs {
+        msgTx := tx.MsgTx()
+        // ...
+        // 3. it's not a spending tx from a previous staking tx,
+        // check whether it spends a previous unbonding tx, and
+        // handle it if so
+        unbondingTx, spendingInputIdx := si.getSpentUnbondingTx(msgTx) // @POC: Only one unbonding transaction is retrieved here,→
+        if spendingInputIdx >= 0 {
+            // this is a spending tx from the unbonding, validate it, and processes it
+            if err := si.handleSpendingUnbondingTransaction( // @POC: Only one unbonding transaction is marked as spent here,→
+                msgTx, unbondingTx, spendingInputIdx, uint64(b.Height)); err != nil {
+                return err
+            }
+            continue
+        }
+    }
+    // ...
+}
+```
+
+## Recommendation
+The `getSpentUnbondingTx` logic must handle the spending of multiple Unbonding transactions. This will impact the logic in `HandleConfirmedBlock`, as it calls this flawed function.
+
+**Babylon:** Fixed in staking-indexer PR 124.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Cantina |
+| Protocol | Babylonchain |
+| Report Date | N/A |
+| Finders | n4nika, zigtur |
+
+### Source Links
+
+- **Source**: https://cdn.cantina.xyz/reports/cantina_competition_babylon_may2024.pdf
+- **GitHub**: N/A
+- **Contest**: https://cantina.xyz/portfolio/3cdcca63-f15d-4cbe-96b2-fa52aa777737
+
+### Keywords for Search
+
+`vulnerability`
+

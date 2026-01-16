@@ -52,36 +52,104 @@ version: all
 
 ## References & Source Reports
 
-> **For Agents**: These patterns are derived from security best practices and real-world audit findings.
+> **For Agents**: These patterns are derived from security best practices and real-world audit findings. Use the report paths to read detailed context.
 
 ### Account Validation Vulnerabilities
-| Category | Reference | Severity |
-|----------|-----------|----------|
-| Missing Signer Check | Neodyme Blog | CRITICAL |
-| Missing Owner Check | Neodyme Blog | HIGH |
-| Missing PDA Validation | Solana Security Course | HIGH |
-| Missing Writer Check | Solana Best Practices | MEDIUM |
+| Category | Report | Path | Severity | Audit Firm |
+|----------|--------|------|----------|------------|
+| Missing Signer Check | Signer Authorization Bypass | `reports/solana_findings/missing-signer-authorization.md` | CRITICAL | Various |
+| Missing Owner Check | Account Owner Not Checked | `reports/solana_findings/account-owner-is-not-checked.md` | HIGH | Various |
+| Missing PDA Validation | Lack of PDA Validation | `reports/solana_findings/lack-of-pda-validation.md` | HIGH | OtterSec |
+| Arbitrary CPI | Arbitrary CPI Calls | `reports/solana_findings/arbitrary-cpi.md` | CRITICAL | Halborn |
 
-### CPI Vulnerabilities
-| Category | Reference | Severity |
-|----------|-----------|----------|
-| Arbitrary CPI | Zellic Blog | CRITICAL |
-| Missing Bump Value | Solana Security Course | HIGH |
-| Incorrect Seed Order | Helius Blog | MEDIUM |
+### CPI and Invocation Vulnerabilities
+| Category | Report | Path | Severity | Audit Firm |
+|----------|--------|------|----------|------------|
+| Arbitrary Callback | Arbitrary Program Execution | `reports/solana_findings/arbitrary-callbacks-can-be-used-to-receive-arbitrary-cpi-calls-to-any-program.md` | CRITICAL | Unknown |
+| CPI Account Ordering | Program ID Confusion | `reports/solana_findings/cpi-account-ordering-vulnerability.md` | HIGH | Various |
+| Missing Bump Value | PDA Bump Mismatch | `reports/solana_findings/missing-bump-seed-validation.md` | HIGH | Various |
 
 ### Token & Mint Vulnerabilities
-| Category | Reference | Severity |
-|----------|-----------|----------|
-| Fee-on-Transfer Handling | SPL Token-2022 Docs | MEDIUM |
-| Missing Freeze Authority Check | Token-2022 Best Practices | MEDIUM |
-| Missing Close Authority Check | Token-2022 Best Practices | LOW |
+| Category | Report | Path | Severity | Audit Firm |
+|----------|--------|------|----------|------------|
+| Freeze Authority DOS | Input Token Freeze Risk | `reports/solana_findings/m-02-risk-of-input-token-mint-with-freeze-authority-leading-to-permanent-dos.md` | MEDIUM | Shieldify |
+| Missing Freeze Check | Collateral Token Freeze | `reports/solana_findings/m-01-lack-of-freeze-authority-check-for-collateral-tokens-on-create-trading-pool.md` | MEDIUM | Unknown |
+| Token Escrow Freeze | Bridge Token Freeze | `reports/solana_findings/h-01-denial-of-service-risk-due-to-frozen-token_escrow-in-onftadapter.md` | HIGH | Unknown |
+| MintCloseAuthority | Decimal Manipulation | `reports/token2022_findings/c-01-mint-decimal-manipulation-through-mintcloseauthority-leads-to-inflation-of-.md` | CRITICAL | Shieldify |
 
 ### DOS Vulnerabilities
-| Category | Reference | Severity |
-|----------|-----------|----------|
-| ATA Init vs Init-If-Needed | Code4rena Pump Science | HIGH |
-| Account Pre-creation Attack | Code4rena Pump Science | HIGH |
-| Lamport-Based Existence Check | Helius Blog | MEDIUM |
+| Category | Report | Path | Severity | Audit Firm |
+|----------|--------|------|----------|------------|
+| Storage Limit DOS | Permanent DOS via Storage | `reports/solana_findings/h-01-permanent-dos-in-liquidity_lockbox-for-under-10.md` | HIGH | Code4rena |
+| Account Pre-creation | Init If Needed Front-run | `reports/solana_findings/init-if-needed-front-run.md` | HIGH | Various |
+
+### PDA and Seed Vulnerabilities
+| Category | Report | Path | Severity | Audit Firm |
+|----------|--------|------|----------|------------|
+| Seed Collision | PDA Seed Collision | `reports/solana_findings/pda-seed-collision.md` | HIGH | Various |
+| Missing Bump Seed | Canonical Bump Not Used | `reports/solana_findings/missing-canonical-bump-validation.md` | HIGH | OtterSec |
+| Cross-Protocol PDA | PDA Derivation Mismatch | `reports/solana_findings/lack-of-pda-validation.md` | HIGH | OtterSec |
+| Critical PDA Flaw | Improper PDA Validation | `reports/solana_findings/c-01-critical-pda-validation-flaw-in-append_data_sandwich_validators_bitmap.md` | HIGH | Pashov |
+
+### Account Type Confusion Vulnerabilities
+| Category | Report | Path | Severity | Audit Firm |
+|----------|--------|------|----------|------------|
+| Type Confusion | Account Type Confusion | `reports/solana_findings/account-type-confusion.md` | MEDIUM | OtterSec |
+| Discriminator Bypass | Missing Discriminator Check | `reports/solana_findings/account-type-confusion.md` | MEDIUM | OtterSec |
+
+### Instruction Introspection Vulnerabilities
+| Category | Report | Path | Severity | Audit Firm |
+|----------|--------|------|----------|------------|
+| Ed25519 Verification | Wrong Offset Ed25519 | `reports/solana_findings/c-02-wrongoffset-ed25519-instruction-introspection-enables-forged-approvals.md` | HIGH | Pashov |
+| Sysvar Validation | Missing Sysvar Check | `reports/solana_findings/lack-of-sysvar-account-validation.md` | HIGH | OtterSec |
+
+### Replay Attack Vulnerabilities
+| Category | Report | Path | Severity | Audit Firm |
+|----------|--------|------|----------|------------|
+| Signature Replay | Missing Nonce Reset | `reports/solana_findings/m-31-missing-nonce-reset-during-tss-address-update-allowing-signature-replay.md` | MEDIUM | Sherlock |
+| Transaction Replay | No Replay Protection | `reports/solana_findings/successful-transactions-are-not-stored-causing-a-replay-attack-on-redeemdeposits.md` | HIGH | Codehawks |
+
+### CPI Security Vulnerabilities
+| Category | Report | Path | Severity | Audit Firm |
+|----------|--------|------|----------|------------|
+| Unrestricted CPI | MarginSwap CPI | `reports/solana_findings/unrestricted-marginswap-cpi.md` | HIGH | OtterSec |
+| Authority Bypass | Incorrect Authority | `reports/solana_findings/deposit-tokens-transferred-from-depositor-token-account-instead-of-signer.md` | MEDIUM | OpenZeppelin |
+| Invalid Authority | Authority Check Bypass | `reports/solana_findings/invalid-authority-check.md` | HIGH | OtterSec |
+| Remaining Accounts | Insufficient Checks | `reports/solana_findings/insufficient-account-checks.md` | MEDIUM | OtterSec |
+
+### Lending/Collateral Vulnerabilities
+| Category | Report | Path | Severity | Audit Firm |
+|----------|--------|------|----------|------------|
+| Collateral Bypass | Claim Without Repay | `reports/solana_findings/h-01-collateral-can-be-claimed-back-without-repaying-its-corresponding-loan-due-.md` | HIGH | Code4rena |
+| Withdrawal DOS | Ticket Desync | `reports/solana_findings/dos-due-to-withdrawal-ticket-desynchronization.md` | HIGH | OtterSec |
+
+### Initialization Vulnerabilities
+| Category | Report | Path | Severity | Audit Firm |
+|----------|--------|------|----------|------------|
+| Front-run Init | Multisig Front-run | `reports/solana_findings/attacker-can-front-run-multisig-creation-transaction.md` | HIGH | TrailOfBits |
+| Permissionless Init | Spoofed Official Instance | `reports/solana_findings/permissionless-offrampstate-initialization-under-official-program-id-enables-spo.md` | MEDIUM | Cyfrin |
+| Self-Assign Admin | Super Admin Hijack | `reports/solana_findings/m-01-any-wallet-can-self-assign-as-super_admin-for-arbitrary-mint.md` | MEDIUM | Pashov |
+| Pre-funding DOS | Create Account DOS | `reports/solana_findings/create_account-can-be-dosed-with-pre-funding.md` | MEDIUM | Cyfrin |
+
+### Arithmetic Vulnerabilities
+| Category | Report | Path | Severity | Audit Firm |
+|----------|--------|------|----------|------------|
+| Silent Overflow | TrimmedAmount Shift | `reports/solana_findings/silent-overflow-in-trimmedamountshift-could-result-in-rate-limiter-being-bypasse.md` | MEDIUM | Cyfrin |
+| Right Shift Panic | Bit Length Overflow | `reports/solana_findings/right-shift-overflow-panic.md` | HIGH | OtterSec |
+| Precision Attack | Mint Check Missing | `reports/solana_findings/precision-manipulation-due-to-missing-mint-check.md` | HIGH | Cyfrin |
+| Decimal Mismatch | Fee Accounting Error | `reports/solana_findings/decimal-mismatch-in-fee-prepayment-accounting-causes-incorrect-balance-tracking.md` | MEDIUM | Cyfrin |
+
+### Rent and Account Size Vulnerabilities
+| Category | Report | Path | Severity | Audit Firm |
+|----------|--------|------|----------|------------|
+| Rent Inclusion Error | Bonding Curve Invariant | `reports/solana_findings/m-02-bonding-curve-invariant-check-incorrectly-validates-sol-balance-due-to-rent.md` | MEDIUM | Code4rena |
+| Account Size Issue | Faulty Reallocation | `reports/solana_findings/faulty-reallocation-of-market-size.md` | MEDIUM | OtterSec |
+| Custody Closing DOS | Token Account Close | `reports/solana_findings/custody-token-account-closing-dos.md` | HIGH | OtterSec |
+
+### Reentrancy Vulnerabilities
+| Category | Report | Path | Severity | Audit Firm |
+|----------|--------|------|----------|------------|
+| Module Bypass | Guard Reentrancy | `reports/solana_findings/h-3-signers-can-bypass-checks-to-add-new-modules-to-a-safe-by-abusing-reentrancy.md` | HIGH | Sherlock |
 
 ### External Links
 - [Solana Program Security Course](https://solana.com/developers/courses/program-security)
@@ -114,6 +182,13 @@ version: all
 10. [Event Emission Vulnerabilities](#10-event-emission-vulnerabilities)
 11. [Arithmetic and Data Handling Vulnerabilities](#11-arithmetic-and-data-handling-vulnerabilities)
 12. [Seed Collision Vulnerabilities](#12-seed-collision-vulnerabilities)
+13. [Account Type Confusion Vulnerabilities](#13-account-type-confusion-vulnerabilities)
+14. [Ed25519 Instruction Introspection Vulnerabilities](#14-ed25519-instruction-introspection-vulnerabilities)
+15. [Signature Replay Attack Vulnerabilities](#15-signature-replay-attack-vulnerabilities)
+16. [Unrestricted CPI Vulnerabilities](#16-unrestricted-cpi-vulnerabilities)
+17. [Initialization Front-Running Vulnerabilities](#17-initialization-front-running-vulnerabilities)
+18. [Create Account Pre-Funding DOS](#18-create-account-pre-funding-dos)
+19. [Rent Exemption Validation Errors](#19-rent-exemption-validation-errors)
 
 ---
 
@@ -1768,6 +1843,548 @@ pub user_account: Account<'info, UserAccount>,
 
 ---
 
+## 13. Account Type Confusion Vulnerabilities
+
+### Overview
+
+Account type confusion occurs when a program deserializes account data without verifying the account's discriminator, allowing attackers to pass accounts of different types that happen to have compatible memory layouts.
+
+> **📚 Source Report:**
+> - `reports/solana_findings/account-type-confusion.md` (OtterSec - Infinex)
+
+### Vulnerability Description
+
+#### Root Cause
+
+- Using raw Borsh deserialization instead of Anchor's `try_deserialize`
+- Not checking the 8-byte discriminator at account start
+- Accepting accounts based solely on size compatibility
+- Different account types with same owner program
+
+### Vulnerable Pattern Example
+
+**Missing Discriminator Check** [MEDIUM]
+```rust
+// ❌ VULNERABLE: Uses Borsh deserialize without discriminator check
+fn load_security_key(
+    wallet_info: &WalletInfo,
+    account_idx: usize,
+    remaining_accounts: &[AccountInfo],
+) -> Result<SecurityKeyV1> {
+    let info = &remaining_accounts[account_idx];
+    // Skips 8 bytes but doesn't verify discriminator!
+    let key_account = SecurityKeyV1::deserialize(&mut &info.data.borrow_mut()[8..])
+        .map_err(|_| error!(AuthorizerError::InvalidSecurityKeyAccount))?;
+    Ok(key_account)
+}
+```
+
+### Secure Implementation
+
+```rust
+// ✅ SECURE: Use Anchor's try_deserialize with discriminator check
+fn load_security_key(
+    account_info: &AccountInfo,
+) -> Result<SecurityKeyV1> {
+    let key_account = SecurityKeyV1::try_deserialize(
+        &mut &account_info.data.borrow()[..]
+    )?;
+    Ok(key_account)
+}
+```
+
+---
+
+## 14. Ed25519 Instruction Introspection Vulnerabilities
+
+### Overview
+
+Programs that verify Ed25519 signatures by inspecting the instruction sysvar can be exploited if they don't properly validate the Ed25519 instruction's structure, offsets, and inline mode.
+
+> **📚 Source Report:**
+> - `reports/solana_findings/c-02-wrongoffset-ed25519-instruction-introspection-enables-forged-approvals.md` (Pashov - Enclave)
+
+### Vulnerability Description
+
+#### Root Cause
+
+The Ed25519 program on Solana is flexible - it can read signature, public key, and message from different instruction indexes and offsets. If a contract doesn't validate:
+1. Previous instruction's program_id is the Ed25519 program
+2. Inline mode is enforced (index fields = 0xFFFF)
+3. Offsets point to expected data ranges
+4. Only one signature exists
+
+Attackers can craft malicious "verification" instructions that pass your checks while verifying attacker-controlled data.
+
+### Vulnerable Pattern Example
+
+**Insufficient Ed25519 Verification** [CRITICAL]
+```rust
+// ❌ VULNERABLE: Doesn't validate Ed25519 instruction structure
+pub fn borrow(ctx: Context<Borrow>, signature: [u8; 64]) -> Result<()> {
+    let ix_sysvar = &ctx.accounts.instructions_sysvar;
+    let prev_ix = get_instruction_relative(-1, ix_sysvar)?;
+    
+    // WRONG: Only checks signature bytes, not instruction structure
+    let sig_data = &prev_ix.data[16..80];
+    require!(sig_data == &signature, ErrorCode::InvalidSignature);
+    
+    // Attacker can place expected bytes at these offsets while
+    // Ed25519 actually verifies different data!
+    Ok(())
+}
+```
+
+### Secure Implementation
+
+```rust
+// ✅ SECURE: Comprehensive Ed25519 verification
+pub fn verify_ed25519_signature(
+    ix_sysvar: &AccountInfo,
+    expected_signer: &Pubkey,
+    expected_message: &[u8],
+) -> Result<()> {
+    let prev_ix = get_instruction_relative(-1, ix_sysvar)?;
+    
+    // 1. Verify program ID is Ed25519
+    require!(
+        prev_ix.program_id == solana_program::ed25519_program::id(),
+        ErrorCode::InvalidProgram
+    );
+    
+    // 2. Parse Ed25519SignatureOffsets
+    let offsets = Ed25519SignatureOffsets::try_from_slice(&prev_ix.data[2..18])?;
+    
+    // 3. Enforce inline mode (all indexes = 0xFFFF)
+    require!(
+        offsets.signature_instruction_index == u16::MAX &&
+        offsets.public_key_instruction_index == u16::MAX &&
+        offsets.message_instruction_index == u16::MAX,
+        ErrorCode::NotInlineMode
+    );
+    
+    // 4. Bounds check offsets
+    let data_len = prev_ix.data.len();
+    require!(
+        (offsets.signature_offset as usize + 64) <= data_len &&
+        (offsets.public_key_offset as usize + 32) <= data_len,
+        ErrorCode::InvalidOffsets
+    );
+    
+    // 5. Verify actual public key matches expected
+    let pubkey_start = offsets.public_key_offset as usize;
+    let inline_pubkey = &prev_ix.data[pubkey_start..pubkey_start + 32];
+    require!(
+        inline_pubkey == expected_signer.as_ref(),
+        ErrorCode::WrongSigner
+    );
+    
+    Ok(())
+}
+```
+
+---
+
+## 15. Signature Replay Attack Vulnerabilities
+
+### Overview
+
+Programs that accept off-chain signatures must implement proper replay protection. Without nonces or state tracking, valid signatures can be reused multiple times.
+
+> **📚 Source Reports:**
+> - `reports/solana_findings/m-31-missing-nonce-reset-during-tss-address-update-allowing-signature-replay.md` (Sherlock - ZetaChain)
+> - `reports/solana_findings/successful-transactions-are-not-stored-causing-a-replay-attack-on-redeemdeposits.md` (Codehawks - Beanstalk)
+
+### Vulnerability Description
+
+#### Root Cause
+
+1. No nonce tracking for signature-based operations
+2. Nonce not reset when signing key changes
+3. Processed signatures not stored to prevent reuse
+4. Missing deadline checks on signatures
+
+### Vulnerable Pattern Examples
+
+**Example 1: Missing Nonce Reset on Key Update** [MEDIUM]
+```rust
+// ❌ VULNERABLE: Nonce persists across TSS key changes
+pub fn update_tss(ctx: Context<UpdateTss>, tss_address: [u8; 20]) -> Result<()> {
+    let pda = &mut ctx.accounts.pda;
+    pda.tss_address = tss_address;  // Key updated
+    // pda.nonce NOT reset - old signatures could replay!
+    Ok(())
+}
+```
+
+**Example 2: No Replay Tracking** [HIGH]
+```rust
+// ❌ VULNERABLE: Same proof can be submitted multiple times
+pub fn redeem_deposits(
+    ctx: Context<Redeem>,
+    proof: Vec<u8>,
+    deposits: Vec<Deposit>,
+) -> Result<()> {
+    // Verify merkle proof
+    verify_merkle_proof(&proof, &deposits)?;
+    
+    // Process deposits - but nothing prevents replay!
+    for deposit in deposits {
+        transfer_tokens(&ctx, deposit)?;
+    }
+    
+    Ok(())
+}
+```
+
+### Secure Implementation
+
+**Fix 1: Reset Nonce on Key Update**
+```rust
+// ✅ SECURE: Reset nonce when updating signing key
+pub fn update_tss(ctx: Context<UpdateTss>, tss_address: [u8; 20]) -> Result<()> {
+    let pda = &mut ctx.accounts.pda;
+    pda.tss_address = tss_address;
+    pda.nonce = 0;  // Reset nonce to prevent replay
+    Ok(())
+}
+```
+
+**Fix 2: Track Processed Operations**
+```rust
+// ✅ SECURE: Store processed signatures/proofs
+pub fn redeem_deposits(
+    ctx: Context<Redeem>,
+    proof_hash: [u8; 32],
+    deposits: Vec<Deposit>,
+) -> Result<()> {
+    // Check if already processed
+    require!(
+        !ctx.accounts.processed_proofs.contains(&proof_hash),
+        ErrorCode::AlreadyProcessed
+    );
+    
+    // Mark as processed
+    ctx.accounts.processed_proofs.insert(proof_hash);
+    
+    // Now safe to process
+    verify_merkle_proof(&proof_hash, &deposits)?;
+    for deposit in deposits {
+        transfer_tokens(&ctx, deposit)?;
+    }
+    
+    Ok(())
+}
+```
+
+---
+
+## 16. Unrestricted CPI Vulnerabilities
+
+### Overview
+
+When a program passes signing authority to another program via CPI, it must carefully validate which programs can be called. Unrestricted CPI allows attackers to invoke arbitrary programs with the victim's signature.
+
+> **📚 Source Report:**
+> - `reports/solana_findings/unrestricted-marginswap-cpi.md` (OtterSec - Jet V2)
+
+### Vulnerability Description
+
+#### Root Cause
+
+- Accepting arbitrary program IDs for CPI
+- Passing signer seeds to untrusted adapters
+- Not validating CPI target programs against allowlist
+- Adapter programs that proxy to arbitrary targets
+
+### Vulnerable Pattern Example
+
+**Unrestricted Swap Program** [CRITICAL]
+```rust
+// ❌ VULNERABLE: Any swap program accepted
+pub fn margin_swap(
+    ctx: Context<MarginSwap>,
+    amount: u64,
+) -> Result<()> {
+    // swap_program is user-provided and unvalidated!
+    invoke_signed(
+        &create_swap_instruction(
+            ctx.accounts.swap_program.key(),
+            amount,
+        ),
+        &[
+            ctx.accounts.margin_account.to_account_info(),
+            ctx.accounts.swap_program.to_account_info(),
+        ],
+        &[&ctx.accounts.margin_account.signer_seeds()],  // Signing with margin authority!
+    )?;
+    
+    Ok(())
+}
+```
+
+### Secure Implementation
+
+```rust
+// ✅ SECURE: Restrict to allowlisted programs
+pub fn margin_swap(
+    ctx: Context<MarginSwap>,
+    amount: u64,
+) -> Result<()> {
+    // Validate swap program against allowlist
+    let allowed_programs = [
+        spl_token_swap_v2::ID,
+        orca_swap_v1::ID,
+        orca_swap_v2::ID,
+    ];
+    
+    require!(
+        allowed_programs.contains(&ctx.accounts.swap_program.key()),
+        ErrorCode::UnauthorizedProgram
+    );
+    
+    invoke_signed(/* ... */)?;
+    
+    Ok(())
+}
+```
+
+---
+
+## 17. Initialization Front-Running Vulnerabilities
+
+### Overview
+
+Programs with permissionless initialization can be front-run by attackers who initialize with malicious parameters before legitimate users.
+
+> **📚 Source Reports:**
+> - `reports/solana_findings/attacker-can-front-run-multisig-creation-transaction.md` (TrailOfBits - Squads v4)
+> - `reports/solana_findings/m-01-any-wallet-can-self-assign-as-super_admin-for-arbitrary-mint.md` (Pashov - Pump)
+> - `reports/solana_findings/permissionless-offrampstate-initialization-under-official-program-id-enables-spo.md` (Cyfrin - Securitize)
+
+### Vulnerability Description
+
+#### Root Cause
+
+1. PDA seeds derived from unauthenticated accounts
+2. No signer validation on initialization
+3. Global state initialized permissionlessly
+4. One-way configuration that can't be corrected
+
+### Vulnerable Pattern Examples
+
+**Example 1: Unauthenticated Create Key** [HIGH]
+```rust
+// ❌ VULNERABLE: create_key not required to sign
+#[derive(Accounts)]
+pub struct MultisigCreate<'info> {
+    #[account(
+        init,
+        seeds = [SEED_PREFIX, SEED_MULTISIG, create_key.key().as_ref()],
+        bump
+    )]
+    pub multisig: Account<'info, Multisig>,
+    
+    /// CHECK: Any random public key
+    pub create_key: AccountInfo<'info>,  // Not a Signer!
+}
+```
+
+**Example 2: Permissionless Admin Assignment** [MEDIUM]
+```rust
+// ❌ VULNERABLE: Anyone can become super_admin for any mint
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    #[account(
+        init,
+        seeds = [SEED, mint.key().as_ref()],
+        bump
+    )]
+    pub state: Account<'info, State>,
+    
+    pub mint: InterfaceAccount<'info, Mint>,  // No authority check!
+    
+    #[account(mut)]
+    pub super_admin: Signer<'info>,  // Anyone can call this
+}
+```
+
+### Secure Implementation
+
+**Fix 1: Require Signer on Key Account**
+```rust
+// ✅ SECURE: create_key must sign the transaction
+#[derive(Accounts)]
+pub struct MultisigCreate<'info> {
+    #[account(
+        init,
+        seeds = [SEED_PREFIX, SEED_MULTISIG, create_key.key().as_ref()],
+        bump
+    )]
+    pub multisig: Account<'info, Multisig>,
+    
+    pub create_key: Signer<'info>,  // Now requires signature!
+}
+```
+
+**Fix 2: Gate Behind Mint Authority**
+```rust
+// ✅ SECURE: Only mint authority can initialize
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    #[account(
+        constraint = mint.mint_authority == COption::Some(super_admin.key())
+            @ ErrorCode::NotMintAuthority
+    )]
+    pub mint: InterfaceAccount<'info, Mint>,
+    
+    #[account(mut)]
+    pub super_admin: Signer<'info>,
+}
+```
+
+---
+
+## 18. Create Account Pre-Funding DOS
+
+### Overview
+
+Solana's `system_instruction::create_account` fails if the target address already has non-zero lamports. Attackers can pre-fund PDA addresses to permanently block their creation.
+
+> **📚 Source Report:**
+> - `reports/solana_findings/create_account-can-be-dosed-with-pre-funding.md` (Cyfrin - Deriverse)
+
+### Vulnerability Description
+
+#### Root Cause
+
+Using `create_account` instead of the more resilient pattern of separate fund, allocate, and assign operations.
+
+### Vulnerable Pattern Example
+
+**Direct Create Account** [MEDIUM]
+```rust
+// ❌ VULNERABLE: Fails if account already has lamports
+invoke_signed(
+    &system_instruction::create_account(
+        payer.key,
+        holder_acc.key,
+        Rent::default().minimum_balance(account_size),
+        account_size as u64,
+        program_id,
+    ),
+    &[payer.clone(), holder_acc.clone()],
+    &[&[HOLDER_SEED, payer.key.as_ref(), &[bump_seed]]],
+)?;
+```
+
+### Secure Implementation
+
+```rust
+// ✅ SECURE: Handles pre-existing lamports
+pub fn create_pda_resilient(
+    payer: &AccountInfo,
+    pda: &AccountInfo,
+    space: usize,
+    owner: &Pubkey,
+    seeds: &[&[u8]],
+) -> Result<()> {
+    let rent = Rent::get()?;
+    let required_lamports = rent.minimum_balance(space);
+    
+    // Fund the account (works even if it has some lamports)
+    let current_lamports = pda.lamports();
+    if current_lamports < required_lamports {
+        invoke(
+            &system_instruction::transfer(
+                payer.key,
+                pda.key,
+                required_lamports - current_lamports,
+            ),
+            &[payer.clone(), pda.clone()],
+        )?;
+    }
+    
+    // Allocate space
+    invoke_signed(
+        &system_instruction::allocate(pda.key, space as u64),
+        &[pda.clone()],
+        &[seeds],
+    )?;
+    
+    // Assign to program
+    invoke_signed(
+        &system_instruction::assign(pda.key, owner),
+        &[pda.clone()],
+        &[seeds],
+    )?;
+    
+    Ok(())
+}
+```
+
+---
+
+## 19. Rent Exemption Validation Errors
+
+### Overview
+
+Programs that check SOL balances for invariants must account for rent exemption amounts. Failing to subtract rent leads to incorrect validations.
+
+> **📚 Source Report:**
+> - `reports/solana_findings/m-02-bonding-curve-invariant-check-incorrectly-validates-sol-balance-due-to-rent.md` (Code4rena - Pump Science)
+
+### Vulnerability Description
+
+#### Root Cause
+
+Using `account.lamports()` (which includes rent) in comparisons with values that don't include rent.
+
+### Vulnerable Pattern Example
+
+**Invariant Check Without Rent** [MEDIUM]
+```rust
+// ❌ VULNERABLE: Compares lamports (with rent) to reserves (without rent)
+pub fn check_invariant(
+    sol_escrow: &AccountInfo,
+    bonding_curve: &BondingCurve,
+) -> Result<()> {
+    let sol_escrow_lamports = sol_escrow.lamports();  // Includes rent!
+    
+    if sol_escrow_lamports < bonding_curve.real_sol_reserves {
+        return Err(ContractError::BondingCurveInvariant.into());
+    }
+    // This can pass incorrectly when actual SOL < reserves
+    // but rent makes up the difference
+    Ok(())
+}
+```
+
+### Secure Implementation
+
+```rust
+// ✅ SECURE: Subtract rent before comparison
+pub fn check_invariant(
+    sol_escrow: &AccountInfo,
+    bonding_curve: &BondingCurve,
+) -> Result<()> {
+    let rent = Rent::get()?;
+    let rent_exempt_amount = rent.minimum_balance(sol_escrow.data_len());
+    
+    let actual_sol = sol_escrow.lamports()
+        .checked_sub(rent_exempt_amount)
+        .ok_or(ContractError::InsufficientBalance)?;
+    
+    if actual_sol < bonding_curve.real_sol_reserves {
+        return Err(ContractError::BondingCurveInvariant.into());
+    }
+    
+    Ok(())
+}
+```
+
+---
+
 ## Prevention Guidelines
 
 ### Development Best Practices
@@ -1796,7 +2413,7 @@ pub user_account: Account<'info, UserAccount>,
 
 > These keywords enhance vector search retrieval:
 
-`solana`, `anchor`, `spl_token`, `token_2022`, `pda`, `cpi`, `signer_check`, `owner_check`, `account_validation`, `missing_signer`, `missing_owner`, `pda_validation`, `arbitrary_cpi`, `seed_collision`, `account_closure`, `init_if_needed`, `dos_attack`, `front_running`, `account_reloading`, `stale_state`, `reallocation`, `rent_exempt`, `lamports_transfer`, `freeze_authority`, `close_authority`, `transfer_fee`, `remaining_accounts`, `bump_seed`, `signer_seeds`, `checked_arithmetic`, `overflow`, `underflow`, `type_casting`, `event_emission`, `token_program`, `system_program`, `sysvar`, `account_pre_creation`
+`solana`, `anchor`, `spl_token`, `token_2022`, `pda`, `cpi`, `signer_check`, `owner_check`, `account_validation`, `missing_signer`, `missing_owner`, `pda_validation`, `arbitrary_cpi`, `seed_collision`, `account_closure`, `init_if_needed`, `dos_attack`, `front_running`, `account_reloading`, `stale_state`, `reallocation`, `rent_exempt`, `lamports_transfer`, `freeze_authority`, `close_authority`, `transfer_fee`, `remaining_accounts`, `bump_seed`, `signer_seeds`, `checked_arithmetic`, `overflow`, `underflow`, `type_casting`, `event_emission`, `token_program`, `system_program`, `sysvar`, `account_pre_creation`, `type_confusion`, `discriminator`, `ed25519`, `instruction_introspection`, `signature_replay`, `nonce_reset`, `unrestricted_cpi`, `adapter_program`, `initialization_frontrun`, `multisig`, `create_key`, `permissionless_init`, `pre_funding_dos`, `create_account`, `rent_inclusion`, `bonding_curve`, `invariant_check`, `canonical_bump`, `reentrancy`, `guard_bypass`, `decimal_mismatch`, `precision_manipulation`, `tss_address`, `merkle_proof`
 
 ---
 

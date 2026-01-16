@@ -1,0 +1,121 @@
+---
+# Core Classification
+protocol: Babylon chain launch (phase-2)
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 55374
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/677
+source_link: none
+github_link: https://github.com/sherlock-audit/2024-12-babylon-judging/issues/6
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - n4nika
+---
+
+## Vulnerability Title
+
+M-1: Btcstaking module allows `stakingTx` to be coinbase transaction which is unslashable for 100 blocks
+
+### Overview
+
+
+This bug report discusses an issue with the Btcstaking module, which allows for a coinbase transaction to be used as a staking transaction. This is problematic because coinbase transactions have a special property of not being spendable for 100 blocks after creation, making it impossible to slash a staker who double-signs during this time. The root cause of this issue is a lack of specific checks for coinbase transactions in the code. The attacker must be the creator of the block in order to exploit this vulnerability. The impact of this bug is high, as it allows for malicious stakers to avoid being slashed for double-signing. The proposed mitigation is to check for coinbase transactions and reject them as staking transactions. The issue has been fixed by the protocol team in a recent commit.
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2024-12-babylon-judging/issues/6 
+
+## Found by 
+n4nika
+
+### Summary
+
+Coinbase transactions have a special property of not being spendable for 100 bocks after creation. If now a staker uses such a transaction as a staking transaction (by adding the required outputs), that transaction will be recognized as a valid staking TX but if the owner of it double-signs, he cannot be slashed for 100 blocks due to the unspendability of the coinbase TX.
+
+### Root Cause
+
+Looking at [`CreateBTCDelegation`](https://github.com/sherlock-audit/2024-12-babylon/blob/main/babylon/x/btcstaking/keeper/msg_server.go#L198-L244) and [`ValidateParsedMessageAgainstTheParams`](https://github.com/sherlock-audit/2024-12-babylon/blob/main/babylon/x/btcstaking/types/validate_parsed_message.go#L19) which does verification on the provided TX, there are no specific checks for whether a transaction is a coinbase transaction.
+
+
+### Internal Pre-conditions
+
+None
+
+### External Pre-conditions
+
+Attacker needs to be the creator of a block (a miner) in order to build the coinbase TX like they want
+
+### Attack Path
+
+* Create a coinbase TX which is a valid staking TX
+* Call `CreateBTCDelegation` with that TX
+* It gets accepted and its value added as voting power
+
+### Impact
+
+The README states under `High` impact: `Inability to slash BTC stake for which the voting power was involved in double-signing.`
+
+That is exactly what happens here. Even if the staker's delegator misbehaves, the staker's `stakingTx` cannot be spent until 100 blocks after. Adding to the impact, if now the minimum staking time is less than 100 bitcoin blocks, this allows the malicious staker to unstake before getting slashed (if the slashing even gets retried after 100 blocks)
+
+### PoC
+
+_No response_
+
+### Mitigation
+
+Coinbase transactions can be identified since the `ID` of their input must be all zeros. Therefore consider checking whether a staking transaction has one input with an ID of all-zeros and reject it if so.
+
+## Discussion
+
+**sherlock-admin2**
+
+The protocol team fixed this issue in the following PRs/commits:
+ https://github.com/babylonlabs-io/babylon/pull/563
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Sherlock |
+| Protocol | Babylon chain launch (phase-2) |
+| Report Date | N/A |
+| Finders | n4nika |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2024-12-babylon-judging/issues/6
+- **Contest**: https://app.sherlock.xyz/audits/contests/677
+
+### Keywords for Search
+
+`vulnerability`
+
