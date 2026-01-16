@@ -16,14 +16,14 @@ vuln-database/
 │   │   │   └── PYTH_ORACLE_VULNERABILITIES.md
 │   │   ├── chainlink/          # Chainlink specific issues
 │   │   └── twap/               # TWAP oracle issues
-│   ├── economic/               # Economic attack patterns
-│   ├── logic/                  # Business logic vulnerabilities
+│   ├── amm/                    # Economic attack patterns
+│   ├── yeild/                  # Business logic vulnerabilities
 │   └── [category]/             # Other vulnerability categories
-├── reports/                     # Raw audit reports (source data)
+├── reports/                    # Raw audit reports (source data)
 │   ├── pyth_findings/          # 198 raw Pyth vulnerability reports
 │   ├── chainlink_findings/     # Raw Chainlink audit reports
 │   └── [topic]_findings/       # Other raw findings
-├── Variant-analysis/            # Variant analysis methodology & tools
+├── Variant-analysis/           # Variant analysis methodology & tools
 │   ├── Methodology.md          # Variant analysis guide
 │   ├── Skills.md               # Required skills documentation
 │   ├── Tasker.md               # Task management
