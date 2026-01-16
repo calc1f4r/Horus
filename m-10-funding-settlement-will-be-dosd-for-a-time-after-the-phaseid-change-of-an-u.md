@@ -1,0 +1,127 @@
+---
+# Core Classification
+protocol: Hubble Exchange
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 20695
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/72
+source_link: none
+github_link: https://github.com/sherlock-audit/2023-04-hubble-exchange-judging/issues/177
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - derivatives
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - 0x52
+---
+
+## Vulnerability Title
+
+M-10: Funding settlement will be DOS'd for a time after the phaseID change of an underlying chainlink aggregator
+
+### Overview
+
+
+This bug report is about an issue with the funding settlement of a chainlink aggregator when the phaseID changes. The roundID is actually two values packed together: phaseId and aggregatorRoundId. When the phaseID is incremented the roundID increases by 2 ** 64. This means that when `currentRound - 1` is queried after the increment, the call will revert because that round doesn't exist, resulting in a Denial of Service (DOS) for up to 24 hours depending on market settings. This DOS will cause loss of yield to a portion of all users in every market each time there is a phaseId shift. The bug was found by 0x52 and was confirmed by asquare08. The recommendation is to use a try block when calling the aggregator, and if the roundID is nonzero and is reverting then the oracle needs try again with a lower phaseId. This issue will be fixed with post-mainnet releases because the oracle will be deployed on hubbleNet with mainnet release and any updates will be notified prior.
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2023-04-hubble-exchange-judging/issues/177 
+
+## Found by 
+0x52
+## Summary
+
+Oracle incorrectly assumes that roundID is always incremented by one but this is not the case. Chainlink's roundID is actually two values packed together: phaseId and aggregatorRoundId. When the phaseID is incremented the roundID increases by 2 ** 64. After a phaseID increment all calls to settle funding will revert until an entire funding interval has elapsed. Since all markets are settled simultaneously, even a single oracle incrementing will result in all market funding being DOS'd. Although this funding can be made up later it will user different TWAP values which will result in users being paid differently causing loss of yield to a portion of all users. 
+
+## Vulnerability Detail
+
+https://snowtrace.io/address/0x976b3d034e162d8bd72d6b9c989d545b839003b0#code#L206
+
+      function getAnswer(uint256 _roundId)
+        public
+        view
+        virtual
+        override
+        returns (int256 answer)
+      {
+        if (_roundId > MAX_ID) return 0;
+    
+        (uint16 phaseId, uint64 aggregatorRoundId) = parseIds(_roundId);
+        AggregatorV2V3Interface aggregator = phaseAggregators[phaseId];
+        if (address(aggregator) == address(0)) return 0;
+    
+        return aggregator.getAnswer(aggregatorRoundId);
+      }
+
+The above code is from the ETH/USD aggregator on AVAX, It can be seen that the roundId is made up of 2 packed components, the phaseId and aggregatorRoundId. As explained in the summary, when the phaseId is incremented 2 ** 64 "rounds" will be skipped. When `currentRound - 1` is inevitably queried after this increment, the call will revert because that round doesn't exist this DOS will last for up to 24 hours depending on market settings. After the DOS ends, settingFunding will be able to catch up but it will now calculate the funding rate with different TWAP values.
+
+## Impact
+
+Loss of yield to a portion of all users in every market each time there is a phaseId shift
+
+## Code Snippet
+
+## Tool used
+
+Manual Review
+
+## Recommendation
+
+I would recommend using a try block when calling the aggregator. If the roundID is nonzero and is reverting then the oracle needs try again with a lower phaseId
+
+
+
+## Discussion
+
+**asquare08**
+
+This is a valid issue. We will fix it with post-mainnet releases because we are using trusted oracle (deployed on hubbleNet) with mainnet release and any updates to that will be notified prior.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Sherlock |
+| Protocol | Hubble Exchange |
+| Report Date | N/A |
+| Finders | 0x52 |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2023-04-hubble-exchange-judging/issues/177
+- **Contest**: https://app.sherlock.xyz/audits/contests/72
+
+### Keywords for Search
+
+`vulnerability`
+
