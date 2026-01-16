@@ -1,0 +1,170 @@
+---
+# Core Classification
+protocol: Core Contracts
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 57326
+audit_firm: Codehawks
+contest_link: https://codehawks.cyfrin.io/c/cm5vbyum90000ffs0xblmb4gj
+source_link: none
+github_link: https://github.com/Cyfrin/2025-02-raac
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - oxelmiguel
+  - dharkartz
+---
+
+## Vulnerability Title
+
+ Missing Update of `lastUpdateTime` in `updatePeriod()
+
+### Overview
+
+
+The `updatePeriod()` function is not updating the `lastUpdateTime` correctly, leading to incorrect calculation of rewards. This happens when a new period starts and results in over-distribution of rewards. This can cause financial loss and undermine trust in the protocol. A code review and test analysis were used to identify this issue. The recommendation is to update the `lastUpdateTime` to the start of the new period in the `updatePeriod()` function.
+
+### Original Finding Content
+
+## Summary
+
+The `updatePeriod()` function fails to update `lastUpdateTime` correctly when a new period starts. This results in rewards being calculated incorrectly, as the time elapsed between the end of the previous period and the start of the new period is also counted, leading to an over-distribution of rewards.
+
+---
+
+## Vulnerability Details
+
+https://github.com/Cyfrin/2025-02-raac/blob/89ccb062e2b175374d40d824263a4c0b601bcb7f/contracts/core/governance/gauges/BaseGauge.sol#L452
+
+The `updatePeriod()` function is responsible for transitioning the contract from one period to the next. However, it does not update `lastUpdateTime` to the start of the new period. Instead, it sets `lastUpdateTime` to `nextPeriodStart`, which is the start of the next period. This causes the following issue:
+
+- When `getRewardPerToken()` is called, it calculates rewards based on the time elapsed since `lastUpdateTime`.
+- If `lastUpdateTime` is not updated to the start of the new period, the time elapsed between the end of the previous period and the start of the new period is also included in the reward calculation.
+- This results in rewards being over-distributed, as the contract incorrectly accounts for time outside the active period.
+
+---
+
+## Impact
+
+- **Over-Distribution of Rewards**: Users can claim rewards for time outside the active period, leading to an unfair distribution of tokens.
+- **Financial Loss**: The protocol may lose funds due to excessive reward payouts.
+- **Incorrect Accounting**: The reward distribution mechanism becomes unreliable, undermining trust in the protocol.
+
+---
+
+## Poc
+
+run in `BaseGauge.test.js`
+
+```JS
+it(" should get more reward in second period due to missing lastUpdateTime update", async () => {
+
+            let nextPeriodStart = await baseGauge.getCurrentPeriodStart();
+            let t = await time.latest();
+            await time.increase(nextPeriodStart- BigInt(t));
+           
+            await baseGauge.setEmission(ethers.parseEther("1000"));
+            
+            // Setup rewards and voting
+            await gaugeController.connect(user1).vote(await baseGauge.getAddress(), 5000);
+            // Stake some tokens to gauge to be eligible for rewards
+            await rewardToken.mint(user1.address, ethers.parseEther("1000"));
+            await rewardToken.connect(user1).approve(await baseGauge.getAddress(), ethers.parseEther("1000"));
+            await baseGauge.connect(user1).stake(ethers.parseEther("1000"));
+            
+           
+            await baseGauge.notifyRewardAmount(ethers.parseEther("1000"));
+            
+            // Wait for rewards to accrue for 7 Days
+            await time.increase(DAY * 7);
+
+            let before = await rewardToken.balanceOf(user1.address);
+            // user claim reward for the whole period
+            await baseGauge.connect(user1).getReward();
+            let after = await rewardToken.balanceOf(user1.address);
+            const FirstPeriodReward = after-before;
+            console.log('Reward get in the first period  : ',FirstPeriodReward);
+            
+            // start a new period
+            await baseGauge.connect(owner).updatePeriod();
+             nextPeriodStart = await baseGauge.getCurrentPeriodStart();
+             t = await time.latest();
+            await time.increase(nextPeriodStart- BigInt(t));
+            await baseGauge.setEmission(ethers.parseEther("1000"));
+            
+            
+           // notify 1000 rewards again
+            await baseGauge.notifyRewardAmount(ethers.parseEther("1000"));
+
+            // Wait for rewards to accrue
+            await time.increase(DAY * 7);
+
+             
+            before = await rewardToken.balanceOf(user1.address);
+            await baseGauge.connect(user1).getReward();
+            after = await rewardToken.balanceOf(user1.address);
+
+            const secondPeriodReward = after-before;
+            // The second period will distribute 2 times more than the first period for the same reward notify
+            expect(secondPeriodReward).to.be.greaterThan((FirstPeriodReward * BigInt(2)) );
+            console.log('Reward get in the second period   : ',secondPeriodReward);
+
+        });
+```
+
+## Tools Used
+
+- Manual code review.
+- Test output analysis.
+
+---
+
+## Recommendations
+
+Update `lastUpdateTime` to the start of the new period in the `updatePeriod()` function. Specifically, set `lastUpdateTime` to `periodState.periodStartTime` after resetting the period state.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Codehawks |
+| Protocol | Core Contracts |
+| Report Date | N/A |
+| Finders | oxelmiguel, dharkartz |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/Cyfrin/2025-02-raac
+- **Contest**: https://codehawks.cyfrin.io/c/cm5vbyum90000ffs0xblmb4gj
+
+### Keywords for Search
+
+`vulnerability`
+

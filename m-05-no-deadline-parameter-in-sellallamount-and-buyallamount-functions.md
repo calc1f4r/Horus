@@ -1,0 +1,118 @@
+---
+# Core Classification
+protocol: Rubicon
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 48961
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2023-04-rubicon
+source_link: https://code4rena.com/reports/2023-04-rubicon
+github_link: https://github.com/code-423n4/2023-04-rubicon-findings/issues/1257
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - dexes
+  - cdp
+  - yield
+  - yield_aggregator
+  - rwa
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - sayan
+  - nirlin
+---
+
+## Vulnerability Title
+
+[M-05] No deadline parameter in `sellAllAmount()` and `buyAllAmount()` functions:
+
+### Overview
+
+
+This bug report is about missing a deadline parameter in two functions. This means that transactions can be left pending for a long time and then executed at a later point, causing potential malicious actions. The report provides a scenario where a user unknowingly performs a bad trade due to a pending transaction that they forgot about. It also explains how this issue can be exploited by MEV bots, resulting in significant loss for the user. The report recommends adding a deadline parameter as a mitigation step, but there is a disagreement about the severity of the issue. The judge believes it is a medium severity bug, while others argue that it is out of scope for this project. 
+
+### Original Finding Content
+
+
+There is no deadline parameter in these two functions. This missing feature enables pending transactions to be maliciously executed at a later point.
+
+### Proof of Concept
+
+Consider following scnerio:
+
+1.  Alice wants to create order of 1000DAI for 1 ETH . She signs the transaction with  `minOutputAmount = 0.99 ETH` to allow for some slippage.
+2. The transaction is submitted to the mempool; however, Alice chose a transaction fee that is too low for miners to be interested in including her transaction in a block. The transaction stays pending in the mempool for extended periods, which could be hours, days, weeks, or even longer.
+3. The average gas fee dropped far enough for Alice's transaction to become interesting again for miners to include it. In the meantime, the price of ETH could have drastically changed. She will still at least get 0.99 ETH due to `minOutputAmount`, but the DAI value of that output might be significantly lower. She has unknowingly performed a bad trade due to the pending transaction she forgot about.
+
+An even worse way this issue can be maliciously exploited is through MEV:
+
+1.  The swap transaction is still pending in the mempool. Average fees are still too high for miners to be interested in it. The price of `___` has gone up significantly since the transaction was signed (lets say its not dai now and some other token), meaning Alice would receive a lot more ETH when the swap is executed. But that also means that her `minOutputAmount` value is outdated and would allow for significant slippage.
+2.  A MEV bot detects the pending transaction. Since the outdated `minOutputAmount` now allows for high slippage, the bot sandwiches Alice, resulting in significant profit for the bot and significant loss for Alice.
+
+### Recommended Mitigation Steps
+
+Add deadline param
+
+**[bghughes (Rubicon) disputed, disagreed with severity and commented](https://github.com/code-423n4/2023-04-rubicon-findings/issues/1257#issuecomment-1533496094):**
+ > In my opinion, this is a good recommendation but is OOS.<br>
+ > Due to MEV argument - seems network-level to me - nice enhancement idea though.
+
+**[HickupHH3 (judge) commented](https://github.com/code-423n4/2023-04-rubicon-findings/issues/1257#issuecomment-1562647818):**
+ > Ignoring the MEV argument since we're dealing with L2s.
+> 
+> I think the first portion has some merit. Reference [here](https://code4rena.com/reports/2022-06-canto-v2/#m-01-stableswap---deadline-do-not-work).
+> > Because front-running is a key aspect of AMM design, deadline is a useful tool to ensure that your tx cannot be “saved for later”.
+> 
+> While both Arbitrum & Optimism has minimum gas prices, network congestion could mean that the tx doesn't get mined until they go back down (eg. trading during Arb airdrop).
+> 
+> It's again a user-conditional error, which, following the reasoning in [#1298](https://github.com/code-423n4/2023-04-rubicon-findings/issues/1298), would be medium severity.
+
+***
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Rubicon |
+| Report Date | N/A |
+| Finders | sayan, nirlin |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2023-04-rubicon
+- **GitHub**: https://github.com/code-423n4/2023-04-rubicon-findings/issues/1257
+- **Contest**: https://code4rena.com/reports/2023-04-rubicon
+
+### Keywords for Search
+
+`vulnerability`
+

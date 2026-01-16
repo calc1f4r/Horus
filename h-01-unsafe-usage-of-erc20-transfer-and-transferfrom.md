@@ -1,0 +1,128 @@
+---
+# Core Classification
+protocol: FIAT DAO
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 42775
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2022-08-fiatdao
+source_link: https://code4rena.com/reports/2022-08-fiatdao
+github_link: https://github.com/code-423n4/2022-08-fiatdao-findings/issues/231
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - dexes
+  - cdp
+  - yield
+  - cross_chain
+  - synthetics
+
+# Audit Details
+report_date: unknown
+finders_count: 0
+finders:
+---
+
+## Vulnerability Title
+
+[H-01] Unsafe usage of ERC20 transfer and transferFrom
+
+### Overview
+
+
+This bug report was submitted by multiple people and discovered by CertoraInc, 0x1f8b, 0xSky, CodingNameKiki, DecorativePineapple, jonatascm, Noah3o6, oyc&#95;109, pedr02b2, peritoflores, and Waze. The report identifies a problem with the `VotingEscrow` contract, which will not work with certain ERC20 tokens that do not return a boolean value. This includes tokens like USDT, BNB, and OMG. The report suggests using OpenZepplin's `safeTransfer` and `safeTransferFrom` functions to mitigate this issue. The judges and wardens disputed whether this was a real issue, but the sponsor decided to make a change to address the finding. The fix involves replacing `require()` statements with calls to OpenZeppelin's functions and using their `IERC20` interface. This change also addresses a potential issue with the `decimals()` function.
+
+### Original Finding Content
+
+_Submitted by CertoraInc, also found by 0x1f8b, 0xSky, CodingNameKiki, DecorativePineapple, jonatascm, Noah3o6, oyc&#95;109, pedr02b2, peritoflores, and Waze_
+
+<https://github.com/code-423n4/2022-08-fiatdao/blob/fece3bdb79ccacb501099c24b60312cd0b2e4bb2/contracts/VotingEscrow.sol#L425-L428><br>
+<https://github.com/code-423n4/2022-08-fiatdao/blob/fece3bdb79ccacb501099c24b60312cd0b2e4bb2/contracts/VotingEscrow.sol#L485-L488><br>
+<https://github.com/code-423n4/2022-08-fiatdao/blob/fece3bdb79ccacb501099c24b60312cd0b2e4bb2/contracts/VotingEscrow.sol#L546><br>
+<https://github.com/code-423n4/2022-08-fiatdao/blob/fece3bdb79ccacb501099c24b60312cd0b2e4bb2/contracts/VotingEscrow.sol#L657><br>
+<https://github.com/code-423n4/2022-08-fiatdao/blob/fece3bdb79ccacb501099c24b60312cd0b2e4bb2/contracts/VotingEscrow.sol#L676><br>
+
+Some ERC20 tokens functions don't return a boolean, for example USDT, BNB, OMG. So the `VotingEscrow` contract simply won't work with tokens like that as the `token`.
+
+### Proof of Concept
+
+The USDT's `transfer` and `transferFrom` functions doesn't return a bool, so the call to these functions will revert although the user has enough balance and the `VotingEscrow` contract won't work, assuming that token is USDT.
+
+### Tools Used
+
+Manual auditing - VS Code, some hardhat tests and me :)
+
+### Recommended Mitigation Steps
+
+Use the OpenZepplin's `safeTransfer` and `safeTransferFrom` functions.
+
+**[lacoop6tu (FIAT DAO) disputed and commented](https://github.com/code-423n4/2022-08-fiatdao-findings/issues/231#issuecomment-1216336341):**
+ > In our case the token is a BalancerV2 Pool Token which returns the boolean
+
+**[Justin Goro (judge) commented](https://github.com/code-423n4/2022-08-fiatdao-findings/issues/231#issuecomment-1232382424):**
+ > This should be acknowledged, not disputed, since there is nothing in documentation suggesting the token is inherently safe to use. 
+
+**[elnilz (FIAT DAO) commented](https://github.com/code-423n4/2022-08-fiatdao-findings/issues/231#issuecomment-1241595744):**
+ > @Justin Goro it's a no-issue in our specific case bc we will use VotingEscrow in combination with `token` which returns bool upon transfer/transferFrom. So at best this is a QA issue bc we should document that. some wardens actually asked us about what token we will be using pointing out the issue.
+> 
+> Now even if you'd want to award wardens who reported the issue it should then be a Med Risk bc if VotingEscrow is deployed with an unsafe `token` ppl would simply not be able to deposit into the contract but no funds would be at risk.
+
+**[elnilz (FIAT DAO) commented](https://github.com/code-423n4/2022-08-fiatdao-findings/issues/231#issuecomment-1242096432):**
+ > Fyi, even though we don't think this is an issue, we will make use of safeTransfer and safeTransferFrom so its a helpful submission nonetheless.
+
+**[Justin Goro (judge) commented](https://github.com/code-423n4/2022-08-fiatdao-findings/issues/231#issuecomment-1242900816):**
+ > It's tokens like BNB that led me to maintain the high risk rating. For BNB, transferFrom returns a bool but transfer doesn't. In other words, users can stake but not unstake on any protocol that doesn't use safeTransfer.
+> 
+> I agree that wardens should contact sponsors but it's not a channel we can really monitor. So although the net result is a documentation fix rather than a bug fix, it's a documentation fix informed by the identification of a potentially show stopping bug rather than something like "Comment typo: it should be Bitcoin, not bit coin".
+
+**IllIllI (warden) reviewed mitigation:**
+ > The sponsor disputed the issue because the token it's planned to be used with does correctly return a boolean. However, the sponsor decided to make a change to address the finding as [Issue 18](https://github.com/fiatdao/veFDT/pull/19/files/9d532c58e30e9730050fe26dd82bb4c293691001). The fix properly replaces the `require()` statements that check for successful transfers, with calls to OpenZeppelin's `safeTransfer()`. The PR also replaces the internal definition of the `IERC20` interface with OpenZeppelin's version. The prior version of the code's `IERC20` included the function `decimals()`, which is not one of the required functions for the interface, so it's possible for the code to encounter a token without this function, but it would be immediately apparent what happened because the constructor is the function that calls `decimals()`. The change to using OpenZeppelin required making this distinction more visible due to the fact that they're defined separately as `IERC20` and `IERC20Metadata`. The new code is not checking that the token actually supports the function (e.g. using a `safeDecimals()`-like function), but it is not any worse off that it had been prior to the change.
+
+
+
+***
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | FIAT DAO |
+| Report Date | N/A |
+| Finders | N/A |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2022-08-fiatdao
+- **GitHub**: https://github.com/code-423n4/2022-08-fiatdao-findings/issues/231
+- **Contest**: https://code4rena.com/reports/2022-08-fiatdao
+
+### Keywords for Search
+
+`vulnerability`
+

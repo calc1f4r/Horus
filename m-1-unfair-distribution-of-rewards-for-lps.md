@@ -1,0 +1,130 @@
+---
+# Core Classification
+protocol: Super DCA Liquidity Network
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 63423
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/1171
+source_link: none
+github_link: https://github.com/sherlock-audit/2025-09-super-dca-judging/issues/489
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - patitonar
+  - vinica\_boy
+---
+
+## Vulnerability Title
+
+M-1: Unfair distribution of rewards for LPs
+
+### Overview
+
+
+This bug report describes an issue found by two users, patitonar and vinica_boy, in the Super DCA protocol. The problem is related to the distribution of rewards to liquidity providers (LPs) in the Uniswap pool. Currently, rewards are distributed to in-range LPs at the current tick, regardless of which positions provided active liquidity during the accrual period. This can be exploited by an attacker who performs a series of steps, ultimately resulting in the theft of rewards from other honest LPs. The root cause of this issue is that the protocol is unable to account for which LPs have provided actual in-range liquidity during reward accrual. The impact of this bug is the loss of LPs' rewards. The protocol team has proposed a non-trivial solution to mitigate this issue by locking LPs' positions and distributing rewards on a fixed time epoch instead of on liquidity operations. 
+
+### Original Finding Content
+
+
+Source: https://github.com/sherlock-audit/2025-09-super-dca-judging/issues/489 
+
+## Found by 
+patitonar, vinica\_boy
+
+### Summary
+The pool's reward distribution occurs during each liquidity operation through the beforeAddLiquidity and beforeRemoveLiquidity hooks. The Uniswap pool's donate mechanism is used, which distributes rewards to in-range LPs at the current slot0.tick. The problem with this design is that rewards accrued over a certain period are distributed to the current in-range position, regardless of which positions provided active liquidity during the accrual period. This can be exploited by an attacker who performs the following steps (can be done in a single transaction):
+
+1. Some time has passed and rewards have been accumulated, but not distributed.
+2. Attacker makes a swap to move the tick to a predefined tick where their position provides liquidity in a small adjacent tick range.
+3. Triggers the reward distribution mechanism by collecting fees (e.g., modifying liquidity with a 0 liquidity delta, which triggers the beforeRemoveLiquidity hook).
+4. His position would accrue most of the fees because of the super tight range it has provided liquidity.
+5. Swaps back to move the tick to its original value.
+The attacker incurs gas fees and swap fees, but depending on the accrued rewards, this can be profitable. Even if not profitable, this would still lead to steal of rewards from other honest LPs.
+
+In a normal workflow scenario it would look like this - rewards accrue over a certain time period without any liquidity operations and numerous swaps move the tick in range of tick t0 to  tick t1. All LPs that have provided active liquidity during that period should be rewarded, but if there is a certain market movement and price/tick move to a different tick t2 and liquidity operation is triggered at that point, only positions which have tick t2 in range would accrue rewards for all period since the last distribution.
+### Root Cause
+
+The main problem is that the protocol cannot account for which LPs have provided actual in-range liquidity during reward accrual and distributes reward when there is an liquidity operation.
+
+[handleDistributionAndSettlement()](https://github.com/sherlock-audit/2025-09-super-dca/blob/main/super-dca-gauge/src/SuperDCAGauge.sol#L323C5-L367C6)
+### Internal Pre-conditions
+
+N/A
+
+### External Pre-conditions
+
+N/A
+
+### Attack Path
+
+Shared in the Summary section.
+### Impact
+
+Steal of LPs rewards.
+
+### PoC
+
+N/A
+
+### Mitigation
+
+Non-trivial mitigation as we need a way to account for the active LP position which deserve part of the accumulated rewards. One option would be to lock LPs positions and distribute rewards on a fixed time epochs instead of distributing rewards on liquidity operations. This would allow to verify which positions have actually provided in-range liquidity for that epoch and distribute rewards based on that.
+
+## Discussion
+
+**sherlock-admin2**
+
+The protocol team fixed this issue in the following PRs/commits:
+https://github.com/Super-DCA-Tech/super-dca-gauge/pull/52
+
+
+
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Sherlock |
+| Protocol | Super DCA Liquidity Network |
+| Report Date | N/A |
+| Finders | patitonar, vinica\_boy |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2025-09-super-dca-judging/issues/489
+- **Contest**: https://app.sherlock.xyz/audits/contests/1171
+
+### Keywords for Search
+
+`vulnerability`
+

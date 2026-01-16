@@ -1,0 +1,94 @@
+---
+# Core Classification
+protocol: UMA Accelerating Distributor Incremental Audit
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 32690
+audit_firm: OpenZeppelin
+contest_link: none
+source_link: https://blog.openzeppelin.com/uma-accelerating-distributor-incremental-audit
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - OpenZeppelin
+---
+
+## Vulnerability Title
+
+Configuration update retroactively impacts users rewards
+
+### Overview
+
+
+This bug report discusses an issue with the `configureStakingToken` function in the `AcceleratingDistributor` contract. When this function is used to update the `maxMultiplier` or `secondsToMaxMultiplier` parameters, it immediately affects the rewards received by all users who have staked in the pool. This is because the calculations in the `getUserRewardMultiplier` function use these parameters to determine the rewards. However, updating the `baseEmissionRate` parameter does not have an immediate impact on rewards. The report suggests implementing a mechanism to prevent parameter changes from retroactively affecting user rewards. Although the issue has been acknowledged and documentation has been added, no changes have been made to the contract to address it. The team responsible for the contract has decided not to implement a fix and believes that the admin should set the stakingToken configuration reasonably to avoid unexpected reward drops for users. 
+
+### Original Finding Content
+
+Updating the configuration of a staking pool using the [`configureStakingToken`](https://github.com/across-protocol/across-token/blob/dde7aedc766bf69f1cb0eb791b60259c705baa26/contracts/AcceleratingDistributor.sol#L115) function in the [`AcceleratingDistributor`](https://github.com/across-protocol/across-token/blob/dde7aedc766bf69f1cb0eb791b60259c705baa26/contracts/AcceleratingDistributor.sol#L19) contract will immediately affect the rewards received by all users who have staked in the pool. If the `maxMultiplier` or `secondsToMaxMultiplier` parameters are modified, users who have previously staked in the pool will see a change in their outstanding rewards. Specifically:
+
+
+* Increasing/decreasing the `maxMultiplier` parameter causes an immediate increase/decrease in outstanding rewards, respectively.
+* Increasing/decreasing the `secondsToMaxMultiplier` parameter causes an immediate decrease/increase in outstanding rewards, respectively.
+
+
+This is a direct result of the calculations performed in the [`getUserRewardMultiplier`](https://github.com/across-protocol/across-token/blob/dde7aedc766bf69f1cb0eb791b60259c705baa26/contracts/AcceleratingDistributor.sol#L318) function where the `fractionOfMaxMultiplier` variable is a function of the `secondsToMaxMultiplier` value, and the return value is a function of `fractionOfMaxMultiplier` and `maxMultiplier`. The [`getOutstandingRewards`](https://github.com/across-protocol/across-token/blob/dde7aedc766bf69f1cb0eb791b60259c705baa26/contracts/AcceleratingDistributor.sol#L336) function returns a value called `newUserRewards`, which represents the rewards that a user has received. If this function is called immediately before adjusting the `maxMultiplier` or `secondsToMaxMultiplier` parameters, and then again immediately after adjusting these parameters within the same block, the `newUserRewards` value will be different in each case. In other words, adjusting these parameters will immediately affect the outstanding rewards received by a user.
+
+
+Updating the `baseEmissionRate` does not have any immediate impact on outstanding rewards because within the [`baseRewardPerToken`](https://github.com/across-protocol/across-token/blob/dde7aedc766bf69f1cb0eb791b60259c705baa26/contracts/AcceleratingDistributor.sol#299) function, `getCurrentTime()` will be equal to `stakingToken.lastUpdateTime` since the [`_updateReward`](https://github.com/across-protocol/across-token/blob/dde7aedc766bf69f1cb0eb791b60259c705baa26/contracts/AcceleratingDistributor.sol#382) function is called by the `configureStakingToken` function prior to updating the parameters. Thus, the `baseRewardPerToken` function will return `stakingToken.rewardPerTokenStored`, not causing any immediate impact on the outstanding rewards.
+
+
+Consider implementing a mechanism to checkpoint user rewards such that parameter changes do not retroactively impact outstanding rewards.
+
+
+***Update:** Acknowledged, not resolved. Documentation was added to the `configureStakingToken` function in [pull request #55](https://github.com/across-protocol/across-token/pull/55) with commit [2110ce2](https://github.com/across-protocol/across-token/commit/2110ce2935e3ac7bdda3073960c106792277444f). The documentation clarifies the consequences of updating the `maxMultiplier` and `secondsToMaxMultiplier` parameters, however no changes were made to contract to prevent parameter changes from impacting outstanding user rewards. The UMA team stated:*
+
+
+
+> *We decided not to implement this fix and instead are willing to live with the fact that the admin has full control over the contract's rewards and should set the stakingToken configuration reasonably so as not to cause unexpected reward drops for users. (Unexpected reward increases are ok). The admin already has full ability to drain all rewards (not principal!) from the contract so doing so by changing stakingToken configs doesn't strike us as a different risk profile.*
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | OpenZeppelin |
+| Protocol | UMA Accelerating Distributor Incremental Audit |
+| Report Date | N/A |
+| Finders | OpenZeppelin |
+
+### Source Links
+
+- **Source**: https://blog.openzeppelin.com/uma-accelerating-distributor-incremental-audit
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+

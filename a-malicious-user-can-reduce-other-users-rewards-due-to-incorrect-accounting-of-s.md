@@ -1,0 +1,83 @@
+---
+# Core Classification
+protocol: Nayms 2024 (Retainer)
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 59474
+audit_firm: Quantstamp
+contest_link: https://certificate.quantstamp.com/full/nayms-2024-retainer/04e1c37c-19e8-4c7d-b743-268e4a6466c9/index.html
+source_link: https://certificate.quantstamp.com/full/nayms-2024-retainer/04e1c37c-19e8-4c7d-b743-268e4a6466c9/index.html
+github_link: none
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 3
+finders:
+  - Roman Rohleder
+  - Valerian Callens
+  - Jeffrey Kam
+---
+
+## Vulnerability Title
+
+A malicious user can reduce other users' rewards due to incorrect accounting of stake balances
+
+### Overview
+
+
+The client has marked a bug as "Fixed" in the file `contracts-v3/LibTokenizedVaultStaking.sol`. The issue is in the function `_unstake()` where the stake balance of the entity is not properly reduced when a user unstakes their tokens. This can cause problems with accurately representing the amount of tokens staked and can also lead to incorrect accounting in the function `_payRewards()`. The recommendation is to fix this by reducing the stake balance in the function `_unstake()`. 
+
+### Original Finding Content
+
+**Update**
+Marked as "Fixed" by the client. Addressed in: `639134848b30d20ec3293c78c5e99c21ece6c096`.
+
+**File(s) affected:**`contracts-v3/LibTokenizedVaultStaking.sol`
+
+**Description:** In the function `_unstake()`, the stake balance of the entity is not reduced for the current interval, namely `s.stakeBalance[vTokenId][_entityId]` is not reduced by the amount unstaked. This is problematic because a user can stake and unstake in the current interval, but this only increases the stake balance of the entity for the current interval. This means the actual amount of tokens staked in `_entityId` is not accurately represented by the `stakeBalance` mapping. This in turn leads to wrong accounting in `_payRewards()` if the entity admin decides to pay rewards at the current interval after the user's unstaking. In particular, some rewards will be unclaimable because a portion of the rewards is allocated to the "unstaked" user. Furthermore, an attacker can deny other users from claiming their rewards by staking a huge amount and then immediately unstaking.
+
+**Recommendation:** Consider reducing in the function `_unstake()` the variable `s.stakeBalance[vTokenId][_entityId]` by the amount unstaked to ensure accurate accounting.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Quantstamp |
+| Protocol | Nayms 2024 (Retainer) |
+| Report Date | N/A |
+| Finders | Roman Rohleder, Valerian Callens, Jeffrey Kam |
+
+### Source Links
+
+- **Source**: https://certificate.quantstamp.com/full/nayms-2024-retainer/04e1c37c-19e8-4c7d-b743-268e4a6466c9/index.html
+- **GitHub**: N/A
+- **Contest**: https://certificate.quantstamp.com/full/nayms-2024-retainer/04e1c37c-19e8-4c7d-b743-268e4a6466c9/index.html
+
+### Keywords for Search
+
+`vulnerability`
+

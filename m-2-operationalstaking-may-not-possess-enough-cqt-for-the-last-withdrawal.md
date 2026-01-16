@@ -1,0 +1,172 @@
+---
+# Core Classification
+protocol: Covalent
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 30209
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/127
+source_link: none
+github_link: https://github.com/sherlock-audit/2023-11-covalent-judging/issues/39
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - dexes
+  - cdp
+  - services
+  - yield_aggregator
+  - cross_chain
+
+# Audit Details
+report_date: unknown
+finders_count: 4
+finders:
+  - bitsurfer
+  - aslanbek
+  - cheatcode
+  - dany.armstrong90
+---
+
+## Vulnerability Title
+
+M-2: OperationalStaking may not possess enough CQT for the last withdrawal
+
+### Overview
+
+
+This bug report discusses an issue with the OperationalStaking contract where there may not be enough CQT tokens for the last withdrawal. This is due to rounding errors in the calculation of shares when staking and unstaking. As a result, users may end up withdrawing more than their initial stake and share of rewards, causing their transactions to revert. The recommended solution is to round off instead of rounding down in the affected functions. The issue has been fixed in a recent pull request. 
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2023-11-covalent-judging/issues/39 
+
+## Found by 
+aslanbek, bitsurfer, cheatcode, dany.armstrong90
+## Summary
+Both `_sharesToTokens` and `_tokensToShares` round down instead of rounding off against the user. This can result in users withdrawing few weis more than they should, which in turn would make the last CQT transfer from the contract revert due to insufficient balance.
+
+## Vulnerability Detail
+1. When users `stake`, the shares they will receive is calculated via `_tokensToShares`:
+```solidity
+    function _tokensToShares(
+        uint128 amount,
+        uint128 rate
+    ) internal view returns (uint128) {
+        return uint128((uint256(amount) * DIVIDER) / uint256(rate));
+    }
+```
+So the rounding will be against the user, or zero if the user provided the right amount of CQT.
+
+2. When users unstake, their shares are decreased by 
+
+```solidity
+    function _sharesToTokens(
+        uint128 sharesN,
+        uint128 rate
+    ) internal view returns (uint128) {
+        return uint128((uint256(sharesN) * uint256(rate)) / DIVIDER);
+    }
+```
+So it is possible to `stake` and `unstake` such amounts, that would leave dust amount of shares on user's balance after their full withdrawal. However, dust amounts can not be withdrawn due to the check in _redeemRewards:
+```solidity
+        require(
+            effectiveAmount >= REWARD_REDEEM_THRESHOLD,
+            "Requested amount must be higher than redeem threshold"
+        );
+```
+But, if the user does not withdraw immediately, but instead does it after the multiplier is increased, the dust he received from rounding error becomes withdrawable, because his `totalUnlockedValue` becomes greater than `REWARD_REDEEM_THRESHOLD`. 
+
+So the user will end up withdrawing more than their `initialStake + shareOfRewards`, which means, if the rounding after all other operations stays net-zero for the protocol, there won't be enough CQT for the last CQT withdrawal (be it `transferUnstakedOut`, `redeemRewards`, or `redeemCommission`).
+
+[Foundry PoC](https://gist.github.com/aslanbekaibimov/e0962c60213ac460c8ea1c3b013e5537)
+
+## Impact
+
+Victim's transactions will keep reverting unless they figure out that they need to decrease their withdrawal amount.
+
+## Code Snippet
+https://github.com/sherlock-audit/2023-11-covalent/blob/main/cqt-staking/contracts/OperationalStaking.sol#L386-L388
+
+https://github.com/sherlock-audit/2023-11-covalent/blob/main/cqt-staking/contracts/OperationalStaking.sol#L393-L395
+## Tool used
+
+Manual Review
+
+## Recommendation
+`_sharesToTokens` and `_tokensToShares`, instead of rounding down, should always round off against the user.
+
+
+
+## Discussion
+
+**sherlock-admin2**
+
+1 comment(s) were left on this issue during the judging contest.
+
+**takarez** commented:
+>  valid: watson explained how rounding error would prevent the the last to withdraw the chance to unless there are some changes in place; medium(5)
+
+
+
+**noslav**
+
+The issue lies in this check 
+```solidity
+        require(
+            effectiveAmount >= REWARD_REDEEM_THRESHOLD,
+            "Requested amount must be higher than redeem threshold"
+        );
+```
+
+where the value by default for REWARD_REDEEM_THRESHOLD is 10*8 and hence redemption below that value is not possible leading to the build up of dust as the issue describes until that threshold is crossed
+
+**noslav**
+
+fixed by [round up sharesToBurn and sharesToRemove due to uint258 to uint128 co](https://github.com/covalenthq/cqt-staking/pull/125/commits/1f957c05aacfb765d751a5ec3cbfd1798e1fae15)
+
+**rogarcia**
+
+correct PR commit https://github.com/covalenthq/cqt-staking/pull/125/commits/5a771c3aa5f046c06bd531f0f49530fb7d7bfdee
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Sherlock |
+| Protocol | Covalent |
+| Report Date | N/A |
+| Finders | bitsurfer, aslanbek, cheatcode, dany.armstrong90 |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2023-11-covalent-judging/issues/39
+- **Contest**: https://app.sherlock.xyz/audits/contests/127
+
+### Keywords for Search
+
+`vulnerability`
+
