@@ -1,0 +1,192 @@
+---
+# Core Classification
+protocol: Olympus Update
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 8716
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/60
+source_link: none
+github_link: https://github.com/sherlock-audit/2023-03-olympus-judging/issues/3
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 1.00
+financial_impact: high
+
+# Scoring
+quality_score: 5
+rarity_score: 4
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - liquid_staking
+  - cdp
+  - yield
+  - cross_chain
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - 0x52
+---
+
+## Vulnerability Title
+
+H-2: minTokenAmounts_ is useless in new configuration and doesn't provide any real slippage protection
+
+### Overview
+
+
+This bug report was found by 0x52 and was reported on the GitHub repository for the Sherlock Audit 2023-03-olympus-judging. The issue is that the minTokenAmounts_ in the new configuration of BLVaultLido#withdraw does not provide any real slippage protection because it only ensures that enough is received from the liquidity pool but does not enforce how much is received by the user. This is due to the fact that wstETH is skimmed off to the treasury, resulting in users not being able to protect themselves from oracle slop/wstETH skimming. The code snippet provided shows that minTokenAmounts_ only applies to the removal of liquidity.
+
+The impact of this issue is that users cannot protect themselves from oracle slop/wstETH skimming. The recommendation to fix this issue is to allow the user to specify the amount of wstETH they receive AFTER the arb is skimmed. The discussion in the report shows that there is disagreement on the severity of the issue, with some thinking it is low or medium, while others think it is worth fixing. The conclusion is that the issue should be fixed and a fix implementation was provided.
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2023-03-olympus-judging/issues/3 
+
+## Found by 
+0x52
+
+## Summary
+
+BLVaultLido#withdraw skims off extra stETH from the user that results from oracle arb. The problem with this is that minTokenAmounts_ no longer provides any slippage protection because it only ensures that enough is received from the liquidity pool but never enforces how much is received by the user.
+
+## Vulnerability Detail
+
+[BLVaultLido.sol#L224-L247](https://github.com/sherlock-audit/2023-03-olympus/blob/main/sherlock-olympus/src/policies/BoostedLiquidity/BLVaultLido.sol#L224-L247)
+
+        _exitBalancerPool(lpAmount_, minTokenAmounts_);
+
+        // Calculate OHM and wstETH amounts received
+        uint256 ohmAmountOut = ohm.balanceOf(address(this)) - ohmBefore;
+        uint256 wstethAmountOut = wsteth.balanceOf(address(this)) - wstethBefore;
+
+        // Calculate oracle expected wstETH received amount
+        // getTknOhmPrice returns the amount of wstETH per 1 OHM based on the oracle price
+        uint256 wstethOhmPrice = manager.getTknOhmPrice();
+        uint256 expectedWstethAmountOut = (ohmAmountOut * wstethOhmPrice) / _OHM_DECIMALS;
+
+        // Take any arbs relative to the oracle price for the Treasury and return the rest to the owner
+        uint256 wstethToReturn = wstethAmountOut > expectedWstethAmountOut
+            ? expectedWstethAmountOut
+            : wstethAmountOut;
+        if (wstethAmountOut > wstethToReturn)
+            wsteth.safeTransfer(TRSRY(), wstethAmountOut - wstethToReturn);
+
+        // Burn OHM
+        ohm.increaseAllowance(MINTR(), ohmAmountOut);
+        manager.burnOhmFromVault(ohmAmountOut);
+
+        // Return wstETH to owner
+        wsteth.safeTransfer(msg.sender, wstethToReturn);
+
+minTokenAmounts_ only applies to the removal of liquidity. Since wstETH is skimmed off to the treasury the user no longer has any way to protect themselves from slippage. As shown in my other submission, oracle slop can lead to loss of funds due to this skimming.
+
+## Impact
+
+Users cannot protect themselves from oracle slop/wstETH skimming
+
+## Code Snippet
+
+https://github.com/sherlock-audit/2023-03-olympus/blob/main/sherlock-olympus/src/policies/BoostedLiquidity/BLVaultLido.sol#L203-L256
+
+## Tool used
+
+Manual Review
+
+## Recommendation
+
+Allow the user to specify the amount of wstETH they receive AFTER the arb is skimmed.
+
+## Discussion
+
+**0xLienid**
+
+This is true, I'm not sure it would matter much in practice since there's no real economic incentive for anyone but the Treasury to do this. That said, it's a relatively easy fix so I think it's worth including anyways.
+
+**0xLienid**
+
+Fix Implementation: https://github.com/0xLienid/sherlock-olympus/pull/11/files
+
+**cducrest**
+
+Escalate for 10 USDC
+
+Disagree with severity, probably medium or even low. The main reason slippage protection is needed in exchange is because of sandwich attacks that directly and instantly impact the price on the pool. Here the issue points to a lack of slippage protection with regards to the oracle price which cannot be impacted by an outsider. 
+
+Since there is slippage protection on the pool withdraw, the vault withdraw tx cannot be sandwiched for profit (or grief). It is just a nice to have.
+
+**sherlock-admin**
+
+ > Escalate for 10 USDC
+> 
+> Disagree with severity, probably medium or even low. The main reason slippage protection is needed in exchange is because of sandwich attacks that directly and instantly impact the price on the pool. Here the issue points to a lack of slippage protection with regards to the oracle price which cannot be impacted by an outsider. 
+> 
+> Since there is slippage protection on the pool withdraw, the vault withdraw tx cannot be sandwiched for profit (or grief). It is just a nice to have.
+
+You've created a valid escalation for 10 USDC!
+
+To remove the escalation from consideration: Delete your comment.
+
+You may delete or edit your escalation comment anytime before the 48-hour escalation window closes. After that, the escalation becomes final.
+
+**IAm0x52**
+
+Escalate for 10 USDC
+
+Disagree with the above comment. Since skimming of arb happens AFTER pool slippage checks the user would still lose funds.
+
+**sherlock-admin**
+
+ > Escalate for 10 USDC
+> 
+> Disagree with the above comment. Since skimming of arb happens AFTER pool slippage checks the user would still lose funds.
+
+You've created a valid escalation for 10 USDC!
+
+To remove the escalation from consideration: Delete your comment.
+
+You may delete or edit your escalation comment anytime before the 48-hour escalation window closes. After that, the escalation becomes final.
+
+**cducrest**
+
+The user may lose funds, if the arbs relative to the oracle price are to his disfavour. I agree with that. But whether it is to his disfavour or not cannot be impacted by an outsider. Additionally, the user can know in advance that he will be subjected to arbs by checking the oracle/real life asset price. This is not analogous to a dex swap using a pool of which the state can be influenced by a previous transaction (front-run / sandwich attack).
+
+I.e. the reason we protect pool swaps with slippage parameters is not present in the arb relative to the oracle price.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 5/5 |
+| Rarity Score | 4/5 |
+| Audit Firm | Sherlock |
+| Protocol | Olympus Update |
+| Report Date | N/A |
+| Finders | 0x52 |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2023-03-olympus-judging/issues/3
+- **Contest**: https://app.sherlock.xyz/audits/contests/60
+
+### Keywords for Search
+
+`vulnerability`
+

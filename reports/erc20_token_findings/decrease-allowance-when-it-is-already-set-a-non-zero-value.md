@@ -1,0 +1,141 @@
+---
+# Core Classification
+protocol: LI.FI
+chain: everychain
+category: uncategorized
+vulnerability_type: usdt
+
+# Attack Vector Details
+attack_type: usdt
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 7039
+audit_firm: Spearbit
+contest_link: https://github.com/spearbit/portfolio/blob/master/pdfs/LIFI-Spearbit-Security-Review.pdf
+source_link: https://github.com/spearbit/portfolio/blob/master/pdfs/LIFI-Spearbit-Security-Review.pdf
+github_link: none
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 1.00
+financial_impact: high
+
+# Scoring
+quality_score: 5
+rarity_score: 4
+
+# Context Tags
+tags:
+  - usdt
+  - approve
+
+protocol_categories:
+  - dexes
+  - bridge
+  - services
+  - cross_chain
+  - liquidity_manager
+
+# Audit Details
+report_date: unknown
+finders_count: 3
+finders:
+  - Jonah1005
+  - DefSec
+  - Gerard Persoon
+---
+
+## Vulnerability Title
+
+Decrease allowance when it is already set a non-zero value
+
+### Overview
+
+
+This bug report relates to a problem encountered when dealing with non-standard tokens, such as USDT. When a contract or user tries to approve an allowance for a spender, the transaction will revert if the spender allowance is already set to a non-zero value. This is due to a vulnerability which can be exploited by an attacker, known as front-running.
+
+The bug has been identified in four different contracts: AxelarFacet.sol, LibAsset.sol, FusePoolZap.sol and Executor.sol. In AxelarFacet.sol, the faucet should use the LibAsset.maxApproveERC20() function, as is used in the other faucets. In LibAsset, the function can approve with zero first, or safeIncreaseAllowance can be utilized. In FusePoolZap.sol, the contract should use safeApprove with approving zero. Finally, in Executor.sol, the contract should utilize LibAsset.maxApproveERC20() function, as is done in the other contracts.
+
+The recommended solution is to approve with a zero amount first before setting the actual amount, or to use the safeIncreaseAllowance function in the LibAsset.maxApproveERC20() function. These solutions have been implemented in PR #10 and have been verified.
+
+### Original Finding Content
+
+## Security Analysis Report
+
+## Severity
+**High Risk**
+
+## Context
+- AxelarFacet.sol#L71
+- LibAsset.sol#L52
+- FusePoolZap.sol#L64
+- Executor.sol#L312
+
+## Description
+Non-standard tokens like USDT will revert the transaction when a contract or a user tries to approve an allowance when the spender allowance is already set to a non-zero value. For that reason, the previous allowance should be decreased before increasing the allowance in the related function.
+
+- Performing a direct overwrite of the value in the allowances mapping is susceptible to front-running scenarios by an attacker (e.g., an approved spender). As OpenZeppelin mentioned, `safeApprove` should only be called when setting an initial allowance or when resetting it to zero.
+
+### Function
+```solidity
+function safeApprove(
+    IERC20 token,
+    address spender,
+    uint256 value
+) internal {
+    // safeApprove should only be called when setting an initial allowance,
+    // or when resetting it to zero. To increase and decrease it, use
+    // 'safeIncreaseAllowance' and 'safeDecreaseAllowance'.
+    require(
+        (value == 0) || (token.allowance(address(this), spender) == 0),
+        "SafeERC20: approve from non-zero to non-zero allowance"
+    );
+    _callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, value));
+}
+```
+
+### Instances of the Issue
+There are four instances of this issue:
+
+1. **AxelarFacet.sol** is directly using the `approve` function, which does not check the return value of an external function. The faucet should utilize `LibAsset.maxApproveERC20()` function like the other faucets.
+   
+2. **LibAsset**'s `LibAsset.maxApproveERC20()` function is used in the other faucets. For instance, USDT’s approval mechanism reverts if current allowance is nonzero. For that reason, the function can approve with zero first or `safeIncreaseAllowance` can be utilized.
+
+3. **FusePoolZap.sol** is also using the `approve` function, which does not check the return value. The contract does not import any other libraries; thus, the contract should use the `safeApprove` function with approving zero.
+
+4. **Executor.sol** is directly using the `approve` function, which does not check the return value of an external function. The contract should utilize `LibAsset.maxApproveERC20()` function like the other contracts.
+
+## Recommendation
+Approve with a zero amount first before setting the actual amount, or `safeIncreaseAllowance` can be utilized in the `LibAsset.maxApproveERC20()` function.
+
+## LiFi
+Fixed with PR #10.
+
+## Spearbit
+Verified.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 5/5 |
+| Rarity Score | 4/5 |
+| Audit Firm | Spearbit |
+| Protocol | LI.FI |
+| Report Date | N/A |
+| Finders | Jonah1005, DefSec, Gerard Persoon |
+
+### Source Links
+
+- **Source**: https://github.com/spearbit/portfolio/blob/master/pdfs/LIFI-Spearbit-Security-Review.pdf
+- **GitHub**: N/A
+- **Contest**: https://github.com/spearbit/portfolio/blob/master/pdfs/LIFI-Spearbit-Security-Review.pdf
+
+### Keywords for Search
+
+`USDT, Approve`
+

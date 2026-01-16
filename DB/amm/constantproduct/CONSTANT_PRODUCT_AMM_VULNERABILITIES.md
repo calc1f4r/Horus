@@ -1,4 +1,3 @@
-Note : Hey Agent, ignore this file, if you are not working with constant prodcuct AMM vulnerabiliities.
 ---
 # Core Classification (Required)
 protocol: generic

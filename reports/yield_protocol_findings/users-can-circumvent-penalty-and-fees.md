@@ -1,0 +1,97 @@
+---
+# Core Classification
+protocol: IntentX
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 59430
+audit_firm: Quantstamp
+contest_link: https://certificate.quantstamp.com/full/intent-x/a195e62f-30b6-4219-b9e5-42af8a9e2fd5/index.html
+source_link: https://certificate.quantstamp.com/full/intent-x/a195e62f-30b6-4219-b9e5-42af8a9e2fd5/index.html
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 3
+finders:
+  - Mustafa Hasan
+  - Adrian Koegl
+  - Cameron Biniamow
+---
+
+## Vulnerability Title
+
+Users Can Circumvent Penalty and Fees
+
+### Overview
+
+
+The client has acknowledged a problem with the INTX staking mechanism, which is meant to encourage long-term investment. However, there is a loophole in the system that allows users to bypass penalties and fees when trading xINTX tokens in a secondary market. This is because certain functions have not been disabled or overridden, allowing for the creation of specific quantities of xINTX tokens. To illustrate this vulnerability, a hypothetical scenario is presented where a user can sell their tokens without facing penalties and the buyer can acquire them with better conditions. The recommendation is to modify the system to account for secondary market activities and make it more in line with the intended incentives.
+
+### Original Finding Content
+
+**Update**
+Marked as "Acknowledged" by the client. The client provided the following explanation:
+
+> In the commit for the fix for [QS-8](https://certificate.quantstamp.com/full/intent-x/a195e62f-30b6-4219-b9e5-42af8a9e2fd5/index.html#findings-qs8) some functions have been override to avoid sale on opensea and approved based secundary markets. We believe the secondary market problem you give as an example, can ever happens. If someone creates it, it won't have any marketing from our project. so this won't be a problem.
+
+**File(s) affected:**`StakedINTX.sol`
+
+**Description:** The INTX staking mechanism, designed to promote long-term investment, includes a reward boost for sustained staking, penalties for early unstaking, and redemption fees. However, these mechanisms can be bypassed in a secondary market for xINTX tokens. In such a market, users can trade xINTX tokens without triggering reward resets, early unstaking penalties, or redemption fees.
+
+This loophole exists because the `transfer()` and `transferFrom()` functions are not disabled or overriden, and specific quantities of xINTX can be created using the `split()` function. Consequently, secondary market trades are inadvertently incentivized, as both buyers and sellers benefit from maintaining high reward boosts and avoiding penalties or fees.
+
+**Exploit Scenario:** To illustrate this vulnerability, consider a hypothetical secondary market smart contract sequence:
+
+1.   User A wishes to sell their **y** xINTX balance prematurely. User B is interested in buying **z**<**y** xINTX balance.
+2.   User A sends their xINTX token (balance **y**) to the smart contract, setting sale parameters.
+3.   User B sees the offer and agrees to buy **z**<**y** xINTX balance under these terms.
+4.   The smart contract will `split()` the xINTX tokens into two: one with **z** and another with **z** - **y** balance.
+5.   The smart contract now holds an xINTX token with a **y** - **z** balance for future sales.
+
+User B successfully acquired **z** xINTX balance with remaining boost and better conditions, as the dynamic ratio is better than acquiring xINTX through `stake()`. Furthermore, User A did not pay any penalty or fees on this purchase.
+
+**Recommendation:** We strongly advise revisiting the incentive design to account for secondary market activities. One solution is to modify the `_transfer()` function to impose fees or reset the reward boost upon transfer. While this doesn't completely eliminate the potential for off-chain account sales or smart account trades, it significantly complicates such secondary market transactions, aligning them more closely with the intended staking incentives.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Quantstamp |
+| Protocol | IntentX |
+| Report Date | N/A |
+| Finders | Mustafa Hasan, Adrian Koegl, Cameron Biniamow |
+
+### Source Links
+
+- **Source**: https://certificate.quantstamp.com/full/intent-x/a195e62f-30b6-4219-b9e5-42af8a9e2fd5/index.html
+- **GitHub**: N/A
+- **Contest**: https://certificate.quantstamp.com/full/intent-x/a195e62f-30b6-4219-b9e5-42af8a9e2fd5/index.html
+
+### Keywords for Search
+
+`vulnerability`
+

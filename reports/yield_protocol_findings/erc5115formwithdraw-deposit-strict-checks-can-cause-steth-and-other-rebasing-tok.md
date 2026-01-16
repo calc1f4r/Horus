@@ -1,0 +1,124 @@
+---
+# Core Classification
+protocol: Superform
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 54122
+audit_firm: Cantina
+contest_link: https://cantina.xyz/portfolio/bd046a21-6683-498a-b0e0-fc641e47191a
+source_link: https://cdn.cantina.xyz/reports/cantina_solo_superform_jul2024.pdf
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 3
+finders:
+  - cergyk
+  - Windhustler
+  - Akshay Srivastav
+---
+
+## Vulnerability Title
+
+ERC5115Form::withdraw /deposit strict checks can cause stETH (and other rebasing tokens) to revert 
+
+### Overview
+
+
+This bug report is about an issue with ERC5115Form token transfers. The problem occurs when transferring stEth tokens, where there is a rounding error in the share calculation. This can result in a difference of up to 2 wei in the destination address's balance before and after the transfer. This can cause the transfer to fail in some cases.
+
+The issue is found in two lines of code: line 314 and line 566 in the ERC5115Form.sol file. The problem is related to the logic used in xChain deposits and withdrawals, which may cause the transfer to fail if the amount transferred is not exact.
+
+The transfer logic for xChain deposits involves pulling tokens from the sender, increasing the allowance, and depositing the tokens for shares. However, the amount may not be available for deposit after the transfer. The withdrawal logic involves a strict equality check, which will cause the transfer to fail if the exact amount is not transferred.
+
+The report recommends two solutions: using the balance difference around the transfer for deposits, and using a tolerance constant for withdrawals. The fixes for these issues have been implemented in two commits: 02ee7426 and 6527830b.
+
+In summary, there is a bug in ERC5115Form token transfers that can cause the transfer to fail due to a rounding error in the share calculation. The recommended fixes have been implemented in two commits. 
+
+### Original Finding Content
+
+## Error Report on ERC5115Form Token Transfers
+
+## Context
+- **Lines:** ERC5115Form.sol#L314, ERC5115Form.sol#L566
+
+## Description
+Due to a rounding issue with share calculation during the transfer of stEth tokens (see [lido-dao/issues/442](https://github.com/lido-dao/issues/442)), the balance difference of the destination address before and after the transfer of the amount is not exactly the amount itself, but can be off by at most 2 wei. The logic inside xChain deposits (direct deposits should not be affected) and withdrawals may revert if the amount transferred is not exact.
+
+### Transfer Logic 
+
+- **xChain Deposit Logic** (ERC5115Form.sol#L314-L320):
+    ```solidity
+    /// @dev pulling from sender, to auto-send tokens back in case of failed deposits / reverts
+    IERC20(vaultTokenIn).safeTransferFrom(msg.sender, address(this), singleVaultData_.amount);
+    
+    /// @dev allowance is modified inside of the IERC20.transferFrom() call
+    IERC20(vaultTokenIn).safeIncreaseAllowance(vaultLoc, singleVaultData_.amount);
+    
+    /// @dev deposit vaultTokenIn for shares and add extra validation check to ensure intended ERC5115 behavior
+    shares = _depositAndValidate(singleVaultData_, singleVaultData_.amount);
+    ```
+    Note: `singleVaultData_.amount` may not be available to deposit after the transfer.
+
+- **Withdrawal Logic** (ERC5115Form.sol#L566):
+    ```solidity
+    if (
+        (assetsBalanceAfter - assetsBalanceBefore != assets) ||
+        (ENTIRE_SLIPPAGE * assets < singleVaultData_.outputAmount * (ENTIRE_SLIPPAGE - singleVaultData_.maxSlippage))
+    ) {
+        revert Error.VAULT_IMPLEMENTATION_FAILED();
+    }
+    ```
+    The strict equality check will revert if the exact amount is not transferred.
+
+## Recommendations
+1. **Deposit Case**: Consider using the balance difference around the transfer, as done during direct deposits.
+2. **Withdrawal Case**: Consider using a tolerance constant `EPSILON` (can be set to 10 wei, for example), and tolerate that difference from the exact amount.
+
+## Fixes
+- Deposit case fixed in commit [02ee7426](https://github.com/your-repo/commit/02ee7426)
+- Withdrawal case fixed in commit [6527830b](https://github.com/your-repo/commit/6527830b)
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Cantina |
+| Protocol | Superform |
+| Report Date | N/A |
+| Finders | cergyk, Windhustler, Akshay Srivastav |
+
+### Source Links
+
+- **Source**: https://cdn.cantina.xyz/reports/cantina_solo_superform_jul2024.pdf
+- **GitHub**: N/A
+- **Contest**: https://cantina.xyz/portfolio/bd046a21-6683-498a-b0e0-fc641e47191a
+
+### Keywords for Search
+
+`vulnerability`
+

@@ -1,4 +1,3 @@
-Note : Hey Agent please ignore this file, if the protocol does not use Chainlink oracles.
 ---
 # Core Classification (Required)
 protocol: generic
