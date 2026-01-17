@@ -80,6 +80,26 @@ version: all
 | Fixed Token Account Size | `reports/solana_findings/fixed-token-account-size-causes-initialization-failures-for-token-accounts-whose.md` | MEDIUM | Unknown |
 | Hard-coded Vault Size | `reports/solana_findings/hard-coded-165-byte-vault-account-is-too-small-for-raydium-token-2022-mints-with.md` | MEDIUM | Unknown |
 
+### Permanent Delegate Vulnerabilities
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Permanent Delegate Token Drain | Illustrative Pattern - No specific report | CRITICAL | N/A |
+
+### Interest Bearing Token Vulnerabilities
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Interest Rate Manipulation | Illustrative Pattern - No specific report | MEDIUM | N/A |
+
+### Non-Transferable Token Vulnerabilities
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Non-Transferable Token Bypass | Illustrative Pattern - No specific report | MEDIUM | N/A |
+
+### Token Account Closing Vulnerabilities
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Custody Token Account Closing DOS | `reports/solana_findings/custody-token-account-closing-dos.md` | HIGH | OtterSec |
+
 ### External Links
 - [SPL Token-2022 Documentation](https://spl.solana.com/token-2022)
 - [Token-2022 Extensions Guide](https://spl.solana.com/token-2022/extensions)
