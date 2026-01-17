@@ -24,7 +24,7 @@ Understanding patterns across reports helps create comprehensive, search-optimiz
 1. **Read** multiple vulnerability reports from `reports/<topic>/` folder (minimum 5-10)
 2. **Identify** common patterns, root causes, and variants across different reports
 3. **Synthesize** comprehensive vulnerability entries following TEMPLATE.md
-4. **Optimize** entries for vector search with rich semantic context
+4. **Optimize** entries for vector search with rich semantic context for llms and ai agent readibility
 5. **Organize** generic vulnerabilities under `db/general/<vulnerability_class>/` structure
 
 ## Root Cause Analysis Framework
@@ -88,7 +88,7 @@ When you have multiple reports for a topic:
 2. **Read titles and severity ratings** - skim vulnerability descriptions
 3. **Create initial buckets** based on keywords and root causes
 4. **Prioritize** - start with HIGH/CRITICAL severity reports
-
+5. **Chunking** : if you think you have a lot of reports, break them into groups of 5-10 for focused analysis and then synthesize across groups.
 Example categorization output:
 - Staleness Issues (12 reports): mach-finance-staleness.md (MEDIUM), astrolab-stale-price.md (MEDIUM)...
 - Confidence Interval (8 reports): hedge-vault-confidence.md (LOW), reya-confidence-validation.md (MEDIUM)...

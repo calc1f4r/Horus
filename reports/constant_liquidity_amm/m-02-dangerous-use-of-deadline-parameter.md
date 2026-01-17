@@ -1,0 +1,160 @@
+---
+# Core Classification
+protocol: Particle Protocol
+chain: everychain
+category: uncategorized
+vulnerability_type: deadline
+
+# Attack Vector Details
+attack_type: deadline
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 29699
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2023-12-particle
+source_link: https://code4rena.com/reports/2023-12-particle
+github_link: https://github.com/code-423n4/2023-12-particle-findings/issues/59
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+  - deadline
+
+protocol_categories:
+  - dexes
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - adriro
+  - immeas
+---
+
+## Vulnerability Title
+
+[M-02] Dangerous use of deadline parameter
+
+### Overview
+
+
+This bug report discusses an issue with the particle protocol's use of a deadline parameter when interacting with the Uniswap NFT Position Manager. The protocol is currently using `block.timestamp` as the deadline argument, which defeats the purpose of having a deadline. This can potentially allow pending transactions to be maliciously executed at a later point, causing harm to the submitter. The recommendation is to add a proper deadline parameter to each of the functions used to manage the liquidity position, and to forward this parameter to the underlying calls to the Uniswap NonfungiblePositionManager contract. 
+
+### Original Finding Content
+
+
+<https://github.com/code-423n4/2023-12-particle/blob/a3af40839b24aa13f5764d4f84933dbfa8bc8134/contracts/libraries/LiquidityPosition.sol#L144> 
+
+<https://github.com/code-423n4/2023-12-particle/blob/a3af40839b24aa13f5764d4f84933dbfa8bc8134/contracts/libraries/LiquidityPosition.sol#L197> 
+
+<https://github.com/code-423n4/2023-12-particle/blob/a3af40839b24aa13f5764d4f84933dbfa8bc8134/contracts/libraries/LiquidityPosition.sol#L260>
+
+The protocol is using `block.timestamp` as the deadline argument while interacting with the Uniswap NFT Position Manager, which completely defeats the purpose of using a deadline.
+
+### Impact
+
+Actions in the Uniswap NonfungiblePositionManager contract are protected by a `deadline` parameter to limit the execution of pending transactions. Functions that modify the liquidity of the pool check this parameter against the current block timestamp in order to discard expired actions.
+
+These interactions with the Uniswap position are present in the LiquidityPosition library. The functions `mint()`, `increaseLiquidity()` and `decreaseLiquidity()` call their corresponding functions in the Uniswap Position Manager, providing `block.timestamp` as the argument for the `deadline` parameter:
+
+<https://github.com/code-423n4/2023-12-particle/blob/a3af40839b24aa13f5764d4f84933dbfa8bc8134/contracts/libraries/LiquidityPosition.sol#L131-L146>
+
+```solidity
+131:         // mint the position
+132:         (tokenId, liquidity, amount0Minted, amount1Minted) = Base.UNI_POSITION_MANAGER.mint(
+133:             INonfungiblePositionManager.MintParams({
+134:                 token0: params.token0,
+135:                 token1: params.token1,
+136:                 fee: params.fee,
+137:                 tickLower: params.tickLower,
+138:                 tickUpper: params.tickUpper,
+139:                 amount0Desired: params.amount0ToMint,
+140:                 amount1Desired: params.amount1ToMint,
+141:                 amount0Min: params.amount0Min,
+142:                 amount1Min: params.amount1Min,
+143:                 recipient: address(this),
+144:                 deadline: block.timestamp
+145:             })
+146:         );
+```
+
+<https://github.com/code-423n4/2023-12-particle/blob/a3af40839b24aa13f5764d4f84933dbfa8bc8134/contracts/libraries/LiquidityPosition.sol#L189-L199>
+
+```solidity
+189:         // increase liquidity via position manager
+190:         (liquidity, amount0Added, amount1Added) = Base.UNI_POSITION_MANAGER.increaseLiquidity(
+191:             INonfungiblePositionManager.IncreaseLiquidityParams({
+192:                 tokenId: tokenId,
+193:                 amount0Desired: amount0,
+194:                 amount1Desired: amount1,
+195:                 amount0Min: 0,
+196:                 amount1Min: 0,
+197:                 deadline: block.timestamp
+198:             })
+199:         );
+```
+
+<https://github.com/code-423n4/2023-12-particle/blob/a3af40839b24aa13f5764d4f84933dbfa8bc8134/contracts/libraries/LiquidityPosition.sol#L254-L262>
+
+```solidity
+254:         (amount0, amount1) = Base.UNI_POSITION_MANAGER.decreaseLiquidity(
+255:             INonfungiblePositionManager.DecreaseLiquidityParams({
+256:                 tokenId: tokenId,
+257:                 liquidity: liquidity,
+258:                 amount0Min: 0,
+259:                 amount1Min: 0,
+260:                 deadline: block.timestamp
+261:             })
+262:         );
+```
+
+Using `block.timestamp` as the deadline is effectively a no-operation that has no effect nor protection. Since `block.timestamp` will take the timestamp value when the transaction gets mined, the check will end up comparing `block.timestamp` against the same value, i.e. `block.timestamp <= block.timestamp` (see <https://github.com/Uniswap/v3-periphery/blob/697c2474757ea89fec12a4e6db16a574fe259610/contracts/base/PeripheryValidation.sol#L7>).
+
+Failure to provide a proper deadline value enables pending transactions to be maliciously executed at a later point. Transactions that provide an insufficient amount of gas such that they are not mined within a reasonable amount of time, can be picked by malicious actors or MEV bots and executed later in detriment of the submitter.
+
+See [this issue](https://github.com/code-423n4/2022-12-backed-findings/issues/64) for an excellent reference on the topic (the author runs a MEV bot).
+
+### Recommendation
+
+Add a deadline parameter to each of the functions that are used to manage the liquidity position, `ParticlePositionManager.mint()`, `ParticlePositionManager.increaseLiquidity()` and `ParticlePositionManager.decreaseLiquidity()`. Forward this parameter to the corresponding underlying calls to the Uniswap NonfungiblePositionManager contract.
+
+**[wukong-particle (Particle) confirmed and commented](https://github.com/code-423n4/2023-12-particle-findings/issues/59#issuecomment-1868223319):**
+ > Good practice to learn! Will add a proper in the input timestamp.
+
+***
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Particle Protocol |
+| Report Date | N/A |
+| Finders | adriro, immeas |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2023-12-particle
+- **GitHub**: https://github.com/code-423n4/2023-12-particle-findings/issues/59
+- **Contest**: https://code4rena.com/reports/2023-12-particle
+
+### Keywords for Search
+
+`Deadline`
+
