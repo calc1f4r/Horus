@@ -167,6 +167,52 @@ version: all
 | Imbalanced Pool Reinvest | `reports/constantproduct/h-5-reinvest-will-return-sub-optimal-return-if-the-pool-is-imbalanced.md` | HIGH | Sherlock |
 | Thin Liquidity Fee Exploit | `reports/constantproduct/m-7-attacker-can-exploit-thin-liquidity-in-xyk-pool-to-save-on-fees.md` | MEDIUM | Sherlock |
 
+### Imbalanced Liquidity Addition Exploitation
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| LP Pair Overpayment via Sandwich | `reports/constant_product/overpayment-of-one-side-of-lp-pair-onjoinpool-due-to-sandwich-or-user-error.md` | HIGH | Spearbit |
+| LP Fund Loss on Add Liquidity | `reports/constant_product/h-02-liquidity-providers-may-lose-funds-when-adding-liquidity.md` | HIGH | Code4rena |
+| Imbalanced Pool Manipulation | `reports/constant_product/m-5-uniswap-pool-price-can-be-manipulated-so-stnxm-adds-liquidity-to-a-super-imb.md` | MEDIUM | Sherlock |
+
+### Rebasing Token Integration Issues
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Aave Share Token Rebasing | `reports/constant_product/h-05-aaves-share-tokens-are-rebasing-breaking-current-strategy-code.md` | HIGH | Code4rena |
+
+### Impermanent Loss Protection Abuse
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| IL Protection Reserve Drain | `reports/constant_product/h-06-paying-il-protection-for-all-vaderpool-pairs-allows-the-reserve-to-be-drain.md` | HIGH | Code4rena |
+
+### Protocol Invariant Breaking
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Invariant Broken via Valid Txns | `reports/constant_product/protocols-invariants-can-be-broken.md` | HIGH | Cyfrin |
+| Well Function Logic Ignored | `reports/constant_product/ignoring-the-well-function-logic-for-a-ratio-of-reserves-calculation.md` | MEDIUM | Codehawks |
+
+### DEX Swap Slippage Accounting Issues
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Vault Slippage Not Accounted | `reports/constant_product/rebalancevaultsassets-incorrectly-accounts-vaults-depositedusdc.md` | MEDIUM | Codehawks |
+| Incorrect Swap Amount Calculation | `reports/constant_product/incorrect-swap-amount-in-creditdelegationbranchsettlevaultsdebt-improperly-infla.md` | MEDIUM | Codehawks |
+
+### Leftover Token Accumulation
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Autocompound Leftover pTKNs | `reports/constant_product/h-4-autocompoundingpodlp-_pairedlptokentopodlp-does-not-correctly-handle-leftove.md` | HIGH | Sherlock |
+| ReLP Dust Tokens Stuck | `reports/constant_product/m-16-inaccurate-swap-amount-calculation-in-relp-leads-to-stuck-tokens-and-lost-l.md` | MEDIUM | Code4rena |
+
+### WETH/ETH Pool Mismatch
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| WETH Asset with ETH Pool | `reports/constant_product/m-22-setup-with-asset-weth-and-a-curve-pool-that-contains-native-eth-will-lead-t.md` | MEDIUM | Sherlock |
+
+### Exit Type Confusion
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Single-Sided Emergency Exit | `reports/constant_product/h-9-single-sided-instead-of-proportional-exit-is-performed-during-emergency-exit.md` | HIGH | Sherlock |
+| Remove Liquidity Token Tracking | `reports/constant_product/h-7-tokens-received-from-curves-remove_liquidity-should-be-added-to-the-assets-l.md` | HIGH | Sherlock |
+
 ---
 
 # Constant Product AMM Integration Vulnerabilities - Comprehensive Database
@@ -189,7 +235,15 @@ version: all
 10. [Decimal & Math Calculation Issues](#10-decimal--math-calculation-issues)
 11. [Liquidity Migration & Protocol Upgrade Attacks](#11-liquidity-migration--protocol-upgrade-attacks)
 12. [Flash Loan-Based Graduation/Threshold Manipulation](#12-flash-loan-based-graduationthreshold-manipulation)
-13. [Detection Patterns & Audit Checklist](#13-detection-patterns--audit-checklist)
+13. [Imbalanced Liquidity Addition Exploitation](#13-imbalanced-liquidity-addition-exploitation)
+14. [Rebasing Token Integration Issues](#14-rebasing-token-integration-issues)
+15. [Impermanent Loss Protection Abuse](#15-impermanent-loss-protection-abuse)
+16. [Protocol Invariant Breaking](#16-protocol-invariant-breaking)
+17. [DEX Swap Slippage Accounting Discrepancies](#17-dex-swap-slippage-accounting-discrepancies)
+18. [Leftover Token Accumulation in Autocompounding](#18-leftover-token-accumulation-in-autocompounding)
+19. [WETH/ETH Pool Asset Mismatch](#19-wetheth-pool-asset-mismatch)
+20. [Single-Sided vs Proportional Exit Confusion](#20-single-sided-vs-proportional-exit-confusion)
+21. [Detection Patterns & Audit Checklist](#21-detection-patterns--audit-checklist)
 
 ---
 
@@ -1301,6 +1355,478 @@ function unwrapToken() external {
 ### Keywords for Search
 
 `constant_product`, `x*y=k`, `amm`, `uniswap`, `liquidity_pool`, `swap`, `slippage`, `sandwich_attack`, `mev`, `front_running`, `back_running`, `flash_loan`, `price_manipulation`, `slot0`, `sqrtPriceX96`, `twap`, `reserves`, `getReserves`, `first_depositor`, `inflation_attack`, `minimum_liquidity`, `lp_token`, `deadline`, `amountOutMin`, `price_impact`, `impermanent_loss`, `arbitrage`, `dex`, `swap_router`, `pair`, `factory`
+
+---
+
+## 13. Imbalanced Liquidity Addition Exploitation
+
+### Overview
+
+When adding liquidity to a constant product pool, LP tokens are minted based on the minimum ratio of the two tokens provided. Attackers can manipulate pool prices to cause LPs to overpay on one side, losing the excess tokens to the pool.
+
+> **📚 Source Reports for Deep Dive:**
+> - `reports/constant_product/overpayment-of-one-side-of-lp-pair-onjoinpool-due-to-sandwich-or-user-error.md` (Cron Finance - Spearbit)
+> - `reports/constant_product/h-02-liquidity-providers-may-lose-funds-when-adding-liquidity.md` (Caviar - Code4rena)
+> - `reports/constant_product/m-5-uniswap-pool-price-can-be-manipulated-so-stnxm-adds-liquidity-to-a-super-imb.md` (stNXM - Sherlock)
+
+### Vulnerability Description
+
+#### Root Cause
+
+LP token calculation uses the minimum of two ratios:
+```solidity
+liquidity = min(amount0 * totalSupply / reserve0, amount1 * totalSupply / reserve1)
+```
+
+If tokens are provided in different proportions, the excess from the larger ratio is not refunded - it becomes a donation to the pool.
+
+### Vulnerable Pattern Examples
+
+**Example 1: Sandwich During Join** [HIGH]
+> 📖 Reference: `reports/constant_product/overpayment-of-one-side-of-lp-pair-onjoinpool-due-to-sandwich-or-user-error.md`
+```solidity
+// ❌ VULNERABLE: Only minimum ratio determines LP tokens
+function onJoinPool(...) {
+    amountLP = Math.min(
+        _token0InU112.mul(supplyLP).divDown(_token0ReserveU112),
+        _token1InU112.mul(supplyLP).divDown(_token1ReserveU112)
+    );
+    // Excess of one token is lost to the pool!
+}
+```
+
+**Example 2: Add Liquidity to Manipulated Pool** [HIGH]
+> 📖 Reference: `reports/constant_product/m-5-uniswap-pool-price-can-be-manipulated-so-stnxm-adds-liquidity-to-a-super-imb.md`
+```solidity
+// ❌ VULNERABLE: No slippage checks on liquidity initialization
+function initializeExternals() external {
+    // Attacker front-runs to push tick to extreme value
+    dex.mint(...);  // Adds only one token due to extreme price
+    // Attacker swaps tiny amount to steal all the other token
+}
+```
+
+### Secure Implementation
+
+```solidity
+// ✅ SECURE: Calculate optimal amounts first
+function addLiquidity(uint256 amount0Desired, uint256 amount1Desired, uint256 amount0Min, uint256 amount1Min) {
+    (uint256 reserve0, uint256 reserve1) = getReserves();
+    
+    // Calculate optimal amounts to avoid overpayment
+    uint256 amount1Optimal = amount0Desired * reserve1 / reserve0;
+    uint256 amount0, amount1;
+    
+    if (amount1Optimal <= amount1Desired) {
+        require(amount1Optimal >= amount1Min, "Insufficient B");
+        (amount0, amount1) = (amount0Desired, amount1Optimal);
+    } else {
+        uint256 amount0Optimal = amount1Desired * reserve0 / reserve1;
+        require(amount0Optimal >= amount0Min, "Insufficient A");
+        (amount0, amount1) = (amount0Optimal, amount1Desired);
+    }
+    // Only use optimal amounts
+}
+```
+
+---
+
+## 14. Rebasing Token Integration Issues
+
+### Overview
+
+Rebasing tokens (like aTokens from Aave) automatically adjust balances to reflect accrued interest. When protocols cache share amounts instead of tracking the rebasing behavior, users lose accrued yield or calculations become incorrect.
+
+> **📚 Source Reports for Deep Dive:**
+> - `reports/constant_product/h-05-aaves-share-tokens-are-rebasing-breaking-current-strategy-code.md` (Sublime - Code4rena)
+
+### Vulnerability Description
+
+#### Root Cause
+
+When depositing rebasing tokens, the initial balance equals the deposit amount. If this static balance is cached, it doesn't reflect interest accrual, while the actual token balance continues to grow.
+
+### Vulnerable Pattern Examples
+
+**Example 1: Cached Share Balance** [HIGH]
+> 📖 Reference: `reports/constant_product/h-05-aaves-share-tokens-are-rebasing-breaking-current-strategy-code.md`
+```solidity
+// ❌ VULNERABLE: Caching rebasing token shares
+function deposit(uint256 _amount, address _strategy) external {
+    uint256 _sharesReceived = _deposit(_amount, _token, _strategy);
+    // This is STATIC - doesn't track rebase!
+    balanceInShares[_to][_token][_strategy] += _sharesReceived;
+}
+
+function getTokensForShares(uint256 shares, address asset) public view returns (uint256) {
+    // Uses rebasing total supply but static user shares
+    amount = scaledBalance * liquidityIndex * shares / IERC20(aToken).balanceOf(this);
+    // Incorrect calculation!
+}
+```
+
+### Impact
+
+- Users don't receive accrued interest on deposits
+- Collateral valuation is incorrect, leading to early liquidations
+- Protocol accounting becomes inconsistent over time
+
+### Secure Implementation
+
+```solidity
+// ✅ SECURE: Use wrapper token or track scaled balances
+function deposit(uint256 amount) external returns (uint256 shares) {
+    uint256 scaledBalanceBefore = aToken.scaledBalanceOf(address(this));
+    underlying.safeTransferFrom(msg.sender, address(this), amount);
+    aavePool.deposit(underlying, amount, address(this), 0);
+    uint256 scaledBalanceAfter = aToken.scaledBalanceOf(address(this));
+    
+    // Track SCALED balance which is non-rebasing
+    shares = scaledBalanceAfter - scaledBalanceBefore;
+    scaledShares[msg.sender] += shares;
+}
+
+function getBalance(address user) public view returns (uint256) {
+    // Convert scaled shares back to actual balance
+    return scaledShares[user] * pool.getReserveNormalizedIncome(underlying) / 1e27;
+}
+```
+
+---
+
+## 15. Impermanent Loss Protection Abuse
+
+### Overview
+
+Some AMM protocols offer impermanent loss (IL) protection to incentivize liquidity provision. When IL protection is offered for all token pairs without whitelisting, attackers can create synthetic pools designed to maximize IL protection payouts.
+
+> **📚 Source Reports for Deep Dive:**
+> - `reports/constant_product/h-06-paying-il-protection-for-all-vaderpool-pairs-allows-the-reserve-to-be-drain.md` (Vader Protocol - Code4rena)
+
+### Vulnerability Description
+
+#### Root Cause
+
+IL protection calculates losses by comparing initial deposit ratios to withdrawal ratios. If an attacker controls a synthetic token, they can manipulate the price to maximize the calculated IL and drain the protection reserve.
+
+### Vulnerable Pattern Examples
+
+**Example 1: Synthetic Token IL Exploit** [HIGH]
+> 📖 Reference: `reports/constant_product/h-06-paying-il-protection-for-all-vaderpool-pairs-allows-the-reserve-to-be-drain.md`
+```solidity
+// ❌ VULNERABLE: IL protection for ALL pairs
+function burn() external {
+    // Calculate IL based on reserves
+    uint256 ilLoss = VaderMath.calculateIL(
+        originalAmount0, originalAmount1,
+        removedAmount0, removedAmount1
+    );
+    // Pay IL protection from reserve for ANY token pair!
+    reserve.reimburse(msg.sender, ilLoss);
+}
+
+// Attack:
+// 1. Flashloan VADER
+// 2. Deploy mintable TKN token
+// 3. Add liquidity: lots of VADER, tiny TKN
+// 4. Mint TKN to buy all VADER from pool
+// 5. Claim massive IL protection
+// 6. Repay flashloan with profit
+```
+
+### Secure Implementation
+
+```solidity
+// ✅ SECURE: Whitelist tokens eligible for IL protection
+mapping(address => bool) public ilProtectionEligible;
+
+function burn() external {
+    // Only whitelisted pairs get IL protection
+    require(ilProtectionEligible[token0] && ilProtectionEligible[token1], 
+            "Not eligible for IL protection");
+    // Calculate and pay IL...
+}
+```
+
+---
+
+## 16. Protocol Invariant Breaking
+
+### Overview
+
+Constant product AMMs maintain the invariant `totalSupply() == calcLpTokenSupply(reserves)`. When this invariant is broken through edge cases in add/remove liquidity operations, valid transactions may revert, leading to protocol insolvency.
+
+> **📚 Source Reports for Deep Dive:**
+> - `reports/constant_product/protocols-invariants-can-be-broken.md` (Beanstalk Wells - Cyfrin)
+> - `reports/constant_product/ignoring-the-well-function-logic-for-a-ratio-of-reserves-calculation.md` (Beanstalk - Codehawks)
+
+### Vulnerable Pattern Examples
+
+**Example 1: Invariant Violation Leading to Reverts** [HIGH]
+> 📖 Reference: `reports/constant_product/protocols-invariants-can-be-broken.md`
+```solidity
+// ❌ VULNERABLE: Rounding errors accumulate to break invariant
+function test_invariantBroken() public {
+    // After specific sequence of add/remove operations:
+    // totalSupply() != calcLpTokenSupply(reserves)
+    
+    // Valid liquidity removal now reverts!
+    removeLiquidityOneToken(lpAmount, 0); // REVERTS
+}
+```
+
+### Secure Implementation
+
+```solidity
+// ✅ SECURE: Add invariant check after operations
+function checkInvariant() internal view {
+    uint256 calculatedSupply = wellFunction.calcLpTokenSupply(reserves);
+    require(totalSupply() == calculatedSupply, "Invariant broken");
+}
+
+function removeLiquidity(uint256 lpTokens) external {
+    // ... removal logic
+    checkInvariant();
+}
+```
+
+---
+
+## 17. DEX Swap Slippage Accounting Discrepancies
+
+### Overview
+
+When protocols perform internal rebalancing between vaults via DEX swaps, the actual output may differ from expected due to slippage. If the protocol doesn't account for this difference, internal accounting becomes incorrect.
+
+> **📚 Source Reports for Deep Dive:**
+> - `reports/constant_product/rebalancevaultsassets-incorrectly-accounts-vaults-depositedusdc.md` (Zaros - Codehawks)
+> - `reports/constant_product/incorrect-swap-amount-in-creditdelegationbranchsettlevaultsdebt-improperly-infla.md` (Zaros - Codehawks)
+
+### Vulnerable Pattern Examples
+
+**Example 1: Expected vs Actual Output Mismatch** [MEDIUM]
+> 📖 Reference: `reports/constant_product/rebalancevaultsassets-incorrectly-accounts-vaults-depositedusdc.md`
+```solidity
+// ❌ VULNERABLE: Uses expected amount, not actual received
+function rebalanceVaultsAssets() external {
+    uint256 assetInputNative = dexAdapter.getExpectedOutput(usdc, collateralAsset, amount);
+    
+    dexSwapStrategy.executeSwapExactInputSingle(swapCallData); // Actual output differs!
+    
+    // Uses expected amount for accounting, not actual!
+    uint128 usdDelta = depositAmountUsdX18.toUint128();
+    inCreditVault.depositedUsdc += usdDelta;  // Wrong!
+    inDebtVault.depositedUsdc -= usdDelta;    // Wrong!
+}
+```
+
+### Secure Implementation
+
+```solidity
+// ✅ SECURE: Track actual swap output
+function rebalanceVaultsAssets() external {
+    uint256 balanceBefore = IERC20(usdc).balanceOf(address(this));
+    
+    dexSwapStrategy.executeSwapExactInputSingle(swapCallData);
+    
+    uint256 actualReceived = IERC20(usdc).balanceOf(address(this)) - balanceBefore;
+    
+    // Use actual amounts for accounting
+    inCreditVault.depositedUsdc += actualReceived;
+    inDebtVault.depositedUsdc -= actualReceived;
+}
+```
+
+---
+
+## 18. Leftover Token Accumulation in Autocompounding
+
+### Overview
+
+Autocompounding vaults that swap reward tokens to LP tokens can accumulate leftover tokens when add liquidity operations fail due to slippage. If subsequent operations don't account for existing balances, the problem compounds over time.
+
+> **📚 Source Reports for Deep Dive:**
+> - `reports/constant_product/h-4-autocompoundingpodlp-_pairedlptokentopodlp-does-not-correctly-handle-leftove.md` (Peapods - Sherlock)
+> - `reports/constant_product/m-16-inaccurate-swap-amount-calculation-in-relp-leads-to-stuck-tokens-and-lost-l.md` (Dopex - Code4rena)
+
+### Vulnerable Pattern Examples
+
+**Example 1: Snowballing Token Imbalance** [HIGH]
+> 📖 Reference: `reports/constant_product/h-4-autocompoundingpodlp-_pairedlptokentopodlp-does-not-correctly-handle-leftove.md`
+```solidity
+// ❌ VULNERABLE: Doesn't consider existing balance before swap
+function _getSwapAmt(uint256 pairedBalance) internal view returns (uint256) {
+    // Ignores existing pTKN balance!
+    return pairedBalance / 2;  // Always swaps half
+}
+
+// Problem:
+// Epoch 1: 10000 pairedLpTKN → swap 5000 → 5000 pairedLpTKN, 5000 pTKN
+// Add LP fails due to slippage
+// Epoch 2: Still 5000 pairedLpTKN → swap 2500 → 2500 pairedLpTKN, 7500 pTKN
+// Ratio becomes more imbalanced each epoch!
+```
+
+### Secure Implementation
+
+```solidity
+// ✅ SECURE: Account for existing balances
+function _tokenToPodLp(address _token, uint256 _amountIn) internal returns (uint256) {
+    uint256 existingPtknBalance = IERC20(ptkn).balanceOf(address(this));
+    uint256 pairedBalance = _tokenToPairedLpToken(_token, _amountIn);
+    
+    // First pair existing pTKN with pairedLpTKN
+    uint256 pairedForExisting = calculateOptimalPairing(existingPtknBalance, pairedBalance);
+    
+    // Only swap remaining after pairing
+    uint256 remainingPaired = pairedBalance - pairedForExisting;
+    uint256 swapAmount = _getSwapAmt(remainingPaired);
+    // ...
+}
+```
+
+---
+
+## 19. WETH/ETH Pool Asset Mismatch
+
+### Overview
+
+When vaults interact with pools that use native ETH (like some Curve pools) but the vault's asset is WETH, unwrap/wrap operations can fail or cause accounting issues.
+
+> **📚 Source Reports for Deep Dive:**
+> - `reports/constant_product/m-22-setup-with-asset-weth-and-a-curve-pool-that-contains-native-eth-will-lead-t.md` (Notional - Sherlock)
+
+### Vulnerable Pattern Examples
+
+**Example 1: Native ETH Pool with WETH Asset** [MEDIUM]
+> 📖 Reference: `reports/constant_product/m-22-setup-with-asset-weth-and-a-curve-pool-that-contains-native-eth-will-lead-t.md`
+```solidity
+// ❌ VULNERABLE: Pool uses ETH but vault holds WETH
+function _unstakeAndExitPool() internal {
+    // Curve pool returns native ETH
+    pool.remove_liquidity(lpAmount, minAmounts);
+    
+    // Vault tries to use WETH balance - fails!
+    uint256 balance = IERC20(WETH).balanceOf(address(this));
+    // balance is 0, but we have ETH!
+}
+```
+
+### Secure Implementation
+
+```solidity
+// ✅ SECURE: Handle WETH/ETH conversion
+function _unstakeAndExitPool() internal {
+    pool.remove_liquidity(lpAmount, minAmounts);
+    
+    // If pool returns ETH, wrap it
+    uint256 ethBalance = address(this).balance;
+    if (ethBalance > 0 && asset == address(WETH)) {
+        WETH.deposit{value: ethBalance}();
+    }
+}
+```
+
+---
+
+## 20. Single-Sided vs Proportional Exit Confusion
+
+### Overview
+
+AMM exit types have different characteristics: proportional exits maintain token ratios with minimal slippage, while single-sided exits swap internally and incur slippage. Using the wrong exit type in emergency situations can result in significant fund loss.
+
+> **📚 Source Reports for Deep Dive:**
+> - `reports/constant_product/h-9-single-sided-instead-of-proportional-exit-is-performed-during-emergency-exit.md` (Notional - Sherlock)
+> - `reports/constant_product/h-7-tokens-received-from-curves-remove_liquidity-should-be-added-to-the-assets-l.md` (Sentiment - Sherlock)
+
+### Vulnerable Pattern Examples
+
+**Example 1: Wrong Exit Type for Emergency** [HIGH]
+> 📖 Reference: `reports/constant_product/h-9-single-sided-instead-of-proportional-exit-is-performed-during-emergency-exit.md`
+```solidity
+// ❌ VULNERABLE: Uses single-sided exit during emergency
+function emergencyExit(uint256 claimToExit) external {
+    // Comment says proportional, but isSingleSided = true!
+    _unstakeAndExitPool(claimToExit, new uint256[](NUM_TOKENS()), true);
+    // Single-sided exit incurs unnecessary slippage
+    // Subject to front-running despite comment claiming otherwise
+}
+```
+
+### Secure Implementation
+
+```solidity
+// ✅ SECURE: Use proportional exit for emergencies
+function emergencyExit(uint256 claimToExit) external {
+    // Proportional exit - no slippage from internal swaps
+    _unstakeAndExitPool(claimToExit, minAmounts, false); // isSingleSided = false
+}
+
+function _unstakeAndExitPool(uint256 poolClaim, uint256[] memory minAmounts, bool isSingleSided) internal {
+    if (isSingleSided) {
+        // EXACT_BPT_IN_FOR_ONE_TOKEN_OUT - has slippage
+        customData = abi.encode(ExitKind.EXACT_BPT_IN_FOR_ONE_TOKEN_OUT, poolClaim, primaryIndex);
+    } else {
+        // EXACT_BPT_IN_FOR_TOKENS_OUT - proportional, minimal slippage
+        customData = abi.encode(ExitKind.EXACT_BPT_IN_FOR_TOKENS_OUT, poolClaim);
+    }
+}
+```
+
+---
+
+## 13. Detection Patterns & Audit Checklist
+
+### Code Patterns to Look For
+
+```
+- Pattern 1: `slot0()` or `getReserves()` used for pricing without TWAP
+- Pattern 2: Missing `amountOutMin` or set to 0
+- Pattern 3: No `deadline` parameter in swap functions
+- Pattern 4: First deposit without MINIMUM_LIQUIDITY burn
+- Pattern 5: `balanceOf(address(this))` used in critical calculations
+- Pattern 6: Missing decimal normalization in multi-token calculations
+- Pattern 7: Unrestricted `burn()` function on LP tokens
+- Pattern 8: Unrestricted callback functions (mintCallback, swapCallback)
+- Pattern 9: Deterministic addresses with CREATE opcode
+- Pattern 10: Pool existence checked via balanceOf instead of factory.getPair
+- Pattern 11: Hardcoded init_code_hash for pair address computation
+- Pattern 12: Migration functions using raw balanceOf
+- Pattern 13: Atomic graduation + unwrap without time locks
+- Pattern 14: Missing nonReentrant modifiers on swap paths
+- Pattern 15: LP token minting without checking optimal amounts
+- Pattern 16: Rebasing tokens stored as static balances
+- Pattern 17: IL protection without token whitelisting
+- Pattern 18: Expected swap output used instead of actual received
+- Pattern 19: Existing token balances ignored before swap calculations
+- Pattern 20: WETH vault interacting with native ETH pools
+- Pattern 21: Single-sided exit used where proportional is needed
+```
+
+### Audit Checklist
+
+- [ ] First depositor attack: Is MINIMUM_LIQUIDITY burned?
+- [ ] Slippage: Is amountOutMin enforced and non-zero?
+- [ ] Deadline: Can users specify transaction expiry?
+- [ ] Price source: Is TWAP used instead of spot price?
+- [ ] Reserve manipulation: Are reserves time-weighted?
+- [ ] LP calculation: Are token decimals handled correctly?
+- [ ] MEV protection: Are critical operations protected?
+- [ ] Donation attack: Does balanceOf include donated tokens?
+- [ ] Burn function: Is LP burning restricted?
+- [ ] Sync function: Can attackers manipulate reserves via sync()?
+- [ ] **NEW**: Imbalanced LP addition: Are optimal amounts calculated before adding liquidity?
+- [ ] **NEW**: Rebasing tokens: Are rebasing token balances tracked properly?
+- [ ] **NEW**: IL protection: Is token pair whitelisted for protection?
+- [ ] **NEW**: Swap accounting: Is actual output used, not expected?
+- [ ] **NEW**: Leftover tokens: Are existing balances considered in autocompounding?
+- [ ] **NEW**: ETH/WETH: Does vault handle native ETH pool interactions?
+- [ ] **NEW**: Exit types: Is proportional exit used for emergency withdrawals?
+- [ ] **NEW**: Protocol invariants: Is totalSupply consistent with calculated LP from reserves?
+
+### Keywords for Search
+
+`constant_product`, `x*y=k`, `amm`, `uniswap`, `liquidity_pool`, `swap`, `slippage`, `sandwich_attack`, `mev`, `front_running`, `back_running`, `flash_loan`, `price_manipulation`, `slot0`, `sqrtPriceX96`, `twap`, `reserves`, `getReserves`, `first_depositor`, `inflation_attack`, `minimum_liquidity`, `lp_token`, `deadline`, `amountOutMin`, `price_impact`, `impermanent_loss`, `arbitrage`, `dex`, `swap_router`, `pair`, `factory`, `rebasing_token`, `atoken`, `autocompound`, `emergency_exit`, `proportional_exit`, `single_sided_exit`, `invariant`, `weth_eth_mismatch`, `leftover_tokens`
 
 ---
 
