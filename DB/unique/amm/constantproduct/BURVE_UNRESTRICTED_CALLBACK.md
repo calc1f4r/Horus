@@ -1,6 +1,6 @@
 ---
 # Core Classification
-protocol: Burve
+protocol: Burve 
 chain: everychain
 category: amm
 vulnerability_type: unrestricted_callback
