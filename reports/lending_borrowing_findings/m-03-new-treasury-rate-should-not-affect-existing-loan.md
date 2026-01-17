@@ -1,0 +1,128 @@
+---
+# Core Classification
+protocol: Particle Protocol
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 20707
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2023-05-particle
+source_link: https://code4rena.com/reports/2023-05-particle
+github_link: https://github.com/code-423n4/2023-05-particle-findings/issues/9
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - dexes
+
+# Audit Details
+report_date: unknown
+finders_count: 3
+finders:
+  - d3e4
+  - minhquanym
+  - rbserver
+---
+
+## Vulnerability Title
+
+[M-03] New treasury rate should not affect existing loan
+
+### Overview
+
+
+This bug report is about the protocol in which lenders have to pay a small treasury fee when they claim their interest. The contract owner can change this `_treasuryRate` at any time using the function `setTreasuryRate()`. However, when the admin changes the rate, the new treasury rate will also be applied to active loans, which is not the agreed-upon term between the lenders and borrowers when they supplied the NFT and created the loan.
+
+To demonstrate this issue, the bug report provides an example scenario in which Alice and Bob have an active loan with an accumulated interest of 1 ETH and `_treasuryRate = 5%`. The admin suddenly changes the `_treasuryRate` to `50%`. In this case, if Alice claims the interest, she needs to pay 0.5 ETH to the treasury and keep 0.5 ETH, which is not what she agreed to at the beginning.
+
+The bug report suggests two mitigation steps. Firstly, storing the `treasuryRate` in the loan struct can prevent the admin from changing the treasury rate. Secondly, a timelock mechanism can be used to prevent the admin from changing the treasury rate.
+
+The bug report was marked as primary because of the concise explanation and the mitigation suggestion. The bug was acknowledged by the Particle team, and they decided to mitigate it with an upper bound on the treasury rate, and perhaps the timelock mechanism. Finally, the bug was mitigated.
+
+### Original Finding Content
+
+
+In the protocol, lenders have to pay a small treasury fee when they claim their interest. The contract owner can change this `_treasuryRate` at any time using the function `setTreasuryRate()`.
+
+```solidity
+// @audit treasury rate should not affect existing loan
+function setTreasuryRate(uint256 rate) external onlyOwner {
+    if (rate > MathUtils._BASIS_POINTS) {
+        revert Errors.InvalidParameters();
+    }
+    _treasuryRate = rate;
+    emit UpdateTreasuryRate(rate);
+}
+
+```
+However, when the admin changes the rate, the new treasury rate will also be applied to active loans, which is not the agreed-upon term between the lenders and borrowers when they supplied the NFT and created the loan.
+
+### Proof of Concept
+
+Consider the following scenario:
+
+1.  Alice and Bob have an active loan with an accumulated interest of 1 ETH and `_treasuryRate = 5%`.
+2.  The admin suddenly changes the `_treasuryRate` to `50%`. Now, if Alice claims the interest, she needs to pay 0.5 ETH to the treasury and keep 0.5 ETH.
+3.  Alice can either accept it and keep 0.5 ETH interest or front-run the admin transaction and claim before the `_treasuryRate` is updated.
+
+The point is,  Alice only agreed to pay a `5%` treasury rate at the beginning, so the new rate should not apply to her.
+
+### Recommended Mitigation Steps
+
+Consider storing the `treasuryRate` in the loan struct. The loan struct is not kept in storage, so the gas cost will not increase significantly.
+
+Alternatively, consider adding a timelock mechanism to prevent the admin from changing the treasury rate.
+
+**[hansfriese (judge) commented](https://github.com/code-423n4/2023-05-particle-findings/issues/9#issuecomment-1577988560):**
+ > Marked as primary because of the concise explanation and the mitigation suggestion.
+
+**[wukong-particle (Particle) confirmed and commented](https://github.com/code-423n4/2023-05-particle-findings/issues/9#issuecomment-1579290921):**
+ > Acknowledged the issue, though the fix might not be the same as suggested. We will mitigate it with an upper bound on the treasury rate, and perhaps the timelock mechanism.
+
+**[wukong-particle (Particle) commented](https://github.com/code-423n4/2023-05-particle-findings/issues/9#issuecomment-1583455652):**
+ > Mitigated.
+
+***
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Particle Protocol |
+| Report Date | N/A |
+| Finders | d3e4, minhquanym, rbserver |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2023-05-particle
+- **GitHub**: https://github.com/code-423n4/2023-05-particle-findings/issues/9
+- **Contest**: https://code4rena.com/reports/2023-05-particle
+
+### Keywords for Search
+
+`vulnerability`
+

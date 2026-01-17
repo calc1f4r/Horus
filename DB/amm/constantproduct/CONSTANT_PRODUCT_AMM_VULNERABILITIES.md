@@ -213,6 +213,50 @@ version: all
 | Single-Sided Emergency Exit | `reports/constant_product/h-9-single-sided-instead-of-proportional-exit-is-performed-during-emergency-exit.md` | HIGH | Sherlock |
 | Remove Liquidity Token Tracking | `reports/constant_product/h-7-tokens-received-from-curves-remove_liquidity-should-be-added-to-the-assets-l.md` | HIGH | Sherlock |
 
+### Type Casting & Integer Overflow Issues
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Unchecked Type Casting u64 to i64 | `reports/constant_product/unchecked-type-casting.md` | HIGH | OtterSec |
+| DoS via uint8 Array Index Overflow | `reports/constant_product/denial-of-service-conditions-caused-by-the-use-of-more-than-256-slices.md` | HIGH | TrailOfBits |
+
+### Spot Price Abuse in Protocol Swaps
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| SponsorVault Sandwich Attack | `reports/constant_product/use-of-spot-price-in-sponsorvault-leads-to-sandwich-attack.md` | HIGH | Spearbit |
+| Spot DEX Price Repay Attack | `reports/constant_product/use-of-spot-dex-price-when-repay-portal-debt-leads-to-sandwich-attacks.md` | HIGH | Various |
+
+### LP Token Burn/Hijack Attacks
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Hijack Pool by Burning LP | `reports/constant_product/h-10-hijack-token-pool-by-burning-liquidity-token.md` | HIGH | Code4rena |
+| LP Tokens Never Burned | `reports/constant_product/the-lp-tokens-are-never-burned-by-the-stream-pool-contract.md` | HIGH | TrailOfBits |
+
+### Constant Sum AMM Arbitrage
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Unlimited Arbitrage 1:1 AMM | `reports/constant_product/unlimited-arbitrage-in-ccfrax1to1amm.md` | HIGH | TrailOfBits |
+
+### State Accounting Discrepancies
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| ohmMinted vs ohmRemoved Tracking | `reports/constant_product/m-8-singlesidedliquidityvaultwithdraw-will-decreases-ohmminted-which-will-make-t.md` | MEDIUM | Sherlock |
+| Parameter Misordering in Fee Collection | `reports/constant_product/h-05-parameter-misordering-in-fee-collection-function-causes-denial-of-service-a.md` | HIGH | Code4rena |
+
+### Incorrect Liquidity Ownership Assumptions
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Assumes Protocol Owns All LP | `reports/constant_product/h-09-relpcontract-wrongfully-assumes-protocol-owns-all-of-the-liquidity-in-the-u.md` | HIGH | Code4rena |
+
+### Dividend/Reward Gaming
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Dividend Reward Gaming via Small Trades | `reports/constant_product/h-08-dividend-reward-can-be-gamed.md` | HIGH | Code4rena |
+
+### Missing Account Validation (Solana-Specific)
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Missing TokenAccount Checks | `reports/constant_product/missing-tokenaccount-checks.md` | HIGH | OtterSec |
+
 ---
 
 # Constant Product AMM Integration Vulnerabilities - Comprehensive Database
@@ -243,7 +287,15 @@ version: all
 18. [Leftover Token Accumulation in Autocompounding](#18-leftover-token-accumulation-in-autocompounding)
 19. [WETH/ETH Pool Asset Mismatch](#19-wetheth-pool-asset-mismatch)
 20. [Single-Sided vs Proportional Exit Confusion](#20-single-sided-vs-proportional-exit-confusion)
-21. [Detection Patterns & Audit Checklist](#21-detection-patterns--audit-checklist)
+21. [Type Casting & Integer Overflow Issues](#21-type-casting--integer-overflow-issues)
+22. [Spot Price Abuse in Protocol Swaps](#22-spot-price-abuse-in-protocol-swaps)
+23. [LP Token Burn/Hijack Attacks](#23-lp-token-burnhijack-attacks)
+24. [Constant Sum AMM Arbitrage](#24-constant-sum-amm-arbitrage)
+25. [State Accounting Discrepancies](#25-state-accounting-discrepancies)
+26. [Incorrect Liquidity Ownership Assumptions](#26-incorrect-liquidity-ownership-assumptions)
+27. [Dividend/Reward Gaming](#27-dividendreward-gaming)
+28. [Missing Account Validation (Solana-Specific)](#28-missing-account-validation-solana-specific)
+29. [Detection Patterns & Audit Checklist](#29-detection-patterns--audit-checklist)
 
 ---
 
@@ -1775,7 +1827,692 @@ function _unstakeAndExitPool(uint256 poolClaim, uint256[] memory minAmounts, boo
 
 ---
 
-## 13. Detection Patterns & Audit Checklist
+## 21. Type Casting & Integer Overflow Issues
+
+### Overview
+
+AMM implementations often require type conversions between different integer sizes (e.g., u64 to i64, uint256 to uint128). Unchecked type casting can lead to silent overflow/underflow, causing incorrect calculations, DoS conditions, or fund loss. This is particularly critical in price calculations and liquidity amount computations.
+
+> **📚 Source Reports for Deep Dive:**
+> - `reports/constant_product/unchecked-type-casting.md` (Raydium AMM V3 - OtterSec)
+> - `reports/constant_product/denial-of-service-conditions-caused-by-the-use-of-more-than-256-slices.md` (Shell Protocol - TrailOfBits)
+
+### Vulnerability Description
+
+#### Root Cause
+
+When casting from larger integer types to smaller ones without validation:
+- `u64::MAX` cast to `i64` produces a negative number
+- `uint256` values exceeding type limits silently truncate
+- Loop counters with `uint8` overflow at 256 iterations
+
+### Vulnerable Pattern Examples
+
+**Example 1: Unchecked u64 to i64 Conversion** [HIGH]
+> 📖 Reference: `reports/constant_product/unchecked-type-casting.md`
+```rust
+// ❌ VULNERABLE: u64 may exceed i64::MAX
+pub fn get_delta_amount_0_signed(
+    sqrt_ratio_a_x64: u128,
+    sqrt_ratio_b_x64: u128,
+    liquidity: i128,
+) -> i64 {
+    if liquidity < 0 {
+        -(get_delta_amount_0_unsigned(
+            sqrt_ratio_a_x64,
+            sqrt_ratio_b_x64,
+            -liquidity as u128,
+            false,
+        ) as i64)  // ❌ Unchecked cast - can overflow!
+    } else {
+        get_delta_amount_0_unsigned(sqrt_ratio_a_x64, sqrt_ratio_b_x64,
+            liquidity as u128, true) as i64  // ❌ u64::MAX > i64::MAX
+    }
+}
+```
+
+**Example 2: uint8 Loop Counter Overflow** [HIGH]
+> 📖 Reference: `reports/constant_product/denial-of-service-conditions-caused-by-the-use-of-more-than-256-slices.md`
+```solidity
+// ❌ VULNERABLE: uint8 can only go up to 255
+function _findSlice(int128 m) internal view returns (uint8 i) {
+    i = 0;
+    while (i < slices.length) {  // If slices.length > 256, infinite loop!
+        if (m <= slices[i].mLeft && m > slices[i].mRight) return i;
+        unchecked {
+            ++i;  // Overflows at 256, restarts from 0
+        }
+    }
+    return i - 1;
+}
+```
+
+### Secure Implementation
+
+```rust
+// ✅ SECURE: Use try_from with error handling
+pub fn get_delta_amount_0_signed(
+    sqrt_ratio_a_x64: u128,
+    sqrt_ratio_b_x64: u128,
+    liquidity: i128,
+) -> Result<i64, Error> {
+    let unsigned_result = get_delta_amount_0_unsigned(
+        sqrt_ratio_a_x64,
+        sqrt_ratio_b_x64,
+        liquidity.unsigned_abs(),
+        liquidity >= 0,
+    );
+    
+    // Safe conversion with error handling
+    let signed_result = i64::try_from(unsigned_result)
+        .map_err(|_| Error::Overflow)?;
+    
+    if liquidity < 0 {
+        Ok(-signed_result)
+    } else {
+        Ok(signed_result)
+    }
+}
+```
+
+```solidity
+// ✅ SECURE: Use uint256 for array iteration
+function _findSlice(int128 m) internal view returns (uint256 i) {
+    require(slices.length <= type(uint256).max, "Too many slices");
+    
+    for (i = 0; i < slices.length; i++) {
+        if (m <= slices[i].mLeft && m > slices[i].mRight) return i;
+    }
+    return slices.length - 1;
+}
+```
+
+---
+
+## 22. Spot Price Abuse in Protocol Swaps
+
+### Overview
+
+When protocols perform internal swaps using DEX spot prices without oracle validation, attackers can manipulate the spot price via sandwich attacks to drain protocol funds. This is especially critical for sponsor vaults, debt repayment, and other protocol-initiated swaps.
+
+> **📚 Source Reports for Deep Dive:**
+> - `reports/constant_product/use-of-spot-price-in-sponsorvault-leads-to-sandwich-attack.md` (Connext - Spearbit)
+> - `reports/constant_product/use-of-spot-dex-price-when-repay-portal-debt-leads-to-sandwich-attacks.md` (Various)
+
+### Vulnerability Description
+
+#### Root Cause
+
+Protocol contracts that:
+1. Calculate swap amounts using current DEX spot price
+2. Execute swaps without comparing to oracle price
+3. Don't have slippage protection on protocol-initiated swaps
+
+### Vulnerable Pattern Examples
+
+**Example 1: Sponsor Vault Spot Price Swap** [CRITICAL]
+> 📖 Reference: `reports/constant_product/use-of-spot-price-in-sponsorvault-leads-to-sandwich-attack.md`
+```solidity
+// ❌ VULNERABLE: Uses spot price for swap amount calculation
+contract SponsorVault {
+    function reimburseLiquidityFees(
+        address _token,
+        uint256 _liquidityFee,
+        address _receiver
+    ) external onlyConnext returns (uint256) {
+        // Spot price can be manipulated!
+        uint256 amountIn = tokenExchange.getInGivenExpectedOut(_token, _liquidityFee);
+        amountIn = currentBalance >= amountIn ? amountIn : currentBalance;
+        
+        // Attacker manipulates DEX: 1 ETH = 0.1 USDC
+        // Protocol pays 1000 ETH for 100 USDC
+        sponsoredFee = tokenExchange.swapExactIn{value: amountIn}(_token, msg.sender);
+    }
+}
+```
+
+**Attack Scenario:**
+1. Attacker manipulates DEX to make native token (ETH) appear cheap: 1 ETH = 0.1 USDC
+2. `getInGivenExpectedOut` returns 1000 (ETH needed for 100 USDC)
+3. SponsorVault buys 100 USDC with 1000 ETH
+4. Price drops further, attacker buys cheap ETH
+5. Repeat until vault is drained
+
+### Secure Implementation
+
+```solidity
+// ✅ SECURE: Validate spot price against oracle
+contract SponsorVault {
+    uint256 public constant MAX_DEVIATION = 500; // 5%
+    
+    function reimburseLiquidityFees(
+        address _token,
+        uint256 _liquidityFee,
+        address _receiver
+    ) external onlyConnext returns (uint256) {
+        // Get oracle price
+        uint256 oraclePrice = priceOracle.getPrice(_token, USDC);
+        
+        // Get spot price
+        uint256 spotPrice = tokenExchange.getSpotPrice(_token);
+        
+        // Compare and revert if deviation too high
+        uint256 deviation = _calculateDeviation(oraclePrice, spotPrice);
+        require(deviation <= MAX_DEVIATION, "Price deviation too high");
+        
+        // Use oracle price for calculation
+        uint256 amountIn = (_liquidityFee * 1e18) / oraclePrice;
+        
+        // Execute with slippage protection
+        uint256 minOut = _liquidityFee * (10000 - MAX_DEVIATION) / 10000;
+        sponsoredFee = tokenExchange.swapExactIn{value: amountIn}(
+            _token, 
+            msg.sender,
+            minOut  // Slippage protection
+        );
+    }
+}
+```
+
+---
+
+## 23. LP Token Burn/Hijack Attacks
+
+### Overview
+
+When LP token `burn()` functions are unrestricted or LP tokens are sent to the wrong contract during redemption, attackers can manipulate total supply to steal deposits or permanently lock funds. This includes scenarios where burning reduces total supply to manipulate share prices.
+
+> **📚 Source Reports for Deep Dive:**
+> - `reports/constant_product/h-10-hijack-token-pool-by-burning-liquidity-token.md` (Spartan Protocol - Code4rena)
+> - `reports/constant_product/the-lp-tokens-are-never-burned-by-the-stream-pool-contract.md` (PixelSwap - TrailOfBits)
+
+### Vulnerability Description
+
+#### Root Cause
+
+1. Public `burn()` function without withdrawal logic
+2. Sending burn message to master contract instead of wallet
+3. No minimum supply enforcement after burns
+
+### Vulnerable Pattern Examples
+
+**Example 1: Pool Hijack via LP Burn** [HIGH]
+> 📖 Reference: `reports/constant_product/h-10-hijack-token-pool-by-burning-liquidity-token.md`
+```solidity
+// ❌ VULNERABLE: Unrestricted burn allows totalSupply manipulation
+contract Pool {
+    // Public burn without requiring liquidity withdrawal
+    function burn(uint256 amount) external {
+        _burn(msg.sender, amount);
+        // No tokens are withdrawn - just LP destroyed
+    }
+}
+
+// Attack scenario:
+// 1. Attacker creates pool, deposits minimal (1 wei each token)
+// 2. Receives 1 LP token
+// 3. Burns all but 1 wei of LP: burn(init_amount - 1)
+// 4. Now totalSupply = 1, but reserves can be inflated via donation
+// 5. New deposits round to 0 LP tokens
+// Formula: units = P * (part1 + part2) / part3
+// When P (totalSupply) = 1, all calculations round down
+```
+
+**Example 2: LP Tokens Never Burned** [HIGH]
+> 📖 Reference: `reports/constant_product/the-lp-tokens-are-never-burned-by-the-stream-pool-contract.md`
+```solidity
+// ❌ VULNERABLE: Burn message sent to master, not wallet
+contract JettonFactory {
+    function burn(uint256 amount, address user) internal {
+        // Wrong! Sending to Jetton master instead of Jetton wallet
+        send(
+            jettonMaster,  // ❌ Should be jettonWallet
+            TokenBurn { amount: amount, ... }
+        );
+        // Burn fails silently (bounce = false), LP tokens remain
+    }
+}
+// Impact: Users remove liquidity but LP tokens accumulate in pool
+```
+
+### Secure Implementation
+
+```solidity
+// ✅ SECURE: Burn only through withdrawal with minimum enforced
+contract Pool {
+    uint256 public constant MINIMUM_LIQUIDITY = 1000;
+    
+    // No public burn - only through withdraw
+    function withdraw(uint256 lpAmount) external {
+        require(totalSupply() - lpAmount >= MINIMUM_LIQUIDITY, "Below minimum");
+        
+        // Calculate tokens to return
+        uint256 token0Out = (lpAmount * reserve0) / totalSupply();
+        uint256 token1Out = (lpAmount * reserve1) / totalSupply();
+        
+        // Burn LP tokens
+        _burn(msg.sender, lpAmount);
+        
+        // Transfer underlying tokens
+        token0.transfer(msg.sender, token0Out);
+        token1.transfer(msg.sender, token1Out);
+    }
+}
+```
+
+---
+
+## 24. Constant Sum AMM Arbitrage
+
+### Overview
+
+Constant sum AMMs (x + y = k) maintain a fixed exchange rate regardless of reserve imbalance. While simple, they are fundamentally vulnerable to unlimited arbitrage when token prices diverge in external markets, allowing attackers to completely drain one side of the pool.
+
+> **📚 Source Reports for Deep Dive:**
+> - `reports/constant_product/unlimited-arbitrage-in-ccfrax1to1amm.md` (Frax - TrailOfBits)
+
+### Vulnerability Description
+
+#### Root Cause
+
+Constant sum invariant: `k = a + b`
+
+Unlike x*y=k (constant product), the price doesn't change with reserves. If external markets show even slight price deviation:
+- Buy the relatively cheaper token from AMM at 1:1
+- Sell on external market for profit
+- Repeat until pool is fully imbalanced
+
+### Vulnerable Pattern Examples
+
+**Example 1: 1:1 Stablecoin AMM Drain** [HIGH]
+> 📖 Reference: `reports/constant_product/unlimited-arbitrage-in-ccfrax1to1amm.md`
+```solidity
+// ❌ VULNERABLE: Constant sum AMM with 1:1 rate
+contract CCFrax1to1AMM {
+    // Invariant: k = frax_balance + token_balance
+    // Price is always 1:1 regardless of reserves!
+    
+    function swap(address tokenIn, uint256 amountIn) external {
+        // Always swaps 1:1 (minus fees)
+        uint256 amountOut = amountIn * (10000 - swapFee) / 10000;
+        // No price impact from reserve ratio!
+    }
+}
+
+// Attack scenario with price_tolerance = 0.05:
+// 1. External market: FRAX = 1.005 USD, Token T = 0.995 USD
+// 2. Attacker buys 100,000 T from external market
+// 3. Swaps all T for FRAX at 1:1 in AMM
+// 4. Sells FRAX on external market at 1.005
+// 5. Profit: ~$960 per 100k, pool is now 100% T
+// 6. AMM is completely drained of FRAX
+```
+
+### Secure Implementation
+
+```solidity
+// ✅ SECURE: Use constant product or stableswap invariant
+contract StableSwapAMM {
+    // Curve-style stableswap invariant provides:
+    // - Low slippage near peg
+    // - High slippage when imbalanced (arbitrage limiting)
+    
+    function swap(address tokenIn, uint256 amountIn) external {
+        // Calculate using stableswap invariant
+        uint256 amountOut = _calculateStableSwap(amountIn);
+        
+        // Price impact increases as pool becomes imbalanced
+        // This naturally limits arbitrage profitability
+    }
+}
+
+// Alternative: Don't use constant sum for significant funds
+// Use Curve pools or proven stableswap implementations
+```
+
+---
+
+## 25. State Accounting Discrepancies
+
+### Overview
+
+AMM protocols track various state variables (minted tokens, removed tokens, fees, balances) that must remain synchronized. When update logic incorrectly modifies these variables, the protocol's invariants break, leading to incorrect emissions, limit calculations, or fund access issues.
+
+> **📚 Source Reports for Deep Dive:**
+> - `reports/constant_product/m-8-singlesidedliquidityvaultwithdraw-will-decreases-ohmminted-which-will-make-t.md` (Olympus - Sherlock)
+> - `reports/constant_product/h-05-parameter-misordering-in-fee-collection-function-causes-denial-of-service-a.md` (Superposition - Code4rena)
+
+### Vulnerability Description
+
+#### Root Cause
+
+State variables are updated incorrectly:
+- Subtraction from wrong counter (e.g., reducing `minted` instead of increasing `removed`)
+- Parameter misordering in function calls
+- Missing state updates in certain code paths
+
+### Vulnerable Pattern Examples
+
+**Example 1: Wrong Counter Updated on Withdraw** [MEDIUM]
+> 📖 Reference: `reports/constant_product/m-8-singlesidedliquidityvaultwithdraw-will-decreases-ohmminted-which-will-make-t.md`
+```solidity
+// ❌ VULNERABLE: Decreases ohmMinted instead of increasing ohmRemoved
+contract SingleSidedLiquidityVault {
+    uint256 public ohmMinted;   // Should only increase on deposit
+    uint256 public ohmRemoved;  // Should only increase on withdraw
+    
+    function withdraw(uint256 lpAmount) external {
+        (uint256 ohmReceived, ) = _withdraw(lpAmount, minTokenAmounts);
+        
+        // ❌ Wrong! This decreases minted instead of increasing removed
+        ohmMinted -= ohmReceived > ohmMinted ? ohmMinted : ohmReceived;
+        ohmRemoved += ohmReceived > ohmMinted ? ohmReceived - ohmMinted : 0;
+        
+        // Result: After deposit 100, withdraw 100:
+        // ohmMinted = 0, ohmRemoved = 0
+        // But should be: ohmMinted = 100, ohmRemoved = 100
+        // _canDeposit and getOhmEmissions now return wrong values
+    }
+}
+```
+
+**Example 2: Parameter Misordering in Fee Transfer** [HIGH]
+> 📖 Reference: `reports/constant_product/h-05-parameter-misordering-in-fee-collection-function-causes-denial-of-service-a.md`
+```rust
+// ❌ VULNERABLE: Token and recipient swapped
+pub fn collect_protocol_fees(pool: Address, recipient: Address) {
+    // Function signature: transfer_to_addr(token, recipient, amount)
+    // But called with: (recipient, pool, amount) ← WRONG!
+    erc20::transfer_to_addr(recipient, pool, token_0)?;  // ❌
+    erc20::transfer_to_addr(recipient, FUSDC_ADDR, token_1)?;  // ❌
+    // Transaction reverts, fees permanently stuck
+}
+```
+
+### Secure Implementation
+
+```solidity
+// ✅ SECURE: Clear separation of minted vs removed tracking
+contract SingleSidedLiquidityVault {
+    uint256 public ohmMinted;
+    uint256 public ohmRemoved;
+    
+    function deposit(uint256 pairTokenAmount) external {
+        uint256 ohmToMint = _calculateOhmAmount(pairTokenAmount);
+        ohmMinted += ohmToMint;  // Only minted increases here
+    }
+    
+    function withdraw(uint256 lpAmount) external {
+        (uint256 ohmReceived, ) = _withdraw(lpAmount, minTokenAmounts);
+        ohmRemoved += ohmReceived;  // Only removed increases here
+        // ohmMinted stays unchanged!
+    }
+    
+    function getOhmEmissions() external view returns (uint256 emitted, uint256 removed) {
+        // Now correctly reflects: minted - removed = net emissions
+        return (ohmMinted, ohmRemoved);
+    }
+}
+```
+
+---
+
+## 26. Incorrect Liquidity Ownership Assumptions
+
+### Overview
+
+Protocols that integrate with external AMMs sometimes incorrectly assume they own all liquidity in a pool. This leads to calculations based on total pool reserves rather than the protocol's actual LP share, causing DoS or fund loss when other LPs exist.
+
+> **📚 Source Reports for Deep Dive:**
+> - `reports/constant_product/h-09-relpcontract-wrongfully-assumes-protocol-owns-all-of-the-liquidity-in-the-u.md` (Dopex - Code4rena)
+
+### Vulnerability Description
+
+#### Root Cause
+
+Protocol calculates:
+```
+lpToRemove = (tokenToRemove * totalLpSupply) / totalReserve
+```
+
+But if protocol only owns a fraction of the pool, `lpToRemove` exceeds protocol's LP balance.
+
+### Vulnerable Pattern Examples
+
+**Example 1: Assuming 100% Pool Ownership** [HIGH]
+> 📖 Reference: `reports/constant_product/h-09-relpcontract-wrongfully-assumes-protocol-owns-all-of-the-liquidity-in-the-u.md`
+```solidity
+// ❌ VULNERABLE: Uses total pool reserves, not owned portion
+contract ReLPContract {
+    function reLP(uint256 _amount) external {
+        // Gets TOTAL pool reserves (all LPs combined)
+        (uint256 reserveA, uint256 reserveB) = UniswapV2Library.getReserves(
+            addresses.ammFactory,
+            tokenASorted,
+            tokenBSorted
+        );
+        
+        // Calculate based on total reserves
+        uint256 tokenAToRemove = ((_amount * tokenALpReserve * baseReLpRatio) / ...);
+        
+        // Calculate LP needed - based on TOTAL supply!
+        uint256 totalLpSupply = IUniswapV2Pair(addresses.pair).totalSupply();
+        uint256 lpToRemove = (tokenAToRemove * totalLpSupply) / tokenALpReserve;
+        
+        // ❌ REVERTS if lpToRemove > protocol's actual LP balance!
+        IERC20(addresses.pair).transferFrom(addresses.amo, address(this), lpToRemove);
+    }
+}
+
+// Attack scenario:
+// 1. Protocol owns 10% of pool LP (100 LP of 1000 total)
+// 2. User deposits enough to trigger reLP requiring 200 LP removal
+// 3. Protocol tries to transferFrom 200 LP but only has 100
+// 4. Transaction reverts - complete DoS of bonding functionality
+```
+
+### Secure Implementation
+
+```solidity
+// ✅ SECURE: Base calculations on protocol's actual LP holdings
+contract ReLPContract {
+    function reLP(uint256 _amount) external {
+        uint256 protocolLpBalance = IERC20(addresses.pair).balanceOf(addresses.amo);
+        uint256 totalLpSupply = IUniswapV2Pair(addresses.pair).totalSupply();
+        
+        // Calculate protocol's SHARE of reserves
+        (uint256 totalReserveA, ) = UniswapV2Library.getReserves(...);
+        uint256 protocolReserveA = (totalReserveA * protocolLpBalance) / totalLpSupply;
+        
+        // Calculate based on OWNED reserves only
+        uint256 tokenAToRemove = ((_amount * protocolReserveA * baseReLpRatio) / ...);
+        
+        // LP to remove from owned balance
+        uint256 lpToRemove = (tokenAToRemove * protocolLpBalance) / protocolReserveA;
+        
+        // Sanity check
+        require(lpToRemove <= protocolLpBalance, "Insufficient LP");
+        
+        IERC20(addresses.pair).transferFrom(addresses.amo, address(this), lpToRemove);
+    }
+}
+```
+
+---
+
+## 27. Dividend/Reward Gaming
+
+### Overview
+
+AMM protocols with dividend or reward distribution based on recent trading activity can be gamed by manipulating the baseline metrics. Attackers execute many tiny trades to skew the average fee calculation, then capture inflated dividends.
+
+> **📚 Source Reports for Deep Dive:**
+> - `reports/constant_product/h-08-dividend-reward-can-be-gamed.md` (Spartan Protocol - Code4rena)
+
+### Vulnerability Description
+
+#### Root Cause
+
+Dividend calculation uses short-term fee averages:
+- Only last N trades (e.g., 20) are considered
+- Zero-fee trades can reset the average to 0
+- Large dividend allocated relative to manipulated baseline
+
+### Vulnerable Pattern Examples
+
+**Example 1: Gaming Dividend via Small Trades** [HIGH]
+> 📖 Reference: `reports/constant_product/h-08-dividend-reward-can-be-gamed.md`
+```solidity
+// ❌ VULNERABLE: normalAverageFee based on last 20 trades only
+contract Router {
+    uint256 constant arrayFeeSize = 20;
+    uint256 public normalAverageFee;
+    
+    function addTradeFee(uint256 fee) internal {
+        fees[feeIndex] = fee;
+        feeIndex = (feeIndex + 1) % arrayFeeSize;
+        normalAverageFee = _calculateAverage(fees);
+    }
+    
+    function addDividend(uint256 _fees) external {
+        // Dividend = _fees * dailyAllocation / (_fees + normalAverageFee)
+        uint256 feeDividend = (_fees * dailyAllocation) / (_fees + normalAverageFee);
+        // If normalAverageFee = 0, feeDividend = dailyAllocation!
+        reserve.sendDividend(pool, feeDividend);
+    }
+}
+
+// Attack:
+// 1. Become large LP holder in smallest curated pool
+// 2. Execute 20 trades of 1 wei each (0 fees) → normalAverageFee = 0
+// 3. Execute trade with some fees → feeDividend = _fees * daily / (2 * _fees) = daily/2
+// 4. Capture half of daily allocation per attack
+// 5. Repeat until reserve is drained
+```
+
+### Secure Implementation
+
+```solidity
+// ✅ SECURE: Use time-weighted volume, not individual trade count
+contract Router {
+    mapping(address => uint256) public poolVolumeDaily;
+    mapping(address => uint256) public poolLastUpdate;
+    
+    function recordTrade(address pool, uint256 volume) internal {
+        // Reset daily volume if new day
+        if (block.timestamp / 1 days > poolLastUpdate[pool] / 1 days) {
+            poolVolumeDaily[pool] = 0;
+        }
+        poolVolumeDaily[pool] += volume;
+        poolLastUpdate[pool] = block.timestamp;
+    }
+    
+    function addDividend(address pool, uint256 _fees) external {
+        // Base dividend on actual 24h volume, not manipulable averages
+        uint256 poolVolume = poolVolumeDaily[pool];
+        uint256 totalVolume = getTotalDailyVolume();
+        
+        // Pool gets proportional share of daily allocation
+        uint256 feeDividend = (dailyAllocation * poolVolume) / totalVolume;
+        
+        // Minimum threshold to prevent gaming
+        require(poolVolume >= MIN_VOLUME_THRESHOLD, "Volume too low");
+        
+        reserve.sendDividend(pool, feeDividend);
+    }
+}
+```
+
+---
+
+## 28. Missing Account Validation (Solana-Specific)
+
+### Overview
+
+Solana programs must validate all passed accounts to ensure they are the expected PDAs or token accounts. Missing validation on reward vault or LP token accounts allows attackers to substitute arbitrary accounts and drain funds.
+
+> **📚 Source Reports for Deep Dive:**
+> - `reports/constant_product/missing-tokenaccount-checks.md` (Raydium Staking - OtterSec)
+
+### Vulnerability Description
+
+#### Root Cause
+
+Solana accounts are passed as parameters; the program must verify:
+- Account derivation (PDA seeds)
+- Account ownership
+- Token mint matches expected
+
+### Vulnerable Pattern Examples
+
+**Example 1: Unvalidated Reward Vault in Withdrawal** [HIGH]
+> 📖 Reference: `reports/constant_product/missing-tokenaccount-checks.md`
+```rust
+// ❌ VULNERABLE: No validation on vault_reward_token_b_info
+pub fn withdraw_v2(ctx: Context<WithdrawV2>) -> Result<()> {
+    let dest_reward_token_b_info = next_account_info(account_info_iter)?;
+    let vault_reward_token_b_info = next_account_info(account_info_iter)?;
+    // ❌ No checks on vault_reward_token_b_info!
+    
+    if pending_b > 0 {
+        // Attacker passes LP token vault as vault_reward_token_b_info
+        Self::token_transfer_with_authority(
+            stake_pool_info.key,
+            token_program_info.clone(),
+            vault_reward_token_b_info.clone(),  // ❌ Could be any vault!
+            dest_reward_token_b_info.clone(),
+            authority_info.clone(),
+            stake_pool.nonce as u8,
+            pending_b
+        )?;
+    }
+}
+
+// Attack:
+// 1. Deposit 1000 LP tokens to farm
+// 2. Wait for rewards to accumulate (any amount works)
+// 3. Call withdraw with vault_reward_token_b = LP_token_vault
+// 4. Receive LP tokens instead of reward tokens
+// 5. In one day, attacker can 20x their deposit in BTC-stSOL farm
+```
+
+### Secure Implementation
+
+```rust
+// ✅ SECURE: Validate all accounts against expected PDAs
+#[derive(Accounts)]
+pub struct WithdrawV2<'info> {
+    #[account(
+        mut,
+        seeds = [b"reward_vault_a", stake_pool.key().as_ref()],
+        bump,
+        token::mint = reward_mint_a,
+        token::authority = pool_authority,
+    )]
+    pub vault_reward_a: Account<'info, TokenAccount>,
+    
+    #[account(
+        mut,
+        seeds = [b"reward_vault_b", stake_pool.key().as_ref()],
+        bump,
+        token::mint = reward_mint_b,  // ✅ Validates mint matches
+        token::authority = pool_authority,  // ✅ Validates authority
+    )]
+    pub vault_reward_b: Account<'info, TokenAccount>,
+    
+    #[account(
+        seeds = [b"lp_vault", stake_pool.key().as_ref()],
+        bump,
+        token::mint = lp_mint,
+        token::authority = pool_authority,
+    )]
+    pub lp_vault: Account<'info, TokenAccount>,  // ✅ Separate from reward vaults
+}
+```
+
+---
+
+## 29. Detection Patterns & Audit Checklist
 
 ### Code Patterns to Look For
 
@@ -1801,6 +2538,16 @@ function _unstakeAndExitPool(uint256 poolClaim, uint256[] memory minAmounts, boo
 - Pattern 19: Existing token balances ignored before swap calculations
 - Pattern 20: WETH vault interacting with native ETH pools
 - Pattern 21: Single-sided exit used where proportional is needed
+- Pattern 22: `as i64` or `as uint128` without try_from validation
+- Pattern 23: uint8 used as loop counter for arrays > 255 elements
+- Pattern 24: Protocol swaps using getInGivenExpectedOut without oracle check
+- Pattern 25: Public burn() without corresponding withdrawal
+- Pattern 26: Constant sum (x+y=k) invariant used for stablecoins
+- Pattern 27: State counters modified with wrong operation (+/- confusion)
+- Pattern 28: Parameter ordering swapped in transfer/approve calls
+- Pattern 29: Calculations using pool.totalSupply when protocol owns partial LP
+- Pattern 30: Dividend based on last N trades instead of time-weighted volume
+- Pattern 31: (Solana) next_account_info without seed/mint validation
 ```
 
 ### Audit Checklist
@@ -1815,18 +2562,28 @@ function _unstakeAndExitPool(uint256 poolClaim, uint256[] memory minAmounts, boo
 - [ ] Donation attack: Does balanceOf include donated tokens?
 - [ ] Burn function: Is LP burning restricted?
 - [ ] Sync function: Can attackers manipulate reserves via sync()?
-- [ ] **NEW**: Imbalanced LP addition: Are optimal amounts calculated before adding liquidity?
-- [ ] **NEW**: Rebasing tokens: Are rebasing token balances tracked properly?
-- [ ] **NEW**: IL protection: Is token pair whitelisted for protection?
-- [ ] **NEW**: Swap accounting: Is actual output used, not expected?
-- [ ] **NEW**: Leftover tokens: Are existing balances considered in autocompounding?
-- [ ] **NEW**: ETH/WETH: Does vault handle native ETH pool interactions?
-- [ ] **NEW**: Exit types: Is proportional exit used for emergency withdrawals?
-- [ ] **NEW**: Protocol invariants: Is totalSupply consistent with calculated LP from reserves?
+- [ ] Imbalanced LP addition: Are optimal amounts calculated before adding liquidity?
+- [ ] Rebasing tokens: Are rebasing token balances tracked properly?
+- [ ] IL protection: Is token pair whitelisted for protection?
+- [ ] Swap accounting: Is actual output used, not expected?
+- [ ] Leftover tokens: Are existing balances considered in autocompounding?
+- [ ] ETH/WETH: Does vault handle native ETH pool interactions?
+- [ ] Exit types: Is proportional exit used for emergency withdrawals?
+- [ ] Protocol invariants: Is totalSupply consistent with calculated LP from reserves?
+- [ ] **NEW**: Type casting: Are u64→i64, uint256→uint128 casts checked?
+- [ ] **NEW**: Loop bounds: Are loop counters sized for array lengths?
+- [ ] **NEW**: Spot price swaps: Do protocol-initiated swaps validate against oracle?
+- [ ] **NEW**: LP burn hijack: Is burn() tied to withdrawal only?
+- [ ] **NEW**: AMM curve: Is constant-sum avoided for real assets?
+- [ ] **NEW**: State counters: Are mint/burn/remove counters updated correctly?
+- [ ] **NEW**: Parameter order: Are token/recipient parameters in correct order?
+- [ ] **NEW**: LP ownership: Does protocol track its own LP share vs total pool?
+- [ ] **NEW**: Dividend gaming: Is reward calculation resistant to small trades?
+- [ ] **NEW**: (Solana) Account validation: Are all PDAs and mints verified?
 
 ### Keywords for Search
 
-`constant_product`, `x*y=k`, `amm`, `uniswap`, `liquidity_pool`, `swap`, `slippage`, `sandwich_attack`, `mev`, `front_running`, `back_running`, `flash_loan`, `price_manipulation`, `slot0`, `sqrtPriceX96`, `twap`, `reserves`, `getReserves`, `first_depositor`, `inflation_attack`, `minimum_liquidity`, `lp_token`, `deadline`, `amountOutMin`, `price_impact`, `impermanent_loss`, `arbitrage`, `dex`, `swap_router`, `pair`, `factory`, `rebasing_token`, `atoken`, `autocompound`, `emergency_exit`, `proportional_exit`, `single_sided_exit`, `invariant`, `weth_eth_mismatch`, `leftover_tokens`
+`constant_product`, `x*y=k`, `amm`, `uniswap`, `liquidity_pool`, `swap`, `slippage`, `sandwich_attack`, `mev`, `front_running`, `back_running`, `flash_loan`, `price_manipulation`, `slot0`, `sqrtPriceX96`, `twap`, `reserves`, `getReserves`, `first_depositor`, `inflation_attack`, `minimum_liquidity`, `lp_token`, `deadline`, `amountOutMin`, `price_impact`, `impermanent_loss`, `arbitrage`, `dex`, `swap_router`, `pair`, `factory`, `rebasing_token`, `atoken`, `autocompound`, `emergency_exit`, `proportional_exit`, `single_sided_exit`, `invariant`, `weth_eth_mismatch`, `leftover_tokens`, `type_casting`, `overflow`, `uint8_loop`, `constant_sum`, `sponsor_vault`, `lp_burn`, `hijack`, `dividend_gaming`, `parameter_order`, `ownership_assumption`, `pda_validation`, `token_account`
 
 ---
 

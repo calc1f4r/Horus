@@ -33,6 +33,25 @@ This database contains synthesized vulnerability patterns from 847 security audi
   - EVM-Cosmos state desync in precompiles
   - Real-world: Allora, Andromeda, Cosmos LSM, ZetaChain
 
+- **slashing-evasion-bypass.md** - Slashing evasion and bypass vulnerabilities
+  - Frontrunning slash with withdrawal/exit
+  - Checkpoint protection blocking slash execution
+  - Withdrawal delay bypass via pre-request
+  - Cooldown activation during protocol pause
+  - Governance timing attacks (lockup < voting period)
+  - Gas griefing denial of slashing
+  - Real-world: Telcoin, Celo, Audius, Increment, Rio Network, Ethos, Mantle
+
+- **epoch-snapshot-timing-manipulation.md** - Epoch/snapshot timing and reward manipulation
+  - Future epoch cache manipulation for reward inflation
+  - Same-block supply snapshot desynchronization
+  - Unlimited validator registration without stake locking
+  - Double-counting unclaimed/delayed rewards
+  - Orphaned rewards capture by first staker
+  - Snapshot blocking via same-block validator creation
+  - Checkpoint protection bypass for slashing avoidance
+  - Real-world: Suzaku Core, Cabal, Karak, Casimir, Elixir, Zivoe, Celo, Ajna
+
 ### app-chain/precompiles/
 - **evm-precompile-vulnerabilities.md** - EVM precompile security issues
   - DELEGATECALL allowing fund theft (msg.value reuse)

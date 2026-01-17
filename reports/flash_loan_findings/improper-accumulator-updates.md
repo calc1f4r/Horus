@@ -1,0 +1,94 @@
+---
+# Core Classification
+protocol: Thala
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 48051
+audit_firm: OtterSec
+contest_link: https://www.thalalabs.xyz/
+source_link: https://www.thalalabs.xyz/
+github_link: https://github.com/ThalaLabs/thala-modules
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 4
+finders:
+  - Akash Gurugunti
+  - Robert Chen
+  - Ajay Kunapareddy
+  - OtterSec
+---
+
+## Vulnerability Title
+
+Improper Accumulator Updates
+
+### Overview
+
+
+This bug report discusses a vulnerability in the THL coin rewards system, where altering the stake amount can result in incorrect calculations of extra rewards. This can be exploited by a malicious user who takes out a flash loan to increase their stake amount and claim rewards for the newly added stake. The report also includes a proof of concept and a recommended solution, which involves updating the accumulator for extra rewards before modifying the stake amount. The bug has been fixed in the latest patch.
+
+### Original Finding Content
+
+## Stake and Unstake Update Parameters for THL Coin Rewards
+
+Stake and unstake update parameters for THL coin rewards, which are also affected by the `stake_amount`. As a result, altering the stake amount may cause incorrect calculations of extra rewards. A malicious user may exploit this vulnerability and take out a flash loan to increase their `stake_amount`, enabling them to collect rewards for the newly added stake.
+
+## Proof of Concept
+
+1. The manager adds more reward coins to the farming protocol.
+2. A user claims additional rewards from the farm, which updates the global accumulator based on the current pool stake value.
+3. An attacker stakes a large amount and attempts to claim the reward.
+4. Due to the failure to update `user_pool_info.last_acc_rewards_per_share` for extra rewards before staking and unstaking, the attacker may claim the entire pool balance by calling `claim_extra_reward`.
+
+## Remediation
+
+`stakeandunstake` should first update the accumulator for extra rewards using `claim_extra_reward` before modifying the stake amount. Creating a vector to store the names of all additional reward coins and using them in the claim function is a way to go about it.
+
+## Patch
+
+Fixed in `2693e34` by adding an additional field to the `PoolInfo` structure for storing the amounts of extra reward coins. These amounts are updated during the staking and unstaking processes.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | OtterSec |
+| Protocol | Thala |
+| Report Date | N/A |
+| Finders | Akash Gurugunti, Robert Chen, Ajay Kunapareddy, OtterSec |
+
+### Source Links
+
+- **Source**: https://www.thalalabs.xyz/
+- **GitHub**: https://github.com/ThalaLabs/thala-modules
+- **Contest**: https://www.thalalabs.xyz/
+
+### Keywords for Search
+
+`vulnerability`
+

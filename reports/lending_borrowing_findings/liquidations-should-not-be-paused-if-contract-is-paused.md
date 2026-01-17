@@ -1,0 +1,89 @@
+---
+# Core Classification
+protocol: Stfil
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 44882
+audit_firm: Zokyo
+contest_link: none
+source_link: https://github.com/solodit/solodit_content/blob/main/reports/Zokyo/2023-08-28-STFIL.md
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - Zokyo
+---
+
+## Vulnerability Title
+
+Liquidations Should Not Be Paused If Contract Is Paused
+
+### Overview
+
+
+The StakingPool contract has a bug where it can be paused by the staking pool configurator in an emergency situation. While paused, important functions like borrowing, staking, and withdrawing cannot be executed. This can lead to significant losses if liquidations are also paused, as the contract calculates debt based on interest-accruing tokens. Additionally, an attacker can take advantage of this bug by setting up a bot to liquidate user positions without giving them a chance to repay. To fix this, it is recommended to resume both liquidations and repayments while the contract is paused.
+
+### Original Finding Content
+
+**Severity** - Medium
+
+**Status** - Resolved
+
+**Description**
+
+The contract StakingPool can be paused by the staking pool configurator in cases of emergency , once paused functions borrow , stake , unstake , withdraw , repay and liquidation can not be executed due to the whenNotPaused modifier.
+
+If liquidations are paused , the protocol can incur huge losses due to unhealthy node debt positions . It is always advisable to resume liquidations in cases of emergency too.
+
+When the StakingPool contract is paused , repayments and liquidations are paused . The debt of a node is calculated through its debt tokens (variable and stable) balance. These tokens are interest accruing tokens. It is possible that while the contract is paused , a user’s position becomes subject to liquidation. 
+An attacker can set up a front-running bot , as soon as the contract is resumed the bot calls liquidate on the user’s position without giving the user a chance to repay.
+
+**Recommendation**: 
+
+Just resuming liquidations will not  be the complete fix , resume repayments too while contract is paused , as if liquidations are unpaused and repayments are paused then positions can be liquidated without giving users the chance to repay/keep their positions healthy.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Zokyo |
+| Protocol | Stfil |
+| Report Date | N/A |
+| Finders | Zokyo |
+
+### Source Links
+
+- **Source**: https://github.com/solodit/solodit_content/blob/main/reports/Zokyo/2023-08-28-STFIL.md
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+
