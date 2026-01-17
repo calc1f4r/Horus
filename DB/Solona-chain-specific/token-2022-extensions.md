@@ -864,6 +864,164 @@ pub fn validate_no_transfer_hook(mint: &InterfaceAccount<Mint>) -> Result<()> {
 
 ---
 
+## 8. Interest Bearing Extension Vulnerabilities
+
+### Overview
+
+The Interest Bearing extension allows token balances to accrue interest over time. The actual balance is calculated based on the stored amount and the elapsed time since the last update. Protocols that read balances directly without accounting for accrued interest will have incorrect values.
+
+### Vulnerability Description
+
+#### Root Cause
+
+With interest-bearing tokens:
+1. `token_account.amount` returns the base amount, not the actual balance with interest
+2. Protocols must use `amount_to_ui_amount` or calculate interest manually
+3. Rate changes can occur, affecting calculations between reads
+
+### Vulnerable Pattern Examples
+
+**Example 1: Direct Balance Read Without Interest** [MEDIUM]
+```rust
+// ❌ VULNERABLE: Doesn't account for accrued interest
+pub fn get_collateral_value(ctx: Context<GetValue>) -> Result<u64> {
+    // For interest-bearing tokens, this is the BASE amount only!
+    let raw_amount = ctx.accounts.collateral_vault.amount;
+    
+    // Calculation is wrong - missing accrued interest
+    let value = raw_amount * ctx.accounts.price_feed.price;
+    Ok(value)
+}
+```
+
+### Secure Implementation
+
+**Fix 1: Calculate Interest-Adjusted Balance**
+```rust
+use spl_token_2022::extension::interest_bearing_mint::InterestBearingConfig;
+
+// ✅ SECURE: Account for interest when reading balance
+pub fn get_interest_adjusted_balance(
+    mint: &InterfaceAccount<Mint>,
+    token_account: &InterfaceAccount<TokenAccount>,
+) -> Result<u64> {
+    let mint_info = mint.to_account_info();
+    let mint_data = mint_info.data.borrow();
+    
+    let base_amount = token_account.amount;
+    
+    if let Ok(state) = StateWithExtensions::<spl_token_2022::state::Mint>::unpack(&mint_data) {
+        if let Ok(config) = state.get_extension::<InterestBearingConfig>() {
+            let current_time = Clock::get()?.unix_timestamp;
+            
+            // Calculate accrued interest
+            let rate_bps = i128::from(config.current_rate);
+            let time_elapsed = current_time
+                .checked_sub(i64::from(config.last_update_timestamp))
+                .ok_or(ErrorCode::ArithmeticError)?;
+            
+            // Simple interest calculation (actual formula may be more complex)
+            let interest_multiplier = 10000i128 + (rate_bps * time_elapsed as i128 / 31536000);
+            let adjusted = (base_amount as i128 * interest_multiplier / 10000) as u64;
+            
+            return Ok(adjusted);
+        }
+    }
+    
+    // No interest bearing extension - return base amount
+    Ok(base_amount)
+}
+```
+
+**Fix 2: Reject Interest Bearing Tokens**
+```rust
+// ✅ SECURE: Reject if protocol can't handle interest calculations
+pub fn validate_no_interest_bearing(mint: &InterfaceAccount<Mint>) -> Result<()> {
+    let mint_info = mint.to_account_info();
+    let mint_data = mint_info.data.borrow();
+    
+    if let Ok(state) = StateWithExtensions::<spl_token_2022::state::Mint>::unpack(&mint_data) {
+        if state.get_extension::<InterestBearingConfig>().is_ok() {
+            return Err(ErrorCode::InterestBearingNotSupported.into());
+        }
+    }
+    
+    Ok(())
+}
+```
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- Direct reads of token_account.amount without interest adjustment
+- Balance comparisons that don't account for time-based changes
+- Snapshot-based logic that becomes stale over time
+```
+
+---
+
+## 9. Confidential Transfer Vulnerabilities
+
+### Overview
+
+Confidential Transfer is one of the most complex Token-2022 extensions, enabling encrypted token balances using zero-knowledge proofs. The on-chain balance becomes a ciphertext that can only be decrypted by the account owner.
+
+### Vulnerability Description
+
+#### Root Cause
+
+With confidential transfers:
+1. Public balance (`amount`) may be 0 or a pending balance waiting for transfer
+2. Actual balance is encrypted in `confidential_transfer_account` extension data
+3. Third parties (including protocols) cannot verify true balances
+4. Requires special transfer instructions that include ZK proofs
+
+### Impact Analysis
+
+#### Technical Impact
+- Collateral verification impossible without user cooperation
+- Liquidation logic cannot verify undercollateralization
+- Balance-based access control fails
+- Accounting and reporting systems break
+
+#### Business Impact
+- Cannot implement trustless collateralized lending
+- Unable to enforce minimum balance requirements
+- Protocol risk management compromised
+- Regulatory compliance challenges
+
+### Secure Implementation
+
+**Fix 1: Reject Confidential Transfer Tokens for DeFi**
+```rust
+use spl_token_2022::extension::confidential_transfer::ConfidentialTransferMint;
+
+// ✅ SECURE: Reject for protocols requiring balance visibility
+pub fn validate_no_confidential_transfer(mint: &InterfaceAccount<Mint>) -> Result<()> {
+    let mint_info = mint.to_account_info();
+    let mint_data = mint_info.data.borrow();
+    
+    if let Ok(state) = StateWithExtensions::<spl_token_2022::state::Mint>::unpack(&mint_data) {
+        if state.get_extension::<ConfidentialTransferMint>().is_ok() {
+            return Err(ErrorCode::ConfidentialTransferNotSupported.into());
+        }
+    }
+    
+    Ok(())
+}
+```
+
+### Detection Patterns
+
+#### Audit Checklist
+- [ ] Protocol rejects mints with ConfidentialTransferMint extension
+- [ ] Or protocol explicitly handles confidential balances with ZK proofs
+- [ ] No reliance on public balance for security-critical decisions
+- [ ] Clear documentation of confidential transfer stance
+
+---
+
 ## 10. General Token-2022 Integration Vulnerabilities
 
 ### Comprehensive Extension Validation
@@ -956,7 +1114,551 @@ pub fn validate_safe_mint(mint: &InterfaceAccount<Mint>) -> Result<()> {
 
 ## Keywords for Search
 
-`token_2022`, `spl_token_2022`, `mint_close_authority`, `freeze_authority`, `transfer_fee`, `permanent_delegate`, `transfer_hook`, `default_account_state`, `token_extensions`, `decimal_manipulation`, `fee_on_transfer`, `token_account_size`, `extension_validation`, `interface_account`, `token_interface`
+`token_2022`, `spl_token_2022`, `mint_close_authority`, `freeze_authority`, `transfer_fee`, `permanent_delegate`, `transfer_hook`, `default_account_state`, `token_extensions`, `decimal_manipulation`, `fee_on_transfer`, `token_account_size`, `extension_validation`, `interface_account`, `token_interface`, `confidential_transfer`, `interest_bearing`, `non_transferable`, `metadata_pointer`, `group_pointer`
+
+---
+
+## 11. Non-Transferable Token Extension Vulnerabilities
+
+### Overview
+
+The Non-Transferable extension creates soulbound tokens that cannot be transferred after minting. Protocols integrating these tokens must understand that standard transfer operations will fail, and some extensions may still allow burning.
+
+### Vulnerability Description
+
+#### Root Cause
+
+Protocols that accept arbitrary Token-2022 mints may:
+1. Allow deposits of non-transferable tokens that can never be withdrawn
+2. Break liquidation mechanisms that require token transfers
+3. Create permanently locked positions in vaults or pools
+
+### Vulnerable Pattern Examples
+
+**Example 1: Non-Transferable Tokens in Vault** [MEDIUM]
+```rust
+// ❌ VULNERABLE: Accepts non-transferable tokens
+#[derive(Accounts)]
+pub struct Deposit<'info> {
+    pub token_mint: InterfaceAccount<'info, Mint>,  // No extension check!
+    
+    #[account(mut)]
+    pub user_token_account: InterfaceAccount<'info, TokenAccount>,
+    
+    #[account(mut)]
+    pub vault: InterfaceAccount<'info, TokenAccount>,
+}
+
+// If user deposits non-transferable tokens, they cannot be withdrawn
+pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
+    token::transfer(/* ... */, amount)?;  // This works for deposit
+    // But withdrawal will FAIL for non-transferable tokens!
+    Ok(())
+}
+```
+
+### Impact Analysis
+
+#### Technical Impact
+- Tokens deposited to vaults become permanently locked
+- Liquidations fail as tokens cannot be transferred
+- Protocol state becomes inconsistent
+
+#### Business Impact
+- User funds locked forever
+- Protocol becomes unusable for specific token types
+- Potential for griefing attacks
+
+### Secure Implementation
+
+**Fix 1: Check for Non-Transferable Extension**
+```rust
+use spl_token_2022::extension::non_transferable::NonTransferable;
+
+// ✅ SECURE: Reject non-transferable tokens
+pub fn validate_transferable_token(mint: &InterfaceAccount<Mint>) -> Result<()> {
+    let mint_info = mint.to_account_info();
+    let mint_data = mint_info.data.borrow();
+    
+    if let Ok(state) = StateWithExtensions::<spl_token_2022::state::Mint>::unpack(&mint_data) {
+        if state.get_extension::<NonTransferable>().is_ok() {
+            return Err(ErrorCode::NonTransferableTokenNotSupported.into());
+        }
+    }
+    
+    Ok(())
+}
+```
+
+---
+
+## 12. Confidential Transfer Extension Vulnerabilities
+
+### Overview
+
+The Confidential Transfer extension enables encrypted token balances using zero-knowledge proofs. This creates unique challenges for protocols that need to verify balances or enforce minimum amounts.
+
+### Vulnerability Description
+
+#### Root Cause
+
+With confidential transfers:
+1. On-chain balance is encrypted and cannot be read directly
+2. Traditional balance checks (e.g., `token_account.amount`) return 0 or encrypted values
+3. Protocols relying on balance visibility break or make incorrect decisions
+
+### Vulnerable Pattern Examples
+
+**Example 1: Balance Check with Confidential Tokens** [MEDIUM]
+```rust
+// ❌ VULNERABLE: Assumes balance is readable
+pub fn check_collateral_ratio(ctx: Context<CheckRatio>) -> Result<()> {
+    // For confidential tokens, this may return 0 or meaningless value!
+    let collateral = ctx.accounts.collateral_vault.amount;
+    let debt = ctx.accounts.debt_amount;
+    
+    require!(
+        collateral >= debt * 150 / 100,
+        ErrorCode::InsufficientCollateral
+    );
+    Ok(())
+}
+```
+
+### Secure Implementation
+
+**Fix 1: Reject Confidential Transfer Tokens**
+```rust
+use spl_token_2022::extension::confidential_transfer::ConfidentialTransferMint;
+
+// ✅ SECURE: Reject confidential transfer tokens if balance visibility required
+pub fn validate_no_confidential_transfer(mint: &InterfaceAccount<Mint>) -> Result<()> {
+    let mint_info = mint.to_account_info();
+    let mint_data = mint_info.data.borrow();
+    
+    if let Ok(state) = StateWithExtensions::<spl_token_2022::state::Mint>::unpack(&mint_data) {
+        if state.get_extension::<ConfidentialTransferMint>().is_ok() {
+            return Err(ErrorCode::ConfidentialTransferNotSupported.into());
+        }
+    }
+    
+    Ok(())
+}
+```
+
+---
+
+## 13. Metadata Pointer Extension Vulnerabilities
+
+### Overview
+
+The Metadata Pointer extension allows token metadata to be stored in a separate account or within the mint itself. Incorrect assumptions about metadata location can lead to failed lookups or manipulation.
+
+### Vulnerability Description
+
+#### Root Cause
+
+Protocols may:
+1. Assume metadata is stored in Metaplex metadata accounts
+2. Fail to follow the metadata pointer to the correct account
+3. Not validate that metadata actually exists at the pointer location
+
+### Secure Implementation
+
+**Fix 1: Follow Metadata Pointer**
+```rust
+use spl_token_2022::extension::metadata_pointer::MetadataPointer;
+
+// ✅ SECURE: Follow metadata pointer correctly
+pub fn get_token_metadata(mint: &InterfaceAccount<Mint>) -> Result<Option<Pubkey>> {
+    let mint_info = mint.to_account_info();
+    let mint_data = mint_info.data.borrow();
+    
+    if let Ok(state) = StateWithExtensions::<spl_token_2022::state::Mint>::unpack(&mint_data) {
+        if let Ok(pointer) = state.get_extension::<MetadataPointer>() {
+            // Metadata address might be in the mint itself or external account
+            return Ok(Option::<Pubkey>::from(pointer.metadata_address));
+        }
+    }
+    
+    Ok(None)  // No metadata pointer
+}
+```
+
+---
+
+## 14. Group and Group Member Extension Vulnerabilities
+
+### Overview
+
+The Group Pointer and Group Member Pointer extensions enable token grouping functionality. These extensions can affect how tokens are treated in collections and may have implications for NFT protocols.
+
+### Secure Implementation
+
+**Fix 1: Validate Group Extensions**
+```rust
+use spl_token_2022::extension::{group_pointer::GroupPointer, group_member_pointer::GroupMemberPointer};
+
+// ✅ SECURE: Check for group extensions
+pub fn validate_group_extensions(mint: &InterfaceAccount<Mint>) -> Result<()> {
+    let mint_info = mint.to_account_info();
+    let mint_data = mint_info.data.borrow();
+    
+    if let Ok(state) = StateWithExtensions::<spl_token_2022::state::Mint>::unpack(&mint_data) {
+        // Handle group pointer if present
+        if let Ok(group_ptr) = state.get_extension::<GroupPointer>() {
+            msg!("Token has group pointer: {:?}", group_ptr.group_address);
+        }
+        
+        // Handle group member pointer if present
+        if let Ok(member_ptr) = state.get_extension::<GroupMemberPointer>() {
+            msg!("Token is group member: {:?}", member_ptr.member_address);
+        }
+    }
+    
+    Ok(())
+}
+```
+
+---
+
+## 15. CPI Guard Extension Vulnerabilities
+
+### Overview
+
+The CPI Guard extension protects token accounts from unauthorized Cross-Program Invocation (CPI) operations. When enabled, certain CPI operations are restricted to prevent malicious programs from draining tokens.
+
+### Vulnerability Description
+
+#### Root Cause
+
+Protocols may:
+1. Fail to account for CPI Guard being enabled on user accounts
+2. Attempt restricted CPI operations that fail unexpectedly
+3. Not provide clear error messages when CPI Guard blocks operations
+
+### Vulnerable Pattern Examples
+
+**Example 1: CPI Operation Blocked by Guard** [MEDIUM]
+```rust
+// ❌ VULNERABLE: May fail if CPI Guard is enabled on source account
+pub fn transfer_via_cpi(ctx: Context<TransferCpi>, amount: u64) -> Result<()> {
+    // This CPI call may fail if user has CPI Guard enabled
+    token::transfer(
+        CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.user_token.to_account_info(),
+                to: ctx.accounts.vault.to_account_info(),
+                authority: ctx.accounts.user.to_account_info(),
+            },
+        ),
+        amount,
+    )?;
+    Ok(())
+}
+```
+
+### Secure Implementation
+
+**Fix 1: Handle CPI Guard Gracefully**
+```rust
+use spl_token_2022::extension::cpi_guard::CpiGuard;
+
+// ✅ SECURE: Check for CPI Guard and handle appropriately
+pub fn check_cpi_guard_enabled(
+    token_account: &InterfaceAccount<TokenAccount>
+) -> Result<bool> {
+    let account_info = token_account.to_account_info();
+    let account_data = account_info.data.borrow();
+    
+    if let Ok(state) = StateWithExtensions::<spl_token_2022::state::Account>::unpack(&account_data) {
+        if let Ok(guard) = state.get_extension::<CpiGuard>() {
+            return Ok(guard.lock_cpi.into());
+        }
+    }
+    
+    Ok(false)
+}
+
+// In your instruction
+pub fn transfer_with_guard_check(ctx: Context<Transfer>, amount: u64) -> Result<()> {
+    let guard_enabled = check_cpi_guard_enabled(&ctx.accounts.user_token)?;
+    
+    if guard_enabled {
+        // User must sign directly, not via CPI
+        return Err(ErrorCode::CpiGuardEnabled.into());
+    }
+    
+    // Proceed with CPI transfer
+    token::transfer(/* ... */)?;
+    Ok(())
+}
+```
+
+---
+
+## 16. Required Memo Extension Vulnerabilities
+
+### Overview
+
+The Required Memo extension enforces that all transfers to a token account must include a memo instruction in the same transaction. Protocols failing to include memos will have their transfers rejected.
+
+### Vulnerability Description
+
+#### Root Cause
+
+When transferring to accounts with Required Memo extension:
+1. Transfers without accompanying memo instruction fail
+2. Automated systems may not know to include memos
+3. Protocol operations that don't use memos break
+
+### Secure Implementation
+
+**Fix 1: Add Memo to Transfers**
+```rust
+use spl_memo::instruction::build_memo;
+
+// ✅ SECURE: Include memo when required
+pub fn transfer_with_memo(
+    ctx: Context<TransferWithMemo>,
+    amount: u64,
+    memo: String,
+) -> Result<()> {
+    // Add memo instruction
+    invoke(
+        &build_memo(memo.as_bytes(), &[&ctx.accounts.authority.key()]),
+        &[ctx.accounts.authority.to_account_info()],
+    )?;
+    
+    // Then transfer
+    token::transfer(/* ... */, amount)?;
+    
+    Ok(())
+}
+```
+
+**Fix 2: Reject Required Memo Accounts**
+```rust
+use spl_token_2022::extension::memo_transfer::MemoTransfer;
+
+// ✅ SECURE: Reject accounts requiring memo if not supported
+pub fn validate_no_memo_required(
+    token_account: &InterfaceAccount<TokenAccount>
+) -> Result<()> {
+    let account_info = token_account.to_account_info();
+    let account_data = account_info.data.borrow();
+    
+    if let Ok(state) = StateWithExtensions::<spl_token_2022::state::Account>::unpack(&account_data) {
+        if let Ok(memo) = state.get_extension::<MemoTransfer>() {
+            if bool::from(memo.require_incoming_transfer_memos) {
+                return Err(ErrorCode::MemoRequiredNotSupported.into());
+            }
+        }
+    }
+    
+    Ok(())
+}
+```
+
+---
+
+## 17. Immutable Owner Extension Vulnerabilities
+
+### Overview
+
+The Immutable Owner extension prevents the owner of a token account from being changed. While generally a security feature, protocols must understand this when designing account recovery or migration mechanisms.
+
+### Impact Analysis
+
+#### Design Considerations
+- Token accounts with immutable owner cannot be reassigned
+- Account recovery mechanisms relying on owner change will fail
+- This is generally desirable for security but affects flexibility
+
+---
+
+## 18. Comprehensive Token-2022 Extension Whitelist Pattern
+
+### Overview
+
+For high-security protocols, the safest approach is to explicitly whitelist only the extensions you support rather than blacklisting dangerous ones.
+
+### Secure Implementation
+
+**Complete Extension Whitelist Validator**
+```rust
+use spl_token_2022::extension::*;
+
+/// Comprehensive Token-2022 extension validator with whitelist approach
+pub fn validate_supported_extensions(mint: &InterfaceAccount<Mint>) -> Result<()> {
+    let mint_info = mint.to_account_info();
+    
+    // SPL Token (not Token-2022) is always safe
+    if *mint_info.owner == spl_token::id() {
+        return validate_spl_token_mint(mint);
+    }
+    
+    // Must be Token-2022
+    require!(
+        *mint_info.owner == spl_token_2022::id(),
+        ErrorCode::UnsupportedTokenProgram
+    );
+    
+    let mint_data = mint_info.data.borrow();
+    let state = StateWithExtensions::<spl_token_2022::state::Mint>::unpack(&mint_data)?;
+    
+    // Get all extension types
+    let extension_types = state.get_extension_types()?;
+    
+    for ext_type in extension_types {
+        match ext_type {
+            // SAFE extensions - explicitly allow
+            ExtensionType::MetadataPointer => {},
+            ExtensionType::TokenMetadata => {},
+            ExtensionType::ImmutableOwner => {},
+            
+            // CONDITIONALLY SAFE - allow with checks
+            ExtensionType::TransferFeeConfig => {
+                msg!("Warning: Transfer fee token - ensure fee handling");
+            },
+            ExtensionType::InterestBearingConfig => {
+                msg!("Warning: Interest bearing - recalculate amounts");
+            },
+            ExtensionType::DefaultAccountState => {
+                // Check it's not frozen by default
+                if let Ok(default_state) = state.get_extension::<DefaultAccountState>() {
+                    require!(
+                        default_state.state != spl_token_2022::state::AccountState::Frozen as u8,
+                        ErrorCode::FrozenDefaultState
+                    );
+                }
+            },
+            
+            // DANGEROUS extensions - reject
+            ExtensionType::MintCloseAuthority => {
+                return Err(ErrorCode::DangerousExtension.into());
+            },
+            ExtensionType::PermanentDelegate => {
+                return Err(ErrorCode::DangerousExtension.into());
+            },
+            ExtensionType::TransferHook => {
+                return Err(ErrorCode::DangerousExtension.into());
+            },
+            ExtensionType::ConfidentialTransferMint => {
+                return Err(ErrorCode::DangerousExtension.into());
+            },
+            ExtensionType::NonTransferable => {
+                return Err(ErrorCode::DangerousExtension.into());
+            },
+            
+            // UNKNOWN extensions - reject by default
+            _ => {
+                msg!("Unknown extension type: {:?}", ext_type);
+                return Err(ErrorCode::UnknownExtension.into());
+            }
+        }
+    }
+    
+    // Check freeze authority
+    require!(
+        state.base.freeze_authority.is_none(),
+        ErrorCode::FreezableMint
+    );
+    
+    Ok(())
+}
+
+fn validate_spl_token_mint(mint: &InterfaceAccount<Mint>) -> Result<()> {
+    // For SPL Token, just check freeze authority
+    require!(
+        mint.freeze_authority.is_none(),
+        ErrorCode::FreezableMint
+    );
+    Ok(())
+}
+```
+
+---
+
+## 19. Token-2022 Account Extension Validation
+
+### Overview
+
+Token accounts (not just mints) can also have extensions in Token-2022. Programs must validate token account extensions separately from mint extensions.
+
+### Secure Implementation
+
+**Token Account Extension Validator**
+```rust
+// ✅ SECURE: Validate token account extensions
+pub fn validate_token_account_extensions(
+    token_account: &InterfaceAccount<TokenAccount>
+) -> Result<()> {
+    let account_info = token_account.to_account_info();
+    
+    // Skip if not Token-2022
+    if *account_info.owner != spl_token_2022::id() {
+        return Ok(());
+    }
+    
+    let account_data = account_info.data.borrow();
+    let state = StateWithExtensions::<spl_token_2022::state::Account>::unpack(&account_data)?;
+    
+    // Check CPI Guard
+    if let Ok(guard) = state.get_extension::<CpiGuard>() {
+        if bool::from(guard.lock_cpi) {
+            msg!("Warning: Account has CPI Guard enabled");
+        }
+    }
+    
+    // Check Memo Transfer requirement
+    if let Ok(memo) = state.get_extension::<MemoTransfer>() {
+        if bool::from(memo.require_incoming_transfer_memos) {
+            msg!("Warning: Account requires memos on incoming transfers");
+        }
+    }
+    
+    Ok(())
+}
+```
+
+---
+
+## Prevention Guidelines
+
+### Development Best Practices
+
+1. **Always validate Token-2022 extensions** before accepting any mint
+2. **Create allowlists** for known-safe mints in high-value protocols
+3. **Reject dangerous extensions** by default (MintCloseAuthority, PermanentDelegate, TransferHook)
+4. **Handle transfer fees** by measuring balance changes or pre-calculating fees
+5. **Use InterfaceAccount and Interface** for Token-2022 compatibility
+6. **Calculate dynamic account sizes** for Token-2022 accounts
+7. **Test with Token-2022 mints** including various extension combinations
+8. **Document extension requirements** for supported tokens
+9. **Validate token account extensions** separately from mint extensions
+10. **Use whitelist approach** for critical protocols - only allow known-safe extensions
+
+### Token-2022 Extension Risk Matrix (Extended)
+
+| Extension | Risk Level | Issue | Recommendation |
+|-----------|------------|-------|----------------|
+| MintCloseAuthority | CRITICAL | Decimal manipulation | Reject |
+| PermanentDelegate | CRITICAL | Can drain any account | Reject |
+| FreezeAuthority | HIGH | Can freeze accounts | Reject or allowlist |
+| TransferFee | MEDIUM | Accounting errors | Handle or reject |
+| TransferHook | MEDIUM-HIGH | Unpredictable behavior, reentrancy | Reject or audit hook |
+| DefaultAccountState | LOW-MEDIUM | Frozen by default | Check state |
+| InterestBearing | LOW | Balance calculation | Update on each read |
+| NonTransferable | MEDIUM | Transfer restrictions, locked funds | Reject for vaults |
+| ConfidentialTransfer | MEDIUM | Hidden balances | Reject if visibility needed |
+| CpiGuard | LOW | CPI restrictions | Handle gracefully |
+| MemoTransfer | LOW | Memo required | Include memo or reject |
+| ImmutableOwner | LOW | Cannot reassign owner | Generally safe |
+| MetadataPointer | LOW | Metadata location | Follow pointer correctly |
+| GroupPointer | LOW | Token grouping | Handle for NFT protocols |
+| GroupMemberPointer | LOW | Group membership | Handle for NFT protocols |
 
 ---
 
