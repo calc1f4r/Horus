@@ -1,0 +1,167 @@
+---
+# Core Classification
+protocol: Vader Protocol
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 42424
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2021-12-vader
+source_link: https://code4rena.com/reports/2021-12-vader
+github_link: https://github.com/code-423n4/2021-12-vader-findings/issues/103
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - oracle
+  - liquid_staking
+  - bridge
+  - cdp
+  - yield_aggregator
+
+# Audit Details
+report_date: unknown
+finders_count: 0
+finders:
+---
+
+## Vulnerability Title
+
+[H-10] `previousPrices` Is Never Updated Upon Syncing Token Price
+
+### Overview
+
+
+The `LiquidityBasedTWAP` contract is designed to track the prices of `VADER` and `USDV` accurately while also being resistant to manipulation and short-term volatility. However, there is a bug in the contract that affects the accuracy of the price tracking. The `previousPrices` array is not being updated correctly, which means that the current price of `VADER` and `USDV` is not being reflected accurately in the liquidity weightings. This issue can lead to a divergence between the set price and the actual market price, which can cause problems with the TWAP implementation. The bug has been acknowledged by the team and a potential solution has been recommended.
+
+### Original Finding Content
+
+_Submitted by leastwood_
+
+The `LiquidityBasedTWAP` contract attempts to accurately track the price of `VADER` and `USDV` while still being resistant to flash loan manipulation and short-term volatility. The `previousPrices` array is meant to track the last queried price for the two available paths, namely `VADER` and `USDV`.
+
+The `setupVader` function configures the `VADER` token by setting `previousPrices` and adding a token pair. However, `syncVaderPrice` does not update `previousPrices` after syncing, causing `currentLiquidityEvaluation` to be dependent on the initial price for `VADER`. As a result, liquidity weightings do not accurately reflect the current and most up to date price for `VADER`.
+
+This same issue also affects how `USDV` calculates `currentLiquidityEvaluation`.
+
+This issue is of high risk and heavily impacts the accuracy of the TWAP implementation as the set price for `VADER/USDV` diverges from current market prices. For example, as the Chainlink oracle price and initial price for `VADER` diverge, `currentLiquidityEvaluation` will begin to favour either on-chain or off-chain price data depending on which price result is greater. The following calculation for `currentLiquidityEvaluation` outlines this behaviour.
+
+    currentLiquidityEvaluation =
+        (reserveNative * previousPrices[uint256(Paths.VADER)]) +
+        (reserveForeign * getChainlinkPrice(pairData.foreignAsset));
+
+#### Proof of Concept
+
+<https://github.com/code-423n4/2021-12-vader/blob/main/contracts/lbt/LiquidityBasedTWAP.sol#L150-L189>
+
+    function _updateVaderPrice(
+        IUniswapV2Pair pair,
+        ExchangePair storage pairData,
+        uint256 timeElapsed
+    ) internal returns (uint256 currentLiquidityEvaluation) {
+        bool isFirst = pair.token0() == vader;
+
+        (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
+
+        (uint256 reserveNative, uint256 reserveForeign) = isFirst
+            ? (reserve0, reserve1)
+            : (reserve1, reserve0);
+
+        (
+            uint256 price0Cumulative,
+            uint256 price1Cumulative,
+            uint256 currentMeasurement
+        ) = UniswapV2OracleLibrary.currentCumulativePrices(address(pair));
+
+        uint256 nativeTokenPriceCumulative = isFirst
+            ? price0Cumulative
+            : price1Cumulative;
+
+        unchecked {
+            pairData.nativeTokenPriceAverage = FixedPoint.uq112x112(
+                uint224(
+                    (nativeTokenPriceCumulative -
+                        pairData.nativeTokenPriceCumulative) / timeElapsed
+                )
+            );
+        }
+
+        pairData.nativeTokenPriceCumulative = nativeTokenPriceCumulative;
+
+        pairData.lastMeasurement = currentMeasurement;
+
+        currentLiquidityEvaluation =
+            (reserveNative * previousPrices[uint256(Paths.VADER)]) +
+            (reserveForeign * getChainlinkPrice(pairData.foreignAsset));
+    }
+
+<https://github.com/code-423n4/2021-12-vader/blob/main/contracts/lbt/LiquidityBasedTWAP.sol#L221-L235>
+
+    function setupVader(
+        IUniswapV2Pair pair,
+        IAggregatorV3 oracle,
+        uint256 updatePeriod,
+        uint256 vaderPrice
+    ) external onlyOwner {
+        require(
+            previousPrices[uint256(Paths.VADER)] == 0,
+            "LBTWAP::setupVader: Already Initialized"
+        );
+
+        previousPrices[uint256(Paths.VADER)] = vaderPrice;
+
+        _addVaderPair(pair, oracle, updatePeriod);
+    }
+
+#### Recommended Mitigation Steps
+
+Consider updating `previousPrices[uint256(Paths.VADER)]` and `previousPrices[uint256(Paths.USDV)]` after syncing the respective prices for the two tokens. This will ensure the most up to date price is used when evaluating liquidity for all available token pairs.
+
+**[SamSteinGG (Vader) acknowledged](https://github.com/code-423n4/2021-12-vader-findings/issues/103)**
+
+
+
+***
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Vader Protocol |
+| Report Date | N/A |
+| Finders | N/A |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2021-12-vader
+- **GitHub**: https://github.com/code-423n4/2021-12-vader-findings/issues/103
+- **Contest**: https://code4rena.com/reports/2021-12-vader
+
+### Keywords for Search
+
+`vulnerability`
+

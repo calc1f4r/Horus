@@ -1,0 +1,123 @@
+---
+# Core Classification
+protocol: UMA DVM 2.0 Audit
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 10448
+audit_firm: OpenZeppelin
+contest_link: none
+source_link: https://blog.openzeppelin.com/uma-dvm-2-0-audit/
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - dexes
+  - bridge
+  - cdp
+  - services
+  - cross_chain
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - OpenZeppelin
+---
+
+## Vulnerability Title
+
+Incorrect math in slashing library comments
+
+### Overview
+
+
+A bug was identified in the SlashingLibrary contract of the UMAprotocol. The functions calcWrongVoteSlashPerToken and calcNoVoteSlashPerToken were meant to return constants representing a slashing percentage per wrong vote or no vote that would counteract the 20% staking APY under the assumption of 120 yearly votes. The formula in the inline comments was incorrect, using basic interest instead of compound interest. The correct formula to counteract a 20% APY over 120 votes would be 1 - (1 / 1.2)**(1/120). The deviation between both values is currently negligible, however, it becomes important for a higher APY and more yearly votes. The documentation was updated to include the correct mathematical formula and an advisory to check the inequality (1 + APY) * ( 1 - calcNoVoteSlashPerToken() )**expected_yearly_votes < 1 to prevent setting any incentives for staking without participating in votes. The bug was fixed in commit fed9d90bff9ec5052ced798e52ff36502f3cac1e of pull request #4066.
+
+### Original Finding Content
+
+In the [`SlashingLibrary`](https://github.com/UMAprotocol/protocol/blob/7938617bf79854811959eb605237edf6bdccbc90/packages/core/contracts/oracle/implementation/SlashingLibrary.sol) contract the functions [`calcWrongVoteSlashPerToken`](https://github.com/UMAprotocol/protocol/blob/7938617bf79854811959eb605237edf6bdccbc90/packages/core/contracts/oracle/implementation/SlashingLibrary.sol#L12) and [`calcNoVoteSlashPerToken`](https://github.com/UMAprotocol/protocol/blob/7938617bf79854811959eb605237edf6bdccbc90/packages/core/contracts/oracle/implementation/SlashingLibrary.sol#L44) are meant to return constants representing a slashing percentage per wrong vote or no vote that would counteract the 20% staking APY under the assumption of 120 yearly votes. Both functions contain commentary with an incorrect mathematical formula to counteract a 20% APY.
+
+
+More specifically, the formula outlined in [the inline comments](https://github.com/UMAprotocol/protocol/blob/7938617bf79854811959eb605237edf6bdccbc90/packages/core/contracts/oracle/implementation/SlashingLibrary.sol#L17:L18)
+
+
+
+
+```
+0.2/(10*12)
+
+```
+
+
+uses basic interest instead of compound interest and assumes that a 20% increase will be negated with a subsequent 20% loss. However, the correct formula to counteract a 20% APY over 120 votes would be
+
+
+
+
+```
+ 1 - (1 / 1.2)**(1/120)
+
+```
+
+
+While the current deviation between both values is negligible, applying the correct formula becomes crucially important for a higher APY and more yearly votes.
+
+
+Consider updating the documentation to include both the correct mathematical formula and an advisory to check the inequality
+
+
+
+
+```
+(1 + APY) * ( 1 - calcNoVoteSlashPerToken() )**expected_yearly_votes < 1
+
+```
+
+
+to prevent setting any incentives for staking without participating in votes.
+
+
+**Update:** *Fixed as of commit [`fed9d90bff9ec5052ced798e52ff36502f3cac1e`](https://github.com/UMAprotocol/protocol/pull/4066/commits/fed9d90bff9ec5052ced798e52ff36502f3cac1e) of [pull request #4066](https://github.com/UMAprotocol/protocol/pull/4066).*
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | OpenZeppelin |
+| Protocol | UMA DVM 2.0 Audit |
+| Report Date | N/A |
+| Finders | OpenZeppelin |
+
+### Source Links
+
+- **Source**: https://blog.openzeppelin.com/uma-dvm-2-0-audit/
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+
