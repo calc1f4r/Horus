@@ -1,0 +1,123 @@
+---
+# Core Classification
+protocol: Elusiv
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 48624
+audit_firm: OtterSec
+contest_link: https://elusiv.io/
+source_link: https://elusiv.io/
+github_link: github.com/elusiv-privacy/elusiv.
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 3
+finders:
+  - Harrison Green
+  - Ajay Kunapareddy
+  - OtterSec
+---
+
+## Vulnerability Title
+
+Nullifier Trees can be Cleared
+
+### Overview
+
+
+The report discusses a bug in the Elusiv framework, which uses subaccounts to store large amounts of related data in Solana accounts. The bug allows an attacker to repeatedly spend the same money by clearing the nullifier tree, which is used to prevent duplicate spending. The code responsible for initializing subaccounts does not check if the account is already in use, resulting in the deletion of all stored data. This vulnerability has been fixed in a recent commit by adding a one-byte marker to indicate if the account is in use. 
+
+### Original Finding Content
+
+## Elusiv Framework and Subaccounts
+
+In order to store large amounts of related data in Solana accounts, Elusiv uses the concept of a subaccount. In the Elusiv framework, a subaccount is a data-only account pointed to by a parent tracker account.
+
+## Nullifier Trees
+
+Nullifier trees are one example of a structure that must be stored via subaccounts. The purpose of a nullifier tree in the context of a zero-knowledge token program is to prevent duplicate spending. Every spent transaction gets marked in the nullifier tree, which means if a user tries to spend a transaction that has already been marked in the nullifier tree, it will be rejected as an attempted double-spend.
+
+## Constructing Initial Data Accounts
+
+In order to construct the initial data accounts, a user invokes `EnableNullifierSubAccount`, providing both the `nullifier_account` (parent tracker account) and the data-only `sub_account`:
+
+```rust
+pub fn enable_nullifier_sub_account(
+    nullifier_account: &AccountInfo,
+    sub_account: &AccountInfo,
+    _merkle_tree_index: u64,
+    sub_account_index: u32,
+) -> ProgramResult {
+    // Note: we don't zero-check these accounts, BUT we need to
+    // manipulate the maps we store in each account and set the size to zero
+    setup_sub_account::<NullifierAccount, {NullifierAccount::COUNT}>(
+        nullifier_account,
+        sub_account,
+        sub_account_index as usize,
+        false
+    )?;
+    
+    // Set map size to zero (leading u32)
+    let data = &mut sub_account.data.borrow_mut()[..];
+    for b in data.iter_mut().take(4) {
+        *b = 0;
+    }
+    Ok(())
+}
+```
+
+However, this code does not verify that the provided `sub_account` is not already in use. Since it resets the map size to zero (by clearing the first four bytes of the data), it implicitly deletes all of the stored data in the account.
+
+## Vulnerability
+
+An attacker could use this vulnerability to clear the nullifier tree and spend the same money repeatedly until the program pool is drained.
+
+## Patch
+
+This vulnerability has been fixed in commit `e436e69` by storing a one-byte marker at the start of all subaccounts that indicates whether the account is in use. Any code that initializes a subaccount ensures that this flag is not set before initializing the account. 
+
+© 2022 OtterSec LLC. All Rights Reserved.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | OtterSec |
+| Protocol | Elusiv |
+| Report Date | N/A |
+| Finders | Harrison Green, Ajay Kunapareddy, OtterSec |
+
+### Source Links
+
+- **Source**: https://elusiv.io/
+- **GitHub**: github.com/elusiv-privacy/elusiv.
+- **Contest**: https://elusiv.io/
+
+### Keywords for Search
+
+`vulnerability`
+

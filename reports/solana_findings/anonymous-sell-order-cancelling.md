@@ -1,0 +1,145 @@
+---
+# Core Classification
+protocol: NTF Store
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 50208
+audit_firm: Halborn
+contest_link: https://www.halborn.com/audits/phantasia-sports/ntf-store-solana-program-security-assessment
+source_link: https://www.halborn.com/audits/phantasia-sports/ntf-store-solana-program-security-assessment
+github_link: none
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - Halborn
+---
+
+## Vulnerability Title
+
+ANONYMOUS SELL ORDER CANCELLING
+
+### Overview
+
+
+This bug report discusses a problem with the `Phantasia Sports` program that allows an attacker to cause a denial of service by cancelling all sell orders. The issue is caused by a lack of verification in the `CancelNftSale` and `CancelEditionSale` instruction handlers, which do not check if the NFT owner is the transaction signer. This allows an anonymous attacker to cancel all sell orders, causing a disruption in the program. The report includes the code location and the impact and likelihood of the bug. The `Phantasia Sports` team has since fixed the issue by verifying the transaction signer's public key to match the `seller_wallet` account address.
+
+### Original Finding Content
+
+##### Description
+
+Owners can place sell orders on their NFTs by sending either a `ListNftForSale` instruction or a `ListEditionForSale` instruction to the program. Either instruction handler transfers the token's authority to an account address derived from the program's ID and a static seed and creates an order account. This account stores the ask price, NFT mint and several other parameters.
+
+Sellers may choose to cancel their orders before they're filled. To accomplish that, they can send either a `CancelNftSale` or a `CancelEditionSale`. Either instruction handler transfers the NFT's authority back to the seller (NFT owner) and closes the order account, sending the rent back to the seller.
+
+However, because neither the `CancelNftSale` instruction handler nor the `CancelEditionSale` instruction handler verifies if the NFT owner is, in fact, a transaction signer, an anonymous attacker may cause a DoS of the program by cancelling all sell orders.
+
+Code Location
+-------------
+
+#### processor/cancel\_listing.rs
+
+```
+pub fn process_cancel_listing(accounts: &[AccountInfo], program_id: &Pubkey) -> ProgramResult {
+    let account_info_iter = &mut accounts.iter();
+    let seller_wallet_account = next_account_info(account_info_iter)?;
+    let selling_nft_token_account = next_account_info(account_info_iter)?;
+    let sell_order_data_storage_account = next_account_info(account_info_iter)?;
+    let nft_store_signer_pda_account = next_account_info(account_info_iter)?;
+    let token_program = next_account_info(account_info_iter)?;
+
+```
+
+The only check performed on the seller account by the instruction handler.
+
+#### processor/cancel\_listing.rs
+
+```
+if sell_order_data.seller_wallet != *seller_wallet_account.key {
+    msg!("PhantasiaError::SellerMismatched");
+    return Err(PhantasiaError::SellerMismatched.into());
+}
+
+```
+
+#### processor/cancel\_edition\_listing.rs
+
+```
+pub fn process_cancel_edition_listing(
+    accounts: &[AccountInfo],
+    program_id: &Pubkey,
+) -> ProgramResult {
+    let account_info_iter = &mut accounts.iter();
+    let seller_wallet_account = next_account_info(account_info_iter)?;
+    let selling_nft_token_account = next_account_info(account_info_iter)?;
+    let sell_order_data_storage_account = next_account_info(account_info_iter)?;
+    let nft_store_signer_pda_account = next_account_info(account_info_iter)?;
+    let token_program = next_account_info(account_info_iter)?;
+
+```
+
+The only check performed on the seller account by the instruction handler.
+
+#### processor/cancel\_edition\_listing.rs
+
+```
+if sell_order_data.seller_wallet != *seller_wallet_account.key {
+    msg!("PhantasiaError::SellerMismatched");
+    return Err(PhantasiaError::SellerMismatched.into());
+}
+
+```
+
+##### Score
+
+Impact: 4  
+Likelihood: 5
+
+##### Recommendation
+
+**SOLVED:** The `Phantasia Sports` team fixed this issue in commit [5a1b332897736200f6d793852891ac179144c48d](https://github.com/Phantasia-Sports/phantasia-nft-store-program/commit/5a1b332897736200f6d793852891ac179144c48d): the transaction signer public key is verified to match the `seller_wallet` account address saved in the sale order.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Halborn |
+| Protocol | NTF Store |
+| Report Date | N/A |
+| Finders | Halborn |
+
+### Source Links
+
+- **Source**: https://www.halborn.com/audits/phantasia-sports/ntf-store-solana-program-security-assessment
+- **GitHub**: N/A
+- **Contest**: https://www.halborn.com/audits/phantasia-sports/ntf-store-solana-program-security-assessment
+
+### Keywords for Search
+
+`vulnerability`
+

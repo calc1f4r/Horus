@@ -1,0 +1,122 @@
+---
+# Core Classification
+protocol: Olas
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 40815
+audit_firm: Cantina
+contest_link: https://cantina.xyz/portfolio/b1baa964-865e-4ae7-9087-72859d9c46ea
+source_link: https://cdn.cantina.xyz/reports/cantina_competition_olas_lockbox_jan2024.pdf
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - meltedblocks
+---
+
+## Vulnerability Title
+
+Possibility of freezing any bridge token account due to lack of freeze authority check 
+
+### Overview
+
+
+This bug report discusses an issue with the initialization of lockboxes in a protocol on Solana. The report highlights the absence of checks against the freeze_authority for bridged_token_mint, which could potentially lead to misuse of the freeze functionality and block users from transacting with bridge tokens or withdrawing their funds. The report suggests introducing a verification step to ensure that the bridge_token_mint provided during lockbox initialization does not have an active freeze_authority. The protocol team assures that the possibility of such an event is close to zero as it goes against their intentions and trust. 
+
+### Original Finding Content
+
+## Context 
+(No context files were provided by the reviewer)
+
+## Description 
+There is an absence of checks against the `freeze_authority` for `bridged_token_mint` in `lockbox` and `lockbox2` during the initialization of lockboxes:
+
+- `[account(constraint = bridged_token_mint.mint_authority.unwrap() == lockbox.key())]`
+  
+```rust
+pub bridged_token_mint: Box<Account<'info, Mint>>,
+```
+
+The `freeze_authority` feature in token mints is a significant aspect of token management on Solana. It allows the designated authority to issue `FreezeAccount` instructions, rendering associated accounts unusable. When an account is frozen, any token transaction (including those involving bridge tokens) will fail until the account is thawed using the `ThawAccount` instruction. As `bridged_token_mint` ownership is passed to `lockbox` / `lockbox2` program, it’s then impossible to modify the `freeze_authority` parameter. Without proper verification of the `freeze_authority`, there's a risk that the protocol owners could freeze any token account associated with the lockbox. This capability can be misused to block users from transacting with bridge tokens or withdrawing their allocated funds.
+
+## Proof of Concept: 
+
+Using provided tests, modify mint creation to include freeze authority:
+```javascript
+const bridgedTokenMint = await createMint(provider.connection, userWallet, pdaProgram, userWallet.publicKey, 8);
+```
+
+After funds deposit and before withdrawal, freeze user account:
+
+```javascript
+// Freeze authority can freeze any bridge token account any time
+const freezeTx = await freezeAccount(provider.connection, userWallet, bridgedTokenAccount.address, bridgedTokenMint, userWallet.publicKey);
+```
+
+Observe that withdraw and token transfer cannot proceed because the account is frozen:
+
+```
+logs: [
+  ' Program 7ahQGWysExobjeZ91RTsNqTCN3kWyHGZ43ud2vB7VVoZ invoke [1] ',
+  ' Program log: Instruction: Withdraw ',
+  ' Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2] ',
+  ' Program log: Instruction: BurnChecked ',
+  ' Program log: Error: Account is frozen ',
+  ' Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4188 of 165844 compute units ',
+  ' Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA failed: custom program error: 0x11 ',
+  ' Program 7ahQGWysExobjeZ91RTsNqTCN3kWyHGZ43ud2vB7VVoZ consumed 38344 of 200000 compute units ',
+  ' Program 7ahQGWysExobjeZ91RTsNqTCN3kWyHGZ43ud2vB7VVoZ failed: custom program error: 0x11 '
+]
+```
+
+## Recommendation 
+Introduce a verification step to ensure that the `bridge_token_mint` provided during lockbox initialization does not have an active `freeze_authority`. This precaution will prevent potential misuse of the freeze functionality and safeguard user assets and transactions involving bridge tokens.
+
+## Olas 
+The protocol initializes the bridged token mint, and it is in its best intention to have a default NULL value of a freeze authority, as clearly provided within the testing environment. Under no circumstances could the protocol start using incorrectly initialized programs, as setting a non-NULL `freeze_authority` instantly reduces trust, making the protocol the enemy to itself. Thus, the possibility of such an event is close to zero.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Cantina |
+| Protocol | Olas |
+| Report Date | N/A |
+| Finders | meltedblocks |
+
+### Source Links
+
+- **Source**: https://cdn.cantina.xyz/reports/cantina_competition_olas_lockbox_jan2024.pdf
+- **GitHub**: N/A
+- **Contest**: https://cantina.xyz/portfolio/b1baa964-865e-4ae7-9087-72859d9c46ea
+
+### Keywords for Search
+
+`vulnerability`
+
