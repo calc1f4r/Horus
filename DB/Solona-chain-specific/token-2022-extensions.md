@@ -11,7 +11,7 @@ affected_component: mint|token_account|extensions
 
 # Solana-Specific Fields
 program_type: spl_token_2022
-token_extension_vector: close_authority|freeze_authority|transfer_fee|permanent_delegate|confidential_transfer|transfer_hook
+token_extension_vector: close_authority|freeze_authority|transfer_fee|permanent_delegate|confidential_transfer|transfer_hook|interest_bearing|non_transferable|cpi_guard|memo_transfer|metadata_pointer|group_pointer
 
 # Technical Primitives (Required)
 primitives:
@@ -27,6 +27,10 @@ primitives:
   - metadata_pointer
   - group_pointer
   - group_member_pointer
+  - cpi_guard
+  - memo_transfer
+  - immutable_owner
+  - token_account_extensions
 
 # Impact Classification (Required)
 severity: critical|high|medium|low
@@ -126,6 +130,15 @@ version: all
 8. [Interest Bearing Extension Vulnerabilities](#8-interest-bearing-extension-vulnerabilities)
 9. [Confidential Transfer Vulnerabilities](#9-confidential-transfer-vulnerabilities)
 10. [General Token-2022 Integration Vulnerabilities](#10-general-token-2022-integration-vulnerabilities)
+11. [Non-Transferable Token Extension Vulnerabilities](#11-non-transferable-token-extension-vulnerabilities)
+12. [Confidential Transfer Extension Vulnerabilities (Extended)](#12-confidential-transfer-extension-vulnerabilities)
+13. [Metadata Pointer Extension Vulnerabilities](#13-metadata-pointer-extension-vulnerabilities)
+14. [Group and Group Member Extension Vulnerabilities](#14-group-and-group-member-extension-vulnerabilities)
+15. [CPI Guard Extension Vulnerabilities](#15-cpi-guard-extension-vulnerabilities)
+16. [Required Memo Extension Vulnerabilities](#16-required-memo-extension-vulnerabilities)
+17. [Immutable Owner Extension Vulnerabilities](#17-immutable-owner-extension-vulnerabilities)
+18. [Comprehensive Token-2022 Extension Whitelist Pattern](#18-comprehensive-token-2022-extension-whitelist-pattern)
+19. [Token-2022 Account Extension Validation](#19-token-2022-account-extension-validation)
 
 ---
 
