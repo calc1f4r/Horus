@@ -1,0 +1,38 @@
+name: Sync main to master (no reports)
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Configure git
+        run: |
+          git config user .name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Remove reports folder
+        run: |
+          if [ -d reports ]; then
+            git rm -r reports
+          fi
+
+      - name: Commit changes
+        run: |
+          git commit -m "Sync main to master without reports" --allow-empty
+
+      - name: Push to master
+        run: |
+          git push origin HEAD:master --force
