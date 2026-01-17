@@ -1,0 +1,259 @@
+---
+# Core Classification
+protocol: Era
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 55736
+audit_firm: Codehawks
+contest_link: https://codehawks.cyfrin.io/c/cm22xh6ic0001ycafljtvvf7d
+source_link: none
+github_link: https://github.com/Cyfrin/2024-10-zksync
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - bridge
+  - cross_chain
+
+# Audit Details
+report_date: unknown
+finders_count: 10
+finders:
+  - auditweiler
+  - bladesec
+  - joshuajee
+  - malfurionwhitehat
+  - saaj
+---
+
+## Vulnerability Title
+
+USDT and similar tokens does not return bool due to incompatible with ERC20 Standard
+
+### Overview
+
+
+The bug report is about a problem with USDT and similar tokens not returning a bool value when the EIP20 standard is used. This means that these tokens cannot be used in certain contracts and transactions will fail. The report suggests using a different method, called SafeERC20, to handle these tokens instead.
+
+### Original Finding Content
+
+## Summary
+
+Approve is incompatible with non-standard erc20 tokens
+
+## Vulnerability Details
+
+USDT and similar tokens do not correctly implement the EIP20 standard, and their approve function returns void instead of a success `bool`.
+
+Calling these functions with the EIP20 function signatures will always revert. Tokens like USDT on Ethereum, will be unusable in the `L1ERC20Bridge` contract as it will revert the transaction because of the missing return value.
+
+Some tokens also require that the allowance be set to 0 before issuing a new approve call. Calling the approve function when the allowance is not zero reverts the transaction with these types of tokens.
+
+## Impact
+
+Checking bool return of ERC20 approve breaks protocol for mainnet USDT and similar tokens does not return [true]() even when calls are successful.
+
+## POC
+
+The below test clearly highlight the issue of revert, if we try approve method for USDT on mainnet.
+
+ A random address is selected having USDT tokens then `approve` call is made for the `test_Contract`.
+
+```Solidity
+// forge t --mt test\_ApproveERC -vvv
+
+    function test\_ApproveERC() external {
+
+        IERC20 USDT = IERC20(0xdAC17F958D2ee523a2206206994597C13D831ec7); // usdt address on Mainnet
+
+        address random\_User = 0x46340b20830761efd32832A74d7169B29FEB9758; // random User having USDT
+
+ 
+
+        uint256 user\_Balance = IERC20(USDT).balanceOf(random\_User); // user Balance
+
+        console.log("user\_Balance:", user\_Balance / 1e6); // division by 1e6 as USDT have 6 decimals
+
+ 
+
+        uint256 amount\_Approve = 1000 \* 1e6; // approving 1000 USDT sans decimals
+
+ 
+
+        vm.prank(random\_User); // mock call made by user
+
+        IERC20(USDT).approve(address(test\_Contract), amount\_Approve); // approving amount
+
+    }
+```
+
+ 
+
+In the test we made a fork call which simulates transaction carried in real world to the mainnet.
+
+The result clearly shows call revert when `approve`method is called for `USDT` Token.
+
+ 
+
+```Solidity
+\$ forge t -f \$fork\_rpc\_url --etherscan-api-key \$key\_Api --mt test\_ApproveERC
+
+\[⠒] Compiling...
+
+\[⠔] Compiling 1 files with Solc 0.8.27
+
+\[⠑] Solc 0.8.27 finished in 2.45s
+
+Compiler run successful!
+
+ 
+
+Ran 1 test for test/Contract\_Test.t.sol:CounterTest
+
+\[FAIL: EvmError: Revert] test\_ApproveERC() (gas: 41748)
+
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 8.95s (3.07s CPU time)
+
+ 
+
+Ran 1 test suite in 10.49s (8.95s CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+ 
+
+Failing tests:
+
+Encountered 1 failing test in test/Contract\_Test.t.sol:CounterTest
+
+\[FAIL: EvmError: Revert] test\_ApproveERC() (gas: 41748)
+
+ 
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+```
+
+## Mitigation
+
+Then we tried the same test with OZ’s SafeErc20 `forceApprove` method using fork call method.
+
+```Solidity
+     // forge t --mt test\_forceApprove -vvv
+
+    function test\_forceApprove() external {
+
+        IERC20 USDT = IERC20(0xdAC17F958D2ee523a2206206994597C13D831ec7); // usdt address on Mainnet
+
+        address random\_User = 0x46340b20830761efd32832A74d7169B29FEB9758; // random User having USDT
+
+ 
+
+        uint256 user\_Balance = IERC20(USDT).balanceOf(random\_User); // user Balance
+
+        console.log("user\_Balance:", user\_Balance / 1e6); // division by 1e6 as USDT have 6 decimals
+
+ 
+
+        uint256 amount\_Approve = 1000 \* 1e6; // approving 1000 USDT
+
+ 
+
+        vm.startPrank(random\_User); // mock call made by user
+
+        SafeERC20.forceApprove(USDT, address(test\_Contract), amount\_Approve); // approving amount
+
+        uint256 approved\_Balance = IERC20(USDT).allowance(random\_User, address(test\_Contract)); // caching approved amount
+
+ 
+
+        console.log("test\_Contract Approved Balance: %e", approved\_Balance);
+
+    }
+
+```
+
+The result shows test passes and the `test_Contract` balance changes when we call the `allowance` method.
+
+```Solidity
+\$ forge t -f \$fork\_rpc\_url --etherscan-api-key \$key\_Api -vvv --mt test\_forceApprove
+
+\[⠒] Compiling...
+
+\[⠒] Compiling 1 files with Solc 0.8.27
+
+\[⠘] Solc 0.8.27 finished in 2.45s
+
+Compiler run successful!
+
+ 
+
+Ran 1 test for test/Contract\_Test.t.sol:CounterTest
+
+\[PASS] test\_forceApprove() (gas: 45103)
+
+Logs:
+
+  user\_Balance: 35414102
+
+  test\_Contract Approved Balance: 1e9
+
+ 
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 6.47s (2.79s CPU time)
+
+ 
+
+Ran 1 test suite in 7.94s (6.47s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)
+
+```
+
+## Code Reference
+
+https://github.com/Cyfrin/2024-10-zksync/blob/b0c5565b6078a93cc3358a5d5012258caa701385/era-contracts/l1-contracts/contracts/bridge/L1ERC20Bridge.sol#L230
+
+
+
+## Recommendation
+
+It is recommended to use OpenZeppelin’s SafeERC20 `forceApprove` method to handle non-standard-compliant tokens.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Codehawks |
+| Protocol | Era |
+| Report Date | N/A |
+| Finders | auditweiler, bladesec, joshuajee, malfurionwhitehat, saaj, mspenceya, theweb3mechanic, siisivan, merklemore, cipher27 |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/Cyfrin/2024-10-zksync
+- **Contest**: https://codehawks.cyfrin.io/c/cm22xh6ic0001ycafljtvvf7d
+
+### Keywords for Search
+
+`vulnerability`
+
