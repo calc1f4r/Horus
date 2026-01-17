@@ -6,6 +6,15 @@ This database contains synthesized vulnerability patterns from 847 security audi
 
 ## Database Structure
 
+### app-chain/abci-lifecycle/
+- **unmetered-lifecycle-dos.md** - Unmetered ABCI lifecycle execution DoS
+  - Unbounded iteration in BeginBlock/EndBlock without gas metering
+  - Geometric unbonding amplification (multi-denom delegation attacks)
+  - Hook failure propagation causing chain halt
+  - Silent error handling leading to state corruption
+  - Non-determinism in FinalizeBlock via RPC calls
+  - Real-world: MilkyWay, MANTRA Chain, Allora, Skip Block-SDK, Story
+
 ### app-chain/consensus/
 - **abci-vote-extensions.md** - Vote extension validation vulnerabilities in ABCI++
   - Malicious vote extensions
@@ -52,6 +61,31 @@ This database contains synthesized vulnerability patterns from 847 security audi
   - Checkpoint protection bypass for slashing avoidance
   - Real-world: Suzaku Core, Cabal, Karak, Casimir, Elixir, Zivoe, Celo, Ajna
 
+### app-chain/governance/
+- **governance-voting-manipulation.md** - Governance voting and parameter manipulation
+  - Quorum lowering via delegation manipulation
+  - DAO vote bypass via stale poll re-triggering
+  - Commission rate manipulation trapping delegators
+  - Voting power snapshot timing attacks
+  - Real-world: FrankenDAO, Ethereum Credit Guild, Tortuga
+
+### app-chain/hooks-callbacks/
+- **malicious-hook-callback-dos.md** - Hook/callback denial of service vulnerabilities
+  - TokenFactory BeforeSendHook with invalid address causing chain halt
+  - Rogue plugin overflow preventing removal and freezing staking
+  - External hook state dependencies blocking operations
+  - BeginBlocker panic via reward distribution hook failures
+  - Real-world: MANTRA Chain, Telcoin, Radiant Capital, Toki Bridge
+
+### app-chain/module-accounting/
+- **cross-module-fund-accounting.md** - Cross-module fund transfer and token supply accounting
+  - Incorrect coin iteration (processing entire sdk.Coins instead of sdk.Coin)
+  - Non-atomic operations with temporary contexts (mint before EVM call)
+  - Missing withdrawal address configuration freezing rewards
+  - Duplicate accounting entries inflating tracked balances
+  - Silent error handling in SendCoinsFromModuleToAccount
+  - Real-world: Initia MiniEVM, ZetaChain, Andromeda, stNXM, Allora, MilkyWay
+
 ### app-chain/precompiles/
 - **evm-precompile-vulnerabilities.md** - EVM precompile security issues
   - DELEGATECALL allowing fund theft (msg.value reuse)
@@ -88,11 +122,14 @@ This database contains synthesized vulnerability patterns from 847 security audi
 1. **Consensus** - ABCI++, vote extensions, PrepareProposal, ProcessProposal
 2. **Gas Metering** - EVM gas handling, intrinsic gas, infinite meters
 3. **IBC** - Middleware authentication, packet handling, channel handshake
-4. **Staking/Delegation** - State management, unbonding, slashing
-5. **Precompiles** - EVM precompile security, DELEGATECALL, state isolation
-6. **Message Handling** - Codec registration, signing, type confusion
-7. **State Management** - EVM-Cosmos sync, nonces, cache contexts
-8. **Unique/DoS** - Chain halt vectors, non-determinism
+4. **Staking/Delegation** - State management, unbonding, slashing, epoch timing
+5. **Hooks/Callbacks** - TokenFactory hooks, plugin callbacks, BeforeSendHook DoS
+6. **Precompiles** - EVM precompile security, DELEGATECALL, state isolation
+7. **Message Handling** - Codec registration, signing, type confusion
+8. **State Management** - EVM-Cosmos sync, nonces, cache contexts
+9. **Module Accounting** - Cross-module fund transfers, token supply, atomicity, CacheContext
+10. **ABCI Lifecycle** - BeginBlock/EndBlock DoS, hook failures, non-determinism
+11. **Unique/DoS** - Chain halt vectors, non-determinism
 
 ## Usage
 
