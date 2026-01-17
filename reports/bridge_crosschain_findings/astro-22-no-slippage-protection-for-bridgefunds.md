@@ -1,0 +1,114 @@
+---
+# Core Classification
+protocol: Astrolab
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 62367
+audit_firm: Hexens
+contest_link: none
+source_link: https://github.com/solodit/solodit_content/blob/main/reports/Hexens/2023-04-17-Astrolab.md
+github_link: none
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - Hexens
+---
+
+## Vulnerability Title
+
+[ASTRO-22] No slippage protection for bridgeFunds
+
+### Overview
+
+
+A bug has been found in the BridgeConnectorHomeSTG.sol and BridgeConnectorRemoteSTG.sol contracts. The function bridgeFunds, which is used to send assets from one chain to another, does not have slippage protection in place. This means that the swap can be manipulated by unexpected market conditions, causing misaligned debt calculations and impacting the protocol's consistency. The bug has been fixed by adding a minimal output amount parameter to the bridgeFunds function.
+
+### Original Finding Content
+
+**Severity:** High
+
+**Path:** BridgeConnectorHomeSTG.sol, BridgeConnectorRemoteSTG.sol
+
+**Description:** The function bridgeFunds (in both Home and Remote contracts) is used to send assets from a crate to a remote chain; it uses Stargate to make the swap. Although the minimal output amount parameter of the swap is hardcoded to be zero, thus the swap will be made without slippage protection. Although a stableswap is being made, slippage protection should be in place as it can be “sandwich” attacked or manipulated by unexpected market conditions.
+
+Furthermore, all debt calculations will be misaligned if slippage occurs and thus impact protocol consistency.
+```
+    function bridgeFunds(
+        uint256 _amount,
+        uint256 _chainId
+    ) external payable override onlyCrate {B
+        // Loading this in memory for gas savings
+        // We send directly to the allocator
+        address destination = allocatorsMap[_chainId];
+        uint256 dstPoolId = dstPoolIdMap[_chainId];
+        if (dstPoolId == 0) {
+            revert PoolNotSet(_chainId);
+        }
+
+        // Bridging using Stargate
+        IStargateRouter(stgEndpoint).swap{ value: msg.value }(
+            lzChainIdMap[_chainId], // destination chain Id
+            srcPoolId, // local pool Id (ex: USDC is 1)
+            dstPoolIdMap[_chainId], // remote pool Id
+            payable(tx.origin), // refund address for extra gas
+            _amount, // quantity to swap
+            0, // the min qty you would accept on the destination  
+            IStargateRouter.lzTxObj(0, 0, bytes("")), // params for gas forwarding
+            abi.encodePacked(destination), // receiver of the tokens
+            bytes("") // data for the destination router
+        );
+        emit BridgeSuccess(_amount, _chainId, msg.value, destination);
+    }
+```
+
+**Remediation:**  Add a minimal output amount parameter in bridgeFunds.
+
+**Status:**  Fixed
+
+- - -
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Hexens |
+| Protocol | Astrolab |
+| Report Date | N/A |
+| Finders | Hexens |
+
+### Source Links
+
+- **Source**: https://github.com/solodit/solodit_content/blob/main/reports/Hexens/2023-04-17-Astrolab.md
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+

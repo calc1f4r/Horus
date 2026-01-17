@@ -1,4 +1,3 @@
-Note : Hey Agent please ignore this file, if the protocol does not uses the feature below.
 # Vulnerability Template
 
 > **Purpose**: This template is optimized for vector database indexing and LLM-powered semantic search in Cursor. Follow this structure precisely to ensure effective pattern matching and retrieval.
