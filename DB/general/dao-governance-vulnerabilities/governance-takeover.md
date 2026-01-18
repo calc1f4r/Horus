@@ -18,6 +18,7 @@ primitives:
   - governance_control
   - token_distribution
   - multisig
+  - access_control
 
 # Impact Classification (Required)
 severity: high_to_critical

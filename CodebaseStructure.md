@@ -11,6 +11,7 @@ This repository serves as a comprehensive vulnerability pattern database for sma
 ```
 vuln-database/
 ├── DB/                          # Main vulnerability database
+│   ├── index.json              # ⭐ Master index - START HERE
 │   ├── oracle/                  # Oracle-related vulnerabilities
 │   │   ├── pyth/               # Pyth Network specific issues
 │   │   │   └── PYTH_ORACLE_VULNERABILITIES.md
@@ -39,6 +40,27 @@ vuln-database/
 ---
 
 ## Key Files
+
+### DB/index.json ⭐ START HERE
+**Path:** `./DB/index.json`  
+**Purpose:** Master index of all vulnerability files in the database. **Agents should always read this file first** to understand available vulnerability patterns and find relevant files quickly.
+
+**Contains:**
+- `categories`: Hierarchical organization of all vulnerability files with keywords and focus areas
+- `searchIndex`: Quick keyword → file mappings for common search terms
+- `protocolContext`: Recommended files based on protocol type being audited (lending, DEX, vault, governance, bridge, etc.)
+
+**Usage by Agents:**
+```json
+// Find files for a specific keyword
+searchIndex.mappings["chainlink"] → returns all Chainlink-related files
+
+// Find files for a protocol type  
+protocolContext.mappings["lending_protocol"] → returns priority files for lending audits
+
+// Browse by category
+categories.oracle.subcategories.chainlink.files → detailed file list with focus areas
+```
 
 ### TEMPLATE.md
 **Path:** `./TEMPLATE.md`  
@@ -247,6 +269,7 @@ Every `.md` entry contains:
 
 | Document | Path | Description |
 |----------|------|-------------|
+| **Index** | [DB/index.json](./DB/index.json) | ⭐ Master index - agents start here |
 | Template | [TEMPLATE.md](./TEMPLATE.md) | Entry structure specification |
 | Example | [Example.md](./Example.md) | Reference implementation |
 | Agent Guide | [Agents.md](./Agents.md) | AI agent instructions |

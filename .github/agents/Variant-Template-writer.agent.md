@@ -270,10 +270,139 @@ Document relationships between vulnerability patterns:
 
 ## Resources
 
+- **DB Index**: [DB/index.json](../../DB/index.json) - ⭐ **START HERE** - Master index for vulnerability discovery
 - **Entry Template**: TEMPLATE.md - Complete structure for vulnerability entries
 - **Example Entry**: Example.md - Comprehensive example of a completed entry
 - **Individual Reports**: `reports/<topic>/` - Raw audit findings to analyze
 - **Curated Databases**: `DB/oracle/`, `DB/general/`, etc. - Organized by category
+
+---
+
+## 🔍 Using DB/index.json for Vulnerability Discovery
+
+The `DB/index.json` is your **primary entry point** for finding relevant vulnerability patterns. Always consult it before deep-diving into individual files.
+
+### Index Structure Overview
+
+```json
+{
+  "meta": { ... },           // Version and usage info
+  "categories": { ... },      // Hierarchical vulnerability taxonomy with keywords
+  "searchIndex": { ... },     // Quick keyword-to-file mappings
+  "protocolContext": { ... }, // Protocol-type based recommendations
+  "auditChecklist": { ... }   // Quick checklist per vulnerability type
+}
+```
+
+### Workflow: Finding Relevant Patterns
+
+#### Step 1: Check Protocol Context First
+
+When auditing a specific protocol type, start with `protocolContext`:
+
+```json
+// For a DEX/AMM audit:
+index.protocolContext.mappings.dex_amm.priority_files
+→ [
+    "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+    "DB/amm/concentrated-liquidity/liquidity-management-vulnerabilities.md",
+    "DB/general/slippage-protection/slippage-protection.md",
+    ...
+  ]
+```
+
+**Protocol Context Mappings Available:**
+- `lending_protocol` - Aave, Compound style
+- `dex_amm` - Uniswap, SushiSwap style
+- `vault_yield` - ERC4626 vaults, yield aggregators
+- `governance_dao` - DAOs, voting systems
+- `cross_chain_bridge` - LayerZero, Wormhole, bridges
+- `cosmos_appchain` - Cosmos SDK, IBC
+- `solana_program` - Solana, Anchor
+- `nft_marketplace` - NFT platforms
+- `perpetuals_derivatives` - Perp DEXes, options
+- `staking_liquid_staking` - Staking, LSDs
+
+#### Step 2: Use Keyword Search
+
+For specific technical terms, use `searchIndex`:
+
+```json
+// Searching for "slot0" manipulation
+index.searchIndex.mappings["slot0"]
+→ [
+    "DB/amm/concentrated-liquidity/price-oracle-manipulation.md",
+    "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md"
+  ]
+
+// Searching for "reentrancy"
+index.searchIndex.mappings["reentrancy"]
+→ [
+    "DB/general/reentrancy/reentrancy.md",
+    "DB/unique/amm/constantproduct/SENTIMENT_CURVE_READONLY_REENTRANCY.md",
+    ...
+  ]
+```
+
+**Common keyword searches:**
+- Function names: `latestRoundData`, `lzReceive`, `convertToShares`, `getPriceUnsafe`
+- Attack patterns: `inflation attack`, `first depositor`, `sandwich`, `read-only reentrancy`
+- Protocols: `chainlink`, `pyth`, `layerzero`, `curve`, `balancer`
+- Concepts: `oracle`, `slippage`, `flash loan`, `governance`, `staking`
+
+#### Step 3: Browse Categories for Subcategory Keywords
+
+For deeper exploration, each category has detailed keywords:
+
+```json
+index.categories.oracle.subcategories.chainlink.keywords
+→ [
+    "chainlink", "price feed", "latestRoundData", "stale price", 
+    "sequencer", "heartbeat", "minAnswer", "maxAnswer", "circuit breaker", 
+    "L2 sequencer", "grace period", "phaseId"
+  ]
+```
+
+#### Step 4: Use Audit Checklist
+
+Quick validation during audits:
+
+```json
+index.auditChecklist.oracle
+→ [
+    "Check staleness validation (updatedAt, publishTime)",
+    "Verify L2 sequencer uptime checks",
+    "Check circuit breaker bounds (minAnswer/maxAnswer)",
+    ...
+  ]
+```
+
+### Example Discovery Workflow
+
+**User Request:** "Find vault inflation attack patterns"
+
+1. **Search Index Lookup:**
+   ```
+   searchIndex["inflation attack"] → DB/tokens/erc4626/..., DB/general/vault-inflation-attack/...
+   searchIndex["first depositor"] → DB/tokens/erc4626/..., DB/amm/constantproduct/...
+   ```
+
+2. **Protocol Context (if applicable):**
+   ```
+   protocolContext.vault_yield.priority_files → Full list of relevant files
+   ```
+
+3. **Category Keywords:**
+   ```
+   categories.tokens.subcategories.erc4626.keywords → 
+   ["convertToShares", "totalAssets", "virtual shares", "decimal offset", ...]
+   ```
+
+4. **Read Priority Files:**
+   Open the files from step 1-2 and extract patterns
+
+5. **Apply Patterns:**
+   Use extracted patterns for code search/analysis
 
 ## The Expert Analyst Mindset
 
@@ -799,3 +928,66 @@ For each vulnerability class, systematically check:
    - Impact in liquidation logic vs swaps vs lending
    - Severity during high vs low volatility
    - Mainnet vs L2 timestamp considerations
+
+
+---
+
+## ⚠️ Critical: Maintaining DB/index.json
+
+**On every update/addition of a new vulnerability template**, you MUST update [DB/index.json](../../DB/index.json):
+
+### What to Update
+
+1. **Add to `categories`**: Add the new file under the appropriate `category.subcategories.*.files[]` array
+2. **Add keywords**: Add technical keywords to `category.subcategories.*.keywords[]`
+3. **Update `searchIndex`**: Add relevant keyword mappings in `searchIndex.mappings`
+4. **Update `protocolContext`**: If relevant, add to `priority_files` for applicable protocol types
+5. **Update `auditChecklist`**: Add new check items if the vulnerability introduces new patterns
+
+### Index Update Checklist
+
+When adding a new vulnerability entry:
+
+- [ ] File path added to `categories.{category}.subcategories.{subcategory}.files[]`
+- [ ] `focus` array populated with key vulnerability aspects
+- [ ] Technical keywords added to subcategory's `keywords[]` array
+- [ ] Function/method names added to `searchIndex.mappings` (e.g., `latestRoundData`, `lzReceive`)
+- [ ] Attack pattern names added to `searchIndex.mappings` (e.g., `inflation attack`, `sandwich`)
+- [ ] Protocol-type associations updated in `protocolContext.mappings.{type}.priority_files`
+- [ ] New checklist items added to `auditChecklist.{category}` if applicable
+- [ ] Version number bumped in `meta.version` for significant changes
+
+### Example: Adding a New Vault Vulnerability
+
+```json
+// 1. Add to categories
+"categories.tokens.subcategories.erc4626.files": [
+  // ... existing files
+  {
+    "name": "NEW_VAULT_VULNERABILITY.md",
+    "path": "DB/tokens/erc4626/NEW_VAULT_VULNERABILITY.md",
+    "focus": ["share manipulation", "exchange rate", "deposit"]
+  }
+]
+
+// 2. Add keywords
+"categories.tokens.subcategories.erc4626.keywords": [
+  // ... existing keywords
+  "new_function_name", "new_attack_pattern"
+]
+
+// 3. Update searchIndex
+"searchIndex.mappings": {
+  // ... existing mappings
+  "new_function_name": ["DB/tokens/erc4626/NEW_VAULT_VULNERABILITY.md"],
+  "new_attack_pattern": ["DB/tokens/erc4626/NEW_VAULT_VULNERABILITY.md"]
+}
+
+// 4. Update protocolContext if applicable
+"protocolContext.mappings.vault_yield.priority_files": [
+  // ... existing files
+  "DB/tokens/erc4626/NEW_VAULT_VULNERABILITY.md"
+]
+```
+
+**Version bump**: Update `meta.version` (e.g., `2.0.0` → `2.1.0`) when making significant changes to the index structure.
