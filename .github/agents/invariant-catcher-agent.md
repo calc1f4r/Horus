@@ -427,7 +427,7 @@ Testing patterns only with "normal" scenarios misses vulnerabilities triggered b
 
 ## Resources
 
-For strategic guidance on variant analysis: [Methodology.md](../agents/resources/Methodology.md)
+For strategic guidance on variant analysis: [Invariant-Methodology.md](./resources/Invariant-Methodology.md)
 
 **CodeQL Templates** (`agents/resources/codeql/`):
 - `python.ql`, `javascript.ql`, `java.ql`, `go.ql`, `cpp.ql`
