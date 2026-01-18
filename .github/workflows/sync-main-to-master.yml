@@ -23,15 +23,15 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Remove reports folder
+      - name: Remove all except DB and .github
         run: |
-          if [ -d reports ]; then
-            git rm -r reports
-          fi
+          git rm -r --cached .
+          git add DB/
+          git add .github/
 
       - name: Commit changes
         run: |
-          git commit -m "Sync main to master without reports" --allow-empty
+          git commit -m "Sync DB and .github to master" --allow-empty
 
       - name: Push to master
         run: |
