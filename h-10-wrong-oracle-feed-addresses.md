@@ -1,0 +1,119 @@
+---
+# Core Classification
+protocol: USSD - Autonomous Secure Dollar
+chain: everychain
+category: oracle
+vulnerability_type: oracle
+
+# Attack Vector Details
+attack_type: oracle
+affected_component: oracle
+
+# Source Information
+source: solodit
+solodit_id: 19139
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/82
+source_link: none
+github_link: https://github.com/sherlock-audit/2023-05-USSD-judging/issues/817
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+  - oracle
+  - configuration
+
+protocol_categories:
+  - algo-stables
+
+# Audit Details
+report_date: unknown
+finders_count: 86
+finders:
+  - J4de
+  - Dug
+  - shaka
+  - nobody2018
+  - lil.eth
+---
+
+## Vulnerability Title
+
+H-10: Wrong Oracle feed addresses
+
+### Overview
+
+
+This bug report is about the wrong Oracle feed addresses in the StableOracleWBTC.sol, StableOracleDAI.sol, and StableOracleWBGL.sol files. These addresses, if not corrected, will result in wrong prices for collateral assets. A manual review was conducted by 0xGusMcCrae, 0xHati, 0xPkhatri, 0xRobocop, 0xStalin, 0xeix, 0xlmanini, 0xyPhilic, 14si2o_Flint, ADM, Aymen0909, Bahurum, Bauchibred, Bauer, BenRai, Brenzee, BugHunter101, Delvir0, DevABDee, Dug, G-Security, GimelSec, HonorLt, J4de, JohnnyTime, Juntao, Kirkeelee, Kodyvim, Kose, Lilyjjo, Madalad, PNS, PTolev, PokemonAuditSimulator, Proxy, Saeedalipoor01988, SaharDevep, Schpiel, SensoYard, T1MOH, TheNaubit, Vagner, Viktor_Cortess, WATCHPUG, __141345__, ashirleyshe, ast3ros, berlin-101, blockdev, chainNue, chalex.eth, ck, ctf_sec, curiousapple, dacian, evilakela, giovannidisiena, immeas, innertia, juancito, kie, kiki_dev, kutugu, lil.eth, martin, mrpathfindr, neumo, ni8mare, nobody2018, peanuts, pengun, qpzm, ravikiran.web3, saidam017, sakshamguruji, sam_gmk, sashik_eth, shaka, shogoki, simon135, theOwl, the_endless_sea, toshii, twicek, ustas, whiteh4t9527. The wrong addresses were found in the following lines in the code snippet: StableOracleWBTC.sol#L17, StableOracleDAI.sol#L28, StableOracleDAI.sol#L30, and StableOracleWBGL
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2023-05-USSD-judging/issues/817 
+
+## Found by 
+0xGusMcCrae, 0xHati, 0xPkhatri, 0xRobocop, 0xStalin, 0xeix, 0xlmanini, 0xyPhilic, 14si2o\_Flint, ADM, Aymen0909, Bahurum, Bauchibred, Bauer, BenRai, Brenzee, BugHunter101, Delvir0, DevABDee, Dug, G-Security, GimelSec, HonorLt, J4de, JohnnyTime, Juntao, Kirkeelee, Kodyvim, Kose, Lilyjjo, Madalad, PNS, PTolev, PokemonAuditSimulator, Proxy, Saeedalipoor01988, SaharDevep, Schpiel, SensoYard, T1MOH, TheNaubit, Vagner, Viktor\_Cortess, WATCHPUG, \_\_141345\_\_, ashirleyshe, ast3ros, berlin-101, blockdev, chainNue, chalex.eth, ck, ctf\_sec, curiousapple, dacian, evilakela, giovannidisiena, immeas, innertia, juancito, kie, kiki\_dev, kutugu, lil.eth, martin, mrpathfindr, neumo, ni8mare, nobody2018, peanuts, pengun, qpzm, ravikiran.web3, saidam017, sakshamguruji, sam\_gmk, sashik\_eth, shaka, shogoki, simon135, theOwl, the\_endless\_sea, toshii, twicek, ustas, whiteh4t9527
+## Summary
+
+Wrong Oracle feed addresses will result in wrong prices.
+
+## Vulnerability Detail
+
+StableOracleWBTC.sol#L17 the address is not the BTC/USD feed address.
+
+StableOracleDAI.sol#L28, `DAIEthOracle` is wrong.
+
+StableOracleDAI.sol#L30, address for `ethOracle` is address zero (a hanging todo).
+
+StableOracleWBGL.sol#L19, the address for staticOracleUniV3 is wrong, the current one is actually the univ3 pool address.
+
+## Impact
+
+Wrong prices for collateral assets.
+
+## Code Snippet
+
+https://github.com/sherlock-audit/2023-05-USSD/blob/main/ussd-contracts/contracts/oracles/StableOracleWBTC.sol#L8-L28
+
+https://github.com/sherlock-audit/2023-05-USSD/blob/main/ussd-contracts/contracts/oracles/StableOracleDAI.sol#L23-L31
+
+https://github.com/USSDofficial/ussd-contracts/blob/f44c726371f3152634bcf0a3e630802e39dec49c/contracts/oracles/StableOracleWBGL.sol#L17-L22
+
+## Tool used
+
+Manual Review
+
+## Recommendation
+
+Use correct addresses.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Sherlock |
+| Protocol | USSD - Autonomous Secure Dollar |
+| Report Date | N/A |
+| Finders | J4de, Dug, shaka, nobody2018, lil.eth, Delvir0, giovannidisiena, Juntao, 0xyPhilic, juancito, the\_endless\_sea, SaharDevep, PNS, sam\_gmk, Schpiel, Kirkeelee, Lilyjjo, ADM, SensoYard, ashirleyshe, immeas, Viktor\_Cortess, BugHunter101, G-Security, Kose, Kodyvim, kie, chalex.eth, mrpathfindr, kutugu, \_\_141345\_\_, HonorLt, curiousapple, chainNue, innertia, blockdev, WATCHPUG, peanuts, JohnnyTime, ctf\_sec, saidam017, Vagner, Aymen0909, 0xRobocop, sakshamguruji, martin, neumo, GimelSec, ni8mare, toshii, 0xPkhatri, twicek, T1MOH, Brenzee, Bahurum, simon135, Madalad, theOwl, Bauchibred, PokemonAuditSimulator, Proxy, PTolev, berlin-101, ravikiran.web3, pengun, 0xGusMcCrae, shogoki, evilakela, sashik\_eth, TheNaubit, BenRai, ck, 0xStalin, qpzm, dacian, 0xeix, 14si2o\_Flint, DevABDee, 0xHati, kiki\_dev, ast3ros, Bauer, ustas, 0xlmanini, whiteh4t9527, Saeedalipoor01988 |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2023-05-USSD-judging/issues/817
+- **Contest**: https://app.sherlock.xyz/audits/contests/82
+
+### Keywords for Search
+
+`Oracle, Configuration`
+
