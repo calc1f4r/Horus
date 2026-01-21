@@ -1,0 +1,182 @@
+---
+# Core Classification
+protocol: 0x v3 Exchange
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 13992
+audit_firm: ConsenSys
+contest_link: none
+source_link: https://consensys.net/diligence/audits/2019/09/0x-v3-exchange/
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - dexes
+  - bridge
+  - services
+  - synthetics
+  - payments
+
+# Audit Details
+report_date: unknown
+finders_count: 3
+finders:
+  - Sergii Kravchenko
+  -  Alex Wade
+  - Steve Marx
+---
+
+## Vulnerability Title
+
+The Exchange owner should not be able to call executeTransaction or batchExecuteTransaction  Won't Fix
+
+### Overview
+
+
+This bug report describes an issue with functions in the MixinTransactions and MixinAssetProxyDispatcher contracts. The issue is that if the owner calls either of these functions, the resulting `delegatecall` can pass `onlyOwner` modifiers even if the transaction signer is not the owner. This is because, regardless of the `contextAddress` set through `_executeTransaction`, the `onlyOwner` modifier checks `msg.sender`. The development team has determined that this is a minor inconsistency in the logic of these functions, and is not dangerous. The recommendation is to add a check to `_executeTransaction` to prevent the owner from calling this function.
+
+### Original Finding Content
+
+#### Resolution
+
+
+
+From the development team:
+
+
+
+> 
+> While this is a minor inconsistency in the logic of these functions, it is in no way dangerous. `currentContextAddress` is not used when calling any admin functions, so the address of the transaction signer will be completely disregarded.
+> 
+> 
+> 
+
+
+
+
+#### Description
+
+
+If the owner calls either of these functions, the resulting `delegatecall` can pass `onlyOwner` modifiers even if the transaction signer is not the owner. This is because, regardless of the `contextAddress` set through `_executeTransaction`, the `onlyOwner` modifier checks `msg.sender`.
+
+
+#### Examples
+
+
+1. `_executeTransaction` sets the context address to the signer address, which is not `msg.sender` in this case:
+
+
+**code/contracts/exchange/contracts/src/MixinTransactions.sol:L102-L104**
+
+
+
+```
+// Set the current transaction signer
+address signerAddress = transaction.signerAddress;
+\_setCurrentContextAddressIfRequired(signerAddress, signerAddress);
+
+```
+2. The resulting `delegatecall` could target an admin function like this one:
+
+
+**code/contracts/exchange/contracts/src/MixinAssetProxyDispatcher.sol:L38-L61**
+
+
+
+```
+/// @dev Registers an asset proxy to its asset proxy id.
+/// Once an asset proxy is registered, it cannot be unregistered.
+/// @param assetProxy Address of new asset proxy to register.
+function registerAssetProxy(address assetProxy)
+    external
+    onlyOwner
+{
+    // Ensure that no asset proxy exists with current id.
+    bytes4 assetProxyId = IAssetProxy(assetProxy).getProxyId();
+    address currentAssetProxy = \_assetProxies[assetProxyId];
+    if (currentAssetProxy != address(0)) {
+        LibRichErrors.rrevert(LibExchangeRichErrors.AssetProxyExistsError(
+            assetProxyId,
+            currentAssetProxy
+        ));
+    }
+  
+    // Add asset proxy and log registration.
+    \_assetProxies[assetProxyId] = assetProxy;
+    emit AssetProxyRegistered(
+        assetProxyId,
+        assetProxy
+    );
+}
+
+```
+3. The `onlyOwner` modifier does not check the context address, but checks `msg.sender`:
+
+
+**code/contracts/utils/contracts/src/Ownable.sol:L35-L45**
+
+
+
+```
+function \_assertSenderIsOwner()
+    internal
+    view
+{
+    if (msg.sender != owner) {
+        LibRichErrors.rrevert(LibOwnableRichErrors.OnlyOwnerError(
+            msg.sender,
+            owner
+        ));
+    }
+}
+
+```
+
+
+#### Recommendation
+
+
+Add a check to `_executeTransaction` that prevents the owner from calling this function.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | ConsenSys |
+| Protocol | 0x v3 Exchange |
+| Report Date | N/A |
+| Finders | Sergii Kravchenko,  Alex Wade, Steve Marx |
+
+### Source Links
+
+- **Source**: https://consensys.net/diligence/audits/2019/09/0x-v3-exchange/
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+
