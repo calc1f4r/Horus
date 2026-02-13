@@ -1,0 +1,41 @@
+name: Regenerate Manifests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'DB/**/*.md'
+      - 'generate_manifests.py'
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run manifest generator
+        run: python3 generate_manifests.py
+
+      - name: Check for changes
+        id: diff
+        run: |
+          git diff --quiet DB/index.json DB/manifests/ && echo "changed=false" >> "$GITHUB_OUTPUT" || echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add DB/index.json DB/manifests/
+          git commit -m "chore: regenerate manifests"
+          git push

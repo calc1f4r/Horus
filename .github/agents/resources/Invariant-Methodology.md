@@ -475,43 +475,45 @@ if order.owner_id == current_user.id:
 
 ## DB-to-Code Workflow Summary
 
-### Step 0: Consult DB/index.json (START HERE)
-- Use `searchIndex.mappings` for keyword lookups
-- Use `protocolContext.mappings` for protocol-type recommendations
+### Step 0: Consult DB/index.json → Load Manifests (START HERE)
+- Read `DB/index.json` (~330 lines) for protocol context and manifest listing
+- Use `protocolContext.mappings` to identify relevant manifests for the protocol type
+- Use `DB/manifests/keywords.json` for keyword → manifest lookups
 - Use `auditChecklist` for quick validation items
 
-### Step 1: Parse User Request → Index Lookup
-- "access control" → `searchIndex["access control"]` or `protocolContext.governance_dao`
-- "vault inflation" → `searchIndex["inflation attack"]` + `searchIndex["first depositor"]`
-- "oracle manipulation" → `searchIndex["oracle"]` + specific provider keywords
-- "reentrancy" → `searchIndex["reentrancy"]`
+### Step 1: Parse User Request → Manifest Lookup
+- "access control" → `keywords.json["access_control"]` → `general-security` manifest
+- "vault inflation" → `keywords.json["convertToShares"]` → `general-defi` manifest
+- "oracle manipulation" → `protocolContext.lending_protocol` → `oracle` manifest
+- "reentrancy" → `keywords.json["reentrancy"]` → `general-infrastructure` manifest
 
-### Step 2: Read Priority DB Files
-- Get files from index lookup results
-- Extract YAML frontmatter (primitives, tags, affected_component)
-- Note vulnerable code patterns and detection regex
+### Step 2: Read Targeted DB Patterns
+- Load relevant manifest(s) from `DB/manifests/<name>.json`
+- Find patterns by title, severity, or codeKeywords
+- Read ONLY the targeted line ranges (lineStart → lineEnd) from the MD files
+- Note vulnerable code patterns and detection regex from the targeted sections
 
 ### Step 3: Build Pattern Library
 - Convert DB patterns to ripgrep/Semgrep patterns
-- Use `categories.*.subcategories.*.keywords` for search terms
+- Use `codeKeywords` from manifest entries as search terms
 - Record abstraction levels for each pattern
 
 ### Step 4: Hunt in Codebase
 - Run patterns against target code
 - Document matches with confidence levels
-- Link findings to DB references (file path from index)
+- Link findings to DB references (manifest ID + file path + line range)
 
 ### Step 5: Generate Reports
 - Create `invariants-caught/{category}-findings/` folder
 - Write report.md with all findings
 - Include patterns-used.md for reproducibility
-- Reference index paths for traceability
+- Reference manifest IDs and line ranges for traceability
 
 ---
 
 ## Summary: The Expert Mindset
 
-1. **Start with index.json**: Always consult `DB/index.json` first for pattern discovery
+1. **Start with index.json → manifests**: Always consult the 3-tier architecture first
 2. **Understand before searching**: Root cause analysis is non-negotiable
 3. **Start specific**: Your first pattern should match exactly one thing
 4. **Climb the ladder**: Generalize one step at a time
@@ -522,5 +524,5 @@ if order.owner_id == current_user.id:
 9. **Expand vulnerability classes**: One root cause has many manifestations
 10. **Check semantics**: Verify code matches documentation intent
 11. **Test edge cases**: Null values and boundary conditions reveal hidden bugs
-12. **Use protocol context**: Match protocol type to get relevant vulnerability patterns
+12. **Use protocol context**: Match protocol type to get relevant manifests
 13. **Output to invariants-caught/**: All findings are documented for reproducibility

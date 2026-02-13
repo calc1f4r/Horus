@@ -43,24 +43,39 @@ vuln-database/
 
 ### DB/index.json ⭐ START HERE
 **Path:** `./DB/index.json`  
-**Purpose:** Master index of all vulnerability files in the database. **Agents should always read this file first** to understand available vulnerability patterns and find relevant files quickly.
+**Purpose:** Lean router (~330 lines) that points agents to the right manifest files. **Agents should always read this file first** to find relevant vulnerability patterns.
 
 **Contains:**
-- `categories`: Hierarchical organization of all vulnerability files with keywords and focus areas
-- `searchIndex`: Quick keyword → file mappings for common search terms
-- `protocolContext`: Recommended files based on protocol type being audited (lending, DEX, vault, governance, bridge, etc.)
+- `protocolContext`: Maps protocol types (lending, DEX, vault, etc.) to relevant manifest names and focus patterns
+- `manifests`: Lists all 11 manifest files with descriptions and pattern counts
+- `auditChecklist`: Quick security checks by category
+- `keywordIndex`: Points to `DB/manifests/keywords.json` for keyword lookup
+
+**3-Tier Search Architecture:**
+```
+Tier 1: DB/index.json              ← Lean router (~330 lines). Start here.
+   ↓
+Tier 2: DB/manifests/<name>.json   ← Pattern-level indexes with line ranges (11 manifests)
+   ↓
+Tier 3: DB/**/*.md                 ← Vulnerability content. Read ONLY targeted line ranges.
+```
 
 **Usage by Agents:**
-```json
-// Find files for a specific keyword
-searchIndex.mappings["chainlink"] → returns all Chainlink-related files
-
-// Find files for a protocol type  
-protocolContext.mappings["lending_protocol"] → returns priority files for lending audits
-
-// Browse by category
-categories.oracle.subcategories.chainlink.files → detailed file list with focus areas
 ```
+// Find manifests for a protocol type
+DB/index.json → protocolContext.mappings.lending_protocol
+  → manifests: ["oracle", "general-defi", "tokens", "general-security"]
+
+// Find patterns by keyword
+DB/manifests/keywords.json → "getPriceUnsafe" → ["oracle"]
+→ Load DB/manifests/oracle.json → find pattern → read targeted line ranges
+
+// Browse patterns by severity
+Load DB/manifests/general-defi.json → filter severity: ["HIGH", "CRITICAL"]
+→ Read targeted line ranges from MD files
+```
+
+For the full search guide, see `DB/SEARCH_GUIDE.md`.
 
 ### TEMPLATE.md
 **Path:** `./TEMPLATE.md`  
