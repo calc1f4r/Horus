@@ -1,7 +1,7 @@
 ---
 name: DeFiHackLabs Exploit Indexer
 description: Analyzes DeFiHackLabs exploit PoCs and README documentation to extract vulnerability patterns, attack vectors, and root causes. Creates TEMPLATE.md-compliant database entries with verified attack mechanics from real-world exploits. Use when indexing DeFi exploits from DeFiHackLabs, creating vulnerability entries from PoC code, or building pattern databases from historical incidents.
-tools: ['edit/editFiles', 'search/codebase', 'web/githubRepo', 'web/fetch', 'search/usages', 'search', 'read/terminalLastCommand', 'read/problems', 'execute/createAndRunTask', 'execute/runTask', 'read/getTaskOutput', 'execute/testFailure', 'execute/getTerminalOutput','execute/runInTerminal','read/terminalLastCommand','read/terminalSelection']
+tools: ['edit/editFiles', 'search/codebase', 'web/githubRepo', 'web/fetch', 'search/usages', 'search', 'read/terminalLastCommand', 'read/problems', 'execute/createAndRunTask', 'execute/testFailure', 'execute/getTerminalOutput','execute/runInTerminal','read/terminalSelection']
 ---
 
 # DeFiHackLabs Exploit Indexer
@@ -37,7 +37,7 @@ Indexing Progress:
 - [ ] Phase 4: Abstract pattern (Level 0 → Level 2 minimum)
 - [ ] Phase 5: Create TEMPLATE.md-compliant entry
 - [ ] Phase 6: Verification gate — every claim has source evidence
-- [ ] Phase 7: Update DB/index.json
+- [ ] Phase 7: Regenerate manifests
 ```
 
 ### Phase 1: Metadata Extraction
@@ -108,9 +108,15 @@ Verification Gate:
 - [ ] No vague claims — every statement has a code reference (L45, L98-102)
 ```
 
-### Phase 7: Index Update
+### Phase 7: Regenerate Manifests
 
-Follow the [index update guide](resources/index-update-guide.md). Every new entry must be indexed.
+After creating the entry, regenerate the search manifests:
+
+```bash
+python3 generate_manifests.py
+```
+
+This auto-updates `DB/index.json` and all `DB/manifests/*.json` files. See the [manifest update guide](resources/index-update-guide.md) for verification steps.
 
 ---
 
@@ -160,13 +166,13 @@ Prioritize by loss amount — high-impact exploits first.
 Each analyzed exploit produces:
 
 1. **Database entry** → `DB/{category}/{subcategory}/{pattern-name}.md` (TEMPLATE.md format)
-2. **Index update** → `DB/index.json` additions
+2. **Manifest regeneration** → Run `python3 generate_manifests.py` to update all manifests
 
 ---
 
 ## Critical Rules
 
-**MUST**: Read actual PoC code. Verify loss amounts. Document all prerequisites. Use real code snippets. Apply falsification protocol. Update index.json.
+**MUST**: Read actual PoC code. Verify loss amounts. Document all prerequisites. Use real code snippets. Apply falsification protocol. Run `python3 generate_manifests.py` after creating entries.
 
 **NEVER**: Hallucinate exploit details. Overstate severity. Skip PoC analysis (README alone is insufficient). Create synthetic examples. Use vague descriptions. Skip index updates.
 

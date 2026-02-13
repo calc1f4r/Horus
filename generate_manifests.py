@@ -56,7 +56,7 @@ def extract_severity_from_context(lines, start, end):
 
 def extract_keywords_from_context(lines, start, end):
     """Extract code identifiers and key terms from a section's content."""
-    text = "\n".join(lines[start:min(end, start + 60)])
+    text = "\n".join(lines[start:min(end, start + 120)])
     keywords = set()
 
     # Backtick-wrapped terms (code identifiers)
@@ -173,10 +173,55 @@ def build_file_manifest(filepath, category):
                 if key and val:
                     frontmatter[key] = val
 
-    # Filter to meaningful sections (H2 and H3 with content)
+    # Filter out non-vulnerability structural sections
+    SKIP_H2_TITLES = {
+        "table of contents", "references", "references & source reports",
+        "keywords for search", "related vulnerabilities", "prevention guidelines",
+        "testing requirements", "security research", "technical documentation",
+        "external links", "summary", "conclusion", "appendix",
+        "development best practices", "reference", "change log",
+    }
+    SKIP_H3_TITLES = SKIP_H2_TITLES | {
+        "overview", "attack categories",
+        "secure implementation", "detection patterns", "audit checklist",
+        "code patterns to look for", "impact analysis", "technical impact",
+        "business impact", "affected scenarios", "known exploits",
+        "related cves/reports", "real-world examples",
+    }
+
+    def is_h2_vulnerability(sec):
+        title_lower = sec["title"].lower().strip()
+        if title_lower in SKIP_H2_TITLES:
+            return False
+        if sec["lineCount"] < 8:
+            return False
+        return True
+
+    def is_h3_vulnerability(sec):
+        title_lower = sec["title"].lower().strip()
+        if title_lower in SKIP_H3_TITLES:
+            return False
+        if sec["lineCount"] < 5:
+            return False
+        return True
+
     patterns = []
-    h2_sections = [s for s in sections if s["heading_level"] == 2 and s["lineCount"] > 5]
-    h3_sections = [s for s in sections if s["heading_level"] == 3 and s["lineCount"] > 3]
+    h2_sections = [s for s in sections if s["heading_level"] == 2 and is_h2_vulnerability(s)]
+    h3_all = [s for s in sections if s["heading_level"] == 3 and is_h3_vulnerability(s)]
+
+    # If there are no good H2s but there are H3s (common in cosmos/template-based files),
+    # promote H3s to be the primary patterns
+    if not h2_sections and h3_all:
+        h2_sections = h3_all
+        h3_all = [s for s in sections if s["heading_level"] == 4 and s["lineCount"] >= 5]
+    # If only a template "Vulnerability Title" H2 wraps everything, use its H3 children instead
+    all_h2 = [s for s in sections if s["heading_level"] == 2]
+    vuln_title_h2 = [s for s in all_h2 if s["title"].lower().strip() == "vulnerability title"]
+    if len(all_h2) <= 2 and len(vuln_title_h2) == 1 and h3_all:
+        h2_sections = h3_all
+        h3_all = [s for s in sections if s["heading_level"] == 4 and s["lineCount"] >= 5]
+
+    h3_sections = h3_all
 
     # Use H2 as primary patterns, H3 as sub-patterns
     for idx, sec in enumerate(h2_sections):
@@ -293,7 +338,6 @@ def build_lean_router(manifests):
         },
         "manifests": {},
         "protocolContext": {},
-        "quickKeywords": {},
         "auditChecklist": {},
     }
 
@@ -316,7 +360,7 @@ def add_protocol_context(router):
         "mappings": {
             "lending_protocol": {
                 "description": "Aave, Compound, lending/borrowing protocols",
-                "manifests": ["oracle", "general", "tokens"],
+                "manifests": ["oracle", "general-defi", "tokens", "general-security"],
                 "focusPatterns": [
                     "staleness", "price manipulation", "liquidation",
                     "flash loan", "precision", "rounding", "inflation attack",
@@ -325,7 +369,7 @@ def add_protocol_context(router):
             },
             "dex_amm": {
                 "description": "Uniswap, SushiSwap, decentralized exchanges",
-                "manifests": ["amm", "general", "oracle"],
+                "manifests": ["amm", "general-defi", "oracle"],
                 "focusPatterns": [
                     "slippage", "sandwich", "MEV", "TWAP", "slot0",
                     "liquidity", "constant product", "fee", "reentrancy"
@@ -333,7 +377,7 @@ def add_protocol_context(router):
             },
             "vault_yield": {
                 "description": "ERC4626 vaults, yield aggregators, strategies",
-                "manifests": ["tokens", "general", "oracle", "unique"],
+                "manifests": ["tokens", "general-defi", "oracle", "unique"],
                 "focusPatterns": [
                     "ERC4626", "inflation attack", "first depositor",
                     "rounding", "share manipulation", "harvest", "strategy"
@@ -341,7 +385,7 @@ def add_protocol_context(router):
             },
             "governance_dao": {
                 "description": "DAOs, governance systems, voting contracts",
-                "manifests": ["general"],
+                "manifests": ["general-governance"],
                 "focusPatterns": [
                     "governance", "voting power", "quorum", "timelock",
                     "proposal", "flash loan governance", "delegation"
@@ -349,7 +393,7 @@ def add_protocol_context(router):
             },
             "cross_chain_bridge": {
                 "description": "Bridges, LayerZero, Wormhole, cross-chain messaging",
-                "manifests": ["bridge", "general"],
+                "manifests": ["bridge", "general-infrastructure"],
                 "focusPatterns": [
                     "replay", "message validation", "gas", "trusted remote",
                     "VAA", "lzReceive", "channel blocking"
@@ -373,7 +417,7 @@ def add_protocol_context(router):
             },
             "perpetuals_derivatives": {
                 "description": "Perpetual DEXes, options, derivatives",
-                "manifests": ["oracle", "general", "amm"],
+                "manifests": ["oracle", "general-defi", "amm"],
                 "focusPatterns": [
                     "oracle staleness", "price manipulation", "liquidation",
                     "flash loan", "precision", "funding rate"
@@ -381,7 +425,7 @@ def add_protocol_context(router):
             },
             "token_launch": {
                 "description": "New token launches, meme coins, trading contracts",
-                "manifests": ["general", "tokens"],
+                "manifests": ["general-governance", "tokens", "general-security"],
                 "focusPatterns": [
                     "rug pull", "honeypot", "backdoor", "hidden mint",
                     "fee extraction", "access control", "proxy hijack"
@@ -389,7 +433,7 @@ def add_protocol_context(router):
             },
             "staking_liquid_staking": {
                 "description": "Staking protocols, liquid staking derivatives",
-                "manifests": ["general", "tokens", "oracle"],
+                "manifests": ["general-defi", "tokens", "oracle"],
                 "focusPatterns": [
                     "reward calculation", "precision", "rounding",
                     "ERC4626", "reentrancy", "staking"
@@ -397,7 +441,7 @@ def add_protocol_context(router):
             },
             "nft_marketplace": {
                 "description": "NFT platforms, ERC721 marketplaces",
-                "manifests": ["tokens", "general"],
+                "manifests": ["tokens", "general-infrastructure"],
                 "focusPatterns": [
                     "ERC721", "callback", "onERC721Received",
                     "reentrancy", "approval"
@@ -407,12 +451,18 @@ def add_protocol_context(router):
     }
 
 
-def add_quick_keywords(router, manifests):
-    """Build a compact keyword → manifest mapping for quick routing."""
+def build_quick_keywords(manifests):
+    """Build a compact keyword → manifest mapping, saved as separate file."""
     keyword_to_manifests = defaultdict(set)
 
     for cat_name, manifest in manifests.items():
         for file_entry in manifest["files"]:
+            # Extract keywords from file path components
+            path_parts = re.findall(r"[a-zA-Z][a-zA-Z0-9]{2,}", file_entry["file"])
+            for part in path_parts:
+                if part.lower() not in {"md", "db", "general", "vulnerabilities", "patterns"}:
+                    keyword_to_manifests[part.lower()].add(cat_name)
+
             for pattern in file_entry["patterns"]:
                 # Index by code keywords
                 for kw in pattern.get("codeKeywords", []):
@@ -427,18 +477,17 @@ def add_quick_keywords(router, manifests):
                     "references", "keywords", "search", "related", "table",
                     "contents", "vulnerabilities", "vulnerability",
                 }
-                for word in re.findall(r"[a-zA-Z]{3,}", pattern["title"]):
+                for word in re.findall(r"[a-zA-Z][a-zA-Z0-9]{2,}", pattern["title"]):
                     if word.lower() not in stop_words:
                         keyword_to_manifests[word.lower()].add(cat_name)
 
-    # Convert sets to sorted lists, only keep keywords mapping to ≤3 manifests (specific)
+    # Convert sets to sorted lists
     compact = {}
     for kw, cats in sorted(keyword_to_manifests.items()):
-        if len(cats) <= 3:
-            compact[kw] = sorted(cats)
+        compact[kw] = sorted(cats)
 
-    router["quickKeywords"] = {
-        "description": "Keyword → manifest names for quick routing. Load the manifest file (DB/manifests/<name>.json), then search its patterns for details. Only keywords mapping to ≤3 categories included.",
+    return {
+        "description": "Keyword → manifest names. Load manifest (DB/manifests/<name>.json) then search patterns.",
         "totalKeywords": len(compact),
         "mappings": compact,
     }
@@ -487,6 +536,77 @@ def add_audit_checklist(router):
     }
 
 
+# Sub-categories for the "general" folder — split into smaller manifests
+GENERAL_SUBCATEGORIES = {
+    "general-security": {
+        "folders": [
+            "access-control", "arbitrary-call", "missing-validations",
+            "validation", "initialization", "signature",
+        ],
+        "description": "Access control, input validation, signatures, initialization",
+    },
+    "general-defi": {
+        "folders": [
+            "flash-loan", "flash-loan-attacks", "slippage-protection",
+            "vault-inflation-attack", "yield-strategy-vulnerabilities",
+            "fee-on-transfer-tokens", "token-compatibility",
+            "precision", "rounding-precision-loss", "calculation",
+            "integer-overflow", "business-logic",
+        ],
+        "description": "DeFi-specific: flash loans, slippage, vaults, precision, calculations",
+    },
+    "general-infrastructure": {
+        "folders": [
+            "proxy-vulnerabilities", "uups-proxy", "diamond-proxy",
+            "storage-collision", "reentrancy", "bridge",
+            "erc7702-integration",
+        ],
+        "description": "Smart contract infrastructure: proxies, reentrancy, storage, bridges",
+    },
+    "general-governance": {
+        "folders": [
+            "dao-governance-vulnerabilities",
+            "stablecoin-vulnerabilities",
+            "malicious", "mev-bot", "randomness",
+        ],
+        "description": "Governance, stablecoins, malicious patterns, MEV, randomness",
+    },
+}
+
+
+def build_general_sub_manifests():
+    """Split general/ into focused sub-manifests for agent precision."""
+    sub_manifests = {}
+    general_dir = DB_DIR / "general"
+
+    for sub_name, sub_config in GENERAL_SUBCATEGORIES.items():
+        entries = []
+        total_patterns = 0
+
+        for subfolder in sub_config["folders"]:
+            folder = general_dir / subfolder
+            if folder.exists():
+                for md_file in sorted(folder.rglob("*.md")):
+                    if md_file.name == "README.md":
+                        continue
+                    entry = build_file_manifest(md_file, sub_name)
+                    if entry:
+                        entries.append(entry)
+                        total_patterns += entry["patternCount"]
+
+        manifest = {
+            "meta": {
+                "category": sub_name,
+                "description": sub_config["description"],
+                "fileCount": len(entries),
+                "totalPatterns": total_patterns,
+                "usage": "Use patterns[].lineStart/lineEnd to read exact sections",
+            },
+            "files": entries,
+        }
+        sub_manifests[sub_name] = manifest
+    return sub_manifests
+
 def main():
     MANIFEST_DIR.mkdir(parents=True, exist_ok=True)
     manifests = {}
@@ -496,6 +616,18 @@ def main():
     print("=" * 60)
 
     for category, folders in CATEGORY_MAP.items():
+        if category == "general":
+            # Split general into focused sub-manifests
+            print(f"\n📁 Processing category: general (split into sub-manifests)")
+            sub_manifests = build_general_sub_manifests()
+            for sub_name, sub_manifest in sub_manifests.items():
+                manifests[sub_name] = sub_manifest
+                manifest_path = MANIFEST_DIR / f"{sub_name}.json"
+                with open(manifest_path, "w", encoding="utf-8") as f:
+                    json.dump(sub_manifest, f, indent=2, ensure_ascii=False)
+                print(f"   → {sub_name}: {sub_manifest['meta']['fileCount']} files, {sub_manifest['meta']['totalPatterns']} patterns")
+            continue
+
         print(f"\n📁 Processing category: {category}")
         manifest = build_manifest(category, folders)
         manifests[category] = manifest
@@ -512,8 +644,23 @@ def main():
     print(f"\n📋 Building lean router index...")
     router = build_lean_router(manifests)
     add_protocol_context(router)
-    add_quick_keywords(router, manifests)
     add_audit_checklist(router)
+
+    # Write quickKeywords to a separate file (keeps router lean)
+    keywords_data = build_quick_keywords(manifests)
+    keywords_path = DB_DIR / "manifests" / "keywords.json"
+    with open(keywords_path, "w", encoding="utf-8") as f:
+        json.dump(keywords_data, f, indent=2, ensure_ascii=False)
+    keywords_size = os.path.getsize(keywords_path)
+    print(f"   → Keywords index: {keywords_size:,} bytes ({keywords_data['totalKeywords']} keywords)")
+    print(f"   → Written to {keywords_path}")
+
+    # Add reference in router
+    router["keywordIndex"] = {
+        "file": "DB/manifests/keywords.json",
+        "description": "Keyword → manifest routing. Load this file only when doing keyword-based search.",
+        "totalKeywords": keywords_data["totalKeywords"],
+    }
 
     # Write router
     router_path = DB_DIR / "index.json"

@@ -1,7 +1,7 @@
 ---
 name: Variant Template Writer
 description: Analyzes security audit reports from reports/<topic>/ folders to identify cross-report vulnerability patterns and creates TEMPLATE.md-compliant database entries optimized for vector search. Synthesizes 5-10+ reports per pattern with verified severity consensus and evidence-backed examples. Use when synthesizing audit findings into database entries, performing variant analysis across auditors, or creating comprehensive vulnerability templates.
-tools: ['edit/editFiles', 'search/codebase', 'web/githubRepo', 'web/fetch', 'search/usages', 'search', 'read/terminalLastCommand', 'read/problems', 'execute/createAndRunTask', 'execute/runTask', 'read/getTaskOutput', 'execute/testFailure', 'execute/getTerminalOutput','execute/runInTerminal','read/terminalLastCommand','read/terminalSelection']
+tools: ['edit/editFiles', 'search/codebase', 'web/githubRepo', 'web/fetch', 'search/usages', 'search', 'read/terminalLastCommand', 'read/problems']
 ---
 
 # Variant Template Writer
@@ -24,7 +24,7 @@ Analysis Progress:
 - [ ] Phase 4: Synthesize patterns with frequency + severity consensus
 - [ ] Phase 5: Write TEMPLATE.md-compliant entry
 - [ ] Phase 6: Verification gate — all references exist, no hallucinations
-- [ ] Phase 7: Update DB/index.json
+- [ ] Phase 7: Regenerate manifests
 ```
 
 ### Phase 1: Scan and Categorize
@@ -126,9 +126,15 @@ Verification Gate:
 - [ ] Cross-links to related vulnerability entries documented
 ```
 
-### Phase 7: Index Update
+### Phase 7: Regenerate Manifests
 
-Follow the [index update guide](resources/index-update-guide.md).
+After creating the entry, regenerate the search manifests:
+
+```bash
+python3 generate_manifests.py
+```
+
+This auto-updates `DB/index.json` and all `DB/manifests/*.json` files. See the [manifest update guide](resources/index-update-guide.md) for verification steps and tips for better indexing.
 
 ---
 
@@ -187,13 +193,13 @@ Before finalizing, systematically expand coverage:
 
 Each analysis produces:
 1. **Database entry** → `DB/general/<vulnerability_class>/<pattern-name>.md` (or appropriate folder)
-2. **Index update** → `DB/index.json` additions
+2. **Manifest regeneration** → Run `python3 generate_manifests.py` to update all manifests
 
 ---
 
 ## Critical Rules
 
-**MUST**: Analyze 5+ reports per pattern. Verify all file paths exist. Label every example with source + severity. Document pattern frequency. Use the lowest severity when reports disagree. Apply falsification protocol. Update index.json.
+**MUST**: Analyze 5+ reports per pattern. Verify all file paths exist. Label every example with source + severity. Document pattern frequency. Use the lowest severity when reports disagree. Apply falsification protocol. Run `python3 generate_manifests.py` after creating entries.
 
 **NEVER**: Overstate severity. Hallucinate references. Create unlabeled synthetic examples. Base entries on single reports. Use vague descriptions. Skip frequency documentation. Assume severity.
 

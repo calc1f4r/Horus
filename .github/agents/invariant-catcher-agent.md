@@ -1,6 +1,6 @@
 ---
 description: 'Hunts for vulnerability patterns in smart contract codebases using the Vulnerability Database (DB/). Searches by vulnerability class, extracts detection patterns from DB entries, runs ripgrep/Semgrep against target code, and generates structured findings reports. Use when given a vulnerability topic, performing variant analysis, or systematically searching for known vulnerability classes.'
-tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent', 'github.vscode-pull-request-github/copilotCodingAgent', 'github.vscode-pull-request-github/issue_fetch', 'github.vscode-pull-request-github/suggest-fix', 'github.vscode-pull-request-github/searchSyntax', 'github.vscode-pull-request-github/doSearch', 'github.vscode-pull-request-github/renderIssues', 'github.vscode-pull-request-github/activePullRequest', 'github.vscode-pull-request-github/openPullRequest', 'ms-python.python/getPythonEnvironmentInfo', 'ms-python.python/getPythonExecutableCommand', 'ms-python.python/installPythonPackage', 'ms-python.python/configurePythonEnvironment', 'ms-toolsai.jupyter/configureNotebook', 'ms-toolsai.jupyter/listNotebookPackages', 'ms-toolsai.jupyter/installNotebookPackages', 'todo']
+tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent']
 ---
 
 # Invariant Catcher Agent
@@ -24,41 +24,84 @@ Hunt Progress:
 - [ ] Step 5: Generate report in invariants-caught/
 ```
 
-### Step 1: Map Topic to DB Folders
+### Step 1: Map Topic to DB Using 3-Tier Search
 
-Parse the user's topic to identify category, attack type, and target chain. Map to DB paths:
+Use the **manifest architecture** to find relevant vulnerability patterns efficiently.
 
-| Topic keyword | DB path |
-|---------------|---------|
-| access control | `DB/general/access-control/` |
-| yield, staking, rewards | `DB/general/yield-strategy-vulnerabilities/` |
-| reentrancy | `DB/general/reentrancy/` |
-| oracle, price feed | `DB/oracle/` |
-| bridge, cross-chain | `DB/bridge/` |
-| governance, DAO | `DB/general/dao-governance-vulnerabilities/` |
-| vault, ERC4626 | `DB/tokens/erc4626/` |
-| AMM, swap, liquidity | `DB/amm/` |
-| Cosmos, IBC | `DB/cosmos/` |
-| Solana, Anchor | `DB/Solona-chain-specific/` |
+#### Quick Start: Load the Router
 
-Also check `DB/index.json` — it contains `searchIndex` and `protocolContext` mappings for discovery.
+Read `DB/index.json` (~330 lines). It contains:
+- **`protocolContext`** — maps protocol types (lending, DEX, vault, etc.) to relevant manifest names + focus patterns
+- **`manifests`** — lists all 11 manifest files with descriptions and pattern counts
+- **`auditChecklist`** — quick security checks by category
+- **`keywordIndex`** — points to `DB/manifests/keywords.json` for keyword search
 
-### Step 2: Read DB Entries and Extract Patterns
+#### Find Patterns by Protocol Type
 
-For each relevant DB file:
+```
+DB/index.json → protocolContext.mappings.{protocol_type}
+  → manifests: ["oracle", "general-defi", "tokens", ...]
+  → focusPatterns: ["staleness", "liquidation", "flash loan", ...]
+→ Load DB/manifests/<name>.json → search patterns → read line ranges
+```
 
-1. **Parse YAML frontmatter** — extract `tags`, `primitives`, `attack_type`, `severity`
-2. **Extract vulnerable code patterns** — the specific code shapes that indicate the bug
-3. **Note detection patterns** — regex or structural patterns documented in the entry
-4. **Record secure implementations** — to distinguish true from false positives
+#### Find Patterns by Keyword
 
-If a file `X.md` exists, also check for folder `X/` with additional entries.
+```
+DB/manifests/keywords.json → "getPriceUnsafe" → ["oracle"]
+→ Load DB/manifests/oracle.json → find matching pattern → read targeted lines
+```
 
-Build a pattern library linking each pattern to its DB source:
+#### Available Manifests
 
-| Pattern Name | Primitives | Detection Regex | DB Source |
-|-------------|-----------|----------------|-----------|
-| {name} | {primitives} | {regex} | `DB/{path}` |
+| Manifest | Patterns | Focus |
+|----------|----------|-------|
+| `oracle` | 39 | Chainlink, Pyth, price manipulation |
+| `amm` | 65 | Concentrated liquidity, constant product |
+| `bridge` | 32 | LayerZero, Wormhole, Hyperlane |
+| `tokens` | 33 | ERC20, ERC4626, ERC721 |
+| `cosmos` | 26 | Cosmos SDK, IBC, staking |
+| `solana` | 38 | Solana programs, Token-2022 |
+| `general-security` | 31 | Access control, signatures, validation |
+| `general-defi` | 115 | Flash loans, vaults, precision |
+| `general-infrastructure` | 41 | Proxies, reentrancy, storage |
+| `general-governance` | 56 | Governance, stablecoins, MEV |
+| `unique` | 59 | Protocol-specific unique exploits |
+
+For the full search guide, see `DB/SEARCH_GUIDE.md`.
+
+### Step 2: Read DB Entries Using Manifest Line Ranges
+
+Each manifest entry provides exact line ranges — read ONLY targeted sections, not entire files:
+
+```json
+{
+  "id": "oracle-staleness-001",
+  "title": "Missing Staleness Check",
+  "lineStart": 93,
+  "lineEnd": 248,
+  "severity": ["MEDIUM"],
+  "codeKeywords": ["getPriceUnsafe", "publishTime"],
+  "rootCause": "No freshness validation on oracle price data..."
+}
+```
+
+```
+read_file("DB/oracle/pyth/PYTH_ORACLE_VULNERABILITIES.md", startLine=93, endLine=248)
+```
+
+From each targeted section, extract:
+
+1. **Vulnerable code patterns** — the specific code shapes that indicate the bug
+2. **Detection patterns** — regex or structural patterns documented in the entry
+3. **Severity and codeKeywords** — already pre-extracted in the manifest
+4. **Secure implementations** — to distinguish true from false positives
+
+Build a pattern library linking each pattern to its manifest source:
+
+| Pattern Name | codeKeywords | Detection Regex | DB Source | Lines |
+|-------------|-------------|----------------|-----------|-------|
+| {name} | {from manifest} | {regex} | `DB/{path}` | L{start}-L{end} |
 
 ### Step 3: Build Search Patterns
 
@@ -68,10 +111,10 @@ Build a pattern library linking each pattern to its DB source:
 2. Identify abstraction points (variable names can abstract; function names keep specific if unique to bug)
 3. Generalize iteratively — stop when false positive rate exceeds ~50%
 
-Use tags from DB entries to find related patterns across files:
+Use `codeKeywords` from manifest entries to find related patterns across files:
 ```bash
-rg -l "tags:.*vault" DB/
-rg -l "primitives:.*share_price" DB/
+# Search using codeKeywords from the manifest
+rg -l "getPriceUnsafe|publishTime|latestRoundData" DB/
 ```
 
 ### Step 4: Hunt in Target Codebase
@@ -140,9 +183,9 @@ Testing only with valid users → missing bypass when `userId = null` matches `r
 
 ## Key Principles
 
-1. **Database first** — always consult DB before hunting
-2. **Parse YAML metadata** — tags and primitives guide search
-3. **Check related folders** — if `X.md` exists, check `X/` too
+1. **Manifest-first** — always consult DB/index.json → manifests before hunting
+2. **Use line ranges** — read only targeted sections using manifest lineStart/lineEnd
+3. **Leverage codeKeywords** — manifest keywords guide search patterns
 4. **Start specific** — first pattern matches exactly the known bug
 5. **Document everything** — all findings go to `invariants-caught/`
 6. **Link to sources** — every finding references its DB origin

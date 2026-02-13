@@ -4,41 +4,58 @@ This document covers the strategic thinking behind effective variant analysis.
 
 ---
 
-## 🔍 Start Here: Using DB/index.json
+## Start Here: Using the 3-Tier Manifest Architecture
 
-**The vulnerability database index (`DB/index.json`) is your primary entry point** for pattern discovery. Always consult it first before exploring individual files.
+**The vulnerability database uses a 3-tier architecture** for efficient, precise pattern discovery. Always start with the router.
+
+```
+Tier 1: DB/index.json              ← Lean router (~330 lines). Start here.
+   ↓
+Tier 2: DB/manifests/<name>.json   ← Pattern-level index with line ranges (11 manifests)
+   ↓
+Tier 3: DB/**/*.md                 ← Vulnerability content. Read ONLY targeted line ranges.
+```
 
 ### Quick Reference
 
 ```bash
-# View the index structure
+# View the router structure
 cat DB/index.json | jq 'keys'
-# → ["meta", "categories", "searchIndex", "protocolContext", "auditChecklist"]
+# → ["meta", "searchStrategy", "manifests", "protocolContext", "auditChecklist", "keywordIndex"]
 ```
 
-### Index Sections
+### Router Sections
 
 | Section | Purpose | How to Use |
 |---------|---------|------------|
-| `searchIndex.mappings` | Keyword → file lookups | Search by function names, attack patterns, concepts |
-| `protocolContext.mappings` | Protocol-type recommendations | Get priority files for lending, DEX, vault, etc. |
-| `categories` | Hierarchical taxonomy with keywords | Browse by category for comprehensive coverage |
+| `protocolContext.mappings` | Protocol-type → manifest names + focus patterns | Get priority manifests for lending, DEX, vault, etc. |
+| `manifests` | Lists all 11 manifests with descriptions + pattern counts | Pick the right manifest to load |
 | `auditChecklist` | Quick check items per type | Rapid validation during audits |
+| `keywordIndex` | Points to `DB/manifests/keywords.json` | Keyword → manifest lookup |
 
 ### Example Lookups
 
-```json
-// Find files for "reentrancy"
-searchIndex.mappings["reentrancy"]
-→ ["DB/general/reentrancy/reentrancy.md", "DB/unique/amm/constantproduct/SENTIMENT_CURVE_READONLY_REENTRANCY.md", ...]
+**By Protocol Type:**
+```
+DB/index.json → protocolContext.mappings.lending_protocol
+  → manifests: ["oracle", "general-defi", "tokens", "general-security"]
+  → focusPatterns: ["staleness", "liquidation", "flash loan", ...]
+→ Load DB/manifests/oracle.json → find pattern by title/severity/codeKeywords
+→ Read DB/oracle/pyth/PYTH_ORACLE_VULNERABILITIES.md lines 93-248
+```
 
-// Get priority files for vault audits
-protocolContext.mappings.vault_yield.priority_files
-→ ["DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md", "DB/general/vault-inflation-attack/vault-inflation-attack.md", ...]
+**By Keyword:**
+```
+DB/manifests/keywords.json → "reentrancy" → ["general-infrastructure"]
+→ Load DB/manifests/general-infrastructure.json → find reentrancy patterns
+→ Read targeted line ranges from the MD file
+```
 
-// Get keywords for Chainlink vulnerabilities
-categories.oracle.subcategories.chainlink.keywords
-→ ["latestRoundData", "stale price", "sequencer", "heartbeat", "minAnswer", "maxAnswer", ...]
+**By Manifest Browse:**
+```
+Load DB/manifests/general-defi.json → 115 patterns
+→ Filter by severity: ["HIGH", "CRITICAL"]
+→ Read targeted line ranges for each match
 ```
 
 ---
@@ -51,64 +68,51 @@ The vulnerability database (`DB/`) is your primary source of truth for known vul
 
 ### Understanding YAML Frontmatter
 
-Every vulnerability file contains YAML metadata that guides your search:
+### Understanding Manifest Pattern Entries
 
-```yaml
----
-# Core Classification
-protocol: generic
-chain: everychain
-category: yield                    # Main category for folder mapping
-vulnerability_type: inflation_attack
+Each manifest contains pattern entries with pre-extracted metadata that guides your search:
 
-# Attack Vector Details
-attack_type: economic_exploit|logical_error
-affected_component: vault|staking|rewards
-
-# Technical Primitives - THESE TELL YOU WHAT TO SEARCH FOR
-primitives:
-  - share_price          # Search: share calculation functions
-  - exchange_rate        # Search: rate conversion logic
-  - total_supply         # Search: totalSupply() in divisions
-  - reward_accrual       # Search: reward update mechanisms
-
-# Context Tags - THESE HELP FIND RELATED PATTERNS
-tags:
-  - defi
-  - vault
-  - erc4626
-  - inflation
-  - staking
----
+```json
+{
+  "id": "general-defi-inflation-001",
+  "title": "First Depositor / Inflation Attack",
+  "lineStart": 45,
+  "lineEnd": 198,
+  "lineCount": 154,
+  "severity": ["HIGH", "CRITICAL"],
+  "codeKeywords": ["convertToShares", "totalSupply", "totalAssets", "donate"],
+  "rootCause": "Empty vault allows first depositor to manipulate share price...",
+  "subsections": [
+    {"title": "Vault Inflation via Donation", "lineStart": 80, "lineEnd": 130}
+  ]
+}
 ```
 
-### Using Primitives for Code Search
+### Using codeKeywords for Code Search
 
-Each primitive maps to specific code patterns:
+The `codeKeywords` from manifest entries map to specific code patterns to search for:
 
-| Primitive | What to Search | Example Patterns |
+| codeKeyword | What to Search | Example Patterns |
 |-----------|----------------|------------------|
-| `share_price` | Share/asset ratio calculations | `assets * totalSupply / totalAssets` |
-| `exchange_rate` | Rate conversions | `balanceOf(address(this)) / totalShares` |
-| `total_supply` | Supply-based divisions | `totalSupply() / totalAssets()` |
-| `reward_accrual` | Reward distribution logic | `rewardPerToken`, `lastUpdated` |
-| `access_control` | Permission checks | `onlyOwner`, `require(msg.sender ==` |
-| `reentrancy` | External calls before state changes | `.call{}`, `.transfer(` before state |
-| `flash_loan` | Single-block operations | deposit + withdraw same block |
-| `veto` | Veto/guardian mechanisms | `vetoProposal`, `guardian` |
-| `51_percent_attack` | Majority control | voting power, proposal execution |
+| `convertToShares` | Share/asset ratio calculations | `assets * totalSupply / totalAssets` |
+| `totalSupply` | Supply-based divisions | `totalSupply() / totalAssets()` |
+| `latestRoundData` | Oracle price fetching | Chainlink price feed calls |
+| `getPriceUnsafe` | Pyth oracle calls | Pyth price without staleness |
+| `onlyOwner` | Permission checks | Access control modifiers |
+| `delegatecall` | Proxy forwarding | State corruption via delegatecall |
+| `lzReceive` | LayerZero message handling | Bridge message validation |
 
-### Tag-Based Pattern Discovery
+### Keyword-Based Pattern Discovery
 
-Tags help you find related vulnerabilities across the database:
+Use `DB/manifests/keywords.json` to find which manifests contain relevant patterns:
 
 ```bash
-# Find all files with matching tags
-rg -l "tags:.*vault" DB/
-rg -l "tags:.*governance" DB/
+# Look up keywords to find relevant manifests
+cat DB/manifests/keywords.json | jq '.keywords.reentrancy'
+# → ["general-infrastructure"]
 
-# Find files with multiple related tags
-rg -l "tags:.*\b(vault|erc4626)\b" DB/
+cat DB/manifests/keywords.json | jq '.keywords.getPriceUnsafe'
+# → ["oracle"]
 ```
 
 ---
@@ -143,14 +147,15 @@ Each report should include:
 
 ### Linking to DB Sources
 
-Every finding must reference its source pattern in the DB:
+Every finding must reference its source pattern in the DB with line ranges:
 
 ```markdown
 ### Finding 1: First Depositor Attack Variant
 
-**DB Reference**: [First Depositor Attack](DB/general/yield-strategy-vulnerabilities.md#1-first-depositor--inflation-attack)
-**Matched Primitive**: `share_price`, `total_supply`
-**Matched Tags**: `vault`, `erc4626`
+**DB Reference**: [First Depositor Attack](DB/general/vault-inflation-attack/vault-inflation-attack.md#L45-L198)
+**Manifest**: `general-defi.json` → pattern `general-defi-inflation-001`
+**Matched codeKeywords**: `convertToShares`, `totalSupply`
+**Severity**: HIGH
 ```
 
 ---

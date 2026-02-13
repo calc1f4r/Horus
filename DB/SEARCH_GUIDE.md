@@ -1,0 +1,190 @@
+# Vulnerability Database Search Guide
+
+> **Audience**: AI agents performing variant analysis, security audits, and vulnerability research.  
+> **Goal**: Get precise, targeted results from the vulnerability database with minimal context window usage.
+
+---
+
+## Architecture Overview
+
+The database uses a **3-tier search architecture** that progressively narrows from broad categories to exact line ranges:
+
+```
+Tier 1: DB/index.json           (Router — 330 lines, ~10KB)
+   ↓    Identifies which manifests to load
+Tier 2: DB/manifests/<name>.json (Manifest — 30-130KB each)
+   ↓    Finds specific patterns with line ranges  
+Tier 3: DB/**/*.md               (Vulnerability files — read only relevant lines)
+```
+
+### Why This Matters
+
+| Approach | Lines Read | Precision |
+|----------|-----------|-----------|
+| Old: Read index.json + full files | 5,000-15,000 | Low (noise dilutes findings) |
+| New: Router → Manifest → Targeted read | 200-500 | High (exact pattern + line range) |
+
+---
+
+## Search Workflows
+
+### Workflow A: Protocol-Type Search (Most Common)
+
+**When**: You know the protocol type (lending, DEX, vault, etc.)
+
+```
+1. Read DB/index.json → protocolContext.mappings.<protocol_type>
+2. Get manifest list + focusPatterns
+3. Load each manifest → search patterns matching focusPatterns
+4. Read only lineStart-lineEnd of matching patterns
+```
+
+**Example**: Auditing a lending protocol
+```
+→ index.json: protocolContext.mappings.lending_protocol
+  → manifests: ["oracle", "general-defi", "tokens", "general-security"]
+  → focusPatterns: ["staleness", "price manipulation", "liquidation", ...]
+
+→ Load DB/manifests/oracle.json
+  → Search patterns for "staleness" → find pattern at L183-245 in PYTH_ORACLE file
+  → read_file(PYTH_ORACLE, startLine=183, endLine=245)  ← exact vulnerability content
+```
+
+### Workflow B: Keyword Search
+
+**When**: You have a specific function name, concept, or code pattern
+
+```
+1. Load DB/manifests/keywords.json
+2. Find keyword → get manifest name(s)
+3. Load manifest → search patterns by codeKeywords
+4. Read matching line ranges
+```
+
+**Example**: Looking for `getPriceUnsafe` vulnerabilities
+```
+→ keywords.json: "getpriceunsafe" → ["oracle"]
+→ Load DB/manifests/oracle.json
+→ Search patterns where codeKeywords contains "getPriceUnsafe"
+→ Found in PYTH_ORACLE L183-245, severity: MEDIUM
+→ read_file(DB/oracle/pyth/PYTH_ORACLE_VULNERABILITIES.md, 183, 245)
+```
+
+### Workflow C: Category Browse
+
+**When**: Exploring a broad vulnerability class
+
+```
+1. Read DB/index.json → manifests section
+2. Choose relevant manifest by description
+3. Load manifest → browse all patterns with titles + severity
+4. Read patterns of interest
+```
+
+### Workflow D: Severity-Focused Search
+
+**When**: Looking for high-severity patterns only
+
+```
+1. Load relevant manifest
+2. Filter patterns where severity includes "HIGH" or "CRITICAL"
+3. Read matching line ranges
+```
+
+---
+
+## Available Manifests
+
+| Manifest | File | Patterns | Focus |
+|----------|------|----------|-------|
+| `oracle` | DB/manifests/oracle.json | 39 | Chainlink, Pyth, price manipulation |
+| `amm` | DB/manifests/amm.json | 65 | Concentrated liquidity, constant product AMMs |
+| `bridge` | DB/manifests/bridge.json | 32 | LayerZero, Wormhole, Hyperlane, cross-chain |
+| `tokens` | DB/manifests/tokens.json | 33 | ERC20, ERC4626, ERC721 |
+| `cosmos` | DB/manifests/cosmos.json | 26 | Cosmos SDK, IBC, staking, precompiles |
+| `solana` | DB/manifests/solana.json | 38 | Solana programs, Token-2022 |
+| `general-security` | DB/manifests/general-security.json | 31 | Access control, signatures, validation |
+| `general-defi` | DB/manifests/general-defi.json | 115 | Flash loans, vaults, precision, calculations |
+| `general-infrastructure` | DB/manifests/general-infrastructure.json | 41 | Proxies, reentrancy, storage, bridges |
+| `general-governance` | DB/manifests/general-governance.json | 56 | Governance, stablecoins, rug pulls, MEV |
+| `unique` | DB/manifests/unique.json | 59 | Protocol-specific unique exploits |
+
+---
+
+## Pattern Entry Format
+
+Each pattern in a manifest looks like:
+
+```json
+{
+  "id": "oracle-staleness-check-001",
+  "title": "1. CheckUpkeep/PerformUpkeep Mismatch",
+  "lineStart": 93,
+  "lineEnd": 248,
+  "lineCount": 156,
+  "severity": ["MEDIUM"],
+  "codeKeywords": ["checkUpkeep", "performData", "performUpkeep"],
+  "rootCause": "checkUpkeep returns data encoded in one format, but performUpkeep expects...",
+  "subsections": [
+    {
+      "title": "Vulnerability Description",
+      "lineStart": 102,
+      "lineEnd": 115,
+      "severity": ["MEDIUM"],
+      "codeKeywords": ["checkUpkeep"]
+    }
+  ]
+}
+```
+
+**Key fields for agents:**
+- `lineStart` / `lineEnd` → Use with `read_file` for surgical access
+- `severity` → Filter for HIGH/CRITICAL when prioritizing
+- `codeKeywords` → Match against target codebase identifiers
+- `rootCause` → Quick preview of the vulnerability without reading the file
+- `subsections` → Drill into specific sub-patterns for even more precision
+
+---
+
+## Best Practices for Agents
+
+### DO
+- **Start with index.json** to route to the right manifest(s)
+- **Load only relevant manifests** — don't load all 11
+- **Use lineStart/lineEnd** to read only the exact section needed
+- **Search by codeKeywords** to match against code identifiers you find in target
+- **Check severity** to prioritize findings
+- **Use protocolContext** to quickly get the right manifests for a protocol type
+
+### DON'T
+- Don't read entire vulnerability .md files (500-2400 lines) — use line ranges
+- Don't load all manifests at once — pick 2-3 relevant ones
+- Don't rely on filename alone — use pattern metadata for precision
+- Don't skip the router — it tells you which manifests are relevant
+
+### Context Window Efficiency
+
+| Action | Context Cost | Value |
+|--------|-------------|-------|
+| Read full index.json (old) | ~3800 lines | Low (mostly noise) |
+| Read new router | ~330 lines | High (routing decisions) |
+| Load 1 manifest | 1000-4500 lines | Medium (pattern browsing) |
+| Read 1 pattern (targeted) | 50-200 lines | Very High (exact content) |
+
+**Ideal flow**: 330 lines (router) + 200 lines (manifest scan) + 150 lines (pattern read) = **680 lines** for a precise result.
+
+---
+
+## Regenerating Manifests
+
+When vulnerability files are added or updated, re-run:
+
+```bash
+python3 generate_manifests.py
+```
+
+This will:
+1. Re-parse all `.md` files in `DB/`
+2. Re-generate all manifests with updated patterns and line ranges
+3. Update the router `index.json`
+4. Back up the previous index

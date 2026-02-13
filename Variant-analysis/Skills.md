@@ -6,7 +6,7 @@ Your role is to:
 1. **Read** multiple vulnerability reports from `reports/<topic>/` folder
 2. **Identify** common patterns, root causes, and variants across different reports
 3. **Synthesize** comprehensive vulnerability entries following [TEMPLATE.md](../TEMPLATE.md)
-4. **Optimize** When a generic vulnerability (e.g., off-by-one, missing bounds checks, whitelisting bypass, pause/unpause and various others) is found, ensure db/general/ exists, then create or update an entry using [Template.md](../TEMPLATE.md) under the preferred structure db/general/<vulnerability_class>/generaldb.md; if the class folder does not exist, create it, and if restructuring is needed, migrate all existing data without deleting or losing any prior entries.
+4. **Optimize** When a generic vulnerability (e.g., off-by-one, missing bounds checks, whitelisting bypass, pause/unpause and various others) is found, ensure db/general/ exists, then create or update an entry using [Template.md](../TEMPLATE.md) under the preferred structure db/general/<vulnerability_class>/generaldb.md; if the class folder does not exist, create it, and if restructuring is needed, migrate all existing data without deleting or losing any prior entries. After creating or modifying entries, run `python3 generate_manifests.py` from the repo root to regenerate all search manifests.
 
 ## The Five-Step Analysis Process
 
@@ -224,7 +224,10 @@ These common mistakes reduce the quality and accuracy of vulnerability database 
 ### Report Sources
 
 - **Individual Reports**: `reports/<topic>/` - Raw audit findings
-- **Curated Databases**: `DB/oracle/`, `DB/reentrancy/`, etc. - Organized by category
+- **Vulnerability Database**: `DB/` - Organized by category, searchable via manifests
+- **Search Guide**: `DB/SEARCH_GUIDE.md` - How to use the 3-tier manifest architecture
+- **Lean Router**: `DB/index.json` (~330 lines) - Entry point for all DB searches
+- **Pattern Manifests**: `DB/manifests/*.json` - Pattern-level indexes with line ranges
 
 ### Search Optimization Tools
 
@@ -275,6 +278,7 @@ Starting a new vulnerability analysis? Follow this checklist:
 - [ ] Verified all references are actual files
 - [ ] Cross-checked severity ratings
 - [ ] Reviewed for hallucination and accuracy
+- [ ] Ran `python3 generate_manifests.py` to update manifests
 
 **Remember:** Quality over speed. A well-researched, accurate entry is far more valuable than a quick, incomplete onthat don't provide rich context for vector search
 

@@ -1,0 +1,2242 @@
+{
+  "meta": {
+    "category": "general-governance",
+    "description": "Governance, stablecoins, malicious patterns, MEV, randomness",
+    "fileCount": 9,
+    "totalPatterns": 56,
+    "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
+  },
+  "files": [
+    {
+      "file": "DB/general/dao-governance-vulnerabilities/governance-takeover.md",
+      "totalLines": 695,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "governance",
+        "vulnerability_type": "governance_takeover",
+        "attack_type": "51%_attack|centralization|access_control",
+        "affected_component": "governance_control|veto_power|admin_privileges|token_distribution",
+        "severity": "high_to_critical",
+        "impact": "complete_governance_takeover|fund_loss|protocol_control",
+        "exploitability": "0.70",
+        "financial_impact": "critical",
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 6,
+      "patterns": [
+        {
+          "id": "general-governance-1-51-attack-via-arbitrary-execution-000",
+          "title": "1. 51% Attack via Arbitrary Execution",
+          "lineStart": 84,
+          "lineEnd": 230,
+          "lineCount": 147,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "executeExtraordinaryProposal",
+            "executeProposal"
+          ],
+          "rootCause": "Governance systems often designate certain assets as \"precious\" or \"protected\" - they shouldn't be transferable through normal proposals. However, if arbitrary external calls are allowed, a 51% majori",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 94,
+              "lineEnd": 108,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 109,
+              "lineEnd": 155,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "executeExtraordinaryProposal",
+                "executeProposal"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-2-loss-of-veto-power-enabling-takeover-001",
+          "title": "2. Loss of Veto Power Enabling Takeover",
+          "lineStart": 231,
+          "lineEnd": 329,
+          "lineCount": 99,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "executeGuardianChange",
+            "initialize",
+            "proposeGuardianChange",
+            "setGuardian",
+            "veto"
+          ],
+          "rootCause": "Veto power transfer or renunciation is not adequately protected:\n\n- Veto address can be set to zero\n\n- Veto can be removed through governance proposal\n\n- Single point of failure (one key holds veto)",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 240,
+              "lineEnd": 257,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 258,
+              "lineEnd": 292,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "initialize",
+                "setGuardian",
+                "veto"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-3-centralized-governance-control-002",
+          "title": "3. Centralized Governance Control",
+          "lineStart": 330,
+          "lineEnd": 459,
+          "lineCount": 130,
+          "severity": [
+            "CRITICAL",
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "gov",
+            "mint",
+            "owner",
+            "pause",
+            "setParameters",
+            "upgradeImplementation",
+            "withdrawTreasury"
+          ],
+          "rootCause": "Protocol design concentrates too much power in single addresses:\n\n- Single `owner` can change all parameters\n\n- Single `gov` address can mint tokens, drain treasury\n\n- No multi-sig, timelock, or gover",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 339,
+              "lineEnd": 355,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "gov",
+                "owner"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 356,
+              "lineEnd": 389,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "mint",
+                "setParameters",
+                "upgradeImplementation",
+                "withdrawTreasury"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-4-emergency-function-abuse-003",
+          "title": "4. Emergency Function Abuse",
+          "lineStart": 460,
+          "lineEnd": 558,
+          "lineCount": 99,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "emergencyDrain",
+            "emergencyWithdraw",
+            "executeEmergencyDrain",
+            "initiateEmergencyDrain"
+          ],
+          "rootCause": "Emergency functions bypass normal governance security:\n\n- Emergency withdraw allows extracting governance-locked tokens\n\n- Emergency functions accessible by single admin\n\n- No timelock or multi-sig on",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 469,
+              "lineEnd": 486,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 487,
+              "lineEnd": 517,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "emergencyDrain",
+                "emergencyWithdraw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-5-unrestricted-deployment-election-takeo-004",
+          "title": "5. Unrestricted Deployment/Election Takeover",
+          "lineStart": 559,
+          "lineEnd": 641,
+          "lineCount": 83,
+          "severity": [
+            "CRITICAL",
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "approveBytecode",
+            "deployElectionMaster",
+            "getWinner"
+          ],
+          "rootCause": "No access control on critical deployment or election functions:\n\n- Anyone can deploy new governance modules\n\n- Election results can be overwritten\n\n- No validation of deployed contract code",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 568,
+              "lineEnd": 584,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 585,
+              "lineEnd": 611,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "deployElectionMaster",
+                "getWinner"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-detection-patterns-005",
+          "title": "Detection Patterns",
+          "lineStart": 642,
+          "lineEnd": 666,
+          "lineCount": 25,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/dao-governance-vulnerabilities/proposal-lifecycle-manipulation.md",
+      "totalLines": 610,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "governance",
+        "vulnerability_type": "proposal_lifecycle_manipulation",
+        "attack_type": "logical_error|griefing|access_control",
+        "affected_component": "proposal_creation|proposal_cancellation|proposal_execution|state_machine",
+        "severity": "medium",
+        "impact": "governance_dos|proposal_manipulation|griefing",
+        "exploitability": "0.60",
+        "financial_impact": "medium_to_high",
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 6,
+      "patterns": [
+        {
+          "id": "general-governance-1-unrestricted-proposal-cancellation-000",
+          "title": "1. Unrestricted Proposal Cancellation",
+          "lineStart": 87,
+          "lineEnd": 207,
+          "lineCount": 121,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "cancel"
+          ],
+          "rootCause": "The `cancel()` function lacks proper access control, allowing anyone (or a broader class of users than intended) to cancel proposals. This includes:\n\n- No caller validation\n\n- Checking proposer's curr",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 97,
+              "lineEnd": 112,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "cancel"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 113,
+              "lineEnd": 154,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "cancel"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-2-proposal-threshold-bypass-for-griefing-001",
+          "title": "2. Proposal Threshold Bypass for Griefing",
+          "lineStart": 208,
+          "lineEnd": 312,
+          "lineCount": 105,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "cancel",
+            "execute",
+            "propose"
+          ],
+          "rootCause": "Threshold is checked at proposal creation time using current voting power. Proposer can acquire tokens momentarily, create proposals, then dispose of tokens, having never held meaningful stake.",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 217,
+              "lineEnd": 231,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 232,
+              "lineEnd": 272,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "cancel",
+                "propose"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-3-proposal-expiration-logic-errors-002",
+          "title": "3. Proposal Expiration Logic Errors",
+          "lineStart": 313,
+          "lineEnd": 411,
+          "lineCount": 99,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_isExpired",
+            "state"
+          ],
+          "rootCause": "Expiration timestamp calculation errors:\n\n- Wrong base timestamp (start instead of end)\n\n- Off-by-one errors in comparison\n\n- Missing grace period addition\n\n- Inverted comparison operators",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 322,
+              "lineEnd": 340,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 341,
+              "lineEnd": 382,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_isExpired",
+                "state"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-4-state-machine-transition-vulnerabiliti-003",
+          "title": "4. State Machine Transition Vulnerabilities",
+          "lineStart": 412,
+          "lineEnd": 480,
+          "lineCount": 69,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "execute",
+            "queue"
+          ],
+          "rootCause": "State machine implementation errors:\n\n- Missing state checks before transitions\n\n- Wrong state returned from state() function\n\n- Race conditions between state checks and actions",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 418,
+              "lineEnd": 426,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 427,
+              "lineEnd": 455,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "execute",
+                "queue"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-5-proposal-execution-vulnerabilities-004",
+          "title": "5. Proposal Execution Vulnerabilities",
+          "lineStart": 481,
+          "lineEnd": 556,
+          "lineCount": 76,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "execute",
+            "propose",
+            "updateProposal"
+          ],
+          "rootCause": "Execution-related issues:\n\n- Proposal content modified after creation\n\n- Execution without proper state checks\n\n- Partial execution with no rollback\n\n- Reentrancy during execution",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 487,
+              "lineEnd": 496,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 497,
+              "lineEnd": 531,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "execute",
+                "updateProposal"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-detection-patterns-005",
+          "title": "Detection Patterns",
+          "lineStart": 557,
+          "lineEnd": 582,
+          "lineCount": 26,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/dao-governance-vulnerabilities/quorum-manipulation.md",
+      "totalLines": 591,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "governance",
+        "vulnerability_type": "quorum_manipulation",
+        "attack_type": "logical_error|state_manipulation",
+        "affected_component": "quorum_calculation|dynamic_quorum|voting_threshold",
+        "severity": "medium_to_high",
+        "impact": "governance_bypass|proposal_manipulation",
+        "exploitability": "0.65",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 6,
+      "patterns": [
+        {
+          "id": "general-governance-1-quorum-lowering-via-delegation-abuse-000",
+          "title": "1. Quorum Lowering via Delegation Abuse",
+          "lineStart": 82,
+          "lineEnd": 208,
+          "lineCount": 127,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_quorumReached",
+            "adjustedTotalSupply",
+            "propose",
+            "quorumVotes"
+          ],
+          "rootCause": "Quorum is calculated based on total adjusted supply at a snapshot block. If delegation changes can affect what counts as \"adjusted\" supply after the snapshot, attackers can lower the quorum requiremen",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 92,
+              "lineEnd": 107,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 108,
+              "lineEnd": 152,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_quorumReached",
+                "adjustedTotalSupply",
+                "quorumVotes"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-2-dynamic-quorum-manipulation-001",
+          "title": "2. Dynamic Quorum Manipulation",
+          "lineStart": 209,
+          "lineEnd": 271,
+          "lineCount": 63,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "updateQuorum"
+          ],
+          "rootCause": "Automatic quorum adjustment algorithms that lower quorum when participation drops can be gamed by coordinated non-participation.",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 215,
+              "lineEnd": 228,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 229,
+              "lineEnd": 247,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "updateQuorum"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-3-quorum-threshold-miscalculation-002",
+          "title": "3. Quorum Threshold Miscalculation",
+          "lineStart": 272,
+          "lineEnd": 366,
+          "lineCount": 95,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_isProposalSucceeded",
+            "_quorumReached"
+          ],
+          "rootCause": "Mathematical errors in quorum calculation - using wrong base values, missing percentage conversions, or comparing against wrong vote tallies.",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 281,
+              "lineEnd": 293,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 294,
+              "lineEnd": 327,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_isProposalSucceeded",
+                "_quorumReached"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-4-quorum-not-enforced-in-state-transitio-003",
+          "title": "4. Quorum Not Enforced in State Transitions",
+          "lineStart": 367,
+          "lineEnd": 449,
+          "lineCount": 83,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "state"
+          ],
+          "rootCause": "The `state()` function determines proposal outcome but fails to check quorum in the success path, or quorum check is placed in wrong branch of conditional logic.",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 376,
+              "lineEnd": 389,
+              "severity": [],
+              "codeKeywords": [
+                "state"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 390,
+              "lineEnd": 416,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "state"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-5-tie-handling-vulnerabilities-004",
+          "title": "5. Tie Handling Vulnerabilities",
+          "lineStart": 450,
+          "lineEnd": 537,
+          "lineCount": 88,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_isSucceeded",
+            "state"
+          ],
+          "rootCause": "Using `>=` instead of `>` when comparing FOR votes to AGAINST votes causes ties to pass. This is often an intentional design choice but frequently inconsistent with governance documentation.",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 460,
+              "lineEnd": 473,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 474,
+              "lineEnd": 505,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_isSucceeded",
+                "state"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-detection-patterns-005",
+          "title": "Detection Patterns",
+          "lineStart": 538,
+          "lineEnd": 563,
+          "lineCount": 26,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/dao-governance-vulnerabilities/timelock-bypass.md",
+      "totalLines": 569,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "governance",
+        "vulnerability_type": "timelock_bypass",
+        "attack_type": "logical_error|access_control",
+        "affected_component": "timelock_controller|governance_admin|delay_enforcement",
+        "severity": "high",
+        "impact": "governance_bypass|unauthorized_execution|fund_loss",
+        "exploitability": "0.75",
+        "financial_impact": "critical",
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 6,
+      "patterns": [
+        {
+          "id": "general-governance-1-timelock-bypass-via-privileged-functio-000",
+          "title": "1. Timelock Bypass via Privileged Functions",
+          "lineStart": 86,
+          "lineEnd": 219,
+          "lineCount": 134,
+          "severity": [
+            "CRITICAL",
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "emergencyWithdraw",
+            "setAdmin",
+            "setDelay",
+            "setDelay(0",
+            "setGovernor",
+            "setGovernor(attackerAddress"
+          ],
+          "rootCause": "Critical governance functions that control the timelock parameters (delay, governor, admin) can be called directly by privileged addresses without going through the timelock delay mechanism themselves",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 95,
+              "lineEnd": 108,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "setDelay(0",
+                "setGovernor(attackerAddress"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 109,
+              "lineEnd": 162,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "emergencyWithdraw",
+                "setAdmin",
+                "setDelay",
+                "setGovernor"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-2-zero-minimal-delay-vulnerabilities-001",
+          "title": "2. Zero/Minimal Delay Vulnerabilities",
+          "lineStart": 220,
+          "lineEnd": 285,
+          "lineCount": 66,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "setDelay"
+          ],
+          "rootCause": "Constructor or initialization code sets the delay to zero, or validation logic allows zero/minimal delays, effectively disabling the timelock.",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 229,
+              "lineEnd": 241,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 242,
+              "lineEnd": 264,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "setDelay"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-3-timelock-reduction-during-active-lock-002",
+          "title": "3. Timelock Reduction During Active Lock",
+          "lineStart": 286,
+          "lineEnd": 348,
+          "lineCount": 63,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_timelockMint"
+          ],
+          "rootCause": "Timelock end timestamp is calculated as `block.timestamp + timelockLength` every time a minting/locking function is called, rather than taking the maximum of existing and new timelocks.",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 295,
+              "lineEnd": 308,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 309,
+              "lineEnd": 328,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_timelockMint"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-4-canceled-proposal-still-executable-003",
+          "title": "4. Canceled Proposal Still Executable",
+          "lineStart": 349,
+          "lineEnd": 439,
+          "lineCount": 91,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "TimelockController.executeBatch",
+            "cancel",
+            "executeBatch"
+          ],
+          "rootCause": "The `cancel()` function in the governance contract only updates the governance state but does not call `cancel()` on the TimelockController, leaving the operation still queued for execution.",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 358,
+              "lineEnd": 372,
+              "severity": [],
+              "codeKeywords": [
+                "TimelockController.executeBatch",
+                "cancel"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 373,
+              "lineEnd": 413,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "cancel",
+                "executeBatch"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-5-storage-collision-attacks-004",
+          "title": "5. Storage Collision Attacks",
+          "lineStart": 440,
+          "lineEnd": 518,
+          "lineCount": 79,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "bytes32",
+            "cancel",
+            "cancel(bytes32(0",
+            "initialize"
+          ],
+          "rootCause": "The `cancel()` function takes a raw `bytes32` id as input without validation. When XORed with internal storage slot calculations, arbitrary storage slots can be cleared if the id matches certain patte",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 449,
+              "lineEnd": 463,
+              "severity": [],
+              "codeKeywords": [
+                "bytes32",
+                "cancel",
+                "cancel(bytes32(0",
+                "initialize"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 464,
+              "lineEnd": 487,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "cancel"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-detection-patterns-005",
+          "title": "Detection Patterns",
+          "lineStart": 519,
+          "lineEnd": 542,
+          "lineCount": 24,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/dao-governance-vulnerabilities/voting-power-manipulation.md",
+      "totalLines": 607,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "governance",
+        "vulnerability_type": "voting_power_manipulation",
+        "attack_type": "economic_exploit|logical_error",
+        "affected_component": "voting_system|delegation_logic|checkpoint_system",
+        "severity": "high",
+        "impact": "governance_hijacking|fund_loss|manipulation",
+        "exploitability": "0.80",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 6,
+      "patterns": [
+        {
+          "id": "general-governance-1-double-voting-via-delegation-abuse-000",
+          "title": "1. Double Voting via Delegation Abuse",
+          "lineStart": 88,
+          "lineEnd": 263,
+          "lineCount": 176,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "delegate",
+            "getVotes",
+            "vote",
+            "withdraw"
+          ],
+          "rootCause": "When a user delegates their voting power and later withdraws/transfers their stake, there are no restrictions preventing the delegated stake from being used again. Additionally, when re-delegating to ",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 98,
+              "lineEnd": 112,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 113,
+              "lineEnd": 188,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "delegate",
+                "getVotes",
+                "vote",
+                "withdraw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-2-flash-loan-voting-attacks-001",
+          "title": "2. Flash Loan Voting Attacks",
+          "lineStart": 264,
+          "lineEnd": 360,
+          "lineCount": 97,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "castVote",
+            "countMemberVotes",
+            "getVotingPower",
+            "propose",
+            "vote"
+          ],
+          "rootCause": "Voting power is calculated based on current token balance at vote time, rather than a historical snapshot taken before the proposal was created. This allows instantaneous balance changes to affect vot",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 273,
+              "lineEnd": 286,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 287,
+              "lineEnd": 323,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "castVote",
+                "countMemberVotes",
+                "vote"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-3-unlimited-vote-minting-002",
+          "title": "3. Unlimited Vote Minting",
+          "lineStart": 361,
+          "lineEnd": 448,
+          "lineCount": 88,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_initializeDistributionRecord",
+            "again",
+            "initializeDistributionRecord"
+          ],
+          "rootCause": "Public initialization functions that mint voting tokens lack proper access control or single-use enforcement, allowing repeated calls to inflate voting power.",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 370,
+              "lineEnd": 383,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "again",
+                "initializeDistributionRecord"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 384,
+              "lineEnd": 411,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_initializeDistributionRecord",
+                "initializeDistributionRecord"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-4-missing-voting-power-snapshots-003",
+          "title": "4. Missing Voting Power Snapshots",
+          "lineStart": 449,
+          "lineEnd": 529,
+          "lineCount": 81,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "castVote",
+            "getVotingPower(msg.sender",
+            "propose"
+          ],
+          "rootCause": "The governance contract uses current voting power (`getVotingPower(msg.sender)`) instead of historical voting power at a specific snapshot block.",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 458,
+              "lineEnd": 471,
+              "severity": [],
+              "codeKeywords": [
+                "getVotingPower(msg.sender"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 472,
+              "lineEnd": 499,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "castVote"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-5-delegation-logic-errors-004",
+          "title": "5. Delegation Logic Errors",
+          "lineStart": 530,
+          "lineEnd": 556,
+          "lineCount": 27,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_delegate"
+          ],
+          "rootCause": "Self-delegation toggles community power",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 536,
+              "lineEnd": 556,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_delegate"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-detection-patterns-005",
+          "title": "Detection Patterns",
+          "lineStart": 557,
+          "lineEnd": 579,
+          "lineCount": 23,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/stablecoin-vulnerabilities/STABLECOIN_VULNERABILITIES.md",
+      "totalLines": 232,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "logic",
+        "vulnerability_type": "stablecoin_pricing_assumptions",
+        "attack_type": "logical_error",
+        "affected_component": "pricing_logic",
+        "severity": "low",
+        "impact": "incorrect_pricing",
+        "exploitability": "0.45",
+        "financial_impact": "medium",
+        "language": "solidity|rust",
+        "version": "all"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "general-governance-vulnerability-description-000",
+          "title": "Vulnerability Description",
+          "lineStart": 66,
+          "lineEnd": 144,
+          "lineCount": 79,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "mint"
+          ],
+          "rootCause": "- Stablecoins are treated as permanently pegged to $1 (or to another stablecoin) without real-time price validation.\n\n- Hardcoded prices or static exchange rates are used where a live oracle or tolera",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 68,
+              "lineEnd": 74,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Attack Scenario",
+              "lineStart": 75,
+              "lineEnd": 81,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 82,
+              "lineEnd": 144,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "mint"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/malicious/rug-pull-detection-patterns.md",
+      "totalLines": 834,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "malicious_code",
+        "vulnerability_type": "rug_pull_detection",
+        "attack_type": "intentional_malicious_code",
+        "affected_component": "token_contract",
+        "severity": "critical",
+        "impact": "total_fund_loss",
+        "exploitability": "1.0",
+        "financial_impact": "critical",
+        "source": "DeFiHackLabs"
+      },
+      "patternCount": 13,
+      "patterns": [
+        {
+          "id": "general-governance-rug-pull-malicious-contract-detection-pa-000",
+          "title": "Rug Pull & Malicious Contract Detection Patterns",
+          "lineStart": 46,
+          "lineEnd": 76,
+          "lineCount": 31,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": "Malicious contracts contain intentionally hidden functionality that allows the contract deployer (or privileged addresses) to:\n\n- Drain liquidity from trading pairs\n\n- Prevent users from selling token",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 52,
+              "lineEnd": 76,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-governance-category-1-hidden-mint-burn-functions-001",
+          "title": "Category 1: Hidden Mint/Burn Functions",
+          "lineStart": 77,
+          "lineEnd": 143,
+          "lineCount": 67,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_secretMint",
+            "burnFrom",
+            "transferFrom",
+            "updateRewards"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 1.1: Magic Number Triggered Mint (YziAI Pattern) [CRITICAL]",
+              "lineStart": 79,
+              "lineEnd": 115,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "transferFrom"
+              ]
+            },
+            {
+              "title": "Pattern 1.2: Privileged Mint Without Event Emission [HIGH]",
+              "lineStart": 116,
+              "lineEnd": 131,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_secretMint",
+                "updateRewards"
+              ]
+            },
+            {
+              "title": "Pattern 1.3: Burn from Any Address [HIGH]",
+              "lineStart": 132,
+              "lineEnd": 143,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "burnFrom"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-category-2-transfer-restrictions-honeypo-002",
+          "title": "Category 2: Transfer Restrictions (Honeypots)",
+          "lineStart": 144,
+          "lineEnd": 266,
+          "lineCount": 123,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_transfer",
+            "burn",
+            "setAccSeMaxAmount",
+            "setBlacklist",
+            "setSellFee",
+            "setTaxWallet",
+            "transferFrom"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 2.1: TaxWallet-Based Pair Drain (IRYSAI Pattern) [CRITICAL]",
+              "lineStart": 146,
+              "lineEnd": 176,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "burn",
+                "setTaxWallet",
+                "transferFrom"
+              ]
+            },
+            {
+              "title": "Pattern 2.2: Cumulative Transfer Limit (Honeypot) [CRITICAL]",
+              "lineStart": 177,
+              "lineEnd": 211,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_transfer",
+                "setAccSeMaxAmount"
+              ]
+            },
+            {
+              "title": "Pattern 2.3: Blacklist/Whitelist Manipulation [HIGH]",
+              "lineStart": 212,
+              "lineEnd": 228,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_transfer",
+                "setBlacklist"
+              ]
+            },
+            {
+              "title": "Pattern 2.4: Time-Based Transfer Lock [HIGH]",
+              "lineStart": 229,
+              "lineEnd": 246,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_transfer"
+              ]
+            },
+            {
+              "title": "Pattern 2.5: Hidden Fee That Blocks Sells [HIGH]",
+              "lineStart": 247,
+              "lineEnd": 266,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_transfer",
+                "setSellFee"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-category-3-hidden-fee-mechanisms-003",
+          "title": "Category 3: Hidden Fee Mechanisms",
+          "lineStart": 267,
+          "lineEnd": 314,
+          "lineCount": 48,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_transfer",
+            "setFeeRecipient",
+            "startTrading"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 3.1: Unverified External Contract Fee Logic (CirculateBUSD Pattern) [CRITICAL]",
+              "lineStart": 269,
+              "lineEnd": 294,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "startTrading"
+              ]
+            },
+            {
+              "title": "Pattern 3.2: Dynamic Fee Recipient [HIGH]",
+              "lineStart": 295,
+              "lineEnd": 314,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_transfer",
+                "setFeeRecipient"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-category-4-self-destruct-capabilities-004",
+          "title": "Category 4: Self-Destruct Capabilities",
+          "lineStart": 315,
+          "lineEnd": 347,
+          "lineCount": 33,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "emergencyWithdraw",
+            "selfdestruct",
+            "upgrade"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 4.1: Hidden Selfdestruct [CRITICAL]",
+              "lineStart": 317,
+              "lineEnd": 334,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "emergencyWithdraw",
+                "selfdestruct"
+              ]
+            },
+            {
+              "title": "Pattern 4.2: Delegatecall to Selfdestruct [CRITICAL]",
+              "lineStart": 335,
+              "lineEnd": 347,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "upgrade"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-category-5-malicious-proxy-implementatio-005",
+          "title": "Category 5: Malicious Proxy Implementations",
+          "lineStart": 348,
+          "lineEnd": 418,
+          "lineCount": 71,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_getAdmin",
+            "admin",
+            "sweepERC20",
+            "sweepETH",
+            "transfer",
+            "upgradeTo"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 5.1: Trojan Proxy Upgrade (Bybit Pattern) [CRITICAL]",
+              "lineStart": 350,
+              "lineEnd": 391,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "sweepERC20",
+                "sweepETH",
+                "transfer"
+              ]
+            },
+            {
+              "title": "Pattern 5.2: Upgradeable Proxy with Hidden Admin [HIGH]",
+              "lineStart": 392,
+              "lineEnd": 418,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_getAdmin",
+                "admin",
+                "upgradeTo"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-category-6-time-locked-malicious-upgrade-006",
+          "title": "Category 6: Time-Locked Malicious Upgrades",
+          "lineStart": 419,
+          "lineEnd": 475,
+          "lineCount": 57,
+          "severity": [
+            "CRITICAL",
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "EmergencyWithdraw",
+            "emergencyDrain",
+            "initialize"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 6.1: Time-Based Backdoor Activation (Roar Pattern) [CRITICAL]",
+              "lineStart": 421,
+              "lineEnd": 456,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "EmergencyWithdraw"
+              ]
+            },
+            {
+              "title": "Pattern 6.2: Delayed Activation via Block Number [HIGH]",
+              "lineStart": 457,
+              "lineEnd": 475,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "emergencyDrain",
+                "initialize"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-category-7-owner-controlled-swap-disabli-007",
+          "title": "Category 7: Owner-Controlled Swap Disabling",
+          "lineStart": 476,
+          "lineEnd": 548,
+          "lineCount": 73,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_transfer",
+            "approve",
+            "attack",
+            "enableTrading",
+            "setBot",
+            "setTradingPair",
+            "transferFrom"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 7.1: Trading Enable/Disable (BUBAI Pattern) [CRITICAL]",
+              "lineStart": 478,
+              "lineEnd": 506,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "approve",
+                "attack",
+                "transferFrom"
+              ]
+            },
+            {
+              "title": "Pattern 7.2: Trading Pair Manipulation [HIGH]",
+              "lineStart": 507,
+              "lineEnd": 529,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_transfer",
+                "enableTrading",
+                "setTradingPair"
+              ]
+            },
+            {
+              "title": "Pattern 7.3: Anti-Bot That Blocks Everyone [HIGH]",
+              "lineStart": 530,
+              "lineEnd": 548,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_transfer",
+                "setBot"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-category-8-vrug-direct-pair-swap-manipul-008",
+          "title": "Category 8: VRug - Direct Pair Swap Manipulation [CRITICAL]",
+          "lineStart": 549,
+          "lineEnd": 573,
+          "lineCount": 25,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-impact-analysis-009",
+          "title": "Impact Analysis",
+          "lineStart": 574,
+          "lineEnd": 597,
+          "lineCount": 24,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-secure-implementation-010",
+          "title": "Secure Implementation",
+          "lineStart": 598,
+          "lineEnd": 676,
+          "lineCount": 79,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "executeUpgrade",
+            "proposeUpgrade",
+            "transfer",
+            "transferFrom"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-detection-patterns-011",
+          "title": "Detection Patterns",
+          "lineStart": 677,
+          "lineEnd": 728,
+          "lineCount": 52,
+          "severity": [],
+          "codeKeywords": [
+            "transferFrom"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Static Analysis Queries",
+              "lineStart": 709,
+              "lineEnd": 728,
+              "severity": [],
+              "codeKeywords": [
+                "transferFrom"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-real-world-examples-012",
+          "title": "Real-World Examples",
+          "lineStart": 747,
+          "lineEnd": 769,
+          "lineCount": 23,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Related Post-Mortems",
+              "lineStart": 762,
+              "lineEnd": 769,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/mev-bot/mev-bot-vulnerabilities.md",
+      "totalLines": 401,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "mev",
+        "vulnerability_type": "mev_bot_exploitation",
+        "attack_type": "arbitrage_exploitation",
+        "affected_component": "mev_bot",
+        "severity": "high",
+        "impact": "fund_loss",
+        "exploitability": "0.7",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "all",
+        "source": "DeFiHackLabs"
+      },
+      "patternCount": 6,
+      "patterns": [
+        {
+          "id": "general-governance-overview-000",
+          "title": "Overview",
+          "lineStart": 48,
+          "lineEnd": 55,
+          "lineCount": 8,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-vulnerability-categories-001",
+          "title": "Vulnerability Categories",
+          "lineStart": 56,
+          "lineEnd": 74,
+          "lineCount": 19,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "5. Private Key Compromise",
+              "lineStart": 70,
+              "lineEnd": 74,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-governance-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 75,
+          "lineEnd": 278,
+          "lineCount": 204,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "executeOperation",
+            "pancakeCall",
+            "uniswapV3SwapCallback"
+          ],
+          "rootCause": "Open callback function without access control",
+          "subsections": [
+            {
+              "title": "Example 1: 0xbad MEV Bot [CRITICAL]",
+              "lineStart": 77,
+              "lineEnd": 117,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "executeOperation"
+              ]
+            },
+            {
+              "title": "Example 2: BNB48 MEV Bot [CRITICAL]",
+              "lineStart": 118,
+              "lineEnd": 149,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "pancakeCall"
+              ]
+            },
+            {
+              "title": "Example 3: Uniswap V3 Callback Exploitation [HIGH]",
+              "lineStart": 150,
+              "lineEnd": 197,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "uniswapV3SwapCallback"
+              ]
+            },
+            {
+              "title": "Example 4: Token Approval Exposure [HIGH]",
+              "lineStart": 198,
+              "lineEnd": 229,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "emergencyExecute",
+                "setupApprovals"
+              ]
+            },
+            {
+              "title": "Example 5: Private Transaction Leakage [MEDIUM]",
+              "lineStart": 230,
+              "lineEnd": 250,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Example 6: OmniDex MEV Bot [HIGH]",
+              "lineStart": 251,
+              "lineEnd": 278,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "executeArbitrage"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-real-world-exploits-summary-003",
+          "title": "Real-World Exploits Summary",
+          "lineStart": 279,
+          "lineEnd": 290,
+          "lineCount": 12,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-secure-implementation-guidelines-004",
+          "title": "Secure Implementation Guidelines",
+          "lineStart": 291,
+          "lineEnd": 375,
+          "lineCount": 85,
+          "severity": [],
+          "codeKeywords": [
+            "approveForTrade",
+            "executeAndRevoke",
+            "executeArbitrage",
+            "executeSwap",
+            "revokeApproval",
+            "uniswapV3SwapCallback"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "1. Strict Access Control on All Functions",
+              "lineStart": 293,
+              "lineEnd": 309,
+              "severity": [],
+              "codeKeywords": [
+                "executeArbitrage"
+              ]
+            },
+            {
+              "title": "2. Validate Callback Callers",
+              "lineStart": 310,
+              "lineEnd": 327,
+              "severity": [],
+              "codeKeywords": [
+                "uniswapV3SwapCallback"
+              ]
+            },
+            {
+              "title": "3. Minimize Token Approvals",
+              "lineStart": 328,
+              "lineEnd": 356,
+              "severity": [],
+              "codeKeywords": [
+                "approveForTrade",
+                "executeAndRevoke",
+                "revokeApproval"
+              ]
+            },
+            {
+              "title": "4. Use Private Transaction Submission",
+              "lineStart": 357,
+              "lineEnd": 364,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "5. Implement Reentrancy Guards",
+              "lineStart": 365,
+              "lineEnd": 375,
+              "severity": [],
+              "codeKeywords": [
+                "executeSwap"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-detection-patterns-005",
+          "title": "Detection Patterns",
+          "lineStart": 376,
+          "lineEnd": 398,
+          "lineCount": 23,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Manual Checklist",
+              "lineStart": 378,
+              "lineEnd": 386,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Code Review Focus",
+              "lineStart": 387,
+              "lineEnd": 398,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/randomness/weak-randomness-vulnerabilities.md",
+      "totalLines": 495,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "cryptography",
+        "vulnerability_type": "weak_randomness",
+        "attack_type": "prediction",
+        "affected_component": "random_number_generation",
+        "severity": "high",
+        "impact": "fund_loss",
+        "exploitability": "0.8",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "all",
+        "source": "DeFiHackLabs"
+      },
+      "patternCount": 6,
+      "patterns": [
+        {
+          "id": "general-governance-overview-000",
+          "title": "Overview",
+          "lineStart": 49,
+          "lineEnd": 56,
+          "lineCount": 8,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "block.number",
+            "block.timestamp",
+            "blockhash",
+            "prevrandao"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-vulnerability-categories-001",
+          "title": "Vulnerability Categories",
+          "lineStart": 57,
+          "lineEnd": 75,
+          "lineCount": 19,
+          "severity": [],
+          "codeKeywords": [
+            "block.difficulty",
+            "block.number",
+            "block.prevrandao",
+            "block.timestamp",
+            "blockhash"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "5. Commit-Reveal Bypass",
+              "lineStart": 71,
+              "lineEnd": 75,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-governance-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 76,
+          "lineEnd": 355,
+          "lineCount": 280,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "buyTicket",
+            "exploit",
+            "mint",
+            "pickWinner",
+            "tryMint"
+          ],
+          "rootCause": "Predictable randomness from block.timestamp",
+          "subsections": [
+            {
+              "title": "Example 1: Block Timestamp Randomness [CRITICAL]",
+              "lineStart": 78,
+              "lineEnd": 118,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "buyTicket",
+                "pickWinner"
+              ]
+            },
+            {
+              "title": "Example 2: Same-Block Prediction [CRITICAL]",
+              "lineStart": 119,
+              "lineEnd": 183,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "exploit",
+                "mint",
+                "tryMint"
+              ]
+            },
+            {
+              "title": "Example 3: Blockhash Vulnerability [HIGH]",
+              "lineStart": 184,
+              "lineEnd": 230,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "placeBet",
+                "resolveBet"
+              ]
+            },
+            {
+              "title": "Example 4: Prevrandao Misconception [HIGH]",
+              "lineStart": 231,
+              "lineEnd": 257,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "getRandomNumber"
+              ]
+            },
+            {
+              "title": "Example 5: Flawed Commit-Reveal [MEDIUM]",
+              "lineStart": 258,
+              "lineEnd": 322,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "commit",
+                "reveal"
+              ]
+            },
+            {
+              "title": "Example 6: RND Token Exploit [HIGH]",
+              "lineStart": 323,
+              "lineEnd": 355,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "spin"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-real-world-exploits-summary-003",
+          "title": "Real-World Exploits Summary",
+          "lineStart": 356,
+          "lineEnd": 367,
+          "lineCount": 12,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-secure-implementation-guidelines-004",
+          "title": "Secure Implementation Guidelines",
+          "lineStart": 368,
+          "lineEnd": 461,
+          "lineCount": 94,
+          "severity": [],
+          "codeKeywords": [
+            "commit",
+            "fulfillRandom",
+            "fulfillRandomWords",
+            "requestRandom",
+            "requestRandomWinner",
+            "reveal"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "1. Use Chainlink VRF",
+              "lineStart": 370,
+              "lineEnd": 402,
+              "severity": [],
+              "codeKeywords": [
+                "fulfillRandomWords",
+                "requestRandomWinner"
+              ]
+            },
+            {
+              "title": "2. Proper Commit-Reveal",
+              "lineStart": 403,
+              "lineEnd": 428,
+              "severity": [],
+              "codeKeywords": [
+                "commit",
+                "reveal"
+              ]
+            },
+            {
+              "title": "3. Use Block Hash from Future Block (with timeout)",
+              "lineStart": 429,
+              "lineEnd": 461,
+              "severity": [],
+              "codeKeywords": [
+                "fulfillRandom",
+                "requestRandom"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-detection-patterns-005",
+          "title": "Detection Patterns",
+          "lineStart": 462,
+          "lineEnd": 492,
+          "lineCount": 31,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Semgrep Rules",
+              "lineStart": 464,
+              "lineEnd": 482,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Manual Checklist",
+              "lineStart": 483,
+              "lineEnd": 492,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

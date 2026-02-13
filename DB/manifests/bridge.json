@@ -3,7 +3,7 @@
     "category": "bridge",
     "description": "Pattern-level index for bridge vulnerabilities",
     "fileCount": 4,
-    "totalPatterns": 45,
+    "totalPatterns": 32,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
   },
   "files": [
@@ -26,80 +26,10 @@
         "language": "solidity",
         "version": "all"
       },
-      "patternCount": 11,
+      "patternCount": 8,
       "patterns": [
         {
-          "id": "bridge-references-source-reports-000",
-          "title": "References & Source Reports",
-          "lineStart": 52,
-          "lineEnd": 88,
-          "lineCount": 37,
-          "severity": [
-            "HIGH",
-            "MEDIUM"
-          ],
-          "codeKeywords": [],
-          "rootCause": null,
-          "subsections": [
-            {
-              "title": "Cross-Chain Replay Vulnerabilities",
-              "lineStart": 56,
-              "lineEnd": 62,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Sequencer & L2 Issues",
-              "lineStart": 63,
-              "lineEnd": 68,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Token Handling Issues",
-              "lineStart": 69,
-              "lineEnd": 75,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Access Control Issues",
-              "lineStart": 76,
-              "lineEnd": 81,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "External Links",
-              "lineStart": 82,
-              "lineEnd": 88,
-              "severity": [],
-              "codeKeywords": []
-            }
-          ]
-        },
-        {
-          "id": "bridge-table-of-contents-001",
-          "title": "Table of Contents",
-          "lineStart": 95,
-          "lineEnd": 106,
-          "lineCount": 12,
-          "severity": [],
-          "codeKeywords": [],
-          "rootCause": null,
-          "subsections": null
-        },
-        {
-          "id": "bridge-1-cross-chain-replay-attacks-002",
+          "id": "bridge-1-cross-chain-replay-attacks-000",
           "title": "1. Cross-Chain Replay Attacks",
           "lineStart": 107,
           "lineEnd": 324,
@@ -109,19 +39,12 @@
             "HIGH"
           ],
           "codeKeywords": [
-            "bridgeWithSignature"
+            "bridgeWithSignature",
+            "execute",
+            "processMessage"
           ],
           "rootCause": "Bridge messages or signatures don't include sufficient context (chain ID, contract address, nonce) to prevent replay across different chains or contract instances.",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 109,
-              "lineEnd": 117,
-              "severity": [
-                "CRITICAL"
-              ],
-              "codeKeywords": []
-            },
             {
               "title": "Vulnerability Description",
               "lineStart": 118,
@@ -141,27 +64,11 @@
                 "execute",
                 "processMessage"
               ]
-            },
-            {
-              "title": "Impact Analysis",
-              "lineStart": 215,
-              "lineEnd": 226,
-              "severity": [],
-              "codeKeywords": []
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 227,
-              "lineEnd": 324,
-              "severity": [],
-              "codeKeywords": [
-                "bridgeWithSignature"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-2-signature-validation-issues-003",
+          "id": "bridge-2-signature-validation-issues-001",
           "title": "2. Signature Validation Issues",
           "lineStart": 325,
           "lineEnd": 389,
@@ -177,13 +84,6 @@
           "rootCause": "No signature length validation",
           "subsections": [
             {
-              "title": "Overview",
-              "lineStart": 327,
-              "lineEnd": 330,
-              "severity": [],
-              "codeKeywords": []
-            },
-            {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 331,
               "lineEnd": 361,
@@ -195,20 +95,11 @@
                 "execute",
                 "verify"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 362,
-              "lineEnd": 389,
-              "severity": [],
-              "codeKeywords": [
-                "execute"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-3-token-bridging-issues-004",
+          "id": "bridge-3-token-bridging-issues-002",
           "title": "3. Token Bridging Issues",
           "lineStart": 390,
           "lineEnd": 501,
@@ -219,17 +110,12 @@
           "codeKeywords": [
             "bridge",
             "bridgeTokens",
-            "deposit"
+            "denormalizeAmount",
+            "deposit",
+            "normalizeAmount"
           ],
           "rootCause": "Doesn't account for transfer fees",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 392,
-              "lineEnd": 400,
-              "severity": [],
-              "codeKeywords": []
-            },
             {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 401,
@@ -242,22 +128,11 @@
                 "bridgeTokens",
                 "deposit"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 449,
-              "lineEnd": 501,
-              "severity": [],
-              "codeKeywords": [
-                "bridgeTokens",
-                "denormalizeAmount",
-                "normalizeAmount"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-4-sequencer-l2-specific-issues-005",
+          "id": "bridge-4-sequencer-l2-specific-issues-003",
           "title": "4. Sequencer & L2 Specific Issues",
           "lineStart": 502,
           "lineEnd": 584,
@@ -267,17 +142,11 @@
           ],
           "codeKeywords": [
             "claim",
-            "emergencyWithdraw"
+            "emergencyWithdraw",
+            "emergencyWithdrawL1"
           ],
           "rootCause": "Blocked when sequencer down",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 504,
-              "lineEnd": 510,
-              "severity": [],
-              "codeKeywords": []
-            },
             {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 511,
@@ -289,22 +158,11 @@
                 "claim",
                 "emergencyWithdraw"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 543,
-              "lineEnd": 584,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": [
-                "emergencyWithdrawL1"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-5-access-control-vulnerabilities-006",
+          "id": "bridge-5-access-control-vulnerabilities-004",
           "title": "5. Access Control Vulnerabilities",
           "lineStart": 585,
           "lineEnd": 658,
@@ -321,13 +179,6 @@
           "rootCause": "Approval persists after bridging",
           "subsections": [
             {
-              "title": "Overview",
-              "lineStart": 587,
-              "lineEnd": 594,
-              "severity": [],
-              "codeKeywords": []
-            },
-            {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 595,
               "lineEnd": 629,
@@ -339,21 +190,11 @@
                 "bridge",
                 "createCrossChainAccount"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 630,
-              "lineEnd": 658,
-              "severity": [],
-              "codeKeywords": [
-                "bridgeNFT",
-                "createCrossChainAccount"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-6-slippage-mev-issues-007",
+          "id": "bridge-6-slippage-mev-issues-005",
           "title": "6. Slippage & MEV Issues",
           "lineStart": 659,
           "lineEnd": 741,
@@ -364,17 +205,11 @@
           "codeKeywords": [
             "bridgeAndSwap",
             "complete",
+            "completeSwap",
             "quote"
           ],
           "rootCause": "No minimum output",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 661,
-              "lineEnd": 664,
-              "severity": [],
-              "codeKeywords": []
-            },
             {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 665,
@@ -387,23 +222,11 @@
                 "complete",
                 "quote"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 702,
-              "lineEnd": 741,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "bridgeAndSwap",
-                "completeSwap"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-7-message-ordering-timing-008",
+          "id": "bridge-7-message-ordering-timing-006",
           "title": "7. Message Ordering & Timing",
           "lineStart": 742,
           "lineEnd": 802,
@@ -420,13 +243,6 @@
           "rootCause": "Assumes message order",
           "subsections": [
             {
-              "title": "Overview",
-              "lineStart": 744,
-              "lineEnd": 747,
-              "severity": [],
-              "codeKeywords": []
-            },
-            {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 748,
               "lineEnd": 766,
@@ -437,69 +253,17 @@
                 "deposit",
                 "withdraw"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 767,
-              "lineEnd": 802,
-              "severity": [],
-              "codeKeywords": [
-                "processBurn",
-                "processMint"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-detection-patterns-009",
+          "id": "bridge-detection-patterns-007",
           "title": "Detection Patterns",
           "lineStart": 803,
           "lineEnd": 832,
           "lineCount": 30,
           "severity": [],
           "codeKeywords": [],
-          "rootCause": null,
-          "subsections": [
-            {
-              "title": "Code Patterns to Look For",
-              "lineStart": 805,
-              "lineEnd": 818,
-              "severity": [],
-              "codeKeywords": []
-            },
-            {
-              "title": "Audit Checklist",
-              "lineStart": 819,
-              "lineEnd": 832,
-              "severity": [],
-              "codeKeywords": []
-            }
-          ]
-        },
-        {
-          "id": "bridge-keywords-for-search-010",
-          "title": "Keywords for Search",
-          "lineStart": 833,
-          "lineEnd": 838,
-          "lineCount": 6,
-          "severity": [],
-          "codeKeywords": [
-            "DOMAIN_SEPARATOR",
-            "EIP712",
-            "MEV",
-            "approval",
-            "bridge",
-            "chain_id",
-            "cross_chain",
-            "decimal",
-            "fee_on_transfer",
-            "finality",
-            "front_run",
-            "message_ordering",
-            "nonce",
-            "rebasing",
-            "replay_attack"
-          ],
           "rootCause": null,
           "subsections": null
         }
@@ -524,61 +288,10 @@
         "language": "solidity",
         "version": "all"
       },
-      "patternCount": 9,
+      "patternCount": 6,
       "patterns": [
         {
-          "id": "bridge-references-source-reports-000",
-          "title": "References & Source Reports",
-          "lineStart": 52,
-          "lineEnd": 72,
-          "lineCount": 21,
-          "severity": [
-            "HIGH",
-            "MEDIUM"
-          ],
-          "codeKeywords": [],
-          "rootCause": null,
-          "subsections": [
-            {
-              "title": "ISM (Interchain Security Module) Vulnerabilities",
-              "lineStart": 56,
-              "lineEnd": 60,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Message Replay Vulnerabilities",
-              "lineStart": 61,
-              "lineEnd": 65,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "External Links",
-              "lineStart": 66,
-              "lineEnd": 72,
-              "severity": [],
-              "codeKeywords": []
-            }
-          ]
-        },
-        {
-          "id": "bridge-table-of-contents-001",
-          "title": "Table of Contents",
-          "lineStart": 79,
-          "lineEnd": 88,
-          "lineCount": 10,
-          "severity": [],
-          "codeKeywords": [],
-          "rootCause": null,
-          "subsections": null
-        },
-        {
-          "id": "bridge-1-ism-validation-vulnerabilities-002",
+          "id": "bridge-1-ism-validation-vulnerabilities-000",
           "title": "1. ISM Validation Vulnerabilities",
           "lineStart": 89,
           "lineEnd": 237,
@@ -589,21 +302,14 @@
           ],
           "codeKeywords": [
             "Mailbox.process",
+            "_handle",
             "handle",
             "moduleType",
+            "setInterchainSecurityModule",
             "verify"
           ],
           "rootCause": "Contracts that receive Hyperlane messages fail to configure or validate the ISM properly, allowing arbitrary message acceptance without proper signature/proof verification.",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 91,
-              "lineEnd": 97,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": []
-            },
             {
               "title": "Vulnerability Description",
               "lineStart": 98,
@@ -629,29 +335,11 @@
                 "moduleType",
                 "verify"
               ]
-            },
-            {
-              "title": "Impact Analysis",
-              "lineStart": 168,
-              "lineEnd": 179,
-              "severity": [],
-              "codeKeywords": []
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 180,
-              "lineEnd": 237,
-              "severity": [],
-              "codeKeywords": [
-                "_handle",
-                "deploy",
-                "setInterchainSecurityModule"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-2-message-replay-attacks-003",
+          "id": "bridge-2-message-replay-attacks-001",
           "title": "2. Message Replay Attacks",
           "lineStart": 238,
           "lineEnd": 402,
@@ -664,13 +352,6 @@
           ],
           "rootCause": "When message processing fails (reverts), the protocol may not mark the message as consumed. Subsequent retries process the message again, causing double-spend or unlimited minting.",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 240,
-              "lineEnd": 246,
-              "severity": [],
-              "codeKeywords": []
-            },
             {
               "title": "Vulnerability Description",
               "lineStart": 247,
@@ -688,20 +369,11 @@
               "codeKeywords": [
                 "_handle"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 314,
-              "lineEnd": 402,
-              "severity": [],
-              "codeKeywords": [
-                "_handle"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-3-router-configuration-issues-004",
+          "id": "bridge-3-router-configuration-issues-002",
           "title": "3. Router Configuration Issues",
           "lineStart": 403,
           "lineEnd": 484,
@@ -719,15 +391,6 @@
           "rootCause": "Any sender accepted",
           "subsections": [
             {
-              "title": "Overview",
-              "lineStart": 405,
-              "lineEnd": 408,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": []
-            },
-            {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 409,
               "lineEnd": 446,
@@ -739,21 +402,11 @@
                 "_handle",
                 "handle"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 447,
-              "lineEnd": 484,
-              "severity": [],
-              "codeKeywords": [
-                "_handle",
-                "enrollRemoteRouters"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-4-handle-function-vulnerabilities-005",
+          "id": "bridge-4-handle-function-vulnerabilities-003",
           "title": "4. Handle Function Vulnerabilities",
           "lineStart": 485,
           "lineEnd": 563,
@@ -768,15 +421,6 @@
           "rootCause": "State change after external call",
           "subsections": [
             {
-              "title": "Overview",
-              "lineStart": 487,
-              "lineEnd": 490,
-              "severity": [],
-              "codeKeywords": [
-                "handle"
-              ]
-            },
-            {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 491,
               "lineEnd": 532,
@@ -787,20 +431,11 @@
                 "_handle",
                 "handle"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 533,
-              "lineEnd": 563,
-              "severity": [],
-              "codeKeywords": [
-                "_handle"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-5-gas-payment-issues-006",
+          "id": "bridge-5-gas-payment-issues-004",
           "title": "5. Gas Payment Issues",
           "lineStart": 564,
           "lineEnd": 638,
@@ -809,17 +444,11 @@
             "MEDIUM"
           ],
           "codeKeywords": [
+            "_estimateGas",
             "sendMessage"
           ],
           "rootCause": "Hardcoded gas may be insufficient",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 566,
-              "lineEnd": 569,
-              "severity": [],
-              "codeKeywords": []
-            },
             {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 570,
@@ -830,69 +459,17 @@
               "codeKeywords": [
                 "sendMessage"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 592,
-              "lineEnd": 638,
-              "severity": [],
-              "codeKeywords": [
-                "_estimateGas",
-                "sendMessage"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-detection-patterns-007",
+          "id": "bridge-detection-patterns-005",
           "title": "Detection Patterns",
           "lineStart": 639,
           "lineEnd": 664,
           "lineCount": 26,
           "severity": [],
           "codeKeywords": [],
-          "rootCause": null,
-          "subsections": [
-            {
-              "title": "Code Patterns to Look For",
-              "lineStart": 641,
-              "lineEnd": 652,
-              "severity": [],
-              "codeKeywords": []
-            },
-            {
-              "title": "Audit Checklist",
-              "lineStart": 653,
-              "lineEnd": 664,
-              "severity": [],
-              "codeKeywords": []
-            }
-          ]
-        },
-        {
-          "id": "bridge-keywords-for-search-008",
-          "title": "Keywords for Search",
-          "lineStart": 665,
-          "lineEnd": 670,
-          "lineCount": 6,
-          "severity": [],
-          "codeKeywords": [
-            "ISM",
-            "Router",
-            "TokenRouter",
-            "WarpRoute",
-            "bridge",
-            "cross_chain",
-            "dispatch",
-            "enrollRemoteRouter",
-            "handle",
-            "hyperlane",
-            "interchain",
-            "interchainSecurityModule",
-            "mailbox",
-            "message_replay",
-            "payForGas"
-          ],
           "rootCause": null,
           "subsections": null
         }
@@ -917,373 +494,10 @@
         "language": "solidity",
         "version": "all"
       },
-      "patternCount": 16,
+      "patternCount": 12,
       "patterns": [
         {
-          "id": "bridge-references-source-reports-000",
-          "title": "References & Source Reports",
-          "lineStart": 72,
-          "lineEnd": 346,
-          "lineCount": 275,
-          "severity": [
-            "HIGH",
-            "MEDIUM"
-          ],
-          "codeKeywords": [],
-          "rootCause": null,
-          "subsections": [
-            {
-              "title": "Channel Blocking Vulnerabilities",
-              "lineStart": 76,
-              "lineEnd": 84,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Gas Estimation & Fee Vulnerabilities",
-              "lineStart": 85,
-              "lineEnd": 95,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Fee Refund Vulnerabilities",
-              "lineStart": 96,
-              "lineEnd": 106,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Payload Size & Address Vulnerabilities",
-              "lineStart": 107,
-              "lineEnd": 111,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Composed Message (lzCompose) Vulnerabilities",
-              "lineStart": 112,
-              "lineEnd": 119,
-              "severity": [
-                "HIGH",
-                "LOW",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "OFT/ONFT Specific Vulnerabilities",
-              "lineStart": 120,
-              "lineEnd": 130,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Payload Theft Vulnerabilities",
-              "lineStart": 131,
-              "lineEnd": 140,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Stargate/sgReceive Vulnerabilities",
-              "lineStart": 141,
-              "lineEnd": 152,
-              "severity": [
-                "HIGH",
-                "LOW",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Payload Validation Vulnerabilities",
-              "lineStart": 153,
-              "lineEnd": 163,
-              "severity": [
-                "HIGH",
-                "LOW"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Gas Limit Calculation Vulnerabilities",
-              "lineStart": 164,
-              "lineEnd": 172,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Refund Address Misconfiguration",
-              "lineStart": 173,
-              "lineEnd": 178,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain DAO & Deployment Vulnerabilities",
-              "lineStart": 179,
-              "lineEnd": 185,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "OFT/ONFT Fee & Bypass Vulnerabilities",
-              "lineStart": 186,
-              "lineEnd": 193,
-              "severity": [
-                "HIGH",
-                "LOW",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Slippage & Rate Vulnerabilities",
-              "lineStart": 194,
-              "lineEnd": 199,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Trust & Remote Configuration Vulnerabilities",
-              "lineStart": 200,
-              "lineEnd": 207,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Replay Attack Vulnerabilities",
-              "lineStart": 208,
-              "lineEnd": 218,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Chain Reorganization & Double Spending",
-              "lineStart": 219,
-              "lineEnd": 225,
-              "severity": [
-                "HIGH",
-                "LOW",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Front-Running & Griefing",
-              "lineStart": 226,
-              "lineEnd": 233,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Token Locking & Stuck Funds",
-              "lineStart": 234,
-              "lineEnd": 241,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Call Failure & Reverts",
-              "lineStart": 242,
-              "lineEnd": 248,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Bridge Freeze & Denial of Service",
-              "lineStart": 249,
-              "lineEnd": 255,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "L2 Sequencer Downtime Vulnerabilities",
-              "lineStart": 256,
-              "lineEnd": 260,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain State Synchronization Vulnerabilities",
-              "lineStart": 261,
-              "lineEnd": 268,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Authentication Bypass Vulnerabilities",
-              "lineStart": 269,
-              "lineEnd": 276,
-              "severity": [
-                "HIGH",
-                "LOW",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Reentrancy Vulnerabilities",
-              "lineStart": 277,
-              "lineEnd": 283,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Signature Replay Attack Vulnerabilities",
-              "lineStart": 284,
-              "lineEnd": 289,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Slippage Vulnerabilities",
-              "lineStart": 290,
-              "lineEnd": 295,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Encoding & Hash Collision Vulnerabilities",
-              "lineStart": 296,
-              "lineEnd": 300,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Issuance Cap & Limit Bypass Vulnerabilities",
-              "lineStart": 301,
-              "lineEnd": 307,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Arbitrary Cross-Chain Minting Vulnerabilities",
-              "lineStart": 308,
-              "lineEnd": 312,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Decimal & Precision Vulnerabilities",
-              "lineStart": 313,
-              "lineEnd": 318,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Fee Handling Vulnerabilities",
-              "lineStart": 319,
-              "lineEnd": 324,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Validator/Relayer Vulnerabilities",
-              "lineStart": 325,
-              "lineEnd": 331,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Cross-Chain Address & Token Mapping Vulnerabilities",
-              "lineStart": 332,
-              "lineEnd": 336,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "External Links",
-              "lineStart": 337,
-              "lineEnd": 346,
-              "severity": [],
-              "codeKeywords": []
-            }
-          ]
-        },
-        {
-          "id": "bridge-table-of-contents-001",
-          "title": "Table of Contents",
-          "lineStart": 353,
-          "lineEnd": 368,
-          "lineCount": 16,
-          "severity": [],
-          "codeKeywords": [],
-          "rootCause": null,
-          "subsections": null
-        },
-        {
-          "id": "bridge-1-channel-blocking-vulnerabilities-002",
+          "id": "bridge-1-channel-blocking-vulnerabilities-000",
           "title": "1. Channel Blocking Vulnerabilities",
           "lineStart": 369,
           "lineEnd": 516,
@@ -1301,13 +515,6 @@
           ],
           "rootCause": "Protocols inherit from `LzApp` without implementing the non-blocking pattern (`NonblockingLzApp`), or they implement it incorrectly. When `lzReceive()` reverts, the message is stored in `storedPayload",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 371,
-              "lineEnd": 379,
-              "severity": [],
-              "codeKeywords": []
-            },
             {
               "title": "Vulnerability Description",
               "lineStart": 380,
@@ -1332,32 +539,11 @@
                 "_nonblockingLzReceive",
                 "lzReceive"
               ]
-            },
-            {
-              "title": "Impact Analysis",
-              "lineStart": 447,
-              "lineEnd": 464,
-              "severity": [],
-              "codeKeywords": [
-                "NonblockingLzApp",
-                "forceResumeReceive"
-              ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 465,
-              "lineEnd": 516,
-              "severity": [],
-              "codeKeywords": [
-                "_nonblockingLzReceive",
-                "forceResumeReceive",
-                "retryMessage"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-2-minimum-gas-validation-vulnerabilities-003",
+          "id": "bridge-2-minimum-gas-validation-vulnerabilities-001",
           "title": "2. Minimum Gas Validation Vulnerabilities",
           "lineStart": 517,
           "lineEnd": 627,
@@ -1368,24 +554,16 @@
           ],
           "codeKeywords": [
             "NonblockingLzApp",
+            "_getGasLimit",
+            "_lzSend",
             "adapterParams",
             "bridge",
+            "setMinDstGas",
             "storedPayload",
             "triggerSendFrom"
           ],
           "rootCause": "Protocols allow users to specify arbitrary `adapterParams` without validating the gas limit meets minimum requirements for the destination chain operation.",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 519,
-              "lineEnd": 526,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": [
-                "adapterParams"
-              ]
-            },
             {
               "title": "Vulnerability Description",
               "lineStart": 527,
@@ -1411,24 +589,11 @@
                 "bridge",
                 "triggerSendFrom"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 578,
-              "lineEnd": 627,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": [
-                "_getGasLimit",
-                "_lzSend",
-                "setMinDstGas"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-3-gas-estimation-fee-calculation-004",
+          "id": "bridge-3-gas-estimation-fee-calculation-002",
           "title": "3. Gas Estimation & Fee Calculation",
           "lineStart": 628,
           "lineEnd": 734,
@@ -1440,17 +605,11 @@
           "codeKeywords": [
             "quoteLayerZeroFee",
             "requestSnapshot",
-            "send"
+            "send",
+            "setDstChainGasConfig"
           ],
           "rootCause": "Uses source chain gas config for destination",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 630,
-              "lineEnd": 638,
-              "severity": [],
-              "codeKeywords": []
-            },
             {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 639,
@@ -1464,22 +623,11 @@
                 "requestSnapshot",
                 "send"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 689,
-              "lineEnd": 734,
-              "severity": [],
-              "codeKeywords": [
-                "quoteLayerZeroFee",
-                "send",
-                "setDstChainGasConfig"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-4-fee-refund-handling-005",
+          "id": "bridge-4-fee-refund-handling-003",
           "title": "4. Fee Refund Handling",
           "lineStart": 735,
           "lineEnd": 816,
@@ -1496,13 +644,6 @@
           "rootCause": "Contract cannot receive refunds",
           "subsections": [
             {
-              "title": "Overview",
-              "lineStart": 737,
-              "lineEnd": 745,
-              "severity": [],
-              "codeKeywords": []
-            },
-            {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 746,
               "lineEnd": 781,
@@ -1514,21 +655,11 @@
                 "_lzReceive",
                 "sendMessage"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 782,
-              "lineEnd": 816,
-              "severity": [],
-              "codeKeywords": [
-                "sendMessage",
-                "withdrawRefunds"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-5-payload-size-address-validation-006",
+          "id": "bridge-5-payload-size-address-validation-004",
           "title": "5. Payload Size & Address Validation",
           "lineStart": 817,
           "lineEnd": 862,
@@ -1543,15 +674,6 @@
           "rootCause": "No limit on _toAddress length",
           "subsections": [
             {
-              "title": "Overview",
-              "lineStart": 819,
-              "lineEnd": 825,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": []
-            },
-            {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 826,
               "lineEnd": 843,
@@ -1561,20 +683,11 @@
               "codeKeywords": [
                 "sendFrom"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 844,
-              "lineEnd": 862,
-              "severity": [],
-              "codeKeywords": [
-                "sendFrom"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-6-composed-message-vulnerabilities-layer-007",
+          "id": "bridge-6-composed-message-vulnerabilities-layer-005",
           "title": "6. Composed Message Vulnerabilities (LayerZero V2)",
           "lineStart": 863,
           "lineEnd": 965,
@@ -1585,17 +698,11 @@
           ],
           "codeKeywords": [
             "_lzReceive",
-            "lzCompose"
+            "lzCompose",
+            "send"
           ],
           "rootCause": "Composed messages introduce dual-transaction patterns where the initial receive and subsequent compose execution are separate transactions. Failures in either stage can leave tokens stranded or preven",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 865,
-              "lineEnd": 872,
-              "severity": [],
-              "codeKeywords": []
-            },
             {
               "title": "Vulnerability Description",
               "lineStart": 873,
@@ -1615,21 +722,11 @@
                 "_lzReceive",
                 "lzCompose"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 929,
-              "lineEnd": 965,
-              "severity": [],
-              "codeKeywords": [
-                "lzCompose",
-                "send"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-7-oft-onft-specific-vulnerabilities-008",
+          "id": "bridge-7-oft-onft-specific-vulnerabilities-006",
           "title": "7. OFT/ONFT Specific Vulnerabilities",
           "lineStart": 966,
           "lineEnd": 1079,
@@ -1639,17 +736,11 @@
           ],
           "codeKeywords": [
             "_nonblockingLzReceive",
-            "_transferViaOFT"
+            "_transferViaOFT",
+            "bridgeTokens"
           ],
           "rootCause": "Doesn't account for different decimals on chains",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 968,
-              "lineEnd": 977,
-              "severity": [],
-              "codeKeywords": []
-            },
             {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 978,
@@ -1660,22 +751,14 @@
               ],
               "codeKeywords": [
                 "_nonblockingLzReceive",
-                "_transferViaOFT"
-              ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 1048,
-              "lineEnd": 1079,
-              "severity": [],
-              "codeKeywords": [
-                "_transferViaOFT"
+                "_transferViaOFT",
+                "bridgeTokens"
               ]
             }
           ]
         },
         {
-          "id": "bridge-8-peer-trust-configuration-vulnerabiliti-009",
+          "id": "bridge-8-peer-trust-configuration-vulnerabiliti-007",
           "title": "8. Peer & Trust Configuration Vulnerabilities",
           "lineStart": 1080,
           "lineEnd": 1141,
@@ -1691,13 +774,6 @@
           "rootCause": "Uses sender address if peer not configured",
           "subsections": [
             {
-              "title": "Overview",
-              "lineStart": 1082,
-              "lineEnd": 1089,
-              "severity": [],
-              "codeKeywords": []
-            },
-            {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 1090,
               "lineEnd": 1117,
@@ -1709,21 +785,11 @@
                 "_getPeer",
                 "setPeer"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 1118,
-              "lineEnd": 1141,
-              "severity": [],
-              "codeKeywords": [
-                "_getPeer",
-                "setPeer"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-9-stargate-sgreceive-integration-vulnera-010",
+          "id": "bridge-9-stargate-sgreceive-integration-vulnera-008",
           "title": "9. Stargate/sgReceive Integration Vulnerabilities",
           "lineStart": 1142,
           "lineEnd": 1263,
@@ -1733,20 +799,12 @@
           ],
           "codeKeywords": [
             "participate",
+            "recoverStuckTokens",
             "retryRevert",
             "sgReceive"
           ],
           "rootCause": "Complex operations can run out of gas",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 1144,
-              "lineEnd": 1153,
-              "severity": [],
-              "codeKeywords": [
-                "sgReceive"
-              ]
-            },
             {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 1154,
@@ -1759,23 +817,11 @@
                 "retryRevert",
                 "sgReceive"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 1231,
-              "lineEnd": 1263,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": [
-                "recoverStuckTokens",
-                "sgReceive"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-10-cross-chain-payload-validation-vulner-011",
+          "id": "bridge-10-cross-chain-payload-validation-vulner-009",
           "title": "10. Cross-Chain Payload Validation Vulnerabilities",
           "lineStart": 1264,
           "lineEnd": 1362,
@@ -1790,13 +836,6 @@
           "rootCause": "tapSendData.tapOftAddress not validated",
           "subsections": [
             {
-              "title": "Overview",
-              "lineStart": 1266,
-              "lineEnd": 1273,
-              "severity": [],
-              "codeKeywords": []
-            },
-            {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 1274,
               "lineEnd": 1327,
@@ -1807,23 +846,11 @@
                 "exerciseInternal",
                 "sendFrom"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 1328,
-              "lineEnd": 1362,
-              "severity": [
-                "CRITICAL"
-              ],
-              "codeKeywords": [
-                "exerciseInternal",
-                "sendFrom"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-11-insufficient-gas-limit-calculation-012",
+          "id": "bridge-11-insufficient-gas-limit-calculation-010",
           "title": "11. Insufficient Gas Limit Calculation",
           "lineStart": 1363,
           "lineEnd": 1457,
@@ -1834,17 +861,11 @@
           ],
           "codeKeywords": [
             "anyFallback",
-            "getSendOptions"
+            "getSendOptions",
+            "releaseOnEid"
           ],
           "rootCause": "20k gas per token is insufficient for minting",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 1365,
-              "lineEnd": 1372,
-              "severity": [],
-              "codeKeywords": []
-            },
             {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 1373,
@@ -1857,24 +878,11 @@
                 "anyFallback",
                 "getSendOptions"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 1418,
-              "lineEnd": 1457,
-              "severity": [
-                "HIGH",
-                "LOW"
-              ],
-              "codeKeywords": [
-                "getSendOptions",
-                "releaseOnEid"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-detection-patterns-013",
+          "id": "bridge-detection-patterns-011",
           "title": "Detection Patterns",
           "lineStart": 1458,
           "lineEnd": 1499,
@@ -1882,61 +890,6 @@
           "severity": [
             "LOW"
           ],
-          "codeKeywords": [],
-          "rootCause": null,
-          "subsections": [
-            {
-              "title": "Code Patterns to Look For",
-              "lineStart": 1460,
-              "lineEnd": 1479,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Audit Checklist",
-              "lineStart": 1480,
-              "lineEnd": 1499,
-              "severity": [],
-              "codeKeywords": []
-            }
-          ]
-        },
-        {
-          "id": "bridge-keywords-for-search-014",
-          "title": "Keywords for Search",
-          "lineStart": 1500,
-          "lineEnd": 1505,
-          "lineCount": 6,
-          "severity": [],
-          "codeKeywords": [
-            "LzApp",
-            "MessagingFee",
-            "NonblockingLzApp",
-            "OFT",
-            "OFTAdapter",
-            "OFTCore",
-            "ONFT",
-            "StoredPayload",
-            "_creditTill",
-            "_lzSend",
-            "adapterParams",
-            "bridge",
-            "channel_blocking",
-            "composed_message",
-            "cross_chain"
-          ],
-          "rootCause": null,
-          "subsections": null
-        },
-        {
-          "id": "bridge-related-vulnerabilities-015",
-          "title": "Related Vulnerabilities",
-          "lineStart": 1506,
-          "lineEnd": 1511,
-          "lineCount": 6,
-          "severity": [],
           "codeKeywords": [],
           "rootCause": null,
           "subsections": null
@@ -1962,73 +915,10 @@
         "language": "solidity",
         "version": "all"
       },
-      "patternCount": 9,
+      "patternCount": 6,
       "patterns": [
         {
-          "id": "bridge-references-source-reports-000",
-          "title": "References & Source Reports",
-          "lineStart": 53,
-          "lineEnd": 81,
-          "lineCount": 29,
-          "severity": [
-            "HIGH",
-            "LOW",
-            "MEDIUM"
-          ],
-          "codeKeywords": [],
-          "rootCause": null,
-          "subsections": [
-            {
-              "title": "VAA Parsing & Validation Vulnerabilities",
-              "lineStart": 57,
-              "lineEnd": 62,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Guardian & Governance Vulnerabilities",
-              "lineStart": 63,
-              "lineEnd": 68,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "Token Bridge Vulnerabilities",
-              "lineStart": 69,
-              "lineEnd": 74,
-              "severity": [
-                "LOW",
-                "MEDIUM"
-              ],
-              "codeKeywords": []
-            },
-            {
-              "title": "External Links",
-              "lineStart": 75,
-              "lineEnd": 81,
-              "severity": [],
-              "codeKeywords": []
-            }
-          ]
-        },
-        {
-          "id": "bridge-table-of-contents-001",
-          "title": "Table of Contents",
-          "lineStart": 88,
-          "lineEnd": 98,
-          "lineCount": 11,
-          "severity": [],
-          "codeKeywords": [],
-          "rootCause": null,
-          "subsections": null
-        },
-        {
-          "id": "bridge-1-vaa-parsing-vulnerabilities-002",
+          "id": "bridge-1-vaa-parsing-vulnerabilities-000",
           "title": "1. VAA Parsing Vulnerabilities",
           "lineStart": 99,
           "lineEnd": 232,
@@ -2044,16 +934,6 @@
           ],
           "rootCause": "Protocols either use outdated/deprecated Wormhole methods for VAA parsing, fail to validate all VAA fields properly, or don't verify the guardian signatures correctly.",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 101,
-              "lineEnd": 108,
-              "severity": [
-                "CRITICAL",
-                "LOW"
-              ],
-              "codeKeywords": []
-            },
             {
               "title": "Vulnerability Description",
               "lineStart": 109,
@@ -2074,27 +954,11 @@
               "codeKeywords": [
                 "receiveMessage"
               ]
-            },
-            {
-              "title": "Impact Analysis",
-              "lineStart": 180,
-              "lineEnd": 191,
-              "severity": [],
-              "codeKeywords": []
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 192,
-              "lineEnd": 232,
-              "severity": [],
-              "codeKeywords": [
-                "receiveMessage"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-2-guardian-set-vulnerabilities-003",
+          "id": "bridge-2-guardian-set-vulnerabilities-001",
           "title": "2. Guardian Set Vulnerabilities",
           "lineStart": 233,
           "lineEnd": 320,
@@ -2104,17 +968,11 @@
             "LOW"
           ],
           "codeKeywords": [
-            "executeProposal"
+            "executeProposal",
+            "updateMinimumGuardianSet"
           ],
           "rootCause": "Protocols don't account for guardian set transitions properly. During transitions, both old and new guardian set signatures are valid, potentially allowing replay of old guardian actions.",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 235,
-              "lineEnd": 241,
-              "severity": [],
-              "codeKeywords": []
-            },
             {
               "title": "Vulnerability Description",
               "lineStart": 242,
@@ -2134,21 +992,11 @@
               "codeKeywords": [
                 "executeProposal"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 282,
-              "lineEnd": 320,
-              "severity": [],
-              "codeKeywords": [
-                "executeProposal",
-                "updateMinimumGuardianSet"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-3-message-replay-attacks-004",
+          "id": "bridge-3-message-replay-attacks-002",
           "title": "3. Message Replay Attacks",
           "lineStart": 321,
           "lineEnd": 386,
@@ -2162,13 +1010,6 @@
           "rootCause": "Same VAA can be replayed across instances",
           "subsections": [
             {
-              "title": "Overview",
-              "lineStart": 323,
-              "lineEnd": 329,
-              "severity": [],
-              "codeKeywords": []
-            },
-            {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 330,
               "lineEnd": 352,
@@ -2178,20 +1019,11 @@
               "codeKeywords": [
                 "processMessage"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 353,
-              "lineEnd": 386,
-              "severity": [],
-              "codeKeywords": [
-                "processMessage"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-4-token-bridge-integration-005",
+          "id": "bridge-4-token-bridge-integration-003",
           "title": "4. Token Bridge Integration",
           "lineStart": 387,
           "lineEnd": 495,
@@ -2200,18 +1032,13 @@
             "MEDIUM"
           ],
           "codeKeywords": [
+            "bridgeToUser",
             "bridgeTokens",
+            "bridgeWithPayload",
             "completeTransfer"
           ],
           "rootCause": "Uses transferWithPayload incorrectly",
           "subsections": [
-            {
-              "title": "Overview",
-              "lineStart": 389,
-              "lineEnd": 395,
-              "severity": [],
-              "codeKeywords": []
-            },
             {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 396,
@@ -2224,21 +1051,11 @@
                 "bridgeTokens",
                 "completeTransfer"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 442,
-              "lineEnd": 495,
-              "severity": [],
-              "codeKeywords": [
-                "bridgeToUser",
-                "bridgeWithPayload"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-5-gas-limit-issues-006",
+          "id": "bridge-5-gas-limit-issues-004",
           "title": "5. Gas Limit Issues",
           "lineStart": 496,
           "lineEnd": 551,
@@ -2253,13 +1070,6 @@
           "rootCause": "Gas limit cannot be updated",
           "subsections": [
             {
-              "title": "Overview",
-              "lineStart": 498,
-              "lineEnd": 504,
-              "severity": [],
-              "codeKeywords": []
-            },
-            {
               "title": "Vulnerable Pattern Examples",
               "lineStart": 505,
               "lineEnd": 526,
@@ -2269,70 +1079,17 @@
               "codeKeywords": [
                 "requestCrossChainMessage"
               ]
-            },
-            {
-              "title": "Secure Implementation",
-              "lineStart": 527,
-              "lineEnd": 551,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": [
-                "updateGasLimit"
-              ]
             }
           ]
         },
         {
-          "id": "bridge-detection-patterns-007",
+          "id": "bridge-detection-patterns-005",
           "title": "Detection Patterns",
           "lineStart": 552,
           "lineEnd": 577,
           "lineCount": 26,
           "severity": [],
           "codeKeywords": [],
-          "rootCause": null,
-          "subsections": [
-            {
-              "title": "Code Patterns to Look For",
-              "lineStart": 554,
-              "lineEnd": 565,
-              "severity": [],
-              "codeKeywords": []
-            },
-            {
-              "title": "Audit Checklist",
-              "lineStart": 566,
-              "lineEnd": 577,
-              "severity": [],
-              "codeKeywords": []
-            }
-          ]
-        },
-        {
-          "id": "bridge-keywords-for-search-008",
-          "title": "Keywords for Search",
-          "lineStart": 578,
-          "lineEnd": 583,
-          "lineCount": 6,
-          "severity": [],
-          "codeKeywords": [
-            "NttManager",
-            "TokenBridge",
-            "VAA",
-            "bridge",
-            "completeTransfer",
-            "consistencyLevel",
-            "cross_chain",
-            "emitterAddress",
-            "emitterChainId",
-            "governance_bypass",
-            "guardian",
-            "guardianSet",
-            "message_replay",
-            "nonce",
-            "parseAndVerifyVAA"
-          ],
           "rootCause": null,
           "subsections": null
         }

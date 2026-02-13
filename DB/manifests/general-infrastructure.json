@@ -1,0 +1,2109 @@
+{
+  "meta": {
+    "category": "general-infrastructure",
+    "description": "Smart contract infrastructure: proxies, reentrancy, storage, bridges",
+    "fileCount": 8,
+    "totalPatterns": 41,
+    "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
+  },
+  "files": [
+    {
+      "file": "DB/general/proxy-vulnerabilities/PROXY_PATTERN_VULNERABILITIES.md",
+      "totalLines": 1703,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "proxy_pattern",
+        "vulnerability_type": "proxy_implementation",
+        "attack_type": "implementation_exploit",
+        "affected_component": "proxy_contract_system",
+        "severity": "high",
+        "impact": "contract_takeover",
+        "exploitability": "0.7",
+        "financial_impact": "critical",
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 5,
+      "patterns": [
+        {
+          "id": "general-infrastructure-proxy-pattern-implementation-vulnerabili-000",
+          "title": "Proxy Pattern Implementation Vulnerabilities",
+          "lineStart": 53,
+          "lineEnd": 83,
+          "lineCount": 31,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": "Proxy pattern vulnerabilities stem from the separation of contract logic (implementation) and state (proxy), combined with the use of delegatecall for forwarding calls. This architectural pattern crea",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 61,
+              "lineEnd": 83,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-vulnerability-patterns-001",
+          "title": "VULNERABILITY PATTERNS",
+          "lineStart": 84,
+          "lineEnd": 1547,
+          "lineCount": 1464,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_authorizeUpgrade",
+            "initialize",
+            "setReserveFactor",
+            "updateP2PIndexes"
+          ],
+          "rootCause": "Implementation contract constructor doesn't disable initializers",
+          "subsections": [
+            {
+              "title": "Pattern 1: Missing disableInitializers in Implementation Constructor",
+              "lineStart": 88,
+              "lineEnd": 128,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "initialize"
+              ]
+            },
+            {
+              "title": "Pattern 2: Implementation Destruction via Selfdestruct",
+              "lineStart": 129,
+              "lineEnd": 173,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "initialize",
+                "setReserveFactor",
+                "updateP2PIndexes"
+              ]
+            },
+            {
+              "title": "Pattern 3: Unprotected UUPS Upgrade Function",
+              "lineStart": 174,
+              "lineEnd": 217,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_authorizeUpgrade",
+                "initialize"
+              ]
+            },
+            {
+              "title": "Pattern 4: No Storage Gap in Upgradeable Base Contract",
+              "lineStart": 218,
+              "lineEnd": 258,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Pattern 5: Storage Collision - Non-EIP1967 Implementation Slot",
+              "lineStart": 259,
+              "lineEnd": 305,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_getImplementation"
+              ]
+            },
+            {
+              "title": "Pattern 6: Initialization Front-Running",
+              "lineStart": 306,
+              "lineEnd": 355,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "initialize"
+              ]
+            },
+            {
+              "title": "Pattern 7: Wrong Ownable Library in Upgradeable Contract",
+              "lineStart": 356,
+              "lineEnd": 393,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "emergencyWithdraw",
+                "initialize"
+              ]
+            },
+            {
+              "title": "Pattern 8: Delegatecall Nonce Reset Allowing Re-initialization",
+              "lineStart": 394,
+              "lineEnd": 453,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "execute",
+                "init"
+              ]
+            },
+            {
+              "title": "Pattern 9: Constructor State Not Available in Proxy",
+              "lineStart": 454,
+              "lineEnd": 507,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "initToken",
+                "initialize"
+              ]
+            },
+            {
+              "title": "Pattern 10: Clone Validation Checking Insufficient Bytes",
+              "lineStart": 508,
+              "lineEnd": 569,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "isETHPairClone",
+                "isValidPair"
+              ]
+            },
+            {
+              "title": "Pattern 11: Metamorphic Implementation Contract Risk",
+              "lineStart": 570,
+              "lineEnd": 627,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "createGauge",
+                "isMetamorphic"
+              ]
+            },
+            {
+              "title": "Pattern 12: Plugin Selector Collision Override",
+              "lineStart": 628,
+              "lineEnd": 679,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "installPlugin",
+                "onAddictionFeesRefunded"
+              ]
+            },
+            {
+              "title": "Pattern 13: Persisted msg.value in Batch Delegatecalls",
+              "lineStart": 680,
+              "lineEnd": 736,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "batch",
+                "execute"
+              ]
+            },
+            {
+              "title": "Pattern 14: Module Upgrade Without State Migration",
+              "lineStart": 737,
+              "lineEnd": 801,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "executeAction"
+              ]
+            },
+            {
+              "title": "Pattern 15: Storage Layout Change on Upgrade Breaks Roles",
+              "lineStart": 802,
+              "lineEnd": 853,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Pattern 16: Missing Contract Existence Check Before Delegatecall",
+              "lineStart": 854,
+              "lineEnd": 893,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "execute"
+              ]
+            },
+            {
+              "title": "Pattern 17: Proxy Shadowing Implementation Functions",
+              "lineStart": 894,
+              "lineEnd": 950,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "admin",
+                "implementation"
+              ]
+            },
+            {
+              "title": "Pattern 18: Permissions/Allowances Not Reset on Proxy Ownership Transfer",
+              "lineStart": 951,
+              "lineEnd": 999,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "transferOwnership"
+              ]
+            },
+            {
+              "title": "Pattern 19: Temporary Owner Change During Delegatecall",
+              "lineStart": 1000,
+              "lineEnd": 1056,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "execute"
+              ]
+            },
+            {
+              "title": "Pattern 20: Proxy Reuse Without Implementation Version Check",
+              "lineStart": 1057,
+              "lineEnd": 1123,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "processTransfer",
+                "setImplementation"
+              ]
+            },
+            {
+              "title": "Pattern 21: CREATE2 Salt Predictability/Front-Running",
+              "lineStart": 1124,
+              "lineEnd": 1173,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "deployFor",
+                "predict"
+              ]
+            },
+            {
+              "title": "Pattern 22: Counterfactual Wallet Deployment Hijacking",
+              "lineStart": 1174,
+              "lineEnd": 1234,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "deployCounterfactualWallet",
+                "getAddressForCounterfactualWallet"
+              ]
+            },
+            {
+              "title": "Pattern 23: Variable Initialization at Declaration in Upgradeable Contract",
+              "lineStart": 1235,
+              "lineEnd": 1278,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "initialize",
+                "penalty"
+              ]
+            },
+            {
+              "title": "Pattern 24: Beacon Implementation Without Contract Existence Check",
+              "lineStart": 1279,
+              "lineEnd": 1324,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "setImplementation"
+              ]
+            },
+            {
+              "title": "Pattern 25: Approval Set in Constructor for Proxy Contract",
+              "lineStart": 1325,
+              "lineEnd": 1382,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "initialize",
+                "transferExcessM"
+              ]
+            },
+            {
+              "title": "Pattern 26: Proxy Cannot Redeploy After Selfdestruct",
+              "lineStart": 1383,
+              "lineEnd": 1438,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "deployFor"
+              ]
+            },
+            {
+              "title": "Pattern 27: Whitelist Bypass via Upgradeable Proxy",
+              "lineStart": 1439,
+              "lineEnd": 1497,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "addToWhitelist",
+                "executeOnWhitelisted"
+              ]
+            },
+            {
+              "title": "Pattern 28: Re-Initializable Proxy Due to Missing Modifier",
+              "lineStart": 1498,
+              "lineEnd": 1547,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "initialize"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-impact-analysis-002",
+          "title": "Impact Analysis",
+          "lineStart": 1548,
+          "lineEnd": 1598,
+          "lineCount": 51,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Severity Distribution from Reports",
+              "lineStart": 1569,
+              "lineEnd": 1598,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-audit-checklist-003",
+          "title": "Audit Checklist",
+          "lineStart": 1599,
+          "lineEnd": 1657,
+          "lineCount": 59,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "__Contract_init",
+            "_authorizeUpgrade",
+            "_disableInitializers",
+            "initialize",
+            "initializer",
+            "onlyOwner",
+            "payable"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Initialization Security",
+              "lineStart": 1601,
+              "lineEnd": 1608,
+              "severity": [],
+              "codeKeywords": [
+                "__Contract_init",
+                "_disableInitializers",
+                "initialize",
+                "initializer"
+              ]
+            },
+            {
+              "title": "Storage Safety",
+              "lineStart": 1609,
+              "lineEnd": 1616,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Access Control",
+              "lineStart": 1617,
+              "lineEnd": 1622,
+              "severity": [],
+              "codeKeywords": [
+                "_authorizeUpgrade",
+                "onlyOwner"
+              ]
+            },
+            {
+              "title": "Delegatecall Safety",
+              "lineStart": 1623,
+              "lineEnd": 1629,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "payable"
+              ]
+            },
+            {
+              "title": "Clone/Factory Safety",
+              "lineStart": 1630,
+              "lineEnd": 1635,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "CREATE2 and Counterfactual Deployment",
+              "lineStart": 1636,
+              "lineEnd": 1641,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Proxy Ownership Transfer",
+              "lineStart": 1642,
+              "lineEnd": 1646,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Whitelist and Registry Safety",
+              "lineStart": 1651,
+              "lineEnd": 1657,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-real-world-examples-004",
+          "title": "Real-World Examples",
+          "lineStart": 1658,
+          "lineEnd": 1692,
+          "lineCount": 35,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/uups-proxy/UUPS_PROXY_VULNERABILITIES.md",
+      "totalLines": 398,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "upgradeability",
+        "vulnerability_type": "uups_proxy",
+        "attack_type": "logical_error",
+        "affected_component": "proxy_implementation",
+        "severity": "medium_to_high",
+        "impact": "implementation_takeover",
+        "exploitability": "0.7",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "general-infrastructure-vulnerability-description-000",
+          "title": "Vulnerability Description",
+          "lineStart": 59,
+          "lineEnd": 188,
+          "lineCount": 130,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "AssetFactory",
+            "FlashSwapRouter",
+            "ModuleCore",
+            "OwnableUpgradeable",
+            "StakingProxy",
+            "UUPSUpgradeable",
+            "__gap",
+            "_authorizeUpgrade",
+            "initialize",
+            "onlyOwner",
+            "selfdestruct",
+            "upgradeTo",
+            "upgradeToAndCall"
+          ],
+          "rootCause": "UUPS proxy vulnerabilities arise from several fundamental issues:\n\n\n\n1. **Uninitialized Implementation Contracts**: OpenZeppelin UUPSUpgradeable versions >= 4.1.0 < 4.3.2 allow attackers to initialize",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 61,
+              "lineEnd": 69,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "__gap",
+                "_authorizeUpgrade",
+                "onlyOwner",
+                "upgradeToAndCall"
+              ]
+            },
+            {
+              "title": "Attack Scenario",
+              "lineStart": 70,
+              "lineEnd": 92,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "AssetFactory",
+                "FlashSwapRouter",
+                "ModuleCore",
+                "OwnableUpgradeable",
+                "StakingProxy",
+                "UUPSUpgradeable",
+                "_authorizeUpgrade",
+                "initialize"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 93,
+              "lineEnd": 188,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_authorizeUpgrade",
+                "initialize"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/diamond-proxy/DIAMOND_PROXY_VULNERABILITIES.md",
+      "totalLines": 516,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "upgradeability",
+        "vulnerability_type": "diamond_proxy",
+        "attack_type": "logical_error",
+        "affected_component": "proxy_storage",
+        "severity": "medium_to_high",
+        "impact": "state_corruption",
+        "exploitability": "0.5",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "general-infrastructure-vulnerability-description-000",
+          "title": "Vulnerability Description",
+          "lineStart": 68,
+          "lineEnd": 269,
+          "lineCount": 202,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "AccessControl",
+            "AccessControlUpgradeable",
+            "Addresses",
+            "AppStorage",
+            "accessControl",
+            "advancedFarm",
+            "diamondCut",
+            "governor",
+            "hasRole",
+            "initialize",
+            "lastDiamondFreezeTimestamp",
+            "refundEth"
+          ],
+          "rootCause": "Diamond proxy vulnerabilities arise from several fundamental issues:\n\n\n\n1. **Storage Layout Mismanagement**: When structs within `AppStorage` are modified (added/removed members), subsequent variables",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 70,
+              "lineEnd": 80,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "AccessControl",
+                "AccessControlUpgradeable",
+                "AppStorage",
+                "diamondCut",
+                "initialize"
+              ]
+            },
+            {
+              "title": "Attack Scenario",
+              "lineStart": 81,
+              "lineEnd": 102,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "Addresses",
+                "AppStorage",
+                "accessControl",
+                "governor",
+                "hasRole",
+                "lastDiamondFreezeTimestamp"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 103,
+              "lineEnd": 269,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "advancedFarm",
+                "bipSeedGauge",
+                "hasRole",
+                "refundEth"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/storage-collision/storage-collision-vulnerabilities.md",
+      "totalLines": 377,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "proxy",
+        "vulnerability_type": "storage_collision",
+        "attack_type": "state_corruption",
+        "affected_component": "proxy_storage",
+        "severity": "critical",
+        "impact": "fund_loss",
+        "exploitability": "0.6",
+        "financial_impact": "critical",
+        "language": "solidity",
+        "version": "all",
+        "source": "DeFiHackLabs"
+      },
+      "patternCount": 5,
+      "patterns": [
+        {
+          "id": "general-infrastructure-overview-000",
+          "title": "Overview",
+          "lineStart": 49,
+          "lineEnd": 56,
+          "lineCount": 8,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-vulnerability-categories-001",
+          "title": "Vulnerability Categories",
+          "lineStart": 57,
+          "lineEnd": 75,
+          "lineCount": 19,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "5. Initializer Storage Issues",
+              "lineStart": 71,
+              "lineEnd": 75,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 76,
+          "lineEnd": 266,
+          "lineCount": 191,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "asset",
+            "implementation",
+            "initialized",
+            "manager",
+            "owner",
+            "setManager"
+          ],
+          "rootCause": "Proxy upgrade caused storage collision",
+          "subsections": [
+            {
+              "title": "Example 1: Telcoin Storage Collision [CRITICAL]",
+              "lineStart": 78,
+              "lineEnd": 118,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "initialized",
+                "owner"
+              ]
+            },
+            {
+              "title": "Example 2: EFVault Storage Collision [CRITICAL]",
+              "lineStart": 119,
+              "lineEnd": 167,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "asset",
+                "implementation",
+                "manager",
+                "setManager"
+              ]
+            },
+            {
+              "title": "Example 3: Audius Governance Storage Collision [CRITICAL]",
+              "lineStart": 168,
+              "lineEnd": 198,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Example 4: Unstructured Storage Errors [HIGH]",
+              "lineStart": 199,
+              "lineEnd": 231,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_setImplementation"
+              ]
+            },
+            {
+              "title": "Example 5: Diamond Storage Collision [HIGH]",
+              "lineStart": 232,
+              "lineEnd": 266,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-secure-implementation-guidelines-003",
+          "title": "Secure Implementation Guidelines",
+          "lineStart": 267,
+          "lineEnd": 327,
+          "lineCount": 61,
+          "severity": [],
+          "codeKeywords": [
+            "initialize",
+            "validateStorageLayout"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "1. Use EIP-1967 Standard Slots",
+              "lineStart": 269,
+              "lineEnd": 279,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "2. Inherit Storage Layout Properly",
+              "lineStart": 280,
+              "lineEnd": 299,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "3. Use OpenZeppelin's Upgradeable Contracts",
+              "lineStart": 300,
+              "lineEnd": 313,
+              "severity": [],
+              "codeKeywords": [
+                "initialize"
+              ]
+            },
+            {
+              "title": "4. Storage Validation Before Upgrade",
+              "lineStart": 314,
+              "lineEnd": 327,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "validateStorageLayout"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-real-world-exploits-summary-004",
+          "title": "Real-World Exploits Summary",
+          "lineStart": 328,
+          "lineEnd": 338,
+          "lineCount": 11,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/reentrancy/defi-reentrancy-patterns.md",
+      "totalLines": 671,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "reentrancy",
+        "vulnerability_type": "multi_type",
+        "attack_type": "state_manipulation",
+        "affected_component": "external_calls",
+        "severity": "critical",
+        "impact": "fund_loss",
+        "exploitability": "0.8",
+        "financial_impact": "critical",
+        "language": "solidity",
+        "version": "all",
+        "source": "DeFiHackLabs"
+      },
+      "patternCount": 6,
+      "patterns": [
+        {
+          "id": "general-infrastructure-overview-000",
+          "title": "Overview",
+          "lineStart": 54,
+          "lineEnd": 61,
+          "lineCount": 8,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-vulnerability-categories-001",
+          "title": "Vulnerability Categories",
+          "lineStart": 62,
+          "lineEnd": 80,
+          "lineCount": 19,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "5. Callback-Based Reentrancy",
+              "lineStart": 76,
+              "lineEnd": 80,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 81,
+          "lineEnd": 199,
+          "lineCount": 119,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "attack",
+            "borrow",
+            "exitMarket",
+            "getUnderlyingPrice",
+            "liquidate",
+            "receive",
+            "remove_liquidity"
+          ],
+          "rootCause": "State update AFTER external call",
+          "subsections": [
+            {
+              "title": "Example 1: Classic ETH Transfer Reentrancy [CRITICAL]",
+              "lineStart": 83,
+              "lineEnd": 130,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "borrow",
+                "exitMarket",
+                "receive"
+              ]
+            },
+            {
+              "title": "Example 2: Read-Only Reentrancy via Curve Pool [CRITICAL]",
+              "lineStart": 131,
+              "lineEnd": 194,
+              "severity": [
+                "CRITICAL",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "attack",
+                "getUnderlyingPrice",
+                "liquidate",
+                "remove_liquidity"
+              ]
+            },
+            {
+              "title": "Example 3: Vyper Compiler Bug + Reentrancy [CRITICAL]",
+              "lineStart": 195,
+              "lineEnd": 199,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-secure-implementation-patterns-003",
+          "title": "Secure Implementation Patterns",
+          "lineStart": 447,
+          "lineEnd": 534,
+          "lineCount": 88,
+          "severity": [],
+          "codeKeywords": [
+            "checkCurveReentrancy",
+            "deposit",
+            "flashLoan",
+            "liquidate",
+            "withdraw"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Fix 1: Checks-Effects-Interactions (CEI) Pattern",
+              "lineStart": 449,
+              "lineEnd": 465,
+              "severity": [],
+              "codeKeywords": [
+                "withdraw"
+              ]
+            },
+            {
+              "title": "Fix 2: ReentrancyGuard Modifier",
+              "lineStart": 466,
+              "lineEnd": 481,
+              "severity": [],
+              "codeKeywords": [
+                "withdraw"
+              ]
+            },
+            {
+              "title": "Fix 3: Read-Only Reentrancy Protection (Balancer/Curve)",
+              "lineStart": 482,
+              "lineEnd": 506,
+              "severity": [],
+              "codeKeywords": [
+                "checkCurveReentrancy",
+                "liquidate"
+              ]
+            },
+            {
+              "title": "Fix 4: Callback Whitelist / Validation",
+              "lineStart": 507,
+              "lineEnd": 534,
+              "severity": [],
+              "codeKeywords": [
+                "deposit",
+                "flashLoan"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-detection-patterns-004",
+          "title": "Detection Patterns",
+          "lineStart": 535,
+          "lineEnd": 561,
+          "lineCount": 27,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-real-world-examples-005",
+          "title": "Real-World Examples",
+          "lineStart": 562,
+          "lineEnd": 624,
+          "lineCount": 63,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Critical Exploits ($10M+)",
+              "lineStart": 564,
+              "lineEnd": 574,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "High-Severity Exploits ($1M-$10M)",
+              "lineStart": 575,
+              "lineEnd": 585,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Medium-Severity Exploits ($100K-$1M)",
+              "lineStart": 586,
+              "lineEnd": 602,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Lower-Severity Exploits (<$100K)",
+              "lineStart": 603,
+              "lineEnd": 614,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Historical Exploits (2021)",
+              "lineStart": 615,
+              "lineEnd": 624,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/reentrancy/reentrancy.md",
+      "totalLines": 136,
+      "frontmatter": {
+        "vulnerability_class": "reentrancy",
+        "title": "\"Reentrancy Vulnerabilities\"",
+        "category": "Access Control/State Management",
+        "severity_range": "\"MEDIUM to HIGH\"",
+        "- file": "\"reports/yield_protocol_findings/attacker-can-bypass-reentrancy-lock-to-double-spend-deposit.md\"",
+        "protocol": "\"Uniswap: The Compact\"",
+        "severity": "\"MEDIUM\"",
+        "auditor": "\"Spearbit\""
+      },
+      "patternCount": 6,
+      "patterns": [
+        {
+          "id": "general-infrastructure-overview-000",
+          "title": "Overview",
+          "lineStart": 24,
+          "lineEnd": 34,
+          "lineCount": 11,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-vulnerable-code-patterns-001",
+          "title": "Vulnerable Code Patterns",
+          "lineStart": 35,
+          "lineEnd": 71,
+          "lineCount": 37,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "getPrice",
+            "settleVault"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Example 1: Read-Only Reentrancy in Oracle (HIGH - Blueberry)",
+              "lineStart": 37,
+              "lineEnd": 51,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "getPrice"
+              ]
+            },
+            {
+              "title": "Example 2: Classic Reentrancy in Settlement (HIGH - Cega)",
+              "lineStart": 52,
+              "lineEnd": 63,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "settleVault"
+              ]
+            },
+            {
+              "title": "Example 3: Reentrancy Lock Bypass (MEDIUM - Uniswap Compact)",
+              "lineStart": 64,
+              "lineEnd": 71,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-secure-implementation-patterns-002",
+          "title": "Secure Implementation Patterns",
+          "lineStart": 72,
+          "lineEnd": 102,
+          "lineCount": 31,
+          "severity": [],
+          "codeKeywords": [
+            "liquidate",
+            "settleVault"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Fix 1: Checks-Effects-Interactions Pattern",
+              "lineStart": 74,
+              "lineEnd": 81,
+              "severity": [],
+              "codeKeywords": [
+                "settleVault"
+              ]
+            },
+            {
+              "title": "Fix 2: ReentrancyGuard Modifier",
+              "lineStart": 82,
+              "lineEnd": 91,
+              "severity": [],
+              "codeKeywords": [
+                "settleVault"
+              ]
+            },
+            {
+              "title": "Fix 3: Read-Only Reentrancy Protection",
+              "lineStart": 92,
+              "lineEnd": 102,
+              "severity": [],
+              "codeKeywords": [
+                "liquidate"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-impact-analysis-003",
+          "title": "Impact Analysis",
+          "lineStart": 103,
+          "lineEnd": 113,
+          "lineCount": 11,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-detection-checklist-004",
+          "title": "Detection Checklist",
+          "lineStart": 114,
+          "lineEnd": 122,
+          "lineCount": 9,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-real-world-examples-005",
+          "title": "Real-World Examples",
+          "lineStart": 123,
+          "lineEnd": 133,
+          "lineCount": 11,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/bridge/cross-chain-bridge-vulnerabilities.md",
+      "totalLines": 1532,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "bridge",
+        "vulnerability_type": "cross_chain_bridge_exploit",
+        "attack_type": "merkle_proof_bypass|signature_validation|message_validation|key_compromise|token_validation|replay_attack",
+        "affected_component": "bridge_relay|merkle_verifier|signature_verifier|multisig|token_handler|message_processor",
+        "bridge_provider": "custom",
+        "bridge_attack_vector": "merkle_root_bypass|signature_replay|message_injection|key_compromise|token_mismatch|arbitrary_call",
+        "severity": "critical",
+        "impact": "fund_loss",
+        "exploitability": "0.8",
+        "financial_impact": "critical",
+        "language": "solidity",
+        "version": "all",
+        "source": "DeFiHackLabs"
+      },
+      "patternCount": 8,
+      "patterns": [
+        {
+          "id": "general-infrastructure-1-merkle-proof-validation-failures-000",
+          "title": "1. Merkle Proof Validation Failures",
+          "lineStart": 122,
+          "lineEnd": 353,
+          "lineCount": 232,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "acceptableRoot",
+            "acceptableRoot(0x00",
+            "committedRoot",
+            "process",
+            "processWithdrawal",
+            "true",
+            "updateRoot",
+            "verifyMessage"
+          ],
+          "rootCause": "The Nomad Bridge Replica contract was incorrectly initialized with `committedRoot = 0x00`. The `acceptableRoot()` function returned `true` for the zero root, allowing any message with a valid-looking ",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 130,
+              "lineEnd": 144,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "acceptableRoot",
+                "acceptableRoot(0x00",
+                "committedRoot",
+                "process",
+                "true"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 145,
+              "lineEnd": 226,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "acceptableRoot",
+                "process",
+                "processWithdrawal",
+                "updateRoot",
+                "verifyMessage"
+              ]
+            },
+            {
+              "title": "Real-World Exploit Details",
+              "lineStart": 327,
+              "lineEnd": 353,
+              "severity": [],
+              "codeKeywords": [
+                "testExploit"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-2-signature-verification-issues-001",
+          "title": "2. Signature Verification Issues",
+          "lineStart": 354,
+          "lineEnd": 544,
+          "lineCount": 191,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "execute",
+            "withdraw"
+          ],
+          "rootCause": "Bridge signature verification may fail to properly validate signer addresses, allow signature reuse, or accept malleable signatures. In OrbitChain's case, validators' keys were likely compromised or t",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 362,
+              "lineEnd": 367,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 368,
+              "lineEnd": 455,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "execute",
+                "withdraw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-3-message-validation-bypasses-002",
+          "title": "3. Message Validation Bypasses",
+          "lineStart": 545,
+          "lineEnd": 721,
+          "lineCount": 177,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "EthCrossChainData",
+            "EthCrossChainManager",
+            "addAllowedTarget",
+            "putCurEpochConPubKeyBytes",
+            "receive",
+            "receiveMessage",
+            "verifyHeaderAndExecuteTx"
+          ],
+          "rootCause": "Poly Network's EthCrossChainManager",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 553,
+              "lineEnd": 558,
+              "severity": [],
+              "codeKeywords": [
+                "EthCrossChainData",
+                "EthCrossChainManager",
+                "putCurEpochConPubKeyBytes"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 559,
+              "lineEnd": 646,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "receive",
+                "receiveMessage",
+                "verifyHeaderAndExecuteTx"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-4-centralization-key-management-risks-003",
+          "title": "4. Centralization / Key Management Risks",
+          "lineStart": 722,
+          "lineEnd": 931,
+          "lineCount": 210,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "addValidator",
+            "testExploit",
+            "withdrawERC20For"
+          ],
+          "rootCause": "Low validator/signer thresholds combined with insufficient operational security make key compromise a viable attack vector. In Ronin's case, Sky Mavis controlled 4 validators, and Axie DAO (also contr",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 732,
+              "lineEnd": 737,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 738,
+              "lineEnd": 817,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "testExploit",
+                "withdrawERC20For"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-5-token-validation-in-bridge-deposits-004",
+          "title": "5. Token Validation in Bridge Deposits",
+          "lineStart": 932,
+          "lineEnd": 1107,
+          "lineCount": 176,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "address(0",
+            "burn",
+            "contractWhitelist",
+            "deposit",
+            "depositVault",
+            "resourceIDToTokenContractAddress",
+            "safeTransferFrom",
+            "testExample",
+            "testExploit",
+            "underlying"
+          ],
+          "rootCause": "Qubit's deposit handler",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 940,
+              "lineEnd": 945,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "address(0",
+                "safeTransferFrom"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 946,
+              "lineEnd": 1044,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "burn",
+                "contractWhitelist",
+                "deposit",
+                "depositVault",
+                "resourceIDToTokenContractAddress",
+                "testExample",
+                "testExploit",
+                "underlying"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-6-replay-attacks-across-chains-005",
+          "title": "6. Replay Attacks Across Chains",
+          "lineStart": 1108,
+          "lineEnd": 1223,
+          "lineCount": 116,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "execute",
+            "withdraw"
+          ],
+          "rootCause": "No chain ID",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1114,
+              "lineEnd": 1163,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "execute",
+                "withdraw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-7-arbitrary-call-vulnerabilities-006",
+          "title": "7. Arbitrary Call Vulnerabilities",
+          "lineStart": 1224,
+          "lineEnd": 1450,
+          "lineCount": 227,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_attack",
+            "_executeSwaps",
+            "executeRoute",
+            "swap",
+            "testExploit",
+            "transferFrom"
+          ],
+          "rootCause": "Bridge aggregators accept user-provided calldata that is executed against arbitrary addresses. If a user has approved tokens to the bridge contract, an attacker can craft calldata to call `transferFro",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 1235,
+              "lineEnd": 1240,
+              "severity": [],
+              "codeKeywords": [
+                "transferFrom"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1241,
+              "lineEnd": 1352,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "_attack",
+                "_executeSwaps",
+                "executeRoute",
+                "swap",
+                "testExploit"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-detection-patterns-007",
+          "title": "Detection Patterns",
+          "lineStart": 1451,
+          "lineEnd": 1484,
+          "lineCount": 34,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/erc7702-integration/erc7702-integration-vulnerabilities.md",
+      "totalLines": 1510,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "account_abstraction",
+        "vulnerability_type": "erc7702_integration",
+        "attack_type": "logical_error|data_manipulation|access_control|session_key_abuse",
+        "affected_component": "signature_verification|address_handling|callback_implementation|reentrancy_guard|session_key_management|permit_function",
+        "eip_standard": "EIP-7702",
+        "related_standards": "EIP-1271|EIP-4337|EIP-712|ERC-4494",
+        "severity": "medium|high",
+        "impact": "signature_bypass|fund_loss|dos|reentrancy|address_mismatch|session_impersonation|token_theft",
+        "exploitability": "0.75",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 9,
+      "patterns": [
+        {
+          "id": "general-infrastructure-understanding-eip-7702-000",
+          "title": "Understanding EIP-7702",
+          "lineStart": 132,
+          "lineEnd": 148,
+          "lineCount": 17,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "extcodesize(address",
+            "fallback",
+            "receive"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-1-iscontract-extcodesize-logic-broken-001",
+          "title": "1. isContract/extcodesize Logic Broken",
+          "lineStart": 149,
+          "lineEnd": 342,
+          "lineCount": 194,
+          "severity": [
+            "CRITICAL",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "address.code.length",
+            "extcodesize",
+            "isContract",
+            "isContract(user",
+            "isValidSignature",
+            "true",
+            "validateOrder",
+            "verifySignature"
+          ],
+          "rootCause": "Smart contracts commonly use `isContract()` checks to determine whether to verify signatures using ECDSA (for EOAs) or EIP-1271 `isValidSignature()` (for contracts). EIP-7702 allows EOAs to temporaril",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 158,
+              "lineEnd": 172,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "isContract",
+                "isContract(user",
+                "isValidSignature",
+                "true"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 173,
+              "lineEnd": 231,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "isContract",
+                "validateOrder",
+                "verifySignature"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-2-reentrancy-via-eip-7702-delegated-eoas-002",
+          "title": "2. Reentrancy via EIP-7702 Delegated EOAs",
+          "lineStart": 343,
+          "lineEnd": 491,
+          "lineCount": 149,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_is7702DelegatedWallet",
+            "_unwrapAndSendETH",
+            "executeWithCallback",
+            "fallback",
+            "receive",
+            "withdraw"
+          ],
+          "rootCause": "Protocols that detect EIP-7702 delegated wallets may use low-level `.call` with unlimited gas to send ETH, enabling complex operations in the recipient's `receive`/`fallback` functions. This opens ree",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 352,
+              "lineEnd": 365,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "fallback",
+                "receive"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 366,
+              "lineEnd": 411,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_is7702DelegatedWallet",
+                "_unwrapAndSendETH",
+                "executeWithCallback"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-3-missing-token-receiver-callbacks-003",
+          "title": "3. Missing Token Receiver Callbacks",
+          "lineStart": 492,
+          "lineEnd": 662,
+          "lineCount": 171,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "IERC1155Receiver",
+            "IERC721Receiver",
+            "execute",
+            "onERC1155BatchReceived",
+            "onERC1155Received",
+            "onERC721Received",
+            "safeTransfer",
+            "safeTransferFrom"
+          ],
+          "rootCause": "EIP-7702 smart wallet implementations that don't implement `IERC721Receiver` and `IERC1155Receiver` interfaces will fail to receive NFTs via `safeTransfer` functions. Since the delegated code makes th",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 501,
+              "lineEnd": 515,
+              "severity": [],
+              "codeKeywords": [
+                "IERC1155Receiver",
+                "IERC721Receiver",
+                "onERC721Received",
+                "safeTransfer",
+                "safeTransferFrom"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 516,
+              "lineEnd": 561,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "execute",
+                "onERC721Received"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-4-cross-chain-address-mismatch-004",
+          "title": "4. Cross-Chain Address Mismatch",
+          "lineStart": 663,
+          "lineEnd": 813,
+          "lineCount": 151,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "bridgeTokens",
+            "msg.sender",
+            "registerCrossChain",
+            "registerCrossChainAddress"
+          ],
+          "rootCause": "Smart contract wallets are deployed using factory contracts with chain-specific parameters (deployment salts, nonces, factory addresses). The same user's wallet logic results in different contract add",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 672,
+              "lineEnd": 686,
+              "severity": [],
+              "codeKeywords": [
+                "msg.sender"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 687,
+              "lineEnd": 728,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "bridgeTokens",
+                "registerCrossChain"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-5-tx-origin-exploitation-with-smart-wall-005",
+          "title": "5. tx.origin Exploitation with Smart Wallets",
+          "lineStart": 814,
+          "lineEnd": 959,
+          "lineCount": 146,
+          "severity": [
+            "CRITICAL",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "completeMission",
+            "create",
+            "emergencyWithdraw",
+            "execTransaction",
+            "initialize",
+            "tx.origin"
+          ],
+          "rootCause": "Smart wallets like Gnosis Safe accept signed transactions via `execTransaction()` and execute them on behalf of signers. The function is agnostic to who calls it, as long as signatures are valid. When",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 823,
+              "lineEnd": 838,
+              "severity": [],
+              "codeKeywords": [
+                "execTransaction",
+                "tx.origin"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 839,
+              "lineEnd": 880,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "completeMission",
+                "emergencyWithdraw",
+                "initialize"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-6-fallback-receive-function-issues-006",
+          "title": "6. Fallback/Receive Function Issues",
+          "lineStart": 960,
+          "lineEnd": 1083,
+          "lineCount": 124,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "execute",
+            "fallback",
+            "payable"
+          ],
+          "rootCause": "EIP-7702 transforms an EOA into what appears to be a smart contract. If the delegated contract's `fallback` function lacks the `payable` modifier, ETH transfers using `.call{value: x}(\"\")` will fail, ",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 969,
+              "lineEnd": 981,
+              "severity": [],
+              "codeKeywords": [
+                "fallback",
+                "payable"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 982,
+              "lineEnd": 1012,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "execute"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-7-session-key-impersonation-in-smart-wal-007",
+          "title": "7. Session Key Impersonation in Smart Wallets",
+          "lineStart": 1084,
+          "lineEnd": 1227,
+          "lineCount": 144,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_validateSingleCall",
+            "claim",
+            "msg.sender",
+            "sessionKey",
+            "validateUserOp"
+          ],
+          "rootCause": "When a smart wallet allows multiple active sessions concurrently, the signature validation must ensure that the session key that signed the transaction is the same one being used for the operation. Wi",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 1093,
+              "lineEnd": 1109,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "claim",
+                "msg.sender",
+                "sessionKey"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1110,
+              "lineEnd": 1150,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_validateSingleCall",
+                "claim",
+                "validateUserOp"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-8-nft-permit-function-exploitation-008",
+          "title": "8. NFT Permit Function Exploitation",
+          "lineStart": 1228,
+          "lineEnd": 1432,
+          "lineCount": 205,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "isValidSignature",
+            "permit"
+          ],
+          "rootCause": "ERC-4494 adds a `permit()` function to ERC-721, allowing off-chain signed approvals. When an NFT is held by a smart contract wallet (like a Gnosis Safe or rental safe), the wallet's signature verifica",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 1237,
+              "lineEnd": 1252,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "isValidSignature",
+                "permit"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1253,
+              "lineEnd": 1322,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "isValidSignature",
+                "permit"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
