@@ -6,7 +6,7 @@ tools: ['edit/editFiles', 'search/codebase', 'web/githubRepo', 'web/fetch', 'sea
 
 # Variant Template Writer
 
-Synthesizes multiple security audit reports into comprehensive, search-optimized vulnerability database entries. Requires minimum 5 reports per pattern for cross-validation.
+Synthesizes multiple security audit reports into comprehensive, search-optimized vulnerability database entries. Requires minimum 5 reports per pattern for cross-validation and approx 40 patterns per topic for robust coverage.
 
 **Do NOT use for** analyzing DeFiHackLabs exploits (use `defihacklabs-indexer`), initial codebase exploration (use `audit-context-building`), or writing fix recommendations (use `issue-writer`).
 

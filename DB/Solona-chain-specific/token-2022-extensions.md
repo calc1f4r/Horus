@@ -83,6 +83,8 @@ version: all
 | Arbitrary Token Extensions | `reports/solana_findings/m-01-arbitrary-input-tokens-and-token-extensions-leading-to-invariant-manipulati.md` | MEDIUM | Shieldify |
 | Fixed Token Account Size | `reports/solana_findings/fixed-token-account-size-causes-initialization-failures-for-token-accounts-whose.md` | MEDIUM | Unknown |
 | Hard-coded Vault Size | `reports/solana_findings/hard-coded-165-byte-vault-account-is-too-small-for-raydium-token-2022-mints-with.md` | MEDIUM | Unknown |
+| Token-2022 Extension Compatibility Gaps (M-5) | `reports/ZenithReports/fluidreport.md` | MEDIUM | Zenith |
+| Mixed Legacy + Token-2022 Incompatibility (L-17) | `reports/ZenithReports/fluidreport.md` | LOW | Zenith |
 
 ### Permanent Delegate Vulnerabilities
 | Report | Path | Severity | Audit Firm |

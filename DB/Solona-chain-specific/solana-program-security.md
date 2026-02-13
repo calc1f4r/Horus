@@ -151,6 +151,17 @@ version: all
 |----------|--------|------|----------|------------|
 | Module Bypass | Guard Reentrancy | `reports/solana_findings/h-3-signers-can-bypass-checks-to-add-new-modules-to-a-safe-by-abusing-reentrancy.md` | HIGH | Sherlock |
 
+### Fluid Vault/Liquidation Vulnerabilities
+| Category | Report | Path | Severity | Audit Firm |
+|----------|--------|------|----------|------------|
+| Tick Sentinel Confusion | Tick 0 treated as missing top tick | `reports/ZenithReports/fluidreport.md` (C-3) | CRITICAL | Zenith |
+| Selective Path Validation Bypass | `debt_amt=0` bypasses reserve mint validation in liquidate flow | `reports/ZenithReports/fluidreport.md` (C-4) | CRITICAL | Zenith |
+| Cross-Vault State Corruption | Missing `vault_id` check in `tick_id_data_after_operate` | `reports/ZenithReports/fluidreport.md` (C-5) | CRITICAL | Zenith |
+| Saturating Math Underpricing | Overflow in price conversion underprices collateral asset | `reports/ZenithReports/fluidreport.md` (C-6) | CRITICAL | Zenith |
+| Account-Borrow Runtime DoS | Double mutable borrow blocks liquidation path | `reports/ZenithReports/fluidreport.md` (H-3) | HIGH | Zenith |
+| Liquidation State Cleanup Omission | Full liquidation leaves stale debt in position state | `reports/ZenithReports/fluidreport.md` (H-2) | HIGH | Zenith |
+| Account-List Ceiling DoS | Branch-heavy operations exceed Solana account limits | `reports/ZenithReports/fluidreport.md` (H-1) | HIGH | Zenith |
+
 ### External Links
 - [Solana Program Security Course](https://solana.com/developers/courses/program-security)
 - [Neodyme Common Pitfalls](https://neodyme.io/en/blog/solana_common_pitfalls/)
@@ -189,6 +200,7 @@ version: all
 17. [Initialization Front-Running Vulnerabilities](#17-initialization-front-running-vulnerabilities)
 18. [Create Account Pre-Funding DOS](#18-create-account-pre-funding-dos)
 19. [Rent Exemption Validation Errors](#19-rent-exemption-validation-errors)
+20. [Liquidation and State Invariant Vulnerabilities](#20-liquidation-and-state-invariant-vulnerabilities)
 
 ---
 
@@ -2385,6 +2397,139 @@ pub fn check_invariant(
 
 ---
 
+## 20. Liquidation and State Invariant Vulnerabilities
+
+### Overview
+
+Liquidation engines in Solana lending protocols often combine branch/tick state machines, dynamic remaining accounts, and oracle-derived conversion rates. The Fluid report highlights failure modes where sentinel misuse, partial-path validation, and stale state transitions can cascade into liquidation failure, bad debt misclassification, and cross-vault state corruption.
+
+> **📚 Source Report:**
+> - `reports/ZenithReports/fluidreport.md` (C-3, C-4, C-5, C-6, H-1, H-2, H-3)
+
+### Vulnerability Description
+
+#### Root Cause
+
+1. **Sentinel encoding mismatch**: treating `0` as “no tick exists” even when tick `0` is valid.
+2. **Conditional validation gaps**: relying on downstream CPI checks that are skipped on special branches (`debt_amt == 0`).
+3. **Incomplete liquidation cleanup**: updating tick state but leaving debt fields non-zero.
+4. **Unsafe arithmetic strategy**: `saturating_mul` hides overflow and yields severely discounted prices.
+5. **Runtime borrowing conflicts**: overlapping mutable borrows trigger instruction failure in critical liquidation flows.
+
+### Vulnerable Pattern Examples
+
+**Example 1: Tick 0 Sentinel Confusion** [CRITICAL]
+```rust
+// ❌ VULNERABLE: 0 is treated as "no tick", but tick 0 can be valid
+pub fn get_top_tick(&self) -> i32 {
+    if self.topmost_tick == 0 {
+        i32::MIN
+    } else {
+        self.topmost_tick
+    }
+}
+```
+
+**Example 2: Validation Bypass on Special Liquidation Path** [CRITICAL]
+```rust
+// ❌ VULNERABLE: reserve mint checks are assumed to happen in CPI,
+// but this branch exits before CPI when debt_amt == 0
+pub fn liquidate(ctx: Context<Liquidate>, debt_amt: u64) -> Result<()> {
+    absorb_bad_debt(&ctx)?;
+
+    if debt_amt == 0 {
+        return Ok(()); // no downstream validation reached
+    }
+
+    cpi_to_liquidity_program(&ctx)?;
+    Ok(())
+}
+```
+
+**Example 3: Missing Cross-Vault ID Validation** [CRITICAL]
+```rust
+// ❌ VULNERABLE: account belongs to different vault but is accepted
+pub fn verify_operate(ctx: &Context<Operate>) -> Result<()> {
+    let tick_id_data = &ctx.accounts.tick_id_data;
+    require!(tick_id_data.vault_id == ctx.accounts.vault_state.vault_id, ErrorCode::InvalidVaultId);
+
+    // Missing equivalent check for tick_id_data_after_operate
+    Ok(())
+}
+```
+
+**Example 4: Saturating Overflow in Price Pipeline** [CRITICAL]
+```rust
+// ❌ VULNERABLE: saturation hides overflow and produces underpriced assets
+rate = rate
+    .saturating_mul(current_hop_rate)
+    .saturating_div(10u128.pow(RATE_OUTPUT_DECIMALS));
+```
+
+**Example 5: Full Liquidation Leaves Stale Debt** [HIGH]
+```rust
+// ❌ VULNERABLE: full liquidation resets tick but debt is not cleared
+if is_fully_liquidated {
+    position_tick = i32::MIN;
+    // missing: position_raw_debt = 0;
+}
+```
+
+### Secure Implementation
+
+**Fix 1: Explicit Sentinel Domain**
+```rust
+// ✅ SECURE: reserve i32::MIN for "no tick", allow 0 as valid tick
+pub fn get_top_tick(&self) -> i32 {
+    self.topmost_tick
+}
+
+pub fn reset_top_tick(&mut self) {
+    self.topmost_tick = i32::MIN;
+}
+```
+
+**Fix 2: Validate Before Branching**
+```rust
+// ✅ SECURE: enforce reserve/token-vault consistency before any early return
+fn validate_reserves(vault_cfg: &VaultConfig, supply: &TokenReserve, borrow: &TokenReserve) -> Result<()> {
+    require!(supply.mint == vault_cfg.supply_token, ErrorCode::InvalidSupplyReserve);
+    require!(borrow.mint == vault_cfg.borrow_token, ErrorCode::InvalidBorrowReserve);
+    Ok(())
+}
+```
+
+**Fix 3: Checked Math for Price Conversions**
+```rust
+// ✅ SECURE: fail safely on overflow instead of saturating to MAX
+rate = rate
+    .checked_mul(current_hop_rate)
+    .ok_or(ErrorCode::MathOverflow)?
+    .checked_div(10u128.pow(RATE_OUTPUT_DECIMALS))
+    .ok_or(ErrorCode::MathUnderflow)?;
+```
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- sentinel checks that map 0 -> no value for signed domains where 0 is valid
+- early return branches that skip expected downstream CPI-based validation
+- liquidation/full-close flows that modify tick/status but not debt/principal fields
+- saturating_* arithmetic in price, collateral, or liquidation threshold calculations
+- repeated mutable borrows (`load_mut`) of same account in nested liquidation helpers
+```
+
+#### Audit Checklist
+- [ ] Tick sentinel encoding distinguishes "unset" from valid tick 0
+- [ ] All reserve mint and vault_id checks run before path-specific early returns
+- [ ] Full liquidation paths zero debt and synchronize all derived fields
+- [ ] Oracle price conversion uses checked math (or wider integer types)
+- [ ] Liquidation helpers avoid overlapping mutable account borrows
+- [ ] Branch/tick account requirements are bounded to avoid account-count DoS
+
+---
+
 ## Prevention Guidelines
 
 ### Development Best Practices
@@ -2413,7 +2558,7 @@ pub fn check_invariant(
 
 > These keywords enhance vector search retrieval:
 
-`solana`, `anchor`, `spl_token`, `token_2022`, `pda`, `cpi`, `signer_check`, `owner_check`, `account_validation`, `missing_signer`, `missing_owner`, `pda_validation`, `arbitrary_cpi`, `seed_collision`, `account_closure`, `init_if_needed`, `dos_attack`, `front_running`, `account_reloading`, `stale_state`, `reallocation`, `rent_exempt`, `lamports_transfer`, `freeze_authority`, `close_authority`, `transfer_fee`, `remaining_accounts`, `bump_seed`, `signer_seeds`, `checked_arithmetic`, `overflow`, `underflow`, `type_casting`, `event_emission`, `token_program`, `system_program`, `sysvar`, `account_pre_creation`, `type_confusion`, `discriminator`, `ed25519`, `instruction_introspection`, `signature_replay`, `nonce_reset`, `unrestricted_cpi`, `adapter_program`, `initialization_frontrun`, `multisig`, `create_key`, `permissionless_init`, `pre_funding_dos`, `create_account`, `rent_inclusion`, `bonding_curve`, `invariant_check`, `canonical_bump`, `reentrancy`, `guard_bypass`, `decimal_mismatch`, `precision_manipulation`, `tss_address`, `merkle_proof`
+`solana`, `anchor`, `spl_token`, `token_2022`, `pda`, `cpi`, `signer_check`, `owner_check`, `account_validation`, `missing_signer`, `missing_owner`, `pda_validation`, `arbitrary_cpi`, `seed_collision`, `account_closure`, `init_if_needed`, `dos_attack`, `front_running`, `account_reloading`, `stale_state`, `reallocation`, `rent_exempt`, `lamports_transfer`, `freeze_authority`, `close_authority`, `transfer_fee`, `remaining_accounts`, `bump_seed`, `signer_seeds`, `checked_arithmetic`, `overflow`, `underflow`, `type_casting`, `event_emission`, `token_program`, `system_program`, `sysvar`, `account_pre_creation`, `type_confusion`, `discriminator`, `ed25519`, `instruction_introspection`, `signature_replay`, `nonce_reset`, `unrestricted_cpi`, `adapter_program`, `initialization_frontrun`, `multisig`, `create_key`, `permissionless_init`, `pre_funding_dos`, `create_account`, `rent_inclusion`, `bonding_curve`, `invariant_check`, `canonical_bump`, `reentrancy`, `guard_bypass`, `decimal_mismatch`, `precision_manipulation`, `tss_address`, `merkle_proof`, `tick_sentinel`, `liquidation_state_cleanup`, `cross_vault_write`, `saturating_overflow`, `account_borrow_conflict`, `account_count_limit`
 
 ---
 
