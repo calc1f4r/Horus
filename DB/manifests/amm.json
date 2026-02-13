@@ -1,0 +1,3960 @@
+{
+  "meta": {
+    "category": "amm",
+    "description": "Pattern-level index for amm vulnerabilities",
+    "fileCount": 8,
+    "totalPatterns": 82,
+    "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
+  },
+  "files": [
+    {
+      "file": "DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md",
+      "totalLines": 678,
+      "frontmatter": {
+        "title": "\"DoS, Arithmetic, and Initialization Vulnerabilities in Concentrated Liquidity AMMs\"",
+        "vulnerability_class": "\"DoS/Arithmetic/Initialization Vulnerabilities\"",
+        "severity": "\"HIGH to MEDIUM\"",
+        "chain": "\"Multi-chain\"",
+        "last_updated": "\"2025-01-15\""
+      },
+      "patternCount": 8,
+      "patterns": [
+        {
+          "id": "amm-overview-000",
+          "title": "Overview",
+          "lineStart": 27,
+          "lineEnd": 37,
+          "lineCount": 11,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-vulnerable-pattern-examples-001",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 38,
+          "lineEnd": 436,
+          "lineCount": 399,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "getOwedFee",
+            "mulDiv",
+            "unchecked"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 1: Unchecked Overflow in FullMath Migration (HIGH)",
+              "lineStart": 40,
+              "lineEnd": 79,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "mulDiv",
+                "unchecked"
+              ]
+            },
+            {
+              "title": "Pattern 2: Fee Growth Underflow Not Handled (HIGH)",
+              "lineStart": 80,
+              "lineEnd": 127,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "getOwedFee"
+              ]
+            },
+            {
+              "title": "Pattern 3: Rounding Error Amplification Breaking Pool Invariants (HIGH)",
+              "lineStart": 128,
+              "lineEnd": 167,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "buyShares"
+              ]
+            },
+            {
+              "title": "Pattern 4: First Depositor / Inflation Attack (HIGH)",
+              "lineStart": 168,
+              "lineEnd": 209,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "deposit"
+              ]
+            },
+            {
+              "title": "Pattern 5: Counter Overflow DoS (MEDIUM)",
+              "lineStart": 210,
+              "lineEnd": 245,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "add",
+                "emptyRebalance",
+                "setPositionParams"
+              ]
+            },
+            {
+              "title": "Pattern 6: Withdrawal Queue Griefing DoS (HIGH)",
+              "lineStart": 246,
+              "lineEnd": 284,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "processWithdrawals",
+                "requestWithdraw"
+              ]
+            },
+            {
+              "title": "Pattern 7: Re-initialization Vulnerability (CRITICAL)",
+              "lineStart": 285,
+              "lineEnd": 325,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "initialize"
+              ]
+            },
+            {
+              "title": "Pattern 8: Inconsistent Rounding Directions (MEDIUM)",
+              "lineStart": 326,
+              "lineEnd": 359,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "getBuyInfo",
+                "getSellInfo"
+              ]
+            },
+            {
+              "title": "Pattern 9: Broken Multi-Token Pool Invariants (HIGH)",
+              "lineStart": 360,
+              "lineEnd": 402,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "computeSwap",
+                "createPool"
+              ]
+            },
+            {
+              "title": "Pattern 10: Initial LP Token Calculation Ignoring Relative Values (HIGH)",
+              "lineStart": 403,
+              "lineEnd": 436,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "provideInitialLiquidity"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-secure-implementation-examples-002",
+          "title": "Secure Implementation Examples",
+          "lineStart": 437,
+          "lineEnd": 542,
+          "lineCount": 106,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "calculateOwedFees",
+            "initialize"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Secure Pattern 1: Protected Initialization with Immutable Flag",
+              "lineStart": 439,
+              "lineEnd": 466,
+              "severity": [],
+              "codeKeywords": [
+                "initialize"
+              ]
+            },
+            {
+              "title": "Secure Pattern 2: Consistent Underflow Handling",
+              "lineStart": 467,
+              "lineEnd": 488,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "calculateOwedFees"
+              ]
+            },
+            {
+              "title": "Secure Pattern 3: First Depositor Protection",
+              "lineStart": 489,
+              "lineEnd": 517,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "deposit"
+              ]
+            },
+            {
+              "title": "Secure Pattern 4: Bounded Queue with Rate Limiting",
+              "lineStart": 518,
+              "lineEnd": 542,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "requestWithdraw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-impact-analysis-003",
+          "title": "Impact Analysis",
+          "lineStart": 543,
+          "lineEnd": 581,
+          "lineCount": 39,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Technical Impact",
+              "lineStart": 545,
+              "lineEnd": 553,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Financial Impact",
+              "lineStart": 554,
+              "lineEnd": 560,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Attack Scenarios",
+              "lineStart": 561,
+              "lineEnd": 581,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "amm-real-world-examples-004",
+          "title": "Real-World Examples",
+          "lineStart": 630,
+          "lineEnd": 646,
+          "lineCount": 17,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-keywords-for-search-005",
+          "title": "Keywords for Search",
+          "lineStart": 647,
+          "lineEnd": 664,
+          "lineCount": 18,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-related-vulnerabilities-006",
+          "title": "Related Vulnerabilities",
+          "lineStart": 665,
+          "lineEnd": 672,
+          "lineCount": 8,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-references-007",
+          "title": "References",
+          "lineStart": 673,
+          "lineEnd": 678,
+          "lineCount": 6,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/amm/concentrated-liquidity/fee-collection-distribution.md",
+      "totalLines": 489,
+      "frontmatter": {
+        "title": "\"Fee Collection and Distribution Vulnerabilities in AMMs\"",
+        "vulnerability_class": "amm-fee-vulnerabilities",
+        "category": "amm/concentrated-liquidity",
+        "severity_range": "\"MEDIUM to HIGH\"",
+        "consensus_severity": "HIGH",
+        "total_reports_analyzed": "74",
+        "patterns_identified": "12",
+        "critical_patterns": "6"
+      },
+      "patternCount": 8,
+      "patterns": [
+        {
+          "id": "amm-overview-000",
+          "title": "Overview",
+          "lineStart": 46,
+          "lineEnd": 54,
+          "lineCount": 9,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-vulnerable-pattern-examples-001",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 55,
+          "lineEnd": 358,
+          "lineCount": 304,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "addMakerLiquidity",
+            "withdrawFees",
+            "withdrawFees(address(pair"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 1: Fee Theft via Spot Price Manipulation",
+              "lineStart": 57,
+              "lineEnd": 90,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "addMakerLiquidity"
+              ]
+            },
+            {
+              "title": "Pattern 2: Permissionless Fee Withdrawal",
+              "lineStart": 91,
+              "lineEnd": 120,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "withdrawFees",
+                "withdrawFees(address(pair"
+              ]
+            },
+            {
+              "title": "Pattern 3: JIT Fee Theft on Limit Orders",
+              "lineStart": 121,
+              "lineEnd": 146,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_distributeFilledOrderFees"
+              ]
+            },
+            {
+              "title": "Pattern 4: Fee Flash Loan Attack",
+              "lineStart": 147,
+              "lineEnd": 178,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "deposit"
+              ]
+            },
+            {
+              "title": "Pattern 5: Parameter Ordering in Fee Collection",
+              "lineStart": 179,
+              "lineEnd": 201,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Pattern 6: Collect All Fees on First Claim",
+              "lineStart": 202,
+              "lineEnd": 231,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "claim"
+              ]
+            },
+            {
+              "title": "Pattern 7: Fee Growth Underflow Returns Zero",
+              "lineStart": 232,
+              "lineEnd": 263,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "getOwedFee"
+              ]
+            },
+            {
+              "title": "Pattern 8: Fee Tier Spoofing",
+              "lineStart": 264,
+              "lineEnd": 286,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Pattern 9: Fees Not Segregated from Principal",
+              "lineStart": 287,
+              "lineEnd": 310,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "withdrawNative"
+              ]
+            },
+            {
+              "title": "Pattern 10: Double Fee Points Update",
+              "lineStart": 311,
+              "lineEnd": 337,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "executeIncreasePositionSizeMarket"
+              ]
+            },
+            {
+              "title": "Pattern 11: Subtree Borrow Not Propagated (Fee Underpayment)",
+              "lineStart": 338,
+              "lineEnd": 358,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "amm-secure-implementation-patterns-002",
+          "title": "Secure Implementation Patterns",
+          "lineStart": 359,
+          "lineEnd": 430,
+          "lineCount": 72,
+          "severity": [],
+          "codeKeywords": [
+            "claim",
+            "claimFees",
+            "collectFees",
+            "getEquivalentLiquidity"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Secure Pattern 1: TWAP-Based Fee Value Calculation",
+              "lineStart": 361,
+              "lineEnd": 373,
+              "severity": [],
+              "codeKeywords": [
+                "getEquivalentLiquidity"
+              ]
+            },
+            {
+              "title": "Secure Pattern 2: Per-User Fee Tracking",
+              "lineStart": 374,
+              "lineEnd": 390,
+              "severity": [],
+              "codeKeywords": [
+                "claimFees"
+              ]
+            },
+            {
+              "title": "Secure Pattern 3: Proportional Fee Collection",
+              "lineStart": 391,
+              "lineEnd": 411,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "claim"
+              ]
+            },
+            {
+              "title": "Secure Pattern 4: Segregated Fee Accounting",
+              "lineStart": 412,
+              "lineEnd": 430,
+              "severity": [],
+              "codeKeywords": [
+                "collectFees",
+                "withdrawFees"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-impact-analysis-003",
+          "title": "Impact Analysis",
+          "lineStart": 431,
+          "lineEnd": 442,
+          "lineCount": 12,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-detection-checklist-004",
+          "title": "Detection Checklist",
+          "lineStart": 443,
+          "lineEnd": 456,
+          "lineCount": 14,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-real-world-examples-005",
+          "title": "Real-World Examples",
+          "lineStart": 457,
+          "lineEnd": 473,
+          "lineCount": 17,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-related-vulnerabilities-006",
+          "title": "Related Vulnerabilities",
+          "lineStart": 474,
+          "lineEnd": 480,
+          "lineCount": 7,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-keywords-007",
+          "title": "Keywords",
+          "lineStart": 481,
+          "lineEnd": 489,
+          "lineCount": 9,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/amm/concentrated-liquidity/liquidity-management-vulnerabilities.md",
+      "totalLines": 647,
+      "frontmatter": {
+        "title": "\"Liquidity Management Vulnerabilities in Concentrated Liquidity AMMs\"",
+        "vulnerability_class": "\"Liquidity Management Vulnerabilities\"",
+        "severity": "\"HIGH to MEDIUM\"",
+        "chain": "\"Multi-chain\"",
+        "last_updated": "\"2025-01-15\""
+      },
+      "patternCount": 7,
+      "patterns": [
+        {
+          "id": "amm-overview-000",
+          "title": "Overview",
+          "lineStart": 25,
+          "lineEnd": 35,
+          "lineCount": 11,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-vulnerable-pattern-examples-001",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 36,
+          "lineEnd": 414,
+          "lineCount": 379,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "collectAndCalcCompound",
+            "mint"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 1: Overestimation of Available Liquidity in Compound/Rebalance (HIGH)",
+              "lineStart": 38,
+              "lineEnd": 66,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "collectAndCalcCompound"
+              ]
+            },
+            {
+              "title": "Pattern 2: Wrong Inequality at Price Range Boundary (HIGH)",
+              "lineStart": 67,
+              "lineEnd": 103,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "mint"
+              ]
+            },
+            {
+              "title": "Pattern 3: Incorrect Active Liquidity at Tick Boundaries (HIGH)",
+              "lineStart": 104,
+              "lineEnd": 143,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_advanceToNextDown"
+              ]
+            },
+            {
+              "title": "Pattern 4: Pool Initialization Front-Running (MEDIUM)",
+              "lineStart": 144,
+              "lineEnd": 177,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "initialize"
+              ]
+            },
+            {
+              "title": "Pattern 5: Fee Theft via Flash Loan Deposit/Withdraw (HIGH)",
+              "lineStart": 178,
+              "lineEnd": 227,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "deposit"
+              ]
+            },
+            {
+              "title": "Pattern 6: Shared Pool Liquidity Theft Between Pairs (HIGH)",
+              "lineStart": 228,
+              "lineEnd": 271,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "reallocate"
+              ]
+            },
+            {
+              "title": "Pattern 7: Permissionless Fee Withdrawal on Behalf of Pool (HIGH)",
+              "lineStart": 272,
+              "lineEnd": 316,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_transfer",
+                "withdrawFees"
+              ]
+            },
+            {
+              "title": "Pattern 8: Cached Liquidity Allows Undercollateralized Positions (HIGH)",
+              "lineStart": 317,
+              "lineEnd": 373,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_addAsset",
+                "_deposit"
+              ]
+            },
+            {
+              "title": "Pattern 9: Recovery Mode Blocking Liquidity Withdrawal (HIGH)",
+              "lineStart": 374,
+              "lineEnd": 414,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "removeLiquidity",
+                "removeLiquidityForUser",
+                "verifyTransfer"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-secure-implementation-examples-002",
+          "title": "Secure Implementation Examples",
+          "lineStart": 415,
+          "lineEnd": 524,
+          "lineCount": 110,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "addLiquidity",
+            "deposit",
+            "reallocate"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Secure Pattern 1: Atomic Liquidity Verification",
+              "lineStart": 417,
+              "lineEnd": 440,
+              "severity": [],
+              "codeKeywords": [
+                "deposit"
+              ]
+            },
+            {
+              "title": "Secure Pattern 2: Per-Position Liquidity Accounting",
+              "lineStart": 441,
+              "lineEnd": 469,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "addLiquidity",
+                "reallocate"
+              ]
+            },
+            {
+              "title": "Secure Pattern 3: Fee-Adjusted LP Minting",
+              "lineStart": 470,
+              "lineEnd": 499,
+              "severity": [],
+              "codeKeywords": [
+                "_getTotalValue",
+                "deposit"
+              ]
+            },
+            {
+              "title": "Secure Pattern 4: Protected Initialization",
+              "lineStart": 500,
+              "lineEnd": 524,
+              "severity": [],
+              "codeKeywords": [
+                "createAndInitializePool"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-impact-analysis-003",
+          "title": "Impact Analysis",
+          "lineStart": 525,
+          "lineEnd": 566,
+          "lineCount": 42,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "initialize"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Technical Impact",
+              "lineStart": 527,
+              "lineEnd": 535,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Financial Impact",
+              "lineStart": 536,
+              "lineEnd": 542,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Attack Scenarios",
+              "lineStart": 543,
+              "lineEnd": 566,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "initialize"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-real-world-examples-004",
+          "title": "Real-World Examples",
+          "lineStart": 601,
+          "lineEnd": 616,
+          "lineCount": 16,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-keywords-for-search-005",
+          "title": "Keywords for Search",
+          "lineStart": 617,
+          "lineEnd": 634,
+          "lineCount": 18,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-related-vulnerabilities-006",
+          "title": "Related Vulnerabilities",
+          "lineStart": 635,
+          "lineEnd": 642,
+          "lineCount": 8,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/amm/concentrated-liquidity/price-oracle-manipulation.md",
+      "totalLines": 563,
+      "frontmatter": {
+        "title": "\"Price Oracle Manipulation in Concentrated Liquidity AMMs\"",
+        "vulnerability_class": "\"Price Oracle Vulnerabilities\"",
+        "severity": "\"HIGH to MEDIUM\"",
+        "chain": "\"Multi-chain\"",
+        "last_updated": "\"2025-01-15\""
+      },
+      "patternCount": 8,
+      "patterns": [
+        {
+          "id": "amm-overview-000",
+          "title": "Overview",
+          "lineStart": 26,
+          "lineEnd": 36,
+          "lineCount": 11,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "slot0"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-vulnerable-pattern-examples-001",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 37,
+          "lineEnd": 335,
+          "lineCount": 299,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_calculatePriceFromLiquidity",
+            "_gasSwapIn",
+            "reallocate",
+            "slot0.sqrtPriceX96"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 1: Direct slot0 Usage for Price-Sensitive Operations (HIGH - 12+ reports)",
+              "lineStart": 39,
+              "lineEnd": 79,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_calculatePriceFromLiquidity",
+                "_gasSwapIn",
+                "slot0.sqrtPriceX96"
+              ]
+            },
+            {
+              "title": "Pattern 2: slot0-Based Reallocation/Rebalancing (HIGH - 9+ reports)",
+              "lineStart": 80,
+              "lineEnd": 111,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "reallocate"
+              ]
+            },
+            {
+              "title": "Pattern 3: slot0 Tick for Position Tick Setting (HIGH)",
+              "lineStart": 112,
+              "lineEnd": 134,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "rebalance"
+              ]
+            },
+            {
+              "title": "Pattern 4: TWAP Observation Cardinality Manipulation (HIGH)",
+              "lineStart": 135,
+              "lineEnd": 164,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "observe"
+              ]
+            },
+            {
+              "title": "Pattern 5: Negative Tick Delta Rounding Error (HIGH - 19+ reports)",
+              "lineStart": 165,
+              "lineEnd": 199,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_getReferencePoolPriceX96",
+                "consult"
+              ]
+            },
+            {
+              "title": "Pattern 6: Insufficient TWAP Duration (MEDIUM)",
+              "lineStart": 200,
+              "lineEnd": 234,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Pattern 7: Reserve-Based Oracle Pricing (HIGH)",
+              "lineStart": 235,
+              "lineEnd": 258,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "getPriceInEth"
+              ]
+            },
+            {
+              "title": "Pattern 8: Decimal Mismatch in sqrtPriceX96 Calculation (HIGH)",
+              "lineStart": 259,
+              "lineEnd": 283,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_getOracleData"
+              ]
+            },
+            {
+              "title": "Pattern 9: Spot Price in Factory/Deployment (MEDIUM)",
+              "lineStart": 284,
+              "lineEnd": 306,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "deployNewPool"
+              ]
+            },
+            {
+              "title": "Pattern 10: Hook/Callback Price Manipulation (HIGH)",
+              "lineStart": 307,
+              "lineEnd": 335,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "beforeSwap"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-secure-implementation-examples-002",
+          "title": "Secure Implementation Examples",
+          "lineStart": 336,
+          "lineEnd": 440,
+          "lineCount": 105,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "getTWAPPrice",
+            "validateAndGetPrice"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Secure Pattern 1: TWAP Oracle with Proper Configuration",
+              "lineStart": 338,
+              "lineEnd": 366,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "getTWAPPrice"
+              ]
+            },
+            {
+              "title": "Secure Pattern 2: Dual Price Validation",
+              "lineStart": 367,
+              "lineEnd": 396,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "validateAndGetPrice"
+              ]
+            },
+            {
+              "title": "Secure Pattern 3: sqrtPrice-Based Tick Derivation",
+              "lineStart": 397,
+              "lineEnd": 415,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "setPositionTicks"
+              ]
+            },
+            {
+              "title": "Secure Pattern 4: Initialized Observation Check",
+              "lineStart": 416,
+              "lineEnd": 440,
+              "severity": [],
+              "codeKeywords": [
+                "safeObserve"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-impact-analysis-003",
+          "title": "Impact Analysis",
+          "lineStart": 441,
+          "lineEnd": 481,
+          "lineCount": 41,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Technical Impact",
+              "lineStart": 443,
+              "lineEnd": 451,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Financial Impact",
+              "lineStart": 452,
+              "lineEnd": 458,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Attack Scenarios",
+              "lineStart": 459,
+              "lineEnd": 481,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "amm-real-world-examples-004",
+          "title": "Real-World Examples",
+          "lineStart": 512,
+          "lineEnd": 531,
+          "lineCount": 20,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-keywords-for-search-005",
+          "title": "Keywords for Search",
+          "lineStart": 532,
+          "lineEnd": 549,
+          "lineCount": 18,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-related-vulnerabilities-006",
+          "title": "Related Vulnerabilities",
+          "lineStart": 550,
+          "lineEnd": 557,
+          "lineCount": 8,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-references-007",
+          "title": "References",
+          "lineStart": 558,
+          "lineEnd": 563,
+          "lineCount": 6,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/amm/concentrated-liquidity/slippage-sandwich-frontrun.md",
+      "totalLines": 310,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "economic",
+        "vulnerability_type": "slippage_protection",
+        "attack_type": "mev_extraction",
+        "affected_component": "swap_execution",
+        "dex_type": "concentrated_liquidity",
+        "severity": "high",
+        "impact": "fund_loss",
+        "exploitability": "0.85",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 2,
+      "patterns": [
+        {
+          "id": "amm-references-000",
+          "title": "References",
+          "lineStart": 52,
+          "lineEnd": 64,
+          "lineCount": 13,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-vulnerability-title-001",
+          "title": "Vulnerability Title",
+          "lineStart": 65,
+          "lineEnd": 310,
+          "lineCount": 246,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_swap"
+          ],
+          "rootCause": "This vulnerability exists because **swap operations set amountOutMinimum to 0 or use ineffective slippage calculations** when calling Uniswap V3/V4 functions, allowing 100% slippage tolerance. Additio",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 69,
+              "lineEnd": 72,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 73,
+              "lineEnd": 190,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_swap"
+              ]
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 191,
+              "lineEnd": 210,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 211,
+              "lineEnd": 273,
+              "severity": [],
+              "codeKeywords": [
+                "getMinAmountOut",
+                "swap",
+                "validateMinOut"
+              ]
+            },
+            {
+              "title": "Detection Patterns",
+              "lineStart": 274,
+              "lineEnd": 291,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Real-World Examples",
+              "lineStart": 292,
+              "lineEnd": 302,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Keywords for Search",
+              "lineStart": 303,
+              "lineEnd": 306,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Related Vulnerabilities",
+              "lineStart": 307,
+              "lineEnd": 310,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/amm/concentrated-liquidity/tick-range-position-vulnerabilities.md",
+      "totalLines": 329,
+      "frontmatter": {
+        "title": "\"Tick, Range, and Position Vulnerabilities in Concentrated Liquidity AMMs\"",
+        "vulnerability_class": "concentrated-liquidity-tick-range-position",
+        "category": "amm/concentrated-liquidity",
+        "severity_range": "\"MEDIUM to HIGH\"",
+        "consensus_severity": "HIGH",
+        "total_reports_analyzed": "80",
+        "patterns_identified": "14",
+        "critical_patterns": "5"
+      },
+      "patternCount": 8,
+      "patterns": [
+        {
+          "id": "amm-overview-000",
+          "title": "Overview",
+          "lineStart": 46,
+          "lineEnd": 54,
+          "lineCount": 9,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-vulnerable-pattern-examples-001",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 55,
+          "lineEnd": 221,
+          "lineCount": 167,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 1: Missing Lower < Upper Tick Validation",
+              "lineStart": 57,
+              "lineEnd": 74,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Pattern 2: Fee Growth Underflow Without unchecked{}",
+              "lineStart": 75,
+              "lineEnd": 100,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Pattern 3: Wrong Inequality at Tick Boundaries",
+              "lineStart": 101,
+              "lineEnd": 117,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Pattern 4: Tick Tracking Array DoS",
+              "lineStart": 118,
+              "lineEnd": 135,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Pattern 5: Tick Iteration Infinite Loop",
+              "lineStart": 136,
+              "lineEnd": 148,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Pattern 6: Negative TWAP Tick Rounding Error",
+              "lineStart": 149,
+              "lineEnd": 165,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Pattern 7: Position Debt Calculation Sign Error",
+              "lineStart": 166,
+              "lineEnd": 178,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Pattern 8: Position State Desync Between Contracts",
+              "lineStart": 179,
+              "lineEnd": 194,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Pattern 9: Hardcoded Fee Tier",
+              "lineStart": 195,
+              "lineEnd": 207,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Pattern 10: Price Movement During Range Operations",
+              "lineStart": 208,
+              "lineEnd": 221,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "amm-secure-implementation-patterns-002",
+          "title": "Secure Implementation Patterns",
+          "lineStart": 222,
+          "lineEnd": 271,
+          "lineCount": 50,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "crossTicks",
+            "getFeeGrowthInside",
+            "getTwapTick",
+            "mintPosition"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Secure Pattern 1: Proper Tick Validation",
+              "lineStart": 224,
+              "lineEnd": 235,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "mintPosition"
+              ]
+            },
+            {
+              "title": "Secure Pattern 2: Fee Growth with unchecked{}",
+              "lineStart": 236,
+              "lineEnd": 246,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "getFeeGrowthInside"
+              ]
+            },
+            {
+              "title": "Secure Pattern 3: Correct TWAP Tick Calculation",
+              "lineStart": 247,
+              "lineEnd": 258,
+              "severity": [],
+              "codeKeywords": [
+                "getTwapTick"
+              ]
+            },
+            {
+              "title": "Secure Pattern 4: Bounded Tick Tracking",
+              "lineStart": 259,
+              "lineEnd": 271,
+              "severity": [],
+              "codeKeywords": [
+                "crossTicks"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-impact-analysis-003",
+          "title": "Impact Analysis",
+          "lineStart": 272,
+          "lineEnd": 283,
+          "lineCount": 12,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-detection-checklist-004",
+          "title": "Detection Checklist",
+          "lineStart": 284,
+          "lineEnd": 296,
+          "lineCount": 13,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-real-world-examples-005",
+          "title": "Real-World Examples",
+          "lineStart": 297,
+          "lineEnd": 313,
+          "lineCount": 17,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-related-vulnerabilities-006",
+          "title": "Related Vulnerabilities",
+          "lineStart": 314,
+          "lineEnd": 320,
+          "lineCount": 7,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-keywords-007",
+          "title": "Keywords",
+          "lineStart": 321,
+          "lineEnd": 329,
+          "lineCount": 9,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md",
+      "totalLines": 767,
+      "frontmatter": {
+        "title": "\"Uniswap V4 Hook Security and Token Compatibility Vulnerabilities\"",
+        "vulnerability_class": "\"Hook Security / Token Compatibility\"",
+        "severity": "\"HIGH to CRITICAL\"",
+        "chain": "\"Multi-chain\"",
+        "last_updated": "\"2025-01-17\""
+      },
+      "patternCount": 8,
+      "patterns": [
+        {
+          "id": "amm-overview-000",
+          "title": "Overview",
+          "lineStart": 28,
+          "lineEnd": 38,
+          "lineCount": 11,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-vulnerable-pattern-examples-001",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 39,
+          "lineEnd": 504,
+          "lineCount": 466,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "deployBunniToken",
+            "lockForRebalance",
+            "notifyUnsubscribe",
+            "unlockForRebalance",
+            "unsubscribe"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 1: Malicious Hook Bypassing Reentrancy Guards (CRITICAL)",
+              "lineStart": 41,
+              "lineEnd": 83,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "deployBunniToken",
+                "lockForRebalance",
+                "unlockForRebalance"
+              ]
+            },
+            {
+              "title": "Pattern 2: Gas Limit Underestimation in Hook Callbacks (HIGH)",
+              "lineStart": 84,
+              "lineEnd": 129,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "notifyUnsubscribe",
+                "unsubscribe"
+              ]
+            },
+            {
+              "title": "Pattern 3: Hook Callback Fee Farming via Self-Triggered Backrun (HIGH)",
+              "lineStart": 130,
+              "lineEnd": 178,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_afterSwap"
+              ]
+            },
+            {
+              "title": "Pattern 4: Fee-on-Transfer Token Incompatibility (MEDIUM)",
+              "lineStart": 179,
+              "lineEnd": 222,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "mint"
+              ]
+            },
+            {
+              "title": "Pattern 5: Non-Standard ERC20 Return Value Handling (MEDIUM)",
+              "lineStart": 223,
+              "lineEnd": 265,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "bool",
+                "transfer",
+                "transferRobust",
+                "transferSafe",
+                "transferUnsafe"
+              ]
+            },
+            {
+              "title": "Pattern 6: Hook Collision in Token Accounting (MEDIUM)",
+              "lineStart": 266,
+              "lineEnd": 312,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_rebalancePostHook",
+                "_rebalancePreHook"
+              ]
+            },
+            {
+              "title": "Pattern 7: Uniswap V4 Wrapper Position Fee Theft (HIGH)",
+              "lineStart": 313,
+              "lineEnd": 365,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_unwrap",
+                "tokensOwed"
+              ]
+            },
+            {
+              "title": "Pattern 8: Reentrancy via Yield Strategy Trade Path (CRITICAL)",
+              "lineStart": 366,
+              "lineEnd": 409,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "initiateWithdraw",
+                "redeemNative"
+              ]
+            },
+            {
+              "title": "Pattern 9: Dynamic LDF Tick Bound Overflow (MEDIUM)",
+              "lineStart": 410,
+              "lineEnd": 458,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "query"
+              ]
+            },
+            {
+              "title": "Pattern 10: am-AMM Manager Verification Bypass (MEDIUM)",
+              "lineStart": 459,
+              "lineEnd": 504,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "validate"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-secure-implementation-examples-002",
+          "title": "Secure Implementation Examples",
+          "lineStart": 505,
+          "lineEnd": 620,
+          "lineCount": 116,
+          "severity": [],
+          "codeKeywords": [
+            "deployBunniToken",
+            "deposit",
+            "safeTransferWithFeeCheck"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Secure Pattern 1: Hook Whitelist and Per-Pool Reentrancy",
+              "lineStart": 507,
+              "lineEnd": 532,
+              "severity": [],
+              "codeKeywords": [
+                "deployBunniToken",
+                "deposit"
+              ]
+            },
+            {
+              "title": "Secure Pattern 2: Robust Token Transfer Handling",
+              "lineStart": 533,
+              "lineEnd": 559,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "safeTransferWithFeeCheck"
+              ]
+            },
+            {
+              "title": "Secure Pattern 3: Gas-Optimized Hook Callbacks",
+              "lineStart": 560,
+              "lineEnd": 590,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "_warmPositionStorage",
+                "notifySubscribe",
+                "notifyUnsubscribe"
+              ]
+            },
+            {
+              "title": "Secure Pattern 4: Rate-Limited Hook Triggers",
+              "lineStart": 591,
+              "lineEnd": 620,
+              "severity": [],
+              "codeKeywords": [
+                "_afterSwap"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-impact-analysis-003",
+          "title": "Impact Analysis",
+          "lineStart": 621,
+          "lineEnd": 660,
+          "lineCount": 40,
+          "severity": [
+            "CRITICAL",
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "unlockForRebalance"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Technical Impact",
+              "lineStart": 623,
+              "lineEnd": 631,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Financial Impact",
+              "lineStart": 632,
+              "lineEnd": 638,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Attack Scenarios",
+              "lineStart": 639,
+              "lineEnd": 660,
+              "severity": [],
+              "codeKeywords": [
+                "unlockForRebalance"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-real-world-examples-004",
+          "title": "Real-World Examples",
+          "lineStart": 718,
+          "lineEnd": 734,
+          "lineCount": 17,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-keywords-for-search-005",
+          "title": "Keywords for Search",
+          "lineStart": 735,
+          "lineEnd": 752,
+          "lineCount": 18,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-related-vulnerabilities-006",
+          "title": "Related Vulnerabilities",
+          "lineStart": 753,
+          "lineEnd": 761,
+          "lineCount": 9,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-references-007",
+          "title": "References",
+          "lineStart": 762,
+          "lineEnd": 767,
+          "lineCount": 6,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "totalLines": 2595,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "amm",
+        "vulnerability_type": "constant_product_amm_integration",
+        "attack_type": "economic_exploit|price_manipulation|liquidity_attack|dos",
+        "affected_component": "liquidity_pool|swap_router|price_feed|reserves",
+        "amm_type": "constant_product",
+        "amm_formula": "x*y=k",
+        "amm_attack_vector": "slippage|sandwich|first_depositor|reserve_manipulation|spot_price|deadline",
+        "severity": "critical|high|medium|low",
+        "impact": "fund_loss|price_manipulation|dos|unfair_exchange",
+        "exploitability": "0.75",
+        "financial_impact": "high",
+        "language": "solidity|rust|move",
+        "version": "all"
+      },
+      "patternCount": 33,
+      "patterns": [
+        {
+          "id": "amm-references-source-reports-000",
+          "title": "References & Source Reports",
+          "lineStart": 58,
+          "lineEnd": 261,
+          "lineCount": 204,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "First Depositor / Inflation Attacks",
+              "lineStart": 62,
+              "lineEnd": 70,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Slippage Protection Vulnerabilities",
+              "lineStart": 71,
+              "lineEnd": 80,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Sandwich & MEV Attacks",
+              "lineStart": 81,
+              "lineEnd": 88,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Spot Price Manipulation (slot0)",
+              "lineStart": 89,
+              "lineEnd": 96,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Deadline Vulnerabilities",
+              "lineStart": 97,
+              "lineEnd": 101,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Reserve Manipulation",
+              "lineStart": 102,
+              "lineEnd": 108,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Fee Calculation Vulnerabilities",
+              "lineStart": 109,
+              "lineEnd": 114,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "LP Token Calculation Issues",
+              "lineStart": 115,
+              "lineEnd": 122,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Callback & Reentrancy Attacks",
+              "lineStart": 123,
+              "lineEnd": 130,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Factory & Pool Creation Attacks",
+              "lineStart": 131,
+              "lineEnd": 140,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Decimal & Math Calculation Issues",
+              "lineStart": 141,
+              "lineEnd": 148,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Liquidity Migration & Upgrade Attacks",
+              "lineStart": 149,
+              "lineEnd": 154,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Flash Loan Graduation Attacks",
+              "lineStart": 155,
+              "lineEnd": 160,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Protocol-Specific Issues",
+              "lineStart": 161,
+              "lineEnd": 169,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Imbalanced Liquidity Addition Exploitation",
+              "lineStart": 170,
+              "lineEnd": 176,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Rebasing Token Integration Issues",
+              "lineStart": 177,
+              "lineEnd": 181,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Impermanent Loss Protection Abuse",
+              "lineStart": 182,
+              "lineEnd": 186,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Protocol Invariant Breaking",
+              "lineStart": 187,
+              "lineEnd": 192,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "DEX Swap Slippage Accounting Issues",
+              "lineStart": 193,
+              "lineEnd": 198,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Leftover Token Accumulation",
+              "lineStart": 199,
+              "lineEnd": 204,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "WETH/ETH Pool Mismatch",
+              "lineStart": 205,
+              "lineEnd": 209,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Exit Type Confusion",
+              "lineStart": 210,
+              "lineEnd": 215,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Type Casting & Integer Overflow Issues",
+              "lineStart": 216,
+              "lineEnd": 221,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Spot Price Abuse in Protocol Swaps",
+              "lineStart": 222,
+              "lineEnd": 227,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "LP Token Burn/Hijack Attacks",
+              "lineStart": 228,
+              "lineEnd": 233,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Constant Sum AMM Arbitrage",
+              "lineStart": 234,
+              "lineEnd": 238,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "State Accounting Discrepancies",
+              "lineStart": 239,
+              "lineEnd": 244,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Incorrect Liquidity Ownership Assumptions",
+              "lineStart": 245,
+              "lineEnd": 249,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Dividend/Reward Gaming",
+              "lineStart": 250,
+              "lineEnd": 254,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Missing Account Validation (Solana-Specific)",
+              "lineStart": 255,
+              "lineEnd": 261,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "amm-table-of-contents-001",
+          "title": "Table of Contents",
+          "lineStart": 268,
+          "lineEnd": 301,
+          "lineCount": 34,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-1-first-depositor-inflation-attacks-002",
+          "title": "1. First Depositor / Inflation Attacks",
+          "lineStart": 302,
+          "lineEnd": 478,
+          "lineCount": 177,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "addQuote",
+            "sync",
+            "totalSupply"
+          ],
+          "rootCause": "LP tokens are calculated as:\n\n```\n\nliquidity = sqrt(amount0 * amount1)                    // First deposit\n\nliquidity = min(amount0 * totalSupply / reserve0,      // Subsequent deposits\n\n             ",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 304,
+              "lineEnd": 312,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 313,
+              "lineEnd": 335,
+              "severity": [],
+              "codeKeywords": [
+                "sync",
+                "totalSupply"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 336,
+              "lineEnd": 406,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_addLiquidity",
+                "addQuote"
+              ]
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 407,
+              "lineEnd": 425,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 426,
+              "lineEnd": 478,
+              "severity": [],
+              "codeKeywords": [
+                "addLiquidity",
+                "initializePool",
+                "mint"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-2-slippage-protection-vulnerabilities-003",
+          "title": "2. Slippage Protection Vulnerabilities",
+          "lineStart": 479,
+          "lineEnd": 594,
+          "lineCount": 116,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "amountOutMin",
+            "reinvest",
+            "swap"
+          ],
+          "rootCause": "Functions that swap tokens or add/remove liquidity don't validate that the received amount meets user expectations. This occurs when:\n\n- `amountOutMin` is set to 0 or not enforced\n\n- No oracle price c",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 481,
+              "lineEnd": 489,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 490,
+              "lineEnd": 506,
+              "severity": [],
+              "codeKeywords": [
+                "amountOutMin"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 507,
+              "lineEnd": 545,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "executeTrade",
+                "reinvest",
+                "swap"
+              ]
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 546,
+              "lineEnd": 557,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 558,
+              "lineEnd": 594,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "swap"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-3-sandwich-mev-attacks-004",
+          "title": "3. Sandwich & MEV Attacks",
+          "lineStart": 595,
+          "lineEnd": 642,
+          "lineCount": 48,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "rebalance",
+            "withdraw"
+          ],
+          "rootCause": "Withdrawal swaps without protection",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 597,
+              "lineEnd": 605,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 606,
+              "lineEnd": 632,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "rebalance",
+                "withdraw"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 633,
+              "lineEnd": 642,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "amm-4-spot-price-manipulation-slot0-005",
+          "title": "4. Spot Price Manipulation (slot0)",
+          "lineStart": 643,
+          "lineEnd": 731,
+          "lineCount": 89,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "getLPValue",
+            "getPrice",
+            "getReserves",
+            "slot0"
+          ],
+          "rootCause": "`slot0` returns the current tick and sqrtPriceX96 which reflect the most recent swap. An attacker can:\n\n1. Flash loan large amounts\n\n2. Swap to move price\n\n3. Exploit the manipulated price in victim p",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 645,
+              "lineEnd": 653,
+              "severity": [],
+              "codeKeywords": [
+                "slot0"
+              ]
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 654,
+              "lineEnd": 664,
+              "severity": [],
+              "codeKeywords": [
+                "slot0"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 665,
+              "lineEnd": 696,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "getLPValue",
+                "getReserves"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 697,
+              "lineEnd": 731,
+              "severity": [],
+              "codeKeywords": [
+                "getPrice",
+                "validatePrice"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-5-deadline-vulnerabilities-006",
+          "title": "5. Deadline Vulnerabilities",
+          "lineStart": 732,
+          "lineEnd": 783,
+          "lineCount": 52,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "swap"
+          ],
+          "rootCause": "No deadline - transaction can execute anytime",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 734,
+              "lineEnd": 740,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 741,
+              "lineEnd": 759,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "swap"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 760,
+              "lineEnd": 783,
+              "severity": [],
+              "codeKeywords": [
+                "swap"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-6-reserve-manipulation-attacks-007",
+          "title": "6. Reserve Manipulation Attacks",
+          "lineStart": 784,
+          "lineEnd": 821,
+          "lineCount": 38,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "calculateImpermanentLoss"
+          ],
+          "rootCause": "IL calculation uses manipulatable reserves",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 786,
+              "lineEnd": 793,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 794,
+              "lineEnd": 807,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "calculateImpermanentLoss"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 808,
+              "lineEnd": 821,
+              "severity": [],
+              "codeKeywords": [
+                "calculateImpermanentLoss"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-7-lp-token-calculation-issues-008",
+          "title": "7. LP Token Calculation Issues",
+          "lineStart": 822,
+          "lineEnd": 864,
+          "lineCount": 43,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "getLPValue"
+          ],
+          "rootCause": "Assumes 18 decimals for all tokens",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 824,
+              "lineEnd": 831,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 832,
+              "lineEnd": 845,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "getLPValue"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 846,
+              "lineEnd": 864,
+              "severity": [],
+              "codeKeywords": [
+                "getLPValue"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-8-callback-reentrancy-attacks-009",
+          "title": "8. Callback & Reentrancy Attacks",
+          "lineStart": 865,
+          "lineEnd": 981,
+          "lineCount": 117,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_executeTrade",
+            "_transfer",
+            "mintCallback",
+            "swapCallback",
+            "uniswapV3MintCallback",
+            "uniswapV3SwapCallback"
+          ],
+          "rootCause": "No access control on callback",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 867,
+              "lineEnd": 875,
+              "severity": [],
+              "codeKeywords": [
+                "mintCallback",
+                "swapCallback"
+              ]
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 876,
+              "lineEnd": 885,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "uniswapV3MintCallback",
+                "uniswapV3SwapCallback"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 886,
+              "lineEnd": 935,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_executeTrade",
+                "_transfer",
+                "uniswapV3MintCallback"
+              ]
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 936,
+              "lineEnd": 943,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 944,
+              "lineEnd": 981,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "initiateWithdraw",
+                "redeemNative",
+                "swap",
+                "uniswapV3MintCallback"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-9-factory-pool-creation-attacks-010",
+          "title": "9. Factory & Pool Creation Attacks",
+          "lineStart": 982,
+          "lineEnd": 1135,
+          "lineCount": 154,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "CREATE",
+            "_deployToken",
+            "_existsPairPool",
+            "balanceOf",
+            "createLaunchPad"
+          ],
+          "rootCause": "Deterministic token address",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 984,
+              "lineEnd": 994,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 995,
+              "lineEnd": 1008,
+              "severity": [],
+              "codeKeywords": [
+                "CREATE",
+                "balanceOf"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1009,
+              "lineEnd": 1079,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_deployToken",
+                "_existsPairPool",
+                "createLaunchPad",
+                "getOrCreatePoolAndAddLiquidity",
+                "pairFor"
+              ]
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 1080,
+              "lineEnd": 1087,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 1088,
+              "lineEnd": 1135,
+              "severity": [],
+              "codeKeywords": [
+                "addLiquidity",
+                "createPool",
+                "deployToken",
+                "getPool",
+                "poolExists"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-10-decimal-math-calculation-issues-011",
+          "title": "10. Decimal & Math Calculation Issues",
+          "lineStart": 1136,
+          "lineEnd": 1222,
+          "lineCount": 87,
+          "severity": [
+            "CRITICAL",
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_getTimeWeightedPrimaryBalance",
+            "getAmountOut",
+            "getCErc20Price"
+          ],
+          "rootCause": "Assumes both tokens have same decimals",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 1138,
+              "lineEnd": 1146,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1147,
+              "lineEnd": 1195,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_getTimeWeightedPrimaryBalance",
+                "getAmountOut",
+                "getCErc20Price"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 1196,
+              "lineEnd": 1222,
+              "severity": [],
+              "codeKeywords": [
+                "_getTimeWeightedPrimaryBalance"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-11-liquidity-migration-protocol-upgrade--012",
+          "title": "11. Liquidity Migration & Protocol Upgrade Attacks",
+          "lineStart": 1223,
+          "lineEnd": 1308,
+          "lineCount": 86,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "moveLiquidity",
+            "reLP"
+          ],
+          "rootCause": "Uses raw balanceOf for calculations",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 1225,
+              "lineEnd": 1232,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1233,
+              "lineEnd": 1273,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "moveLiquidity",
+                "reLP"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 1274,
+              "lineEnd": 1308,
+              "severity": [],
+              "codeKeywords": [
+                "moveLiquidity",
+                "reLP",
+                "receiveFromBootstrap"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-12-flash-loan-based-graduation-threshold-013",
+          "title": "12. Flash Loan-Based Graduation/Threshold Manipulation",
+          "lineStart": 1309,
+          "lineEnd": 1372,
+          "lineCount": 64,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_graduate",
+            "buy",
+            "unwrapToken"
+          ],
+          "rootCause": "Atomic unwrap allows flash loan closure",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 1311,
+              "lineEnd": 1318,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1319,
+              "lineEnd": 1352,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "buy",
+                "unwrapToken"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 1353,
+              "lineEnd": 1372,
+              "severity": [],
+              "codeKeywords": [
+                "_graduate",
+                "unwrapToken"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-13-detection-patterns-audit-checklist-014",
+          "title": "13. Detection Patterns & Audit Checklist",
+          "lineStart": 1373,
+          "lineEnd": 1412,
+          "lineCount": 40,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "amm",
+            "amountOutMin",
+            "arbitrage",
+            "back_running",
+            "balanceOf(address(this",
+            "burn",
+            "constant_product",
+            "deadline",
+            "dex",
+            "factory",
+            "first_depositor",
+            "flash_loan",
+            "front_running",
+            "getReserves",
+            "impermanent_loss"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Code Patterns to Look For",
+              "lineStart": 1375,
+              "lineEnd": 1393,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "amountOutMin",
+                "balanceOf(address(this",
+                "burn",
+                "deadline",
+                "getReserves",
+                "slot0"
+              ]
+            },
+            {
+              "title": "Audit Checklist",
+              "lineStart": 1394,
+              "lineEnd": 1406,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Keywords for Search",
+              "lineStart": 1407,
+              "lineEnd": 1412,
+              "severity": [],
+              "codeKeywords": [
+                "amm",
+                "amountOutMin",
+                "arbitrage",
+                "back_running",
+                "constant_product",
+                "deadline",
+                "dex",
+                "factory"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-13-imbalanced-liquidity-addition-exploit-015",
+          "title": "13. Imbalanced Liquidity Addition Exploitation",
+          "lineStart": 1413,
+          "lineEnd": 1485,
+          "lineCount": 73,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "addLiquidity",
+            "initializeExternals",
+            "onJoinPool"
+          ],
+          "rootCause": "LP token calculation uses the minimum of two ratios:\n\n```solidity\n\nliquidity = min(amount0 * totalSupply / reserve0, amount1 * totalSupply / reserve1)\n\n```\n\n\n\nIf tokens are provided in different propo",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 1415,
+              "lineEnd": 1423,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 1424,
+              "lineEnd": 1434,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1435,
+              "lineEnd": 1460,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "initializeExternals",
+                "onJoinPool"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 1461,
+              "lineEnd": 1485,
+              "severity": [],
+              "codeKeywords": [
+                "addLiquidity"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-14-rebasing-token-integration-issues-016",
+          "title": "14. Rebasing Token Integration Issues",
+          "lineStart": 1486,
+          "lineEnd": 1548,
+          "lineCount": 63,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "deposit",
+            "getBalance",
+            "getTokensForShares"
+          ],
+          "rootCause": "When depositing rebasing tokens, the initial balance equals the deposit amount. If this static balance is cached, it doesn't reflect interest accrual, while the actual token balance continues to grow.",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 1488,
+              "lineEnd": 1494,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 1495,
+              "lineEnd": 1500,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1501,
+              "lineEnd": 1519,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "deposit",
+                "getTokensForShares"
+              ]
+            },
+            {
+              "title": "Impact",
+              "lineStart": 1520,
+              "lineEnd": 1525,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 1526,
+              "lineEnd": 1548,
+              "severity": [],
+              "codeKeywords": [
+                "deposit",
+                "getBalance"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-15-impermanent-loss-protection-abuse-017",
+          "title": "15. Impermanent Loss Protection Abuse",
+          "lineStart": 1549,
+          "lineEnd": 1604,
+          "lineCount": 56,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "burn"
+          ],
+          "rootCause": "IL protection calculates losses by comparing initial deposit ratios to withdrawal ratios. If an attacker controls a synthetic token, they can manipulate the price to maximize the calculated IL and dra",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 1551,
+              "lineEnd": 1557,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 1558,
+              "lineEnd": 1563,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1564,
+              "lineEnd": 1588,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "burn"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 1589,
+              "lineEnd": 1604,
+              "severity": [],
+              "codeKeywords": [
+                "burn"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-16-protocol-invariant-breaking-018",
+          "title": "16. Protocol Invariant Breaking",
+          "lineStart": 1605,
+          "lineEnd": 1646,
+          "lineCount": 42,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "checkInvariant",
+            "removeLiquidity",
+            "test_invariantBroken"
+          ],
+          "rootCause": "Rounding errors accumulate to break invariant",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 1607,
+              "lineEnd": 1614,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1615,
+              "lineEnd": 1629,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "test_invariantBroken"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 1630,
+              "lineEnd": 1646,
+              "severity": [],
+              "codeKeywords": [
+                "checkInvariant",
+                "removeLiquidity"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-17-dex-swap-slippage-accounting-discrepa-019",
+          "title": "17. DEX Swap Slippage Accounting Discrepancies",
+          "lineStart": 1647,
+          "lineEnd": 1693,
+          "lineCount": 47,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "rebalanceVaultsAssets"
+          ],
+          "rootCause": "Uses expected amount, not actual received",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 1649,
+              "lineEnd": 1656,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1657,
+              "lineEnd": 1674,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "rebalanceVaultsAssets"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 1675,
+              "lineEnd": 1693,
+              "severity": [],
+              "codeKeywords": [
+                "rebalanceVaultsAssets"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-18-leftover-token-accumulation-in-autoco-020",
+          "title": "18. Leftover Token Accumulation in Autocompounding",
+          "lineStart": 1694,
+          "lineEnd": 1741,
+          "lineCount": 48,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_getSwapAmt",
+            "_tokenToPodLp"
+          ],
+          "rootCause": "Doesn't consider existing balance before swap",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 1696,
+              "lineEnd": 1703,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1704,
+              "lineEnd": 1721,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_getSwapAmt"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 1722,
+              "lineEnd": 1741,
+              "severity": [],
+              "codeKeywords": [
+                "_tokenToPodLp"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-19-weth-eth-pool-asset-mismatch-021",
+          "title": "19. WETH/ETH Pool Asset Mismatch",
+          "lineStart": 1742,
+          "lineEnd": 1783,
+          "lineCount": 42,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_unstakeAndExitPool"
+          ],
+          "rootCause": "Pool uses ETH but vault holds WETH",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 1744,
+              "lineEnd": 1750,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1751,
+              "lineEnd": 1766,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_unstakeAndExitPool"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 1767,
+              "lineEnd": 1783,
+              "severity": [],
+              "codeKeywords": [
+                "_unstakeAndExitPool"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-20-single-sided-vs-proportional-exit-con-022",
+          "title": "20. Single-Sided vs Proportional Exit Confusion",
+          "lineStart": 1784,
+          "lineEnd": 1829,
+          "lineCount": 46,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_unstakeAndExitPool",
+            "emergencyExit"
+          ],
+          "rootCause": "Uses single-sided exit during emergency",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 1786,
+              "lineEnd": 1793,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1794,
+              "lineEnd": 1807,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "emergencyExit"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 1808,
+              "lineEnd": 1829,
+              "severity": [],
+              "codeKeywords": [
+                "_unstakeAndExitPool",
+                "emergencyExit"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-21-type-casting-integer-overflow-issues-023",
+          "title": "21. Type Casting & Integer Overflow Issues",
+          "lineStart": 1830,
+          "lineEnd": 1931,
+          "lineCount": 102,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_findSlice",
+            "i64",
+            "u64::MAX",
+            "uint256",
+            "uint8"
+          ],
+          "rootCause": "When casting from larger integer types to smaller ones without validation:\n\n- `u64::MAX` cast to `i64` produces a negative number\n\n- `uint256` values exceeding type limits silently truncate\n\n- Loop co",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 1832,
+              "lineEnd": 1839,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 1840,
+              "lineEnd": 1848,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "i64",
+                "u64::MAX",
+                "uint256",
+                "uint8"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1849,
+              "lineEnd": 1889,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_findSlice"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 1890,
+              "lineEnd": 1931,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_findSlice"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-22-spot-price-abuse-in-protocol-swaps-024",
+          "title": "22. Spot Price Abuse in Protocol Swaps",
+          "lineStart": 1932,
+          "lineEnd": 2018,
+          "lineCount": 87,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "getInGivenExpectedOut",
+            "reimburseLiquidityFees"
+          ],
+          "rootCause": "Protocol contracts that:\n\n1. Calculate swap amounts using current DEX spot price\n\n2. Execute swaps without comparing to oracle price\n\n3. Don't have slippage protection on protocol-initiated swaps",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 1934,
+              "lineEnd": 1941,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 1942,
+              "lineEnd": 1950,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 1951,
+              "lineEnd": 1980,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "getInGivenExpectedOut",
+                "reimburseLiquidityFees"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 1981,
+              "lineEnd": 2018,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "reimburseLiquidityFees"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-23-lp-token-burn-hijack-attacks-025",
+          "title": "23. LP Token Burn/Hijack Attacks",
+          "lineStart": 2019,
+          "lineEnd": 2104,
+          "lineCount": 86,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "burn"
+          ],
+          "rootCause": "1. Public `burn()` function without withdrawal logic\n\n2. Sending burn message to master contract instead of wallet\n\n3. No minimum supply enforcement after burns",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 2021,
+              "lineEnd": 2028,
+              "severity": [],
+              "codeKeywords": [
+                "burn"
+              ]
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 2029,
+              "lineEnd": 2036,
+              "severity": [],
+              "codeKeywords": [
+                "burn"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 2037,
+              "lineEnd": 2077,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "burn"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 2078,
+              "lineEnd": 2104,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "withdraw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-24-constant-sum-amm-arbitrage-026",
+          "title": "24. Constant Sum AMM Arbitrage",
+          "lineStart": 2105,
+          "lineEnd": 2174,
+          "lineCount": 70,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "swap"
+          ],
+          "rootCause": "Constant sum invariant: `k = a + b`\n\n\n\nUnlike x*y=k (constant product), the price doesn't change with reserves. If external markets show even slight price deviation:\n\n- Buy the relatively cheaper toke",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 2107,
+              "lineEnd": 2113,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 2114,
+              "lineEnd": 2124,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 2125,
+              "lineEnd": 2150,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "swap"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 2151,
+              "lineEnd": 2174,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "swap"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-25-state-accounting-discrepancies-027",
+          "title": "25. State Accounting Discrepancies",
+          "lineStart": 2175,
+          "lineEnd": 2259,
+          "lineCount": 85,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "minted",
+            "removed",
+            "withdraw"
+          ],
+          "rootCause": "State variables are updated incorrectly:\n\n- Subtraction from wrong counter (e.g., reducing `minted` instead of increasing `removed`)\n\n- Parameter misordering in function calls\n\n- Missing state updates",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 2177,
+              "lineEnd": 2184,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 2185,
+              "lineEnd": 2193,
+              "severity": [],
+              "codeKeywords": [
+                "minted",
+                "removed"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 2194,
+              "lineEnd": 2231,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "withdraw"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 2232,
+              "lineEnd": 2259,
+              "severity": [],
+              "codeKeywords": [
+                "deposit",
+                "getOhmEmissions",
+                "withdraw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-26-incorrect-liquidity-ownership-assumpt-028",
+          "title": "26. Incorrect Liquidity Ownership Assumptions",
+          "lineStart": 2260,
+          "lineEnd": 2342,
+          "lineCount": 83,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "lpToRemove",
+            "reLP"
+          ],
+          "rootCause": "Protocol calculates:\n\n```\n\nlpToRemove = (tokenToRemove * totalLpSupply) / totalReserve\n\n```\n\n\n\nBut if protocol only owns a fraction of the pool, `lpToRemove` exceeds protocol's LP balance.",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 2262,
+              "lineEnd": 2268,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 2269,
+              "lineEnd": 2279,
+              "severity": [],
+              "codeKeywords": [
+                "lpToRemove"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 2280,
+              "lineEnd": 2313,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "reLP"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 2314,
+              "lineEnd": 2342,
+              "severity": [],
+              "codeKeywords": [
+                "reLP"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-27-dividend-reward-gaming-029",
+          "title": "27. Dividend/Reward Gaming",
+          "lineStart": 2343,
+          "lineEnd": 2427,
+          "lineCount": 85,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "addDividend",
+            "addTradeFee",
+            "recordTrade"
+          ],
+          "rootCause": "Dividend calculation uses short-term fee averages:\n\n- Only last N trades (e.g., 20) are considered\n\n- Zero-fee trades can reset the average to 0\n\n- Large dividend allocated relative to manipulated bas",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 2345,
+              "lineEnd": 2351,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 2352,
+              "lineEnd": 2360,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 2361,
+              "lineEnd": 2392,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "addDividend",
+                "addTradeFee"
+              ]
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 2393,
+              "lineEnd": 2427,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "addDividend",
+                "recordTrade"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-28-missing-account-validation-solana-spe-030",
+          "title": "28. Missing Account Validation (Solana-Specific)",
+          "lineStart": 2428,
+          "lineEnd": 2514,
+          "lineCount": 87,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": "Solana accounts are passed as parameters; the program must verify:\n\n- Account derivation (PDA seeds)\n\n- Account ownership\n\n- Token mint matches expected",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 2430,
+              "lineEnd": 2436,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 2437,
+              "lineEnd": 2445,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 2446,
+              "lineEnd": 2478,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 2479,
+              "lineEnd": 2514,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "amm-29-detection-patterns-audit-checklist-031",
+          "title": "29. Detection Patterns & Audit Checklist",
+          "lineStart": 2515,
+          "lineEnd": 2589,
+          "lineCount": 75,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "amountOutMin",
+            "balanceOf(address(this",
+            "burn",
+            "deadline",
+            "getReserves",
+            "slot0"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Code Patterns to Look For",
+              "lineStart": 2517,
+              "lineEnd": 2552,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "amountOutMin",
+                "balanceOf(address(this",
+                "burn",
+                "deadline",
+                "getReserves",
+                "slot0"
+              ]
+            },
+            {
+              "title": "Audit Checklist",
+              "lineStart": 2553,
+              "lineEnd": 2583,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Keywords for Search",
+              "lineStart": 2584,
+              "lineEnd": 2589,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "amm",
+                "amountOutMin",
+                "arbitrage",
+                "atoken",
+                "autocompound",
+                "back_running",
+                "constant_product",
+                "constant_sum"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-related-vulnerabilities-032",
+          "title": "Related Vulnerabilities",
+          "lineStart": 2590,
+          "lineEnd": 2595,
+          "lineCount": 6,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    }
+  ]
+}

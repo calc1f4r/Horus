@@ -1,0 +1,1941 @@
+{
+  "meta": {
+    "category": "cosmos",
+    "description": "Pattern-level index for cosmos vulnerabilities",
+    "fileCount": 14,
+    "totalPatterns": 37,
+    "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
+  },
+  "files": [
+    {
+      "file": "DB/cosmos/app-chain/abci-lifecycle/unmetered-lifecycle-dos.md",
+      "totalLines": 402,
+      "frontmatter": {
+        "protocol": "cosmos-sdk",
+        "chain": "everychain",
+        "category": "abci_lifecycle",
+        "vulnerability_type": "unmetered_execution_dos",
+        "attack_type": "resource_exhaustion",
+        "affected_component": "abci_lifecycle_handlers",
+        "severity": "high",
+        "impact": "chain_halt",
+        "exploitability": "0.7",
+        "financial_impact": "high",
+        "language": "go",
+        "version": "all"
+      },
+      "patternCount": 2,
+      "patterns": [
+        {
+          "id": "cosmos-references-000",
+          "title": "References",
+          "lineStart": 42,
+          "lineEnd": 49,
+          "lineCount": 8,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "cosmos-vulnerability-title-001",
+          "title": "Vulnerability Title",
+          "lineStart": 50,
+          "lineEnd": 402,
+          "lineCount": 353,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "BeforeSendHook",
+            "BeginBlock",
+            "BeginBlocker",
+            "EndBlock",
+            "EndBlocker",
+            "FinalizeBlock",
+            "continue"
+          ],
+          "rootCause": "The fundamental issues arise from:\n\n1. **Unmetered iteration**: `BeginBlock`/`EndBlock` iterate over user-controlled data structures without consuming gas, allowing attackers to create arbitrarily man",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 54,
+              "lineEnd": 57,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "BeginBlock",
+                "EndBlock",
+                "FinalizeBlock"
+              ]
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 58,
+              "lineEnd": 204,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "BeforeSendHook",
+                "BeginBlock",
+                "BeginBlocker",
+                "EndBlock",
+                "EndBlocker",
+                "FinalizeBlock",
+                "continue"
+              ]
+            },
+            {
+              "title": "Secure Implementation Examples",
+              "lineStart": 205,
+              "lineEnd": 328,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 329,
+              "lineEnd": 349,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "BeginBlock",
+                "EndBlock"
+              ]
+            },
+            {
+              "title": "Detection Patterns",
+              "lineStart": 350,
+              "lineEnd": 382,
+              "severity": [],
+              "codeKeywords": [
+                "BeginBlocker",
+                "EndBlocker",
+                "FinalizeBlock"
+              ]
+            },
+            {
+              "title": "Real-World Examples",
+              "lineStart": 383,
+              "lineEnd": 393,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Keywords for Search",
+              "lineStart": 394,
+              "lineEnd": 402,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/cosmos/app-chain/consensus/abci-vote-extensions.md",
+      "totalLines": 233,
+      "frontmatter": {
+        "protocol": "cosmos-sdk",
+        "chain": "everychain",
+        "category": "consensus",
+        "vulnerability_type": "vote_extension_manipulation",
+        "attack_type": "data_manipulation",
+        "affected_component": "abci_vote_extensions",
+        "severity": "high",
+        "impact": "consensus_manipulation",
+        "exploitability": "0.6",
+        "financial_impact": "high",
+        "language": "go",
+        "version": "cosmos-sdk-v0.50+"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "cosmos-vulnerability-title-000",
+          "title": "Vulnerability Title",
+          "lineStart": 45,
+          "lineEnd": 233,
+          "lineCount": 189,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "CanonicalVoteExtension",
+            "PrepareProposal",
+            "ProcessProposal",
+            "ValidateVoteExtensions",
+            "extCommit.Votes",
+            "totalVP"
+          ],
+          "rootCause": "The `ValidateVoteExtensions` function relies on data injected by the proposer (`extCommit.Votes`), which can be manipulated to:\n\n1. Misrepresent the total voting power (`totalVP`) by selectively inclu",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 49,
+              "lineEnd": 52,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "PrepareProposal",
+                "ProcessProposal"
+              ]
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 53,
+              "lineEnd": 125,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "CanonicalVoteExtension",
+                "ValidateVoteExtensions",
+                "extCommit.Votes",
+                "totalVP"
+              ]
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 126,
+              "lineEnd": 145,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 146,
+              "lineEnd": 205,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Detection Patterns",
+              "lineStart": 206,
+              "lineEnd": 222,
+              "severity": [],
+              "codeKeywords": [
+                "VoteExtensionsEnableHeight",
+                "extCommit.Round",
+                "vote.Validator.Power"
+              ]
+            },
+            {
+              "title": "Real-World Examples",
+              "lineStart": 223,
+              "lineEnd": 230,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/cosmos/app-chain/gas-metering/evm-gas-handling.md",
+      "totalLines": 281,
+      "frontmatter": {
+        "protocol": "cosmos-sdk",
+        "chain": "everychain",
+        "category": "gas_metering",
+        "vulnerability_type": "gas_manipulation",
+        "attack_type": "resource_exhaustion",
+        "affected_component": "evm_gas_metering",
+        "severity": "high",
+        "impact": "denial_of_service",
+        "exploitability": "0.7",
+        "financial_impact": "high",
+        "language": "go",
+        "version": "all"
+      },
+      "patternCount": 2,
+      "patterns": [
+        {
+          "id": "cosmos-references-000",
+          "title": "References",
+          "lineStart": 40,
+          "lineEnd": 46,
+          "lineCount": 7,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "cosmos-vulnerability-title-001",
+          "title": "Vulnerability Title",
+          "lineStart": 47,
+          "lineEnd": 281,
+          "lineCount": 235,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "MsgGasPriceVoter"
+          ],
+          "rootCause": "The fundamental issues arise from:\n\n1. **Missing intrinsic gas charges**: EIP-2930 access list costs not being charged upfront\n\n2. **Infinite gas meters**: Privileged message types using unbounded gas",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 51,
+              "lineEnd": 54,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 55,
+              "lineEnd": 165,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "MsgGasPriceVoter"
+              ]
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 166,
+              "lineEnd": 185,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 186,
+              "lineEnd": 249,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Detection Patterns",
+              "lineStart": 250,
+              "lineEnd": 268,
+              "severity": [],
+              "codeKeywords": [
+                "Erc20GasLimitQuery",
+                "IntrinsicGas",
+                "ctx.GasMeter().ConsumeGas",
+                "newCosmosAnteHandlerNoGasLimit"
+              ]
+            },
+            {
+              "title": "Real-World Examples",
+              "lineStart": 269,
+              "lineEnd": 278,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/cosmos/app-chain/governance/governance-voting-manipulation.md",
+      "totalLines": 392,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "cosmos",
+        "category": "governance",
+        "vulnerability_type": "voting_manipulation",
+        "attack_type": "economic_exploit",
+        "affected_component": "governance_module",
+        "severity": "medium",
+        "impact": "governance_bypass",
+        "exploitability": "0.6",
+        "financial_impact": "medium",
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 2,
+      "patterns": [
+        {
+          "id": "cosmos-references-000",
+          "title": "References",
+          "lineStart": 42,
+          "lineEnd": 47,
+          "lineCount": 6,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "cosmos-vulnerability-title-001",
+          "title": "Vulnerability Title",
+          "lineStart": 48,
+          "lineEnd": 392,
+          "lineCount": 345,
+          "severity": [
+            "CRITICAL",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "cleanup",
+            "offboard",
+            "propose",
+            "supportOffboard"
+          ],
+          "rootCause": "The fundamental issues are:\n\n1. **Quorum calculated at proposal creation** - Allows manipulation before snapshot\n\n2. **Poll state not invalidated after action** - Stale polls can re-trigger flags\n\n3. ",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 52,
+              "lineEnd": 55,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 56,
+              "lineEnd": 205,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "cleanup",
+                "offboard",
+                "propose",
+                "supportOffboard"
+              ]
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 206,
+              "lineEnd": 224,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 225,
+              "lineEnd": 342,
+              "severity": [],
+              "codeKeywords": [
+                "castVote",
+                "cleanup",
+                "propose",
+                "supportOffboard"
+              ]
+            },
+            {
+              "title": "Detection Patterns",
+              "lineStart": 343,
+              "lineEnd": 361,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Real-World Examples",
+              "lineStart": 362,
+              "lineEnd": 368,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Prevention Guidelines",
+              "lineStart": 369,
+              "lineEnd": 384,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Keywords for Search",
+              "lineStart": 385,
+              "lineEnd": 388,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "checkpoint",
+                "commission_manipulation",
+                "community_votes",
+                "dao_vote",
+                "delegation_attack",
+                "governance_bypass",
+                "offboard_bypass",
+                "poll_retrigger"
+              ]
+            },
+            {
+              "title": "Related Vulnerabilities",
+              "lineStart": 389,
+              "lineEnd": 392,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/cosmos/app-chain/hooks-callbacks/malicious-hook-callback-dos.md",
+      "totalLines": 372,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "cosmos",
+        "category": "denial_of_service",
+        "vulnerability_type": "hook_callback_abuse",
+        "attack_type": "denial_of_service",
+        "affected_component": "module_hooks",
+        "severity": "high",
+        "impact": "fund_lockup",
+        "exploitability": "0.7",
+        "financial_impact": "high",
+        "language": "go",
+        "version": "all"
+      },
+      "patternCount": 2,
+      "patterns": [
+        {
+          "id": "cosmos-references-000",
+          "title": "References",
+          "lineStart": 42,
+          "lineEnd": 47,
+          "lineCount": 6,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "cosmos-vulnerability-title-001",
+          "title": "Vulnerability Title",
+          "lineStart": 48,
+          "lineEnd": 372,
+          "lineCount": 325,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "BeforeDelegationSharesModified",
+            "BeforeSendHook",
+            "BeginBlocker",
+            "MsgDepositValidatorRewardsPool",
+            "beforeLockUpdate",
+            "claim",
+            "deactivated",
+            "false",
+            "require"
+          ],
+          "rootCause": "The fundamental issue is that **hook/callback execution is on the critical path** of important operations (token transfers, staking actions, reward distribution) but the hook's behavior can be:\n\n1. **",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 52,
+              "lineEnd": 55,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 56,
+              "lineEnd": 190,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "BeforeDelegationSharesModified",
+                "BeforeSendHook",
+                "BeginBlocker",
+                "MsgDepositValidatorRewardsPool",
+                "beforeLockUpdate",
+                "claim",
+                "deactivated",
+                "false"
+              ]
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 191,
+              "lineEnd": 211,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 212,
+              "lineEnd": 316,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Detection Patterns",
+              "lineStart": 317,
+              "lineEnd": 338,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Real-World Examples",
+              "lineStart": 339,
+              "lineEnd": 346,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Prevention Guidelines",
+              "lineStart": 347,
+              "lineEnd": 364,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Keywords for Search",
+              "lineStart": 365,
+              "lineEnd": 368,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "AfterDelegationModified",
+                "BeforeDelegationSharesModified",
+                "BeforeSendHook",
+                "BeginBlocker_panic",
+                "callback_failure",
+                "chain_halt",
+                "cosmos_sdk_hooks",
+                "delegation_hooks"
+              ]
+            },
+            {
+              "title": "Related Vulnerabilities",
+              "lineStart": 369,
+              "lineEnd": 372,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/cosmos/app-chain/ibc/ibc-middleware-vulnerabilities.md",
+      "totalLines": 345,
+      "frontmatter": {
+        "protocol": "cosmos-sdk",
+        "chain": "everychain",
+        "category": "ibc",
+        "vulnerability_type": "authentication_bypass",
+        "attack_type": "cross_chain_attack",
+        "affected_component": "ibc_middleware",
+        "severity": "medium_to_high",
+        "impact": "unauthorized_execution",
+        "exploitability": "0.6",
+        "financial_impact": "high",
+        "language": "go",
+        "version": "all"
+      },
+      "patternCount": 2,
+      "patterns": [
+        {
+          "id": "cosmos-references-000",
+          "title": "References",
+          "lineStart": 40,
+          "lineEnd": 46,
+          "lineCount": 7,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "cosmos-vulnerability-title-001",
+          "title": "Vulnerability Title",
+          "lineStart": 47,
+          "lineEnd": 345,
+          "lineCount": 299,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "Message",
+            "OnRecvPacket",
+            "finalVersion"
+          ],
+          "rootCause": "The fundamental issues arise from:\n\n1. **Missing sender/channel authentication**: `OnRecvPacket` handlers process packets without verifying the source channel or sender address\n\n2. **Wrong version ret",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 51,
+              "lineEnd": 54,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "OnRecvPacket"
+              ]
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 55,
+              "lineEnd": 198,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "Message",
+                "OnRecvPacket",
+                "finalVersion"
+              ]
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 199,
+              "lineEnd": 218,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 219,
+              "lineEnd": 313,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Detection Patterns",
+              "lineStart": 314,
+              "lineEnd": 332,
+              "severity": [],
+              "codeKeywords": [
+                "OnRecvPacket",
+                "json.Unmarshal"
+              ]
+            },
+            {
+              "title": "Real-World Examples",
+              "lineStart": 333,
+              "lineEnd": 342,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/cosmos/app-chain/message-handling/message-registration-vulnerabilities.md",
+      "totalLines": 100,
+      "frontmatter": {
+        "protocol": "cosmos-sdk",
+        "chain": "everychain",
+        "category": "message_handling",
+        "vulnerability_type": "message_registration",
+        "attack_type": "message_spoofing",
+        "affected_component": "codec",
+        "severity": "medium_to_high",
+        "impact": "functionality_broken",
+        "exploitability": "0.7",
+        "financial_impact": "medium",
+        "language": "go",
+        "version": "all"
+      },
+      "patternCount": 2,
+      "patterns": [
+        {
+          "id": "cosmos-references-000",
+          "title": "References",
+          "lineStart": 44,
+          "lineEnd": 49,
+          "lineCount": 6,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "cosmos-vulnerability-title-001",
+          "title": "Vulnerability Title",
+          "lineStart": 50,
+          "lineEnd": 100,
+          "lineCount": 51,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": "1. **Missing message registration**: Messages not registered in RegisterCodec/RegisterInterfaces are unusable\n\n2. **Amino name mismatch**: RegisterConcrete names must match amino.name protobuf options",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 54,
+              "lineEnd": 57,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Root Cause",
+              "lineStart": 58,
+              "lineEnd": 65,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 66,
+              "lineEnd": 80,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Audit Checklist",
+              "lineStart": 81,
+              "lineEnd": 88,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Real-World Examples",
+              "lineStart": 89,
+              "lineEnd": 97,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/cosmos/app-chain/module-accounting/cross-module-fund-accounting.md",
+      "totalLines": 422,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "cosmos",
+        "category": "module-accounting",
+        "vulnerability_type": "fund_accounting_error",
+        "attack_type": "economic_exploit",
+        "affected_component": "cosmos_sdk_modules",
+        "severity": "high",
+        "impact": "fund_loss",
+        "exploitability": "0.7",
+        "financial_impact": "high",
+        "language": "go",
+        "version": "all"
+      },
+      "patternCount": 2,
+      "patterns": [
+        {
+          "id": "cosmos-references-000",
+          "title": "References",
+          "lineStart": 46,
+          "lineEnd": 53,
+          "lineCount": 8,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "cosmos-vulnerability-title-001",
+          "title": "Vulnerability Title",
+          "lineStart": 54,
+          "lineEnd": 422,
+          "lineCount": 369,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "BurnCoins",
+            "MintCoins",
+            "SendCoins",
+            "SendCoinsFromModuleToAccount",
+            "amount",
+            "onReceive",
+            "sdk.Coin",
+            "sdk.Coins"
+          ],
+          "rootCause": "The fundamental issues are:\n\n\n\n1. **Incorrect iteration over coin amounts** - Processing entire `sdk.Coins` instead of individual `sdk.Coin` in loops\n\n2. **Non-atomic operations with temporary context",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 58,
+              "lineEnd": 61,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "BurnCoins",
+                "MintCoins",
+                "SendCoins"
+              ]
+            },
+            {
+              "title": "Root Cause Statement",
+              "lineStart": 62,
+              "lineEnd": 65,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 66,
+              "lineEnd": 142,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "BurnCoins",
+                "SendCoinsFromModuleToAccount",
+                "amount",
+                "onReceive",
+                "sdk.Coin",
+                "sdk.Coins"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 143,
+              "lineEnd": 229,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Secure Implementation Examples",
+              "lineStart": 230,
+              "lineEnd": 354,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 355,
+              "lineEnd": 364,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Affected Scenarios",
+              "lineStart": 365,
+              "lineEnd": 372,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Detection Patterns",
+              "lineStart": 373,
+              "lineEnd": 397,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Audit Checklist",
+              "lineStart": 398,
+              "lineEnd": 408,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Real-World Examples",
+              "lineStart": 409,
+              "lineEnd": 419,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/cosmos/app-chain/precompiles/evm-precompile-vulnerabilities.md",
+      "totalLines": 326,
+      "frontmatter": {
+        "protocol": "cosmos-sdk",
+        "chain": "everychain",
+        "category": "precompile",
+        "vulnerability_type": "state_manipulation",
+        "attack_type": "fund_theft",
+        "affected_component": "evm_precompile",
+        "severity": "high",
+        "impact": "fund_loss",
+        "exploitability": "0.7",
+        "financial_impact": "critical",
+        "language": "go",
+        "version": "all"
+      },
+      "patternCount": 2,
+      "patterns": [
+        {
+          "id": "cosmos-references-000",
+          "title": "References",
+          "lineStart": 41,
+          "lineEnd": 47,
+          "lineCount": 7,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "cosmos-vulnerability-title-001",
+          "title": "Vulnerability Title",
+          "lineStart": 48,
+          "lineEnd": 326,
+          "lineCount": 279,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": "The fundamental issues arise from:\n\n1. **DELEGATECALL not blocked**: State-changing precompiles accept delegatecall, reusing msg.value/msg.sender from caller context\n\n2. **Dirty state not committed**:",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 52,
+              "lineEnd": 55,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 56,
+              "lineEnd": 183,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 184,
+              "lineEnd": 206,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 207,
+              "lineEnd": 293,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Detection Patterns",
+              "lineStart": 294,
+              "lineEnd": 313,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "SubBalance"
+              ]
+            },
+            {
+              "title": "Real-World Examples",
+              "lineStart": 314,
+              "lineEnd": 323,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/cosmos/app-chain/staking-delegation/epoch-snapshot-timing-manipulation.md",
+      "totalLines": 658,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "staking",
+        "vulnerability_type": "epoch_timing_manipulation",
+        "attack_type": "timing_attack|economic_exploit|frontrunning",
+        "affected_component": "epoch_accounting|snapshot_logic|reward_calculation",
+        "severity": "medium_to_high",
+        "impact": "reward_theft|fund_loss|accounting_corruption",
+        "exploitability": "0.6",
+        "financial_impact": "high",
+        "language": "solidity|move|go|rust",
+        "version": "all"
+      },
+      "patternCount": 12,
+      "patterns": [
+        {
+          "id": "cosmos-references-source-reports-000",
+          "title": "References & Source Reports",
+          "lineStart": 47,
+          "lineEnd": 65,
+          "lineCount": 19,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Epoch/Snapshot Timing Manipulation Reports",
+              "lineStart": 51,
+              "lineEnd": 65,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "cosmos-table-of-contents-001",
+          "title": "Table of Contents",
+          "lineStart": 72,
+          "lineEnd": 84,
+          "lineCount": 13,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "cosmos-overview-002",
+          "title": "Overview",
+          "lineStart": 85,
+          "lineEnd": 90,
+          "lineCount": 6,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "cosmos-vulnerability-description-003",
+          "title": "Vulnerability Description",
+          "lineStart": 91,
+          "lineEnd": 154,
+          "lineCount": 64,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "addNode",
+            "calcAndCacheStakes",
+            "operatorLockedStake",
+            "reportSweptBalance",
+            "rewardStakeRatioSum",
+            "snapshot",
+            "transfer_in_rewards",
+            "unstake"
+          ],
+          "rootCause": "The fundamental issues arise from:\n\n\n\n1. **Missing Epoch Validation**: Functions that cache or calculate stake values don't validate that the epoch is not in the future, allowing attackers to lock in ",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 93,
+              "lineEnd": 103,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Root Cause Statement Formula",
+              "lineStart": 104,
+              "lineEnd": 107,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Attack Scenario Categories",
+              "lineStart": 108,
+              "lineEnd": 154,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "addNode",
+                "calcAndCacheStakes",
+                "operatorLockedStake",
+                "reportSweptBalance",
+                "rewardStakeRatioSum",
+                "snapshot",
+                "transfer_in_rewards",
+                "unstake"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cosmos-vulnerable-pattern-examples-004",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 155,
+          "lineEnd": 367,
+          "lineCount": 213,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "calcAndCacheStakes",
+            "getOperatorStake"
+          ],
+          "rootCause": "No validation that epoch is not in the future",
+          "subsections": null
+        },
+        {
+          "id": "cosmos-impact-analysis-005",
+          "title": "Impact Analysis",
+          "lineStart": 368,
+          "lineEnd": 399,
+          "lineCount": 32,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Technical Impact",
+              "lineStart": 370,
+              "lineEnd": 380,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Business Impact",
+              "lineStart": 381,
+              "lineEnd": 388,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Affected Scenarios",
+              "lineStart": 389,
+              "lineEnd": 399,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "cosmos-secure-implementation-006",
+          "title": "Secure Implementation",
+          "lineStart": 400,
+          "lineEnd": 529,
+          "lineCount": 130,
+          "severity": [],
+          "codeKeywords": [
+            "addNode",
+            "calcAndCacheStakes"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "cosmos-detection-patterns-007",
+          "title": "Detection Patterns",
+          "lineStart": 530,
+          "lineEnd": 574,
+          "lineCount": 45,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Code Patterns to Look For",
+              "lineStart": 532,
+              "lineEnd": 559,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Audit Checklist",
+              "lineStart": 560,
+              "lineEnd": 574,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "cosmos-real-world-examples-008",
+          "title": "Real-World Examples",
+          "lineStart": 575,
+          "lineEnd": 600,
+          "lineCount": 26,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Affected Protocols",
+              "lineStart": 577,
+              "lineEnd": 590,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Attack Patterns Observed",
+              "lineStart": 591,
+              "lineEnd": 600,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "cosmos-prevention-guidelines-009",
+          "title": "Prevention Guidelines",
+          "lineStart": 601,
+          "lineEnd": 632,
+          "lineCount": 32,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Development Best Practices",
+              "lineStart": 603,
+              "lineEnd": 611,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Testing Requirements",
+              "lineStart": 612,
+              "lineEnd": 632,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "cosmos-references-010",
+          "title": "References",
+          "lineStart": 633,
+          "lineEnd": 647,
+          "lineCount": 15,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Related Vulnerabilities",
+              "lineStart": 635,
+              "lineEnd": 639,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Technical Documentation",
+              "lineStart": 640,
+              "lineEnd": 647,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "cosmos-keywords-for-search-011",
+          "title": "Keywords for Search",
+          "lineStart": 648,
+          "lineEnd": 653,
+          "lineCount": 6,
+          "severity": [],
+          "codeKeywords": [
+            "accounting_corruption",
+            "balance_checkpoint",
+            "cache_manipulation",
+            "calcAndCacheStakes",
+            "checkpoint_protection",
+            "convert_to_shares",
+            "double_counting",
+            "epoch",
+            "epoch_caching",
+            "epoch_transition",
+            "first_staker",
+            "frontrunning_snapshot",
+            "future_epoch",
+            "mempool_monitoring",
+            "operatorStakeCache"
+          ],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/cosmos/app-chain/staking-delegation/slashing-evasion-bypass.md",
+      "totalLines": 482,
+      "frontmatter": {
+        "protocol": "cosmos-sdk",
+        "chain": "everychain",
+        "category": "staking",
+        "vulnerability_type": "slashing_evasion",
+        "attack_type": "economic_exploit",
+        "affected_component": "staking_slashing_module",
+        "severity": "medium_to_high",
+        "impact": "fund_loss",
+        "exploitability": "0.7",
+        "financial_impact": "high",
+        "language": "go",
+        "version": "all"
+      },
+      "patternCount": 2,
+      "patterns": [
+        {
+          "id": "cosmos-references-000",
+          "title": "References",
+          "lineStart": 47,
+          "lineEnd": 61,
+          "lineCount": 15,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "cosmos-vulnerability-title-001",
+          "title": "Vulnerability Title",
+          "lineStart": 62,
+          "lineEnd": 482,
+          "lineCount": 421,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_claimAndExit",
+            "decreaseStakeLockupDuration",
+            "fullClaimAndExit",
+            "slash(account",
+            "stake(1",
+            "votingPeriod",
+            "whenNotPaused"
+          ],
+          "rootCause": "The fundamental issues stem from:\n\n\n\n1. **Mempool visibility**: Slash transactions are visible in the mempool before execution, allowing malicious actors to frontrun with withdrawal or exit transactio",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 66,
+              "lineEnd": 69,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Root Cause",
+              "lineStart": 70,
+              "lineEnd": 82,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Attack Scenarios",
+              "lineStart": 83,
+              "lineEnd": 131,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "PendingWithdrawal",
+                "_claimAndExit",
+                "decreaseStakeLockupDuration",
+                "fullClaimAndExit",
+                "revokeActive",
+                "revokePending",
+                "slash(account",
+                "stake(1"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 132,
+              "lineEnd": 255,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "cooldown",
+                "fullClaimAndExit",
+                "requestWithdrawal",
+                "slash",
+                "stake"
+              ]
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 256,
+              "lineEnd": 278,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Secure Implementation Examples",
+              "lineStart": 279,
+              "lineEnd": 404,
+              "severity": [],
+              "codeKeywords": [
+                "_slashInternal",
+                "cooldown",
+                "executeSlash",
+                "exit",
+                "initiateSlash",
+                "slash"
+              ]
+            },
+            {
+              "title": "Detection Patterns",
+              "lineStart": 405,
+              "lineEnd": 432,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Real-World Examples",
+              "lineStart": 433,
+              "lineEnd": 450,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Frequency Analysis",
+              "lineStart": 451,
+              "lineEnd": 462,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Related Vulnerabilities",
+              "lineStart": 463,
+              "lineEnd": 479,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/cosmos/app-chain/staking-delegation/staking-state-management.md",
+      "totalLines": 360,
+      "frontmatter": {
+        "protocol": "cosmos-sdk",
+        "chain": "everychain",
+        "category": "staking",
+        "vulnerability_type": "state_inconsistency",
+        "attack_type": "economic_exploit",
+        "affected_component": "staking_module",
+        "severity": "medium_to_high",
+        "impact": "fund_loss",
+        "exploitability": "0.5",
+        "financial_impact": "high",
+        "language": "go",
+        "version": "all"
+      },
+      "patternCount": 2,
+      "patterns": [
+        {
+          "id": "cosmos-references-000",
+          "title": "References",
+          "lineStart": 42,
+          "lineEnd": 48,
+          "lineCount": 7,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "cosmos-vulnerability-title-001",
+          "title": "Vulnerability Title",
+          "lineStart": 49,
+          "lineEnd": 360,
+          "lineCount": 312,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "LiquidShares",
+            "RemoveReputerStake",
+            "UnbondingTime",
+            "ValidatorBondShare",
+            "claimRewards"
+          ],
+          "rootCause": "The fundamental issues arise from:\n\n1. **Silent error handling in EndBlocker**: Stake removal errors swallowed, leading to inconsistent state where users receive tokens but stake records remain\n\n2. **",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 53,
+              "lineEnd": 56,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 57,
+              "lineEnd": 216,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "LiquidShares",
+                "RemoveReputerStake",
+                "UnbondingTime",
+                "ValidatorBondShare",
+                "claimRewards"
+              ]
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 217,
+              "lineEnd": 239,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Secure Implementation",
+              "lineStart": 240,
+              "lineEnd": 327,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Detection Patterns",
+              "lineStart": 328,
+              "lineEnd": 347,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "Redelegate",
+                "SlashRedelegation",
+                "break"
+              ]
+            },
+            {
+              "title": "Real-World Examples",
+              "lineStart": 348,
+              "lineEnd": 357,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/cosmos/app-chain/state-management/evm-cosmos-state-sync.md",
+      "totalLines": 99,
+      "frontmatter": {
+        "protocol": "cosmos-sdk",
+        "chain": "everychain",
+        "category": "state_management",
+        "vulnerability_type": "state_synchronization",
+        "attack_type": "state_desync",
+        "affected_component": "evm_cosmos_bridge",
+        "severity": "high",
+        "impact": "double_spend",
+        "exploitability": "0.7",
+        "financial_impact": "high",
+        "language": "go",
+        "version": "all"
+      },
+      "patternCount": 2,
+      "patterns": [
+        {
+          "id": "cosmos-references-000",
+          "title": "References",
+          "lineStart": 43,
+          "lineEnd": 48,
+          "lineCount": 6,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "cosmos-vulnerability-title-001",
+          "title": "Vulnerability Title",
+          "lineStart": 49,
+          "lineEnd": 99,
+          "lineCount": 51,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": "1. **Dirty state not committed**: EVM statedb changes not committed before Cosmos operations\n\n2. **Nonce desync**: Account nonces inconsistent between EVM and Cosmos state\n\n3. **Cache context mismanag",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 53,
+              "lineEnd": 56,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Root Cause",
+              "lineStart": 57,
+              "lineEnd": 64,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 65,
+              "lineEnd": 79,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Audit Checklist",
+              "lineStart": 80,
+              "lineEnd": 87,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Real-World Examples",
+              "lineStart": 88,
+              "lineEnd": 96,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/cosmos/unique/chain-halt-dos-vectors.md",
+      "totalLines": 102,
+      "frontmatter": {
+        "protocol": "cosmos-sdk",
+        "chain": "everychain",
+        "category": "chain_halt",
+        "vulnerability_type": "denial_of_service",
+        "attack_type": "chain_halt",
+        "affected_component": "abci_consensus",
+        "severity": "high_to_critical",
+        "impact": "chain_halt",
+        "exploitability": "0.8",
+        "financial_impact": "critical",
+        "language": "go",
+        "version": "all"
+      },
+      "patternCount": 2,
+      "patterns": [
+        {
+          "id": "cosmos-references-000",
+          "title": "References",
+          "lineStart": 43,
+          "lineEnd": 49,
+          "lineCount": 7,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "cosmos-vulnerability-title-001",
+          "title": "Vulnerability Title",
+          "lineStart": 50,
+          "lineEnd": 102,
+          "lineCount": 53,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": "1. **Unmetered linear iteration**: BeginBlock/EndBlocker iterate over unbounded collections without gas limits\n\n2. **Division by zero**: Missing validation allows crafted proposals to cause arithmetic",
+          "subsections": [
+            {
+              "title": "Overview",
+              "lineStart": 54,
+              "lineEnd": 57,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Root Cause",
+              "lineStart": 58,
+              "lineEnd": 65,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Impact Analysis",
+              "lineStart": 66,
+              "lineEnd": 81,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Audit Checklist",
+              "lineStart": 82,
+              "lineEnd": 89,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Real-World Examples",
+              "lineStart": 90,
+              "lineEnd": 99,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
