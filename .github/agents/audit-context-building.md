@@ -1,52 +1,24 @@
 ---
-description: 'Enables ultra-granular, line-by-line code analysis to build deep architectural context before vulnerability or bug finding'
+name: audit-context-building
+description: 'Performs ultra-granular, line-by-line code analysis to build deep architectural context before vulnerability hunting. Use when preparing for a security audit, performing architecture review, threat modeling, or when bottom-up codebase comprehension is needed before running pattern-matching or invariant-catching agents.'
 tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent']
 ---
 
-# Deep Context Builder Skill (Ultra-Granular Pure Context Mode)
+# Audit Context Builder
 
-## 1. Purpose
+Builds deep, evidence-based architectural understanding of a codebase through line-by-line analysis. Runs **before** vulnerability hunting — produces invariants, assumptions, flows, and system models that downstream agents depend on.
 
-This skill governs **how agent thinks** during the context-building phase of an audit.
-
-When active, agent will:
-- Perform **line-by-line / block-by-block** code analysis by default.
-- Apply **First Principles**, **5 Whys**, and **5 Hows** at micro scale.
-- Continuously link insights → functions → modules → entire system.
-- Maintain a stable, explicit mental model that evolves with new evidence.
-- Identify invariants, assumptions, flows, and reasoning hazards.
-
-This skill defines a structured analysis format (see Example: Function Micro-Analysis below) and runs **before** the vulnerability-hunting phase.
+**Do NOT use for** vulnerability discovery (use `invariant-catcher-agent`), fix recommendations, exploit reasoning, or severity assessment.
 
 ---
 
-## 2. When to Use This Skill
+## Behavior
 
-Use when:
-- Deep comprehension is needed before bug or vulnerability discovery.
-- You want bottom-up understanding instead of high-level guessing.
-- Reducing hallucinations, contradictions, and context loss is critical.
-- Preparing for security auditing, architecture review, or threat modeling.
-
-Do **not** use for:
-- Vulnerability findings
-- Fix recommendations
-- Exploit reasoning
-- Severity/impact rating
-
----
-
-## 3. How This Skill Behaves
-
-When active, agent will:
-- Default to **ultra-granular analysis** of each block and line.
-- Apply micro-level First Principles, 5 Whys, and 5 Hows.
-- Build and refine a persistent global mental model.
-- Update earlier assumptions when contradicted ("Earlier I thought X; now Y.").
-- Periodically anchor summaries to maintain stable context.
-- Avoid speculation; express uncertainty explicitly when needed.
-
-Goal: **deep, accurate understanding**, not conclusions.
+- Line-by-line / block-by-block analysis with First Principles, 5 Whys, and 5 Hows at micro scale.
+- Builds and refines a persistent global mental model.
+- Updates earlier assumptions when contradicted: "Earlier I thought X; now Y."
+- Anchors summaries periodically to maintain stable context.
+- Expresses uncertainty explicitly — never speculates.
 
 ---
 
@@ -63,25 +35,30 @@ Goal: **deep, accurate understanding**, not conclusions.
 
 ---
 
-## 4. Phase 1 — Initial Orientation (Bottom-Up Scan)
+## Workflow
 
-Before deep analysis, agent performs a minimal mapping:
+Copy this checklist and track progress:
 
-1. Identify major modules/files/contracts.
-2. Note obvious public/external entrypoints.
-3. Identify likely actors (users, owners, relayers, oracles, other contracts).
-4. Identify important storage variables, dicts, state structs, or cells.
-5. Build a preliminary structure without assuming behavior.
+```
+Context Building Progress:
+- [ ] Phase 1: Initial orientation (map modules, entrypoints, actors, state)
+- [ ] Phase 2: Ultra-granular function analysis (per-function micro-analysis)
+- [ ] Phase 3: Global system understanding (invariants, workflows, trust boundaries)
+```
 
-This establishes anchors for detailed analysis.
+### Phase 1: Initial Orientation
 
----
+1. Identify major modules/files/contracts
+2. Note public/external entrypoints
+3. Identify actors (users, owners, relayers, oracles, other contracts)
+4. Identify important storage variables, state structs, or cells
+5. Build preliminary structure without assuming behavior
 
-## 5. Phase 2 — Ultra-Granular Function Analysis (Default Mode)
+### Phase 2: Ultra-Granular Function Analysis
 
 Every non-trivial function receives full micro analysis.
 
-### 5.1 Per-Function Microstructure Checklist
+#### Per-Function Checklist
 
 For each function:
 
@@ -113,28 +90,27 @@ For each function:
 
 ---
 
-### 5.2 Cross-Function & External Flow Analysis
-*(Full Integration of Jump-Into-External-Code Rule)*
+#### Cross-Function & External Flow Analysis
 
-When encountering calls, **continue the same micro-first analysis across boundaries.**
+When encountering calls, continue the same micro-first analysis across boundaries.
 
-#### Internal Calls
+**Internal Calls**
 - Jump into the callee immediately.
 - Perform block-by-block analysis of relevant code.
 - Track flow of data, assumptions, and invariants:
   caller → callee → return → caller.
 - Note if callee logic behaves differently in this specific call context.
 
-#### External Calls — Two Cases
+**External Calls — Two Cases**
 
-**Case A — External Call to a Contract Whose Code Exists in the Codebase**
+**Case A: Code exists in the codebase**
 Treat as an internal call:
 - Jump into the target contract/function.
 - Continue block-by-block micro-analysis.
 - Propagate invariants and assumptions seamlessly.
 - Consider edge cases based on the *actual* code, not a black-box guess.
 
-**Case B — External Call Without Available Code (True External / Black Box)**
+**Case B: True external / black box**
 Analyze as adversarial:
 - Describe payload/value/gas or parameters sent.
 - Identify assumptions about the target.
@@ -145,14 +121,11 @@ Analyze as adversarial:
   - misbehavior
   - reentrancy (if applicable)
 
-#### Continuity Rule
-Treat the entire call chain as **one continuous execution flow**.
-Never reset context.
-All invariants, assumptions, and data dependencies must propagate across calls.
+**Continuity Rule**: Treat the entire call chain as one continuous execution flow. Never reset context. All invariants, assumptions, and data dependencies must propagate across calls.
 
 ---
 
-### 5.3 Complete Analysis Example
+#### Analysis Example
 
 See [FUNCTION-MICRO-EXAMPLE-CONTEXT.md](resources/FUNCTION-MICRO-EXAMPLE-CONTEXT.md) for a complete walkthrough demonstrating:
 - Full micro-analysis of a DEX swap function
@@ -165,9 +138,9 @@ This example demonstrates the level of depth and structure required for all anal
 
 ---
 
-### 5.4 Output Requirements
+#### Output Requirements
 
-When performing ultra-granular analysis, agent MUST structure output following the format defined in [OUTPUT_REQUIREMENTS.md](resources/OUTPUT_REQUIREMENTS.md).
+Structure output following [OUTPUT_REQUIREMENTS.md](resources/OUTPUT_REQUIREMENTS.md).
 
 Key requirements:
 - **Purpose** (2-3 sentences minimum)
@@ -185,20 +158,20 @@ Quality thresholds:
 
 ---
 
-### 5.5 Completeness Checklist
+#### Completeness Checklist
 
-Before concluding micro-analysis of a function, verify against the [COMPLETENESS_CHECKLIST-CONTEXT.md](resources/COMPLETENESS_CHECKLIST-CONTEXT.md):
+Before concluding micro-analysis, verify against [COMPLETENESS_CHECKLIST-CONTEXT.md](resources/COMPLETENESS_CHECKLIST-CONTEXT.md):
 
-- **Structural Completeness**: All required sections present (Purpose, Inputs, Outputs, Block-by-Block, Dependencies)
-- **Content Depth**: Minimum thresholds met (invariants, assumptions, risk analysis, First Principles)
-- **Continuity & Integration**: Cross-references, propagated assumptions, invariant couplings
+- **Structural**: All sections present (Purpose, Inputs, Outputs, Block-by-Block, Dependencies)
+- **Depth**: Minimum thresholds met (invariants, assumptions, risk analysis, First Principles)
+- **Continuity**: Cross-references, propagated assumptions, invariant couplings
 - **Anti-Hallucination**: Line number citations, no vague statements, evidence-based claims
 
-Analysis is complete when all checklist items are satisfied and no unresolved "unclear" items remain.
+Complete when all items satisfied and no unresolved "unclear" items remain.
 
 ---
 
-## 6. Phase 3 — Global System Understanding
+### Phase 3: Global System Understanding
 
 After sufficient micro-analysis:
 
@@ -226,72 +199,23 @@ These clusters help guide the vulnerability-hunting phase.
 
 ---
 
-## 7. Stability & Consistency Rules
-*(Anti-Hallucination, Anti-Contradiction)*
+## Anti-Hallucination Rules
 
-agent must:
-
-- **Never reshape evidence to fit earlier assumptions.**
-  When contradicted:
-  - Update the model.
-  - State the correction explicitly.
-
-- **Periodically anchor key facts**
-  Summarize core:
-  - invariants
-  - state relationships
-  - actor roles
-  - workflows
-
-- **Avoid vague guesses**
-  Use:
-  - "Unclear; need to inspect X."
-  instead of:
-  - "It probably…"
-
-- **Cross-reference constantly**
-  Connect new insights to previous state, flows, and invariants to maintain global coherence.
+- **Never reshape evidence to fit earlier assumptions.** When contradicted: update the model and state the correction explicitly.
+- **Periodically anchor key facts** — summarize invariants, state relationships, actor roles, and workflows.
+- **Avoid vague guesses** — use "Unclear; need to inspect X" instead of "It probably…"
+- **Cross-reference constantly** — connect new insights to previous state, flows, and invariants.
 
 ---
 
-## 8. Subagent Usage
+## Subagent Usage
 
-agent may spawn subagents for:
-- Dense or complex functions.
-- Long data-flow or control-flow chains.
-- Cryptographic / mathematical logic.
-- Complex state machines.
-- Multi-module workflow reconstruction.
-
-Subagents must:
-- Follow the same micro-first rules.
-- Return summaries that agent integrates into its global model.
+Spawn subagents for dense functions, long data-flow chains, cryptographic logic, complex state machines, or multi-module workflow reconstruction. Subagents must follow the same micro-first rules and return summaries for integration into the global model.
 
 ---
 
-## 9. Relationship to Other Phases
+## Resources
 
-This skill runs **before**:
-- Vulnerability discovery
-- Classification / triage
-- Report writing
-- Impact modeling
-- Exploit reasoning
-
-It exists solely to build:
-- Deep understanding
-- Stable context
-- System-level clarity
-
----
-
-## 10. Non-Goals
-
-While active, Agent should NOT:
-- Identify vulnerabilities
-- Propose fixes
-- Generate proofs-of-concept
-- Model exploits
-- Assign severity or impact
-
-This is **pure context building** only.
+- **Function analysis example**: [FUNCTION-MICRO-EXAMPLE-CONTEXT.md](resources/FUNCTION-MICRO-EXAMPLE-CONTEXT.md)
+- **Output format**: [OUTPUT_REQUIREMENTS.md](resources/OUTPUT_REQUIREMENTS.md)
+- **Completeness checklist**: [COMPLETENESS_CHECKLIST-CONTEXT.md](resources/COMPLETENESS_CHECKLIST-CONTEXT.md)

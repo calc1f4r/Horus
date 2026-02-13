@@ -1,137 +1,115 @@
-# Project Submission: Agentic AI Workflow for Smart Contract Auditing
+# Vulnerability Database
 
-## Summary
-This project builds an agentic workflow to audit smart contracts using specialized AI agents. It combines deep codebase context building, pattern matching, external research, unique finding synthesis, and a curated vulnerability database. The system is designed to improve audit quality, reduce hallucinations, and produce structured, traceable security insights.
+A curated, agent-optimized vulnerability pattern database for smart contract security audits. Aggregates findings from real-world audits and exploits into structured, searchable entries across EVM, Solana, and Cosmos ecosystems.
 
-The repository includes a growing knowledge base of vulnerability patterns, protocol-specific findings, and unique exploit archetypes derived from real-world reports. These artifacts are organized for fast retrieval and for use in automated analysis pipelines (Semgrep/CodeQL) as well as LLM-driven reasoning. The end goal is a repeatable audit workflow that preserves provenance (finding → evidence → database entry), increases coverage, and supports continuous learning as new incidents are added.
+## Quick Start
 
-## Objectives
-- Build a repeatable, multi-agent pipeline for smart contract security audits.
-- Generate high-fidelity codebase context before analysis.
-- Leverage a structured vulnerability database to guide detection and reasoning.
-- Produce consistent, evidence-backed findings and reports.
-- Maintain an extensible database schema optimized for vector search and long-term maintenance.
-- Provide protocol-specific checklists and retrieval shortcuts for auditors and agents.
-- Support cross-protocol reasoning (EVM, Solana, Cosmos) with consistent output formats.
+```bash
+# Clone the repository
+git clone https://github.com/calc1f4r/Vulnerability-database.git
+cd Vulnerability-database
 
-## Architecture Overview
-The workflow orchestrates five core agents:
+# Set up Python environment (for fetching tools)
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
-1. **Context Creator Agent**
-   - Input: target codebase.
-   - Output: ultra-granular architectural context and function-level analysis.
-   - Role: establish a reliable mental model before vulnerability hunting.
+### Search the Database
 
-2. **Pattern Matching Agent**
-   - Input: codebase + vulnerability database.
-   - Output: candidate findings via Semgrep/CodeQL patterns and synthesized reports.
-   - Role: fast, deterministic pattern detection and cross-referencing.
+Start with `DB/index.json` — the master router that points to the right manifest for any protocol type or keyword:
 
-3. **Research Agent**
-   - Input: preliminary findings and protocol context.
-   - Output: external references, historical incidents, and relevant exploit patterns.
-   - Role: enrich reasoning with real-world evidence.
+```
+DB/index.json → protocolContext → relevant manifests
+DB/manifests/<name>.json → pattern-level index with line ranges
+DB/**/*.md → vulnerability content (read only targeted line ranges)
+```
 
-4. **Unique Finding Agent**
-   - Input: “unique” signals from the database + synthesized patterns.
-   - Output: novel or protocol-specific hypotheses and findings.
-   - Role: capture non-obvious issues beyond standard patterns.
+See [DB/SEARCH_GUIDE.md](DB/SEARCH_GUIDE.md) for the complete search guide.
 
-5. **Vulnerability Database Creation**
-   - Input: curated vulnerability knowledge and reports.
-   - Output: structured, searchable database entries.
-   - Role: continuously improve detection quality and recall.
+### Fetch New Reports
 
-## Repository Structure & Data Sources
-The repository is organized to support both automated analysis and manual triage:
+```bash
+source .venv/bin/activate
+python3 solodit_fetcher.py --keyword "<topic>" --output ./reports/<topic>_findings
+```
 
-- **DB/index.json**: central index that maps categories, keywords, and protocol contexts to relevant vulnerability files. This is the primary retrieval entrypoint for agents.
-- **DB/**: canonical vulnerability entries organized by category (oracle, AMM, bridge, tokens, general, Cosmos, Solana) and “unique” exploit patterns.
-- **reports/**: sourced findings and incident reports grouped by protocol domains (bridge, chainlink, ERC4626, proxies, etc.). These reports seed database entries and provide real-world grounding.
-- **Variant-analysis/**: Semgrep and CodeQL templates to drive deterministic pattern matching and automated detection.
-- **TEMPLATE.md / Example.md**: standardized entry formats to ensure consistent, vector-friendly documentation.
+## Repository Structure
 
-This structure allows fast lookup via index keywords, protocol contexts, and category browsing, while keeping raw evidence and curated entries tightly linked.
+```
+├── DB/                              # Vulnerability database
+│   ├── index.json                   # Master router — start here
+│   ├── SEARCH_GUIDE.md              # Detailed search guide
+│   ├── manifests/                   # Pattern-level indexes (11 manifests)
+│   ├── oracle/                      # Oracle vulnerabilities (Chainlink, Pyth)
+│   ├── amm/                         # AMM vulnerabilities
+│   ├── bridge/                      # Cross-chain bridge vulnerabilities
+│   ├── tokens/                      # Token standard vulnerabilities
+│   ├── cosmos/                      # Cosmos SDK / IBC vulnerabilities
+│   ├── Solona-chain-specific/       # Solana program vulnerabilities
+│   ├── general/                     # General security patterns
+│   └── unique/                      # Protocol-specific unique exploits
+├── reports/                         # Raw audit findings (source data)
+├── DeFiHackLabs/                    # Real-world exploit PoCs (submodule)
+├── Variant-analysis/                # Semgrep/CodeQL detection templates
+├── .github/agents/                  # AI agent skill definitions
+├── TEMPLATE.md                      # Canonical entry structure
+├── Example.md                       # Reference implementation
+├── CONTRIBUTING.md                  # Contribution guidelines
+└── Agents.md                        # Agent guidance document
+```
 
-## Context Creator Agent (Core Spec)
-**Name:** audit-context-building
+## 3-Tier Search Architecture
 
-**Description:** Enables ultra-granular, line-by-line code analysis to build deep architectural context before vulnerability or bug finding.
+| Tier | File | Purpose |
+|------|------|---------|
+| 1 | `DB/index.json` | Lean router (~330 lines) — maps protocol types and keywords to manifests |
+| 2 | `DB/manifests/*.json` | Pattern-level indexes with line ranges (11 manifests, 500+ patterns) |
+| 3 | `DB/**/*.md` | Vulnerability content — read ONLY targeted line ranges from manifests |
 
-### Purpose
-Establish a detailed, evidence-based model of the codebase. The output serves as the foundation for all downstream agents.
+### Available Manifests
 
-### Behavior
-- Line-by-line / block-by-block analysis.
-- First Principles, 5 Whys, and 5 Hows applied per block.
-- Explicit invariants, assumptions, and flow mappings.
-- Continuous cross-referencing across internal and external calls.
-- Evidence-first analysis with explicit uncertainty labeling.
-- Formal output structure that preserves traceability between functions and system-level flows.
+| Manifest | Patterns | Focus |
+|----------|----------|-------|
+| `oracle` | 39 | Chainlink, Pyth, price manipulation |
+| `amm` | 65 | Concentrated liquidity, constant product |
+| `bridge` | 32 | LayerZero, Wormhole, Hyperlane |
+| `tokens` | 33 | ERC20, ERC4626, ERC721 |
+| `cosmos` | 26 | Cosmos SDK, IBC, staking |
+| `solana` | 38 | Solana programs, Token-2022 |
+| `general-security` | 31 | Access control, signatures, validation |
+| `general-defi` | 115 | Flash loans, vaults, precision |
+| `general-infrastructure` | 41 | Proxies, reentrancy, storage |
+| `general-governance` | 56 | Governance, stablecoins, MEV |
+| `unique` | 59 | Protocol-specific unique exploits |
 
-### Non-Goals
-- No vulnerability discovery or severity assessment during context building.
+## AI Agent Ecosystem
 
-## Pattern Matching Agent (Core Spec)
-This agent operationalizes the vulnerability database by turning curated knowledge into automated detection:
+Nine specialized agents in `.github/agents/` cover the full audit lifecycle:
 
-- Uses Semgrep/CodeQL patterns in [Variant-analysis/](Variant-analysis/) to scan codebases.
-- Matches on risky constructs, missing validations, dangerous calls, and known exploit sequences.
-- Produces candidate findings with references to the relevant DB entries and source evidence.
-- Prioritizes deterministic matches before reasoning-based escalation.
+| Agent | Purpose |
+|-------|---------|
+| `audit-context-building` | Deep, line-by-line codebase comprehension |
+| `invariant-catcher-agent` | Hunts for known vulnerability patterns using the DB |
+| `variant-template-writer` | Synthesizes audit reports into DB entries |
+| `defihacklabs-indexer` | Indexes real-world exploit PoCs into DB entries |
+| `solodit-fetching` | Fetches raw findings from Solodit API |
+| `missing-validation-reasoning` | Specialized input validation auditor |
+| `poc-writing` | Writes honest, compilable exploit PoCs |
+| `cantina-judge` | Validates findings against Cantina standards |
+| `sherlock-judging` | Validates findings against Sherlock standards |
 
-## Research Agent (Core Spec)
-This agent enriches and validates findings against external evidence:
+## Creating New Entries
 
-- Pulls historical incidents, CVEs, writeups, and protocol-specific exploit postmortems.
-- Validates that observed patterns map to known failure modes.
-- Supplies references that strengthen reasoning and report credibility.
-- Expands edge cases and informs the Unique Finding Agent.
+1. Fetch source reports: use `solodit-fetching` agent or `solodit_fetcher.py`
+2. Analyze patterns: use `variant-template-writer` or `defihacklabs-indexer` agent
+3. Follow [TEMPLATE.md](TEMPLATE.md) structure (see [Example.md](Example.md) for reference)
+4. Regenerate manifests: `python3 generate_manifests.py`
 
-## Unique Finding Agent (Core Spec)
-This agent synthesizes “unique” signals from the database to detect non-obvious issues:
+## Contributing
 
-- Uses the **unique** category and protocol-specific exploit patterns as priors.
-- Performs deeper reasoning to uncover multi-step or cross-contract issues.
-- Flags novel hypotheses that are not strictly detected by static rules.
-- Feeds back to the database creation flow when new patterns are confirmed.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on adding vulnerability entries, improving agents, and maintaining the database.
 
-## Data & Knowledge Sources
-- Curated vulnerability database in [DB/](DB/).
-- Protocol-specific findings in [reports/](reports/).
-- Unique exploit patterns in [DB/unique/](DB/unique/).
-- Index and retrieval metadata in [DB/index.json](DB/index.json).
-- Semgrep/CodeQL templates in [Variant-analysis/](Variant-analysis/).
+## License
 
-## Repository Alignment
-The current repository layout supports the workflow end-to-end:
-- **DB/**: vulnerability database and index.
-- **reports/**: sourced findings and synthesized reports.
-- **TEMPLATE.md / Example.md**: standard entry formats.
-- **CodebaseStructure.md**: repo conventions and structure.
-- **Variant-analysis/**: deterministic scan rules and templates.
-
-## Expected Outputs
-- Consistent, structured vulnerability entries aligned with templates.
-- Evidence-backed audit reports tied to database artifacts.
-- Searchable, vector-friendly metadata for retrieval and reasoning.
-- Automated candidate findings with deterministic pattern matches and supporting references.
-- Protocol-specific audit checklists and retrieval paths for rapid onboarding.
-
-## Workflow (High-Level)
-1. **Ingest** target codebase and determine protocol context.
-2. **Context Creator Agent** builds a detailed, line-level model of the system.
-3. **Pattern Matching Agent** runs Semgrep/CodeQL rules and maps hits to database entries.
-4. **Research Agent** enriches findings with real-world evidence and known exploit patterns.
-5. **Unique Finding Agent** evaluates unique signals to surface non-obvious hypotheses.
-6. **Database Creation** converts validated findings into structured entries to improve future recall.
-
-## Success Criteria
-- High recall of known vulnerability patterns.
-- Clear traceability from findings → evidence → database entries.
-- Reduced hallucination and improved audit consistency.
-- Increased cross-protocol coverage (EVM, Solana, Cosmos).
-- Reduced false positives through stronger pattern-to-evidence alignment.
-
-## Status
-Active development. The database and agent prompts are being expanded and refined as new findings are incorporated.
+This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.

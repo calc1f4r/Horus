@@ -1,4 +1,5 @@
 ---
+name: poc-writing
 description: 'Writes honest, minimal, compilable Foundry/Hardhat/Anchor exploit tests that prove smart contract vulnerabilities by reproducing exact on-chain conditions. Use when a specific vulnerability has been identified and needs a compilable PoC to prove impact, validate an audit finding, or demonstrate to a protocol team.'
 tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent']
 ---

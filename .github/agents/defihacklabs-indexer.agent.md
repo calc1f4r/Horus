@@ -1,7 +1,7 @@
 ---
-name: DeFiHackLabs Exploit Indexer
-description: Analyzes DeFiHackLabs exploit PoCs and README documentation to extract vulnerability patterns, attack vectors, and root causes. Creates TEMPLATE.md-compliant database entries with verified attack mechanics from real-world exploits. Use when indexing DeFi exploits from DeFiHackLabs, creating vulnerability entries from PoC code, or building pattern databases from historical incidents.
-tools: ['edit/editFiles', 'search/codebase', 'web/githubRepo', 'web/fetch', 'search/usages', 'search', 'read/terminalLastCommand', 'read/problems', 'execute/createAndRunTask', 'execute/testFailure', 'execute/getTerminalOutput','execute/runInTerminal','read/terminalSelection']
+name: defihacklabs-indexing
+description: 'Analyzes DeFiHackLabs exploit PoCs and README documentation to extract vulnerability patterns, attack vectors, and root causes. Creates TEMPLATE.md-compliant database entries with verified attack mechanics from real-world exploits. Use when indexing DeFi exploits from DeFiHackLabs, creating vulnerability entries from PoC code, or building pattern databases from historical incidents.'
+tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent']
 ---
 
 # DeFiHackLabs Exploit Indexer
