@@ -162,6 +162,13 @@ version: all
 | Liquidation State Cleanup Omission | Full liquidation leaves stale debt in position state | `reports/ZenithReports/fluidreport.md` (H-2) | HIGH | Zenith |
 | Account-List Ceiling DoS | Branch-heavy operations exceed Solana account limits | `reports/ZenithReports/fluidreport.md` (H-1) | HIGH | Zenith |
 
+### Treehouse Policy & Configuration Vulnerabilities
+| Category | Report | Path | Severity | Audit Firm |
+|----------|--------|------|----------|------------|
+| Upgradeable Program Whitelist Bypass | CPI digest policy can be bypassed after program upgrade | `reports/ZenithReports/Treehousereport.md` (M-1) | MEDIUM | Zenith |
+| Withdraw Authority Misconfiguration Lockout | Non-queue `withdraw_authority` can strand user withdrawals | `reports/ZenithReports/Treehousereport.md` (L-2) | LOW | Zenith |
+| Retroactive Fee Parameter Effect | `set_fees` applies new rates to prior accrual period | `reports/ZenithReports/Treehousereport.md` (L-6) | LOW | Zenith |
+
 ### External Links
 - [Solana Program Security Course](https://solana.com/developers/courses/program-security)
 - [Neodyme Common Pitfalls](https://neodyme.io/en/blog/solana_common_pitfalls/)
@@ -201,6 +208,7 @@ version: all
 18. [Create Account Pre-Funding DOS](#18-create-account-pre-funding-dos)
 19. [Rent Exemption Validation Errors](#19-rent-exemption-validation-errors)
 20. [Liquidation and State Invariant Vulnerabilities](#20-liquidation-and-state-invariant-vulnerabilities)
+21. [CPI Policy and Program Upgradeability Bypass](#21-cpi-policy-and-program-upgradeability-bypass)
 
 ---
 
@@ -2530,6 +2538,93 @@ rate = rate
 
 ---
 
+## 21. CPI Policy and Program Upgradeability Bypass
+
+### Overview
+
+Instruction-digest allowlists are only meaningful when the target program implementation is immutable. If a vault whitelists CPI operations by digest but does not enforce target-program immutability (or frozen upgrade authority), a later program upgrade can preserve digest shape while changing behavior.
+
+> **📚 Source Report:**
+> - `reports/ZenithReports/Treehousereport.md` (M-1)
+
+### Vulnerability Description
+
+#### Root Cause
+
+1. CPI policy stores digest/operator rules for an instruction payload but not upgradeability guarantees for `program_id`.
+2. Policy update and execution paths trust that whitelisted programs remain semantically stable.
+3. Upgradeable loader programs can change code after being allowlisted.
+
+### Vulnerable Pattern Examples
+
+**Example 1: Digest Validation Without Upgradeability Check** [MEDIUM]
+```rust
+// ❌ VULNERABLE: digest checks pass, but target program may be upgradeable
+pub fn update_cpi_digest(ctx: Context<UpdateCpiDigest>, digest: [u8; 32]) -> Result<()> {
+    ctx.accounts.cpi_digest.digest = digest;
+    // Missing: verify target program is immutable / non-upgradeable
+    Ok(())
+}
+```
+
+**Example 2: Execution Path Trusts Mutable Program** [MEDIUM]
+```rust
+// ❌ VULNERABLE: invoke path relies on stale trust from old digest registration
+pub fn manage(ctx: Context<Manage>, ix_data: Vec<u8>) -> Result<()> {
+    require!(matches_digest(&ctx.accounts.cpi_digest, &ix_data), ErrorCode::DigestMismatch);
+    invoke_signed(&build_ix(&ctx.accounts.target_program, &ix_data), &ctx.remaining_accounts, &[])?;
+    Ok(())
+}
+```
+
+### Secure Implementation
+
+**Fix 1: Enforce Immutability at Policy Registration**
+```rust
+// ✅ SECURE: reject upgradeable targets unless upgrade authority is None
+fn validate_program_immutability(program: &AccountInfo, programdata: Option<&AccountInfo>) -> Result<()> {
+    if is_builtin_program(program.key) {
+        return Ok(());
+    }
+
+    require!(program.owner == &bpf_loader::ID || program.owner == &bpf_loader_deprecated::ID, ErrorCode::InvalidProgramOwner);
+
+    if program.owner == &bpf_loader_upgradeable::ID {
+        let data = read_programdata(programdata.ok_or(ErrorCode::MissingProgramData)?)?;
+        require!(data.upgrade_authority_address.is_none(), ErrorCode::ProgramIsUpgradeable);
+    }
+
+    Ok(())
+}
+```
+
+**Fix 2: Bind Policy to Program Identity + Mutability State**
+```rust
+// ✅ SECURE: store program id and immutability fingerprint with digest
+pub struct CpiPolicy {
+    pub program_id: Pubkey,
+    pub digest: [u8; 32],
+    pub immutable: bool,
+}
+```
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- CPI digest/allowlist updates that omit checks for bpf_loader_upgradeable ownership
+- policy engines that validate instruction bytes but not target-program mutability
+- comments asserting CPI safety due to digest checks alone
+```
+
+#### Audit Checklist
+- [ ] Every allowlisted CPI target is immutable or has `upgrade_authority == None`
+- [ ] Policy stores `program_id` and rejects digest reuse across different programs
+- [ ] Built-in programs are explicitly handled as trusted immutable exceptions
+- [ ] Policy updates are independent of pause-state constraints during incidents
+
+---
+
 ## Prevention Guidelines
 
 ### Development Best Practices
@@ -2558,7 +2653,7 @@ rate = rate
 
 > These keywords enhance vector search retrieval:
 
-`solana`, `anchor`, `spl_token`, `token_2022`, `pda`, `cpi`, `signer_check`, `owner_check`, `account_validation`, `missing_signer`, `missing_owner`, `pda_validation`, `arbitrary_cpi`, `seed_collision`, `account_closure`, `init_if_needed`, `dos_attack`, `front_running`, `account_reloading`, `stale_state`, `reallocation`, `rent_exempt`, `lamports_transfer`, `freeze_authority`, `close_authority`, `transfer_fee`, `remaining_accounts`, `bump_seed`, `signer_seeds`, `checked_arithmetic`, `overflow`, `underflow`, `type_casting`, `event_emission`, `token_program`, `system_program`, `sysvar`, `account_pre_creation`, `type_confusion`, `discriminator`, `ed25519`, `instruction_introspection`, `signature_replay`, `nonce_reset`, `unrestricted_cpi`, `adapter_program`, `initialization_frontrun`, `multisig`, `create_key`, `permissionless_init`, `pre_funding_dos`, `create_account`, `rent_inclusion`, `bonding_curve`, `invariant_check`, `canonical_bump`, `reentrancy`, `guard_bypass`, `decimal_mismatch`, `precision_manipulation`, `tss_address`, `merkle_proof`, `tick_sentinel`, `liquidation_state_cleanup`, `cross_vault_write`, `saturating_overflow`, `account_borrow_conflict`, `account_count_limit`
+`solana`, `anchor`, `spl_token`, `token_2022`, `pda`, `cpi`, `signer_check`, `owner_check`, `account_validation`, `missing_signer`, `missing_owner`, `pda_validation`, `arbitrary_cpi`, `seed_collision`, `account_closure`, `init_if_needed`, `dos_attack`, `front_running`, `account_reloading`, `stale_state`, `reallocation`, `rent_exempt`, `lamports_transfer`, `freeze_authority`, `close_authority`, `transfer_fee`, `remaining_accounts`, `bump_seed`, `signer_seeds`, `checked_arithmetic`, `overflow`, `underflow`, `type_casting`, `event_emission`, `token_program`, `system_program`, `sysvar`, `account_pre_creation`, `type_confusion`, `discriminator`, `ed25519`, `instruction_introspection`, `signature_replay`, `nonce_reset`, `unrestricted_cpi`, `adapter_program`, `initialization_frontrun`, `multisig`, `create_key`, `permissionless_init`, `pre_funding_dos`, `create_account`, `rent_inclusion`, `bonding_curve`, `invariant_check`, `canonical_bump`, `reentrancy`, `guard_bypass`, `decimal_mismatch`, `precision_manipulation`, `tss_address`, `merkle_proof`, `tick_sentinel`, `liquidation_state_cleanup`, `cross_vault_write`, `saturating_overflow`, `account_borrow_conflict`, `account_count_limit`, `cpi_digest`, `upgradeable_loader`, `program_upgrade_authority`, `policy_bypass`, `immutable_program`
 
 ---
 

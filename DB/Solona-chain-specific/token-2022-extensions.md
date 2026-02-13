@@ -85,6 +85,12 @@ version: all
 | Hard-coded Vault Size | `reports/solana_findings/hard-coded-165-byte-vault-account-is-too-small-for-raydium-token-2022-mints-with.md` | MEDIUM | Unknown |
 | Token-2022 Extension Compatibility Gaps (M-5) | `reports/ZenithReports/fluidreport.md` | MEDIUM | Zenith |
 | Mixed Legacy + Token-2022 Incompatibility (L-17) | `reports/ZenithReports/fluidreport.md` | LOW | Zenith |
+| Share Mint Not Explicitly Token-2022 (L-4) | `reports/ZenithReports/Treehousereport.md` | LOW | Zenith |
+
+### Metadata Pointer Vulnerabilities
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Share Token Metadata Pointer Recommended (I-10) | `reports/ZenithReports/Treehousereport.md` | INFORMATIONAL | Zenith |
 
 ### Permanent Delegate Vulnerabilities
 | Report | Path | Severity | Audit Firm |
