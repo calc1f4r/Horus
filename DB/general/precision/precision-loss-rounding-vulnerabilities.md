@@ -722,3 +722,74 @@ function swapGivenOut(uint256 tokenAmountOut, uint256 scalingFactor) internal re
 - [Rounding and Precision Loss (Basic)](../rounding-precision-loss/rounding-precision-loss.md) - Simpler rounding issues
 - [Flash Loan Attacks](../flash-loan-attacks/FLASH_LOAN_VULNERABILITIES.md) - Often combined with precision loss
 - [Oracle Price Manipulation](../../oracle/price-manipulation/flash-loan-oracle-manipulation.md) - Economic attacks that leverage precision issues
+
+---
+
+## DeFiHackLabs Real-World Exploits (23 incidents)
+
+**Category**: Precision Loss | **Total Losses**: $312.3M | **Sub-variants**: 4
+
+### Sub-variant Breakdown
+
+#### Precision-Loss/Division Precision (15 exploits, $299.6M)
+
+- **BalancerV2** (2025-11, $120.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2025-11/BalancerV2_exp.sol`
+- **MIMSpell** (2024-01, $65.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2024-01/MIMSpell2_exp.sol`
+- **KyberSwap** (2023-11, $46.0M, None) | PoC: `DeFiHackLabs/src/test/2023-11/KyberSwap_exp.eth.1.sol`
+- *... and 12 more exploits*
+
+#### Precision-Loss/Donation Inflation Rounding (6 exploits, $12.5M)
+
+- **HundredFinance** (2023-04, $7.0M, optimism) | PoC: `DeFiHackLabs/src/test/2023-04/HundredFinance_2_exp.sol`
+- **Raft_fi** (2023-11, $3.2M, ethereum) | PoC: `DeFiHackLabs/src/test/2023-11/Raft_exp.sol`
+- **Balancer** (2023-08, $2.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2023-08/Balancer_exp.sol`
+- *... and 3 more exploits*
+
+#### Precision-Loss/Integer Truncation (1 exploits, $80K)
+
+- **Matez** (2024-11, $80K, bsc) | PoC: `DeFiHackLabs/src/test/2024-11/Matez_exp.sol`
+
+#### Precision-Loss/Truncation (1 exploits, $42K)
+
+- **DualPools** (2024-02, $42K, None) | PoC: `DeFiHackLabs/src/test/2024-02/DualPools_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| BalancerV2 | 2025-11-03 | $120.0M | Precision Loss | ethereum |
+| MIMSpell | 2024-01-30 | $65.0M | Precission Loss | ethereum |
+| KyberSwap | 2023-11-22 | $46.0M | precision loss | None |
+| RadiantCapital | 2024-01-02 | $45.0M | Loss of Precision | arbitrum |
+| Sonne Finance | 2024-05-14 | $20.0M | Precision loss | None |
+| HundredFinance | 2023-04-15 | $7.0M | Donate Inflation ExchangeRate && Rounding Error | optimism |
+| Raft_fi | 2023-11-10 | $3.2M | Donate Inflation ExchangeRate & Rounding Error | ethereum |
+| OnyxProtocol | 2023-11-01 | $2.0M | Precission Loss Vulnerability | ethereum |
+| Balancer | 2023-08-27 | $2.0M | Rounding Error && Business Logic Flaw | ethereum |
+| Hopelend | 2023-10-18 | $825K | Div Precision Loss | ethereum |
+| MidasCapitalXYZ | 2023-06-17 | $600K | Precision Loss | bsc |
+| WiseLending | 2023-10-13 | $260K | Donate Inflation ExchangeRate && Rounding Error | ethereum |
+| DeFiPlaza | 2024-07-05 | $200K | loss of precision | ethereum |
+| Matez | 2024-11-21 | $80K | Integer Truncation | bsc |
+| BaoCommunity | 2023-07-04 | $46K | Donate Inflation ExchangeRate && Rounding Error | None |
+| DualPools | 2024-02-15 | $42K | precision truncation | None |
+| MahaLend | 2023-11-11 | $20K | Donate Inflation ExchangeRate & Rounding Error | ethereum |
+| BigBangSwap | 2024-04-10 | $5K | precission loss | bsc |
+| CCV | 2023-12-28 | $3K | Precision loss | bsc |
+| DominoTT | 2023-12-28 | $5 | Precision loss | bsc |
+| KR | 2023-11-06 | $5 | Precision loss | bsc |
+| BNBX | 2024-04-27 | $5 | precission loss | bsc |
+| Binemon | 2024-03-11 | $0 | precission-loss | bsc |
+
+### Top PoC References
+
+- **BalancerV2** (2025-11, $120.0M): `DeFiHackLabs/src/test/2025-11/BalancerV2_exp.sol`
+- **MIMSpell** (2024-01, $65.0M): `DeFiHackLabs/src/test/2024-01/MIMSpell2_exp.sol`
+- **KyberSwap** (2023-11, $46.0M): `DeFiHackLabs/src/test/2023-11/KyberSwap_exp.eth.1.sol`
+- **RadiantCapital** (2024-01, $45.0M): `DeFiHackLabs/src/test/2024-01/RadiantCapital_exp.sol`
+- **HundredFinance** (2023-04, $7.0M): `DeFiHackLabs/src/test/2023-04/HundredFinance_2_exp.sol`
+- **Raft_fi** (2023-11, $3.2M): `DeFiHackLabs/src/test/2023-11/Raft_exp.sol`
+- **OnyxProtocol** (2023-11, $2.0M): `DeFiHackLabs/src/test/2023-11/OnyxProtocol_exp.sol`
+- **Balancer** (2023-08, $2.0M): `DeFiHackLabs/src/test/2023-08/Balancer_exp.sol`
+- **Hopelend** (2023-10, $825K): `DeFiHackLabs/src/test/2023-10/Hopelend_exp.sol`
+- **MidasCapitalXYZ** (2023-06, $600K): `DeFiHackLabs/src/test/2023-06/MidasCapitalXYZ_exp.sol`

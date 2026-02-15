@@ -669,3 +669,117 @@ contract SecureFlashLoan {
 - [Price Oracle Manipulation](../../oracle/chainlink/CHAINLINK_PRICE_FEED_VULNERABILITIES.md)
 - [Vault Inflation Attack](../vault-inflation-attack/vault-inflation-attack.md)
 - [ERC4626 Vulnerabilities](../../tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md)
+
+---
+
+## DeFiHackLabs Real-World Exploits (56 incidents)
+
+**Category**: Reentrancy | **Total Losses**: $258.3M | **Sub-variants**: 7
+
+### Sub-variant Breakdown
+
+#### Reentrancy/Classic (42 exploits, $220.3M)
+
+- **Rari Capital/Fei Protocol** (2022-04, $80.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2022-04/Rari_exp.sol`
+- **Curve** (2023-07, $41.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2023-07/Curve_exp01.sol`
+- **Grim Finance** (2021-12, $30.0M, fantom) | PoC: `DeFiHackLabs/src/test/2021-12/Grim_exp.sol`
+- *... and 39 more exploits*
+
+#### Reentrancy/Erc777 Callback (2 exploits, $25.2M)
+
+- **LendfMe** (2020-04, $25.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2020-04/LendfMe_exp.sol`
+- **UniSwapV1** (2020-04, $220K, ethereum) | PoC: `DeFiHackLabs/src/test/2020-04/uniswap-erc777.sol`
+
+#### Reentrancy/Read Only (6 exploits, $9.6M)
+
+- **dForce** (2023-02, $3.6M, arbitrum) | PoC: `DeFiHackLabs/src/test/2023-02/dForce_exp.sol`
+- **Conic Finance** (2023-07, $3.2M, ethereum) | PoC: `DeFiHackLabs/src/test/2023-07/Conic_exp.sol`
+- **Sentiment** (2023-04, $1.0M, arbitrum) | PoC: `DeFiHackLabs/src/test/2023-04/Sentiment_exp.sol`
+- *... and 3 more exploits*
+
+#### Reentrancy/Erc667 Callback (2 exploits, $3.2M)
+
+- **Hundred Finance** (2022-03, $1.7M, gnosis) | PoC: `DeFiHackLabs/src/test/2022-03/HundredFinance_exp.sol`
+- **Agave Finance** (2022-03, $1.5M, gnosis) | PoC: `DeFiHackLabs/src/test/2022-03/Agave_exp.sol`
+
+#### Reentrancy/Reward Manipulation (1 exploits, $11K)
+
+- **Penpiexyz_io** (2024-09, $11K, None)
+
+#### Reentrancy/Nft Sell Callback (1 exploits, $138)
+
+- **StepHeroNFTs** (2025-02, $138, bsc) | PoC: `DeFiHackLabs/src/test/2025-02/StepHeroNFTs_exp.sol`
+
+#### Reentrancy/Cross Contract (2 exploits, N/A)
+
+- **RariCapital** (2021-05, N/A, ethereum) | PoC: `DeFiHackLabs/src/test/2021-05/RariCapital_exp.sol`
+- **Value Defi** (2021-05, N/A, bsc) | PoC: `DeFiHackLabs/src/test/2021-05/ValueDefi_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| Rari Capital/Fei Protocol | 2022-04-30 | $80.0M | Flashloan Attack + Reentrancy | ethereum |
+| Curve | 2023-07-30 | $41.0M | Vyper Compiler Bug && Reentrancy | ethereum |
+| Grim Finance | 2021-12-18 | $30.0M | Flashloan & Reentrancy | fantom |
+| LendfMe | 2020-04-19 | $25.0M | ERC777 Reentrancy | ethereum |
+| Cream Finance | 2021-08-30 | $18.0M | Flashloan Attack + Reentrancy | ethereum |
+| Revest Finance | 2022-03-27 | $11.2M | Reentrancy | ethereum |
+| Visor Finance | 2021-12-21 | $8.2M | Reentrancy | ethereum |
+| XSURGE | 2021-08-17 | $5.0M | Flashloan Attack + Reentrancy | bsc |
+| DeltaPrime | 2024-11-11 | $4.8M | Reentrancy | arbitrum |
+| DFXFinance | 2022-11-10 | $4.0M | Reentrancy | ethereum |
+| dForce | 2023-02-10 | $3.6M | Read-Only-Reentrancy | arbitrum |
+| Conic Finance | 2023-07-21 | $3.2M | Read-Only-Reentrancy && MisConfiguration | ethereum |
+| NFTTrader | 2023-12-16 | $3.0M | Reentrancy | ethereum |
+| StarsArena | 2023-10-07 | $3.0M | Reentrancy | avalanche |
+| Orion Protocol | 2023-02-03 | $3.0M | Reentrancy | ethereum |
+| GoodDollar | 2023-12-16 | $2.0M | Lack of Input Validation & Reentrancy | ethereum |
+| Paraluni | 2022-03-13 | $1.7M | Flashloan & Reentrancy | bsc |
+| Hundred Finance | 2022-03-13 | $1.7M | ERC667 Reentrancy | gnosis |
+| Agave Finance | 2022-03-15 | $1.5M | ERC667 Reentrancy | gnosis |
+| Omni NFT | 2022-07-10 | $1.4M | Reentrancy | ethereum |
+| Bacon Protocol | 2022-03-05 | $1.0M | Reentrancy | ethereum |
+| Sentiment | 2023-04-05 | $1.0M | Read-Only-Reentrancy | arbitrum |
+| Sturdy Finance | 2023-06-12 | $800K | Read-Only-Reentrancy | ethereum |
+| MidasCapital | 2023-01-16 | $650K | Read-only Reentrancy | polygon |
+| CloberDEX | 2024-12-10 | $501K | Reentrancy | base |
+| PredyFinance | 2024-05-14 | $464K | Reentrancy | arbitrum |
+| Libertify | 2023-07-11 | $452K | Reentrancy | polygon |
+| ArcadiaFi | 2023-07-10 | $400K | Reentrancy | optimism |
+| SumerMoney | 2024-04-12 | $350K | Reentrancy | base |
+| EarningFram | 2023-08-09 | $286K | Reentrancy | ethereum |
+| UniSwapV1 | 2020-04-18 | $220K | ERC777 Reentrancy | ethereum |
+| Market | 2022-10-24 | $220K | Read-only Reentrancy | polygon |
+| NBLGAME | 2024-01-25 | $180K | Reentrancy | optimism |
+| Defrost | 2022-12-23 | $170K | Reentrancy | avalanche |
+| BarleyFinance | 2024-01-28 | $130K | Reentrancy | ethereum |
+| Paribus | 2023-04-11 | $100K | Reentrancy | arbitrum |
+| Bizness | 2024-12-27 | $16K | Reentrancy | base |
+| Penpiexyz_io | 2024-09-03 | $11K | Reentrancy and Reward Manipulation | None |
+| Unverified_35bc | 2025-02-22 | $7K | Reentrancy | bsc |
+| PeapodsFinance | 2024-01-29 | $1K | Reentrancy | ethereum |
+| Minterest | 2024-07-14 | $427 | Reentrancy | mantle |
+| SpankChain | 2018-10-07 | $155 | Reentrancy | ethereum |
+| StepHeroNFTs | 2025-02-21 | $138 | Reentrancy On Sell NFT | bsc |
+| XSDWETHpool | 2023-09-26 | $57 | Reentrancy | bsc |
+| Game | 2024-02-11 | $20 | Reentrancy && Business Logic Flaw | ethereum |
+| MRP | 2024-07-02 | $17 | Reentrancy | bsc |
+| JAY | 2022-12-29 | $15 | Insufficient validation + Reentrancy | ethereum |
+| RuggedArt | 2024-02-19 | $5 | reentrancy | ethereum |
+| EGGX | 2024-02-20 | $2 | reentrancy | ethereum |
+| uniclyNFT | 2023-09-16 | $1 | Reentrancy | ethereum |
+| ... | ... | ... | +6 more exploits | ... |
+
+### Top PoC References
+
+- **Rari Capital/Fei Protocol** (2022-04, $80.0M): `DeFiHackLabs/src/test/2022-04/Rari_exp.sol`
+- **Curve** (2023-07, $41.0M): `DeFiHackLabs/src/test/2023-07/Curve_exp01.sol`
+- **Grim Finance** (2021-12, $30.0M): `DeFiHackLabs/src/test/2021-12/Grim_exp.sol`
+- **LendfMe** (2020-04, $25.0M): `DeFiHackLabs/src/test/2020-04/LendfMe_exp.sol`
+- **Cream Finance** (2021-08, $18.0M): `DeFiHackLabs/src/test/2021-08/Cream_exp.sol`
+- **Revest Finance** (2022-03, $11.2M): `DeFiHackLabs/src/test/2022-03/Revest_exp.sol`
+- **Visor Finance** (2021-12, $8.2M): `DeFiHackLabs/src/test/2021-12/Visor_exp.sol`
+- **XSURGE** (2021-08, $5.0M): `DeFiHackLabs/src/test/2021-08/XSURGE_exp.sol`
+- **DeltaPrime** (2024-11, $4.8M): `DeFiHackLabs/src/test/2024-11/DeltaPrime_exp.sol`
+- **DFXFinance** (2022-11, $4.0M): `DeFiHackLabs/src/test/2022-11/DFX_exp.sol`

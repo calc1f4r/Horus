@@ -1,4 +1,3 @@
-````chatagent
 ---
 name: issue-writer
 description: 'Takes a validated vulnerability finding and produces a polished, submission-ready write-up compatible with both Sherlock and Cantina formats. Use after triage to convert raw findings into professional audit report entries or contest submissions.'

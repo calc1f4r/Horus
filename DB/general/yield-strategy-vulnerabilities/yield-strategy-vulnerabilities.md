@@ -2214,3 +2214,25 @@ function rebalance(uint256 minSafEthOut, uint256 minVotiumOut) external onlyOwne
 - [ERC20 Token Vulnerabilities](../tokens/)
 - [Access Control Issues](../general/access-control.md)
 - [Reentrancy Patterns](../general/reentrancy.md)
+
+---
+
+## DeFiHackLabs Real-World Exploits (1 incidents)
+
+**Category**: Yield Strategy | **Total Losses**: $10K | **Sub-variants**: 1
+
+### Sub-variant Breakdown
+
+#### Yield-Strategy/Generic (1 exploits, $10K)
+
+- **Thena** (2023-03, $10K, bsc) | PoC: `DeFiHackLabs/src/test/2023-03/Thena_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| Thena | 2023-03-28 | $10K | Yield Protocol Flaw | bsc |
+
+### Top PoC References
+
+- **Thena** (2023-03, $10K): `DeFiHackLabs/src/test/2023-03/Thena_exp.sol`

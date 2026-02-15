@@ -832,3 +832,38 @@ rg "emergency|withdraw|drain|sweep" --type sol
 - [Proxy Pattern Vulnerabilities](../proxy-vulnerabilities/PROXY_PATTERN_VULNERABILITIES.md)
 - [Flash Loan Attack Patterns](../flash-loan/flash-loan-attack-patterns.md)
 - [UUPS Proxy Vulnerabilities](../uups-proxy/UUPS_PROXY_VULNERABILITIES.md)
+
+---
+
+## DeFiHackLabs Real-World Exploits (6 incidents)
+
+**Category**: Rug Pull | **Total Losses**: $987K | **Sub-variants**: 1
+
+### Sub-variant Breakdown
+
+#### Rug-Pull/Generic (6 exploits, $987K)
+
+- **Roar** (2025-04, $777K, ethereum) | PoC: `DeFiHackLabs/src/test/2025-04/Roar_exp.sol`
+- **BUBAI** (2024-10, $131K, ethereum) | PoC: `DeFiHackLabs/src/test/2024-10/BUBAI_exp.sol`
+- **IRYSAI** (2025-05, $70K, bsc) | PoC: `DeFiHackLabs/src/test/2025-05/IRYSAI_exp.sol`
+- *... and 3 more exploits*
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| Roar | 2025-04-16 | $777K | Rug Pull | ethereum |
+| BUBAI | 2024-10-29 | $131K | Rug pull | ethereum |
+| IRYSAI | 2025-05-20 | $70K | rug pull | bsc |
+| VRug | 2024-11-07 | $8K | Rug pull | ethereum |
+| YziAI | 2025-03-27 | $376 | Rug Pull | bsc |
+| NOVAToken | 2022-12-09 | $330 | Malicious Unlimted Minting (Rugged) | bsc |
+
+### Top PoC References
+
+- **Roar** (2025-04, $777K): `DeFiHackLabs/src/test/2025-04/Roar_exp.sol`
+- **BUBAI** (2024-10, $131K): `DeFiHackLabs/src/test/2024-10/BUBAI_exp.sol`
+- **IRYSAI** (2025-05, $70K): `DeFiHackLabs/src/test/2025-05/IRYSAI_exp.sol`
+- **VRug** (2024-11, $8K): `DeFiHackLabs/src/test/2024-11/VRug_exp.sol`
+- **YziAI** (2025-03, $376): `DeFiHackLabs/src/test/2025-03/YziAIToken_exp.sol`
+- **NOVAToken** (2022-12, $330): `DeFiHackLabs/src/test/2022-12/NovaExchange_exp.sol`

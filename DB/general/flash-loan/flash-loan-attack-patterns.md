@@ -1003,3 +1003,82 @@ contract SecureAirdrop {
 - [Euler Finance Post-Mortem](https://www.euler.finance/blog/euler-post-mortem)
 - [Beanstalk Post-Mortem](https://bean.money/blog/beanstalk-post-mortem)
 - [Rari Capital Incident Analysis](https://twitter.com/RariCapital/status/1520460009069178880)
+
+---
+
+## DeFiHackLabs Real-World Exploits (37 incidents)
+
+**Category**: Flash Loan | **Total Losses**: $513.7M | **Sub-variants**: 3
+
+### Sub-variant Breakdown
+
+#### Flash-Loan/Standalone (34 exploits, $513.6M)
+
+- **BeanstalkFarms** (2022-04, $182.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2022-04/Beanstalk_exp.sol`
+- **NewFreeDAO** (2022-09, $125.0M, bsc) | PoC: `DeFiHackLabs/src/test/2022-09/NewFreeDAO_exp.sol`
+- **Rari Capital/Fei Protocol** (2022-04, $80.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2022-04/Rari_exp.sol`
+- *... and 31 more exploits*
+
+#### Flash-Loan/Flash Mint (1 exploits, $29K)
+
+- **Vista** (2024-10, $29K, bsc) | PoC: `DeFiHackLabs/src/test/2024-10/VISTA_exp.sol`
+
+#### Flash-Loan/Callback Validation (2 exploits, $4K)
+
+- **AnnexFinance** (2022-11, $3K, bsc) | PoC: `DeFiHackLabs/src/test/2022-11/Annex_exp.sol`
+- **EFLeverVault** (2022-10, $750, ethereum) | PoC: `DeFiHackLabs/src/test/2022-10/EFLeverVault_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| BeanstalkFarms | 2022-04-16 | $182.0M | DAO + Flashloan | ethereum |
+| NewFreeDAO | 2022-09-08 | $125.0M | Flashloans Attack | bsc |
+| Rari Capital/Fei Protocol | 2022-04-30 | $80.0M | Flashloan Attack + Reentrancy | ethereum |
+| Harvest Finance | 2020-10-26 | $33.8M | Flashloan Attack | ethereum |
+| Grim Finance | 2021-12-18 | $30.0M | Flashloan & Reentrancy | fantom |
+| Cream Finance | 2021-08-30 | $18.0M | Flashloan Attack + Reentrancy | ethereum |
+| DEUS DAO | 2022-04-28 | $13.0M | Flashloan & Price Oracle Manipulation | fantom |
+| ElephantMoney | 2022-04-12 | $11.2M | Flashloan & Price Oracle Manipulation | bsc |
+| PolterFinance | 2024-11-19 | $7.0M | FlashLoan Attack | fantom |
+| XSURGE | 2021-08-17 | $5.0M | Flashloan Attack + Reentrancy | bsc |
+| Paraluni | 2022-03-13 | $1.7M | Flashloan & Reentrancy | bsc |
+| JulSwap | 2021-05-27 | $1.5M | Flash Loan | bsc |
+| OneRing Finance | 2022-03-21 | $1.4M | Flashloan & Price Oracle Manipulation | fantom |
+| ApeCoin (APE) | 2022-05-17 | $1.1M | Flashloan | ethereum |
+| CompoundFork | 2024-10-26 | $1.0M | Flashloan attack | base |
+| DODO | 2021-03-08 | $700K | Flashloan Attack | ethereum |
+| Ploutoz | 2021-11-23 | $365K | Flash Loan | bsc |
+| DDCoin | 2023-06-01 | $300K | Flashloan attack and smart contract vulnerability | bsc |
+| OverNight | 2022-12-02 | $170K | FlashLoan Attack | None |
+| MooCAKECTX | 2022-11-07 | $140K | FlashLoan Attack | bsc |
+| ZoomproFinance | 2022-09-05 | $61K | Flashloans & Price Manipulation | bsc |
+| BXH | 2022-09-28 | $40K | Flashloan & Price Oracle Manipulation | bsc |
+| EGD Finance | 2022-08-07 | $36K | Flashloans & Price Manipulation | bsc |
+| Vista | 2024-10-22 | $29K | flashmint receive error | bsc |
+| SpaceGodzilla | 2022-07-13 | $25K | Flashloans & Price Manipulation | bsc |
+| UEarnPool | 2022-11-17 | $24K | FlashLoan Attack | bsc |
+| APC | 2022-12-01 | $6K | FlashLoan & price manipulation | bsc |
+| AnnexFinance | 2022-11-19 | $3K | Verify flashLoan Callback | bsc |
+| ParaSpace NFT | 2023-03-17 | $3K | Flashloan + scaledBalanceOf Manipulation | ethereum |
+| DFS | 2022-12-30 | $1K | Insufficient validation + flashloan | bsc |
+| GYMNetwork | 2022-04-09 | $1K | Flashloan + token migrate flaw | bsc |
+| EFLeverVault | 2022-10-14 | $750 | Verify flashLoan Callback | ethereum |
+| NOVO Protocol | 2022-05-29 | $279 | Flashloan & Price Oracle Manipulation | bsc |
+| Wiener DOGE | 2022-04-24 | $78 | Flashloan | bsc |
+| InverseFinance | 2022-06-16 | $53 | Flashloan & Price Oracle Manipulation | ethereum |
+| Discover | 2022-06-06 | $49 | Flashloan & Price Oracle Manipulation | bsc |
+| OMPx Contract | 2024-08-16 | $4 | FlashLoan | ethereum |
+
+### Top PoC References
+
+- **BeanstalkFarms** (2022-04, $182.0M): `DeFiHackLabs/src/test/2022-04/Beanstalk_exp.sol`
+- **NewFreeDAO** (2022-09, $125.0M): `DeFiHackLabs/src/test/2022-09/NewFreeDAO_exp.sol`
+- **Rari Capital/Fei Protocol** (2022-04, $80.0M): `DeFiHackLabs/src/test/2022-04/Rari_exp.sol`
+- **Harvest Finance** (2020-10, $33.8M): `DeFiHackLabs/src/test/2020-10/HarvestFinance_exp.sol`
+- **Grim Finance** (2021-12, $30.0M): `DeFiHackLabs/src/test/2021-12/Grim_exp.sol`
+- **Cream Finance** (2021-08, $18.0M): `DeFiHackLabs/src/test/2021-08/Cream_exp.sol`
+- **DEUS DAO** (2022-04, $13.0M): `DeFiHackLabs/src/test/2022-04/deus_exp.sol`
+- **ElephantMoney** (2022-04, $11.2M): `DeFiHackLabs/src/test/2022-04/Elephant_Money_exp.sol`
+- **PolterFinance** (2024-11, $7.0M): `DeFiHackLabs/src/test/2024-11/PolterFinance_exploit.sol`
+- **XSURGE** (2021-08, $5.0M): `DeFiHackLabs/src/test/2021-08/XSURGE_exp.sol`

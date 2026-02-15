@@ -475,3 +475,49 @@ rules:
 **Parameter Terms**: deadline, block.timestamp, minOut, maxIn, minShares
 **Operation Terms**: swap, liquidity, leverage, withdrawal, deposit, redeem
 **Impact Terms**: fund loss, value extraction, unfavorable price
+
+---
+
+## DeFiHackLabs Real-World Exploits (13 incidents)
+
+**Category**: Slippage Protection | **Total Losses**: $8555.4M | **Sub-variants**: 1
+
+### Sub-variant Breakdown
+
+#### Slippage-Protection/Missing Slippage (13 exploits, $8555.4M)
+
+- **FireBirdPair** (2023-09, $8536.0M, polygon) | PoC: `DeFiHackLabs/src/test/2023-09/FireBirdPair_exp.sol`
+- **Yearn YDai** (2021-02, $11.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2021-02/Yearn_ydai_exp.sol`
+- **BabyDogeCoin** (2023-05, $7.5M, bsc) | PoC: `DeFiHackLabs/src/test/2023-05/BabyDogeCoin_exp.sol`
+- *... and 10 more exploits*
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| FireBirdPair | 2023-09-30 | $8536.0M | Lack Slippage Protection | polygon |
+| Yearn YDai | 2021-02-04 | $11.0M | Slippage proection absent | ethereum |
+| BabyDogeCoin | 2023-05-29 | $7.5M | Lack Slippage Protection | bsc |
+| DCFToken | 2025-03-18 | $442K | Lack of Slippage Protection | bsc |
+| TheStandard_io | 2023-11-06 | $290K | Lack of slippage protection | arbitrum |
+| BabyDogeCoin02 | 2023-06-21 | $100K | Lack Slippage Protection | bsc |
+| CurveBurner | 2023-08-02 | $36K | Lack Slippage Protection | ethereum |
+| NewFi | 2023-07-17 | $31K | Lack Slippage Protection | bsc |
+| YVToken | 2025-04-16 | $15K | Not Slippage Protection | bsc |
+| Pump | 2025-03-04 | $6K | Not Slippage Protection | bsc |
+| grok | 2023-11-10 | $26 | Lack of slippage protection | ethereum |
+| LaEeb | 2023-10-30 | $2 | Lack Slippage Protection | bsc |
+| EHX | 2023-11-15 | N/A | Lack of Slippage Control | bsc |
+
+### Top PoC References
+
+- **FireBirdPair** (2023-09, $8536.0M): `DeFiHackLabs/src/test/2023-09/FireBirdPair_exp.sol`
+- **Yearn YDai** (2021-02, $11.0M): `DeFiHackLabs/src/test/2021-02/Yearn_ydai_exp.sol`
+- **BabyDogeCoin** (2023-05, $7.5M): `DeFiHackLabs/src/test/2023-05/BabyDogeCoin_exp.sol`
+- **DCFToken** (2025-03, $442K): `DeFiHackLabs/src/test/2025-03/DCFToken_exp.sol`
+- **TheStandard_io** (2023-11, $290K): `DeFiHackLabs/src/test/2023-11/TheStandard_io_exp.sol`
+- **BabyDogeCoin02** (2023-06, $100K): `DeFiHackLabs/src/test/2023-06/BabyDogeCoin02_exp.sol`
+- **CurveBurner** (2023-08, $36K): `DeFiHackLabs/src/test/2023-08/CurveBurner_exp.sol`
+- **NewFi** (2023-07, $31K): `DeFiHackLabs/src/test/2023-07/NewFi_exp.sol`
+- **YVToken** (2025-04, $15K): `DeFiHackLabs/src/test/2025-04/YBToken_exp.sol`
+- **Pump** (2025-03, $6K): `DeFiHackLabs/src/test/2025-03/Pump_exp.sol`

@@ -493,3 +493,34 @@ rules:
 ## Keywords for Search
 
 `randomness`, `random number`, `block.timestamp`, `blockhash`, `block.number`, `block.difficulty`, `prevrandao`, `keccak256`, `lottery`, `gambling`, `commit reveal`, `VRF`, `Chainlink VRF`, `predictable`, `NFT rarity`, `gaming`, `raffle`
+
+---
+
+## DeFiHackLabs Real-World Exploits (4 incidents)
+
+**Category**: Randomness | **Total Losses**: $34K | **Sub-variants**: 1
+
+### Sub-variant Breakdown
+
+#### Randomness/Weak Rng (4 exploits, $34K)
+
+- **H2O** (2025-03, $22K, bsc) | PoC: `DeFiHackLabs/src/test/2025-03/H2O_exp.sol`
+- **RedKeysCoin** (2024-05, $12K, bsc) | PoC: `DeFiHackLabs/src/test/2024-05/RedKeysCoin_exp.sol`
+- **RFB** (2022-12, $12, bsc) | PoC: `DeFiHackLabs/src/test/2022-12/RFB_exp.sol`
+- *... and 1 more exploits*
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| H2O | 2025-03-14 | $22K | Weak Random Mint | bsc |
+| RedKeysCoin | 2024-05-27 | $12K | Weak RNG | bsc |
+| RFB | 2022-12-05 | $12 | Predicting Random Numbers | bsc |
+| LuckyTiger NFT | 2022-08-24 | N/A | Predicting Random Numbers | ethereum |
+
+### Top PoC References
+
+- **H2O** (2025-03, $22K): `DeFiHackLabs/src/test/2025-03/H2O_exp.sol`
+- **RedKeysCoin** (2024-05, $12K): `DeFiHackLabs/src/test/2024-05/RedKeysCoin_exp.sol`
+- **RFB** (2022-12, $12): `DeFiHackLabs/src/test/2022-12/RFB_exp.sol`
+- **LuckyTiger NFT** (2022-08, N/A): `DeFiHackLabs/src/test/2022-08/LuckyTiger_exp.sol`

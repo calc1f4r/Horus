@@ -441,3 +441,43 @@ rules:
 ## Keywords for Search
 
 `signature verification`, `ecrecover`, `ECDSA`, `EIP712`, `permit`, `signature replay`, `signature malleability`, `nonce`, `domain separator`, `chain id`, `tryRecover`, `invalid signer`, `signature bypass`, `authorization bypass`, `cryptographic signature`, `off-chain signature`
+
+---
+
+## DeFiHackLabs Real-World Exploits (5 incidents)
+
+**Category**: Signature | **Total Losses**: $146K | **Sub-variants**: 3
+
+### Sub-variant Breakdown
+
+#### Signature/Invalid Verification (3 exploits, $119K)
+
+- **AzukiDAO** (2023-07, $69K, ethereum) | PoC: `DeFiHackLabs/src/test/2023-07/AzukiDAO_exp.sol`
+- **ODOS** (2025-01, $50K, base) | PoC: `DeFiHackLabs/src/test/2025-01/ODOS_exp.sol`
+- **BEGO** (2022-10, $12, bsc) | PoC: `DeFiHackLabs/src/test/2022-10/BEGO_exp.sol`
+
+#### Signature/Malleability (1 exploits, $18K)
+
+- **TCH** (2024-05, $18K, bsc) | PoC: `DeFiHackLabs/src/test/2024-05/TCH_exp.sol`
+
+#### Signature/Replay (1 exploits, $9K)
+
+- **MintoFinance** (2023-07, $9K, bsc) | PoC: `DeFiHackLabs/src/test/2023-07/MintoFinance_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| AzukiDAO | 2023-07-03 | $69K | Invalid signature verification | ethereum |
+| ODOS | 2025-01-23 | $50K | invalid-signature-verification | base |
+| TCH | 2024-05-16 | $18K | Signature Malleability Vulnerability | bsc |
+| MintoFinance | 2023-07-23 | $9K | Signature Replay | bsc |
+| BEGO | 2022-10-20 | $12 | Incorrect signature verification | bsc |
+
+### Top PoC References
+
+- **AzukiDAO** (2023-07, $69K): `DeFiHackLabs/src/test/2023-07/AzukiDAO_exp.sol`
+- **ODOS** (2025-01, $50K): `DeFiHackLabs/src/test/2025-01/ODOS_exp.sol`
+- **TCH** (2024-05, $18K): `DeFiHackLabs/src/test/2024-05/TCH_exp.sol`
+- **MintoFinance** (2023-07, $9K): `DeFiHackLabs/src/test/2023-07/MintoFinance_exp.sol`
+- **BEGO** (2022-10, $12): `DeFiHackLabs/src/test/2022-10/BEGO_exp.sol`

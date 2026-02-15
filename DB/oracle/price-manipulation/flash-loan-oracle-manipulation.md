@@ -782,3 +782,137 @@ rules:
 - [DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md](../../tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md)
 - [DB/general/flash-loan-attacks/FLASH_LOAN_VULNERABILITIES.md](../../general/flash-loan-attacks/FLASH_LOAN_VULNERABILITIES.md)
 - [DB/amm/concentrated-liquidity/price-oracle-manipulation.md](../../amm/concentrated-liquidity/price-oracle-manipulation.md)
+
+---
+
+## DeFiHackLabs Real-World Exploits (122 incidents)
+
+**Category**: Price Manipulation, Oracle Issues | **Total Losses**: $440.5M | **Sub-variants**: 11
+
+### Sub-variant Breakdown
+
+#### Price-Manipulation/Generic (92 exploits, $317.5M)
+
+- **CreamFinance** (2021-10, $130.0M, None) | PoC: `DeFiHackLabs/src/test/2021-10/Cream_2_exp.sol`
+- **GMX** (2025-07, $41.0M, None) | PoC: `DeFiHackLabs/src/test/2025-07/gmx_exp.sol`
+- **MonoX Finance** (2021-11, $31.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2021-11/Mono_exp.sol`
+- *... and 89 more exploits*
+
+#### Price-Manipulation/Oracle Manipulation (13 exploits, $117.8M)
+
+- **BonqDAO** (2023-02, $88.0M, polygon) | PoC: `DeFiHackLabs/src/test/2023-02/BonqDAO_exp.sol`
+- **DEUS DAO** (2022-04, $13.0M, fantom) | PoC: `DeFiHackLabs/src/test/2022-04/deus_exp.sol`
+- **ElephantMoney** (2022-04, $11.2M, bsc) | PoC: `DeFiHackLabs/src/test/2022-04/Elephant_Money_exp.sol`
+- *... and 10 more exploits*
+
+#### Price-Manipulation/Twap Oracle (1 exploits, $888K)
+
+- **RodeoFinance** (2023-07, $888K, arbitrum) | PoC: `DeFiHackLabs/src/test/2023-07/RodeoFinance_exp.sol`
+
+#### Price-Manipulation/Pair Balance (5 exploits, $1.2M)
+
+- **YYDS** (2022-09, $742K, bsc) | PoC: `DeFiHackLabs/src/test/2022-09/Yyds_exp.sol`
+- **RES** (2022-10, $291K, bsc) | PoC: `DeFiHackLabs/src/test/2022-10/RES_exp.sol`
+- **RADT** (2022-09, $94K, bsc) | PoC: `DeFiHackLabs/src/test/2022-09/RADT_exp.sol`
+- *... and 2 more exploits*
+
+#### Price-Manipulation/Flash Loan Price (2 exploits, $300K)
+
+- **ImpermaxV3** (2025-04, $300K, base) | PoC: `DeFiHackLabs/src/test/2025-04/ImpermaxV3_exp.sol`
+- **NXUSD** (2022-09, N/A, avalanche) | PoC: `DeFiHackLabs/src/test/2022-09/NXUSD_exp.sol`
+
+#### Price-Manipulation/Pool Manipulation (2 exploits, $78K)
+
+- **KubSplit** (2023-09, $78K, bsc) | PoC: `DeFiHackLabs/src/test/2023-09/Kub_Split_exp.sol`
+- **pSeudoEth** (2023-10, $1, ethereum) | PoC: `DeFiHackLabs/src/test/2023-10/pSeudoEth_exp.sol`
+
+#### Oracle-Issues/Faulty Oracle (3 exploits, $1.5M)
+
+- **Moonwell** (2025-11, $1.0M, base) | PoC: `DeFiHackLabs/src/test/2025-11/Moonwell_exp.sol`
+- **CompoundUni** (2024-02, $440K, ethereum) | PoC: `DeFiHackLabs/src/test/2024-02/CompoundUni_exp.sol`
+- **Paribus** (2025-01, $86K, arbitrum) | PoC: `DeFiHackLabs/src/test/2025-01/Paribus_exp.sol`
+
+#### Oracle-Issues/Health Factor Check (1 exploits, $464K)
+
+- **WiseLending** (2024-01, $464K, ethereum) | PoC: `DeFiHackLabs/src/test/2024-01/WiseLending03_exp.sol`
+
+#### Oracle-Issues/Price Dependency (1 exploits, $447K)
+
+- **vETH** (2024-11, $447K, ethereum) | PoC: `DeFiHackLabs/src/test/2024-11/vETH_exp.sol`
+
+#### Oracle-Issues/Overpriced Asset (1 exploits, $230K)
+
+- **MorphoBlue** (2024-10, $230K, None) | PoC: `DeFiHackLabs/src/test/2024-10/MorphoBlue_exp.sol`
+
+#### Oracle-Issues/Stale Price (1 exploits, $21K)
+
+- **Zenterest** (2024-08, $21K, ethereum) | PoC: `DeFiHackLabs/src/test/2024-08/Zenterest_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| CreamFinance | 2021-10-27 | $130.0M | Price Manipulation | None |
+| BonqDAO | 2023-02-02 | $88.0M | Price Oracle Manipulation | polygon |
+| GMX | 2025-07-09 | $41.0M | Share price manipulation | None |
+| MonoX Finance | 2021-11-30 | $31.0M | Price Manipulation | ethereum |
+| CompounderFinance | 2023-06-07 | $27.2M | Manipulation of funds through fluctuations in the amount of exchangeable assets | ethereum |
+| UwULend | 2024-06-10 | $19.3M | Price Manipulation | ethereum |
+| Indexed Finance | 2021-10-15 | $16.0M | Price Manipulation | ethereum |
+| DEUS DAO | 2022-04-28 | $13.0M | Flashloan & Price Oracle Manipulation | fantom |
+| ElephantMoney | 2022-04-12 | $11.2M | Flashloan & Price Oracle Manipulation | bsc |
+| ResupplyFi | 2025-06-26 | $9.6M | Share price manipulation | ethereum |
+| Jimbo | 2023-05-29 | $8.0M | Protocol Specific Price Manipulation | None |
+| Woofi | 2024-03-05 | $8.0M | Price Manipulation | arbitrum |
+| Gamma | 2024-01-04 | $6.3M | Price manipulation | arbitrum |
+| Lodestar | 2022-12-11 | $4.0M | FlashLoan price manipulation | arbitrum |
+| Fortress Loans | 2022-05-08 | $3.0M | Malicious Proposal & Price Oracle Manipulation | None |
+| MBUToken | 2025-05-11 | $2.2M | Price Manipulation not confirmed | bsc |
+| ZunamiProtocol | 2023-08-14 | $2.0M | Price Manipulation | ethereum |
+| 0vix | 2023-04-28 | $2.0M | FlashLoan Price Manipulation | polygon |
+| NGP | 2025-09-18 | $2.0M | Price Manipulation | bsc |
+| OneRing Finance | 2022-03-21 | $1.4M | Flashloan & Price Oracle Manipulation | fantom |
+| Caterpillar_Coin_CUT | 2024-09-10 | $1.4M | Price Manipulation | None |
+| BH | 2023-10-11 | $1.3M | Price manipulation | bsc |
+| Rikkei Finance | 2022-04-15 | $1.1M | Access control & Price Oracle Manipulation | bsc |
+| Moonwell | 2025-11-04 | $1.0M | Faulty Oracle | base |
+| Conic Finance 02 | 2023-07-22 | $934K | Price Manipulation | ethereum |
+| RodeoFinance | 2023-07-11 | $888K | TWAP Oracle Manipulation | arbitrum |
+| YYDS | 2022-09-08 | $742K | pair manipulate | bsc |
+| SASHAToken | 2024-10-06 | $600K | Price Manipulation | ethereum |
+| Allbridge | 2023-04-02 | $550K | FlashLoan price manipulation | bsc |
+| WiseLending | 2024-01-12 | $464K | Bad HealthFactor Check | ethereum |
+| vETH | 2024-11-14 | $447K | Vulnerable Price Dependency | ethereum |
+| CompoundUni | 2024-02-23 | $440K | Oracle bad price | ethereum |
+| SVT | 2023-08-26 | $400K | flawed price calculation | bsc |
+| Themis | 2023-06-28 | $370K | Manipulation of prices using Flashloan | arbitrum |
+| P719Token | 2024-10-11 | $312K | Price Manipulation Inflate Attack | bsc |
+| ImpermaxV3 | 2025-04-26 | $300K | FlashLoan Price Oracle Manipulation | base |
+| RES | 2022-10-06 | $291K | Token - pair manipulate | bsc |
+| MorphoBlue | 2024-10-13 | $230K | Overpriced Asset in Oracle | None |
+| ZongZi | 2024-03-25 | $223K | Price Manipulation | bsc |
+| SellToken02 | 2023-05-13 | $197K | Price Manipulation | bsc |
+| BelugaDex | 2023-10-13 | $175K | Price manipulation | arbitrum |
+| ElephantStatus | 2023-12-06 | $165K | Price Manipulation | bsc |
+| Circle | 2022-08-16 | $152K | Price Manipulation | ethereum |
+| Carson | 2023-07-26 | $150K | Price manipulation | bsc |
+| Z123 | 2024-04-22 | $135K | price manipulation | bsc |
+| LavaLending | 2024-10-02 | $130K | Price Manipulation | arbitrum |
+| ATK | 2022-10-12 | $127K | FlashLoan manipulate price | bsc |
+| ERC20TokenBank | 2023-05-31 | $111K | Price Manipulation | ethereum |
+| Nalakuvara_LotteryTicket50 | 2025-05-09 | $105K | Price Manipulation | base |
+| DRLVaultV3 | 2025-11-10 | $100K | Price Manipulation | ethereum |
+| ... | ... | ... | +72 more exploits | ... |
+
+### Top PoC References
+
+- **CreamFinance** (2021-10, $130.0M): `DeFiHackLabs/src/test/2021-10/Cream_2_exp.sol`
+- **BonqDAO** (2023-02, $88.0M): `DeFiHackLabs/src/test/2023-02/BonqDAO_exp.sol`
+- **GMX** (2025-07, $41.0M): `DeFiHackLabs/src/test/2025-07/gmx_exp.sol`
+- **MonoX Finance** (2021-11, $31.0M): `DeFiHackLabs/src/test/2021-11/Mono_exp.sol`
+- **CompounderFinance** (2023-06, $27.2M): `DeFiHackLabs/src/test/2023-06/CompounderFinance_exp.sol`
+- **UwULend** (2024-06, $19.3M): `DeFiHackLabs/src/test/2024-06/UwuLend_First_exp.sol`
+- **Indexed Finance** (2021-10, $16.0M): `DeFiHackLabs/src/test/2021-10/IndexedFinance_exp.sol`
+- **DEUS DAO** (2022-04, $13.0M): `DeFiHackLabs/src/test/2022-04/deus_exp.sol`
+- **ElephantMoney** (2022-04, $11.2M): `DeFiHackLabs/src/test/2022-04/Elephant_Money_exp.sol`
+- **ResupplyFi** (2025-06, $9.6M): `DeFiHackLabs/src/test/2025-06/ResupplyFi_exp.sol`

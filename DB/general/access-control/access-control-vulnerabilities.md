@@ -733,3 +733,119 @@ access control, authorization, permission, onlyOwner, onlyAdmin, onlyRole, Acces
 - [SWC-105: Unprotected Ether Withdrawal](https://swcregistry.io/docs/SWC-105)
 - [SWC-106: Unprotected SELFDESTRUCT](https://swcregistry.io/docs/SWC-106)
 - DeFiHackLabs Repository: https://github.com/SunWeb3Sec/DeFiHackLabs
+
+---
+
+## DeFiHackLabs Real-World Exploits (97 incidents)
+
+**Category**: Access Control | **Total Losses**: $100000055.5M | **Sub-variants**: 8
+
+### Sub-variant Breakdown
+
+#### Access-Control/Ownership Transfer (1 exploits, $100000000.0M)
+
+- **Xave Finance** (2022-10, $100000000.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2022-10/XaveFinance_exp.sol`
+
+#### Access-Control/Missing Access (86 exploits, $53.0M)
+
+- **Corkprotocol** (2025-05, $12.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2025-05/Corkprotocol_exp.sol`
+- **SafeMoon Hack** (2023-03, $8.9M, bsc) | PoC: `DeFiHackLabs/src/test/2023-03/safeMoon_exp.sol`
+- **VeloCore** (2024-06, $6.9M, linea) | PoC: `DeFiHackLabs/src/test/2024-06/Velocore_exp.sol`
+- *... and 83 more exploits*
+
+#### Access-Control/Missing Permission (1 exploits, $1.4M)
+
+- **Bazaar** (2024-06, $1.4M, blast) | PoC: `DeFiHackLabs/src/test/2024-06/Bazaar_exp.sol`
+
+#### Access-Control/Approval Logic (2 exploits, $820K)
+
+- **MetaPoint** (2023-04, $820K, bsc) | PoC: `DeFiHackLabs/src/test/2023-04/MetaPoint_exp.sol`
+- **Redacted Cartel** (2022-03, N/A, ethereum) | PoC: `DeFiHackLabs/src/test/2022-03/RedactedCartel_exp.sol`
+
+#### Access-Control/Sender Verification (1 exploits, $155K)
+
+- **TrustPad** (2023-11, $155K, bsc) | PoC: `DeFiHackLabs/src/test/2023-11/TrustPad_exp.sol`
+
+#### Access-Control/Unprotected Function (4 exploits, $39K)
+
+- **98Token** (2025-01, $28K, bsc) | PoC: `DeFiHackLabs/src/test/2025-01/98Token_exp.sol`
+- **ALP** (2024-03, $10K, bsc) | PoC: `DeFiHackLabs/src/test/2024-03/ALP_exp.sol`
+- **wKeyDAO** (2025-03, $767, bsc) | PoC: `DeFiHackLabs/src/test/2025-03/wKeyDAO_exp.sol`
+- *... and 1 more exploits*
+
+#### Access-Control/Parameter Access (1 exploits, N/A)
+
+- **BabySwap** (2022-10, N/A, bsc) | PoC: `DeFiHackLabs/src/test/2022-10/BabySwap_exp.sol`
+
+#### Access-Control/Unauthorized Transfer (1 exploits, N/A)
+
+- **LQDX** (2024-01, N/A, ethereum) | PoC: `DeFiHackLabs/src/test/2024-01/LQDX_alert_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| Xave Finance | 2022-10-09 | $100000000.0M | Malicious Proposal Mint & Transfer Ownership | ethereum |
+| Corkprotocol | 2025-05-28 | $12.0M | Access Control | ethereum |
+| SafeMoon Hack | 2023-03-28 | $8.9M | Access Control | bsc |
+| VeloCore | 2024-06-01 | $6.9M | lack-of-access-control | linea |
+| Shezmu | 2024-09-20 | $4.9M | Access Control | ethereum |
+| DAO Maker | 2021-09-03 | $4.0M | Bad Access Controal | ethereum |
+| Templedao | 2022-10-11 | $2.3M | Insufficient access control | ethereum |
+| GYMNetwork | 2022-06-08 | $2.1M | Accesscontrol | bsc |
+| MEVbot | 2023-11-07 | $2.0M | Lack of access control | ethereum |
+| Unverified_b5cb | 2025-06-25 | $2.0M | Access Control | bsc |
+| Bazaar | 2024-06-10 | $1.4M | Insufficient Permission Check | blast |
+| Rikkei Finance | 2022-04-15 | $1.1M | Access control & Price Oracle Manipulation | bsc |
+| swapX | 2023-02-27 | $1.0M | Access Control | bsc |
+| MetaPoint | 2023-04-12 | $820K | Unrestricted Approval | bsc |
+| SuperRare | 2025-07-28 | $730K | Access Control | ethereum |
+| LeetSwap | 2023-08-01 | $630K | Access Control | base |
+| PLN | 2024-09-05 | $400K | Access control | ethereum |
+| MEVBot_0x8c2d | 2023-11-12 | $365K | Lack of Access Control | bsc |
+| GFOX | 2024-05-10 | $330K | lack of access control | ethereum |
+| LaunchZone | 2023-02-27 | $320K | Access Control | bsc |
+| DAO_SoulMate | 2024-01-22 | $319K | Incorrect Access Control | None |
+| Unverified | 2025-07-05 | $286K | Access Control | ethereum |
+| ULME | 2022-10-25 | $250K | Access Control | bsc |
+| FILX DN404 | 2024-02-10 | $200K | Access Control | None |
+| NGFS | 2024-04-25 | $190K | Bad Access Control | bsc |
+| CIVNFT | 2023-07-08 | $180K | Lack of access control | ethereum |
+| MetaDragon | 2024-05-29 | $180K | Lack of Access Control | bsc |
+| Civfund | 2023-07-08 | $165K | Lack of access control | ethereum |
+| TrustPad | 2023-11-06 | $155K | Lack of msg.sender address verification | bsc |
+| MEVBot_0xa247 | 2023-11-12 | $150K | Incorrect Access Control | ethereum |
+| MevBot private tx | 2022-09-13 | $140K | Incorrect access control | bsc |
+| Phoenix | 2023-03-07 | $100K | Access Control & Arbitrary External Call | polygon |
+| Melo | 2023-05-06 | $90K | Access Control | bsc |
+| RICE | 2025-05-24 | $88K | Lack of Access Control | base |
+| MainnetSettler | 2024-11-20 | $66K | Access Control | ethereum |
+| Unverified 0x6077 | 2025-04-11 | $62K | Lack of Access Control | base |
+| CoW | 2024-11-07 | $59K | Access Control | ethereum |
+| GAX | 2024-07-11 | $50K | Lack of access control | bsc |
+| Unverified_8490 | 2025-06-10 | $48K | Access Control | bsc |
+| 0x8d2e | 2025-08-20 | $40K | Access Control | base |
+| DEPUSDT_LEVUSDC | 2023-06-15 | $36K | Incorrect access control | ethereum |
+| Ak1111 | 2024-11-23 | $32K | Access Control | bsc |
+| CEXISWAP | 2023-09-21 | $30K | Incorrect Access Control | ethereum |
+| FPR | 2022-12-14 | $29K | Access Control | bsc |
+| 98Token | 2025-01-04 | $28K | Unprotected public function | bsc |
+| Uerii Token | 2022-10-17 | $25K | Access Control | ethereum |
+| MetaPool | 2025-06-17 | $25K | Access Control | ethereum |
+| Paraswap | 2024-03-20 | $24K | Incorrect Access Control | ethereum |
+| USDTStakingContract28 | 2023-07-15 | $21K | Lack of access control | ethereum |
+| SizeCredit | 2025-08-15 | $20K | Access Control | ethereum |
+| ... | ... | ... | +47 more exploits | ... |
+
+### Top PoC References
+
+- **Xave Finance** (2022-10, $100000000.0M): `DeFiHackLabs/src/test/2022-10/XaveFinance_exp.sol`
+- **Corkprotocol** (2025-05, $12.0M): `DeFiHackLabs/src/test/2025-05/Corkprotocol_exp.sol`
+- **SafeMoon Hack** (2023-03, $8.9M): `DeFiHackLabs/src/test/2023-03/safeMoon_exp.sol`
+- **VeloCore** (2024-06, $6.9M): `DeFiHackLabs/src/test/2024-06/Velocore_exp.sol`
+- **Shezmu** (2024-09, $4.9M): `DeFiHackLabs/src/test/2024-09/Shezmu_exp.sol`
+- **DAO Maker** (2021-09, $4.0M): `DeFiHackLabs/src/test/2021-09/DaoMaker_exp.sol`
+- **Templedao** (2022-10, $2.3M): `DeFiHackLabs/src/test/2022-10/Templedao_exp.sol`
+- **GYMNetwork** (2022-06, $2.1M): `DeFiHackLabs/src/test/2022-06/Gym_2_exp.sol`
+- **MEVbot** (2023-11, $2.0M): `DeFiHackLabs/src/test/2023-11/bot_exp.sol`
+- **Unverified_b5cb** (2025-06, $2.0M): `DeFiHackLabs/src/test/2025-06/unverified_b5cb_exp.sol`

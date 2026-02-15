@@ -2593,3 +2593,27 @@ pub struct WithdrawV2<'info> {
 - [Oracle Price Manipulation](../../oracle/chainlink/CHAINLINK_VULNERABILITIES.md) - Price feed attacks
 - [Flash Loan Attacks](../../economic/FLASH_LOAN_ATTACKS.md) - Enabling mechanism for many AMM attacks
 
+---
+
+## DeFiHackLabs Real-World Exploits (2 incidents)
+
+**Category**: K Value Manipulation | **Total Losses**: $498K | **Sub-variants**: 1
+
+### Sub-variant Breakdown
+
+#### K-Value-Manipulation/Generic (2 exploits, $498K)
+
+- **Swapos V2** (2023-04, $468K, ethereum) | PoC: `DeFiHackLabs/src/test/2023-04/Swapos_exp.sol`
+- **LinkDAO** (2023-11, $30K, bsc) | PoC: `DeFiHackLabs/src/test/2023-11/LinkDao_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| Swapos V2 | 2023-04-16 | $468K | error k value Attack | ethereum |
+| LinkDAO | 2023-11-15 | $30K | Bad `K` Value Verification | bsc |
+
+### Top PoC References
+
+- **Swapos V2** (2023-04, $468K): `DeFiHackLabs/src/test/2023-04/Swapos_exp.sol`
+- **LinkDAO** (2023-11, $30K): `DeFiHackLabs/src/test/2023-11/LinkDao_exp.sol`

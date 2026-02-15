@@ -418,3 +418,52 @@ rules:
 ## Keywords for Search
 
 `integer overflow`, `integer underflow`, `unchecked`, `SafeMath`, `uint256`, `int256`, `type casting`, `downcast`, `SafeCast`, `arithmetic overflow`, `multiplication overflow`, `subtraction underflow`, `wrap around`, `toUint128`, `toInt256`
+
+---
+
+## DeFiHackLabs Real-World Exploits (11 incidents)
+
+**Category**: Integer Overflow | **Total Losses**: $1052.1M | **Sub-variants**: 2
+
+### Sub-variant Breakdown
+
+#### Integer-Overflow/Generic (9 exploits, $1043.0M)
+
+- **Beauty Chain** (2018-04, $900.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2018-04/BEC_exp.sol`
+- **SmartMesh** (2018-04, $140.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2018-04/SmartMesh_exp.sol`
+- **Creat Future** (2022-04, $1.9M, bsc) | PoC: `DeFiHackLabs/src/test/2022-04/cftoken_exp.sol`
+- *... and 6 more exploits*
+
+#### Integer-Overflow/Unsafe Cast (2 exploits, $9.1M)
+
+- **yETH** (2025-12, $9.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2025-12/yETH_exp.sol`
+- **Alkimiya_IO** (2025-03, $96K, ethereum) | PoC: `DeFiHackLabs/src/test/2025-03/Alkimiya_io_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| Beauty Chain | 2018-04-22 | $900.0M | Integer Overflow | ethereum |
+| SmartMesh | 2018-04-24 | $140.0M | Overflow | ethereum |
+| yETH | 2025-12-01 | $9.0M | Unsafe Math | ethereum |
+| Creat Future | 2022-04-11 | $1.9M | Overflow | bsc |
+| Umbrella Network | 2022-03-20 | $700K | Underflow | ethereum |
+| Poolz | 2023-03-15 | $390K | integer overflow | bsc |
+| Alkimiya_IO | 2025-03-28 | $96K | unsafecast | ethereum |
+| Pandora | 2024-02-08 | $17K | Integer Underflow | ethereum |
+| LW | 2024-07-08 | $7K | Integer Underflow | bsc |
+| SCROLL | 2024-05-29 | $76 | Integer Underflow | ethereum |
+| Qixi | 2022-08-03 | $6 | Underflow | bsc |
+
+### Top PoC References
+
+- **Beauty Chain** (2018-04, $900.0M): `DeFiHackLabs/src/test/2018-04/BEC_exp.sol`
+- **SmartMesh** (2018-04, $140.0M): `DeFiHackLabs/src/test/2018-04/SmartMesh_exp.sol`
+- **yETH** (2025-12, $9.0M): `DeFiHackLabs/src/test/2025-12/yETH_exp.sol`
+- **Creat Future** (2022-04, $1.9M): `DeFiHackLabs/src/test/2022-04/cftoken_exp.sol`
+- **Umbrella Network** (2022-03, $700K): `DeFiHackLabs/src/test/2022-03/Umbrella_exp.sol`
+- **Poolz** (2023-03, $390K): `DeFiHackLabs/src/test/2023-03/poolz_exp.sol`
+- **Alkimiya_IO** (2025-03, $96K): `DeFiHackLabs/src/test/2025-03/Alkimiya_io_exp.sol`
+- **Pandora** (2024-02, $17K): `DeFiHackLabs/src/test/2024-02/PANDORA_exp.sol`
+- **LW** (2024-07, $7K): `DeFiHackLabs/src/test/2024-07/LW_exp.sol`
+- **SCROLL** (2024-05, $76): `DeFiHackLabs/src/test/2024-05/SCROLL_exp.sol`

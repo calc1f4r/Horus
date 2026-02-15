@@ -659,3 +659,49 @@ function testDonationDoesNotAffectExchangeRate() public {
 - [Reentrancy in Vault Operations](../reentrancy/vault-reentrancy.md) - Can enable atomic inflation
 - [Flash Loan Attacks](../economic/flash-loan-attacks.md) - Can fund inflation attack
 - [Rounding Errors](../arithmetic/rounding-errors.md) - Root cause of share loss
+
+---
+
+## DeFiHackLabs Real-World Exploits (9 incidents)
+
+**Category**: Inflation Attack | **Total Losses**: $11.1M | **Sub-variants**: 2
+
+### Sub-variant Breakdown
+
+#### Inflation-Attack/Donate Inflation (6 exploits, $10.7M)
+
+- **HundredFinance** (2023-04, $7.0M, optimism) | PoC: `DeFiHackLabs/src/test/2023-04/HundredFinance_2_exp.sol`
+- **Raft_fi** (2023-11, $3.2M, ethereum) | PoC: `DeFiHackLabs/src/test/2023-11/Raft_exp.sol`
+- **WiseLending** (2023-10, $260K, ethereum) | PoC: `DeFiHackLabs/src/test/2023-10/WiseLending_exp.sol`
+- *... and 3 more exploits*
+
+#### Inflation-Attack/Compound V2 (3 exploits, $332K)
+
+- **ChannelsFinance** (2023-12, $320K, bsc) | PoC: `DeFiHackLabs/src/test/2023-12/ChannelsFinance_exp.sol`
+- **kTAF** (2023-10, $8K, ethereum) | PoC: `DeFiHackLabs/src/test/2023-10/kTAF_exp.sol`
+- **MetaLend** (2023-11, $4K, ethereum) | PoC: `DeFiHackLabs/src/test/2023-11/MetaLend_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| HundredFinance | 2023-04-15 | $7.0M | Donate Inflation ExchangeRate && Rounding Error | optimism |
+| Raft_fi | 2023-11-10 | $3.2M | Donate Inflation ExchangeRate & Rounding Error | ethereum |
+| ChannelsFinance | 2023-12-30 | $320K | CompoundV2 Inflation Attack | bsc |
+| WiseLending | 2023-10-13 | $260K | Donate Inflation ExchangeRate && Rounding Error | ethereum |
+| bZxProtocol | 2023-12-02 | $208K | Inflation Attack | ethereum |
+| BaoCommunity | 2023-07-04 | $46K | Donate Inflation ExchangeRate && Rounding Error | None |
+| MahaLend | 2023-11-11 | $20K | Donate Inflation ExchangeRate & Rounding Error | ethereum |
+| kTAF | 2023-10-19 | $8K | CompoundV2 Inflation Attack | ethereum |
+| MetaLend | 2023-11-25 | $4K | CompoundV2 Inflation Attack | ethereum |
+
+### Top PoC References
+
+- **HundredFinance** (2023-04, $7.0M): `DeFiHackLabs/src/test/2023-04/HundredFinance_2_exp.sol`
+- **Raft_fi** (2023-11, $3.2M): `DeFiHackLabs/src/test/2023-11/Raft_exp.sol`
+- **ChannelsFinance** (2023-12, $320K): `DeFiHackLabs/src/test/2023-12/ChannelsFinance_exp.sol`
+- **WiseLending** (2023-10, $260K): `DeFiHackLabs/src/test/2023-10/WiseLending_exp.sol`
+- **bZxProtocol** (2023-12, $208K): `DeFiHackLabs/src/test/2023-12/bZx_exp.sol`
+- **MahaLend** (2023-11, $20K): `DeFiHackLabs/src/test/2023-11/MahaLend_exp.sol`
+- **kTAF** (2023-10, $8K): `DeFiHackLabs/src/test/2023-10/kTAF_exp.sol`
+- **MetaLend** (2023-11, $4K): `DeFiHackLabs/src/test/2023-11/MetaLend_exp.sol`

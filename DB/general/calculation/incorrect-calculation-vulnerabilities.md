@@ -1057,3 +1057,74 @@ function _transfer(address from, address to, uint256 amount) internal {
 - [Flash Loan Attacks](../flash-loan/flash-loan-attack-patterns.md) - Often combined with calculation exploits
 - [Oracle Price Manipulation](../../oracle/price-manipulation/flash-loan-oracle-manipulation.md) - Similar economic attacks
 - [Reentrancy](../reentrancy/defi-reentrancy-patterns.md) - Can enable repeated reward claims
+
+---
+
+## DeFiHackLabs Real-World Exploits (22 incidents)
+
+**Category**: Calculation Errors, Reward Calculation | **Total Losses**: $51.6M | **Sub-variants**: 4
+
+### Sub-variant Breakdown
+
+#### Calculation-Errors/Generic (8 exploits, $51.0M)
+
+- **Uranium** (2021-04, $50.0M, bsc) | PoC: `DeFiHackLabs/src/test/2021-04/Uranium_exp.sol`
+- **Zeed Finance** (2022-04, $1.0M, bsc) | PoC: `DeFiHackLabs/src/test/2022-04/Zeed_exp.sol`
+- **NowSwap Platform** (2021-09, $158, ethereum) | PoC: `DeFiHackLabs/src/test/2021-09/NowSwap_exp.sol`
+- *... and 5 more exploits*
+
+#### Reward-Calculation/Generic (11 exploits, $537K)
+
+- **SNK** (2023-05, $197K, None) | PoC: `DeFiHackLabs/src/test/2023-05/SNK_exp.sol`
+- **OSN** (2024-05, $109K, bsc) | PoC: `DeFiHackLabs/src/test/2024-05/OSN_exp.sol`
+- **DPC** (2022-09, $104K, bsc) | PoC: `DeFiHackLabs/src/test/2022-09/DPC_exp.sol`
+- *... and 8 more exploits*
+
+#### Reward-Calculation/Unprotected Claim (1 exploits, $19K)
+
+- **BTNFT** (2025-04, $19K, bsc) | PoC: `DeFiHackLabs/src/test/2025-04/BTNFT_exp.sol`
+
+#### Reward-Calculation/Instant Rewards (2 exploits, $13K)
+
+- **OKC Project** (2023-11, $6K, bsc) | PoC: `DeFiHackLabs/src/test/2023-11/OKC_exp.sol`
+- **OKC Project** (2023-11, $6K, bsc) | PoC: `DeFiHackLabs/src/test/2023-11/OKC_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| Uranium | 2021-04-28 | $50.0M | Miscalculation | bsc |
+| Zeed Finance | 2022-04-21 | $1.0M | Incorrect calculation | bsc |
+| SNK | 2023-05-10 | $197K | Reward Calculation Error | None |
+| OSN | 2024-05-06 | $109K | Reward Distribution Problem | bsc |
+| DPC | 2022-09-09 | $104K | Incorrect Reward calculation | bsc |
+| VTF Token | 2022-10-27 | $50K | Incorrect Reward calculation | bsc |
+| SWAPPStaking | 2025-07-24 | $32K | Incorrect Reward calculation | None |
+| LPMine | 2025-01-08 | $24K | Incorrect reward calculation | bsc |
+| BTNFT | 2025-04-18 | $19K | Claim Rewards Without Protection | bsc |
+| Gangsterfinance | 2025-06-20 | $16K | Incorrect dividends | bsc |
+| OKC Project | 2023-11-14 | $6K | Instant Rewards, Unlocked | bsc |
+| OKC Project | 2023-11-14 | $6K | Instant Rewards, Unlocked | bsc |
+| BankrollStack | 2025-06-19 | $5K | Incorrect dividends calculation | bsc |
+| NowSwap Platform | 2021-09-15 | $158 | Incorrect calculation | ethereum |
+| SNOOD | 2022-06-18 | $104 | Miscalculation on \_spendAllowance | ethereum |
+| BankrollNetwork | 2025-06-19 | $24 | Incorrect dividends calculation | bsc |
+| SorStaking | 2025-01-04 | $5 | Incorrect reward calculation | ethereum |
+| Nimbus Platform | 2021-09-15 | $1 | Incorrect calculation | ethereum |
+| PancakeHunny | 2021-06-03 | N/A | Incorrect calculation | bsc |
+| BurgerSwap | 2021-05-27 | N/A | Mathematical flaw + Reentrancy | bsc |
+| Cover Protocol | 2020-12-29 | N/A | Incorrect calculation via cached data | ethereum |
+| RL Token | 2022-10-01 | N/A | Incorrect Reward calculation | bsc |
+
+### Top PoC References
+
+- **Uranium** (2021-04, $50.0M): `DeFiHackLabs/src/test/2021-04/Uranium_exp.sol`
+- **Zeed Finance** (2022-04, $1.0M): `DeFiHackLabs/src/test/2022-04/Zeed_exp.sol`
+- **SNK** (2023-05, $197K): `DeFiHackLabs/src/test/2023-05/SNK_exp.sol`
+- **OSN** (2024-05, $109K): `DeFiHackLabs/src/test/2024-05/OSN_exp.sol`
+- **DPC** (2022-09, $104K): `DeFiHackLabs/src/test/2022-09/DPC_exp.sol`
+- **VTF Token** (2022-10, $50K): `DeFiHackLabs/src/test/2022-10/VTF_exp.sol`
+- **SWAPPStaking** (2025-07, $32K): `DeFiHackLabs/src/test/2025-07/SWAPPStaking_exp.sol`
+- **LPMine** (2025-01, $24K): `DeFiHackLabs/src/test/2025-01/LPMine_exp.sol`
+- **BTNFT** (2025-04, $19K): `DeFiHackLabs/src/test/2025-04/BTNFT_exp.sol`
+- **Gangsterfinance** (2025-06, $16K): `DeFiHackLabs/src/test/2025-06/Gangsterfinance_exp.sol`

@@ -399,3 +399,31 @@ contract SecureBot is ReentrancyGuard {
 ## Keywords for Search
 
 `MEV bot`, `sandwich attack`, `arbitrage bot`, `flashbots`, `frontrunning`, `backrunning`, `callback validation`, `pancakeCall`, `uniswapV3SwapCallback`, `executeOperation`, `token approval`, `private transaction`, `mempool`, `block builder`, `searcher`
+
+---
+
+## DeFiHackLabs Real-World Exploits (3 incidents)
+
+**Category**: Mev | **Total Losses**: $87K | **Sub-variants**: 1
+
+### Sub-variant Breakdown
+
+#### Mev/Sandwich (3 exploits, $87K)
+
+- **SQUID** (2024-04, $87K, bsc) | PoC: `DeFiHackLabs/src/test/2024-04/SQUID_exp.sol`
+- **Sushi Badger Digg** (2021-01, $82, ethereum) | PoC: `DeFiHackLabs/src/test/2021-01/Sushi_Badger_Digg_exp.sol`
+- **Burner** (2024-05, $2, ethereum) | PoC: `DeFiHackLabs/src/test/2024-05/Burner_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| SQUID | 2024-04-08 | $87K | sandwich attack | bsc |
+| Sushi Badger Digg | 2021-01-25 | $82 | Sandwich attack | ethereum |
+| Burner | 2024-05-22 | $2 | sandwich ack | ethereum |
+
+### Top PoC References
+
+- **SQUID** (2024-04, $87K): `DeFiHackLabs/src/test/2024-04/SQUID_exp.sol`
+- **Sushi Badger Digg** (2021-01, $82): `DeFiHackLabs/src/test/2021-01/Sushi_Badger_Digg_exp.sol`
+- **Burner** (2024-05, $2): `DeFiHackLabs/src/test/2024-05/Burner_exp.sol`

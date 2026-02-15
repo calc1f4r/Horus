@@ -994,3 +994,174 @@ function updatePosition(uint256 positionId, int256 sizeDelta) external {
 - [DB/general/reentrancy/reentrancy.md](../reentrancy/reentrancy.md)
 - [DB/general/missing-validations/MISSING_VALIDATION_TEMPLATE.md](../missing-validations/MISSING_VALIDATION_TEMPLATE.md)
 - [DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md](../../tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md)
+
+---
+
+## DeFiHackLabs Real-World Exploits (176 incidents)
+
+**Category**: Business Logic, Dos, Misconfiguration, Transfer Logic, Burn Mint Logic | **Total Losses**: $1700.1M | **Sub-variants**: 19
+
+### Sub-variant Breakdown
+
+#### Business-Logic/Generic (143 exploits, $1607.1M)
+
+- **SATX** (2024-04, $999.0M, bsc) | PoC: `DeFiHackLabs/src/test/2024-04/SATX_exp.sol`
+- **EulerFinance** (2023-03, $200.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2023-03/Euler_exp.sol`
+- **Nomad Bridge** (2022-08, $152.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2022-08/NomadBridge_exp.sol`
+- *... and 140 more exploits*
+
+#### Business-Logic/Reward Logic (1 exploits, $20.0M)
+
+- **Popsicle** (2021-08, $20.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2021-08/Popsicle_exp.sol`
+
+#### Business-Logic/Fake Market (1 exploits, $4.1M)
+
+- **OnyxDAO** (2024-09, $4.1M, ethereum) | PoC: `DeFiHackLabs/src/test/2024-09/OnyxDAO_exp.sol`
+
+#### Business-Logic/Infinite Loans (1 exploits, $3.9M)
+
+- **XCarnival** (2022-06, $3.9M, ethereum) | PoC: `DeFiHackLabs/src/test/2022-06/XCarnival_exp.sol`
+
+#### Business-Logic/Incorrect Burn Mint (2 exploits, $2.6M)
+
+- **Fantasm Finance** (2022-03, $2.6M, fantom) | PoC: `DeFiHackLabs/src/test/2022-03/Fantasm_exp.sol`
+- **Bad Guys by RPF** (2022-09, $400, ethereum) | PoC: `DeFiHackLabs/src/test/2022-09/BadGuysbyRPF_exp.sol`
+
+#### Business-Logic/Incorrect Swap Logic (1 exploits, $1.7M)
+
+- **Bedrock_DeFi** (2024-09, $1.7M, None)
+
+#### Business-Logic/Insolvency Bypass (2 exploits, $1.8M)
+
+- **MIMSpell3** (2025-10, $1.7M, None) | PoC: `DeFiHackLabs/src/test/2025-10/MIMSpell3_exp.sol`
+- **SharwaFinance** (2025-10, $146K, arbitrum) | PoC: `DeFiHackLabs/src/test/2025-10/SharwaFinance_exp.sol`
+
+#### Business-Logic/Emergency Withdraw (2 exploits, $2.0M)
+
+- **Levyathan Finance** (2021-07, $1.5M, bsc) | PoC: `DeFiHackLabs/src/test/2021-07/Levyathan_exp.sol`
+- **BNO** (2023-07, $505K, bsc) | PoC: `DeFiHackLabs/src/test/2023-07/BNO_exp.sol`
+
+#### Business-Logic/Token Destruction (1 exploits, $639K)
+
+- **TecraSpace** (2022-02, $639K, ethereum) | PoC: `DeFiHackLabs/src/test/2022-02/TecraSpace_exp.sol`
+
+#### Business-Logic/Selfdestruct (1 exploits, $514K)
+
+- **Parity** (2017-11, $514K, ethereum) | PoC: `DeFiHackLabs/src/test/2017-11/Parity_kill_exp.sol`
+
+#### Business-Logic/Balance Recalculation (2 exploits, $312K)
+
+- **Spherax USDs** (2023-02, $309K, arbitrum) | PoC: `DeFiHackLabs/src/test/2023-02/USDs_exp.sol`
+- **ParaSpace NFT** (2023-03, $3K, ethereum) | PoC: `DeFiHackLabs/src/test/2023-03/paraspace_exp.sol`
+
+#### Business-Logic/Subscription Incentive (1 exploits, $300K)
+
+- **xWin Finance** (2021-06, $300K, bsc) | PoC: `DeFiHackLabs/src/test/2021-06/xWin_exp.sol`
+
+#### Business-Logic/Approval Logic (2 exploits, $80K)
+
+- **NST Simple Swap** (2023-06, $40K, polygon) | PoC: `DeFiHackLabs/src/test/2023-06/NST_exp.sol`
+- **NST Simple Swap** (2023-06, $40K, polygon) | PoC: `DeFiHackLabs/src/test/2023-06/NST_exp.sol`
+
+#### Business-Logic/Transfer Logic (3 exploits, $24K)
+
+- **PLTD** (2022-10, $24K, bsc) | PoC: `DeFiHackLabs/src/test/2022-10/PLTD_exp.sol`
+- **LPC** (2022-07, $178, bsc) | PoC: `DeFiHackLabs/src/test/2022-07/LPC_exp.sol`
+- **HEALTH** (2022-10, $17, bsc) | PoC: `DeFiHackLabs/src/test/2022-10/HEALTH_exp.sol`
+
+#### Business-Logic/Token Migration (1 exploits, $1K)
+
+- **GYMNetwork** (2022-04, $1K, bsc) | PoC: `DeFiHackLabs/src/test/2022-04/Gym_1_exp.sol`
+
+#### Dos/Generic (1 exploits, $34.0M)
+
+- **Akutar NFT** (2022-04, $34.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2022-04/AkutarNFT_exp.sol`
+
+#### Misconfiguration/Generic (4 exploits, $16.1M)
+
+- **yearnFinance** (2023-04, $11.6M, None) | PoC: `DeFiHackLabs/src/test/2023-04/YearnFinance_exp.sol`
+- **Conic Finance** (2023-07, $3.2M, ethereum) | PoC: `DeFiHackLabs/src/test/2023-07/Conic_exp.sol`
+- **VOW** (2024-08, $1.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2024-08/VOW_exp.sol`
+- *... and 1 more exploits*
+
+#### Transfer-Logic/Generic (3 exploits, $4.8M)
+
+- **SSS** (2024-03, $4.8M, blast) | PoC: `DeFiHackLabs/src/test/2024-03/SSS_exp.sol`
+- **GPU** (2024-05, $32K, bsc) | PoC: `DeFiHackLabs/src/test/2024-05/GPU_exp.sol`
+- **bzx** (2020-09, N/A, ethereum) | PoC: `DeFiHackLabs/src/test/2020-09/bzx_exp.sol`
+
+#### Burn-Mint-Logic/Generic (4 exploits, $101K)
+
+- **WETC** (2025-07, $101K, bsc) | PoC: `DeFiHackLabs/src/test/2025-07/WETC_Token_exp.sol`
+- **WXC** (2025-08, $38, bsc) | PoC: `DeFiHackLabs/src/test/2025-08/WXC_Token_exp.sol`
+- **DUCKVADER** (2025-03, $5, base) | PoC: `DeFiHackLabs/src/test/2025-03/DUCKVADER_exp.sol`
+- *... and 1 more exploits*
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| SATX | 2024-04-16 | $999.0M | Logic Flaw | bsc |
+| EulerFinance | 2023-03-13 | $200.0M | Business Logic Flaw | ethereum |
+| Nomad Bridge | 2022-08-02 | $152.0M | Business Logic Flaw : Incorrect acceptable merkle-root checks | ethereum |
+| HegicOptions | 2025-02-23 | $104.0M | Business Logic Flaw | ethereum |
+| HedgeyFinance | 2024-04-19 | $48.0M | Logic Flaw | ethereum |
+| Akutar NFT | 2022-04-23 | $34.0M | Denial of Service | ethereum |
+| Spartan | 2021-05-02 | $30.5M | Logic Flaw | bsc |
+| Popsicle | 2021-08-04 | $20.0M | Repeated Reward Claim - Logic Flaw | ethereum |
+| FloorProtocol | 2023-12-17 | $16.0M | Business Logic Flaw | ethereum |
+| yearnFinance | 2023-04-13 | $11.6M | Misconfiguration | None |
+| bEarn | 2021-05-16 | $11.0M | Logic Flaw | bsc |
+| Platypusdefi | 2023-02-17 | $8.5M | Business Logic Flaw | avalanche |
+| DEI | 2023-05-05 | $5.4M | wrong implemention | arbitrum |
+| SSS | 2024-03-21 | $4.8M | Token Balance Doubles on Transfer to self | blast |
+| FPC | 2025-07-02 | $4.7M | Logic Flaw | bsc |
+| Chainswap | 2021-07-10 | $4.4M | Bridge, logic flaw | bsc |
+| OnyxDAO | 2024-09-26 | $4.1M | Fake Market | ethereum |
+| XCarnival | 2022-06-26 | $3.9M | Infinite Number of Loans | ethereum |
+| Conic Finance | 2023-07-21 | $3.2M | Read-Only-Reentrancy && MisConfiguration | ethereum |
+| Fantasm Finance | 2022-03-09 | $2.6M | Business logic in mint() | fantom |
+| Platypus | 2023-10-12 | $2.0M | Business Logic Flaw | avalanche |
+| Balancer | 2023-08-27 | $2.0M | Rounding Error && Business Logic Flaw | ethereum |
+| Abracadabra | 2025-10-04 | $1.8M | Logic Flaw | None |
+| Reaper Farm | 2022-08-01 | $1.7M | Business Logic Flaw : Lack of access control mechanism | fantom |
+| Bedrock_DeFi | 2024-09-26 | $1.7M | Swap ETH/BTC 1/1 in mint function | None |
+| MIMSpell3 | 2025-10-04 | $1.7M | Bypassed Insolvency Check | None |
+| XBridge | 2024-04-24 | $1.6M | Logic Flaw | ethereum |
+| Levyathan Finance | 2021-07-28 | $1.5M | (I) Lost keys and minting (II) Vulnerable emergencyWithdraw | bsc |
+| BlueberryProtocol | 2024-02-23 | $1.4M | logic flaw | ethereum |
+| Level | 2023-05-02 | $1.0M | Business Logic Flaw | bsc |
+| VOW | 2024-08-13 | $1.0M | Misconfiguration | ethereum |
+| Palmswap | 2023-07-24 | $900K | Business Logic Flaw | bsc |
+| ElasticSwap | 2022-12-13 | $845K | Business Logic Flaw | avalanche |
+| Pawnfi | 2023-06-17 | $820K | Business Logic Flaw | None |
+| Chainswap | 2021-07-02 | $800K | Bridge, logic flaw | ethereum |
+| BEARNDAO | 2023-12-05 | $769K | Business Logic Flaw | bsc |
+| Tradeonorion | 2024-05-28 | $645K | Business Logic Flaw | None |
+| TecraSpace | 2022-02-04 | $639K | Any token is destroyed | ethereum |
+| IPC Incorrect burn pairs | 2025-01-07 | $590K | Logic Flaw | bsc |
+| Parity | 2017-11-06 | $514K | 'Accidentally Killed It' | ethereum |
+| BNO | 2023-07-18 | $505K | Invalid emergency withdraw mechanism | bsc |
+| UnverifiedContr_0x431abb | 2023-12-01 | $500K | Business Logic Flaw | bsc |
+| MIC | 2024-01-02 | $500K | Business Logic Flaw | bsc |
+| NORMIE | 2024-05-26 | $490K | Business Logic Flaw | base |
+| MO | 2024-03-14 | $413K | business logic flaw | optimism |
+| LavaLending | 2024-03-28 | $340K | Business Logic Flaw | arbitrum |
+| Spherax USDs | 2023-02-03 | $309K | Balance Recalculation Bug | arbitrum |
+| xWin Finance | 2021-06-25 | $300K | subscription-incentive-mechanism | bsc |
+| coinbase | 2025-08-13 | $300K | Misconfiguration | ethereum |
+| OpenLeverage | 2024-04-01 | $234K | business logic flaw | bsc |
+| ... | ... | ... | +126 more exploits | ... |
+
+### Top PoC References
+
+- **SATX** (2024-04, $999.0M): `DeFiHackLabs/src/test/2024-04/SATX_exp.sol`
+- **EulerFinance** (2023-03, $200.0M): `DeFiHackLabs/src/test/2023-03/Euler_exp.sol`
+- **Nomad Bridge** (2022-08, $152.0M): `DeFiHackLabs/src/test/2022-08/NomadBridge_exp.sol`
+- **HegicOptions** (2025-02, $104.0M): `DeFiHackLabs/src/test/2025-02/HegicOptions_exp.sol`
+- **HedgeyFinance** (2024-04, $48.0M): `DeFiHackLabs/src/test/2024-04/HedgeyFinance_exp.sol`
+- **Akutar NFT** (2022-04, $34.0M): `DeFiHackLabs/src/test/2022-04/AkutarNFT_exp.sol`
+- **Spartan** (2021-05, $30.5M): `DeFiHackLabs/src/test/2021-05/Spartan_exp.sol`
+- **Popsicle** (2021-08, $20.0M): `DeFiHackLabs/src/test/2021-08/Popsicle_exp.sol`
+- **FloorProtocol** (2023-12, $16.0M): `DeFiHackLabs/src/test/2023-12/FloorProtocol_exp.sol`
+- **yearnFinance** (2023-04, $11.6M): `DeFiHackLabs/src/test/2023-04/YearnFinance_exp.sol`

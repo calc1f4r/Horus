@@ -79,7 +79,7 @@ Cosmos SDK appchains are susceptible to various chain halt and denial of service
 - User funds inaccessible
 - Massive reputation damage
 
-### Audit Checklist
+### Audit Checklist[text](../../../DeFiHackLabs)
 - BeginBlock/EndBlocker have bounded iteration
 - All user-supplied amounts validated as positive
 - Division operations check for zero divisor

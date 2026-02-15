@@ -2,8 +2,8 @@
   "meta": {
     "category": "unique",
     "description": "Pattern-level index for unique vulnerabilities",
-    "fileCount": 11,
-    "totalPatterns": 59,
+    "fileCount": 20,
+    "totalPatterns": 68,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
   },
   "files": [
@@ -967,6 +967,657 @@
           "codeKeywords": [],
           "rootCause": null,
           "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/unique/defihacklabs/compiler-level-vulnerabilities.md",
+      "totalLines": 299,
+      "frontmatter": {
+        "protocol": "curve",
+        "chain": "ethereum",
+        "category": "compiler_bug",
+        "vulnerability_type": "vyper_reentrancy_lock_bug",
+        "attack_type": "reentrancy",
+        "affected_component": "vyper_compiler",
+        "severity": "critical",
+        "impact": "fund_loss",
+        "exploitability": "0.6",
+        "financial_impact": "critical",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "1",
+        "total_losses": "\"$41.0M\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "unique-compiler-level-vulnerability-patterns-000",
+          "title": "Compiler-Level Vulnerability Patterns",
+          "lineStart": 39,
+          "lineEnd": 74,
+          "lineCount": 36,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "add_liquidity",
+            "receive",
+            "remove_liquidity"
+          ],
+          "rootCause": "The Vyper compiler versions 0.2.15, 0.2.16, and 0.3.0 had a bug in the code generation for the `@nonreentrant` decorator. The reentrancy lock used a storage slot that could be improperly handled acros",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 45,
+              "lineEnd": 68,
+              "severity": [],
+              "codeKeywords": [
+                "add_liquidity",
+                "receive",
+                "remove_liquidity"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 69,
+              "lineEnd": 74,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/unique/defihacklabs/economic-arbitrage-design-flaws.md",
+      "totalLines": 386,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "arbitrage",
+        "vulnerability_type": "economic_design_flaw",
+        "attack_type": "economic_exploit",
+        "affected_component": "pricing_mechanism",
+        "severity": "high",
+        "impact": "fund_loss",
+        "exploitability": "0.7",
+        "financial_impact": "high",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "2",
+        "total_losses": "\"$143K\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "unique-economic-arbitrage-design-flaws-000",
+          "title": "Economic Arbitrage Design Flaws",
+          "lineStart": 40,
+          "lineEnd": 321,
+          "lineCount": 282,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "VaultRouter.deposit",
+            "deposit",
+            "onMorphoFlashLoan",
+            "swapData",
+            "testExploit"
+          ],
+          "rootCause": "1. **Arbitrary Swap Routing via Vault Deposits**: Vault deposit functions accept user-controlled swap routing data (e.g., ParaSwap `swapData`). The attacker creates a thin-liquidity Uniswap V3 pool, p",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 46,
+              "lineEnd": 72,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "swapData"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 73,
+              "lineEnd": 240,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "VaultRouter.deposit",
+                "cancelOrder",
+                "deposit",
+                "flashLoan",
+                "onMorphoFlashLoan",
+                "placeBuyOrder",
+                "swapData",
+                "testExploit"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/unique/defihacklabs/fee-mechanism-exploitation.md",
+      "totalLines": 329,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "fee_mechanism",
+        "vulnerability_type": "fee_calculation_exploitation",
+        "attack_type": "economic_exploit",
+        "affected_component": "fee_controller",
+        "severity": "high",
+        "impact": "fund_loss",
+        "exploitability": "0.8",
+        "financial_impact": "high",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "2",
+        "total_losses": "\"$1.04M\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "unique-fee-mechanism-exploitation-patterns-000",
+          "title": "Fee Mechanism Exploitation Patterns",
+          "lineStart": 40,
+          "lineEnd": 262,
+          "lineCount": 223,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_transfer",
+            "amount",
+            "buyItem",
+            "innerCallback",
+            "safeTransferFrom",
+            "skim",
+            "swap",
+            "sync",
+            "testExploit"
+          ],
+          "rootCause": "1. **Zero Quantity Fee Bypass**: Functions that calculate `totalPrice = quantity * pricePerItem` without requiring `quantity > 0`. When `quantity = 0`, the payment becomes zero, but the asset transfer",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 46,
+              "lineEnd": 71,
+              "severity": [],
+              "codeKeywords": [
+                "_transfer",
+                "amount",
+                "skim",
+                "sync"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 72,
+              "lineEnd": 183,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_transfer",
+                "buyItem",
+                "innerCallback",
+                "safeTransferFrom",
+                "skim",
+                "swap",
+                "sync",
+                "testExploit"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/unique/defihacklabs/liquidity-migration-exploit.md",
+      "totalLines": 412,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "liquidity_migration",
+        "vulnerability_type": "migration_parameter_exploitation",
+        "attack_type": "parameter_manipulation",
+        "affected_component": "migrator_contract",
+        "severity": "critical",
+        "impact": "fund_loss",
+        "exploitability": "0.75",
+        "financial_impact": "critical",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "3",
+        "total_losses": "\"$15.9M\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "unique-liquidity-migration-exploit-patterns-000",
+          "title": "Liquidity Migration Exploit Patterns",
+          "lineStart": 42,
+          "lineEnd": 345,
+          "lineCount": 304,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "burn",
+            "migrate",
+            "pair",
+            "pair.burn",
+            "pair.token0",
+            "pair.token1",
+            "token0",
+            "token1"
+          ],
+          "rootCause": "The root causes fall into three distinct patterns:\n\n\n\n1. **Token/Pair Parameter Mismatch**: Migration functions accept `token0` and `token1` parameters separately from the `pair` address. If the funct",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 48,
+              "lineEnd": 73,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "burn",
+                "migrate",
+                "pair",
+                "token0",
+                "token1"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 74,
+              "lineEnd": 277,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "migrate",
+                "pair.burn",
+                "pair.token0",
+                "pair.token1",
+                "token0",
+                "token1"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/unique/defihacklabs/msgvalue-in-loop.md",
+      "totalLines": 336,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "ethereum",
+        "category": "msgvalue_loop",
+        "vulnerability_type": "msg_value_reuse_in_loop",
+        "attack_type": "economic_exploit",
+        "affected_component": "batch_functions",
+        "severity": "critical",
+        "impact": "fund_loss",
+        "exploitability": "0.9",
+        "financial_impact": "critical",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "1",
+        "total_losses": "\"$371K\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "unique-msg-value-in-loop-vulnerability-000",
+          "title": "msg.value in Loop Vulnerability",
+          "lineStart": 40,
+          "lineEnd": 272,
+          "lineCount": 233,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "batch",
+            "delegatecall",
+            "exercise",
+            "for",
+            "mint",
+            "msg.value",
+            "multicall",
+            "testExploit"
+          ],
+          "rootCause": "Solidity's `msg.value` is immutable for the duration of a transaction call. Unlike a local balance variable, it doesn't decrease when the contract transfers or uses ETH. Any function that validates pa",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 46,
+              "lineEnd": 68,
+              "severity": [],
+              "codeKeywords": [
+                "batch",
+                "for",
+                "msg.value",
+                "multicall"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 69,
+              "lineEnd": 184,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "batchPurchase",
+                "delegatecall",
+                "exercise",
+                "mint",
+                "msg.value",
+                "multicall",
+                "testExploit"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/unique/defihacklabs/nft-specific-exploit-patterns.md",
+      "totalLines": 330,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "optimism",
+        "category": "nft_specific",
+        "vulnerability_type": "marketplace_signature_bypass",
+        "attack_type": "parameter_manipulation",
+        "affected_component": "nft_marketplace",
+        "severity": "high",
+        "impact": "fund_loss",
+        "exploitability": "0.75",
+        "financial_impact": "high",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "1",
+        "total_losses": "\"$100K\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "unique-nft-specific-exploit-patterns-000",
+          "title": "NFT-Specific Exploit Patterns",
+          "lineStart": 41,
+          "lineEnd": 264,
+          "lineCount": 224,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "buyer",
+            "fillSellOrder",
+            "testExploit"
+          ],
+          "rootCause": "1. **Missing Buyer Validation in fillSellOrder()**: The marketplace's `fillSellOrder()` function validates only the seller's EIP-712 signature but accepts any `buyer` address from the caller. Since th",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 47,
+              "lineEnd": 66,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "buyer",
+                "fillSellOrder"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 67,
+              "lineEnd": 180,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "buyer",
+                "fillSellOrder",
+                "testExploit"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/unique/defihacklabs/skim-balance-attack.md",
+      "totalLines": 378,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "bsc",
+        "category": "skim_balance",
+        "vulnerability_type": "pair_skim_exploitation",
+        "attack_type": "economic_exploit",
+        "affected_component": "uniswap_v2_pair",
+        "severity": "medium",
+        "impact": "fund_loss",
+        "exploitability": "0.65",
+        "financial_impact": "medium",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "4",
+        "total_losses": "\"$41K+\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "unique-skim-token-balance-attack-patterns-000",
+          "title": "Skim Token Balance Attack Patterns",
+          "lineStart": 43,
+          "lineEnd": 301,
+          "lineCount": 259,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "DPPFlashLoanCall",
+            "address(pair",
+            "innerCallback",
+            "pair.sync",
+            "skim",
+            "skim(address(pair",
+            "skim(attacker",
+            "swap",
+            "sync",
+            "testExploit"
+          ],
+          "rootCause": "The root causes fall into two distinct patterns:\n\n\n\n1. **Fee-on-Transfer Reserve Divergence**: When a fee-on-transfer token is sent to a pair, the pair receives less than the sent amount due to the tr",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 49,
+              "lineEnd": 77,
+              "severity": [],
+              "codeKeywords": [
+                "pair.sync",
+                "skim",
+                "skim(address(pair",
+                "skim(attacker",
+                "sync"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 78,
+              "lineEnd": 237,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall",
+                "address(pair",
+                "innerCallback",
+                "skim",
+                "skim(pair",
+                "swap",
+                "sync",
+                "testExploit"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/unique/defihacklabs/stale-cached-state-exploits.md",
+      "totalLines": 353,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "stale_state",
+        "vulnerability_type": "cached_state_exploitation",
+        "attack_type": "state_manipulation",
+        "affected_component": "state_cache",
+        "severity": "high",
+        "impact": "fund_loss",
+        "exploitability": "0.7",
+        "financial_impact": "high",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "2",
+        "total_losses": "\"$824K\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "unique-stale-cached-state-exploit-patterns-000",
+          "title": "Stale/Cached State Exploit Patterns",
+          "lineStart": 41,
+          "lineEnd": 286,
+          "lineCount": 246,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_transfer",
+            "borrow",
+            "liquidate",
+            "sellAmount",
+            "testExploit",
+            "updateExchangeRate"
+          ],
+          "rootCause": "1. **Stale Global Variable Accumulation**: A storage variable updated during sells (`sellAmount`) is used in the sell logic to determine burn amounts. But it's also inflated by buy transactions. An at",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 47,
+              "lineEnd": 71,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "sellAmount",
+                "updateExchangeRate"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 72,
+              "lineEnd": 205,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_transfer",
+                "borrow",
+                "liquidate",
+                "sellAmount",
+                "testExploit",
+                "updateExchangeRate"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/unique/defihacklabs/swap-metapool-attack.md",
+      "totalLines": 295,
+      "frontmatter": {
+        "protocol": "curve_saddle",
+        "chain": "ethereum",
+        "category": "metapool_attack",
+        "vulnerability_type": "cross_pool_price_manipulation",
+        "attack_type": "economic_exploit",
+        "affected_component": "curve_metapool",
+        "severity": "high",
+        "impact": "fund_loss",
+        "exploitability": "0.7",
+        "financial_impact": "critical",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "2",
+        "total_losses": "\"$10.0M\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "unique-swap-metapool-attack-patterns-000",
+          "title": "Swap Metapool Attack Patterns",
+          "lineStart": 41,
+          "lineEnd": 232,
+          "lineCount": 192,
+          "severity": [
+            "CRITICAL",
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "exchange",
+            "executeOperation",
+            "swap",
+            "testExploit",
+            "virtual_price"
+          ],
+          "rootCause": "1. **Virtual Price Dependency**: Metapools price their LP token component using the base pool's `virtual_price()`. Large swaps in either pool can create temporary price divergence between the metapool",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 47,
+              "lineEnd": 68,
+              "severity": [],
+              "codeKeywords": [
+                "virtual_price"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 69,
+              "lineEnd": 173,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "exchange",
+                "executeOperation",
+                "swap",
+                "testExploit"
+              ]
+            }
+          ]
         }
       ]
     },

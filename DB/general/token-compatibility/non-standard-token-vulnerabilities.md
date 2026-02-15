@@ -1098,3 +1098,76 @@ contract SecureVault {
 - [Flash Loan Attacks](../flash-loan-attacks/) - Flash loan amplification
 - [Vault Inflation Attack](../vault-inflation-attack/) - Related accounting issues
 - [AMM Vulnerabilities](../../amm/) - DEX-specific attack patterns
+
+---
+
+## DeFiHackLabs Real-World Exploits (21 incidents)
+
+**Category**: Token Compatibility | **Total Losses**: $372K | **Sub-variants**: 4
+
+### Sub-variant Breakdown
+
+#### Token-Compatibility/Deflationary (4 exploits, $238K)
+
+- **SafeDollar** (2021-06, $200K, polygon) | PoC: `DeFiHackLabs/src/test/2021-06/SafeDollar_exp.sol`
+- **3913Token** (2023-11, $31K, bsc) | PoC: `DeFiHackLabs/src/test/2023-11/3913_exp.sol`
+- **KRC** (2025-05, $7K, bsc) | PoC: `DeFiHackLabs/src/test/2025-05/KRCToken_pair_exp.sol`
+- *... and 1 more exploits*
+
+#### Token-Compatibility/Reflection (11 exploits, $133K)
+
+- **MARS** (2024-04, $100K, bsc) | PoC: `DeFiHackLabs/src/test/2024-04/MARS_exp.sol`
+- **BIGFI** (2023-03, $30K, bsc) | PoC: `DeFiHackLabs/src/test/2023-03/BIGFI_exp.sol`
+- **Sheep** (2023-02, $3K, bsc) | PoC: `DeFiHackLabs/src/test/2023-02/Sheep_exp.sol`
+- *... and 8 more exploits*
+
+#### Token-Compatibility/Rebasing (4 exploits, $51)
+
+- **FloorDAO** (2023-09, $40, ethereum) | PoC: `DeFiHackLabs/src/test/2023-09/FloorDAO_exp.sol`
+- **HeavensGate** (2023-09, $8, ethereum) | PoC: `DeFiHackLabs/src/test/2023-09/HeavensGate_exp.sol`
+- **JumpFarm** (2023-09, $2, ethereum) | PoC: `DeFiHackLabs/src/test/2023-09/JumpFarm_exp.sol`
+- *... and 1 more exploits*
+
+#### Token-Compatibility/Incompatible (2 exploits, N/A)
+
+- **Balancer Protocol** (2020-06, N/A, None) | PoC: `DeFiHackLabs/src/test/2020-06/Balancer_20200628_exp.sol`
+- **NUM** (2022-11, N/A, ethereum) | PoC: `DeFiHackLabs/src/test/2022-11/NUM_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| SafeDollar | 2021-06-28 | $200K | Deflationary token uncompatible | polygon |
+| MARS | 2024-04-16 | $100K | Bad Reflection | bsc |
+| 3913Token | 2023-11-02 | $31K | Deflationary Token Attack | bsc |
+| BIGFI | 2023-03-22 | $30K | Reflection token | bsc |
+| KRC | 2025-05-18 | $7K | deflationary token | bsc |
+| Sheep | 2023-02-10 | $3K | Reflection token | bsc |
+| BEVO | 2023-01-30 | $144 | Reflection token | bsc |
+| BUNN | 2023-06-21 | $52 | Reflection tokens | bsc |
+| FloorDAO | 2023-09-05 | $40 | Rebasing logic issue | ethereum |
+| OLIFE | 2023-04-19 | $32 | Reflection token | bsc |
+| TINU | 2023-01-26 | $22 | Reflection token | ethereum |
+| FDP | 2023-02-06 | $16 | Reflection token | bsc |
+| MCC | 2023-05-09 | $10 | Reflection token | ethereum |
+| HeavensGate | 2023-09-05 | $8 | Rebasing logic issue | ethereum |
+| SHOCO | 2023-01-19 | $4 | Reflection token | ethereum |
+| JumpFarm | 2023-09-05 | $2 | Rebasing logic issue | ethereum |
+| HODL | 2023-05-09 | $2 | Reflection token | ethereum |
+| QuantumWN | 2023-09-05 | $0 | Rebasing logic issue | ethereum |
+| ZABU Finance | 2021-09-12 | N/A | Deflationary token uncompatible | avalanche |
+| Balancer Protocol | 2020-06-28 | N/A | Token Incompatible | None |
+| NUM | 2022-11-23 | N/A | Protocol Token incompatible | ethereum |
+
+### Top PoC References
+
+- **SafeDollar** (2021-06, $200K): `DeFiHackLabs/src/test/2021-06/SafeDollar_exp.sol`
+- **MARS** (2024-04, $100K): `DeFiHackLabs/src/test/2024-04/MARS_exp.sol`
+- **3913Token** (2023-11, $31K): `DeFiHackLabs/src/test/2023-11/3913_exp.sol`
+- **BIGFI** (2023-03, $30K): `DeFiHackLabs/src/test/2023-03/BIGFI_exp.sol`
+- **KRC** (2025-05, $7K): `DeFiHackLabs/src/test/2025-05/KRCToken_pair_exp.sol`
+- **Sheep** (2023-02, $3K): `DeFiHackLabs/src/test/2023-02/Sheep_exp.sol`
+- **BEVO** (2023-01, $144): `DeFiHackLabs/src/test/2023-01/BEVO_exp.sol`
+- **BUNN** (2023-06, $52): `DeFiHackLabs/src/test/2023-06/BUNN_exp.sol`
+- **FloorDAO** (2023-09, $40): `DeFiHackLabs/src/test/2023-09/FloorDAO_exp.sol`
+- **OLIFE** (2023-04, $32): `DeFiHackLabs/src/test/2023-04/OLIFE_exp.sol`

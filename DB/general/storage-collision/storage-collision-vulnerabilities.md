@@ -375,3 +375,34 @@ rules:
 ## Keywords for Search
 
 `storage collision`, `proxy storage`, `delegatecall storage`, `EIP-1967`, `storage slot`, `implementation storage`, `upgrade storage`, `storage layout`, `storage gap`, `diamond storage`, `facet storage`, `transparent proxy`, `UUPS storage`, `initializer collision`, `unstructured storage`
+
+---
+
+## DeFiHackLabs Real-World Exploits (4 incidents)
+
+**Category**: Storage Collision | **Total Losses**: $129.5M | **Sub-variants**: 1
+
+### Sub-variant Breakdown
+
+#### Storage-Collision/Generic (4 exploits, $129.5M)
+
+- **Telcoin** (2023-12, $124.0M, polygon) | PoC: `DeFiHackLabs/src/test/2023-12/Telcoin_exp.sol`
+- **EFVault** (2023-02, $5.1M, ethereum) | PoC: `DeFiHackLabs/src/test/2023-02/EFVault_exp.sol`
+- **LeverageSIR** (2025-03, $354K, ethereum) | PoC: `DeFiHackLabs/src/test/2025-03/LeverageSIR_exp.sol`
+- *... and 1 more exploits*
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| Telcoin | 2023-12-25 | $124.0M | Storage Collision | polygon |
+| EFVault | 2023-02-24 | $5.1M | Storage Collision | ethereum |
+| LeverageSIR | 2025-03-30 | $354K | Storage SLOT1 collision | ethereum |
+| Audius | 2022-07-23 | $704 | Storage Collision & Malicious Proposal | ethereum |
+
+### Top PoC References
+
+- **Telcoin** (2023-12, $124.0M): `DeFiHackLabs/src/test/2023-12/Telcoin_exp.sol`
+- **EFVault** (2023-02, $5.1M): `DeFiHackLabs/src/test/2023-02/EFVault_exp.sol`
+- **LeverageSIR** (2025-03, $354K): `DeFiHackLabs/src/test/2025-03/LeverageSIR_exp.sol`
+- **Audius** (2022-07, $704): `DeFiHackLabs/src/test/2022-07/Audius_exp.sol`

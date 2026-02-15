@@ -841,3 +841,50 @@ contract OrderIndependentBridge {
 - [LayerZero Integration Issues](../layerzero/layerzero-integration-vulnerabilities.md)
 - [Wormhole Integration Issues](../wormhole/wormhole-integration-vulnerabilities.md)
 - [Hyperlane Integration Issues](../hyperlane/hyperlane-integration-vulnerabilities.md)
+
+---
+
+## DeFiHackLabs Real-World Exploits (8 incidents)
+
+**Category**: Bridge | **Total Losses**: $1936.1M | **Sub-variants**: 3
+
+### Sub-variant Breakdown
+
+#### Bridge/Generic (6 exploits, $1245.1M)
+
+- **Ronin Network** (2022-03, $624.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2022-03/Ronin_exp.sol`
+- **Poly Network** (2021-08, $611.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2021-08/PolyNetwork_exp.sol`
+- **Chainswap** (2021-07, $4.4M, bsc) | PoC: `DeFiHackLabs/src/test/2021-07/Chainswap_exp2.sol`
+- *... and 3 more exploits*
+
+#### Bridge/Modifier Bypass (1 exploits, $611.0M)
+
+- **Poly Network** (2021-08, $611.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2021-08/PolyNetwork_exp.sol`
+
+#### Bridge/Logic Flaw (1 exploits, $80.0M)
+
+- **Qubit Finance** (2022-01, $80.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2022-01/Qubit_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| Ronin Network | 2022-03-29 | $624.0M | Bridge | ethereum |
+| Poly Network | 2021-08-11 | $611.0M | Bridge, getting around modifier through cross-chain message | ethereum |
+| Poly Network | 2021-08-11 | $611.0M | Bridge, getting around modifier through cross-chain message | ethereum |
+| Qubit Finance | 2022-01-28 | $80.0M | Bridge address(0).safeTransferFrom() does not revert | ethereum |
+| Chainswap | 2021-07-10 | $4.4M | Bridge, logic flaw | bsc |
+| Meter | 2022-02-06 | $4.3M | Bridge | moonriver |
+| Chainswap | 2021-07-02 | $800K | Bridge, logic flaw | ethereum |
+| Li.Fi | 2022-03-20 | $570K | Bridges | ethereum |
+
+### Top PoC References
+
+- **Ronin Network** (2022-03, $624.0M): `DeFiHackLabs/src/test/2022-03/Ronin_exp.sol`
+- **Poly Network** (2021-08, $611.0M): `DeFiHackLabs/src/test/2021-08/PolyNetwork_exp.sol`
+- **Poly Network** (2021-08, $611.0M): `DeFiHackLabs/src/test/2021-08/PolyNetwork_exp.sol`
+- **Qubit Finance** (2022-01, $80.0M): `DeFiHackLabs/src/test/2022-01/Qubit_exp.sol`
+- **Chainswap** (2021-07, $4.4M): `DeFiHackLabs/src/test/2021-07/Chainswap_exp2.sol`
+- **Meter** (2022-02, $4.3M): `DeFiHackLabs/src/test/2022-02/Meter_exp.sol`
+- **Chainswap** (2021-07, $800K): `DeFiHackLabs/src/test/2021-07/Chainswap_exp1.sol`
+- **Li.Fi** (2022-03, $570K): `DeFiHackLabs/src/test/2022-03/LiFi_exp.sol`

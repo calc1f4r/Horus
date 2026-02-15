@@ -693,3 +693,40 @@ function approveBytecode(bytes32 hash) external onlyGovernance {
 - [Timelock Bypass](./timelock-bypass.md)
 - [Quorum Manipulation](./quorum-manipulation.md)
 - [Proposal Lifecycle Manipulation](./proposal-lifecycle-manipulation.md)
+
+---
+
+## DeFiHackLabs Real-World Exploits (5 incidents)
+
+**Category**: Governance | **Total Losses**: $100000185.5M | **Sub-variants**: 2
+
+### Sub-variant Breakdown
+
+#### Governance/Malicious Proposal (3 exploits, $100000003.0M)
+
+- **Xave Finance** (2022-10, $100000000.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2022-10/XaveFinance_exp.sol`
+- **Fortress Loans** (2022-05, $3.0M, None) | PoC: `DeFiHackLabs/src/test/2022-05/FortressLoans_exp.sol`
+- **Audius** (2022-07, $704, ethereum) | PoC: `DeFiHackLabs/src/test/2022-07/Audius_exp.sol`
+
+#### Governance/Generic (2 exploits, $182.5M)
+
+- **BeanstalkFarms** (2022-04, $182.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2022-04/Beanstalk_exp.sol`
+- **BuildFinance** (2022-02, $470K, ethereum) | PoC: `DeFiHackLabs/src/test/2022-02/BuildF_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| Xave Finance | 2022-10-09 | $100000000.0M | Malicious Proposal Mint & Transfer Ownership | ethereum |
+| BeanstalkFarms | 2022-04-16 | $182.0M | DAO + Flashloan | ethereum |
+| Fortress Loans | 2022-05-08 | $3.0M | Malicious Proposal & Price Oracle Manipulation | None |
+| BuildFinance | 2022-02-14 | $470K | DAO | ethereum |
+| Audius | 2022-07-23 | $704 | Storage Collision & Malicious Proposal | ethereum |
+
+### Top PoC References
+
+- **Xave Finance** (2022-10, $100000000.0M): `DeFiHackLabs/src/test/2022-10/XaveFinance_exp.sol`
+- **BeanstalkFarms** (2022-04, $182.0M): `DeFiHackLabs/src/test/2022-04/Beanstalk_exp.sol`
+- **Fortress Loans** (2022-05, $3.0M): `DeFiHackLabs/src/test/2022-05/FortressLoans_exp.sol`
+- **BuildFinance** (2022-02, $470K): `DeFiHackLabs/src/test/2022-02/BuildF_exp.sol`
+- **Audius** (2022-07, $704): `DeFiHackLabs/src/test/2022-07/Audius_exp.sol`

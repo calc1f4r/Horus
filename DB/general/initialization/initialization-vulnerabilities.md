@@ -493,3 +493,25 @@ rules:
 ## Keywords for Search
 
 `initialize`, `initializer`, `uninitialized`, `reinitialize`, `_disableInitializers`, `onlyInitializing`, `implementation takeover`, `proxy initialization`, `front-run initialize`, `missing initializer`, `constructor proxy`, `upgradeable initialize`, `initializable`, `reinitializer`
+
+---
+
+## DeFiHackLabs Real-World Exploits (1 incidents)
+
+**Category**: Initialization | **Total Losses**: $1.4M | **Sub-variants**: 1
+
+### Sub-variant Breakdown
+
+#### Initialization/Uninitialized Proxy (1 exploits, $1.4M)
+
+- **PikeFinance** (2024-04, $1.4M, ethereum) | PoC: `DeFiHackLabs/src/test/2024-04/PikeFinance_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| PikeFinance | 2024-04-30 | $1.4M | Uninitialized Proxy | ethereum |
+
+### Top PoC References
+
+- **PikeFinance** (2024-04, $1.4M): `DeFiHackLabs/src/test/2024-04/PikeFinance_exp.sol`

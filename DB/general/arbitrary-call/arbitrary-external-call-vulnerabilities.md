@@ -1008,3 +1008,78 @@ function processRoute(
 - [Missing Validations](../missing-validations/MISSING_VALIDATION_TEMPLATE.md)
 - [Flash Loan Attacks](../flash-loan-attacks/FLASH_LOAN_VULNERABILITIES.md)
 - [Proxy Pattern Vulnerabilities](../proxy-vulnerabilities/PROXY_PATTERN_VULNERABILITIES.md)
+
+---
+
+## DeFiHackLabs Real-World Exploits (30 incidents)
+
+**Category**: Arbitrary Call | **Total Losses**: $19.1M | **Sub-variants**: 4
+
+### Sub-variant Breakdown
+
+#### Arbitrary-Call/Generic (27 exploits, $14.6M)
+
+- **Seneca** (2024-02, $6.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2024-02/Seneca_exp.sol`
+- **UnizenIO** (2024-03, $2.0M, ethereum) | PoC: `DeFiHackLabs/src/test/2024-03/UnizenIO_exp.sol`
+- **Rubic** (2022-12, $1.5M, ethereum) | PoC: `DeFiHackLabs/src/test/2022-12/Rubic_exp.sol`
+- *... and 24 more exploits*
+
+#### Arbitrary-Call/Yul Calldata (1 exploits, $4.5M)
+
+- **1inch FusionV1 Settlement** (2025-03, $4.5M, None)
+
+#### Arbitrary-Call/Address Spoofing (1 exploits, $85)
+
+- **TIME** (2023-12, $85, ethereum) | PoC: `DeFiHackLabs/src/test/2023-12/TIME_exp.sol`
+
+#### Arbitrary-Call/Unchecked External (1 exploits, N/A)
+
+- **DDC** (2022-08, N/A, bsc) | PoC: `DeFiHackLabs/src/test/2022-08/DDC_exp.sol`
+
+### Complete DeFiHackLabs Exploit Table
+
+| Protocol | Date | Loss | Vulnerability Sub-type | Chain |
+|----------|------|------|----------------------|-------|
+| Seneca | 2024-02-28 | $6.0M | Arbitrary External Call Vulnerability | ethereum |
+| 1inch FusionV1 Settlement | 2025-03-05 | $4.5M | Arbitrary Yul Calldata | None |
+| UnizenIO | 2024-03-09 | $2.0M | unverified external call | ethereum |
+| Rubic | 2022-12-25 | $1.5M | Arbitrary External Call Vulnerability | ethereum |
+| Dexible | 2023-02-17 | $1.5M | Arbitrary External Call Vulnerability | ethereum |
+| MEVBOT | 2022-09-28 | $1.5M | Arbitrary Call | ethereum |
+| Auctus | 2022-03-26 | $726K | Arbitrary Call | ethereum |
+| MEV_0ad8 | 2022-11-08 | $282K | Arbitrary call | ethereum |
+| Rabby Wallet SwapRouter | 2022-10-11 | $200K | Arbitrary External Call Vulnerability | ethereum |
+| ChaingeFinance | 2024-04-15 | $200K | Arbitrary External Call | bsc |
+| CowSwap | 2023-02-07 | $120K | Arbitrary External Call Vulnerability | ethereum |
+| BmiZapper | 2024-01-17 | $114K | Arbitrary external call vulnerability | ethereum |
+| Phoenix | 2023-03-07 | $100K | Access Control & Arbitrary External Call | polygon |
+| BrahTOPG | 2022-11-09 | $89K | Arbitrary External Call Vulnerability | ethereum |
+| UniBotRouter | 2023-10-31 | $84K | Arbitrary External Call | ethereum |
+| AAVE | 2024-08-28 | $52K | Arbitrary Call Error | None |
+| Rico | 2024-04-20 | $36K | Arbitrary Call | arbitrum |
+| RevertFinance | 2023-02-18 | $30K | Arbitrary External Call Vulnerability | ethereum |
+| Bebop | 2025-08-12 | $21K | Arbitrary user input | arbitrum |
+| Kame | 2025-09-13 | $18K | Arbitary External Call | sei |
+| MIMSpell | 2023-06-20 | $17K | Arbitrary External Call Vulnerability | ethereum |
+| MixedSwapRouter | 2024-05-31 | $10K | Arbitrary Call | arbitrum |
+| MulticallWithETH | 2025-07-26 | $10K | arbitrary-call | bsc |
+| YodlRouter | 2024-08-14 | $5K | Arbitrary Call | ethereum |
+| DEXRouter | 2023-09-29 | $4K | Arbitrary External Call | bsc |
+| MaestroRouter2 | 2023-10-24 | $280 | Arbitrary External Call | ethereum |
+| TIME | 2023-12-06 | $85 | Arbitrary Address Spoofing Attack | ethereum |
+| UnverifiedContr_0x00C409 | 2024-04-17 | $18 | unverified external call | None |
+| MulticallWithoutCheck | 2022-10-24 | N/A | Arbitrary External Call Vulnerability | polygon |
+| DDC | 2022-08-28 | N/A | Unchecked External Calls | bsc |
+
+### Top PoC References
+
+- **Seneca** (2024-02, $6.0M): `DeFiHackLabs/src/test/2024-02/Seneca_exp.sol`
+- **UnizenIO** (2024-03, $2.0M): `DeFiHackLabs/src/test/2024-03/UnizenIO_exp.sol`
+- **Rubic** (2022-12, $1.5M): `DeFiHackLabs/src/test/2022-12/Rubic_exp.sol`
+- **Dexible** (2023-02, $1.5M): `DeFiHackLabs/src/test/2023-02/Dexible_exp.sol`
+- **MEVBOT** (2022-09, $1.5M): `DeFiHackLabs/src/test/2022-09/MEVbadc0de_exp.sol`
+- **Auctus** (2022-03, $726K): `DeFiHackLabs/src/test/2022-03/Auctus_exp.sol`
+- **MEV_0ad8** (2022-11, $282K): `DeFiHackLabs/src/test/2022-11/MEV_0ad8_exp.sol`
+- **Rabby Wallet SwapRouter** (2022-10, $200K): `DeFiHackLabs/src/test/2022-10/RabbyWallet_SwapRouter_exp.sol`
+- **ChaingeFinance** (2024-04, $200K): `DeFiHackLabs/src/test/2024-04/ChaingeFinance_exp.sol`
+- **CowSwap** (2023-02, $120K): `DeFiHackLabs/src/test/2023-02/CowSwap_exp.sol`
