@@ -175,6 +175,48 @@ Each pattern in a manifest looks like:
 
 ---
 
+## Exhaustive Search (Audit Mode)
+
+When running a full audit via `audit-orchestrator`, use maximum-depth search:
+
+### Strategy
+
+1. **Load ALL manifests** relevant to the detected protocol type(s) — union manifests from all matched `protocolContext.mappings` entries
+2. **Always include** `general-security` and `unique` as baseline manifests
+3. **Keyword cross-check**: Load `DB/manifests/keywords.json`, scan target code for keyword hits, and add any newly-discovered manifests
+4. **If no protocol detected**: Load all 11 manifests (fallback for unknown codebases)
+
+### Per-Manifest Search Sequence
+
+For each loaded manifest:
+
+```
+1. Parse all patterns → extract codeKeywords arrays
+2. Build a combined regex: "keyword1|keyword2|keyword3|..."
+3. Search target codebase: grep -rn "regex" <path> --include="*.sol"
+4. For each hit:
+   a. Record: pattern ID, target file, target line, matched keyword
+   b. Score relevance: exact keyword match → HIGH, partial → MEDIUM
+5. For HIGH-relevance hits:
+   a. Read DB vulnerability content: read_file(DB/<path>.md, lineStart, lineEnd)
+   b. Compare vulnerable pattern against target code
+   c. Classify: true positive / likely positive / false positive
+```
+
+### Context Cost (Exhaustive)
+
+| Action | Lines | Notes |
+|--------|-------|-------|
+| Read index.json | ~330 | One-time |
+| Load keywords.json | ~500 | One-time keyword scan |
+| Load 1 manifest | 1000-4500 | Per manifest |
+| Read 1 matched pattern | 50-200 | Per HIGH-relevance hit |
+| **Total for full audit** | ~5000-15000 | Spread across sub-agent context windows |
+
+The orchestrator manages context budget by loading manifests one at a time, extracting keywords, then discarding the manifest before loading the next.
+
+---
+
 ## Regenerating Manifests
 
 When vulnerability files are added or updated, re-run:

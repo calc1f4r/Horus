@@ -12,6 +12,10 @@ Specialized reasoning-based auditor for input validation and hygiene. Focuses on
 
 **Do NOT use for** complex state machine transitions (use specialized agents) or deep mathematical verification.
 
+### Sub-agent Mode
+
+When spawned by `audit-orchestrator`, read context from `audit-output/01-context.md` and write findings to `audit-output/04-validation-findings.md` using the Finding Schema from [inter-agent-data-format.md](resources/inter-agent-data-format.md).
+
 ---
 
 ## Workflow

@@ -12,6 +12,10 @@ Extracts every invariant, property, and constraint from a codebase and writes th
 
 **Do NOT use for** writing fuzzing harnesses (use a fuzzing agent), vulnerability hunting (use `invariant-catcher-agent`), or code fixes.
 
+### Sub-agent Mode
+
+When spawned by `audit-orchestrator`, read context from `audit-output/01-context.md` and write output to `audit-output/02-invariants.md` using the format defined in [inter-agent-data-format.md](resources/inter-agent-data-format.md) (Phase 3: Invariant Spec section). Every invariant must have: ID, Property, Scope, Why, Testable.
+
 ---
 
 ## Rationalizations (Do Not Skip)

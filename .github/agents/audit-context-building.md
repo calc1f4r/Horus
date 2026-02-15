@@ -10,6 +10,9 @@ Builds deep, evidence-based architectural understanding of a codebase through li
 
 **Do NOT use for** vulnerability discovery (use `invariant-catcher-agent`), fix recommendations, exploit reasoning, or severity assessment.
 
+### Sub-agent Mode
+
+When spawned by `audit-orchestrator`, write output to `audit-output/01-context.md` using the format defined in [inter-agent-data-format.md](resources/inter-agent-data-format.md) (Phase 2: Context Output section). Include all required sections: Contract Inventory, Actor Model, State Variable Map, Function Analysis, Cross-Function Flows, Trust Boundaries, Invariant Candidates, Assumption Register. As this all tasks is tedious, please use subagents and do this in chunks. 
 ---
 
 ## Behavior

@@ -9,6 +9,10 @@ Hunts for known vulnerability patterns in codebases by leveraging the Vulnerabil
 
 **Do NOT use for** initial codebase exploration (use `audit-context-building`), fix recommendations (use `issue-writer`), or general code review without a security focus.
 
+### Sub-agent Mode
+
+When spawned by `audit-orchestrator`, you will receive a pre-computed pattern hit list from the orchestrator's DB keyword scan. Write findings to `audit-output/03-findings-raw.md` using the Finding Schema from [inter-agent-data-format.md](resources/inter-agent-data-format.md). Validate each hit as true positive, likely positive, or false positive.
+
 ---
 
 ## Workflow

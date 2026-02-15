@@ -152,3 +152,107 @@ python3 generate_manifests.py
 | `Example.md` | Reference implementation of an entry |
 | `generate_manifests.py` | Re-generates manifests after DB changes |
 
+---
+
+## Audit Orchestrator — General Purpose Audit Agent
+
+The `audit-orchestrator` agent (`.github/agents/audit-orchestrator.md`) is the **primary entry point** for auditing an unfamiliar codebase. It takes a codebase path and an optional protocol hint, then runs a 7-phase pipeline using specialized sub-agents.
+
+### Invocation
+
+```
+@audit-orchestrator <codebase-path> [protocol-hint]
+```
+
+### Pipeline
+
+```
+Phase 1: Reconnaissance      → Protocol detection, scope, manifest resolution
+Phase 2: Context Building     → Sub-agent: audit-context-building
+Phase 3: Invariant Extraction → Sub-agent: invariant-writer
+Phase 4: DB-powered Hunting   → Self (DB search) + Sub-agent: invariant-catcher
+Phase 5: Validation Gaps      → Sub-agent: missing-validation-reasoning
+Phase 6: Triage & PoC         → Self + Sub-agent: poc-writing
+Phase 7: Downstream Gen       → Sub-agents: medusa-fuzzing, certora-verification,
+                                 sherlock-judging, cantina-judge
+Final:   Report Assembly      → Produces audit-output/AUDIT-REPORT.md
+```
+
+### Agent Dependency Graph
+
+```
+                        ┌─────────────────────┐
+                        │  audit-orchestrator  │  ← ENTRY POINT
+                        └──────────┬──────────┘
+                                   │
+          ┌────────────────────────┼────────────────────────┐
+          │                        │                        │
+          ▼                        ▼                        ▼
+┌──────────────────┐  ┌────────────────────┐  ┌──────────────────────┐
+│ audit-context-   │  │ invariant-catcher  │  │ missing-validation-  │
+│ building         │  │                    │  │ reasoning            │
+└────────┬─────────┘  └────────────────────┘  └──────────────────────┘
+         │
+         ▼
+┌──────────────────┐
+│ invariant-writer │
+└────────┬─────────┘
+         │
+    ┌────┴────┐
+    ▼         ▼
+┌────────┐ ┌──────────┐
+│ medusa │ │ certora  │
+│ fuzzing│ │ verif.   │
+└────────┘ └──────────┘
+
+Post-triage:
+  ├── poc-writing (per CRITICAL/HIGH finding)
+  ├── issue-writer (polishes findings for submission)
+  ├── sherlock-judging (severity validation)
+  └── cantina-judge (severity validation)
+```
+
+### Data Pipeline Producers & Consumers
+
+| Agent | Produces | Consumes |
+|-------|----------|----------|
+| `audit-orchestrator` | `00-scope.md`, `05-findings-triaged.md`, `AUDIT-REPORT.md` | All outputs |
+| `audit-context-building` | `01-context.md` | Scope |
+| `invariant-writer` | `02-invariants.md` | Context |
+| `invariant-catcher` | `03-findings-raw.md` | Manifests, invariants, pattern hit list |
+| `missing-validation-reasoning` | `04-validation-findings.md` | Context |
+| `poc-writing` | `pocs/F-NNN-poc.t.sol` | Individual findings |
+| `issue-writer` | Polished submission | Individual findings |
+| `medusa-fuzzing` | `fuzzing/` harnesses | Invariant specs |
+| `certora-verification` | `certora/` specs | Invariant specs |
+| `sherlock-judging` | `06-sherlock-validation.md` | Triaged findings |
+| `cantina-judge` | `07-cantina-validation.md` | Triaged findings |
+
+### New Resource Files
+
+| Resource | Purpose |
+|----------|---------|
+| `.github/agents/resources/inter-agent-data-format.md` | Standardized data contracts between pipeline phases |
+| `.github/agents/resources/protocol-detection.md` | Auto-classification decision tree for codebases |
+| `.github/agents/resources/audit-report-template.md` | Final report structure and quality checklist |
+| `.github/agents/resources/orchestration-pipeline.md` | 7-phase pipeline with error handling and context budgets |
+
+### All Agents
+
+| Agent | File | Purpose |
+|-------|------|---------|
+| `audit-orchestrator` | `.github/agents/audit-orchestrator.md` | **Entry point** — orchestrates full audit pipeline |
+| `audit-context-building` | `.github/agents/audit-context-building.md` | Line-by-line codebase analysis |
+| `invariant-writer` | `.github/agents/invariant-writer-agent.md` | Extracts all system invariants |
+| `invariant-catcher` | `.github/agents/invariant-catcher-agent.md` | Hunts for DB vulnerability patterns |
+| `missing-validation-reasoning` | `.github/agents/missing-validation-reasoning-agent.md` | Input validation scanner |
+| `poc-writing` | `.github/agents/poc-writer-agent.md` | Writes Foundry/Hardhat exploit tests |
+| `issue-writer` | `.github/agents/issue-writer-agent.md` | Polishes findings for submission |
+| `medusa-fuzzing` | `.github/agents/medusa-fuzzing-agent.md` | Generates Medusa fuzzing harnesses |
+| `certora-verification` | `.github/agents/certora-verification-agent.md` | Generates Certora CVL specs |
+| `sherlock-judging` | `.github/agents/sherlock-judge-agent.md` | Validates against Sherlock criteria |
+| `cantina-judge` | `.github/agents/cantina-judge-agent.md` | Validates against Cantina criteria |
+| `variant-template-writer` | `.github/agents/variant-template-writer.agent.md` | Creates DB entries from reports |
+| `defihacklabs-indexer` | `.github/agents/defihacklabs-indexer.agent.md` | Indexes DeFiHackLabs exploits |
+| `solodit-fetching` | `.github/agents/solodit-fetching-agent.md` | Fetches reports from Solodit API |
+
