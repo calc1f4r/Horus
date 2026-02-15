@@ -52,6 +52,7 @@ Audit Progress:
 - [ ] Phase 2: Deep context building (sub-agent)
 - [ ] Phase 3: Invariant extraction (sub-agent)
 - [ ] Phase 4: DB-powered vulnerability hunting (sub-agent + self)
+- [ ] Phase 4a: Reasoning-based vulnerability discovery (sub-agent)
 - [ ] Phase 5: Validation gap analysis (sub-agent)
 - [ ] Phase 6: Triage, deduplication & PoC generation
 - [ ] Phase 7: Fuzzing + formal verification + judging
@@ -280,6 +281,56 @@ Merge Track A keyword hits (as candidate findings) with Track B validated findin
 
 ---
 
+## Phase 4a: Reasoning-Based Vulnerability Discovery
+
+**Agent**: Spawn `protocol-reasoning-agent` sub-agent
+**Output**: `audit-output/04a-reasoning-findings.md`
+
+This phase uses deep reasoning (not pattern matching) to discover vulnerabilities that Phase 4's keyword scan would miss — novel bugs, emergent cross-domain interactions, and assumption violations.
+
+### Spawn Instructions
+
+```
+Perform deep reasoning-based vulnerability discovery on the target codebase.
+
+TARGET CODEBASE: <path>
+PROTOCOL TYPE: <detected types>
+
+PIPELINE CONTEXT:
+  - Read audit-output/01-context.md for architecture and function analysis
+  - Read audit-output/02-invariants.md for invariant specifications
+  - Read audit-output/03-findings-raw.md for existing pattern-matched findings (avoid duplicates)
+
+MANIFEST LIST: <resolved manifests from Phase 1>
+
+Perform your full 6-phase workflow:
+  Phase A: Load context & extract reasoning seeds from DB root causes
+  Phase B: Decompose codebase into domains
+  Phase C: Round 1 — Standard per-domain analysis (spawn domain sub-agents)
+  Phase D: Round 2 — Cross-domain interaction analysis
+  Phase E: Round 3 — Edge cases and boundary conditions
+  Phase F: Round 4 — Completeness check and adversarial review
+
+SEVERITY FILTER: Only report MEDIUM, HIGH, or CRITICAL findings.
+Every finding MUST include a reachability proof.
+
+Write output to audit-output/04a-reasoning-findings.md using the Finding Schema
+from resources/inter-agent-data-format.md (Phase 4a section).
+```
+
+### Verify Output
+
+After sub-agent returns, verify `audit-output/04a-reasoning-findings.md` exists and contains:
+- Domain map
+- Reasoning seed catalog (summarized)
+- Findings with reachability proofs
+
+### Error Recovery
+
+If sub-agent fails, retry once with reduced scope (top 3 domains only, 2 rounds instead of 4). If still fails, log the error and continue — Phase 4 findings are still valid.
+
+---
+
 ## Phase 5: Validation Gap Analysis
 
 **Agent**: Spawn `missing-validation-reasoning` sub-agent
@@ -323,6 +374,7 @@ After this sub-agent completes, merge its findings into the combined finding lis
 
 Collect all findings from:
 - `audit-output/03-findings-raw.md`
+- `audit-output/04a-reasoning-findings.md`
 - `audit-output/04-validation-findings.md`
 
 ### Step 2: Deduplicate by Root Cause
@@ -530,7 +582,7 @@ Before delivering the final report, verify ALL items:
 
 ```
 Final Verification:
-- [ ] All 7 phases completed or explicitly skipped with documented reason
+- [ ] All 8 phases (1-4, 4a, 5-7) completed or explicitly skipped with documented reason
 - [ ] audit-output/ directory contains all expected files
 - [ ] Every finding has: root cause, affected code (file+lines), severity, confidence
 - [ ] CRITICAL and HIGH findings have PoC references (or documented reason why not)
@@ -554,6 +606,8 @@ Final Verification:
 - **Inter-agent data format**: [inter-agent-data-format.md](resources/inter-agent-data-format.md)
 - **Protocol detection**: [protocol-detection.md](resources/protocol-detection.md)
 - **Report template**: [audit-report-template.md](resources/audit-report-template.md)
+- **Reasoning skills**: [reasoning-skills.md](resources/reasoning-skills.md)
+- **Domain decomposition**: [domain-decomposition.md](resources/domain-decomposition.md)
 - **Root cause analysis**: [root-cause-analysis.md](resources/root-cause-analysis.md)
 - **Vulnerability taxonomy**: [vulnerability-taxonomy.md](resources/vulnerability-taxonomy.md)
 - **DB search guide**: [DB/SEARCH_GUIDE.md](../../DB/SEARCH_GUIDE.md)

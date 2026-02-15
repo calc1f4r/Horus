@@ -36,6 +36,13 @@ User Input: @audit-orchestrator <path> [hint]
                │ rawFindings (F-NNN)
                ▼
 ┌─────────────────────────────────────┐
+│ Phase 4a: REASONING DISCOVERY       │  Sub-agent: protocol-reasoning-agent
+│ Domain decomposition, 4-round deep  │  Output: 04a-reasoning-findings.md
+│ reasoning, reachability proofs      │  (spawns domain sub-agents internally)
+└──────────────┬──────────────────────┘
+               │ reasoningFindings (F-4a-NNN)
+               ▼
+┌─────────────────────────────────────┐
 │ Phase 5: VALIDATION GAP ANALYSIS    │  Sub-agent: missing-validation-reasoning
 │ Input validation, access control    │  Output: 04-validation-findings.md
 └──────────────┬──────────────────────┘
@@ -199,9 +206,45 @@ Write ALL findings to audit-output/03-findings-raw.md using the Finding Schema
 from resources/inter-agent-data-format.md.
 ```
 
-**Transition**: Read raw findings, pass to Phase 5 alongside context.
+**Transition**: Read raw findings, pass to Phase 4a alongside context.
 
 **Error handling**: If invariant-catcher sub-agent fails, use the self-driven DB search results as raw findings (lower confidence but still useful).
+
+---
+
+### Phase 4a: Reasoning-Based Discovery
+
+| Attribute | Value |
+|-----------|-------|
+| **Agent** | `protocol-reasoning-agent` (sub-agent) |
+| **Input** | Codebase path + context + invariants + Phase 4 findings + manifest list |
+| **Output** | `audit-output/04a-reasoning-findings.md` |
+| **Estimated context** | Large — sub-agent manages its own context, spawns domain sub-agents |
+
+**Sub-agent prompt template**:
+```
+You are the protocol-reasoning-agent. Perform deep reasoning-based vulnerability discovery.
+
+TARGET CODEBASE: <path>
+PROTOCOL TYPE: <detected types>
+MANIFEST LIST: <manifests>
+
+PIPELINE CONTEXT:
+  - Read audit-output/01-context.md for architecture
+  - Read audit-output/02-invariants.md for invariants
+  - Read audit-output/03-findings-raw.md to avoid duplicates
+
+Perform your full 6-phase workflow (Seeds → Domains → Round 1-4 → Merge).
+Severity filter: MEDIUM, HIGH, CRITICAL only.
+Every finding requires a reachability proof.
+
+Write output to audit-output/04a-reasoning-findings.md following the format in
+resources/inter-agent-data-format.md (Phase 4a section).
+```
+
+**Transition**: Read reasoning findings, merge with Phase 4 raw findings, pass to Phase 5.
+
+**Error handling**: If sub-agent fails, retry once with reduced scope (top 3 domains, 2 rounds). If still fails, log and continue — Phase 4 findings remain valid.
 
 ---
 
@@ -244,7 +287,7 @@ numeric bounds, access control gaps, contract existence checks.
 | **Estimated context** | Variable — per-finding PoC spawns |
 
 **Triage sequence**:
-1. **Merge** all findings from `03-findings-raw.md` and `04-validation-findings.md`
+1. **Merge** all findings from `03-findings-raw.md`, `04a-reasoning-findings.md`, and `04-validation-findings.md`
 2. **Deduplicate** by root cause — group findings that share the same underlying issue
 3. **Falsification** — for each finding, apply the 5-check falsification protocol from [root-cause-analysis.md](root-cause-analysis.md):
    - Is there a check I missed that prevents this?
@@ -298,7 +341,8 @@ For each CRITICAL/HIGH finding:
 | 3 | Invariant extraction fails | Use invariant candidates from Phase 2 directly |
 | 4 | DB search finds no matches | Proceed — novel vulnerabilities possible |
 | 4 | Invariant-catcher fails | Use self-driven DB search results |
-| 5 | Validation agent fails | Skip — Phase 4 findings still valid |
+| 4a | Reasoning agent timeout | Retry with top 3 domains + 2 rounds; skip if still fails |
+| 5 | Validation agent fails | Skip — Phase 4+4a findings still valid |
 | 6 | PoC generation fails | Document finding without PoC; add note |
 | 7 | Any downstream fails | Note in report; don't block assembly |
 | Final | Severity disagreement | Use LOWER rating (conservative) |
@@ -314,6 +358,7 @@ For each CRITICAL/HIGH finding:
 | 3 | Delegated | Sub-agent manages own context |
 | 4 (self) | 2000 | Load manifests one at a time, discard after keyword extraction |
 | 4 (sub) | Delegated | Sub-agent manages own context |
+| 4a | Delegated | Sub-agent manages own context; spawns domain sub-agents |
 | 5 | Delegated | Sub-agent manages own context |
 | 6 | 1500 | Merge findings, deduplicate, triage |
 | 7 | Delegated | Sub-agents manage own context |

@@ -171,6 +171,7 @@ Phase 1: Reconnaissance      → Protocol detection, scope, manifest resolution
 Phase 2: Context Building     → Sub-agent: audit-context-building
 Phase 3: Invariant Extraction → Sub-agent: invariant-writer
 Phase 4: DB-powered Hunting   → Self (DB search) + Sub-agent: invariant-catcher
+Phase 4a: Reasoning Discovery  → Sub-agent: protocol-reasoning-agent
 Phase 5: Validation Gaps      → Sub-agent: missing-validation-reasoning
 Phase 6: Triage & PoC         → Self + Sub-agent: poc-writing
 Phase 7: Downstream Gen       → Sub-agents: medusa-fuzzing, certora-verification,
@@ -192,11 +193,12 @@ Final:   Report Assembly      → Produces audit-output/AUDIT-REPORT.md
 │ audit-context-   │  │ invariant-catcher  │  │ missing-validation-  │
 │ building         │  │                    │  │ reasoning            │
 └────────┬─────────┘  └────────────────────┘  └──────────────────────┘
-         │
-         ▼
-┌──────────────────┐
-│ invariant-writer │
-└────────┬─────────┘
+         │                                     
+         ▼                                     ┌──────────────────────┐
+┌──────────────────┐                           │ protocol-reasoning-  │
+│ invariant-writer │                           │ agent (spawns domain │
+└────────┬─────────┘                           │ sub-agents)          │
+         │                                     └──────────────────────┘
          │
     ┌────┴────┐
     ▼         ▼
@@ -220,6 +222,7 @@ Post-triage:
 | `audit-context-building` | `01-context.md` | Scope |
 | `invariant-writer` | `02-invariants.md` | Context |
 | `invariant-catcher` | `03-findings-raw.md` | Manifests, invariants, pattern hit list |
+| `protocol-reasoning-agent` | `04a-reasoning-findings.md` | Context, invariants, raw findings, manifests |
 | `missing-validation-reasoning` | `04-validation-findings.md` | Context |
 | `poc-writing` | `pocs/F-NNN-poc.t.sol` | Individual findings |
 | `issue-writer` | Polished submission | Individual findings |
@@ -236,6 +239,8 @@ Post-triage:
 | `.github/agents/resources/protocol-detection.md` | Auto-classification decision tree for codebases |
 | `.github/agents/resources/audit-report-template.md` | Final report structure and quality checklist |
 | `.github/agents/resources/orchestration-pipeline.md` | 7-phase pipeline with error handling and context budgets |
+| `.github/agents/resources/reasoning-skills.md` | Core reasoning framework for deep vulnerability analysis |
+| `.github/agents/resources/domain-decomposition.md` | Domain decomposition strategy for reasoning agent |
 
 ### All Agents
 
@@ -245,6 +250,7 @@ Post-triage:
 | `audit-context-building` | `.github/agents/audit-context-building.md` | Line-by-line codebase analysis |
 | `invariant-writer` | `.github/agents/invariant-writer-agent.md` | Extracts all system invariants |
 | `invariant-catcher` | `.github/agents/invariant-catcher-agent.md` | Hunts for DB vulnerability patterns |
+| `protocol-reasoning-agent` | `.github/agents/protocol-reasoning-agent.md` | Deep reasoning-based vulnerability discovery |
 | `missing-validation-reasoning` | `.github/agents/missing-validation-reasoning-agent.md` | Input validation scanner |
 | `poc-writing` | `.github/agents/poc-writer-agent.md` | Writes Foundry/Hardhat exploit tests |
 | `issue-writer` | `.github/agents/issue-writer-agent.md` | Polishes findings for submission |

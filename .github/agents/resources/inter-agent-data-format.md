@@ -15,6 +15,7 @@ audit-output/
 ├── 01-context.md            ← Phase 2: Context building
 ├── 02-invariants.md         ← Phase 3: Invariant extraction This should be a folder as there are many invariants, e.g. `02-invariants/INV-001.md`, `02-invariants/INV-002.md`, etc. 
 ├── 03-findings-raw.md       ← Phase 4: DB-powered hunting
+├── 04a-reasoning-findings.md ← Phase 4a: Reasoning-based discovery
 ├── 04-validation-findings.md ← Phase 5: Validation gap analysis
 ├── 05-findings-triaged.md   ← Phase 6: Triage & deduplication
 ├── 06-sherlock-validation.md ← Phase 7: Sherlock judging
@@ -177,6 +178,62 @@ Each invariant MUST have: ID, Property (concrete expression), Scope (files), Why
 
 ---
 
+## Phase 4a: Reasoning Findings (`04a-reasoning-findings.md`)
+
+Produced by `protocol-reasoning-agent`. Extends the standard Finding Schema with reasoning-specific fields.
+
+```markdown
+# Reasoning-Based Findings (Phase 4a)
+
+## Summary
+| Severity | Count |
+|----------|-------|
+| CRITICAL | N |
+| HIGH | N |
+| MEDIUM | N |
+| **Total** | **N** |
+
+## Domain Map
+### Domain: [Name]
+- **Files**: [contract1.sol, contract2.sol]
+- **Functions**: [function list]
+- **Key State**: [state variables]
+- **Interfaces**: [cross-domain connections]
+
+## Reasoning Seed Catalog (Summary)
+### Input Seeds: N seeds applied
+### State Seeds: N seeds applied
+### Ordering Seeds: N seeds applied
+### Economic Seeds: N seeds applied
+### Environmental Seeds: N seeds applied
+
+## Findings
+(Each finding uses the extended Finding Schema below)
+```
+
+### Extended Finding Schema for Phase 4a
+
+Phase 4a findings use the standard Finding Schema (below) PLUS these additional fields:
+
+```markdown
+| **Reasoning Type** | standard / cross-domain / edge-case / completeness |
+| **Round Discovered** | 1 / 2 / 3 / 4 |
+| **Assumption Violated** | Layer N — [Input/State/Ordering/Economic/Environmental] |
+| **DB Seed Reference** | SEED-X-NNN (generalized from <pattern-id>) or "Novel — no seed" |
+
+#### Reachability Proof
+Step 1: [Actor] calls [function(args)] → state S_0 transitions to S_1
+  WHY: [function is externally callable, args are controllable]
+Step 2: [Actor] calls [function(args)] → S_1 transitions to S_2
+  WHY: [precondition met because of S_1]
+...
+Step N: State is now S_vulnerable
+  VERIFICATION: S_vulnerable violates [invariant/assumption]
+  IMPACT: [concrete quantified damage]
+```
+
+---
+
 ## Finding Schema (Phases 3-6)
 
 Every finding across all phases MUST use this format:
@@ -287,10 +344,13 @@ Phase 3 (Invariants) ←── reads invariantCandidates
 Phase 4 (Hunting) ←── reads manifestList + invariant specs
          │──→ raw findings (F-NNN)
          │
+Phase 4a (Reasoning) ←── reads context + invariants + raw findings + manifests
+         │──→ reasoning findings (F-4a-NNN) with reachability proofs
+         │
 Phase 5 (Validation) ←── reads filesInScope + context
          │──→ additional findings (F-NNN)
          │
-Phase 6 (Triage) ←── reads all findings
+Phase 6 (Triage) ←── reads all findings (03 + 04a + 04)
          │──→ deduplicated, scored findings + PoCs
          │
 Phase 7 (Downstream) ←── reads invariant specs + triaged findings
