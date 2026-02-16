@@ -2,8 +2,8 @@
   "meta": {
     "category": "unique",
     "description": "Pattern-level index for unique vulnerabilities",
-    "fileCount": 20,
-    "totalPatterns": 68,
+    "fileCount": 21,
+    "totalPatterns": 79,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
   },
   "files": [
@@ -1027,6 +1027,410 @@
               "codeKeywords": []
             }
           ]
+        }
+      ]
+    },
+    {
+      "file": "DB/unique/defihacklabs/defihacklabs-novel-attack-patterns-2025-2026.md",
+      "totalLines": 747,
+      "frontmatter": {
+        "protocol": "\"generic\"",
+        "chain": "\"ethereum, base, bsc, arbitrum\"",
+        "category": "\"novel_attack_vectors\"",
+        "vulnerability_type": "\"transient_storage_bypass, fee_overcharge, reward_farming, batch_refund, bonding_curve_overflow, fee_unit_mismatch, permissionless_oracle\"",
+        "attack_type": "\"logical_error, arithmetic_overflow, state_manipulation\"",
+        "affected_component": "\"tstore_auth, transfer_fee, staking_rewards, sale_refund, bonding_curve, fee_manager, aum_oracle\"",
+        "severity": "\"critical\"",
+        "impact": "\"fund_loss\"",
+        "exploitability": "0.75",
+        "financial_impact": "\"critical\"",
+        "language": "\"solidity\"",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 11,
+      "patterns": [
+        {
+          "id": "unique-1-transient-storage-eip-1153-authorizati-000",
+          "title": "1. Transient Storage (EIP-1153) Authorization Bypass via CREATE2",
+          "lineStart": 81,
+          "lineEnd": 155,
+          "lineCount": 75,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "ImmutableCreate2Factory.safeCreate2",
+            "amount",
+            "expected",
+            "mint",
+            "tload",
+            "tload(1",
+            "tstore",
+            "uint160(address(this",
+            "uniswapV3SwapCallback",
+            "vault.mint",
+            "vault.uniswapV3SwapCallback"
+          ],
+          "rootCause": "EIP-1153 introduced `tstore`/`tload` opcodes for transient storage that persists only within a single transaction. When a protocol uses transient storage to authorize callbacks (e.g., storing an expec",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 87,
+              "lineEnd": 97,
+              "severity": [],
+              "codeKeywords": [
+                "ImmutableCreate2Factory.safeCreate2",
+                "mint",
+                "tload(1",
+                "uint160(address(this",
+                "vault.mint",
+                "vault.uniswapV3SwapCallback"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 98,
+              "lineEnd": 155,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "amount",
+                "expected",
+                "mint",
+                "uniswapV3SwapCallback"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "unique-2-fee-on-transfer-token-overcharge-amm-s-001",
+          "title": "2. Fee-On-Transfer Token Overcharge + AMM Sync Drain",
+          "lineStart": 156,
+          "lineEnd": 217,
+          "lineCount": 62,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_transfer",
+            "pair.skim(attacker",
+            "pair.sync",
+            "skim",
+            "sync"
+          ],
+          "rootCause": "When a token's `_transfer()` function applies fees based on a percentage list where `sum(shares) > 100%`, the sender is debited more tokens than the recipient receives. When this transfer involves an ",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 162,
+              "lineEnd": 171,
+              "severity": [],
+              "codeKeywords": [
+                "pair.skim(attacker",
+                "pair.sync"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 172,
+              "lineEnd": 217,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "unique-3-staking-reward-farming-via-create2-ide-002",
+          "title": "3. Staking Reward Farming via CREATE2 Identity Rotation",
+          "lineStart": 218,
+          "lineEnd": 287,
+          "lineCount": 70,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "attack",
+            "claimReward",
+            "earned",
+            "execute",
+            "stake"
+          ],
+          "rootCause": "When a staking contract calculates rewards per-address without tracking total claimed amounts globally, an attacker can transfer staked tokens to freshly-deployed contracts (via CREATE2 with increment",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 224,
+              "lineEnd": 232,
+              "severity": [],
+              "codeKeywords": [
+                "claimReward"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 233,
+              "lineEnd": 287,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "attack",
+                "claimReward",
+                "earned",
+                "execute",
+                "stake"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "unique-4-batch-array-refund-multiplication-003",
+          "title": "4. Batch Array Refund Multiplication",
+          "lineStart": 288,
+          "lineEnd": 353,
+          "lineCount": 66,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "buy",
+            "msg.value"
+          ],
+          "rootCause": "When a sale/purchase function accepts arrays of recipients, rates, and refund flags, and processes refunds per-iteration using `msg.value` (which is constant across all iterations), the attacker can s",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 294,
+              "lineEnd": 301,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 302,
+              "lineEnd": 353,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "buy"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "unique-5-bonding-curve-arithmetic-overflow-in-p-004",
+          "title": "5. Bonding Curve Arithmetic Overflow in Price Calculation",
+          "lineStart": 354,
+          "lineEnd": 424,
+          "lineCount": 71,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "THETA",
+            "amount",
+            "buyTRU",
+            "getPurchasePrice",
+            "reserve",
+            "sellTRU",
+            "sellTRU(amount",
+            "solveForAmount",
+            "totalSupply",
+            "type(uint256).max"
+          ],
+          "rootCause": "Bonding curve contracts calculate buy/sell prices using polynomial formulas. When the formula involves `amount × reserve × totalSupply` terms, an attacker can compute an exact `amount` that causes int",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 360,
+              "lineEnd": 367,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "THETA",
+                "reserve",
+                "sellTRU(amount",
+                "totalSupply"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 368,
+              "lineEnd": 424,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "THETA",
+                "buyTRU",
+                "getPurchasePrice",
+                "reserve",
+                "sellTRU",
+                "solveForAmount"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "unique-6-fee-unit-mismatch-between-systems-005",
+          "title": "6. Fee Unit Mismatch Between Systems",
+          "lineStart": 425,
+          "lineEnd": 487,
+          "lineCount": 63,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "addFee",
+            "addFee(tokenAmount",
+            "changePosition",
+            "fee",
+            "feeAmount"
+          ],
+          "rootCause": "When one system computes a fee in **token units** (e.g., 500 USDC) and passes it to another system that **interprets it as basis points or weight** (e.g., 500 = 5%), the receiving system allocates mas",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 431,
+              "lineEnd": 439,
+              "severity": [],
+              "codeKeywords": [
+                "addFee(tokenAmount",
+                "changePosition"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 440,
+              "lineEnd": 487,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "addFee",
+                "changePosition",
+                "fee",
+                "feeAmount"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "unique-7-permissionless-aum-oracle-manipulation-006",
+          "title": "7. Permissionless AUM Oracle Manipulation",
+          "lineStart": 488,
+          "lineEnd": 553,
+          "lineCount": 66,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "MachineShareOracle.getSharePrice",
+            "exchange",
+            "getSharePrice",
+            "machine.updateTotalAum",
+            "updateTotalAum"
+          ],
+          "rootCause": "When a protocol's `updateTotalAum()` function is permissionless (callable by anyone, not just keepers or admins), and its return value feeds into an oracle used by other protocols (e.g., Curve pool), ",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 494,
+              "lineEnd": 501,
+              "severity": [],
+              "codeKeywords": [
+                "MachineShareOracle.getSharePrice",
+                "machine.updateTotalAum"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 502,
+              "lineEnd": 553,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "exchange",
+                "getSharePrice",
+                "updateTotalAum"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "unique-impact-analysis-007",
+          "title": "Impact Analysis",
+          "lineStart": 554,
+          "lineEnd": 584,
+          "lineCount": 31,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "tload",
+            "tstore"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-secure-implementation-008",
+          "title": "Secure Implementation",
+          "lineStart": 585,
+          "lineEnd": 673,
+          "lineCount": 89,
+          "severity": [],
+          "codeKeywords": [
+            "buy",
+            "claimReward",
+            "getPurchasePrice",
+            "mint",
+            "uniswapV3SwapCallback",
+            "updateTotalAum"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-detection-patterns-009",
+          "title": "Detection Patterns",
+          "lineStart": 674,
+          "lineEnd": 699,
+          "lineCount": 26,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "tload",
+            "tstore"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-real-world-examples-010",
+          "title": "Real-World Examples",
+          "lineStart": 700,
+          "lineEnd": 712,
+          "lineCount": 13,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "updateTotalAum"
+          ],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
