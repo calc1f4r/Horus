@@ -2,8 +2,8 @@
   "meta": {
     "category": "general-defi",
     "description": "DeFi-specific: flash loans, slippage, vaults, precision, calculations",
-    "fileCount": 17,
-    "totalPatterns": 141,
+    "fileCount": 19,
+    "totalPatterns": 158,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -3337,6 +3337,302 @@
       ]
     },
     {
+      "file": "DB/general/precision/defihacklabs-precision-share-manipulation-2024-2025.md",
+      "totalLines": 631,
+      "frontmatter": {
+        "protocol": "\"generic\"",
+        "chain": "\"ethereum, arbitrum, optimism, base\"",
+        "category": "\"precision_loss\"",
+        "vulnerability_type": "\"share_price_manipulation, exchange_rate_inflation, elastic_base_rounding\"",
+        "attack_type": "\"economic_exploit\"",
+        "affected_component": "\"exchange_rate, share_accounting, scaling_factors, virtual_balance\"",
+        "severity": "\"critical\"",
+        "impact": "\"fund_loss\"",
+        "exploitability": "0.8",
+        "financial_impact": "\"critical\"",
+        "language": "\"solidity\"",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 10,
+      "patterns": [
+        {
+          "id": "general-defi-1-empty-market-exchange-rate-inflation-v-000",
+          "title": "1. Empty Market Exchange Rate Inflation via Donation",
+          "lineStart": 84,
+          "lineEnd": 163,
+          "lineCount": 80,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "exchangeRate",
+            "totalCash",
+            "totalSupply",
+            "transfer"
+          ],
+          "rootCause": "When Compound V2 fork cToken markets are newly deployed with zero total supply, the `exchangeRate = totalCash / totalSupply` formula becomes exploitable. An attacker mints minimal shares (1-2 wei), th",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 90,
+              "lineEnd": 98,
+              "severity": [],
+              "codeKeywords": [
+                "exchangeRate",
+                "transfer"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 99,
+              "lineEnd": 163,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-2-elastic-base-rebase-math-rounding-expl-001",
+          "title": "2. Elastic/Base Rebase Math Rounding Exploitation",
+          "lineStart": 164,
+          "lineEnd": 216,
+          "lineCount": 53,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "base",
+            "borrowPart",
+            "elastic",
+            "exploit",
+            "mulDiv",
+            "repay",
+            "repayForAll",
+            "toBase",
+            "toElastic",
+            "totalBorrow.elastic"
+          ],
+          "rootCause": "Kashi-based lending protocols (BentoBox/DegenBox) track debt using an elastic/base rebase structure where `elastic` represents the actual token amount and `base` represents shares. The conversion func",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 170,
+              "lineEnd": 178,
+              "severity": [],
+              "codeKeywords": [
+                "borrowPart",
+                "repay",
+                "repayForAll",
+                "totalBorrow.elastic"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 179,
+              "lineEnd": 216,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "exploit"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-3-liquidityindex-inflation-via-recursive-002",
+          "title": "3. LiquidityIndex Inflation via Recursive Flash Loans",
+          "lineStart": 217,
+          "lineEnd": 273,
+          "lineCount": 57,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "liquidityIndex",
+            "rayDiv",
+            "siphonFundsFromPool"
+          ],
+          "rootCause": "Aave V2 fork lending pools that allow flash loans from their own pool create a recursive amplification vector. Each flash loan from the pool accumulates a premium that inflates the `liquidityIndex`. A",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 223,
+              "lineEnd": 231,
+              "severity": [],
+              "codeKeywords": [
+                "liquidityIndex",
+                "rayDiv"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 232,
+              "lineEnd": 273,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "siphonFundsFromPool"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-4-scaling-factor-precision-loss-in-stabl-003",
+          "title": "4. Scaling Factor Precision Loss in StableMath",
+          "lineStart": 274,
+          "lineEnd": 329,
+          "lineCount": 56,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "batchSwap"
+          ],
+          "rootCause": "Balancer V2 ComposableStablePools use scaling factors to normalize token amounts with different decimals or wrapped token rates (e.g., wstETH, osETH). The `FixedPoint.mulDown(amount, scalingFactor)` o",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 280,
+              "lineEnd": 286,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 287,
+              "lineEnd": 329,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-5-share-price-inflation-via-direct-contr-004",
+          "title": "5. Share Price Inflation via Direct Contract Donation",
+          "lineStart": 330,
+          "lineEnd": 412,
+          "lineCount": 83,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "totalAssets"
+          ],
+          "rootCause": "When vault or lending protocols use `totalAssets() / totalShares()` for share pricing and rely on the contract's token balance for `totalAssets()`, an attacker can donate tokens directly to the underl",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 336,
+              "lineEnd": 412,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-6-virtual-balance-math-manipulation-005",
+          "title": "6. Virtual Balance Math Manipulation",
+          "lineStart": 413,
+          "lineEnd": 454,
+          "lineCount": 42,
+          "severity": [
+            "CRITICAL",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "vb_prod",
+            "vb_sum"
+          ],
+          "rootCause": "Multi-asset pools using virtual balance models (e.g., yETH with 8 LST assets) track invariants via `vb_prod` and `vb_sum` variables. When rate providers (like OETH rebase) change asset rates mid-manip",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 419,
+              "lineEnd": 454,
+              "severity": [
+                "CRITICAL",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-impact-analysis-006",
+          "title": "Impact Analysis",
+          "lineStart": 455,
+          "lineEnd": 487,
+          "lineCount": 33,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "mulDown"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-secure-implementation-007",
+          "title": "Secure Implementation",
+          "lineStart": 488,
+          "lineEnd": 557,
+          "lineCount": 70,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_initializeMarket",
+            "_onSwapGivenOut",
+            "borrow",
+            "flashLoan"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-detection-patterns-008",
+          "title": "Detection Patterns",
+          "lineStart": 558,
+          "lineEnd": 583,
+          "lineCount": 26,
+          "severity": [],
+          "codeKeywords": [
+            "exchangeRateStored",
+            "flashLoan",
+            "totalAssets",
+            "vb_prod",
+            "vb_sum"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-real-world-examples-009",
+          "title": "Real-World Examples",
+          "lineStart": 584,
+          "lineEnd": 598,
+          "lineCount": 15,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
       "file": "DB/general/precision/precision-loss-rounding-vulnerabilities.md",
       "totalLines": 795,
       "frontmatter": {
@@ -5165,6 +5461,213 @@
               "codeKeywords": []
             }
           ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/business-logic/defihacklabs-business-logic-2024-2025.md",
+      "totalLines": 387,
+      "frontmatter": {
+        "protocol": "\"generic\"",
+        "chain": "\"ethereum, arbitrum\"",
+        "category": "\"business_logic\"",
+        "vulnerability_type": "\"dangling_approval, repeated_withdrawal, uninitialized_proxy\"",
+        "attack_type": "\"logical_error\"",
+        "affected_component": "\"campaign_lifecycle, tranche_state, proxy_initialization\"",
+        "severity": "\"critical\"",
+        "impact": "\"fund_loss\"",
+        "exploitability": "0.85",
+        "financial_impact": "\"critical\"",
+        "language": "\"solidity\"",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 7,
+      "patterns": [
+        {
+          "id": "general-defi-1-dangling-approval-after-operation-canc-000",
+          "title": "1. Dangling Approval After Operation Cancellation",
+          "lineStart": 68,
+          "lineEnd": 124,
+          "lineCount": 57,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "cancel",
+            "cancelCampaign",
+            "create",
+            "createLockedCampaign",
+            "transferFrom"
+          ],
+          "rootCause": "When a protocol's `create` function pulls tokens via `transferFrom()` and stores them, a corresponding `cancel` function may refund the tokens but fail to revoke the ERC20 allowance that was set durin",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 74,
+              "lineEnd": 82,
+              "severity": [],
+              "codeKeywords": [
+                "cancelCampaign",
+                "createLockedCampaign"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 83,
+              "lineEnd": 124,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-2-repeated-withdrawal-without-state-inva-001",
+          "title": "2. Repeated Withdrawal Without State Invalidation",
+          "lineStart": 125,
+          "lineEnd": 174,
+          "lineCount": 50,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "_burn(trancheID",
+            "withdrawWithoutHedge",
+            "withdrawWithoutHedge(trancheID"
+          ],
+          "rootCause": "When a withdrawal or redemption function processes a tranche/position but fails to burn, delete, or otherwise invalidate the tranche ID after successful withdrawal, the same ID can be reused to withdr",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 131,
+              "lineEnd": 137,
+              "severity": [],
+              "codeKeywords": [
+                "withdrawWithoutHedge(trancheID"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 138,
+              "lineEnd": 174,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "_burn(trancheID",
+                "withdrawWithoutHedge"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-3-uninitialized-uups-proxy-takeover-002",
+          "title": "3. Uninitialized UUPS Proxy Takeover",
+          "lineStart": 175,
+          "lineEnd": 228,
+          "lineCount": 54,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "initialize",
+            "proxiableUUID",
+            "upgradeToAndCall",
+            "withdraw"
+          ],
+          "rootCause": "UUPS (Universal Upgradeable Proxy Standard) proxies require `initialize()` to be called after deployment to set the owner/admin. If the deployer forgets to call `initialize()`, anyone can call it to b",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 181,
+              "lineEnd": 188,
+              "severity": [],
+              "codeKeywords": [
+                "initialize",
+                "withdraw"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 189,
+              "lineEnd": 228,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "proxiableUUID",
+                "withdraw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-impact-analysis-003",
+          "title": "Impact Analysis",
+          "lineStart": 229,
+          "lineEnd": 252,
+          "lineCount": 24,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-secure-implementation-004",
+          "title": "Secure Implementation",
+          "lineStart": 253,
+          "lineEnd": 323,
+          "lineCount": 71,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "_authorizeUpgrade",
+            "cancelCampaign",
+            "initialize",
+            "withdrawWithoutHedge"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-detection-patterns-005",
+          "title": "Detection Patterns",
+          "lineStart": 324,
+          "lineEnd": 346,
+          "lineCount": 23,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_burn(id",
+            "_disableInitializers",
+            "approve(0",
+            "cancel",
+            "initialize",
+            "redeem",
+            "refund",
+            "withdraw",
+            "withdrawn"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-real-world-examples-006",
+          "title": "Real-World Examples",
+          "lineStart": 347,
+          "lineEnd": 355,
+          "lineCount": 9,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },

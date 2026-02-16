@@ -2,8 +2,8 @@
   "meta": {
     "category": "general-security",
     "description": "Access control, input validation, signatures, initialization",
-    "fileCount": 10,
-    "totalPatterns": 50,
+    "fileCount": 12,
+    "totalPatterns": 68,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -430,6 +430,267 @@
               "codeKeywords": []
             }
           ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/access-control/defihacklabs-access-control-2024-2025.md",
+      "totalLines": 472,
+      "frontmatter": {
+        "protocol": "\"generic\"",
+        "chain": "\"ethereum, linea, zksync, base\"",
+        "category": "\"access_control\"",
+        "vulnerability_type": "\"missing_access_control, missing_modifier, public_mint, unvalidated_caller\"",
+        "attack_type": "\"privilege_escalation\"",
+        "affected_component": "\"initialization, execution, minting, pool_exit, module_core\"",
+        "severity": "\"critical\"",
+        "impact": "\"fund_loss\"",
+        "exploitability": "0.90",
+        "financial_impact": "\"critical\"",
+        "language": "\"solidity\"",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 9,
+      "patterns": [
+        {
+          "id": "general-security-1-missing-access-control-on-module-initi-000",
+          "title": "1. Missing Access Control on Module Initialization",
+          "lineStart": 69,
+          "lineEnd": 119,
+          "lineCount": 51,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "initializeModuleCore",
+            "initializer",
+            "issueNewDs",
+            "onlyAdmin",
+            "onlyOwner"
+          ],
+          "rootCause": "When a protocol's core module initialization function (`initializeModuleCore()`) lacks an access control modifier (e.g., `onlyOwner`, `onlyAdmin`, or `initializer`), any external caller can re-initial",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 75,
+              "lineEnd": 82,
+              "severity": [],
+              "codeKeywords": [
+                "initializeModuleCore",
+                "issueNewDs"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 83,
+              "lineEnd": 119,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-security-2-missing-caller-restriction-on-core-exe-001",
+          "title": "2. Missing Caller Restriction on Core Execution Function",
+          "lineStart": 120,
+          "lineEnd": 173,
+          "lineCount": 54,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "execute",
+            "int128",
+            "type(int128).max",
+            "velocore__execute"
+          ],
+          "rootCause": "When a DEX or AMM exposes an `execute()` function that performs token swaps, liquidity operations, and balance adjustments without validating that the caller is an authorized pool or router, anyone ca",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 126,
+              "lineEnd": 132,
+              "severity": [],
+              "codeKeywords": [
+                "type(int128).max",
+                "velocore__execute"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 133,
+              "lineEnd": 173,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "velocore__execute"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-3-public-mint-function-on-collateral-tok-002",
+          "title": "3. Public Mint Function on Collateral Token",
+          "lineStart": 174,
+          "lineEnd": 225,
+          "lineCount": 52,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "mint",
+            "onlyMinter",
+            "onlyOwner"
+          ],
+          "rootCause": "When a protocol's collateral token contract exposes a `mint()` function without an `onlyOwner` or `onlyMinter` modifier, anyone can mint unlimited tokens. If the protocol uses that token as collateral",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 180,
+              "lineEnd": 187,
+              "severity": [],
+              "codeKeywords": [
+                "mint"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 188,
+              "lineEnd": 225,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "mint"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-4-unverified-contract-with-external-tran-003",
+          "title": "4. Unverified Contract with External Transfer Proxy",
+          "lineStart": 226,
+          "lineEnd": 259,
+          "lineCount": 34,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": "Unverified (non-open-source) contracts on blockchain explorers can hide malicious or vulnerable logic. When such contracts implement transfer proxy functionality without proper access control, any cal",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 232,
+              "lineEnd": 259,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-security-5-missing-msg-sender-validation-in-pool--004",
+          "title": "5. Missing msg.sender Validation in Pool Exit",
+          "lineStart": 260,
+          "lineEnd": 312,
+          "lineCount": 53,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "exitPool",
+            "user"
+          ],
+          "rootCause": "When a liquidity pool's `exitPool()` function accepts a `user` parameter to specify whose liquidity to withdraw but doesn't validate that `msg.sender == user`, any caller can exit the pool on behalf o",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 266,
+              "lineEnd": 271,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 272,
+              "lineEnd": 312,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "exitPool"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-impact-analysis-005",
+          "title": "Impact Analysis",
+          "lineStart": 313,
+          "lineEnd": 339,
+          "lineCount": 27,
+          "severity": [],
+          "codeKeywords": [
+            "external"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-secure-implementation-006",
+          "title": "Secure Implementation",
+          "lineStart": 340,
+          "lineEnd": 404,
+          "lineCount": 65,
+          "severity": [],
+          "codeKeywords": [
+            "exitPool",
+            "initializeModuleCore",
+            "issueNewDs",
+            "mint",
+            "velocore__execute"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-detection-patterns-007",
+          "title": "Detection Patterns",
+          "lineStart": 405,
+          "lineEnd": 428,
+          "lineCount": 24,
+          "severity": [],
+          "codeKeywords": [
+            "burn",
+            "external",
+            "init",
+            "initialize",
+            "initializer",
+            "mint"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-real-world-examples-008",
+          "title": "Real-World Examples",
+          "lineStart": 429,
+          "lineEnd": 439,
+          "lineCount": 11,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
@@ -1071,6 +1332,247 @@
               "codeKeywords": []
             }
           ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/arbitrary-call/defihacklabs-arbitrary-call-2024-2025.md",
+      "totalLines": 510,
+      "frontmatter": {
+        "protocol": "\"generic\"",
+        "chain": "\"ethereum, arbitrum, bsc\"",
+        "category": "\"arbitrary_call\"",
+        "vulnerability_type": "\"unvalidated_external_call, input_validation_bypass, calldata_injection\"",
+        "attack_type": "\"logical_error\"",
+        "affected_component": "\"swap_router, bridge_gateway, aggregator_proxy, diamond_facet, settlement\"",
+        "severity": "\"critical\"",
+        "impact": "\"fund_loss\"",
+        "exploitability": "0.9",
+        "financial_impact": "\"critical\"",
+        "language": "\"solidity\"",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 9,
+      "patterns": [
+        {
+          "id": "general-security-1-unvalidated-callto-calldata-in-swap-ro-000",
+          "title": "1. Unvalidated callTo/callData in Swap/Route Structs",
+          "lineStart": 76,
+          "lineEnd": 148,
+          "lineCount": 73,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "call",
+            "callData",
+            "callTo",
+            "getCallData",
+            "getRouteData",
+            "transferFrom"
+          ],
+          "rootCause": "Many DeFi protocols (routers, aggregators, bridges) accept user-supplied swap instructions containing a `callTo` (target address) and `callData` (raw bytes) field. When these are forwarded directly in",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 82,
+              "lineEnd": 90,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "callData",
+                "callTo"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 91,
+              "lineEnd": 148,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "getCallData",
+                "getRouteData"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-2-unrestricted-external-call-actions-ope-001",
+          "title": "2. Unrestricted External Call Actions (OPERATION_CALL)",
+          "lineStart": 149,
+          "lineEnd": 219,
+          "lineCount": 71,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "OPERATION_CALL",
+            "transferFrom"
+          ],
+          "rootCause": "Multi-action contracts (like Kashi/Chamberss) implement an `OPERATION_CALL` action type that allows calling arbitrary external contracts. When there is no whitelist on target addresses or function sel",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 155,
+              "lineEnd": 219,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-security-3-bridge-signer-validation-bypass-002",
+          "title": "3. Bridge Signer Validation Bypass",
+          "lineStart": 220,
+          "lineEnd": 260,
+          "lineCount": 41,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "withdraw"
+          ],
+          "rootCause": "Cross-chain bridges use multi-signature validation on withdrawal requests — requiring N of M authorized validators to sign. When the signer verification is insufficient (e.g., using compromised keys, ",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 226,
+              "lineEnd": 260,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "withdraw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-4-yul-integer-overflow-calldata-corrupti-003",
+          "title": "4. Yul Integer Overflow Calldata Corruption",
+          "lineStart": 261,
+          "lineEnd": 314,
+          "lineCount": 54,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "add",
+            "interactionLength"
+          ],
+          "rootCause": "Contracts using Yul assembly for calldata manipulation are vulnerable to integer overflow, as Yul's `add()` opcode does NOT revert on overflow (unlike Solidity 0.8+). An attacker can craft a fake `int",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 267,
+              "lineEnd": 314,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-security-5-unverified-aggregator-proxy-forwarding-004",
+          "title": "5. Unverified Aggregator Proxy Forwarding",
+          "lineStart": 315,
+          "lineEnd": 347,
+          "lineCount": 33,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [],
+          "rootCause": "Trade aggregator proxies that accept raw calldata and forward it to external contracts create a universal call gadget. When the proxy holds user approvals (standard for aggregators), an attacker encod",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 321,
+              "lineEnd": 347,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-security-impact-analysis-005",
+          "title": "Impact Analysis",
+          "lineStart": 348,
+          "lineEnd": 377,
+          "lineCount": 30,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-secure-implementation-006",
+          "title": "Secure Implementation",
+          "lineStart": 378,
+          "lineEnd": 440,
+          "lineCount": 63,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "executeSwap",
+            "performOperations",
+            "safeAdd"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-detection-patterns-007",
+          "title": "Detection Patterns",
+          "lineStart": 441,
+          "lineEnd": 465,
+          "lineCount": 25,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "OPERATION_CALL",
+            "add",
+            "approve",
+            "interaction",
+            "msg.sender",
+            "routeData",
+            "swapData.callTo.call(swapData.callData",
+            "swapExtraData",
+            "target.call(userSuppliedCallData",
+            "transferFrom",
+            "withdraw"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-real-world-examples-008",
+          "title": "Real-World Examples",
+          "lineStart": 466,
+          "lineEnd": 478,
+          "lineCount": 13,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },

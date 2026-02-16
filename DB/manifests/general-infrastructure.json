@@ -2,8 +2,8 @@
   "meta": {
     "category": "general-infrastructure",
     "description": "Smart contract infrastructure: proxies, reentrancy, storage, bridges",
-    "fileCount": 11,
-    "totalPatterns": 58,
+    "fileCount": 12,
+    "totalPatterns": 66,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -1620,6 +1620,238 @@
             "handleDepeggedCurvePool",
             "remove_liquidity"
           ],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/reentrancy/defihacklabs-reentrancy-2024-patterns.md",
+      "totalLines": 499,
+      "frontmatter": {
+        "protocol": "\"generic\"",
+        "chain": "\"ethereum, arbitrum, fantom\"",
+        "category": "\"reentrancy\"",
+        "vulnerability_type": "\"cross_function_reentrancy, callback_reentrancy, flash_loan_reentrancy\"",
+        "attack_type": "\"reentrancy\"",
+        "affected_component": "\"reward_harvest, collateral_accounting, flash_loan_callback, strategy_callback\"",
+        "severity": "\"critical\"",
+        "impact": "\"fund_loss\"",
+        "exploitability": "0.80",
+        "financial_impact": "\"critical\"",
+        "language": "\"solidity\"",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 8,
+      "patterns": [
+        {
+          "id": "general-infrastructure-1-fake-token-reward-harvesting-callback--000",
+          "title": "1. Fake Token Reward Harvesting Callback Reentrancy",
+          "lineStart": 71,
+          "lineEnd": 135,
+          "lineCount": 65,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "batchHarvestMarketRewards",
+            "claimRewards",
+            "fakeSY.claimRewards",
+            "rewardToken.claimRewards"
+          ],
+          "rootCause": "When a protocol's batch reward harvesting function iterates over market pools and calls `rewardToken.claimRewards()` on each market's SY (Standardized Yield) token without reentrancy protection, an at",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 77,
+              "lineEnd": 85,
+              "severity": [],
+              "codeKeywords": [
+                "batchHarvestMarketRewards",
+                "claimRewards",
+                "fakeSY.claimRewards"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 86,
+              "lineEnd": 135,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "batchHarvestMarketRewards",
+                "claimRewards"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-2-empty-market-phantom-collateral-attack-001",
+          "title": "2. Empty Market Phantom Collateral Attack",
+          "lineStart": 136,
+          "lineEnd": 188,
+          "lineCount": 53,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": "In lending protocols, when a market is empty (no existing deposits), the first depositor sets the initial exchange rate. If the protocol doesn't enforce minimum deposits or uses a flash-loan-compatibl",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 142,
+              "lineEnd": 150,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 151,
+              "lineEnd": 188,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-3-erc-3156-flash-loan-callback-re-deposi-002",
+          "title": "3. ERC-3156 Flash Loan Callback Re-deposit Loop",
+          "lineStart": 189,
+          "lineEnd": 254,
+          "lineCount": 66,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "onFlashLoan"
+          ],
+          "rootCause": "ERC-3156 flash loans include an `onFlashLoan()` callback to the borrower. If the lending protocol that issues the flash loan doesn't apply reentrancy guards on deposit functions during the callback, t",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 195,
+              "lineEnd": 202,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "onFlashLoan"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 203,
+              "lineEnd": 254,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "onFlashLoan"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-4-strategy-callback-reentrancy-via-attac-003",
+          "title": "4. Strategy Callback Reentrancy via Attacker-Controlled Hook",
+          "lineStart": 255,
+          "lineEnd": 332,
+          "lineCount": 78,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "burn",
+            "burnHook",
+            "mintHook"
+          ],
+          "rootCause": "DEX protocols with customizable strategies allow liquidity providers to register callback hooks (e.g., `burnHook`, `mintHook`) that execute when positions are modified. If the hook contract is attacke",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 261,
+              "lineEnd": 268,
+              "severity": [],
+              "codeKeywords": [
+                "burnHook"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 269,
+              "lineEnd": 332,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "burn",
+                "burnHook"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-impact-analysis-004",
+          "title": "Impact Analysis",
+          "lineStart": 333,
+          "lineEnd": 357,
+          "lineCount": 25,
+          "severity": [],
+          "codeKeywords": [
+            "nonReentrant"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-secure-implementation-005",
+          "title": "Secure Implementation",
+          "lineStart": 358,
+          "lineEnd": 432,
+          "lineCount": 75,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "batchHarvestMarketRewards",
+            "burn",
+            "deposit",
+            "flashLoan"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-detection-patterns-006",
+          "title": "Detection Patterns",
+          "lineStart": 433,
+          "lineEnd": 456,
+          "lineCount": 24,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "deposit"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-real-world-examples-007",
+          "title": "Real-World Examples",
+          "lineStart": 457,
+          "lineEnd": 466,
+          "lineCount": 10,
+          "severity": [],
+          "codeKeywords": [],
           "rootCause": null,
           "subsections": null
         }

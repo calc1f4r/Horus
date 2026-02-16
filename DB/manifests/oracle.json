@@ -2,8 +2,8 @@
   "meta": {
     "category": "oracle",
     "description": "Pattern-level index for oracle vulnerabilities",
-    "fileCount": 8,
-    "totalPatterns": 49,
+    "fileCount": 9,
+    "totalPatterns": 59,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
   },
   "files": [
@@ -1275,6 +1275,252 @@
           "lineStart": 502,
           "lineEnd": 517,
           "lineCount": 16,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2024-2025.md",
+      "totalLines": 506,
+      "frontmatter": {
+        "protocol": "\"generic\"",
+        "chain": "\"ethereum, arbitrum, bsc, base\"",
+        "category": "\"oracle\"",
+        "vulnerability_type": "\"price_manipulation, amm_oracle, curve_oracle, self_referencing_oracle, faulty_feed\"",
+        "attack_type": "\"economic_exploit\"",
+        "affected_component": "\"price_feed, oracle_integration, collateral_valuation\"",
+        "oracle_provider": "\"curve, custom_amm, wooracle, chainlink\"",
+        "oracle_attack_vector": "\"manipulation, spot_price, flash_loan, self_referencing, feed_misconfiguration\"",
+        "severity": "\"critical\"",
+        "impact": "\"fund_loss\"",
+        "exploitability": "0.85",
+        "financial_impact": "\"critical\"",
+        "language": "\"solidity\"",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 10,
+      "patterns": [
+        {
+          "id": "oracle-1-curve-pool-based-oracle-manipulation-f-000",
+          "title": "1. Curve Pool-Based Oracle Manipulation for Lending Liquidation",
+          "lineStart": 79,
+          "lineEnd": 138,
+          "lineCount": 60,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "driveDownsUSDEPrice",
+            "driveUpsUSDEPrice"
+          ],
+          "rootCause": "Lending protocols that derive collateral/debt asset prices from Curve pool spot prices are vulnerable to flash-loan-driven price manipulation. An attacker can borrow billions across multiple DeFi prot",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 85,
+              "lineEnd": 93,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 94,
+              "lineEnd": 138,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "driveDownsUSDEPrice",
+                "driveUpsUSDEPrice"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "oracle-2-self-referencing-oracle-spmm-manipulat-001",
+          "title": "2. Self-Referencing Oracle (sPMM) Manipulation",
+          "lineStart": 139,
+          "lineEnd": 181,
+          "lineCount": 43,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [],
+          "rootCause": "Proactive market maker (PMM) DEXes like WooPPV2 use an internal oracle (WooracleV2) that updates its price state based on swaps executed through the same pool. This creates a circular dependency: the ",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 145,
+              "lineEnd": 181,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "oracle-3-concentrated-liquidity-vault-deposit-w-002",
+          "title": "3. Concentrated Liquidity Vault Deposit/Withdraw Cycling",
+          "lineStart": 182,
+          "lineEnd": 231,
+          "lineCount": 50,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "calculatePrice"
+          ],
+          "rootCause": "Concentrated liquidity vaults (e.g., Gamma on Algebra/Uniswap V3) calculate LP share amounts based on the current spot price of the underlying pool. When an attacker manipulates the pool price, deposi",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 188,
+              "lineEnd": 231,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "calculatePrice"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "oracle-4-defective-token-transfer-hook-price-di-003",
+          "title": "4. Defective Token Transfer Hook Price Disruption",
+          "lineStart": 232,
+          "lineEnd": 272,
+          "lineCount": 41,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "_transfer",
+            "_update",
+            "pair.sync",
+            "sync"
+          ],
+          "rootCause": "Custom ERC20 tokens that call `pair.sync()` inside their `_update()` or `_transfer()` function disrupt AMM pricing mechanics. When a swap sends tokens to the pair, the transfer triggers `sync()` which",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 238,
+              "lineEnd": 272,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "oracle-5-broken-vault-mint-ratio-004",
+          "title": "5. Broken Vault Mint Ratio",
+          "lineStart": 273,
+          "lineEnd": 304,
+          "lineCount": 32,
+          "severity": [
+            "CRITICAL",
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": "Vaults or proxy contracts with misconfigured exchange rates or missing decimal normalization can mint vastly disproportionate token amounts for trivial deposits. This often occurs in ERC1967 proxy vau",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 279,
+              "lineEnd": 304,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "oracle-6-faulty-chainlink-oracle-price-feed-005",
+          "title": "6. Faulty Chainlink Oracle Price Feed",
+          "lineStart": 305,
+          "lineEnd": 350,
+          "lineCount": 46,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": "When Chainlink oracle feeds report incorrect prices for wrapped staked tokens (e.g., wrsETH vs wstETH), the price discrepancy between oracle-reported value and actual market value creates an arbitrage",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 311,
+              "lineEnd": 350,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "oracle-impact-analysis-006",
+          "title": "Impact Analysis",
+          "lineStart": 351,
+          "lineEnd": 379,
+          "lineCount": 29,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_update",
+            "sync"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "oracle-secure-implementation-007",
+          "title": "Secure Implementation",
+          "lineStart": 380,
+          "lineEnd": 438,
+          "lineCount": 59,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_updateOracleState",
+            "deposit",
+            "getAssetPrice",
+            "withdraw"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "oracle-detection-patterns-008",
+          "title": "Detection Patterns",
+          "lineStart": 439,
+          "lineEnd": 463,
+          "lineCount": 25,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "oracle-real-world-examples-009",
+          "title": "Real-World Examples",
+          "lineStart": 464,
+          "lineEnd": 475,
+          "lineCount": 12,
           "severity": [],
           "codeKeywords": [],
           "rootCause": null,
