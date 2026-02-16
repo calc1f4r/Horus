@@ -2,8 +2,8 @@
   "meta": {
     "category": "general-defi",
     "description": "DeFi-specific: flash loans, slippage, vaults, precision, calculations",
-    "fileCount": 12,
-    "totalPatterns": 124,
+    "fileCount": 17,
+    "totalPatterns": 141,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -761,6 +761,175 @@
               "codeKeywords": []
             }
           ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/vault-inflation-attack/defihacklabs-vault-inflation-patterns.md",
+      "totalLines": 451,
+      "frontmatter": {
+        "protocol": "\"compound-v2-forks\"",
+        "chain": "\"ethereum, optimism, bsc, arbitrum\"",
+        "category": "\"economic\"",
+        "vulnerability_type": "\"vault_inflation_attack\"",
+        "attack_type": "\"economic_exploit\"",
+        "affected_component": "\"exchange_rate_calculation, share_accounting\"",
+        "severity": "\"critical\"",
+        "impact": "\"fund_loss\"",
+        "exploitability": "0.7",
+        "financial_impact": "\"critical\"",
+        "language": "\"solidity\"",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 6,
+      "patterns": [
+        {
+          "id": "general-defi-1-empty-market-exchange-rate-inflation-000",
+          "title": "1. Empty Market Exchange Rate Inflation",
+          "lineStart": 66,
+          "lineEnd": 174,
+          "lineCount": 109,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "redeemUnderlying",
+            "totalSupply",
+            "transfer"
+          ],
+          "rootCause": "When a CompoundV2-fork cToken market has extremely low `totalSupply` (e.g., 2 shares), directly transferring the underlying token to the cToken contract inflates the `exchangeRate = totalCash / totalS",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 72,
+              "lineEnd": 82,
+              "severity": [],
+              "codeKeywords": [
+                "redeemUnderlying",
+                "transfer"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 83,
+              "lineEnd": 174,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-2-share-price-inflation-via-donation-001",
+          "title": "2. Share Price Inflation via Donation",
+          "lineStart": 175,
+          "lineEnd": 287,
+          "lineCount": 113,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "pseudoTotalPool",
+            "totalShares",
+            "transfer",
+            "withdrawExactAmount"
+          ],
+          "rootCause": "Protocols that track asset balances using variables like `pseudoTotalPool` are vulnerable when the actual token balance can be inflated via direct `transfer()` without minting new shares. The ratio `a",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 181,
+              "lineEnd": 188,
+              "severity": [],
+              "codeKeywords": [
+                "pseudoTotalPool",
+                "totalShares",
+                "withdrawExactAmount"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 189,
+              "lineEnd": 287,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-impact-analysis-002",
+          "title": "Impact Analysis",
+          "lineStart": 288,
+          "lineEnd": 309,
+          "lineCount": 22,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "donate",
+            "redeemUnderlying",
+            "transfer",
+            "withdrawExactAmount"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-secure-implementation-003",
+          "title": "Secure Implementation",
+          "lineStart": 310,
+          "lineEnd": 378,
+          "lineCount": 69,
+          "severity": [],
+          "codeKeywords": [
+            "_convertToAssets",
+            "_convertToShares",
+            "deposit",
+            "exchangeRate",
+            "mint"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-detection-patterns-004",
+          "title": "Detection Patterns",
+          "lineStart": 379,
+          "lineEnd": 404,
+          "lineCount": 26,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "balanceOf",
+            "donate",
+            "exchangeRate",
+            "pseudoTotalPool",
+            "redeemUnderlying",
+            "token.balanceOf(address(this",
+            "transfer"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-real-world-examples-005",
+          "title": "Real-World Examples",
+          "lineStart": 405,
+          "lineEnd": 422,
+          "lineCount": 18,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
@@ -2281,6 +2450,81 @@
               "lineEnd": 2235,
               "severity": [],
               "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/fee-on-transfer-tokens/defihacklabs-deflationary-patterns.md",
+      "totalLines": 322,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "ethereum, bsc, avalanche",
+        "category": "fee_on_transfer",
+        "vulnerability_type": "deflationary_token_incompatibility",
+        "attack_type": "repeated_deposit_drain",
+        "affected_component": "farm_staking, amm_pool, token_balance",
+        "severity": "critical",
+        "impact": "fund_loss",
+        "exploitability": "0.85",
+        "financial_impact": "high",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "3",
+        "total_losses": "\"$5M+\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "general-defi-defihacklabs-deflationary-token-incompat-000",
+          "title": "DeFiHackLabs Deflationary Token Incompatibility Compendium",
+          "lineStart": 38,
+          "lineEnd": 270,
+          "lineCount": 233,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "_amount",
+            "_transfer",
+            "amount",
+            "balanceOf",
+            "deposit",
+            "exploit",
+            "gulp",
+            "swapExactAmountIn",
+            "transferFrom(amount",
+            "withdraw"
+          ],
+          "rootCause": "Farm credits `amount` deposited, not actual tokens received",
+          "subsections": [
+            {
+              "title": "Root Cause Categories",
+              "lineStart": 44,
+              "lineEnd": 50,
+              "severity": [],
+              "codeKeywords": [
+                "amount",
+                "balanceOf",
+                "gulp"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 51,
+              "lineEnd": 202,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "_amount",
+                "_transfer",
+                "amount",
+                "deposit",
+                "exploit",
+                "swapExactAmountIn",
+                "withdraw"
+              ]
             }
           ]
         }
@@ -4068,6 +4312,82 @@
       ]
     },
     {
+      "file": "DB/general/integer-overflow/defihacklabs-overflow-patterns.md",
+      "totalLines": 319,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "ethereum",
+        "category": "integer_overflow",
+        "vulnerability_type": "arithmetic_overflow",
+        "attack_type": "integer_overflow_underflow",
+        "affected_component": "token_transfer, batch_transfer",
+        "severity": "critical",
+        "impact": "fund_loss, token_minting",
+        "exploitability": "0.95",
+        "financial_impact": "critical",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "2",
+        "total_losses": "\"$140M+ confirmed\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "general-defi-defihacklabs-integer-overflow-exploit-pa-000",
+          "title": "DeFiHackLabs Integer Overflow Exploit Patterns",
+          "lineStart": 38,
+          "lineEnd": 268,
+          "lineCount": 231,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_value",
+            "batchTransfer",
+            "require",
+            "transferProxy"
+          ],
+          "rootCause": "In Solidity < 0.8.0, arithmetic operations silently overflow/underflow:\n\n- `uint256(2) - uint256(3) = 2^256 - 1` (underflow → max value)\n\n- `uint256(2^255) * 2 = 0` (overflow → wraps to zero)\n\n\n\nIf a ",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 44,
+              "lineEnd": 53,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "require"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 54,
+              "lineEnd": 160,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_value",
+                "batchTransfer",
+                "transferProxy"
+              ]
+            },
+            {
+              "title": "General Overflow Pattern",
+              "lineStart": 161,
+              "lineEnd": 184,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
       "file": "DB/general/integer-overflow/integer-overflow-vulnerabilities.md",
       "totalLines": 469,
       "frontmatter": {
@@ -4845,6 +5165,294 @@
               "codeKeywords": []
             }
           ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/business-logic/defihacklabs-share-accounting-patterns.md",
+      "totalLines": 456,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "ethereum, bsc",
+        "category": "business_logic",
+        "vulnerability_type": "share_fee_accounting_error",
+        "attack_type": "accounting_manipulation",
+        "affected_component": "share_accounting, fee_distribution, balance_tracking",
+        "severity": "critical",
+        "impact": "fund_loss",
+        "exploitability": "0.8",
+        "financial_impact": "critical",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "6",
+        "total_losses": "\"$35M+\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "general-defi-defihacklabs-share-fee-accounting-errors-000",
+          "title": "DeFiHackLabs Share & Fee Accounting Errors Compendium",
+          "lineStart": 40,
+          "lineEnd": 398,
+          "lineCount": 359,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_transfer",
+            "balanceOf",
+            "collectFees",
+            "deposit",
+            "emergencyBurn",
+            "exploit",
+            "totalShares",
+            "userFeeDebt"
+          ],
+          "rootCause": "Sorbetto Fragola (concentrated liquidity optimizer)",
+          "subsections": [
+            {
+              "title": "Root Cause Categories",
+              "lineStart": 46,
+              "lineEnd": 56,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "balanceOf"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 57,
+              "lineEnd": 326,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "_transfer",
+                "collectFees",
+                "deposit",
+                "emergencyBurn",
+                "exploit",
+                "totalShares",
+                "userFeeDebt"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/business-logic/defihacklabs-solvency-business-logic-patterns.md",
+      "totalLines": 446,
+      "frontmatter": {
+        "protocol": "\"generic\"",
+        "chain": "\"ethereum, avalanche\"",
+        "category": "\"logic\"",
+        "vulnerability_type": "\"business_logic_error\"",
+        "attack_type": "\"economic_exploit\"",
+        "affected_component": "\"solvency_check, swap_routing, balance_tracking\"",
+        "severity": "\"critical\"",
+        "impact": "\"fund_loss\"",
+        "exploitability": "0.5",
+        "financial_impact": "\"critical\"",
+        "language": "\"solidity\"",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 8,
+      "patterns": [
+        {
+          "id": "general-defi-1-missing-solvency-check-on-donation-fun-000",
+          "title": "1. Missing Solvency Check on Donation Functions",
+          "lineStart": 63,
+          "lineEnd": 127,
+          "lineCount": 65,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "donateToReserves",
+            "liquidate",
+            "mint",
+            "violator"
+          ],
+          "rootCause": "Euler Finance's `donateToReserves()` function allowed users to move their eTokens (collateral) to the protocol's reserves without checking whether the account remained solvent after the donation. By d",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 69,
+              "lineEnd": 78,
+              "severity": [],
+              "codeKeywords": [
+                "donateToReserves",
+                "liquidate",
+                "mint"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 79,
+              "lineEnd": 127,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "liquidate",
+                "violator"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-2-precision-loss-in-concentrated-liquidi-001",
+          "title": "2. Precision Loss in Concentrated Liquidity Tick Math",
+          "lineStart": 128,
+          "lineEnd": 190,
+          "lineCount": 63,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_flashCallback"
+          ],
+          "rootCause": "KyberSwap's concentrated liquidity implementation had numeric precision errors in the tick-crossing calculation. When an attacker carefully positioned the pool price at a range boundary with zero liqu",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 134,
+              "lineEnd": 190,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_flashCallback"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-3-internal-vs-actual-balance-divergence-002",
+          "title": "3. Internal vs Actual Balance Divergence",
+          "lineStart": 191,
+          "lineEnd": 241,
+          "lineCount": 51,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "addLiquidity",
+            "baseTokenReserveQty",
+            "kLast",
+            "quoteTokenReserveQty",
+            "removeLiquidity",
+            "swap"
+          ],
+          "rootCause": "ElasticSwap tracked internal balances (`baseTokenReserveQty`, `quoteTokenReserveQty`, `kLast`) separately from actual ERC20 token balances. When tokens were directly transferred to the exchange contra",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 197,
+              "lineEnd": 241,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-4-unchecked-swap-router-callback-trust-003",
+          "title": "4. Unchecked Swap Router Callback Trust",
+          "lineStart": 242,
+          "lineEnd": 291,
+          "lineCount": 50,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "route",
+            "swap",
+            "uniswapV3SwapCallback"
+          ],
+          "rootCause": "SushiSwap's RouteProcessor2 accepted arbitrary `route` bytes that could specify any contract address as a \"pool\" for swap callbacks. When the router called `swap()` on the attacker's fake \"pool\" contr",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 248,
+              "lineEnd": 291,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "swap",
+                "uniswapV3SwapCallback"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-impact-analysis-004",
+          "title": "Impact Analysis",
+          "lineStart": 292,
+          "lineEnd": 314,
+          "lineCount": 23,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-secure-implementation-005",
+          "title": "Secure Implementation",
+          "lineStart": 315,
+          "lineEnd": 376,
+          "lineCount": 62,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "_syncBalances",
+            "donateToReserves",
+            "uniswapV3SwapCallback"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-detection-patterns-006",
+          "title": "Detection Patterns",
+          "lineStart": 377,
+          "lineEnd": 401,
+          "lineCount": 25,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "donateToReserves",
+            "transferFrom"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-real-world-examples-007",
+          "title": "Real-World Examples",
+          "lineStart": 402,
+          "lineEnd": 415,
+          "lineCount": 14,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     }

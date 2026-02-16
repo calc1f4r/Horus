@@ -2,8 +2,8 @@
   "meta": {
     "category": "general-infrastructure",
     "description": "Smart contract infrastructure: proxies, reentrancy, storage, bridges",
-    "fileCount": 8,
-    "totalPatterns": 43,
+    "fileCount": 11,
+    "totalPatterns": 58,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -1241,6 +1241,467 @@
               "lineEnd": 785,
               "severity": [],
               "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/reentrancy/defihacklabs-callback-reentrancy-2022-patterns.md",
+      "totalLines": 544,
+      "frontmatter": {
+        "protocol": "\"lending, defi, nft\"",
+        "chain": "\"ethereum, gnosis, avalanche, polygon\"",
+        "category": "\"reentrancy\"",
+        "vulnerability_type": "\"callback_reentrancy\"",
+        "attack_type": "\"reentrancy\"",
+        "affected_component": "\"lending_pool, flash_loan, nft_mint, share_trading\"",
+        "severity": "\"critical\"",
+        "impact": "\"fund_loss\"",
+        "exploitability": "0.8",
+        "financial_impact": "\"critical\"",
+        "language": "\"solidity\"",
+        "version": "\">=0.6.0\""
+      },
+      "patternCount": 8,
+      "patterns": [
+        {
+          "id": "general-infrastructure-1-erc-677-ontokentransfer-reentrancy-dur-000",
+          "title": "1. ERC-677 `onTokenTransfer` Reentrancy During Liquidation",
+          "lineStart": 70,
+          "lineEnd": 137,
+          "lineCount": 68,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "borrowTokens",
+            "liquidationCall",
+            "onTokenTransfer"
+          ],
+          "rootCause": "This vulnerability exists because Aave V2 forks deployed on chains using ERC-677 bridged tokens (like Gnosis Chain) inherit a callback mechanism not originally accounted for in Aave's design. When the",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 76,
+              "lineEnd": 84,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 85,
+              "lineEnd": 137,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "borrowTokens",
+                "onTokenTransfer"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-2-flash-loan-callback-reentrancy-deposit-001",
+          "title": "2. Flash Loan Callback Reentrancy — Deposit-in-Callback",
+          "lineStart": 138,
+          "lineEnd": 194,
+          "lineCount": 57,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "deposit",
+            "flash",
+            "flashCallback",
+            "viewDeposit",
+            "withdraw"
+          ],
+          "rootCause": "This vulnerability exists because the flash loan function calls back to the borrower BEFORE verifying that the loan has been repaid. The attacker uses the callback to `deposit()` the flash-loaned toke",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 144,
+              "lineEnd": 194,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "deposit",
+                "flash",
+                "flashCallback",
+                "viewDeposit",
+                "withdraw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-3-erc-1155-onerc1155received-reentrancy--002",
+          "title": "3. ERC-1155 `onERC1155Received` Reentrancy During NFT Mint",
+          "lineStart": 195,
+          "lineEnd": 250,
+          "lineCount": 56,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "depositAdditionalToFNFT",
+            "onERC1155Received"
+          ],
+          "rootCause": "This vulnerability exists because ERC-1155 token transfers trigger `onERC1155Received()` callbacks on the recipient. When a protocol mints ERC-1155 tokens (like Financial NFTs), the callback fires dur",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 201,
+              "lineEnd": 250,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "onERC1155Received"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-4-native-eth-avax-receive-reentrancy-exi-003",
+          "title": "4. Native ETH/AVAX `receive()` Reentrancy — exitMarket/State Bypass",
+          "lineStart": 251,
+          "lineEnd": 345,
+          "lineCount": 95,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "address",
+            "borrow",
+            "exitMarket",
+            "fallback",
+            "receive"
+          ],
+          "rootCause": "This vulnerability exists because native token transfers (ETH, AVAX) trigger the recipient's `receive()` or `fallback()` function. In Compound-fork lending protocols, `borrow()` sends native ETH befor",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 257,
+              "lineEnd": 345,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "address"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-impact-analysis-004",
+          "title": "Impact Analysis",
+          "lineStart": 346,
+          "lineEnd": 370,
+          "lineCount": 25,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-secure-implementation-005",
+          "title": "Secure Implementation",
+          "lineStart": 371,
+          "lineEnd": 466,
+          "lineCount": 96,
+          "severity": [],
+          "codeKeywords": [
+            "borrow",
+            "deposit",
+            "depositAdditional",
+            "flash",
+            "liquidationCall",
+            "mintAddressLock"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-detection-patterns-006",
+          "title": "Detection Patterns",
+          "lineStart": 467,
+          "lineEnd": 494,
+          "lineCount": 28,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "deposit",
+            "exitMarket",
+            "mint",
+            "nonReentrant"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-real-world-examples-007",
+          "title": "Real-World Examples",
+          "lineStart": 495,
+          "lineEnd": 510,
+          "lineCount": 16,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/reentrancy/defihacklabs-readonly-reentrancy-patterns.md",
+      "totalLines": 436,
+      "frontmatter": {
+        "protocol": "\"generic\"",
+        "chain": "\"ethereum, arbitrum, polygon\"",
+        "category": "\"reentrancy\"",
+        "vulnerability_type": "\"read_only_reentrancy\"",
+        "attack_type": "\"economic_exploit\"",
+        "affected_component": "\"oracle_price_feed, collateral_valuation\"",
+        "severity": "\"critical\"",
+        "impact": "\"fund_loss\"",
+        "exploitability": "0.6",
+        "financial_impact": "\"critical\"",
+        "language": "\"solidity\"",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 6,
+      "patterns": [
+        {
+          "id": "general-infrastructure-1-curve-pool-read-only-reentrancy-000",
+          "title": "1. Curve Pool Read-Only Reentrancy",
+          "lineStart": 68,
+          "lineEnd": 188,
+          "lineCount": 121,
+          "severity": [
+            "CRITICAL",
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "fallback",
+            "get_virtual_price",
+            "raw_call",
+            "receive",
+            "reenter_1",
+            "remove_liquidity"
+          ],
+          "rootCause": "Curve's `remove_liquidity()` function sends native ETH to the caller via `raw_call()` **before** updating the pool's internal balances. During the ETH transfer, the recipient's `fallback()` or `receiv",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 74,
+              "lineEnd": 83,
+              "severity": [],
+              "codeKeywords": [
+                "receive",
+                "remove_liquidity"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 84,
+              "lineEnd": 188,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "reenter_1"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-2-balancer-pool-read-only-reentrancy-001",
+          "title": "2. Balancer Pool Read-Only Reentrancy",
+          "lineStart": 189,
+          "lineEnd": 262,
+          "lineCount": 74,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "WeightedBalancerLPOracle",
+            "exitPool"
+          ],
+          "rootCause": "Balancer's `exitPool()` function sends native ETH to the caller before updating the pool's internal share accounting. During the ETH transfer callback, the attacker reads the Balancer LP token price f",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 195,
+              "lineEnd": 262,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-impact-analysis-002",
+          "title": "Impact Analysis",
+          "lineStart": 263,
+          "lineEnd": 286,
+          "lineCount": 24,
+          "severity": [],
+          "codeKeywords": [
+            "get_virtual_price",
+            "nonReentrant"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-secure-implementation-003",
+          "title": "Secure Implementation",
+          "lineStart": 287,
+          "lineEnd": 365,
+          "lineCount": 79,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "getLPPrice",
+            "getLPTokenPrice",
+            "getPrice",
+            "is_killed"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-detection-patterns-004",
+          "title": "Detection Patterns",
+          "lineStart": 366,
+          "lineEnd": 390,
+          "lineCount": 25,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "exitPool",
+            "fallback",
+            "get_virtual_price",
+            "receive",
+            "remove_liquidity",
+            "setUserUseReserveAsCollateral"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-real-world-examples-005",
+          "title": "Real-World Examples",
+          "lineStart": 391,
+          "lineEnd": 406,
+          "lineCount": 16,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "WeightedBalancerLPOracle.getPrice",
+            "exitPool",
+            "get_virtual_price",
+            "handleDepeggedCurvePool",
+            "remove_liquidity"
+          ],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/reentrancy/defihacklabs-reentrancy-patterns.md",
+      "totalLines": 527,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "ethereum, bsc, fantom",
+        "category": "reentrancy",
+        "vulnerability_type": "reentrancy_comprehensive",
+        "attack_type": "reentrancy",
+        "affected_component": "external_calls",
+        "severity": "critical",
+        "impact": "fund_loss",
+        "exploitability": "0.85",
+        "financial_impact": "critical",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "10",
+        "total_losses": "\"$116M+\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "general-infrastructure-defihacklabs-reentrancy-pattern-compendi-000",
+          "title": "DeFiHackLabs Reentrancy Pattern Compendium",
+          "lineStart": 43,
+          "lineEnd": 452,
+          "lineCount": 410,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "borrow",
+            "data",
+            "delegatedTransferERC20",
+            "depositFor",
+            "fallback",
+            "receive",
+            "sell",
+            "supply",
+            "tokensReceived",
+            "tokensToSend",
+            "transfer",
+            "transferFrom"
+          ],
+          "rootCause": "Lending protocol borrows ERC-777 token, triggering receiver hook",
+          "subsections": [
+            {
+              "title": "Root Cause Categories",
+              "lineStart": 49,
+              "lineEnd": 58,
+              "severity": [],
+              "codeKeywords": [
+                "data",
+                "delegatedTransferERC20",
+                "fallback",
+                "receive",
+                "sell",
+                "tokensReceived",
+                "tokensToSend",
+                "transfer"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 59,
+              "lineEnd": 365,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "borrow",
+                "depositFor",
+                "supply",
+                "tokensReceived",
+                "tokensToSend",
+                "transferFrom"
+              ]
             }
           ]
         }

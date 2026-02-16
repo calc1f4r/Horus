@@ -2,8 +2,8 @@
   "meta": {
     "category": "general-security",
     "description": "Access control, input validation, signatures, initialization",
-    "fileCount": 7,
-    "totalPatterns": 36,
+    "fileCount": 10,
+    "totalPatterns": 50,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -434,6 +434,240 @@
       ]
     },
     {
+      "file": "DB/general/access-control/defihacklabs-access-control-patterns.md",
+      "totalLines": 403,
+      "frontmatter": {
+        "protocol": "\"generic\"",
+        "chain": "\"ethereum, bsc, avalanche\"",
+        "category": "\"access_control\"",
+        "vulnerability_type": "\"missing_access_control\"",
+        "attack_type": "\"logical_error\"",
+        "affected_component": "\"function_access, token_operations, state_management\"",
+        "severity": "\"critical\"",
+        "impact": "\"fund_loss\"",
+        "exploitability": "0.9",
+        "financial_impact": "\"critical\"",
+        "language": "\"solidity\"",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 8,
+      "patterns": [
+        {
+          "id": "general-security-1-unprotected-token-mint-burn-000",
+          "title": "1. Unprotected Token Mint / Burn",
+          "lineStart": 64,
+          "lineEnd": 122,
+          "lineCount": 59,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "bridgeBurnAddress",
+            "burn",
+            "doBurnHack",
+            "mint",
+            "onlyOwner",
+            "onlyRole",
+            "sync",
+            "uniswapV2Pair"
+          ],
+          "rootCause": "When ERC20 token contracts expose `mint()` and `burn()` functions without access control modifiers (`onlyOwner`, `onlyRole`, or similar), any external caller can mint tokens to themselves or burn toke",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 70,
+              "lineEnd": 76,
+              "severity": [],
+              "codeKeywords": [
+                "sync"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 77,
+              "lineEnd": 122,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "bridgeBurnAddress",
+                "burn",
+                "doBurnHack",
+                "mint",
+                "uniswapV2Pair"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-2-unprotected-migration-function-001",
+          "title": "2. Unprotected Migration Function",
+          "lineStart": 123,
+          "lineEnd": 158,
+          "lineCount": 36,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "amount",
+            "migrateStake",
+            "migrateWithdraw",
+            "oldStaking"
+          ],
+          "rootCause": "When staking or vault contracts implement `migrateStake()` functions for protocol upgrades, these functions must be restricted to only accept calls from authorized sources and only migrate from legiti",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 129,
+              "lineEnd": 158,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "amount",
+                "migrateStake",
+                "migrateWithdraw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-3-unprotected-configuration-setter-002",
+          "title": "3. Unprotected Configuration Setter",
+          "lineStart": 159,
+          "lineEnd": 203,
+          "lineCount": 45,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "setPool",
+            "setRewardToken",
+            "setToken",
+            "stake",
+            "withdraw"
+          ],
+          "rootCause": "When staking or reward contracts expose configuration functions like `setToken()`, `setRewardToken()`, or `setPool()` without access control, an attacker can switch the reward/staking token to a worth",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 165,
+              "lineEnd": 203,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "setToken",
+                "stake",
+                "withdraw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-4-missing-token-registry-validation-003",
+          "title": "4. Missing Token Registry Validation",
+          "lineStart": 204,
+          "lineEnd": 247,
+          "lineCount": 44,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "burn",
+            "expiry",
+            "redeem",
+            "token",
+            "underlying"
+          ],
+          "rootCause": "When bond teller or similar contracts accept a `token` parameter in `redeem()` without validating that it is a legitimately issued bond token, an attacker can deploy a fake token contract that impleme",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 210,
+              "lineEnd": 247,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "burn",
+                "expiry",
+                "redeem",
+                "underlying"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-impact-analysis-004",
+          "title": "Impact Analysis",
+          "lineStart": 248,
+          "lineEnd": 271,
+          "lineCount": 24,
+          "severity": [],
+          "codeKeywords": [
+            "onlyOwner"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-secure-implementation-005",
+          "title": "Secure Implementation",
+          "lineStart": 272,
+          "lineEnd": 332,
+          "lineCount": 61,
+          "severity": [],
+          "codeKeywords": [
+            "burn",
+            "deploy",
+            "migrateStake",
+            "mint",
+            "redeem",
+            "setApprovedOldStaking"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-detection-patterns-006",
+          "title": "Detection Patterns",
+          "lineStart": 333,
+          "lineEnd": 358,
+          "lineCount": 26,
+          "severity": [],
+          "codeKeywords": [
+            "burn",
+            "external",
+            "migrateStake",
+            "mint",
+            "onlyOwner",
+            "public",
+            "redeem",
+            "setRewardToken",
+            "setToken",
+            "visibility"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-real-world-examples-007",
+          "title": "Real-World Examples",
+          "lineStart": 359,
+          "lineEnd": 372,
+          "lineCount": 14,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
       "file": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
       "totalLines": 1085,
       "frontmatter": {
@@ -841,6 +1075,138 @@
       ]
     },
     {
+      "file": "DB/general/arbitrary-call/defihacklabs-arbitrary-call-patterns.md",
+      "totalLines": 401,
+      "frontmatter": {
+        "protocol": "\"generic\"",
+        "chain": "\"ethereum, bsc\"",
+        "category": "\"access_control\"",
+        "vulnerability_type": "\"arbitrary_external_call\"",
+        "attack_type": "\"data_manipulation\"",
+        "affected_component": "\"swap_router, cross_chain_proxy, callback_handler\"",
+        "severity": "\"critical\"",
+        "impact": "\"fund_loss\"",
+        "exploitability": "0.8",
+        "financial_impact": "\"critical\"",
+        "language": "\"solidity\"",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 5,
+      "patterns": [
+        {
+          "id": "general-security-1-unvalidated-router-address-calldata-in-000",
+          "title": "1. Unvalidated Router Address + Calldata in Swap Functions",
+          "lineStart": 63,
+          "lineEnd": 229,
+          "lineCount": 167,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "balanceOf",
+            "calldata",
+            "msg.sender",
+            "router",
+            "router.call(data",
+            "routerCallNative",
+            "swap",
+            "transfer"
+          ],
+          "rootCause": "Swap aggregator and cross-chain proxy contracts often need to interact with multiple DEX routers. The simplest (and most dangerous) implementation accepts an arbitrary `router` address and arbitrary `",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 69,
+              "lineEnd": 77,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 78,
+              "lineEnd": 229,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "balanceOf",
+                "routerCallNative",
+                "swap",
+                "transfer"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-impact-analysis-001",
+          "title": "Impact Analysis",
+          "lineStart": 230,
+          "lineEnd": 252,
+          "lineCount": 23,
+          "severity": [],
+          "codeKeywords": [
+            "address.call(userControlledData"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-secure-implementation-002",
+          "title": "Secure Implementation",
+          "lineStart": 253,
+          "lineEnd": 329,
+          "lineCount": 77,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "addRouter",
+            "routerCall",
+            "swap",
+            "uniswapV3SwapCallback"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-detection-patterns-003",
+          "title": "Detection Patterns",
+          "lineStart": 330,
+          "lineEnd": 356,
+          "lineCount": 27,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "address",
+            "address.call(userControlledCalldata",
+            "callTarget",
+            "delegatecall",
+            "dexRouter",
+            "dexSpender",
+            "from",
+            "router.call(_data",
+            "transferFrom",
+            "uniswapV3SwapCallback"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-real-world-examples-004",
+          "title": "Real-World Examples",
+          "lineStart": 357,
+          "lineEnd": 370,
+          "lineCount": 14,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
       "file": "DB/general/missing-validations/MISSING_VALIDATION_TEMPLATE.md",
       "totalLines": 728,
       "frontmatter": {
@@ -1164,6 +1530,82 @@
                 "buyTokensAndDepositOnBehalf",
                 "execute",
                 "swap"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/initialization/defihacklabs-initialization-patterns.md",
+      "totalLines": 341,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "ethereum, bsc",
+        "category": "initialization",
+        "vulnerability_type": "unprotected_initialization",
+        "attack_type": "initialization_hijack",
+        "affected_component": "proxy_initialization, constructor",
+        "severity": "critical",
+        "impact": "fund_loss, total_control",
+        "exploitability": "0.85",
+        "financial_impact": "critical",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "4",
+        "total_losses": "\"$500M+\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "general-security-defihacklabs-unprotected-initialization--000",
+          "title": "DeFiHackLabs Unprotected Initialization Compendium",
+          "lineStart": 36,
+          "lineEnd": 290,
+          "lineCount": 255,
+          "severity": [
+            "CRITICAL",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "emergencyWithdraw",
+            "flashLoan",
+            "init",
+            "initialize",
+            "initialized",
+            "onlyOwner",
+            "selfdestruct",
+            "setRewards"
+          ],
+          "rootCause": "init() has NO access control — anyone can re-set depositToken",
+          "subsections": [
+            {
+              "title": "Root Cause Categories",
+              "lineStart": 42,
+              "lineEnd": 49,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "init",
+                "selfdestruct"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 50,
+              "lineEnd": 221,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall",
+                "emergencyWithdraw",
+                "flashLoan",
+                "init",
+                "initialized",
+                "onlyOwner",
+                "setRewards"
               ]
             }
           ]

@@ -2,11 +2,195 @@
   "meta": {
     "category": "general-governance",
     "description": "Governance, stablecoins, malicious patterns, MEV, randomness",
-    "fileCount": 9,
-    "totalPatterns": 60,
+    "fileCount": 10,
+    "totalPatterns": 67,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
+    {
+      "file": "DB/general/dao-governance-vulnerabilities/defihacklabs-governance-attack-patterns.md",
+      "totalLines": 377,
+      "frontmatter": {
+        "protocol": "\"generic\"",
+        "chain": "\"ethereum, bsc\"",
+        "category": "\"governance\"",
+        "vulnerability_type": "\"governance_manipulation\"",
+        "attack_type": "\"logical_error\"",
+        "affected_component": "\"governance_voting, proposal_execution, proxy_initialization\"",
+        "severity": "\"critical\"",
+        "impact": "\"fund_loss\"",
+        "exploitability": "0.5",
+        "financial_impact": "\"critical\"",
+        "language": "\"solidity\"",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 7,
+      "patterns": [
+        {
+          "id": "general-governance-1-flash-loan-governance-takeover-000",
+          "title": "1. Flash Loan Governance Takeover",
+          "lineStart": 63,
+          "lineEnd": 115,
+          "lineCount": 53,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "emergencyCommit",
+            "sweep"
+          ],
+          "rootCause": "When governance voting power is determined by token balances at the time of vote (snapshot-less) or uses LP tokens that can be acquired via flash loans, an attacker can temporarily acquire majority vo",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 69,
+              "lineEnd": 79,
+              "severity": [],
+              "codeKeywords": [
+                "emergencyCommit"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 80,
+              "lineEnd": 115,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "sweep"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-2-low-quorum-governance-exploitation-001",
+          "title": "2. Low Quorum Governance Exploitation",
+          "lineStart": 116,
+          "lineEnd": 163,
+          "lineCount": 48,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": "When governance quorum requirements are set too low (or vote delegation concentrates power), an attacker with a relatively small token holding can pass proposals that modify critical protocol paramete",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 122,
+              "lineEnd": 163,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-governance-3-proxy-re-initialization-attack-002",
+          "title": "3. Proxy Re-Initialization Attack",
+          "lineStart": 164,
+          "lineEnd": 215,
+          "lineCount": 52,
+          "severity": [
+            "CRITICAL",
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "getContract",
+            "initialize",
+            "initializer",
+            "isGovernanceAddress"
+          ],
+          "rootCause": "When governance, staking, and delegate manager contracts are deployed behind proxies (UUPS or Transparent), the `initialize()` function must be called exactly once and then locked. If `initialize()` c",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 170,
+              "lineEnd": 215,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "getContract",
+                "isGovernanceAddress"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-impact-analysis-003",
+          "title": "Impact Analysis",
+          "lineStart": 216,
+          "lineEnd": 239,
+          "lineCount": 24,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "emergencyCommit",
+            "initialize"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-secure-implementation-004",
+          "title": "Secure Implementation",
+          "lineStart": 240,
+          "lineEnd": 307,
+          "lineCount": 68,
+          "severity": [],
+          "codeKeywords": [
+            "castVote",
+            "initialize",
+            "propose",
+            "queueTransaction"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-detection-patterns-005",
+          "title": "Detection Patterns",
+          "lineStart": 308,
+          "lineEnd": 334,
+          "lineCount": 27,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "emergencyCommit",
+            "execute",
+            "initialize",
+            "initializer",
+            "propose"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-real-world-examples-006",
+          "title": "Real-World Examples",
+          "lineStart": 335,
+          "lineEnd": 346,
+          "lineCount": 12,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "initialize"
+          ],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
     {
       "file": "DB/general/dao-governance-vulnerabilities/governance-takeover.md",
       "totalLines": 732,
