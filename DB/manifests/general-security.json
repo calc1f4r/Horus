@@ -2,8 +2,8 @@
   "meta": {
     "category": "general-security",
     "description": "Access control, input validation, signatures, initialization",
-    "fileCount": 12,
-    "totalPatterns": 68,
+    "fileCount": 13,
+    "totalPatterns": 77,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -430,6 +430,365 @@
               "codeKeywords": []
             }
           ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/access-control/defihacklabs-access-control-2021-2022-patterns.md",
+      "totalLines": 588,
+      "frontmatter": {
+        "protocol": "Multi-Protocol",
+        "chain": "Ethereum, BSC, Fantom",
+        "category": "access_control",
+        "vulnerability_type": "Access Control Bypass Patterns",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "8",
+        "total_losses": "\"$3.3M+\"",
+        "severity": "CRITICAL",
+        "impact": "Full protocol drain, governance takeover, token supply manipulation",
+        "exploitability": "High",
+        "financial_impact": "\"$3.3M+ aggregate\""
+      },
+      "patternCount": 8,
+      "patterns": [
+        {
+          "id": "general-security-overview-000",
+          "title": "Overview",
+          "lineStart": 53,
+          "lineEnd": 68,
+          "lineCount": 16,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "burn(address",
+            "initialize",
+            "mint",
+            "onlyOwner",
+            "redeem",
+            "transferFrom"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 69,
+          "lineEnd": 98,
+          "lineCount": 30,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "from",
+            "initialize",
+            "initialized",
+            "mint",
+            "msg.sender",
+            "onlyAdmin",
+            "onlyOwner",
+            "owner",
+            "ownerWithdrawAllTo(attacker"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Root Cause Analysis",
+              "lineStart": 71,
+              "lineEnd": 80,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "from",
+                "initialize",
+                "initialized",
+                "msg.sender",
+                "onlyAdmin",
+                "onlyOwner",
+                "owner"
+              ]
+            },
+            {
+              "title": "Attack Scenario Taxonomy",
+              "lineStart": 81,
+              "lineEnd": 98,
+              "severity": [],
+              "codeKeywords": [
+                "mint",
+                "ownerWithdrawAllTo(attacker"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 99,
+          "lineEnd": 388,
+          "lineCount": 290,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "initialize",
+            "initialized",
+            "mint",
+            "onlyOwner",
+            "ownerWithdrawAllTo",
+            "testExploit"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 1: Missing Access Control on Owner Withdrawal",
+              "lineStart": 101,
+              "lineEnd": 128,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "onlyOwner",
+                "ownerWithdrawAllTo",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Pattern 2: Public burn(address) Enables LP Drain",
+              "lineStart": 129,
+              "lineEnd": 160,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Pattern 3: Public mint() Without Any Restriction",
+              "lineStart": 161,
+              "lineEnd": 186,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "mint",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Pattern 4: Unprotected Proxy Re-Initialization (Governance Takeover)",
+              "lineStart": 187,
+              "lineEnd": 236,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "initialize",
+                "initialized",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Pattern 5: Missing Approval Check in ERC-4626 Redeem",
+              "lineStart": 237,
+              "lineEnd": 264,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "msg.sender",
+                "owner",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Pattern 6: Public Function Drains User Approvals",
+              "lineStart": 265,
+              "lineEnd": 301,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall",
+                "testExploit",
+                "user"
+              ]
+            },
+            {
+              "title": "Pattern 7: Router Swaps From Arbitrary Address",
+              "lineStart": 302,
+              "lineEnd": 344,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Pattern 8: Fake Factory Injection Inflates Swap Mining Rewards",
+              "lineStart": 345,
+              "lineEnd": 388,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "factories",
+                "getPair",
+                "getReserves",
+                "testExploit"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-impact-analysis-003",
+          "title": "Impact Analysis",
+          "lineStart": 389,
+          "lineEnd": 405,
+          "lineCount": 17,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-secure-implementation-004",
+          "title": "Secure Implementation",
+          "lineStart": 406,
+          "lineEnd": 512,
+          "lineCount": 107,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "burn",
+            "initialize",
+            "mint",
+            "ownerWithdrawAllTo",
+            "redeem",
+            "swapExactTokensForTokens"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Fix 1: Proper Access Control Modifiers",
+              "lineStart": 408,
+              "lineEnd": 436,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "burn",
+                "mint",
+                "ownerWithdrawAllTo"
+              ]
+            },
+            {
+              "title": "Fix 2: Proxy Initialization Guard",
+              "lineStart": 437,
+              "lineEnd": 460,
+              "severity": [],
+              "codeKeywords": [
+                "initialize"
+              ]
+            },
+            {
+              "title": "Fix 3: ERC-4626 Redeem Authorization",
+              "lineStart": 461,
+              "lineEnd": 482,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "redeem"
+              ]
+            },
+            {
+              "title": "Fix 4: Validate Routing Parameters",
+              "lineStart": 483,
+              "lineEnd": 512,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "swapExactTokensForTokens"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-detection-patterns-005",
+          "title": "Detection Patterns",
+          "lineStart": 513,
+          "lineEnd": 557,
+          "lineCount": 45,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Static Analysis",
+              "lineStart": 515,
+              "lineEnd": 542,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Invariant Checks",
+              "lineStart": 543,
+              "lineEnd": 557,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-security-audit-checklist-006",
+          "title": "Audit Checklist",
+          "lineStart": 558,
+          "lineEnd": 570,
+          "lineCount": 13,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "from",
+            "initialize",
+            "initializer",
+            "mint",
+            "msg.sender",
+            "onlyOwner",
+            "owner",
+            "transferFrom"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-real-world-examples-007",
+          "title": "Real-World Examples",
+          "lineStart": 571,
+          "lineEnd": 585,
+          "lineCount": 15,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
@@ -1578,7 +1937,7 @@
     },
     {
       "file": "DB/general/arbitrary-call/defihacklabs-arbitrary-call-patterns.md",
-      "totalLines": 401,
+      "totalLines": 542,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, bsc\"",
@@ -1593,13 +1952,13 @@
         "language": "\"solidity\"",
         "version": "\">=0.8.0\""
       },
-      "patternCount": 5,
+      "patternCount": 6,
       "patterns": [
         {
           "id": "general-security-1-unvalidated-router-address-calldata-in-000",
           "title": "1. Unvalidated Router Address + Calldata in Swap Functions",
-          "lineStart": 63,
-          "lineEnd": 229,
+          "lineStart": 68,
+          "lineEnd": 234,
           "lineCount": 167,
           "severity": [
             "CRITICAL"
@@ -1618,15 +1977,15 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 69,
-              "lineEnd": 77,
+              "lineStart": 74,
+              "lineEnd": 82,
               "severity": [],
               "codeKeywords": []
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 78,
-              "lineEnd": 229,
+              "lineStart": 83,
+              "lineEnd": 234,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -1641,10 +2000,27 @@
           ]
         },
         {
-          "id": "general-security-impact-analysis-001",
+          "id": "general-security-2-additional-arbitrary-call-patterns-202-001",
+          "title": "2. Additional Arbitrary Call Patterns (2022)",
+          "lineStart": 235,
+          "lineEnd": 360,
+          "lineCount": 126,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "balanceOf",
+            "collateral",
+            "mintToPayable"
+          ],
+          "rootCause": "write() accepts arbitrary callData and executes it",
+          "subsections": null
+        },
+        {
+          "id": "general-security-impact-analysis-002",
           "title": "Impact Analysis",
-          "lineStart": 230,
-          "lineEnd": 252,
+          "lineStart": 361,
+          "lineEnd": 383,
           "lineCount": 23,
           "severity": [],
           "codeKeywords": [
@@ -1654,10 +2030,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-secure-implementation-002",
+          "id": "general-security-secure-implementation-003",
           "title": "Secure Implementation",
-          "lineStart": 253,
-          "lineEnd": 329,
+          "lineStart": 384,
+          "lineEnd": 460,
           "lineCount": 77,
           "severity": [
             "LOW"
@@ -1672,10 +2048,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-detection-patterns-003",
+          "id": "general-security-detection-patterns-004",
           "title": "Detection Patterns",
-          "lineStart": 330,
-          "lineEnd": 356,
+          "lineStart": 461,
+          "lineEnd": 487,
           "lineCount": 27,
           "severity": [
             "LOW"
@@ -1696,11 +2072,11 @@
           "subsections": null
         },
         {
-          "id": "general-security-real-world-examples-004",
+          "id": "general-security-real-world-examples-005",
           "title": "Real-World Examples",
-          "lineStart": 357,
-          "lineEnd": 370,
-          "lineCount": 14,
+          "lineStart": 488,
+          "lineEnd": 511,
+          "lineCount": 24,
           "severity": [],
           "codeKeywords": [],
           "rootCause": null,

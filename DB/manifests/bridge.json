@@ -2,8 +2,8 @@
   "meta": {
     "category": "bridge",
     "description": "Pattern-level index for bridge vulnerabilities",
-    "fileCount": 6,
-    "totalPatterns": 41,
+    "fileCount": 7,
+    "totalPatterns": 49,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
   },
   "files": [
@@ -480,6 +480,242 @@
               "codeKeywords": []
             }
           ]
+        }
+      ]
+    },
+    {
+      "file": "DB/bridge/custom/defihacklabs-bridge-l2-replay-2022-patterns.md",
+      "totalLines": 410,
+      "frontmatter": {
+        "protocol": "Multi-Protocol",
+        "chain": "Ethereum, Optimism, Harmony",
+        "category": "bridge",
+        "vulnerability_type": "Bridge and Cross-Chain Security Patterns",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "3",
+        "total_losses": "\"$115M+\"",
+        "severity": "CRITICAL",
+        "impact": "Full bridge drain, token theft, address takeover",
+        "exploitability": "Medium to High",
+        "financial_impact": "\"$115M+ aggregate\""
+      },
+      "patternCount": 8,
+      "patterns": [
+        {
+          "id": "bridge-overview-000",
+          "title": "Overview",
+          "lineStart": 48,
+          "lineEnd": 58,
+          "lineCount": 11,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "bridge-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 59,
+          "lineEnd": 104,
+          "lineCount": 46,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "CREATE"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Root Cause Analysis",
+              "lineStart": 61,
+              "lineEnd": 70,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "CREATE"
+              ]
+            },
+            {
+              "title": "Attack Scenarios",
+              "lineStart": 71,
+              "lineEnd": 104,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "bridge-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 105,
+          "lineEnd": 221,
+          "lineCount": 117,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "CREATE",
+            "ProxyFactory",
+            "createProxy",
+            "sweepToken",
+            "testExploit"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 1: Cross-Chain Address Collision via CREATE Nonce Replay",
+              "lineStart": 107,
+              "lineEnd": 141,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "CREATE",
+                "ProxyFactory",
+                "createProxy",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Pattern 2: Compromised Multisig Keys with Low Threshold",
+              "lineStart": 142,
+              "lineEnd": 183,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Pattern 3: Token Proxy Dual-Address Bypass on Sweep Function",
+              "lineStart": 184,
+              "lineEnd": 221,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "sweepToken",
+                "testExploit"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-impact-analysis-003",
+          "title": "Impact Analysis",
+          "lineStart": 222,
+          "lineEnd": 233,
+          "lineCount": 12,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "bridge-secure-implementation-004",
+          "title": "Secure Implementation",
+          "lineStart": 234,
+          "lineEnd": 351,
+          "lineCount": 118,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "confirmUnlock",
+            "createProxyWithNonce",
+            "initializeUnderlyingAddresses",
+            "submitUnlock",
+            "sweepToken"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Fix 1: Use CREATE2 with Immutable Salt for Cross-Chain Deployments",
+              "lineStart": 236,
+              "lineEnd": 269,
+              "severity": [],
+              "codeKeywords": [
+                "createProxyWithNonce"
+              ]
+            },
+            {
+              "title": "Fix 2: Higher Multisig Threshold + Time Delays for Bridges",
+              "lineStart": 270,
+              "lineEnd": 317,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "confirmUnlock",
+                "submitUnlock"
+              ]
+            },
+            {
+              "title": "Fix 3: Comprehensive Token Identity Check for Sweep",
+              "lineStart": 318,
+              "lineEnd": 351,
+              "severity": [],
+              "codeKeywords": [
+                "initializeUnderlyingAddresses",
+                "sweepToken"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-detection-patterns-005",
+          "title": "Detection Patterns",
+          "lineStart": 352,
+          "lineEnd": 385,
+          "lineCount": 34,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Static Analysis",
+              "lineStart": 354,
+              "lineEnd": 372,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Invariant Checks",
+              "lineStart": 373,
+              "lineEnd": 385,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "bridge-audit-checklist-006",
+          "title": "Audit Checklist",
+          "lineStart": 386,
+          "lineEnd": 397,
+          "lineCount": 12,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "bridge-real-world-examples-007",
+          "title": "Real-World Examples",
+          "lineStart": 398,
+          "lineEnd": 407,
+          "lineCount": 10,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },

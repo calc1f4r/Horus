@@ -2,8 +2,8 @@
   "meta": {
     "category": "general-defi",
     "description": "DeFi-specific: flash loans, slippage, vaults, precision, calculations",
-    "fileCount": 19,
-    "totalPatterns": 158,
+    "fileCount": 22,
+    "totalPatterns": 175,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -2722,6 +2722,96 @@
       ]
     },
     {
+      "file": "DB/general/token-compatibility/defihacklabs-bsc-token-exploit-patterns-2022.md",
+      "totalLines": 703,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "bsc",
+        "category": "token_compatibility",
+        "vulnerability_type": "bsc_token_exploit_patterns",
+        "attack_type": "economic_exploit",
+        "affected_component": "token_contract",
+        "severity": "high",
+        "impact": "fund_loss",
+        "exploitability": "0.75",
+        "financial_impact": "high",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "9",
+        "total_losses": "\"$200K+\""
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "general-defi-bsc-token-exploit-patterns-2022-000",
+          "title": "BSC Token Exploit Patterns (2022)",
+          "lineStart": 43,
+          "lineEnd": 606,
+          "lineCount": 564,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_isAddLiquidityV1",
+            "_rOwned",
+            "_tOwned",
+            "balanceOf",
+            "excludeFromReward",
+            "getReserves",
+            "includeInReward",
+            "onlyOwner",
+            "reserve",
+            "skim",
+            "swapAndLiquifyStepv1",
+            "sync",
+            "testExploit",
+            "token.swapAndLiquifyStepv1",
+            "transferOwnership"
+          ],
+          "rootCause": "1. **Reflection Token Accounting Desync**: SafeMoon-fork tokens track balances via dual accounting (`_rOwned` / `_tOwned`). The `excludeFromReward()` / `includeInReward()` mechanisms can be manipulate",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 49,
+              "lineEnd": 89,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_isAddLiquidityV1",
+                "_rOwned",
+                "_tOwned",
+                "balanceOf",
+                "excludeFromReward",
+                "getReserves",
+                "includeInReward",
+                "reserve"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 90,
+              "lineEnd": 481,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall",
+                "_rOwned",
+                "_tOwned",
+                "includeInReward",
+                "onlyOwner",
+                "testExploit",
+                "transferBBOX",
+                "transferOwnership"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "file": "DB/general/token-compatibility/non-standard-token-vulnerabilities.md",
       "totalLines": 1173,
       "frontmatter": {
@@ -4171,6 +4261,299 @@
             "HIGH",
             "MEDIUM"
           ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/calculation/defihacklabs-reward-calculation-2022-patterns.md",
+      "totalLines": 483,
+      "frontmatter": {
+        "protocol": "Multi-Protocol",
+        "chain": "Ethereum, BSC",
+        "category": "calculation",
+        "vulnerability_type": "Reward and Fee Calculation Flaws",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "6",
+        "total_losses": "\"$1.5M+\"",
+        "severity": "HIGH",
+        "impact": "Reward inflation, LP pair drain, airdrop multiplication",
+        "exploitability": "Medium to High",
+        "financial_impact": "\"$1.5M+ aggregate\""
+      },
+      "patternCount": 8,
+      "patterns": [
+        {
+          "id": "general-defi-overview-000",
+          "title": "Overview",
+          "lineStart": 55,
+          "lineEnd": 68,
+          "lineCount": 14,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_spendAllowance",
+            "claimStakeLp"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 69,
+          "lineEnd": 82,
+          "lineCount": 14,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_transfer",
+            "skim"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Root Cause Analysis",
+              "lineStart": 71,
+              "lineEnd": 82,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_transfer",
+                "skim"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 83,
+          "lineEnd": 312,
+          "lineCount": 230,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "airDropReward",
+            "claim",
+            "claimStakeLp",
+            "distributeAirdrop",
+            "exploit",
+            "testExploit",
+            "updateUserBalance"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 1: Mass Contract Deployment Reward Farming",
+              "lineStart": 85,
+              "lineEnd": 134,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "claim",
+                "testExploit",
+                "updateUserBalance"
+              ]
+            },
+            {
+              "title": "Pattern 2: Airdrop Recycling via LP Transfer",
+              "lineStart": 135,
+              "lineEnd": 171,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "airDropReward",
+                "distributeAirdrop",
+                "exploit"
+              ]
+            },
+            {
+              "title": "Pattern 3: Multiple Claim Without Cooldown",
+              "lineStart": 172,
+              "lineEnd": 205,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "claimStakeLp",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Pattern 4: Zero-Value Transfer Burns Tokens From LP Pair",
+              "lineStart": 206,
+              "lineEnd": 241,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall",
+                "_transfer",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Pattern 5: Reflection Token Allowance Bypass",
+              "lineStart": 242,
+              "lineEnd": 276,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_getReflectedAmount",
+                "_getStandardAmount",
+                "_spendAllowance",
+                "testExploit",
+                "transferFrom"
+              ]
+            },
+            {
+              "title": "Pattern 6: Skim Loop Fee Amplification Across Multiple Pairs",
+              "lineStart": 277,
+              "lineEnd": 312,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "pancakeCall",
+                "skim"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-impact-analysis-003",
+          "title": "Impact Analysis",
+          "lineStart": 313,
+          "lineEnd": 327,
+          "lineCount": 15,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-secure-implementation-004",
+          "title": "Secure Implementation",
+          "lineStart": 328,
+          "lineEnd": 418,
+          "lineCount": 91,
+          "severity": [],
+          "codeKeywords": [
+            "_spendAllowance",
+            "_transfer",
+            "claimStakeLp",
+            "distributeAirdrop"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Fix 1: Per-Address Claim Tracking",
+              "lineStart": 330,
+              "lineEnd": 356,
+              "severity": [],
+              "codeKeywords": [
+                "distributeAirdrop"
+              ]
+            },
+            {
+              "title": "Fix 2: Staking Claim with Deduction",
+              "lineStart": 357,
+              "lineEnd": 376,
+              "severity": [],
+              "codeKeywords": [
+                "claimStakeLp"
+              ]
+            },
+            {
+              "title": "Fix 3: Safe Transfer Logic (No Pair Side Effects)",
+              "lineStart": 377,
+              "lineEnd": 401,
+              "severity": [],
+              "codeKeywords": [
+                "_transfer"
+              ]
+            },
+            {
+              "title": "Fix 4: Correct Reflection Amount Conversion",
+              "lineStart": 402,
+              "lineEnd": 418,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_spendAllowance"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-detection-patterns-005",
+          "title": "Detection Patterns",
+          "lineStart": 419,
+          "lineEnd": 455,
+          "lineCount": 37,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Static Analysis",
+              "lineStart": 421,
+              "lineEnd": 442,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Invariant Checks",
+              "lineStart": 443,
+              "lineEnd": 455,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-audit-checklist-006",
+          "title": "Audit Checklist",
+          "lineStart": 456,
+          "lineEnd": 467,
+          "lineCount": 12,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_transfer",
+            "skim"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-real-world-examples-007",
+          "title": "Real-World Examples",
+          "lineStart": 468,
+          "lineEnd": 480,
+          "lineCount": 13,
+          "severity": [],
           "codeKeywords": [],
           "rootCause": null,
           "subsections": null
@@ -5664,6 +6047,369 @@
           "lineStart": 347,
           "lineEnd": 355,
           "lineCount": 9,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/business-logic/defihacklabs-protocol-logic-flaws-2021-2022.md",
+      "totalLines": 704,
+      "frontmatter": {
+        "protocol": "Multi-Protocol",
+        "chain": "Ethereum, BSC, Polygon, Fantom, Optimism",
+        "category": "business_logic",
+        "vulnerability_type": "Protocol Logic Flaws",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "12",
+        "total_losses": "\"$40M+\"",
+        "severity": "CRITICAL",
+        "impact": "Fund theft, permanent fund lock, full protocol drain",
+        "exploitability": "Medium to High",
+        "financial_impact": "\"$40M+ aggregate\""
+      },
+      "patternCount": 8,
+      "patterns": [
+        {
+          "id": "general-defi-overview-000",
+          "title": "Overview",
+          "lineStart": 55,
+          "lineEnd": 70,
+          "lineCount": 16,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 71,
+          "lineEnd": 118,
+          "lineCount": 48,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "register",
+            "selector"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Root Cause Analysis",
+              "lineStart": 73,
+              "lineEnd": 84,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "register",
+                "selector"
+              ]
+            },
+            {
+              "title": "Attack Scenarios",
+              "lineStart": 85,
+              "lineEnd": 118,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 119,
+          "lineEnd": 464,
+          "lineCount": 346,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "XNFT.pledgeAndBorrow",
+            "XToken",
+            "_exploit",
+            "dumpETH",
+            "makePledge",
+            "orderId",
+            "register",
+            "remove_liquidity",
+            "testExploit",
+            "withdrawNFT"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 1: NFT Pledge Record Not Invalidated After Withdrawal",
+              "lineStart": 121,
+              "lineEnd": 166,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "XNFT.pledgeAndBorrow",
+                "XToken",
+                "dumpETH",
+                "makePledge",
+                "orderId",
+                "testExploit",
+                "withdrawNFT"
+              ]
+            },
+            {
+              "title": "Pattern 2: Read-Only Reentrancy via Curve LP Pricing",
+              "lineStart": 167,
+              "lineEnd": 205,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_exploit",
+                "remove_liquidity"
+              ]
+            },
+            {
+              "title": "Pattern 3: Game Economics Abuse via Unrestricted Registration",
+              "lineStart": 206,
+              "lineEnd": 254,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "register",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Pattern 4: Decimal Miscalculation in Synthetic Minting",
+              "lineStart": 255,
+              "lineEnd": 282,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "_xftmOut",
+                "collect",
+                "pool.mint",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Pattern 5: Flash Loan Reward Price Manipulation",
+              "lineStart": 283,
+              "lineEnd": 318,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "BiswapCall",
+                "getReward"
+              ]
+            },
+            {
+              "title": "Pattern 6: Arbitrary External Call in Zap Contract",
+              "lineStart": 319,
+              "lineEnd": 359,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "approve",
+                "balanceOf",
+                "executeSwapAndDeposit",
+                "initiateDeposit",
+                "swapAndDeposit",
+                "swapData",
+                "swapTarget"
+              ]
+            },
+            {
+              "title": "Pattern 7: Auction DoS via Reverting Fallback + Permanent Fund Lock",
+              "lineStart": 360,
+              "lineEnd": 401,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "bid",
+                "claimProjectFunds",
+                "processRefunds",
+                "require",
+                "testclaimProjectFunds"
+              ]
+            },
+            {
+              "title": "Pattern 8: Public Strategy Function Enables Sandwich Attack",
+              "lineStart": 402,
+              "lineEnd": 433,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "BvaultsStrategy.convertDustToEarned",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Pattern 9: Token Transfer Side-Effect Price Manipulation",
+              "lineStart": 434,
+              "lineEnd": 464,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall",
+                "testExploit",
+                "transfer"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-impact-analysis-003",
+          "title": "Impact Analysis",
+          "lineStart": 465,
+          "lineEnd": 485,
+          "lineCount": 21,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-secure-implementation-004",
+          "title": "Secure Implementation",
+          "lineStart": 486,
+          "lineEnd": 621,
+          "lineCount": 136,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "borrow",
+            "claimRefund",
+            "getReward",
+            "getRewardTokenPrice",
+            "processRefunds",
+            "swapAndDeposit",
+            "withdrawNFT"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Fix 1: Invalidate State on Withdrawal (XCarnival Pattern)",
+              "lineStart": 488,
+              "lineEnd": 517,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "borrow",
+                "withdrawNFT"
+              ]
+            },
+            {
+              "title": "Fix 2: Use TWAP or Chainlink for Reward Pricing (Nmbplatform Pattern)",
+              "lineStart": 518,
+              "lineEnd": 545,
+              "severity": [],
+              "codeKeywords": [
+                "getReward",
+                "getRewardTokenPrice"
+              ]
+            },
+            {
+              "title": "Fix 3: Pull-Based Refunds (AkutarNFT Pattern)",
+              "lineStart": 546,
+              "lineEnd": 571,
+              "severity": [],
+              "codeKeywords": [
+                "claimRefund",
+                "processRefunds"
+              ]
+            },
+            {
+              "title": "Fix 4: Restrict External Call Targets (Polynomial Pattern)",
+              "lineStart": 572,
+              "lineEnd": 600,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "swapAndDeposit"
+              ]
+            },
+            {
+              "title": "Fix 5: Access Control for Strategy Functions (BDEX Pattern)",
+              "lineStart": 601,
+              "lineEnd": 621,
+              "severity": [],
+              "codeKeywords": [
+                "convertDustToEarned"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-detection-patterns-005",
+          "title": "Detection Patterns",
+          "lineStart": 622,
+          "lineEnd": 668,
+          "lineCount": 47,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Static Analysis",
+              "lineStart": 624,
+              "lineEnd": 651,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Invariant Checks",
+              "lineStart": 652,
+              "lineEnd": 668,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-audit-checklist-006",
+          "title": "Audit Checklist",
+          "lineStart": 669,
+          "lineEnd": 683,
+          "lineCount": 15,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "claimProjectFunds",
+            "compound",
+            "convertDustToEarned",
+            "deposit",
+            "harvest",
+            "register"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-real-world-examples-007",
+          "title": "Real-World Examples",
+          "lineStart": 684,
+          "lineEnd": 701,
+          "lineCount": 18,
           "severity": [],
           "codeKeywords": [],
           "rootCause": null,

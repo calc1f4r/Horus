@@ -2,8 +2,8 @@
   "meta": {
     "category": "oracle",
     "description": "Pattern-level index for oracle vulnerabilities",
-    "fileCount": 9,
-    "totalPatterns": 59,
+    "fileCount": 10,
+    "totalPatterns": 67,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
   },
   "files": [
@@ -1056,6 +1056,337 @@
               "codeKeywords": []
             }
           ]
+        }
+      ]
+    },
+    {
+      "file": "DB/oracle/price-manipulation/defihacklabs-bsc-oracle-manipulation-2022.md",
+      "totalLines": 565,
+      "frontmatter": {
+        "protocol": "Multi-Protocol",
+        "chain": "BSC, Fantom",
+        "category": "oracle_price_manipulation",
+        "vulnerability_type": "AMM-Based Oracle Price Manipulation",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "8",
+        "total_losses": "\"$7M+\"",
+        "severity": "CRITICAL",
+        "impact": "Protocol drain via manipulated prices, reward inflation, vault extraction",
+        "exploitability": "High",
+        "financial_impact": "\"$7M+ aggregate\""
+      },
+      "patternCount": 8,
+      "patterns": [
+        {
+          "id": "oracle-overview-000",
+          "title": "Overview",
+          "lineStart": 58,
+          "lineEnd": 72,
+          "lineCount": 15,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "getPrice"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "oracle-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 73,
+          "lineEnd": 110,
+          "lineCount": 38,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "balanceOf",
+            "balanceOf(msg.sender",
+            "transferFrom"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Root Cause Analysis",
+              "lineStart": 75,
+              "lineEnd": 84,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "balanceOf",
+                "balanceOf(msg.sender",
+                "transferFrom"
+              ]
+            },
+            {
+              "title": "Attack Flow Pattern",
+              "lineStart": 85,
+              "lineEnd": 110,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "oracle-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 111,
+          "lineEnd": 388,
+          "lineCount": 278,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "DPPFlashLoanCall",
+            "batchToken",
+            "claim",
+            "getPrice",
+            "pancakeCall",
+            "swapAndLiquifyStepv1",
+            "swapTokensForOther",
+            "sync",
+            "testExploit",
+            "withdrawReturnAmountByConsumer",
+            "withdrawReturnAmountByMerchant",
+            "withdrawReturnAmountByReferral"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 1: Flash Swap Reserve Drain → Inflated Reward Claims",
+              "lineStart": 113,
+              "lineEnd": 143,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "getPrice",
+                "pancakeCall",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Pattern 2: Multi-function Reward Drain via Pair Price Manipulation",
+              "lineStart": 144,
+              "lineEnd": 173,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "claim",
+                "pancakeCall",
+                "withdrawReturnAmountByConsumer",
+                "withdrawReturnAmountByMerchant",
+                "withdrawReturnAmountByReferral"
+              ]
+            },
+            {
+              "title": "Pattern 3: batchToken Mint Directly Into LP Pair",
+              "lineStart": 174,
+              "lineEnd": 209,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall",
+                "batchToken",
+                "sync"
+              ]
+            },
+            {
+              "title": "Pattern 4: Public Token Function Skews LP Reserves",
+              "lineStart": 210,
+              "lineEnd": 242,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "swapAndLiquifyStepv1",
+                "swapTokensForOther",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Pattern 5: Broken transferFrom Drains LP Pair Reserves",
+              "lineStart": 243,
+              "lineEnd": 279,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "sync",
+                "testExploit",
+                "transferFrom"
+              ]
+            },
+            {
+              "title": "Pattern 6: Flash Loan Vault Share Inflation",
+              "lineStart": 280,
+              "lineEnd": 309,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "balanceOf(address(this",
+                "uniswapV2Call"
+              ]
+            },
+            {
+              "title": "Pattern 7: Spot Price Swap Proxy Arbitrage",
+              "lineStart": 310,
+              "lineEnd": 343,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall"
+              ]
+            },
+            {
+              "title": "Pattern 8: balanceOf-Based Reward Recycling Across Contracts",
+              "lineStart": 344,
+              "lineEnd": 388,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall",
+                "abuse",
+                "balanceOf(msg.sender"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "oracle-impact-analysis-003",
+          "title": "Impact Analysis",
+          "lineStart": 389,
+          "lineEnd": 405,
+          "lineCount": 17,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "oracle-secure-implementation-004",
+          "title": "Secure Implementation",
+          "lineStart": 406,
+          "lineEnd": 489,
+          "lineCount": 84,
+          "severity": [],
+          "codeKeywords": [
+            "claimReward",
+            "deposit",
+            "getTokenPrice",
+            "getTokenPriceTWAP",
+            "withdraw"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Fix 1: Use TWAP or External Oracle (Not AMM Spot Price)",
+              "lineStart": 408,
+              "lineEnd": 434,
+              "severity": [],
+              "codeKeywords": [
+                "getTokenPrice",
+                "getTokenPriceTWAP"
+              ]
+            },
+            {
+              "title": "Fix 2: Tracked Deposits Instead of balanceOf for Rewards",
+              "lineStart": 435,
+              "lineEnd": 464,
+              "severity": [],
+              "codeKeywords": [
+                "claimReward",
+                "deposit"
+              ]
+            },
+            {
+              "title": "Fix 3: Flash Loan Guard for Vault Deposits",
+              "lineStart": 465,
+              "lineEnd": 489,
+              "severity": [],
+              "codeKeywords": [
+                "deposit",
+                "withdraw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "oracle-detection-patterns-005",
+          "title": "Detection Patterns",
+          "lineStart": 490,
+          "lineEnd": 534,
+          "lineCount": 45,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Static Analysis",
+              "lineStart": 492,
+              "lineEnd": 519,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Invariant Checks",
+              "lineStart": 520,
+              "lineEnd": 534,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "oracle-audit-checklist-006",
+          "title": "Audit Checklist",
+          "lineStart": 535,
+          "lineEnd": 547,
+          "lineCount": 13,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "balanceOf(msg.sender",
+            "from",
+            "getReserves",
+            "msg.sender",
+            "sync",
+            "transferFrom"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "oracle-real-world-examples-007",
+          "title": "Real-World Examples",
+          "lineStart": 548,
+          "lineEnd": 562,
+          "lineCount": 15,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },

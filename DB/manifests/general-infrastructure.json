@@ -2,8 +2,8 @@
   "meta": {
     "category": "general-infrastructure",
     "description": "Smart contract infrastructure: proxies, reentrancy, storage, bridges",
-    "fileCount": 12,
-    "totalPatterns": 66,
+    "fileCount": 13,
+    "totalPatterns": 74,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -1620,6 +1620,321 @@
             "handleDepeggedCurvePool",
             "remove_liquidity"
           ],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/reentrancy/defihacklabs-reentrancy-2021-2022-uncovered.md",
+      "totalLines": 537,
+      "frontmatter": {
+        "protocol": "Multi-Protocol",
+        "chain": "Ethereum, BSC, Avalanche",
+        "category": "reentrancy",
+        "vulnerability_type": "Advanced Reentrancy Patterns",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "6",
+        "total_losses": "\"$2M+\"",
+        "severity": "CRITICAL",
+        "impact": "Share inflation, 3x lending, vault drain, double-credit deposits",
+        "exploitability": "Medium to High",
+        "financial_impact": "\"$2M+ aggregate\""
+      },
+      "patternCount": 8,
+      "patterns": [
+        {
+          "id": "general-infrastructure-overview-000",
+          "title": "Overview",
+          "lineStart": 54,
+          "lineEnd": 67,
+          "lineCount": 14,
+          "severity": [],
+          "codeKeywords": [
+            "onERC721Received",
+            "onFlashLoan",
+            "tokensReceived",
+            "tokensToSend",
+            "transferFrom"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 68,
+          "lineEnd": 102,
+          "lineCount": 35,
+          "severity": [],
+          "codeKeywords": [
+            "onERC721Received",
+            "onFlashLoan",
+            "safeTransferFrom",
+            "tokensReceived",
+            "tokensToSend",
+            "transferFrom"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Root Cause Analysis",
+              "lineStart": 70,
+              "lineEnd": 81,
+              "severity": [],
+              "codeKeywords": [
+                "onERC721Received",
+                "onFlashLoan",
+                "safeTransferFrom",
+                "tokensReceived",
+                "tokensToSend",
+                "transferFrom"
+              ]
+            },
+            {
+              "title": "Reentrancy Vector Taxonomy",
+              "lineStart": 82,
+              "lineEnd": 102,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 103,
+          "lineEnd": 358,
+          "lineCount": 256,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "attack",
+            "deposit",
+            "enter",
+            "lend",
+            "onFlashLoan",
+            "setUp",
+            "tokensReceived",
+            "tokensToSend",
+            "totalAssets"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 1: ERC777 `tokensToSend` Hook → Reenter Staking",
+              "lineStart": 105,
+              "lineEnd": 152,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "attack",
+                "enter",
+                "setUp",
+                "tokensToSend"
+              ]
+            },
+            {
+              "title": "Pattern 2: ERC777 `tokensReceived` Hook → Reenter Lending",
+              "lineStart": 153,
+              "lineEnd": 200,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "attack",
+                "lend",
+                "setUp",
+                "tokensReceived"
+              ]
+            },
+            {
+              "title": "Pattern 3: ERC3156 Flash Loan Callback → Deposit During Own Loan",
+              "lineStart": 201,
+              "lineEnd": 242,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "attack",
+                "deposit",
+                "extractProfit",
+                "onFlashLoan",
+                "totalAssets"
+              ]
+            },
+            {
+              "title": "Pattern 4: Fake ERC721 `transferFrom` → Reenter Sell During Buy",
+              "lineStart": 243,
+              "lineEnd": 273,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "JAY_TOKEN.sell",
+                "attack",
+                "buyJay",
+                "transferFrom"
+              ]
+            },
+            {
+              "title": "Pattern 5: ERC721 `onERC721Received` → Reenter Liquidation + Borrow",
+              "lineStart": 274,
+              "lineEnd": 321,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "attack",
+                "onERC721Received",
+                "safeTransferFrom"
+              ]
+            },
+            {
+              "title": "Pattern 6: Fake Token `transferFrom` → Reenter MasterChef Deposit",
+              "lineStart": 322,
+              "lineEnd": 358,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "depositByAddLiquidity",
+                "transferFrom"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-impact-analysis-003",
+          "title": "Impact Analysis",
+          "lineStart": 359,
+          "lineEnd": 371,
+          "lineCount": 13,
+          "severity": [],
+          "codeKeywords": [
+            "onERC721Received",
+            "onFlashLoan",
+            "tokensReceived",
+            "tokensToSend",
+            "transferFrom"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-secure-implementation-004",
+          "title": "Secure Implementation",
+          "lineStart": 372,
+          "lineEnd": 473,
+          "lineCount": 102,
+          "severity": [],
+          "codeKeywords": [
+            "deposit",
+            "depositByAddLiquidity",
+            "enter",
+            "flashLoan",
+            "lend",
+            "nonReentrant"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Fix 1: Reentrancy Guard (OpenZeppelin `nonReentrant`)",
+              "lineStart": 374,
+              "lineEnd": 398,
+              "severity": [],
+              "codeKeywords": [
+                "enter",
+                "nonReentrant"
+              ]
+            },
+            {
+              "title": "Fix 2: CEI Pattern (Checks-Effects-Interactions)",
+              "lineStart": 399,
+              "lineEnd": 418,
+              "severity": [],
+              "codeKeywords": [
+                "lend"
+              ]
+            },
+            {
+              "title": "Fix 3: Validate Token Contracts (Whitelist)",
+              "lineStart": 419,
+              "lineEnd": 444,
+              "severity": [],
+              "codeKeywords": [
+                "depositByAddLiquidity"
+              ]
+            },
+            {
+              "title": "Fix 4: Flash Loan Guard for Vault Deposits",
+              "lineStart": 445,
+              "lineEnd": 473,
+              "severity": [],
+              "codeKeywords": [
+                "deposit",
+                "flashLoan"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-detection-patterns-005",
+          "title": "Detection Patterns",
+          "lineStart": 474,
+          "lineEnd": 510,
+          "lineCount": 37,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Static Analysis",
+              "lineStart": 476,
+              "lineEnd": 497,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Invariant Checks",
+              "lineStart": 498,
+              "lineEnd": 510,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-audit-checklist-006",
+          "title": "Audit Checklist",
+          "lineStart": 511,
+          "lineEnd": 521,
+          "lineCount": 11,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "nonReentrant",
+            "onERC721Received",
+            "safeTransferFrom"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-real-world-examples-007",
+          "title": "Real-World Examples",
+          "lineStart": 522,
+          "lineEnd": 534,
+          "lineCount": 13,
+          "severity": [],
+          "codeKeywords": [],
           "rootCause": null,
           "subsections": null
         }

