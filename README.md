@@ -17,7 +17,6 @@ pip install -r requirements.txt
 
 ## Architecture Overview
 
-![Vulnerability Database — Complete Architecture](Architecture-Diagram.excalidraw)
 ![Full architecture diagram with all components and data flows](./Architecture.png)
 
 ### Search the Database

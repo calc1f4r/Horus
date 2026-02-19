@@ -850,12 +850,22 @@ def main():
     total_files = sum(m["meta"]["fileCount"] for m in manifests.values())
     print(f"Total files indexed: {total_files}")
     print(f"Total patterns extracted: {total_patterns}")
+    print(f"Total hunt cards generated: {total_huntcards}")
     print(f"Manifests generated: {len(manifests)}")
     print(f"\nManifest files:")
     for cat in sorted(manifests.keys()):
         mf = MANIFEST_DIR / f"{cat}.json"
         size = os.path.getsize(mf)
         print(f"  DB/manifests/{cat}.json - {size:,} bytes ({manifests[cat]['meta']['totalPatterns']} patterns)")
+    print(f"\nHunt card files:")
+    for cat in sorted(manifests.keys()):
+        hc = HUNTCARDS_DIR / f"{cat}-huntcards.json"
+        if hc.exists():
+            size = os.path.getsize(hc)
+            print(f"  DB/manifests/huntcards/{cat}-huntcards.json - {size:,} bytes")
+    combined_hc = HUNTCARDS_DIR / "all-huntcards.json"
+    if combined_hc.exists():
+        print(f"  DB/manifests/huntcards/all-huntcards.json - {os.path.getsize(combined_hc):,} bytes (ALL)")
 
 
 if __name__ == "__main__":
