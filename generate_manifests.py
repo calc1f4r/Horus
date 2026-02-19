@@ -574,6 +574,155 @@ GENERAL_SUBCATEGORIES = {
 }
 
 
+HUNTCARDS_DIR = MANIFEST_DIR / "huntcards"
+
+
+def truncate_to_sentence(text, max_len=100):
+    """Truncate text to the first sentence or max_len chars."""
+    if not text:
+        return ""
+    # First sentence
+    for end in [".", "!", "\n\n"]:
+        idx = text.find(end)
+        if 0 < idx < max_len:
+            return text[: idx + 1].strip()
+    # Fall back to truncation at word boundary
+    if len(text) <= max_len:
+        return text.strip()
+    truncated = text[:max_len].rsplit(" ", 1)[0]
+    return truncated.strip() + "..."
+
+
+def select_best_grep_keywords(keywords, max_count=6):
+    """Select the most specific keywords for grep patterns.
+    
+    Prefers longer, more unique identifiers over common short words.
+    Filters out overly generic terms that cause false positives.
+    """
+    if not keywords:
+        return []
+
+    GENERIC_TERMS = {
+        "address", "amount", "balance", "bool", "bytes", "data",
+        "event", "function", "mapping", "msg.sender", "owner",
+        "require", "return", "string", "uint256", "value",
+        "true", "false", "public", "private", "internal", "external",
+    }
+
+    # Filter out generic terms and very short keywords
+    scored = []
+    for kw in keywords:
+        kw_lower = kw.lower().rstrip("()")
+        if kw_lower in GENERIC_TERMS:
+            continue
+        if len(kw) < 3:
+            continue
+        # Score: longer and more specific = better
+        score = len(kw)
+        if "(" in kw or "." in kw:
+            score += 5  # function calls / member access are very specific
+        if any(c.isupper() for c in kw[1:]):
+            score += 3  # camelCase identifiers are specific
+        scored.append((score, kw))
+
+    scored.sort(reverse=True)
+    return [kw for _, kw in scored[:max_count]]
+
+
+def build_huntcard(pattern, file_path):
+    """Build a single compressed hunt card from a manifest pattern entry."""
+    # Select best keywords for grep
+    grep_keywords = select_best_grep_keywords(pattern.get("codeKeywords", []))
+    grep_pattern = "|".join(grep_keywords) if grep_keywords else ""
+
+    # Build detection hint from rootCause or title
+    root_cause = pattern.get("rootCause", "")
+    detect = truncate_to_sentence(root_cause) if root_cause else pattern["title"]
+
+    # Pick highest severity
+    severities = pattern.get("severity", [])
+    top_severity = severities[0] if severities else "UNKNOWN"
+    # Prefer CRITICAL > HIGH > MEDIUM > LOW
+    severity_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
+    if len(severities) > 1:
+        severities_sorted = sorted(severities, key=lambda s: severity_order.get(s, 99))
+        top_severity = severities_sorted[0]
+
+    return {
+        "id": pattern["id"],
+        "title": pattern["title"],
+        "severity": top_severity,
+        "grep": grep_pattern,
+        "detect": detect,
+        "ref": file_path,
+        "lines": [pattern["lineStart"], pattern["lineEnd"]],
+    }
+
+
+def build_huntcards_for_manifest(manifest_name, manifest_data):
+    """Generate compressed hunt cards for all patterns in a manifest."""
+    cards = []
+    for file_entry in manifest_data["files"]:
+        for pattern in file_entry["patterns"]:
+            card = build_huntcard(pattern, file_entry["file"])
+            cards.append(card)
+    return {
+        "meta": {
+            "manifest": manifest_name,
+            "description": f"Compressed hunt cards for {manifest_name} — one-line detection rules for bulk scanning",
+            "totalCards": len(cards),
+            "usage": "Load all cards into context. For each card, grep target code for card.grep pattern. On hit, read full DB entry via read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1]).",
+        },
+        "cards": cards,
+    }
+
+
+def build_all_huntcards(manifests):
+    """Generate hunt card files for all manifests + a combined all-in-one file."""
+    HUNTCARDS_DIR.mkdir(parents=True, exist_ok=True)
+    total_cards = 0
+    all_cards = []
+    per_manifest_info = {}
+
+    for manifest_name, manifest_data in sorted(manifests.items()):
+        huntcard_data = build_huntcards_for_manifest(manifest_name, manifest_data)
+        card_count = huntcard_data["meta"]["totalCards"]
+        total_cards += card_count
+        all_cards.extend(huntcard_data["cards"])
+
+        # Write per-manifest hunt card file
+        path = HUNTCARDS_DIR / f"{manifest_name}-huntcards.json"
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(huntcard_data, f, indent=2, ensure_ascii=False)
+
+        per_manifest_info[manifest_name] = {
+            "file": f"DB/manifests/huntcards/{manifest_name}-huntcards.json",
+            "totalCards": card_count,
+        }
+
+        size = os.path.getsize(path)
+        print(f"   → {manifest_name}-huntcards.json: {card_count} cards, {size:,} bytes")
+
+    # Write combined all-in-one file
+    combined = {
+        "meta": {
+            "description": "ALL hunt cards from all manifests — compressed detection rules for bulk codebase scanning",
+            "totalCards": total_cards,
+            "manifests": list(sorted(manifests.keys())),
+            "usage": "Load this single file to get all vulnerability detection cards (~15K tokens). For each card: grep target code for card.grep pattern. On hit, read full entry via read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1]).",
+        },
+        "cards": all_cards,
+    }
+    combined_path = HUNTCARDS_DIR / "all-huntcards.json"
+    with open(combined_path, "w", encoding="utf-8") as f:
+        json.dump(combined, f, indent=2, ensure_ascii=False)
+
+    combined_size = os.path.getsize(combined_path)
+    print(f"   → all-huntcards.json: {total_cards} cards, {combined_size:,} bytes")
+
+    return per_manifest_info, total_cards
+
+
 def build_general_sub_manifests():
     """Split general/ into focused sub-manifests for agent precision."""
     sub_manifests = {}
@@ -660,6 +809,18 @@ def main():
         "file": "DB/manifests/keywords.json",
         "description": "Keyword → manifest routing. Load this file only when doing keyword-based search.",
         "totalKeywords": keywords_data["totalKeywords"],
+    }
+
+    # Build hunt cards (Tier 1.5 — compressed detection cards)
+    print(f"\n🎯 Building hunt cards (Tier 1.5)...")
+    huntcard_info, total_huntcards = build_all_huntcards(manifests)
+
+    # Add hunt card references to router
+    router["huntcards"] = {
+        "description": "Compressed pattern cards for bulk scanning. Each card has a grep pattern + one-line detection rule. Load all-huntcards.json to fit ALL patterns (~15K tokens) in context simultaneously.",
+        "allInOne": "DB/manifests/huntcards/all-huntcards.json",
+        "totalCards": total_huntcards,
+        "perManifest": huntcard_info,
     }
 
     # Write router

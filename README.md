@@ -15,6 +15,11 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## Architecture Overview
+
+![Vulnerability Database — Complete Architecture](Architecture-Diagram.excalidraw)
+![Full architecture diagram with all components and data flows](./Architecture.png)
+
 ### Search the Database
 
 Start with `DB/index.json` — the master router that points to the right manifest for any protocol type or keyword:
