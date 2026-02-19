@@ -2,17 +2,23 @@
   "meta": {
     "manifest": "tokens",
     "description": "Compressed hunt cards for tokens — one-line detection rules for bulk scanning",
-    "totalCards": 30,
-    "skipped": 3,
+    "totalCards": 29,
+    "skipped": 4,
     "usage": "Load all cards into context. For each card, grep target code for card.grep pattern. On hit, read full DB entry via read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])."
   },
   "cards": [
     {
-      "id": "tokens-1-transfer-transferfrom-vulnerabilities-000",
+      "id": "tokens-erc20-token-vulnerab-1-transfer-transferfrom-vulner-000",
       "title": "1. Transfer & TransferFrom Vulnerabilities",
       "severity": "HIGH",
       "grep": "token.transferFrom|token.transfer|transferFrom|safeTransfer|sendTokens|withdraw",
-      "detect": "The ERC20 standard specifies that `transfer()` and `transferFrom()` should return a boolean...",
+      "detect": "The ERC20 standard specifies that `transfer()` and `transferFrom()` should return a boolean indicating success.",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
         130,
@@ -20,11 +26,17 @@
       ]
     },
     {
-      "id": "tokens-2-approval-allowance-vulnerabilities-001",
+      "id": "tokens-erc20-token-vulnerab-2-approval-allowance-vulnerabi-001",
       "title": "2. Approval & Allowance Vulnerabilities",
       "severity": "MEDIUM",
       "grep": "safeApproveWithReset|increaseAllowance|decreaseAllowance|updateAllowance|safeApprove|approveMax",
-      "detect": "1.",
+      "detect": "Race Condition**: The `approve()` function doesn't protect against front-running when changing allowance from non-zero...",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
         281,
@@ -32,23 +44,36 @@
       ]
     },
     {
-      "id": "tokens-3-decimals-precision-vulnerabilities-002",
+      "id": "tokens-erc20-token-vulnerab-3-decimals-precision-vulnerabi-002",
       "title": "3. Decimals & Precision Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "calculateCollateralValue|scaleToStandard|normalizeAmount|calculateReward|mintShares|swap",
-      "detect": "1.",
+      "grep": "calculateCollateralValue|scaleToStandard|normalizeAmount|calculateReward|mintShares",
+      "detect": "Hardcoded 18 Decimals**: Using `1e18` or `10**18` as scaling factor regardless of actual token decimals",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
         445,
         641
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "tokens-4-fee-on-transfer-token-vulnerabilities-003",
+      "id": "tokens-erc20-token-vulnerab-4-fee-on-transfer-token-vulner-003",
       "title": "4. Fee-on-Transfer Token Vulnerabilities",
       "severity": "HIGH",
       "grep": "depositCollateral|claimRewards|addLiquidity|withdraw|deposit|stake",
-      "detect": "1.",
+      "detect": "Balance Tracking Mismatch**: Protocol tracks transferred amount instead of actual received amount",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
         642,
@@ -56,11 +81,17 @@
       ]
     },
     {
-      "id": "tokens-5-rebasing-token-vulnerabilities-004",
+      "id": "tokens-erc20-token-vulnerab-5-rebasing-token-vulnerabiliti-004",
       "title": "5. Rebasing Token Vulnerabilities",
       "severity": "HIGH",
       "grep": "getCollateralValue|getClaimableAmount|calculateReward|depositAave|liquidate|withdraw",
-      "detect": "1.",
+      "detect": "Cached Balance**: Storing balanceOf() result and using cached value later",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
         887,
@@ -68,23 +99,36 @@
       ]
     },
     {
-      "id": "tokens-6-erc777-reentrancy-vulnerabilities-005",
+      "id": "tokens-erc20-token-vulnerab-6-erc777-reentrancy-vulnerabil-005",
       "title": "6. ERC777 Reentrancy Vulnerabilities",
       "severity": "CRITICAL",
       "grep": "withdrawCollateral|swapTokenForEth|tokensReceived|transferFrom|tokensToSend|buyNFT",
-      "detect": "1.",
+      "detect": "Hidden Callbacks**: ERC777 transfers trigger hooks that execute arbitrary code",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
         1145,
         1407
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "tokens-7-blacklist-pausable-token-vulnerabiliti-006",
+      "id": "tokens-erc20-token-vulnerab-7-blacklist-pausable-token-vul-006",
       "title": "7. Blacklist & Pausable Token Vulnerabilities",
       "severity": "MEDIUM",
       "grep": "repayAndWithdrawCollateral|claimVested|fillOrder|liquidate|release",
-      "detect": "1.",
+      "detect": "Assumed Transferability**: Protocols assume transfers will always succeed",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
         1408,
@@ -92,35 +136,55 @@
       ]
     },
     {
-      "id": "tokens-8-inflation-first-depositor-attack-vulne-007",
+      "id": "tokens-erc20-token-vulnerab-8-inflation-first-depositor-at-007",
       "title": "8. Inflation & First Depositor Attack Vulnerabilities",
       "severity": "CRITICAL",
       "grep": "totalAssets|deposit|stake",
-      "detect": "1.",
+      "detect": "Share Price Manipulation**: First depositor can inflate share price by donating tokens",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
         1715,
         2009
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "tokens-9-mint-burn-vulnerabilities-008",
+      "id": "tokens-erc20-token-vulnerab-9-mint-burn-vulnerabilities-008",
       "title": "9. Mint & Burn Vulnerabilities",
       "severity": "CRITICAL",
       "grep": "mintBasedOnBalance|depositAndMint|burnFrom|withdraw|mint|burn",
-      "detect": "1.",
+      "detect": "Missing Access Control**: Mint/burn functions without proper authorization",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
         2010,
         2158
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "tokens-10-comprehensive-keyword-index-009",
+      "id": "tokens-erc20-token-vulnerab-10-comprehensive-keyword-index-009",
       "title": "10. Comprehensive Keyword Index",
       "severity": "HIGH",
-      "grep": "Comprehensive|Keyword|Index",
-      "detect": "10. Comprehensive Keyword Index",
+      "grep": "balance_before_after|supply_manipulation|share_manipulation|decimal_assumption",
+      "detect": "This section provides keywords optimized for vector search to help auditors find relevant vulnerability patterns.",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
         2159,
@@ -128,35 +192,55 @@
       ]
     },
     {
-      "id": "tokens-summary-quick-reference-010",
+      "id": "tokens-erc20-token-vulnerab-summary-quick-reference-010",
       "title": "Summary & Quick Reference",
       "severity": "CRITICAL",
-      "grep": "Summary|Quick|Reference",
+      "grep": "increaseAllowance|ReentrancyGuard|safeTransfer|SafeERC20",
       "detect": "Summary & Quick Reference",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
         2231,
         2262
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "tokens-1-first-depositor-inflation-attack-vulne-000",
+      "id": "tokens-erc4626-vault-vulner-1-first-depositor-inflation-at-000",
       "title": "1. First Depositor / Inflation Attack Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "balanceOf(address(this|convertToShares|totalSupply|totalAssets|_mintShares|_depositMin",
+      "grep": "balanceOf(address(this|convertToShares|_mintShares|_depositMin|totalSupply|totalAssets",
       "detect": "The ERC4626 share calculation formula is:",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
         151,
         393
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "tokens-2-erc4626-compliance-issues-001",
+      "id": "tokens-erc4626-vault-vulner-2-erc4626-compliance-issues-001",
       "title": "2. ERC4626 Compliance Issues",
       "severity": "MEDIUM",
       "grep": "_depositInternal|previewDeposit|previewMint|maxDeposit|deposit|mint",
       "detect": "ERC4626 specifies exact behavior for all functions including:",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
         394,
@@ -164,23 +248,36 @@
       ]
     },
     {
-      "id": "tokens-3-rounding-direction-vulnerabilities-002",
+      "id": "tokens-erc4626-vault-vulner-3-rounding-direction-vulnerabi-002",
       "title": "3. Rounding Direction Vulnerabilities",
       "severity": "CRITICAL",
       "grep": "previewWithdraw|convertToShares|convertToAssets|previewDeposit|previewRedeem|previewMint",
-      "detect": "ERC4626 rounding rules:",
+      "detect": "ERC4626 rounding rules:\n\n- **Round DOWN** (favor vault): `convertToShares`, `previewDeposit`, `previewRedeem`\n\n-...",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
         571,
         698
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "tokens-4-fee-handling-vulnerabilities-003",
+      "id": "tokens-erc4626-vault-vulner-4-fee-handling-vulnerabilities-003",
       "title": "4. Fee Handling Vulnerabilities",
       "severity": "HIGH",
-      "grep": "previewDeposit|previewMint|_feeOnTotal|addValue|deposit",
+      "grep": "previewDeposit|_feeOnTotal|previewMint|addValue|deposit",
       "detect": "Different fee calculations for deposit vs mint",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
         699,
@@ -188,11 +285,17 @@
       ]
     },
     {
-      "id": "tokens-5-slippage-protection-issues-004",
+      "id": "tokens-erc4626-vault-vulner-5-slippage-protection-issues-004",
       "title": "5. Slippage Protection Issues",
       "severity": "MEDIUM",
       "grep": "withdraw|deposit|mint",
       "detect": "User has no control over minimum shares received",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
         791,
@@ -200,11 +303,17 @@
       ]
     },
     {
-      "id": "tokens-6-exchange-rate-manipulation-005",
+      "id": "tokens-erc4626-vault-vulner-6-exchange-rate-manipulation-005",
       "title": "6. Exchange Rate Manipulation",
       "severity": "MEDIUM",
-      "grep": "balanceOf(address(this|convertToShares|_exchangeRate|totalAssets|_withdraw|_deposit",
+      "grep": "balanceOf(address(this|_exchangeRate|convertToShares|totalAssets|_withdraw|_deposit",
       "detect": "Donation can inflate totalAssets",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
         896,
@@ -212,11 +321,17 @@
       ]
     },
     {
-      "id": "tokens-7-decimal-handling-issues-006",
+      "id": "tokens-erc4626-vault-vulner-7-decimal-handling-issues-006",
       "title": "7. Decimal Handling Issues",
       "severity": "HIGH",
       "grep": "getTokensForShares|convertToShares|decimals",
       "detect": "Assumes all tokens have 18 decimals",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
         977,
@@ -224,11 +339,17 @@
       ]
     },
     {
-      "id": "tokens-8-reentrancy-vulnerabilities-007",
+      "id": "tokens-erc4626-vault-vulner-8-reentrancy-vulnerabilities-007",
       "title": "8. Reentrancy Vulnerabilities",
       "severity": "HIGH",
       "grep": "withdraw|deposit",
       "detect": "Balance cached before transfer with ERC777 token",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
         1046,
@@ -236,11 +357,17 @@
       ]
     },
     {
-      "id": "tokens-9-token-compatibility-issues-008",
+      "id": "tokens-erc4626-vault-vulner-9-token-compatibility-issues-008",
       "title": "9. Token Compatibility Issues",
       "severity": "MEDIUM",
-      "grep": "deposit",
+      "grep": "deposit|safeTransferFrom|erc4626_findings|previewDeposit",
       "detect": "Assumes transferred amount equals requested amount",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
         1171,
@@ -248,11 +375,17 @@
       ]
     },
     {
-      "id": "tokens-10-access-control-state-management-009",
+      "id": "tokens-erc4626-vault-vulner-10-access-control-state-manage-009",
       "title": "10. Access Control & State Management",
       "severity": "MEDIUM",
       "grep": "maxWithdraw|maxDeposit|deposit",
       "detect": "Returns max even when paused",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
         1233,
@@ -260,23 +393,17 @@
       ]
     },
     {
-      "id": "tokens-detection-patterns-summary-010",
-      "title": "Detection Patterns Summary",
-      "severity": "LOW",
-      "grep": "Detection|Summary",
-      "detect": "Detection Patterns Summary",
-      "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
-      "lines": [
-        1281,
-        1321
-      ]
-    },
-    {
-      "id": "tokens-1-transfer-safety-vulnerabilities-001",
+      "id": "tokens-erc721-nft-vulnerabi-1-transfer-safety-vulnerabilit-001",
       "title": "1. Transfer Safety Vulnerabilities",
       "severity": "MEDIUM",
-      "grep": "safeTransferFrom|onERC721Received|initializeBundle|transferFrom|transferNFT|fillOrder",
+      "grep": "safeTransferFrom|onERC721Received|initializeBundle|transferFrom|_safeMint|transferNFT",
       "detect": "No check if receiver can handle ERC721",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
         68,
@@ -284,23 +411,36 @@
       ]
     },
     {
-      "id": "tokens-2-reentrancy-via-nft-callbacks-002",
+      "id": "tokens-erc721-nft-vulnerabi-2-reentrancy-via-nft-callbacks-002",
       "title": "2. Reentrancy via NFT Callbacks",
       "severity": "CRITICAL",
       "grep": "safeTransferFrom|onERC721Received|whitelistMint|mintPosition|_safeMint|liquidate",
       "detect": "State updated after callback",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
         153,
         308
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "tokens-3-approval-and-access-control-issues-003",
+      "id": "tokens-erc721-nft-vulnerabi-3-approval-and-access-control--003",
       "title": "3. Approval and Access Control Issues",
       "severity": "HIGH",
       "grep": "approveTransferERC721|transferERC721|transferKey|_transfer",
       "detect": "Approval persists across transfers",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
         309,
@@ -308,11 +448,17 @@
       ]
     },
     {
-      "id": "tokens-4-voting-and-delegation-vulnerabilities-004",
+      "id": "tokens-erc721-nft-vulnerabi-4-voting-and-delegation-vulner-004",
       "title": "4. Voting and Delegation Vulnerabilities",
       "severity": "HIGH",
-      "grep": "delegate(Alice|_afterTokenTransfer|_moveDelegateVotes|withdrawManaged|delegates|_delegate",
+      "grep": "_afterTokenTransfer|_moveDelegateVotes|delegate(Alice|withdrawManaged|_delegate|delegates",
       "detect": "Self-delegation doubles voting power",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
         401,
@@ -320,23 +466,36 @@
       ]
     },
     {
-      "id": "tokens-5-royalty-manipulation-005",
+      "id": "tokens-erc721-nft-vulnerabi-5-royalty-manipulation-005",
       "title": "5. Royalty Manipulation",
       "severity": "CRITICAL",
-      "grep": "buy",
+      "grep": "buy|erc721_nft_findings|safeTransferETH|Manipulation",
       "detect": "Royalty queried twice, can change between calls",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
         534,
         595
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "tokens-6-erc-721-standard-compliance-issues-006",
+      "id": "tokens-erc721-nft-vulnerabi-6-erc-721-standard-compliance--006",
       "title": "6. ERC-721 Standard Compliance Issues",
       "severity": "HIGH",
       "grep": "onERC721Received|tokenURI|_mint",
       "detect": "Returns value for non-existent tokens",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
         596,
@@ -344,11 +503,17 @@
       ]
     },
     {
-      "id": "tokens-7-nft-liquidation-and-collateral-issues-007",
+      "id": "tokens-erc721-nft-vulnerabi-7-nft-liquidation-and-collater-007",
       "title": "7. NFT Liquidation and Collateral Issues",
       "severity": "HIGH",
       "grep": "liquidatePosition|claimNFT",
       "detect": "NFT stuck if owner blocks transfer",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
         678,
@@ -356,11 +521,17 @@
       ]
     },
     {
-      "id": "tokens-8-self-transfer-edge-cases-008",
+      "id": "tokens-erc721-nft-vulnerabi-8-self-transfer-edge-cases-008",
       "title": "8. Self-Transfer Edge Cases",
       "severity": "HIGH",
       "grep": "_beforeTokenTransfer|afterUpdate",
       "detect": "Self-transfer corrupts state",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
         720,

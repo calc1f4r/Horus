@@ -170,12 +170,12 @@ Categories: Solvency, Access Control, State Machine, Arithmetic, Oracle, Cross-C
 | **Agent** | Self (hunt card pruning) + `invariant-catcher` (sub-agent) |
 | **Input** | Manifest list + invariant specs + codebase path |
 | **Output** | `audit-output/03-findings-raw.md` + `audit-output/hunt-card-hits.json` |
-| **Estimated context** | ~41K tokens (all hunt cards) + ~30K per read batch |
+| **Estimated context** | ~55K tokens (all hunt cards) + ~30K per read batch |
 
 **Hunt card grep-prune sequence** (self-driven):
 1. Load hunt cards for resolved manifests:
    - Per-manifest: `DB/manifests/huntcards/<manifest>-huntcards.json`
-   - Or all at once: `DB/manifests/huntcards/all-huntcards.json` (~41K tokens)
+   - Or all at once: `DB/manifests/huntcards/all-huntcards.json` (~55K tokens)
 2. For each card, run its `grep` pattern against the target codebase:
    ```bash
    grep -rn "card.grep" <path> --include="*.sol" --include="*.rs" -l
@@ -360,7 +360,7 @@ For each CRITICAL/HIGH finding:
 | 1 | 500 | Read index.json + targeted file listing |
 | 2 | Delegated | Sub-agent manages own context |
 | 3 | Delegated | Sub-agent manages own context |
-| 4 (self) | ~41K tokens | Load hunt cards, grep-prune, write surviving cards to hunt-card-hits.json |
+| 4 (self) | ~55K tokens | Load hunt cards, grep-prune, write surviving cards to hunt-card-hits.json |
 | 4 (sub) | ~30K per batch | Sub-agent reads DB entries in batches of 30-40 cards, checkpoints between batches |
 | 4a | Delegated | Sub-agent manages own context; spawns domain sub-agents |
 | 5 | Delegated | Sub-agent manages own context |

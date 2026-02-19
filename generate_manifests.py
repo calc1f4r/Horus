@@ -148,8 +148,9 @@ def parse_md_file(filepath):
 
 def generate_pattern_id(category, filename, section_title, idx):
     """Generate a unique pattern ID."""
-    slug = re.sub(r"[^a-z0-9]+", "-", section_title.lower()).strip("-")[:40]
-    return f"{category}-{slug}-{idx:03d}"
+    file_slug = re.sub(r"[^a-z0-9]+", "-", filename.lower()).strip("-")[:20]
+    title_slug = re.sub(r"[^a-z0-9]+", "-", section_title.lower()).strip("-")[:30]
+    return f"{category}-{file_slug}-{title_slug}-{idx:03d}"
 
 
 def build_file_manifest(filepath, category):
@@ -576,21 +577,149 @@ GENERAL_SUBCATEGORIES = {
 
 HUNTCARDS_DIR = MANIFEST_DIR / "huntcards"
 
+# ── Category mapping for hunt card tags ──
+MANIFEST_CATEGORY_MAP = {
+    "oracle": ["oracle", "price-feed", "data-freshness"],
+    "amm": ["amm", "dex", "liquidity", "swap"],
+    "bridge": ["bridge", "cross-chain", "messaging"],
+    "cosmos": ["cosmos", "ibc", "appchain"],
+    "solana": ["solana", "spl", "anchor"],
+    "tokens": ["token", "erc20", "erc721", "erc4626"],
+    "general-defi": ["defi", "calculation", "vault", "flash-loan"],
+    "general-governance": ["governance", "dao", "voting", "stablecoin", "mev"],
+    "general-infrastructure": ["proxy", "reentrancy", "storage", "upgradeable"],
+    "general-security": ["access-control", "signature", "validation", "input"],
+    "unique": ["protocol-specific", "unique"],
+}
 
-def truncate_to_sentence(text, max_len=100):
-    """Truncate text to the first sentence or max_len chars."""
+
+def truncate_to_sentence(text, max_len=120):
+    """Truncate text to the first *meaningful* sentence or max_len chars.
+    Skips numbered list prefixes like '1.', '- ', bullet stubs.
+    Handles backtick-wrapped identifiers (won't break on periods inside backticks)."""
     if not text:
         return ""
-    # First sentence
+    # Strip leading numbered/bullet prefixes: "1. ", "2. ", "- ", "* "
+    cleaned = re.sub(r"^(\d+\.\s*|-\s*|\*\s*)+", "", text.strip())
+    if not cleaned or len(cleaned) < 5:
+        return ""  # Signal caller to use fallback
+    # Replace backtick-wrapped content with placeholders to avoid breaking on internal periods
+    backtick_spans = []
+    def _save_backtick(m):
+        backtick_spans.append(m.group(0))
+        return f"__BT{len(backtick_spans)-1}__"
+    safe = re.sub(r"`[^`]+`", _save_backtick, cleaned)
+    # Also protect version/decimal numbers from triggering sentence-end (e.g. "0.8.0", "2.5")
+    decimal_spans = []
+    def _save_decimal(m):
+        decimal_spans.append(m.group(0))
+        return f"__DC{len(decimal_spans)-1}__"
+    safe = re.sub(r"\d+(?:\.\d+)+", _save_decimal, safe)
+    # Also protect numbered list items (e.g. "\n1.", "\n2.") from being treated as sentence ends
+    safe = re.sub(r"(?<=\n)(\d+)\.", lambda m: f"_NL{m.group(1)}_", safe)
+    # First sentence (on cleaned text without backtick/decimal/list-item internals)
     for end in [".", "!", "\n\n"]:
-        idx = text.find(end)
+        idx = safe.find(end)
         if 0 < idx < max_len:
-            return text[: idx + 1].strip()
+            result = safe[: idx + 1].strip()
+            # Skip results that are just preambles ending in colon ("Protocols may:")
+            stripped_result = result.rstrip(".!").strip()
+            if stripped_result.endswith(":") and len(stripped_result) < 40:
+                continue
+            # Skip results that are too short to be meaningful
+            if len(result) < 15:
+                continue
+            # Restore backtick content
+            for i, span in enumerate(backtick_spans):
+                result = result.replace(f"__BT{i}__", span)
+            # Restore decimal numbers
+            for i, span in enumerate(decimal_spans):
+                result = result.replace(f"__DC{i}__", span)
+            # Restore numbered list items
+            result = re.sub(r"_NL(\d+)_", r"\1.", result)
+            return result
     # Fall back to truncation at word boundary
-    if len(text) <= max_len:
-        return text.strip()
-    truncated = text[:max_len].rsplit(" ", 1)[0]
+    result = cleaned  # use original with backticks
+    if len(result) <= max_len:
+        return result.strip()
+    truncated = result[:max_len].rsplit(" ", 1)[0]
     return truncated.strip() + "..."
+
+
+def extract_identifiers_from_content(file_path, line_start, line_end, max_keywords=6):
+    """Scan the actual .md content for Solidity/Rust identifiers to enrich grep patterns.
+    
+    Looks for camelCase function names, function calls with parens, snake_case identifiers,
+    and well-known DeFi function signatures in code blocks.
+    """
+    try:
+        full_path = Path(file_path)
+        if not full_path.is_absolute():
+            full_path = DB_DIR.parent / file_path
+        if not full_path.exists():
+            return []
+        with open(full_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        section = "".join(lines[max(0, line_start - 1):line_end])
+    except Exception:
+        return []
+
+    # Extract identifiers from code blocks and inline code
+    identifiers = set()
+
+    # camelCase function-like: word(  or .word(
+    for m in re.finditer(r"\b([a-z][a-zA-Z0-9]{4,})\s*\(", section):
+        identifiers.add(m.group(1))
+    # PascalCase identifiers (Go/Cosmos): Word(  or .Word(
+    for m in re.finditer(r"\b([A-Z][a-zA-Z0-9]{4,})\s*[\(\{]?", section):
+        word = m.group(1)
+        # Skip markdown/prose words (all-caps or common English)
+        if not word.isupper() and any(c.islower() for c in word):
+            identifiers.add(word)
+    # Member access patterns: object.method (camelCase or PascalCase)
+    for m in re.finditer(r"\.([a-zA-Z][a-zA-Z0-9]{3,})\s*\(", section):
+        identifiers.add(m.group(1))
+    # snake_case identifiers (Rust/Solana): word_word
+    for m in re.finditer(r"\b([a-z][a-z0-9]*_[a-z][a-z0-9_]{2,})\b", section):
+        identifiers.add(m.group(1))
+    # Inline code backtick identifiers: `something`
+    for m in re.finditer(r"`([a-zA-Z_][a-zA-Z0-9_\.]{3,})`", section):
+        identifiers.add(m.group(1))
+    # Well-known Solidity patterns
+    for m in re.finditer(r"\b(msg\.value|msg\.sender|block\.timestamp|tx\.origin|delegatecall|staticcall)\b", section):
+        identifiers.add(m.group(1))
+
+    # Filter noise
+    NOISE = {
+        "function", "require", "returns", "return", "memory", "storage",
+        "calldata", "pragma", "import", "contract", "library", "interface",
+        "modifier", "constructor", "virtual", "override", "public", "private",
+        "internal", "external", "view", "pure", "payable", "indexed", "event",
+        "emit", "struct", "mapping", "address", "uint256", "uint128", "uint64",
+        "uint32", "uint8", "int256", "bool", "bytes32", "bytes", "string",
+        "amount", "balance", "value", "owner", "sender", "block", "this",
+        # Go/Cosmos noise
+        "context", "error", "string", "module", "keeper", "query",
+        "handler", "types", "params", "genesis", "store",
+        # Markdown/prose noise
+        "example", "pattern", "vulnerability", "attack", "impact",
+        "description", "following", "secure", "implementation", "section",
+        "using", "when", "where", "which", "should", "would", "could",
+        "above", "below", "ensure", "check", "verify", "validate",
+    }
+    filtered = [ident for ident in identifiers if ident.lower() not in NOISE and len(ident) >= 4]
+
+    # Score by specificity (longer + more structure = better)
+    scored = []
+    for ident in filtered:
+        score = len(ident)
+        if "_" in ident:
+            score += 3
+        if any(c.isupper() for c in ident[1:]):
+            score += 4
+        scored.append((score, ident))
+    scored.sort(reverse=True)
+    return [ident for _, ident in scored[:max_keywords]]
 
 
 def select_best_grep_keywords(keywords, max_count=6):
@@ -607,87 +736,195 @@ def select_best_grep_keywords(keywords, max_count=6):
         "event", "function", "mapping", "msg.sender", "owner",
         "require", "return", "string", "uint256", "value",
         "true", "false", "public", "private", "internal", "external",
+        "swap", "transfer", "token", "call", "emit", "send",
+        "block", "memory", "storage", "error", "check", "input",
+        "output", "result", "state", "total", "count", "index",
+        "length", "type", "name", "code", "hash", "key", "user",
+        "contract", "sender", "receiver", "from", "target",
     }
+
+    # Also reject keywords that are just "exploit" — these are DeFiHackLabs markers
+    REJECT_EXACT = {"exploit", "exploits", "hack", "hacks", "poc", "test"}
 
     # Filter out generic terms and very short keywords
     scored = []
     for kw in keywords:
-        kw_lower = kw.lower().rstrip("()")
-        if kw_lower in GENERIC_TERMS:
+        kw_clean = kw.strip().rstrip("()")
+        kw_lower = kw_clean.lower()
+        if kw_lower in GENERIC_TERMS or kw_lower in REJECT_EXACT:
             continue
-        if len(kw) < 3:
+        if len(kw_clean) < 3:
             continue
         # Score: longer and more specific = better
-        score = len(kw)
+        score = len(kw_clean)
         if "(" in kw or "." in kw:
             score += 5  # function calls / member access are very specific
-        if any(c.isupper() for c in kw[1:]):
+        if any(c.isupper() for c in kw_clean[1:]):
             score += 3  # camelCase identifiers are specific
-        scored.append((score, kw))
+        if "_" in kw_clean:
+            score += 3  # snake_case identifiers are specific
+        scored.append((score, kw_clean))
 
     scored.sort(reverse=True)
     return [kw for _, kw in scored[:max_count]]
 
 
-def build_huntcard(pattern, file_path):
+def _extract_detect_from_content(file_path, line_start, line_end, title):
+    """Extract the first meaningful prose sentence from .md content for the detect field.
+    Falls back to title if nothing meaningful is found."""
+    try:
+        full_path = Path(file_path)
+        if not full_path.is_absolute():
+            full_path = DB_DIR.parent / file_path
+        if not full_path.exists():
+            return title
+        with open(full_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        section_lines = lines[max(0, line_start - 1):min(line_end, len(lines))]
+    except Exception:
+        return title
+
+    # Scan for first meaningful prose line (not heading, not code, not empty, not bullet-only)
+    for line in section_lines:
+        stripped = line.strip()
+        # Skip headings, code fences, empty lines, short lines
+        if not stripped or stripped.startswith(("#", "```", "---", "|", ">", "<!--")):
+            continue
+        # Skip pure bullet/number lines that are just labels
+        cleaned = re.sub(r"^(\d+\.\s*|-\s*|\*\s*|\*\*[^*]+\*\*:?\s*)+", "", stripped)
+        if len(cleaned) < 20:
+            continue
+        # Skip YAML frontmatter lines (key: value)
+        if re.match(r"^[a-z_]+:\s", stripped):
+            continue
+        # Found a meaningful sentence
+        return truncate_to_sentence(cleaned, max_len=120) or title
+
+    return title
+
+
+def build_huntcard(pattern, file_path, manifest_name=""):
     """Build a single compressed hunt card from a manifest pattern entry.
     Returns None if the pattern is not suitable for hunting (structural sections, etc.)."""
     # Skip structural/non-vulnerability sections
     title_lower = pattern["title"].lower().strip()
-    SKIP_TITLES = {
+
+    # Titles that are ALWAYS structural (never contain vulnerability content)
+    ALWAYS_SKIP = {
         "overview", "secure implementation examples", "secure implementation",
         "secure implementation patterns", "secure patterns",
         "detection patterns", "detection checklist", "audit checklist",
         "summary", "conclusion",
         "references", "prevention guidelines", "testing requirements",
-        "code patterns to look for", "impact analysis", "technical impact",
-        "business impact", "affected scenarios", "known exploits",
-        "related cves/reports", "real-world examples", "table of contents",
+        "code patterns to look for",
+        "related cves/reports", "table of contents",
         "keywords for search", "related vulnerabilities",
         "development best practices", "reference", "change log",
         "security research", "technical documentation", "external links",
-        "appendix", "attack categories",
-        "vulnerable pattern examples", "vulnerable patterns",
+        "appendix",
+        "secure implementation guidelines", "frequency analysis",
+        "mitigation strategies", "remediation", "common patterns",
+        # Analysis/example sections that are meta-content not patterns
+        "impact analysis", "technical impact", "business impact",
+        "real-world examples", "known exploits",
+        "attack mechanics", "attack vectors", "attack scenario",
+        "mathematical proof", "vulnerable architecture",
+        # Summary/reference/detection meta sections
+        "real-world examples summary", "real-world exploits summary",
+        "real-world loss summary by category",
+        "detection patterns summary", "semgrep detection rules",
     }
-    if title_lower in SKIP_TITLES:
+    if title_lower in ALWAYS_SKIP:
         return None
+
+    # Titles that are structural UNLESS they have severity and substantial content
+    SKIP_UNLESS_SUBSTANTIAL = {
+        "vulnerability description", "vulnerable pattern examples",
+        "vulnerable patterns", "attack categories", "attack scenarios",
+        "affected scenarios",
+    }
+    line_count = pattern.get("lineCount", pattern["lineEnd"] - pattern["lineStart"])
+    has_severity = bool(pattern.get("severity"))
+    if title_lower in SKIP_UNLESS_SUBSTANTIAL:
+        # Keep only if it has severity AND is substantial (>= 40 lines)
+        if not has_severity or line_count < 40:
+            return None
 
     # Skip defihacklabs index sections (reference lists, not patterns)
     if title_lower.startswith("defihacklabs real-world"):
         return None
+    # Skip category index headers ("Category N: ...", "BSC Token Exploit Patterns")
+    if re.match(r"^(category\s+\d+|bsc\s+token\s+exploit)", title_lower):
+        return None
 
     # Skip sections that are too small to be meaningful vulnerability patterns
-    line_count = pattern.get("lineCount", pattern["lineEnd"] - pattern["lineStart"])
     if line_count < 10:
         return None
 
-    # Select best keywords for grep
+    # ── Grep keyword assembly (multi-source enrichment) ──
     grep_keywords = select_best_grep_keywords(pattern.get("codeKeywords", []))
 
-    # If no keywords from the pattern itself, try to extract from subsections
-    if not grep_keywords and pattern.get("subsections"):
+    # Enrich from subsections if sparse
+    if len(grep_keywords) < 2 and pattern.get("subsections"):
         all_sub_keywords = []
         for sub in pattern["subsections"]:
             all_sub_keywords.extend(sub.get("codeKeywords", []))
-        grep_keywords = select_best_grep_keywords(all_sub_keywords)
+        sub_kws = select_best_grep_keywords(all_sub_keywords)
+        # Merge without duplicating
+        existing = {k.lower() for k in grep_keywords}
+        for kw in sub_kws:
+            if kw.lower() not in existing:
+                grep_keywords.append(kw)
+                existing.add(kw.lower())
+            if len(grep_keywords) >= 6:
+                break
 
-    # If still empty, try to extract meaningful terms from the title
+    # If still < 2 keywords, scan actual .md content for identifiers
+    if len(grep_keywords) < 2:
+        content_kws = extract_identifiers_from_content(
+            file_path, pattern["lineStart"], pattern["lineEnd"]
+        )
+        existing = {k.lower() for k in grep_keywords}
+        for kw in content_kws:
+            if kw.lower() not in existing:
+                grep_keywords.append(kw)
+                existing.add(kw.lower())
+            if len(grep_keywords) >= 4:
+                break
+
+    # Last resort: extract from title
     if not grep_keywords:
         title_words = re.findall(r"[a-zA-Z][a-zA-Z0-9]{3,}", pattern["title"])
         stop_words = {
             "vulnerability", "vulnerabilities", "pattern", "patterns",
-            "attack", "example", "examples", "implementation", "secure",
-            "vulnerable", "description", "analysis", "impact", "overview",
+            "attack", "attacks", "example", "examples", "implementation",
+            "secure", "vulnerable", "description", "analysis", "impact",
+            "overview", "missing", "incorrect", "improper", "issue", "issues",
         }
         grep_keywords = [w for w in title_words if w.lower() not in stop_words][:4]
 
     grep_pattern = "|".join(grep_keywords) if grep_keywords else ""
 
-    # Build detection hint from rootCause or title
+    # ── Detect field (multi-fallback for quality) ──
     root_cause = pattern.get("rootCause", "")
-    detect = truncate_to_sentence(root_cause) if root_cause else pattern["title"]
+    detect = truncate_to_sentence(root_cause)
+    # If truncate returned empty (numbered list stub), build from title + rootCause
+    if not detect or len(detect) < 15:
+        # Try to find a real sentence in rootCause after stripping bullets
+        if root_cause:
+            lines_rc = root_cause.strip().split("\n")
+            for line_rc in lines_rc:
+                candidate = re.sub(r"^(\d+\.\s*|-\s*|\*\s*)+", "", line_rc).strip()
+                if len(candidate) >= 20:
+                    detect = truncate_to_sentence(candidate)
+                    break
+        # Still bad? Try extracting first meaningful sentence from the .md content
+        if not detect or len(detect) < 15:
+            detect = _extract_detect_from_content(
+                file_path, pattern["lineStart"], pattern["lineEnd"], pattern["title"]
+            )
 
-    # Pick highest severity
+    # ── Severity ──
     severities = pattern.get("severity", [])
     top_severity = severities[0] if severities else "UNKNOWN"
     severity_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
@@ -695,15 +932,26 @@ def build_huntcard(pattern, file_path):
         severities_sorted = sorted(severities, key=lambda s: severity_order.get(s, 99))
         top_severity = severities_sorted[0]
 
-    return {
+    # ── Category tags ──
+    categories = MANIFEST_CATEGORY_MAP.get(manifest_name, ["general"])
+
+    # ── Never-prune flag for CRITICAL patterns ──
+    never_prune = top_severity == "CRITICAL"
+
+    card = {
         "id": pattern["id"],
         "title": pattern["title"],
         "severity": top_severity,
         "grep": grep_pattern,
         "detect": detect,
+        "cat": categories,  # category tags for grouping
         "ref": file_path,
         "lines": [pattern["lineStart"], pattern["lineEnd"]],
     }
+    if never_prune:
+        card["neverPrune"] = True
+
+    return card
 
 
 def build_huntcards_for_manifest(manifest_name, manifest_data):
@@ -713,7 +961,7 @@ def build_huntcards_for_manifest(manifest_name, manifest_data):
     skipped = 0
     for file_entry in manifest_data["files"]:
         for pattern in file_entry["patterns"]:
-            card = build_huntcard(pattern, file_entry["file"])
+            card = build_huntcard(pattern, file_entry["file"], manifest_name)
             if card is not None:
                 cards.append(card)
             else:

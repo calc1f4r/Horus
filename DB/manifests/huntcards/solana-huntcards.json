@@ -8,23 +8,34 @@
   },
   "cards": [
     {
-      "id": "solana-1-account-validation-vulnerabilities-000",
+      "id": "solana-solana-program-secur-1-account-validation-vulnerabi-000",
       "title": "1. Account Validation Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "Account|Validation",
-      "detect": "Programs fail to verify that:\n\n1.",
+      "grep": "solana_common_pitfalls|find_program_address|UncheckedAccount|update_balance",
+      "detect": "Programs fail to verify that:\n\n1. **Signer**: The account actually signed the transaction\n\n2. **Owner**: The account is...",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         215,
         440
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "solana-2-account-data-reallocation-vulnerabilit-001",
+      "id": "solana-solana-program-secur-2-account-data-reallocation-vu-001",
       "title": "2. Account Data Reallocation Vulnerabilities",
       "severity": "HIGH",
-      "grep": "Account|Data|Reallocation",
-      "detect": "Programs fail to:\n\n1.",
+      "grep": "AccountDataTooSmall|resize_account|expand_account|ProgramError",
+      "detect": "Programs fail to:\n\n1. Zero-initialize newly allocated memory regions\n\n2. Handle allocation failures gracefully\n\n3....",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         441,
@@ -32,47 +43,70 @@
       ]
     },
     {
-      "id": "solana-3-lamports-transfer-from-pda-vulnerabili-002",
+      "id": "solana-solana-program-secur-3-lamports-transfer-from-pda-v-002",
       "title": "3. Lamports Transfer from PDA Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "Lamports|Transfer|from",
-      "detect": "1.",
+      "grep": "InsufficientFundsForRent|try_borrow_mut_lamports|withdraw_from_pda|current_lamports",
+      "detect": "Transferring lamports without checking rent-exempt threshold",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         556,
         683
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "solana-4-cpi-cross-program-invocation-vulnerabi-003",
+      "id": "solana-solana-program-secur-4-cpi-cross-program-invocation-003",
       "title": "4. CPI (Cross-Program Invocation) Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "Cross|Program|Invocation",
-      "detect": "1.",
+      "grep": "KnownProgram111111111111111111111111111111|execute_arbitrary|arbitrary_program|some_instruction",
+      "detect": "Arbitrary program invocation without validation",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         684,
         881
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "solana-5-unvalidated-account-vulnerabilities-004",
+      "id": "solana-solana-program-secur-5-unvalidated-account-vulnerab-004",
       "title": "5. Unvalidated Account Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "Unvalidated|Account",
-      "detect": "1.",
+      "grep": "validate_token_account_exists|InvalidTokenAccountOwner|check_account_exists|InvalidTokenAccount",
+      "detect": "Token program not validated against expected ID",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         882,
         1090
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "solana-6-account-reloading-vulnerabilities-005",
+      "id": "solana-solana-program-secur-6-account-reloading-vulnerabil-005",
       "title": "6. Account Reloading Vulnerabilities",
       "severity": "HIGH",
-      "grep": "Account|Reloading",
-      "detect": "After a CPI that modifies an account, the program continues using the stale local copy instead of...",
+      "grep": "process_with_cpi|initial_balance|source_token|Vulnerabilities",
+      "detect": "After a CPI that modifies an account, the program continues using the stale local copy instead of refreshing the...",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         1091,
@@ -80,23 +114,34 @@
       ]
     },
     {
-      "id": "solana-7-account-closure-vulnerabilities-006",
+      "id": "solana-solana-program-secur-7-account-closure-vulnerabilit-006",
       "title": "7. Account Closure Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "Account|Closure",
-      "detect": "1.",
+      "grep": "try_borrow_mut_lamports|try_borrow_mut_data|InvalidDestination|account_to_close",
+      "detect": "Missing authorization for account closure",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         1184,
         1331
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "solana-8-dos-attack-vectors-007",
+      "id": "solana-solana-program-secur-8-dos-attack-vectors-007",
       "title": "8. DOS Attack Vectors",
       "severity": "HIGH",
       "grep": "init_if_needed|init",
-      "detect": "1.",
+      "detect": "Using `init` instead of `init_if_needed` for ATA creation",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         1332,
@@ -104,11 +149,16 @@
       ]
     },
     {
-      "id": "solana-9-mint-token-extension-vulnerabilities-008",
+      "id": "solana-solana-program-secur-9-mint-token-extension-vulnera-008",
       "title": "9. Mint & Token Extension Vulnerabilities",
       "severity": "MEDIUM",
-      "grep": "Mint|Token|Extension",
-      "detect": "1.",
+      "grep": "transfer_with_fee_awareness|UnexpectedFreezeAuthority|UnexpectedCloseAuthority|calculate_transfer_fee",
+      "detect": "Not checking for close authority extension",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         1445,
@@ -116,23 +166,34 @@
       ]
     },
     {
-      "id": "solana-10-event-emission-vulnerabilities-009",
+      "id": "solana-solana-program-secur-10-event-emission-vulnerabilit-009",
       "title": "10. Event Emission Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "Event|Emission",
-      "detect": "1.",
+      "grep": "AdminChangedEvent|transfer_with_fee|unix_timestamp|TransferEvent",
+      "detect": "Emitting incorrect data in events",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         1592,
         1679
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "solana-11-arithmetic-and-data-handling-vulnerab-010",
+      "id": "solana-solana-program-secur-11-arithmetic-and-data-handlin-010",
       "title": "11. Arithmetic and Data Handling Vulnerabilities",
       "severity": "HIGH",
-      "grep": "Arithmetic|Data|Handling",
-      "detect": "1.",
+      "grep": "solana_common_pitfalls|ArithmeticOverflow|calculate_share|DivisionByZero",
+      "detect": "Unchecked arithmetic operations",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         1680,
@@ -140,11 +201,16 @@
       ]
     },
     {
-      "id": "solana-12-seed-collision-vulnerabilities-011",
+      "id": "solana-solana-program-secur-12-seed-collision-vulnerabilit-011",
       "title": "12. Seed Collision Vulnerabilities",
       "severity": "HIGH",
-      "grep": "Seed|Collision",
-      "detect": "1.",
+      "grep": "vote_session|vote_account|user_vote_id|user_account",
+      "detect": "Simple/short seed prefixes",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         1774,
@@ -152,11 +218,16 @@
       ]
     },
     {
-      "id": "solana-13-account-type-confusion-vulnerabilitie-012",
+      "id": "solana-solana-program-secur-13-account-type-confusion-vuln-012",
       "title": "13. Account Type Confusion Vulnerabilities",
       "severity": "MEDIUM",
-      "grep": "try_deserialize",
-      "detect": "- Using raw Borsh deserialization instead of Anchor's `try_deserialize`",
+      "grep": "try_deserialize|InvalidSecurityKeyAccount|remaining_accounts|load_security_key",
+      "detect": "Using raw Borsh deserialization instead of Anchor's `try_deserialize`",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         1866,
@@ -164,23 +235,34 @@
       ]
     },
     {
-      "id": "solana-14-ed25519-instruction-introspection-vul-013",
+      "id": "solana-solana-program-secur-14-ed25519-instruction-introsp-013",
       "title": "14. Ed25519 Instruction Introspection Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "Ed25519|Instruction|Introspection",
-      "detect": "The Ed25519 program on Solana is flexible - it can read signature, public key, and message from...",
+      "grep": "public_key_instruction_index|signature_instruction_index|message_instruction_index|verify_ed25519_signature",
+      "detect": "The Ed25519 program on Solana is flexible - it can read signature, public key, and message from different instruction...",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         1918,
         2007
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "solana-15-signature-replay-attack-vulnerabiliti-014",
+      "id": "solana-solana-program-secur-15-signature-replay-attack-vul-014",
       "title": "15. Signature Replay Attack Vulnerabilities",
       "severity": "HIGH",
-      "grep": "Signature|Replay",
-      "detect": "1.",
+      "grep": "verify_merkle_proof|AlreadyProcessed|processed_proofs|transfer_tokens",
+      "detect": "No nonce tracking for signature-based operations",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         2008,
@@ -188,23 +270,34 @@
       ]
     },
     {
-      "id": "solana-16-unrestricted-cpi-vulnerabilities-015",
+      "id": "solana-solana-program-secur-16-unrestricted-cpi-vulnerabil-015",
       "title": "16. Unrestricted CPI Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "Unrestricted",
-      "detect": "- Accepting arbitrary program IDs for CPI",
+      "grep": "create_swap_instruction|UnauthorizedProgram|spl_token_swap_v2|allowed_programs",
+      "detect": "Accepting arbitrary program IDs for CPI",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         2102,
         2173
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "solana-17-initialization-front-running-vulnerab-016",
+      "id": "solana-solana-program-secur-17-initialization-front-runnin-016",
       "title": "17. Initialization Front-Running Vulnerabilities",
       "severity": "HIGH",
-      "grep": "Initialization|Front|Running",
-      "detect": "1.",
+      "grep": "NotMintAuthority|InterfaceAccount|solana_findings|MultisigCreate",
+      "detect": "PDA seeds derived from unauthenticated accounts",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         2174,
@@ -212,11 +305,16 @@
       ]
     },
     {
-      "id": "solana-18-create-account-pre-funding-dos-017",
+      "id": "solana-solana-program-secur-18-create-account-pre-funding--017",
       "title": "18. Create Account Pre-Funding DOS",
       "severity": "MEDIUM",
       "grep": "system_instruction::create_account|create_account",
-      "detect": "Using `create_account` instead of the more resilient pattern of separate fund, allocate, and assign...",
+      "detect": "Using `create_account` instead of the more resilient pattern of separate fund, allocate, and assign operations.",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         2268,
@@ -224,11 +322,16 @@
       ]
     },
     {
-      "id": "solana-19-rent-exemption-validation-errors-018",
+      "id": "solana-solana-program-secur-19-rent-exemption-validation-e-018",
       "title": "19. Rent Exemption Validation Errors",
       "severity": "MEDIUM",
-      "grep": "account.lamports",
-      "detect": "Using `account.",
+      "grep": "account.lamports|BondingCurveInvariant|InsufficientBalance|sol_escrow_lamports",
+      "detect": "Using `account.lamports()` (which includes rent) in comparisons with values that don't include rent.",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         2348,
@@ -236,23 +339,34 @@
       ]
     },
     {
-      "id": "solana-20-liquidation-and-state-invariant-vulne-019",
+      "id": "solana-solana-program-secur-20-liquidation-and-state-invar-019",
       "title": "20. Liquidation and State Invariant Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "saturating_mul",
-      "detect": "1.",
+      "grep": "saturating_mul|tick_id_data_after_operate|cpi_to_liquidity_program|InvalidSupplyReserve",
+      "detect": "Sentinel encoding mismatch**: treating `0` as “no tick exists” even when tick `0` is valid.",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         2408,
         2540
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "solana-21-cpi-policy-and-program-upgradeability-020",
+      "id": "solana-solana-program-secur-21-cpi-policy-and-program-upgr-020",
       "title": "21. CPI Policy and Program Upgradeability Bypass",
       "severity": "MEDIUM",
-      "grep": "program_id",
-      "detect": "1.",
+      "grep": "program_id|validate_program_immutability|upgrade_authority_address|bpf_loader_upgradeable",
+      "detect": "CPI policy stores digest/operator rules for an instruction payload but not upgradeability guarantees for `program_id`.",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/solana-program-security.md",
       "lines": [
         2541,
@@ -260,23 +374,34 @@
       ]
     },
     {
-      "id": "solana-1-mintcloseauthority-extension-vulnerabi-000",
+      "id": "solana-token-2022-extension-1-mintcloseauthority-extension-000",
       "title": "1. MintCloseAuthority Extension Vulnerabilities",
       "severity": "CRITICAL",
       "grep": "MintCloseAuthority|ld2sd_rate",
-      "detect": "When a protocol accepts any Token-2022 mint without checking for the `MintCloseAuthority`...",
+      "detect": "When a protocol accepts any Token-2022 mint without checking for the `MintCloseAuthority` extension:",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         153,
         320
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "solana-2-freeze-authority-vulnerabilities-001",
+      "id": "solana-token-2022-extension-2-freeze-authority-vulnerabili-001",
       "title": "2. Freeze Authority Vulnerabilities",
       "severity": "HIGH",
-      "grep": "Freeze|Authority",
-      "detect": "Protocols accept mints with freeze authority set, allowing the mint authority to:\n\n1.",
+      "grep": "validate_mint_no_freeze_authority|FreezableMintNotSupported|is_safe_collateral_mint|StateWithExtensions",
+      "detect": "Protocols accept mints with freeze authority set, allowing the mint authority to:",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         321,
@@ -284,11 +409,16 @@
       ]
     },
     {
-      "id": "solana-3-transfer-fee-extension-vulnerabilities-002",
+      "id": "solana-token-2022-extension-3-transfer-fee-extension-vulne-002",
       "title": "3. Transfer Fee Extension Vulnerabilities",
       "severity": "MEDIUM",
       "grep": "transfer(amount|transfer(1000",
       "detect": "Protocols assume `transfer(amount)` results in recipient receiving exactly `amount`.",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         468,
@@ -296,23 +426,34 @@
       ]
     },
     {
-      "id": "solana-4-permanent-delegate-extension-vulnerabi-003",
+      "id": "solana-token-2022-extension-4-permanent-delegate-extension-003",
       "title": "4. Permanent Delegate Extension Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "Permanent|Delegate|Extension",
-      "detect": "The permanent delegate can:\n\n1.",
+      "grep": "validate_no_permanent_delegate|PermanentDelegateNotSupported|StateWithExtensions|permanent_delegate",
+      "detect": "The permanent delegate can:\n\n1. Transfer tokens from any token account holding that mint\n\n2. Burn tokens from any...",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         647,
         714
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "solana-5-token-account-size-vulnerabilities-004",
+      "id": "solana-token-2022-extension-5-token-account-size-vulnerabi-004",
       "title": "5. Token Account Size Vulnerabilities",
       "severity": "MEDIUM",
-      "grep": "Token|Account|Size",
-      "detect": "Hardcoding `space = 165` for token accounts fails for Token-2022 because:\n\n1.",
+      "grep": "try_calculate_account_len|get_token_account_size|StateWithExtensions|get_extension_types",
+      "detect": "Hardcoding `space = 165` for token accounts fails for Token-2022 because:",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         715,
@@ -320,11 +461,16 @@
       ]
     },
     {
-      "id": "solana-6-default-account-state-extension-vulner-005",
+      "id": "solana-token-2022-extension-6-default-account-state-extens-005",
       "title": "6. Default Account State Extension Vulnerabilities",
       "severity": "MEDIUM",
-      "grep": "Default|Account|State|Extension",
+      "grep": "FrozenDefaultStateNotSupported|validate_unfrozen_default|default_account_state|StateWithExtensions",
       "detect": "Doesn't handle frozen default state",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         785,
@@ -332,11 +478,16 @@
       ]
     },
     {
-      "id": "solana-7-transfer-hook-extension-vulnerabilitie-006",
+      "id": "solana-token-2022-extension-7-transfer-hook-extension-vuln-006",
       "title": "7. Transfer Hook Extension Vulnerabilities",
       "severity": "MEDIUM",
-      "grep": "Transfer|Hook|Extension",
-      "detect": "Transfer hooks can:\n\n1.",
+      "grep": "validate_no_transfer_hook|TransferHookNotSupported|StateWithExtensions|transfer_b_to_user",
+      "detect": "Transfer hooks can:\n\n1. Reject transfers arbitrarily\n\n2. Cause DOS by reverting\n\n3. Introduce reentrancy through...",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         829,
@@ -344,11 +495,16 @@
       ]
     },
     {
-      "id": "solana-8-interest-bearing-extension-vulnerabili-007",
+      "id": "solana-token-2022-extension-8-interest-bearing-extension-v-007",
       "title": "8. Interest Bearing Extension Vulnerabilities",
       "severity": "MEDIUM",
       "grep": "token_account.amount|amount_to_ui_amount",
-      "detect": "With interest-bearing tokens:\n\n1.",
+      "detect": "With interest-bearing tokens:\n\n1. `token_account.amount` returns the base amount, not the actual balance with...",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         888,
@@ -356,11 +512,16 @@
       ]
     },
     {
-      "id": "solana-9-confidential-transfer-vulnerabilities-008",
+      "id": "solana-token-2022-extension-9-confidential-transfer-vulner-008",
       "title": "9. Confidential Transfer Vulnerabilities",
       "severity": "UNKNOWN",
-      "grep": "confidential_transfer_account",
-      "detect": "With confidential transfers:\n\n1.",
+      "grep": "confidential_transfer_account|validate_no_confidential_transfer|ConfidentialTransferNotSupported|ConfidentialTransferMint",
+      "detect": "With confidential transfers:\n\n1. Public balance (`amount`) may be 0 or a pending balance waiting for transfer\n\n2....",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         985,
@@ -368,11 +529,16 @@
       ]
     },
     {
-      "id": "solana-10-general-token-2022-integration-vulner-009",
+      "id": "solana-token-2022-extension-10-general-token-2022-integrat-009",
       "title": "10. General Token-2022 Integration Vulnerabilities",
       "severity": "UNKNOWN",
-      "grep": "General|Token|Integration",
-      "detect": "10. General Token-2022 Integration Vulnerabilities",
+      "grep": "MintCloseAuthorityNotSupported|FrozenDefaultStateNotSupported|PermanentDelegateNotSupported|FreezableMintNotSupported",
+      "detect": "use spl_token_2022::extension::*;",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         1046,
@@ -380,11 +546,16 @@
       ]
     },
     {
-      "id": "solana-11-non-transferable-token-extension-vuln-010",
+      "id": "solana-token-2022-extension-11-non-transferable-token-exte-010",
       "title": "11. Non-Transferable Token Extension Vulnerabilities",
       "severity": "MEDIUM",
-      "grep": "Transferable|Token|Extension",
-      "detect": "Protocols that accept arbitrary Token-2022 mints may:\n\n1.",
+      "grep": "NonTransferableTokenNotSupported|validate_transferable_token|StateWithExtensions|user_token_account",
+      "detect": "Protocols that accept arbitrary Token-2022 mints may:",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         1142,
@@ -392,11 +563,16 @@
       ]
     },
     {
-      "id": "solana-12-confidential-transfer-extension-vulne-011",
+      "id": "solana-token-2022-extension-12-confidential-transfer-exten-011",
       "title": "12. Confidential Transfer Extension Vulnerabilities",
       "severity": "MEDIUM",
-      "grep": "token_account.amount",
-      "detect": "With confidential transfers:\n\n1.",
+      "grep": "token_account.amount|validate_no_confidential_transfer|ConfidentialTransferNotSupported|ConfidentialTransferMint",
+      "detect": "With confidential transfers:\n\n1. On-chain balance is encrypted and cannot be read directly\n\n2. Traditional balance...",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         1216,
@@ -404,11 +580,16 @@
       ]
     },
     {
-      "id": "solana-13-metadata-pointer-extension-vulnerabil-012",
+      "id": "solana-token-2022-extension-13-metadata-pointer-extension--012",
       "title": "13. Metadata Pointer Extension Vulnerabilities",
       "severity": "LOW",
-      "grep": "Metadata|Pointer|Extension",
-      "detect": "Protocols may:\n\n1.",
+      "grep": "StateWithExtensions|get_token_metadata|InterfaceAccount|metadata_pointer",
+      "detect": "Protocols may:\n\n1. Assume metadata is stored in Metaplex metadata accounts\n\n2. Fail to follow the metadata pointer to...",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         1272,
@@ -416,11 +597,16 @@
       ]
     },
     {
-      "id": "solana-14-group-and-group-member-extension-vuln-013",
+      "id": "solana-token-2022-extension-14-group-and-group-member-exte-013",
       "title": "14. Group and Group Member Extension Vulnerabilities",
       "severity": "UNKNOWN",
-      "grep": "Group|Group|Member|Extension",
-      "detect": "14. Group and Group Member Extension Vulnerabilities",
+      "grep": "validate_group_extensions|group_member_pointer|StateWithExtensions|GroupMemberPointer",
+      "detect": "The Group Pointer and Group Member Pointer extensions enable token grouping functionality.",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         1311,
@@ -428,11 +614,16 @@
       ]
     },
     {
-      "id": "solana-15-cpi-guard-extension-vulnerabilities-014",
+      "id": "solana-token-2022-extension-15-cpi-guard-extension-vulnera-014",
       "title": "15. CPI Guard Extension Vulnerabilities",
       "severity": "MEDIUM",
-      "grep": "Guard|Extension",
-      "detect": "Protocols may:\n\n1.",
+      "grep": "transfer_with_guard_check|check_cpi_guard_enabled|StateWithExtensions|InterfaceAccount",
+      "detect": "Protocols may:\n\n1. Fail to account for CPI Guard being enabled on user accounts\n\n2. Attempt restricted CPI operations...",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         1346,
@@ -440,11 +631,16 @@
       ]
     },
     {
-      "id": "solana-16-required-memo-extension-vulnerabiliti-015",
+      "id": "solana-token-2022-extension-16-required-memo-extension-vul-015",
       "title": "16. Required Memo Extension Vulnerabilities",
       "severity": "UNKNOWN",
-      "grep": "Required|Memo|Extension",
-      "detect": "When transferring to accounts with Required Memo extension:\n\n1.",
+      "grep": "require_incoming_transfer_memos|validate_no_memo_required|MemoRequiredNotSupported|StateWithExtensions",
+      "detect": "When transferring to accounts with Required Memo extension:",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         1422,
@@ -452,11 +648,16 @@
       ]
     },
     {
-      "id": "solana-17-immutable-owner-extension-vulnerabili-016",
+      "id": "solana-token-2022-extension-17-immutable-owner-extension-v-016",
       "title": "17. Immutable Owner Extension Vulnerabilities",
       "severity": "UNKNOWN",
-      "grep": "Immutable|Owner|Extension",
-      "detect": "17. Immutable Owner Extension Vulnerabilities",
+      "grep": "Vulnerabilities|Considerations|Immutable|Extension",
+      "detect": "The Immutable Owner extension prevents the owner of a token account from being changed.",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         1487,
@@ -464,11 +665,16 @@
       ]
     },
     {
-      "id": "solana-18-comprehensive-token-2022-extension-wh-017",
+      "id": "solana-token-2022-extension-18-comprehensive-token-2022-ex-017",
       "title": "18. Comprehensive Token-2022 Extension Whitelist Pattern",
       "severity": "HIGH",
-      "grep": "Comprehensive|Token|Extension|Whitelist",
-      "detect": "18. Comprehensive Token-2022 Extension Whitelist Pattern",
+      "grep": "validate_supported_extensions|ConfidentialTransferMint|UnsupportedTokenProgram|validate_spl_token_mint",
+      "detect": "For high-security protocols, the safest approach is to explicitly whitelist only the extensions you support rather than...",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         1502,
@@ -476,11 +682,16 @@
       ]
     },
     {
-      "id": "solana-19-token-2022-account-extension-validati-018",
+      "id": "solana-token-2022-extension-19-token-2022-account-extensio-018",
       "title": "19. Token-2022 Account Extension Validation",
       "severity": "UNKNOWN",
-      "grep": "Token|Account|Extension|Validation",
-      "detect": "19. Token-2022 Account Extension Validation",
+      "grep": "validate_token_account_extensions|require_incoming_transfer_memos|StateWithExtensions|InterfaceAccount",
+      "detect": "Token accounts (not just mints) can also have extensions in Token-2022.",
+      "cat": [
+        "solana",
+        "spl",
+        "anchor"
+      ],
       "ref": "DB/Solona-chain-specific/token-2022-extensions.md",
       "lines": [
         1605,

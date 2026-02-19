@@ -2,17 +2,22 @@
   "meta": {
     "manifest": "cosmos",
     "description": "Compressed hunt cards for cosmos — one-line detection rules for bulk scanning",
-    "totalCards": 13,
-    "skipped": 14,
+    "totalCards": 15,
+    "skipped": 12,
     "usage": "Load all cards into context. For each card, grep target code for card.grep pattern. On hit, read full DB entry via read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])."
   },
   "cards": [
     {
-      "id": "cosmos-vulnerability-description-000",
+      "id": "cosmos-unmetered-lifecycle--vulnerability-description-000",
       "title": "Vulnerability Description",
       "severity": "HIGH",
       "grep": "BeforeSendHook|FinalizeBlock|BeginBlocker|EndBlocker|BeginBlock|EndBlock",
-      "detect": "The fundamental issues arise from:\n\n1.",
+      "detect": "The fundamental issues arise from:\n\n1. **Unmetered iteration**: `BeginBlock`/`EndBlock` iterate over user-controlled...",
+      "cat": [
+        "cosmos",
+        "ibc",
+        "appchain"
+      ],
       "ref": "DB/cosmos/app-chain/abci-lifecycle/unmetered-lifecycle-dos.md",
       "lines": [
         58,
@@ -20,11 +25,16 @@
       ]
     },
     {
-      "id": "cosmos-vulnerability-description-000",
+      "id": "cosmos-abci-vote-extensions-vulnerability-description-000",
       "title": "Vulnerability Description",
       "severity": "HIGH",
       "grep": "ValidateVoteExtensions|CanonicalVoteExtension|extCommit.Votes|totalVP",
-      "detect": "The `ValidateVoteExtensions` function relies on data injected by the proposer (`extCommit.",
+      "detect": "The `ValidateVoteExtensions` function relies on data injected by the proposer (`extCommit.Votes`), which can be manipulated to:",
+      "cat": [
+        "cosmos",
+        "ibc",
+        "appchain"
+      ],
       "ref": "DB/cosmos/app-chain/consensus/abci-vote-extensions.md",
       "lines": [
         53,
@@ -32,11 +42,16 @@
       ]
     },
     {
-      "id": "cosmos-vulnerability-description-000",
+      "id": "cosmos-evm-gas-handling-vulnerability-description-000",
       "title": "Vulnerability Description",
       "severity": "HIGH",
-      "grep": "MsgGasPriceVoter",
-      "detect": "The fundamental issues arise from:\n\n1.",
+      "grep": "MsgGasPriceVoter|newCosmosAnteHandlerNoGasLimit|MsgVoteOnObservedInboundTx|MsgEthereumTxResponse",
+      "detect": "The fundamental issues arise from:\n\n1. **Missing intrinsic gas charges**: EIP-2930 access list costs not being charged...",
+      "cat": [
+        "cosmos",
+        "ibc",
+        "appchain"
+      ],
       "ref": "DB/cosmos/app-chain/gas-metering/evm-gas-handling.md",
       "lines": [
         55,
@@ -44,11 +59,16 @@
       ]
     },
     {
-      "id": "cosmos-vulnerability-description-000",
+      "id": "cosmos-governance-voting-ma-vulnerability-description-000",
       "title": "Vulnerability Description",
       "severity": "HIGH",
       "grep": "supportOffboard|quorumVotes|offboard|delegate|propose|cleanup",
-      "detect": "The fundamental issues are:\n\n1.",
+      "detect": "The fundamental issues are:\n\n1. **Quorum calculated at proposal creation** - Allows manipulation before snapshot\n\n2....",
+      "cat": [
+        "cosmos",
+        "ibc",
+        "appchain"
+      ],
       "ref": "DB/cosmos/app-chain/governance/governance-voting-manipulation.md",
       "lines": [
         56,
@@ -56,23 +76,34 @@
       ]
     },
     {
-      "id": "cosmos-vulnerability-description-000",
+      "id": "cosmos-malicious-hook-callb-vulnerability-description-000",
       "title": "Vulnerability Description",
       "severity": "CRITICAL",
       "grep": "MsgDepositValidatorRewardsPool|BeforeDelegationSharesModified|beforeLockUpdate|BeforeSendHook|removePlugin|BeginBlocker",
-      "detect": "The fundamental issue is that **hook/callback execution is on the critical path** of important...",
+      "detect": "The fundamental issue is that **hook/callback execution is on the critical path** of important operations (token...",
+      "cat": [
+        "cosmos",
+        "ibc",
+        "appchain"
+      ],
       "ref": "DB/cosmos/app-chain/hooks-callbacks/malicious-hook-callback-dos.md",
       "lines": [
         56,
         190
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "cosmos-vulnerability-description-000",
+      "id": "cosmos-ibc-middleware-vulne-vulnerability-description-000",
       "title": "Vulnerability Description",
       "severity": "MEDIUM",
       "grep": "finalVersion|OnRecvPacket|Message",
-      "detect": "The fundamental issues arise from:\n\n1.",
+      "detect": "The fundamental issues arise from:\n\n1. **Missing sender/channel authentication**: `OnRecvPacket` handlers process...",
+      "cat": [
+        "cosmos",
+        "ibc",
+        "appchain"
+      ],
       "ref": "DB/cosmos/app-chain/ibc/ibc-middleware-vulnerabilities.md",
       "lines": [
         55,
@@ -80,11 +111,16 @@
       ]
     },
     {
-      "id": "cosmos-vulnerability-description-000",
+      "id": "cosmos-cross-module-fund-ac-vulnerability-description-000",
       "title": "Vulnerability Description",
       "severity": "HIGH",
       "grep": "SendCoinsFromModuleToAccount|sdk.Coins|sdk.Coin|stakedNxm|onReceive|BurnCoins",
-      "detect": "The fundamental issues are:\n\n\n\n1.",
+      "detect": "The fundamental issues are:\n\n\n\n1. **Incorrect iteration over coin amounts** - Processing entire `sdk.Coins` instead of...",
+      "cat": [
+        "cosmos",
+        "ibc",
+        "appchain"
+      ],
       "ref": "DB/cosmos/app-chain/module-accounting/cross-module-fund-accounting.md",
       "lines": [
         66,
@@ -92,23 +128,51 @@
       ]
     },
     {
-      "id": "cosmos-vulnerability-description-000",
+      "id": "cosmos-cross-module-fund-ac-vulnerable-pattern-examples-001",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "HIGH",
+      "grep": "stakedNxm|stake",
+      "detect": "// Sends entire amount instead of individual coin",
+      "cat": [
+        "cosmos",
+        "ibc",
+        "appchain"
+      ],
+      "ref": "DB/cosmos/app-chain/module-accounting/cross-module-fund-accounting.md",
+      "lines": [
+        143,
+        229
+      ]
+    },
+    {
+      "id": "cosmos-evm-precompile-vulne-vulnerability-description-000",
       "title": "Vulnerability Description",
       "severity": "CRITICAL",
-      "grep": "",
-      "detect": "The fundamental issues arise from:\n\n1.",
+      "grep": "precompile_delegate|NewIntFromBigInt|byte_string_view|StakingContract",
+      "detect": "The fundamental issues arise from:\n\n1. **DELEGATECALL not blocked**: State-changing precompiles accept delegatecall,...",
+      "cat": [
+        "cosmos",
+        "ibc",
+        "appchain"
+      ],
       "ref": "DB/cosmos/app-chain/precompiles/evm-precompile-vulnerabilities.md",
       "lines": [
         56,
         183
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "cosmos-vulnerability-description-000",
+      "id": "cosmos-epoch-snapshot-timin-vulnerability-description-000",
       "title": "Vulnerability Description",
       "severity": "HIGH",
-      "grep": "rewardStakeRatioSum|operatorLockedStake|reportSweptBalance|calcAndCacheStakes|transfer_in_rewards|addNode",
-      "detect": "The fundamental issues arise from:\n\n\n\n1.",
+      "grep": "transfer_in_rewards|rewardStakeRatioSum|operatorLockedStake|reportSweptBalance|calcAndCacheStakes|addNode",
+      "detect": "The fundamental issues arise from:\n\n\n\n1. **Missing Epoch Validation**: Functions that cache or calculate stake values...",
+      "cat": [
+        "cosmos",
+        "ibc",
+        "appchain"
+      ],
       "ref": "DB/cosmos/app-chain/staking-delegation/epoch-snapshot-timing-manipulation.md",
       "lines": [
         91,
@@ -116,11 +180,33 @@
       ]
     },
     {
-      "id": "cosmos-root-cause-000",
+      "id": "cosmos-epoch-snapshot-timin-vulnerable-pattern-examples-001",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "HIGH",
+      "grep": "_getOperatorAvailableStake|calcAndCacheStakes|getOperatorStake|finalizeReport|startReport|addNode",
+      "detect": "No validation that epoch is not in the future",
+      "cat": [
+        "cosmos",
+        "ibc",
+        "appchain"
+      ],
+      "ref": "DB/cosmos/app-chain/staking-delegation/epoch-snapshot-timing-manipulation.md",
+      "lines": [
+        155,
+        367
+      ]
+    },
+    {
+      "id": "cosmos-slashing-evasion-byp-root-cause-000",
       "title": "Root Cause",
       "severity": "LOW",
-      "grep": "Root|Cause",
-      "detect": "The fundamental issues stem from:\n\n\n\n1.",
+      "grep": "Insufficient|Withdrawal|Incomplete|Converting",
+      "detect": "The fundamental issues stem from:\n\n\n\n1. **Mempool visibility**: Slash transactions are visible in the mempool before...",
+      "cat": [
+        "cosmos",
+        "ibc",
+        "appchain"
+      ],
       "ref": "DB/cosmos/app-chain/staking-delegation/slashing-evasion-bypass.md",
       "lines": [
         70,
@@ -128,11 +214,16 @@
       ]
     },
     {
-      "id": "cosmos-attack-scenarios-001",
+      "id": "cosmos-slashing-evasion-byp-attack-scenarios-001",
       "title": "Attack Scenarios",
       "severity": "HIGH",
-      "grep": "decreaseStakeLockupDuration|PendingWithdrawal|fullClaimAndExit|slash(account|whenNotPaused|revokePending",
-      "detect": "Attack Scenarios",
+      "grep": "decreaseStakeLockupDuration|PendingWithdrawal|fullClaimAndExit|_claimAndExit|slash(account|whenNotPaused",
+      "detect": "Malicious staker commits slashable offense",
+      "cat": [
+        "cosmos",
+        "ibc",
+        "appchain"
+      ],
       "ref": "DB/cosmos/app-chain/staking-delegation/slashing-evasion-bypass.md",
       "lines": [
         83,
@@ -140,23 +231,33 @@
       ]
     },
     {
-      "id": "cosmos-frequency-analysis-004",
-      "title": "Frequency Analysis",
-      "severity": "UNKNOWN",
-      "grep": "Frequency",
-      "detect": "Frequency Analysis",
+      "id": "cosmos-slashing-evasion-byp-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "MEDIUM",
+      "grep": "_notifyStakeChangeAllPlugins|verifyDoubleSigning|requestWithdrawal|fullClaimAndExit|cooldown|staking",
+      "detect": "Slash can be frontrun with exit",
+      "cat": [
+        "cosmos",
+        "ibc",
+        "appchain"
+      ],
       "ref": "DB/cosmos/app-chain/staking-delegation/slashing-evasion-bypass.md",
       "lines": [
-        451,
-        462
+        132,
+        255
       ]
     },
     {
-      "id": "cosmos-vulnerability-description-000",
+      "id": "cosmos-staking-state-manage-vulnerability-description-000",
       "title": "Vulnerability Description",
       "severity": "LOW",
       "grep": "ValidatorBondShare|RemoveReputerStake|UnbondingTime|claimRewards|LiquidShares",
-      "detect": "The fundamental issues arise from:\n\n1.",
+      "detect": "The fundamental issues arise from:\n\n1. **Silent error handling in EndBlocker**: Stake removal errors swallowed, leading...",
+      "cat": [
+        "cosmos",
+        "ibc",
+        "appchain"
+      ],
       "ref": "DB/cosmos/app-chain/staking-delegation/staking-state-management.md",
       "lines": [
         57,

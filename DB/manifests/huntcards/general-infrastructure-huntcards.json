@@ -8,23 +8,36 @@
   },
   "cards": [
     {
-      "id": "general-infrastructure-proxy-pattern-implementation-vulnerabili-000",
+      "id": "general-infrastructure-proxy-pattern-vulner-proxy-pattern-implementation-v-000",
       "title": "Proxy Pattern Implementation Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "Proxy",
-      "detect": "Proxy pattern vulnerabilities stem from the separation of contract logic (implementation) and state...",
+      "grep": "OpenZeppelin|Vulnerabilities|Uninitialized|Delegatecalls",
+      "detect": "Proxy pattern vulnerabilities stem from the separation of contract logic (implementation) and state (proxy), combined...",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/proxy-vulnerabilities/PROXY_PATTERN_VULNERABILITIES.md",
       "lines": [
         53,
         83
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-vulnerability-patterns-001",
+      "id": "general-infrastructure-proxy-pattern-vulner-vulnerability-patterns-001",
       "title": "VULNERABILITY PATTERNS",
       "severity": "HIGH",
       "grep": "_authorizeUpgrade|updateP2PIndexes|setReserveFactor|initialize",
       "detect": "Implementation contract constructor doesn't disable initializers",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/proxy-vulnerabilities/PROXY_PATTERN_VULNERABILITIES.md",
       "lines": [
         84,
@@ -32,11 +45,17 @@
       ]
     },
     {
-      "id": "general-infrastructure-vulnerability-description-000",
+      "id": "general-infrastructure-uups-proxy-vulnerabi-vulnerability-description-000",
       "title": "Vulnerability Description",
       "severity": "HIGH",
-      "grep": "OwnableUpgradeable|_authorizeUpgrade|upgradeToAndCall|UUPSUpgradeable|FlashSwapRouter|StakingProxy",
-      "detect": "UUPS proxy vulnerabilities arise from several fundamental issues:\n\n\n\n1.",
+      "grep": "_authorizeUpgrade|OwnableUpgradeable|upgradeToAndCall|UUPSUpgradeable|FlashSwapRouter|StakingProxy",
+      "detect": "UUPS proxy vulnerabilities arise from several fundamental issues:",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/uups-proxy/UUPS_PROXY_VULNERABILITIES.md",
       "lines": [
         59,
@@ -44,11 +63,17 @@
       ]
     },
     {
-      "id": "general-infrastructure-vulnerability-description-000",
+      "id": "general-infrastructure-diamond-proxy-vulner-vulnerability-description-000",
       "title": "Vulnerability Description",
       "severity": "HIGH",
       "grep": "lastDiamondFreezeTimestamp|AccessControlUpgradeable|accessControl|AccessControl|advancedFarm|diamondCut",
-      "detect": "Diamond proxy vulnerabilities arise from several fundamental issues:\n\n\n\n1.",
+      "detect": "Diamond proxy vulnerabilities arise from several fundamental issues:",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/diamond-proxy/DIAMOND_PROXY_VULNERABILITIES.md",
       "lines": [
         68,
@@ -56,11 +81,17 @@
       ]
     },
     {
-      "id": "general-infrastructure-vulnerability-categories-001",
+      "id": "general-infrastructure-storage-collision-vu-vulnerability-categories-001",
       "title": "Vulnerability Categories",
       "severity": "UNKNOWN",
-      "grep": "Categories",
-      "detect": "Vulnerability Categories",
+      "grep": "Initialization|Unstructured|Initializer|Categories",
+      "detect": "Proxy variables collide with implementation's storage layout.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/storage-collision/storage-collision-vulnerabilities.md",
       "lines": [
         57,
@@ -68,35 +99,36 @@
       ]
     },
     {
-      "id": "general-infrastructure-secure-implementation-guidelines-003",
-      "title": "Secure Implementation Guidelines",
-      "severity": "UNKNOWN",
-      "grep": "validateStorageLayout|initialize",
-      "detect": "Secure Implementation Guidelines",
+      "id": "general-infrastructure-storage-collision-vu-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "CRITICAL",
+      "grep": "implementation|setManager|initialized|manager|asset",
+      "detect": "Proxy upgrade caused storage collision",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/storage-collision/storage-collision-vulnerabilities.md",
       "lines": [
-        267,
-        327
-      ]
+        76,
+        266
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-real-world-exploits-summary-004",
-      "title": "Real-World Exploits Summary",
-      "severity": "UNKNOWN",
-      "grep": "Real|World|Exploits|Summary",
-      "detect": "Real-World Exploits Summary",
-      "ref": "DB/general/storage-collision/storage-collision-vulnerabilities.md",
-      "lines": [
-        328,
-        338
-      ]
-    },
-    {
-      "id": "general-infrastructure-vulnerability-categories-001",
+      "id": "general-infrastructure-defi-reentrancy-patt-vulnerability-categories-001",
       "title": "Vulnerability Categories",
       "severity": "LOW",
-      "grep": "Categories",
-      "detect": "Vulnerability Categories",
+      "grep": "Exploitation|mechanisms|Reentrancy|Categories",
+      "detect": "State updates occur AFTER external calls, allowing recursive exploitation.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defi-reentrancy-patterns.md",
       "lines": [
         62,
@@ -104,155 +136,264 @@
       ]
     },
     {
-      "id": "general-infrastructure-1-erc-677-ontokentransfer-reentrancy-dur-000",
+      "id": "general-infrastructure-defi-reentrancy-patt-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "CRITICAL",
+      "grep": "getUnderlyingPrice|remove_liquidity|exitMarket|liquidate|receive|borrow",
+      "detect": "State update AFTER external call",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
+      "ref": "DB/general/reentrancy/defi-reentrancy-patterns.md",
+      "lines": [
+        81,
+        199
+      ],
+      "neverPrune": true
+    },
+    {
+      "id": "general-infrastructure-defihacklabs-callbac-1-erc-677-ontokentransfer-reen-000",
       "title": "1. ERC-677 `onTokenTransfer` Reentrancy During Liquidation",
       "severity": "CRITICAL",
       "grep": "onTokenTransfer|liquidationCall|borrowTokens",
-      "detect": "This vulnerability exists because Aave V2 forks deployed on chains using ERC-677 bridged tokens...",
+      "detect": "This vulnerability exists because Aave V2 forks deployed on chains using ERC-677 bridged tokens (like Gnosis Chain)...",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-callback-reentrancy-2022-patterns.md",
       "lines": [
         70,
         137
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-2-flash-loan-callback-reentrancy-deposit-001",
+      "id": "general-infrastructure-defihacklabs-callbac-2-flash-loan-callback-reentran-001",
       "title": "2. Flash Loan Callback Reentrancy — Deposit-in-Callback",
       "severity": "CRITICAL",
       "grep": "flashCallback|viewDeposit|withdraw|deposit|flash",
-      "detect": "This vulnerability exists because the flash loan function calls back to the borrower BEFORE...",
+      "detect": "This vulnerability exists because the flash loan function calls back to the borrower BEFORE verifying that the loan has...",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-callback-reentrancy-2022-patterns.md",
       "lines": [
         138,
         194
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-3-erc-1155-onerc1155received-reentrancy--002",
+      "id": "general-infrastructure-defihacklabs-callbac-3-erc-1155-onerc1155received-r-002",
       "title": "3. ERC-1155 `onERC1155Received` Reentrancy During NFT Mint",
       "severity": "CRITICAL",
       "grep": "depositAdditionalToFNFT|onERC1155Received",
-      "detect": "This vulnerability exists because ERC-1155 token transfers trigger `onERC1155Received()` callbacks...",
+      "detect": "This vulnerability exists because ERC-1155 token transfers trigger `onERC1155Received()` callbacks on the recipient.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-callback-reentrancy-2022-patterns.md",
       "lines": [
         195,
         250
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-4-native-eth-avax-receive-reentrancy-exi-003",
+      "id": "general-infrastructure-defihacklabs-callbac-4-native-eth-avax-receive-reen-003",
       "title": "4. Native ETH/AVAX `receive()` Reentrancy — exitMarket/State Bypass",
       "severity": "CRITICAL",
       "grep": "exitMarket|fallback|receive|borrow",
-      "detect": "This vulnerability exists because native token transfers (ETH, AVAX) trigger the recipient's...",
+      "detect": "This vulnerability exists because native token transfers (ETH, AVAX) trigger the recipient's `receive()` or...",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-callback-reentrancy-2022-patterns.md",
       "lines": [
         251,
         345
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-1-curve-pool-read-only-reentrancy-000",
+      "id": "general-infrastructure-defihacklabs-readonl-1-curve-pool-read-only-reentra-000",
       "title": "1. Curve Pool Read-Only Reentrancy",
       "severity": "CRITICAL",
       "grep": "get_virtual_price|remove_liquidity|reenter_1|raw_call|fallback|receive",
-      "detect": "Curve's `remove_liquidity()` function sends native ETH to the caller via `raw_call()` **before**...",
+      "detect": "Curve's `remove_liquidity()` function sends native ETH to the caller via `raw_call()` **before** updating the pool's internal balances.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-readonly-reentrancy-patterns.md",
       "lines": [
         68,
         188
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-2-balancer-pool-read-only-reentrancy-001",
+      "id": "general-infrastructure-defihacklabs-readonl-2-balancer-pool-read-only-reen-001",
       "title": "2. Balancer Pool Read-Only Reentrancy",
       "severity": "CRITICAL",
       "grep": "WeightedBalancerLPOracle|exitPool",
-      "detect": "Balancer's `exitPool()` function sends native ETH to the caller before updating the pool's internal...",
+      "detect": "Balancer's `exitPool()` function sends native ETH to the caller before updating the pool's internal share accounting.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-readonly-reentrancy-patterns.md",
       "lines": [
         189,
         262
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-vulnerability-description-001",
-      "title": "Vulnerability Description",
-      "severity": "UNKNOWN",
-      "grep": "safeTransferFrom|onERC721Received|tokensReceived|transferFrom|tokensToSend|onFlashLoan",
-      "detect": "Vulnerability Description",
+      "id": "general-infrastructure-defihacklabs-reentra-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "CRITICAL",
+      "grep": "tokensReceived|tokensToSend|totalAssets|onFlashLoan|setUp|deposit",
+      "detect": "Severity**: 🔴 CRITICAL | **Loss**: WETH | **Protocol**: N00d Token | **Chain**: Ethereum",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2021-2022-uncovered.md",
       "lines": [
-        68,
-        102
-      ]
+        103,
+        358
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-1-read-only-reentrancy-via-curve-lp-with-000",
+      "id": "general-infrastructure-defihacklabs-reentra-1-read-only-reentrancy-via-cur-000",
       "title": "1. Read-Only Reentrancy via Curve LP Withdrawal",
       "severity": "CRITICAL",
       "grep": "curvePool.remove_liquidity|get_virtual_price|remove_liquidity|call.value|fallback|receive",
-      "detect": "Curve pools use ETH transfers (via `call.",
+      "detect": "Curve pools use ETH transfers (via `call.value()`) during `remove_liquidity()`.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md",
       "lines": [
         93,
         179
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-2-read-only-reentrancy-via-curve-callbac-001",
+      "id": "general-infrastructure-defihacklabs-reentra-2-read-only-reentrancy-via-cur-001",
       "title": "2. Read-Only Reentrancy via Curve Callback (Conic $3.25M)",
       "severity": "CRITICAL",
       "grep": "handleDepeggedCurvePool|remove_liquidity",
       "detect": "Conic Finance's ETH omnipool used Curve LP tokens as underlying.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md",
       "lines": [
         180,
         219
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-3-balancer-view-reentrancy-via-lp-price--002",
+      "id": "general-infrastructure-defihacklabs-reentra-3-balancer-view-reentrancy-via-002",
       "title": "3. Balancer View Reentrancy via LP Price Oracle (Sentiment $1M)",
       "severity": "CRITICAL",
       "grep": "flashLoan|joinPool|getPrice|exitPool",
       "detect": "Sentiment protocol used Balancer weighted LP tokens as collateral.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md",
       "lines": [
         220,
         265
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-4-fake-token-reentrancy-in-dex-swap-orio-003",
+      "id": "general-infrastructure-defihacklabs-reentra-4-fake-token-reentrancy-in-dex-003",
       "title": "4. Fake Token Reentrancy in DEX Swap (Orion $645K)",
       "severity": "CRITICAL",
       "grep": "swapThroughOrionPool|uniswapV2Call|transferFrom|deposit",
-      "detect": "Orion Protocol's `swapThroughOrionPool()` function allowed users to specify arbitrary token...",
+      "detect": "Orion Protocol's `swapThroughOrionPool()` function allowed users to specify arbitrary token addresses in the swap path.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md",
       "lines": [
         266,
         320
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-5-native-token-receive-reentrancy-starsa-004",
+      "id": "general-infrastructure-defihacklabs-reentra-5-native-token-receive-reentra-004",
       "title": "5. Native Token Receive() Reentrancy (StarsArena $3M)",
       "severity": "CRITICAL",
       "grep": "call.value|testExploit|receive",
-      "detect": "StarsArena (a social token trading platform on Avalanche) sent AVAX via `call.",
+      "detect": "StarsArena (a social token trading platform on Avalanche) sent AVAX via `call.value()` during share selling.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md",
       "lines": [
         321,
         369
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-6-curve-reentrancy-in-read-only-oracle-s-005",
+      "id": "general-infrastructure-defihacklabs-reentra-6-curve-reentrancy-in-read-onl-005",
       "title": "6. Curve Reentrancy in Read-Only Oracle (Sturdy $800K)",
       "severity": "HIGH",
       "grep": "get_virtual_price|remove_liquidity",
-      "detect": "Sturdy Finance (Aave V2 fork) used Curve stETH LP tokens as collateral, pricing them via Curve's...",
+      "detect": "Sturdy Finance (Aave V2 fork) used Curve stETH LP tokens as collateral, pricing them via Curve's `get_virtual_price()`.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md",
       "lines": [
         370,
@@ -260,11 +401,17 @@
       ]
     },
     {
-      "id": "general-infrastructure-secure-implementations-006",
+      "id": "general-infrastructure-defihacklabs-reentra-secure-implementations-006",
       "title": "Secure Implementations",
       "severity": "MEDIUM",
       "grep": "swapThroughPool|sellShares|getPrice",
-      "detect": "Secure Implementations",
+      "detect": "// ✅ SECURE: Check Curve's reentrancy lock before reading price",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md",
       "lines": [
         400,
@@ -272,35 +419,55 @@
       ]
     },
     {
-      "id": "general-infrastructure-1-fake-token-reward-harvesting-callback--000",
+      "id": "general-infrastructure-defihacklabs-reentra-1-fake-token-reward-harvesting-000",
       "title": "1. Fake Token Reward Harvesting Callback Reentrancy",
       "severity": "CRITICAL",
       "grep": "rewardToken.claimRewards|batchHarvestMarketRewards|fakeSY.claimRewards|claimRewards",
-      "detect": "When a protocol's batch reward harvesting function iterates over market pools and calls...",
+      "detect": "When a protocol's batch reward harvesting function iterates over market pools and calls `rewardToken.claimRewards()` on...",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2024-patterns.md",
       "lines": [
         71,
         135
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-2-empty-market-phantom-collateral-attack-001",
+      "id": "general-infrastructure-defihacklabs-reentra-2-empty-market-phantom-collate-001",
       "title": "2. Empty Market Phantom Collateral Attack",
       "severity": "CRITICAL",
-      "grep": "Empty|Market|Phantom|Collateral",
-      "detect": "In lending protocols, when a market is empty (no existing deposits), the first depositor sets the...",
+      "grep": "PolterFinance|flashLoan|balanceOf|ISpookyV2",
+      "detect": "In lending protocols, when a market is empty (no existing deposits), the first depositor sets the initial exchange rate.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2024-patterns.md",
       "lines": [
         136,
         188
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-3-erc-3156-flash-loan-callback-re-deposi-002",
+      "id": "general-infrastructure-defihacklabs-reentra-3-erc-3156-flash-loan-callback-002",
       "title": "3. ERC-3156 Flash Loan Callback Re-deposit Loop",
       "severity": "HIGH",
-      "grep": "onFlashLoan",
+      "grep": "onFlashLoan|ERC3156FlashBorrower|MinterestLending|lendRUSDY",
       "detect": "ERC-3156 flash loans include an `onFlashLoan()` callback to the borrower.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2024-patterns.md",
       "lines": [
         189,
@@ -308,11 +475,17 @@
       ]
     },
     {
-      "id": "general-infrastructure-4-strategy-callback-reentrancy-via-attac-003",
+      "id": "general-infrastructure-defihacklabs-reentra-4-strategy-callback-reentrancy-003",
       "title": "4. Strategy Callback Reentrancy via Attacker-Controlled Hook",
       "severity": "HIGH",
       "grep": "mintHook|burnHook|burn",
       "detect": "DEX protocols with customizable strategies allow liquidity providers to register callback hooks (e.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2024-patterns.md",
       "lines": [
         255,
@@ -320,23 +493,36 @@
       ]
     },
     {
-      "id": "general-infrastructure-defihacklabs-reentrancy-pattern-compendi-000",
+      "id": "general-infrastructure-defihacklabs-reentra-defihacklabs-reentrancy-patter-000",
       "title": "DeFiHackLabs Reentrancy Pattern Compendium",
       "severity": "CRITICAL",
-      "grep": "delegatedTransferERC20|tokensReceived|transferFrom|tokensToSend|depositFor|transfer",
+      "grep": "delegatedTransferERC20|tokensReceived|transferFrom|tokensToSend|depositFor|fallback",
       "detect": "Lending protocol borrows ERC-777 token, triggering receiver hook",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-patterns.md",
       "lines": [
         43,
         452
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-vulnerable-code-patterns-001",
+      "id": "general-infrastructure-reentrancy-vulnerable-code-patterns-001",
       "title": "Vulnerable Code Patterns",
       "severity": "HIGH",
       "grep": "settleVault|getPrice",
-      "detect": "Vulnerable Code Patterns",
+      "detect": "Reference**: h-13-balancerpairoracle-can-be-manipulated-using-read-only-reentrancy.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/reentrancy/reentrancy.md",
       "lines": [
         35,
@@ -344,71 +530,112 @@
       ]
     },
     {
-      "id": "general-infrastructure-1-merkle-proof-validation-failures-000",
+      "id": "general-infrastructure-cross-chain-bridge-v-1-merkle-proof-validation-fail-000",
       "title": "1. Merkle Proof Validation Failures",
       "severity": "CRITICAL",
       "grep": "acceptableRoot(0x00|processWithdrawal|acceptableRoot|verifyMessage|committedRoot|updateRoot",
       "detect": "The Nomad Bridge Replica contract was incorrectly initialized with `committedRoot = 0x00`.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/bridge/cross-chain-bridge-vulnerabilities.md",
       "lines": [
         122,
         353
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-2-signature-verification-issues-001",
+      "id": "general-infrastructure-cross-chain-bridge-v-2-signature-verification-issue-001",
       "title": "2. Signature Verification Issues",
       "severity": "CRITICAL",
       "grep": "withdraw|execute",
-      "detect": "Bridge signature verification may fail to properly validate signer addresses, allow signature...",
+      "detect": "Bridge signature verification may fail to properly validate signer addresses, allow signature reuse, or accept...",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/bridge/cross-chain-bridge-vulnerabilities.md",
       "lines": [
         354,
         544
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-3-message-validation-bypasses-002",
+      "id": "general-infrastructure-cross-chain-bridge-v-3-message-validation-bypasses-002",
       "title": "3. Message Validation Bypasses",
       "severity": "CRITICAL",
       "grep": "putCurEpochConPubKeyBytes|verifyHeaderAndExecuteTx|EthCrossChainManager|EthCrossChainData|addAllowedTarget|receiveMessage",
       "detect": "Poly Network's EthCrossChainManager",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/bridge/cross-chain-bridge-vulnerabilities.md",
       "lines": [
         545,
         721
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-4-centralization-key-management-risks-003",
+      "id": "general-infrastructure-cross-chain-bridge-v-4-centralization-key-managemen-003",
       "title": "4. Centralization / Key Management Risks",
       "severity": "CRITICAL",
       "grep": "withdrawERC20For|addValidator|testExploit",
-      "detect": "Low validator/signer thresholds combined with insufficient operational security make key compromise...",
+      "detect": "Low validator/signer thresholds combined with insufficient operational security make key compromise a viable attack...",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/bridge/cross-chain-bridge-vulnerabilities.md",
       "lines": [
         722,
         931
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-5-token-validation-in-bridge-deposits-004",
+      "id": "general-infrastructure-cross-chain-bridge-v-5-token-validation-in-bridge-d-004",
       "title": "5. Token Validation in Bridge Deposits",
       "severity": "CRITICAL",
       "grep": "resourceIDToTokenContractAddress|contractWhitelist|safeTransferFrom|depositVault|testExploit|testExample",
       "detect": "Qubit's deposit handler",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/bridge/cross-chain-bridge-vulnerabilities.md",
       "lines": [
         932,
         1107
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-6-replay-attacks-across-chains-005",
+      "id": "general-infrastructure-cross-chain-bridge-v-6-replay-attacks-across-chains-005",
       "title": "6. Replay Attacks Across Chains",
       "severity": "HIGH",
       "grep": "withdraw|execute",
-      "detect": "No chain ID",
+      "detect": "Messages signed for one chain or bridge instance can potentially be replayed on another chain or instance if replay...",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/bridge/cross-chain-bridge-vulnerabilities.md",
       "lines": [
         1108,
@@ -416,23 +643,36 @@
       ]
     },
     {
-      "id": "general-infrastructure-7-arbitrary-call-vulnerabilities-006",
+      "id": "general-infrastructure-cross-chain-bridge-v-7-arbitrary-call-vulnerabiliti-006",
       "title": "7. Arbitrary Call Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "_executeSwaps|transferFrom|executeRoute|testExploit|_attack|swap",
+      "grep": "_executeSwaps|transferFrom|executeRoute|testExploit|_attack",
       "detect": "Bridge aggregators accept user-provided calldata that is executed against arbitrary addresses.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/bridge/cross-chain-bridge-vulnerabilities.md",
       "lines": [
         1224,
         1450
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-understanding-eip-7702-000",
+      "id": "general-infrastructure-erc7702-integration--understanding-eip-7702-000",
       "title": "Understanding EIP-7702",
       "severity": "LOW",
       "grep": "extcodesize(address|fallback|receive",
-      "detect": "Understanding EIP-7702",
+      "detect": "EIP-7702, introduced with the Ethereum Pectra upgrade, fundamentally changes the EOA/contract distinction that many...",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/erc7702-integration/erc7702-integration-vulnerabilities.md",
       "lines": [
         132,
@@ -440,23 +680,36 @@
       ]
     },
     {
-      "id": "general-infrastructure-1-iscontract-extcodesize-logic-broken-001",
+      "id": "general-infrastructure-erc7702-integration--1-iscontract-extcodesize-logic-001",
       "title": "1. isContract/extcodesize Logic Broken",
       "severity": "CRITICAL",
       "grep": "address.code.length|isContract(user|isValidSignature|verifySignature|validateOrder|isContract",
-      "detect": "Smart contracts commonly use `isContract()` checks to determine whether to verify signatures using...",
+      "detect": "Smart contracts commonly use `isContract()` checks to determine whether to verify signatures using ECDSA (for EOAs) or...",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/erc7702-integration/erc7702-integration-vulnerabilities.md",
       "lines": [
         149,
         342
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-2-reentrancy-via-eip-7702-delegated-eoas-002",
+      "id": "general-infrastructure-erc7702-integration--2-reentrancy-via-eip-7702-dele-002",
       "title": "2. Reentrancy via EIP-7702 Delegated EOAs",
       "severity": "MEDIUM",
-      "grep": "_is7702DelegatedWallet|executeWithCallback|_unwrapAndSendETH|withdraw|fallback|receive",
-      "detect": "Protocols that detect EIP-7702 delegated wallets may use low-level `.",
+      "grep": "_is7702DelegatedWallet|_unwrapAndSendETH|executeWithCallback|withdraw|fallback|receive",
+      "detect": "Protocols that detect EIP-7702 delegated wallets may use low-level `.call` with unlimited gas to send ETH, enabling...",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/erc7702-integration/erc7702-integration-vulnerabilities.md",
       "lines": [
         343,
@@ -464,11 +717,17 @@
       ]
     },
     {
-      "id": "general-infrastructure-3-missing-token-receiver-callbacks-003",
+      "id": "general-infrastructure-erc7702-integration--3-missing-token-receiver-callb-003",
       "title": "3. Missing Token Receiver Callbacks",
       "severity": "MEDIUM",
       "grep": "onERC1155BatchReceived|onERC1155Received|safeTransferFrom|onERC721Received|IERC1155Receiver|IERC721Receiver",
-      "detect": "EIP-7702 smart wallet implementations that don't implement `IERC721Receiver` and `IERC1155Receiver`...",
+      "detect": "EIP-7702 smart wallet implementations that don't implement `IERC721Receiver` and `IERC1155Receiver` interfaces will...",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/erc7702-integration/erc7702-integration-vulnerabilities.md",
       "lines": [
         492,
@@ -476,11 +735,17 @@
       ]
     },
     {
-      "id": "general-infrastructure-4-cross-chain-address-mismatch-004",
+      "id": "general-infrastructure-erc7702-integration--4-cross-chain-address-mismatch-004",
       "title": "4. Cross-Chain Address Mismatch",
       "severity": "MEDIUM",
       "grep": "registerCrossChainAddress|registerCrossChain|bridgeTokens",
-      "detect": "Smart contract wallets are deployed using factory contracts with chain-specific parameters...",
+      "detect": "Smart contract wallets are deployed using factory contracts with chain-specific parameters (deployment salts, nonces,...",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/erc7702-integration/erc7702-integration-vulnerabilities.md",
       "lines": [
         663,
@@ -488,23 +753,36 @@
       ]
     },
     {
-      "id": "general-infrastructure-5-tx-origin-exploitation-with-smart-wall-005",
+      "id": "general-infrastructure-erc7702-integration--5-tx-origin-exploitation-with--005",
       "title": "5. tx.origin Exploitation with Smart Wallets",
       "severity": "CRITICAL",
       "grep": "emergencyWithdraw|execTransaction|completeMission|tx.origin|initialize|create",
-      "detect": "Smart wallets like Gnosis Safe accept signed transactions via `execTransaction()` and execute them...",
+      "detect": "Smart wallets like Gnosis Safe accept signed transactions via `execTransaction()` and execute them on behalf of signers.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/erc7702-integration/erc7702-integration-vulnerabilities.md",
       "lines": [
         814,
         959
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "general-infrastructure-6-fallback-receive-function-issues-006",
+      "id": "general-infrastructure-erc7702-integration--6-fallback-receive-function-is-006",
       "title": "6. Fallback/Receive Function Issues",
       "severity": "MEDIUM",
       "grep": "fallback|payable|execute",
       "detect": "EIP-7702 transforms an EOA into what appears to be a smart contract.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/erc7702-integration/erc7702-integration-vulnerabilities.md",
       "lines": [
         960,
@@ -512,11 +790,17 @@
       ]
     },
     {
-      "id": "general-infrastructure-7-session-key-impersonation-in-smart-wal-007",
+      "id": "general-infrastructure-erc7702-integration--7-session-key-impersonation-in-007",
       "title": "7. Session Key Impersonation in Smart Wallets",
       "severity": "HIGH",
       "grep": "_validateSingleCall|validateUserOp|sessionKey|claim",
-      "detect": "When a smart wallet allows multiple active sessions concurrently, the signature validation must...",
+      "detect": "When a smart wallet allows multiple active sessions concurrently, the signature validation must ensure that the session...",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/erc7702-integration/erc7702-integration-vulnerabilities.md",
       "lines": [
         1084,
@@ -524,11 +808,17 @@
       ]
     },
     {
-      "id": "general-infrastructure-8-nft-permit-function-exploitation-008",
+      "id": "general-infrastructure-erc7702-integration--8-nft-permit-function-exploita-008",
       "title": "8. NFT Permit Function Exploitation",
       "severity": "MEDIUM",
       "grep": "isValidSignature|permit",
       "detect": "ERC-4494 adds a `permit()` function to ERC-721, allowing off-chain signed approvals.",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
       "ref": "DB/general/erc7702-integration/erc7702-integration-vulnerabilities.md",
       "lines": [
         1228,

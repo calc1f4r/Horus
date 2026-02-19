@@ -226,7 +226,7 @@ Load hunt cards for each resolved manifest:
 DB/manifests/huntcards/<manifest>-huntcards.json
 ```
 
-Or load all at once (~41K tokens):
+Or load all at once (~55K tokens):
 ```
 DB/manifests/huntcards/all-huntcards.json
 ```
@@ -251,6 +251,7 @@ For EACH hunt card, run its `grep` pattern against the target codebase:
 grep -rn "card.grep" <path> --include="*.sol" --include="*.rs" -l
 ```
 
+- **`neverPrune: true`** → card **always survives** (CRITICAL severity safety net)
 - **Hit** → card survives (pattern is relevant to this codebase)
 - **No hit** → card is **discarded** (pattern cannot apply)
 

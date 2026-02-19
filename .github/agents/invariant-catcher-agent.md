@@ -51,14 +51,14 @@ If the file exists, skip already-completed cards and continue from the current b
 
 ### Step 1: Load Hunt Cards (Tier 1.5)
 
-Hunt cards are **compressed detection rules** (~41K tokens for ALL 490 patterns). They solve the context window problem by letting you hold all patterns simultaneously.
+Hunt cards are **compressed detection rules** (~55K tokens for ALL 451 patterns). They solve the context window problem by letting you hold all patterns simultaneously.
 
 #### Quick Start
 
 1. Read `DB/index.json` (~350 lines) → identify manifest list from `protocolContext`
 2. Load hunt cards for those manifests:
    - **If ≤ 4 manifests**: Load per-manifest cards from `DB/manifests/huntcards/<name>-huntcards.json`
-   - **If > 4 manifests or full audit**: Load `DB/manifests/huntcards/all-huntcards.json` (~41K tokens)
+   - **If > 4 manifests or full audit**: Load `DB/manifests/huntcards/all-huntcards.json` (~55K tokens)
 
 Each hunt card:
 ```json
@@ -68,26 +68,34 @@ Each hunt card:
   "severity": "CRITICAL",
   "grep": "redeemUnderlying|totalSupply|transfer",
   "detect": "When a CompoundV2-fork cToken market has extremely low totalSupply...",
+  "cat": "defi",
   "ref": "DB/general/vault-inflation-attack/defihacklabs-vault-inflation-patterns.md",
-  "lines": [66, 174]
+  "lines": [66, 174],
+  "neverPrune": true
 }
 ```
+
+**Key fields:**
+- `grep` — pipe-separated keywords for target code scanning (always 2+ keywords)
+- `detect` — one-line detection rule explaining what to look for
+- `cat` — category tag (oracle, defi, proxy, amm, etc.) for grouping
+- `neverPrune` — if `true`, this CRITICAL card must **never be pruned** by grep, even with zero hits
 
 #### Available Hunt Cards
 
 | Manifest | Cards | Focus |
 |----------|-------|-------|
 | `oracle` | 58 | Chainlink, Pyth, price manipulation |
-| `amm` | 32 | Concentrated liquidity, constant product |
-| `bridge` | 33 | LayerZero, Wormhole, Hyperlane |
-| `tokens` | 30 | ERC20, ERC4626, ERC721 |
-| `cosmos` | 13 | Cosmos SDK, IBC, staking |
+| `amm` | 38 | Concentrated liquidity, constant product |
+| `bridge` | 34 | LayerZero, Wormhole, Hyperlane |
+| `tokens` | 29 | ERC20, ERC4626, ERC721 |
+| `cosmos` | 15 | Cosmos SDK, IBC, staking |
 | `solana` | 40 | Solana programs, Token-2022 |
-| `general-security` | 39 | Access control, signatures, validation |
-| `general-defi` | 112 | Flash loans, vaults, precision |
+| `general-security` | 36 | Access control, signatures, validation |
+| `general-defi` | 91 | Flash loans, vaults, precision |
 | `general-infrastructure` | 44 | Proxies, reentrancy, storage |
-| `general-governance` | 48 | Governance, stablecoins, MEV |
-| `unique` | 41 | Protocol-specific unique exploits |
+| `general-governance` | 37 | Governance, stablecoins, MEV |
+| `unique` | 29 | Protocol-specific unique exploits |
 
 For the full search guide, see `DB/SEARCH_GUIDE.md`.
 
@@ -103,10 +111,11 @@ rg -l "keyword1|keyword2|keyword3" <target_path>
 ```
 
 **Pruning rules:**
+- Card has `neverPrune: true` → **ALWAYS KEEP** (CRITICAL patterns, never skip)
 - Card grep has **zero hits** in target → **PRUNE** (skip entirely)
 - Card grep has hits → **KEEP** (proceed to Step 3)
 
-Organize surviving cards by `ref` file (group cards that reference the same DB file together — you'll read that file section once instead of multiple times).
+Organize surviving cards by `ref` file (group cards that reference the same DB file together — you'll read that file section once instead of multiple times). You can also group by `cat` field to process related vulnerability categories together.
 
 **If you received pre-pruned cards from the orchestrator**, skip this step — they're already filtered.
 

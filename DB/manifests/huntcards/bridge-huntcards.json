@@ -2,29 +2,40 @@
   "meta": {
     "manifest": "bridge",
     "description": "Compressed hunt cards for bridge — one-line detection rules for bulk scanning",
-    "totalCards": 33,
-    "skipped": 16,
+    "totalCards": 34,
+    "skipped": 15,
     "usage": "Load all cards into context. For each card, grep target code for card.grep pattern. On hit, read full DB entry via read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])."
   },
   "cards": [
     {
-      "id": "bridge-1-cross-chain-replay-attacks-000",
+      "id": "bridge-cross-chain-general--1-cross-chain-replay-attacks-000",
       "title": "1. Cross-Chain Replay Attacks",
       "severity": "CRITICAL",
       "grep": "bridgeWithSignature|processMessage|execute",
-      "detect": "Bridge messages or signatures don't include sufficient context (chain ID, contract address, nonce)...",
+      "detect": "Bridge messages or signatures don't include sufficient context (chain ID, contract address, nonce) to prevent replay...",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/custom/cross-chain-general-vulnerabilities.md",
       "lines": [
         107,
         324
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "bridge-2-signature-validation-issues-001",
+      "id": "bridge-cross-chain-general--2-signature-validation-issues-001",
       "title": "2. Signature Validation Issues",
       "severity": "HIGH",
       "grep": "execute|verify",
       "detect": "No signature length validation",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/custom/cross-chain-general-vulnerabilities.md",
       "lines": [
         325,
@@ -32,11 +43,16 @@
       ]
     },
     {
-      "id": "bridge-3-token-bridging-issues-002",
+      "id": "bridge-cross-chain-general--3-token-bridging-issues-002",
       "title": "3. Token Bridging Issues",
       "severity": "MEDIUM",
       "grep": "denormalizeAmount|normalizeAmount|bridgeTokens|deposit|bridge",
       "detect": "Doesn't account for transfer fees",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/custom/cross-chain-general-vulnerabilities.md",
       "lines": [
         390,
@@ -44,11 +60,16 @@
       ]
     },
     {
-      "id": "bridge-4-sequencer-l2-specific-issues-003",
+      "id": "bridge-cross-chain-general--4-sequencer-l2-specific-issues-003",
       "title": "4. Sequencer & L2 Specific Issues",
       "severity": "MEDIUM",
       "grep": "emergencyWithdrawL1|emergencyWithdraw|claim",
       "detect": "Blocked when sequencer down",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/custom/cross-chain-general-vulnerabilities.md",
       "lines": [
         502,
@@ -56,11 +77,16 @@
       ]
     },
     {
-      "id": "bridge-5-access-control-vulnerabilities-004",
+      "id": "bridge-cross-chain-general--5-access-control-vulnerabiliti-004",
       "title": "5. Access Control Vulnerabilities",
       "severity": "HIGH",
       "grep": "createCrossChainAccount|bridgeNFT|bridge",
       "detect": "Approval persists after bridging",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/custom/cross-chain-general-vulnerabilities.md",
       "lines": [
         585,
@@ -68,11 +94,16 @@
       ]
     },
     {
-      "id": "bridge-6-slippage-mev-issues-005",
+      "id": "bridge-cross-chain-general--6-slippage-mev-issues-005",
       "title": "6. Slippage & MEV Issues",
       "severity": "MEDIUM",
       "grep": "bridgeAndSwap|completeSwap|complete|quote",
       "detect": "No minimum output",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/custom/cross-chain-general-vulnerabilities.md",
       "lines": [
         659,
@@ -80,11 +111,16 @@
       ]
     },
     {
-      "id": "bridge-7-message-ordering-timing-006",
+      "id": "bridge-cross-chain-general--7-message-ordering-timing-006",
       "title": "7. Message Ordering & Timing",
       "severity": "MEDIUM",
       "grep": "processMint|processBurn|withdraw|deposit",
       "detect": "Assumes message order",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/custom/cross-chain-general-vulnerabilities.md",
       "lines": [
         742,
@@ -92,47 +128,70 @@
       ]
     },
     {
-      "id": "bridge-1-zero-hash-trusted-root-message-proof-b-000",
+      "id": "bridge-defihacklabs-bridge--1-zero-hash-trusted-root-messa-000",
       "title": "1. Zero-Hash Trusted Root — Message Proof Bypass",
       "severity": "CRITICAL",
       "grep": "Replica.process(modifiedMessage|MessageStatus.Proven|bytes32(0|process",
-      "detect": "During a routine upgrade, the Nomad Replica contract was initialized with a trusted root of `0x00`...",
+      "detect": "During a routine upgrade, the Nomad Replica contract was initialized with a trusted root of `0x00` (zero hash).",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/custom/defihacklabs-bridge-2022-patterns.md",
       "lines": [
         62,
         111
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "bridge-2-native-token-deposit-fakery-address-0--001",
+      "id": "bridge-defihacklabs-bridge--2-native-token-deposit-fakery--001",
       "title": "2. Native Token Deposit Fakery — address(0) Whitelisting",
       "severity": "CRITICAL",
       "grep": "contractWhitelist|msg.value|address(0|resourceID|deposit|Deposit",
-      "detect": "Qubit's QBridge mapped the ETH `resourceID` to `address(0)` in the deposit handler, and...",
+      "detect": "Qubit's QBridge mapped the ETH `resourceID` to `address(0)` in the deposit handler, and `address(0)` was whitelisted in `contractWhitelist`.",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/custom/defihacklabs-bridge-2022-patterns.md",
       "lines": [
         112,
         149
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "bridge-3-native-token-wrapping-bypass-002",
+      "id": "bridge-defihacklabs-bridge--3-native-token-wrapping-bypass-002",
       "title": "3. Native Token Wrapping Bypass",
       "severity": "CRITICAL",
-      "grep": "msg.value",
-      "detect": "Bridge deposit handlers that support both native tokens (ETH/BNB) and ERC20 tokens must correctly...",
+      "grep": "msg.value|swapExactTokensForTokens|encodeWithSignature|transferFrom",
+      "detect": "Bridge deposit handlers that support both native tokens (ETH/BNB) and ERC20 tokens must correctly enforce that...",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/custom/defihacklabs-bridge-2022-patterns.md",
       "lines": [
         150,
         193
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "bridge-vulnerability-description-001",
+      "id": "bridge-defihacklabs-bridge--vulnerability-description-001",
       "title": "Vulnerability Description",
       "severity": "HIGH",
-      "grep": "CREATE",
-      "detect": "Vulnerability Description",
+      "grep": "CREATE|submitTransaction|ProxyFactory|unlockToken",
+      "detect": "Bridge and cross-chain vulnerabilities differ from standard DeFi exploits because they span multiple execution...",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/custom/defihacklabs-bridge-l2-replay-2022-patterns.md",
       "lines": [
         59,
@@ -140,23 +199,52 @@
       ]
     },
     {
-      "id": "bridge-defihacklabs-bridge-exploit-patterns-com-000",
+      "id": "bridge-defihacklabs-bridge--vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "CRITICAL",
+      "grep": "ProxyFactory|testExploit|createProxy|sweepToken|CREATE",
+      "detect": "Severity**: 🔴 CRITICAL | **Loss**: 20M OP (~$15M) | **Protocol**: Optimism/Wintermute | **Chain**: Optimism",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/custom/defihacklabs-bridge-l2-replay-2022-patterns.md",
+      "lines": [
+        105,
+        221
+      ],
+      "neverPrune": true
+    },
+    {
+      "id": "bridge-defihacklabs-bridge--defihacklabs-bridge-exploit-pa-000",
       "title": "DeFiHackLabs Bridge Exploit Patterns Compendium",
       "severity": "CRITICAL",
       "grep": "EthCrossChainData.putCurEpochConPubKeyBytes|putCurEpochConPubKeyBytes|verifyHeaderAndExecuteTx|_executeCrossChainTx|EthCrossChainManager|EthCrossChainData",
       "detect": "EthCrossChainManager can execute on ANY target contract",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/custom/defihacklabs-bridge-patterns.md",
       "lines": [
         38,
         305
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "bridge-1-ism-validation-vulnerabilities-000",
+      "id": "bridge-hyperlane-integratio-1-ism-validation-vulnerabiliti-000",
       "title": "1. ISM Validation Vulnerabilities",
       "severity": "MEDIUM",
       "grep": "setInterchainSecurityModule|Mailbox.process|moduleType|_handle|verify|handle",
-      "detect": "Contracts that receive Hyperlane messages fail to configure or validate the ISM properly, allowing...",
+      "detect": "Contracts that receive Hyperlane messages fail to configure or validate the ISM properly, allowing arbitrary message...",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md",
       "lines": [
         89,
@@ -164,11 +252,16 @@
       ]
     },
     {
-      "id": "bridge-2-message-replay-attacks-001",
+      "id": "bridge-hyperlane-integratio-2-message-replay-attacks-001",
       "title": "2. Message Replay Attacks",
       "severity": "HIGH",
-      "grep": "_handle",
+      "grep": "_handle|bridge_crosschain_findings|IncompleteFailureHandling|VulnerableTokenBridge",
       "detect": "When message processing fails (reverts), the protocol may not mark the message as consumed.",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md",
       "lines": [
         238,
@@ -176,11 +269,16 @@
       ]
     },
     {
-      "id": "bridge-3-router-configuration-issues-002",
+      "id": "bridge-hyperlane-integratio-3-router-configuration-issues-002",
       "title": "3. Router Configuration Issues",
       "severity": "HIGH",
       "grep": "enrollRemoteRouters|_handle|handle",
       "detect": "Any sender accepted",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md",
       "lines": [
         403,
@@ -188,11 +286,16 @@
       ]
     },
     {
-      "id": "bridge-4-handle-function-vulnerabilities-003",
+      "id": "bridge-hyperlane-integratio-4-handle-function-vulnerabilit-003",
       "title": "4. Handle Function Vulnerabilities",
       "severity": "HIGH",
       "grep": "_handle|handle",
       "detect": "State change after external call",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md",
       "lines": [
         485,
@@ -200,11 +303,16 @@
       ]
     },
     {
-      "id": "bridge-5-gas-payment-issues-004",
+      "id": "bridge-hyperlane-integratio-5-gas-payment-issues-004",
       "title": "5. Gas Payment Issues",
       "severity": "MEDIUM",
       "grep": "_estimateGas|sendMessage",
       "detect": "Hardcoded gas may be insufficient",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md",
       "lines": [
         564,
@@ -212,11 +320,16 @@
       ]
     },
     {
-      "id": "bridge-1-channel-blocking-vulnerabilities-000",
+      "id": "bridge-layerzero-integratio-1-channel-blocking-vulnerabili-000",
       "title": "1. Channel Blocking Vulnerabilities",
       "severity": "HIGH",
       "grep": "_nonblockingLzReceive|forceResumeReceive|NonblockingLzApp|storedPayload|lzReceive|LzApp",
-      "detect": "Protocols inherit from `LzApp` without implementing the non-blocking pattern (`NonblockingLzApp`),...",
+      "detect": "Protocols inherit from `LzApp` without implementing the non-blocking pattern (`NonblockingLzApp`), or they implement it...",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/layerzero/layerzero-integration-vulnerabilities.md",
       "lines": [
         369,
@@ -224,11 +337,16 @@
       ]
     },
     {
-      "id": "bridge-2-minimum-gas-validation-vulnerabilities-001",
+      "id": "bridge-layerzero-integratio-2-minimum-gas-validation-vulne-001",
       "title": "2. Minimum Gas Validation Vulnerabilities",
       "severity": "HIGH",
-      "grep": "NonblockingLzApp|triggerSendFrom|storedPayload|adapterParams|setMinDstGas|_getGasLimit",
-      "detect": "Protocols allow users to specify arbitrary `adapterParams` without validating the gas limit meets...",
+      "grep": "NonblockingLzApp|triggerSendFrom|_getGasLimit|storedPayload|adapterParams|setMinDstGas",
+      "detect": "Protocols allow users to specify arbitrary `adapterParams` without validating the gas limit meets minimum requirements...",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/layerzero/layerzero-integration-vulnerabilities.md",
       "lines": [
         517,
@@ -236,11 +354,16 @@
       ]
     },
     {
-      "id": "bridge-3-gas-estimation-fee-calculation-002",
+      "id": "bridge-layerzero-integratio-3-gas-estimation-fee-calculati-002",
       "title": "3. Gas Estimation & Fee Calculation",
       "severity": "HIGH",
-      "grep": "setDstChainGasConfig|quoteLayerZeroFee|requestSnapshot|send",
+      "grep": "setDstChainGasConfig|quoteLayerZeroFee|requestSnapshot",
       "detect": "Uses source chain gas config for destination",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/layerzero/layerzero-integration-vulnerabilities.md",
       "lines": [
         628,
@@ -248,11 +371,16 @@
       ]
     },
     {
-      "id": "bridge-4-fee-refund-handling-003",
+      "id": "bridge-layerzero-integratio-4-fee-refund-handling-003",
       "title": "4. Fee Refund Handling",
       "severity": "HIGH",
-      "grep": "withdrawRefunds|sendMessage|_lzReceive",
+      "grep": "withdrawRefunds|_lzReceive|sendMessage",
       "detect": "Contract cannot receive refunds",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/layerzero/layerzero-integration-vulnerabilities.md",
       "lines": [
         735,
@@ -260,11 +388,16 @@
       ]
     },
     {
-      "id": "bridge-5-payload-size-address-validation-004",
+      "id": "bridge-layerzero-integratio-5-payload-size-address-validat-004",
       "title": "5. Payload Size & Address Validation",
       "severity": "HIGH",
-      "grep": "sendFrom",
+      "grep": "sendFrom|bridge_crosschain_findings|LayerZero|Vulnerable",
       "detect": "No limit on _toAddress length",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/layerzero/layerzero-integration-vulnerabilities.md",
       "lines": [
         817,
@@ -272,11 +405,16 @@
       ]
     },
     {
-      "id": "bridge-6-composed-message-vulnerabilities-layer-005",
+      "id": "bridge-layerzero-integratio-6-composed-message-vulnerabili-005",
       "title": "6. Composed Message Vulnerabilities (LayerZero V2)",
       "severity": "HIGH",
-      "grep": "_lzReceive|lzCompose|send",
-      "detect": "Composed messages introduce dual-transaction patterns where the initial receive and subsequent...",
+      "grep": "_lzReceive|lzCompose",
+      "detect": "Composed messages introduce dual-transaction patterns where the initial receive and subsequent compose execution are...",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/layerzero/layerzero-integration-vulnerabilities.md",
       "lines": [
         863,
@@ -284,11 +422,16 @@
       ]
     },
     {
-      "id": "bridge-7-oft-onft-specific-vulnerabilities-006",
+      "id": "bridge-layerzero-integratio-7-oft-onft-specific-vulnerabil-006",
       "title": "7. OFT/ONFT Specific Vulnerabilities",
       "severity": "MEDIUM",
       "grep": "_nonblockingLzReceive|_transferViaOFT|bridgeTokens",
       "detect": "Doesn't account for different decimals on chains",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/layerzero/layerzero-integration-vulnerabilities.md",
       "lines": [
         966,
@@ -296,11 +439,16 @@
       ]
     },
     {
-      "id": "bridge-8-peer-trust-configuration-vulnerabiliti-007",
+      "id": "bridge-layerzero-integratio-8-peer-trust-configuration-vul-007",
       "title": "8. Peer & Trust Configuration Vulnerabilities",
       "severity": "MEDIUM",
       "grep": "_getPeer|setPeer",
       "detect": "Uses sender address if peer not configured",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/layerzero/layerzero-integration-vulnerabilities.md",
       "lines": [
         1080,
@@ -308,11 +456,16 @@
       ]
     },
     {
-      "id": "bridge-9-stargate-sgreceive-integration-vulnera-008",
+      "id": "bridge-layerzero-integratio-9-stargate-sgreceive-integrati-008",
       "title": "9. Stargate/sgReceive Integration Vulnerabilities",
       "severity": "HIGH",
       "grep": "recoverStuckTokens|retryRevert|sgReceive|participate",
       "detect": "Complex operations can run out of gas",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/layerzero/layerzero-integration-vulnerabilities.md",
       "lines": [
         1142,
@@ -320,11 +473,16 @@
       ]
     },
     {
-      "id": "bridge-10-cross-chain-payload-validation-vulner-009",
+      "id": "bridge-layerzero-integratio-10-cross-chain-payload-validat-009",
       "title": "10. Cross-Chain Payload Validation Vulnerabilities",
       "severity": "HIGH",
       "grep": "exerciseInternal|sendFrom",
-      "detect": "tapSendData.",
+      "detect": "tapSendData.tapOftAddress not validated",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/layerzero/layerzero-integration-vulnerabilities.md",
       "lines": [
         1264,
@@ -332,11 +490,16 @@
       ]
     },
     {
-      "id": "bridge-11-insufficient-gas-limit-calculation-010",
+      "id": "bridge-layerzero-integratio-11-insufficient-gas-limit-calc-010",
       "title": "11. Insufficient Gas Limit Calculation",
       "severity": "HIGH",
       "grep": "getSendOptions|releaseOnEid|anyFallback",
       "detect": "20k gas per token is insufficient for minting",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/layerzero/layerzero-integration-vulnerabilities.md",
       "lines": [
         1363,
@@ -344,23 +507,34 @@
       ]
     },
     {
-      "id": "bridge-1-vaa-parsing-vulnerabilities-000",
+      "id": "bridge-wormhole-integration-1-vaa-parsing-vulnerabilities-000",
       "title": "1. VAA Parsing Vulnerabilities",
       "severity": "CRITICAL",
       "grep": "parseAndVerifyVAA|receiveMessage",
-      "detect": "Protocols either use outdated/deprecated Wormhole methods for VAA parsing, fail to validate all VAA...",
+      "detect": "Protocols either use outdated/deprecated Wormhole methods for VAA parsing, fail to validate all VAA fields properly, or...",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/wormhole/wormhole-integration-vulnerabilities.md",
       "lines": [
         99,
         232
-      ]
+      ],
+      "neverPrune": true
     },
     {
-      "id": "bridge-2-guardian-set-vulnerabilities-001",
+      "id": "bridge-wormhole-integration-2-guardian-set-vulnerabilities-001",
       "title": "2. Guardian Set Vulnerabilities",
       "severity": "HIGH",
       "grep": "updateMinimumGuardianSet|executeProposal",
       "detect": "Protocols don't account for guardian set transitions properly.",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/wormhole/wormhole-integration-vulnerabilities.md",
       "lines": [
         233,
@@ -368,11 +542,16 @@
       ]
     },
     {
-      "id": "bridge-3-message-replay-attacks-002",
+      "id": "bridge-wormhole-integration-3-message-replay-attacks-002",
       "title": "3. Message Replay Attacks",
       "severity": "HIGH",
-      "grep": "processMessage",
+      "grep": "processMessage|bridge_crosschain_findings|VulnerableInstance|SecureInstance",
       "detect": "Same VAA can be replayed across instances",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/wormhole/wormhole-integration-vulnerabilities.md",
       "lines": [
         321,
@@ -380,11 +559,16 @@
       ]
     },
     {
-      "id": "bridge-4-token-bridge-integration-003",
+      "id": "bridge-wormhole-integration-4-token-bridge-integration-003",
       "title": "4. Token Bridge Integration",
       "severity": "MEDIUM",
       "grep": "bridgeWithPayload|completeTransfer|bridgeTokens|bridgeToUser",
       "detect": "Uses transferWithPayload incorrectly",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/wormhole/wormhole-integration-vulnerabilities.md",
       "lines": [
         387,
@@ -392,11 +576,16 @@
       ]
     },
     {
-      "id": "bridge-5-gas-limit-issues-004",
+      "id": "bridge-wormhole-integration-5-gas-limit-issues-004",
       "title": "5. Gas Limit Issues",
       "severity": "HIGH",
       "grep": "requestCrossChainMessage|updateGasLimit",
       "detect": "Gas limit cannot be updated",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
       "ref": "DB/bridge/wormhole/wormhole-integration-vulnerabilities.md",
       "lines": [
         496,

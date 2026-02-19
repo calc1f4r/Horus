@@ -18,14 +18,14 @@ The database uses a **tiered architecture** for precision. Never read entire vul
 ```
 Tier 1:   DB/index.json                          ← Router (~350 lines). Start here.
    ↓  
-Tier 1.5: DB/manifests/huntcards/*-huntcards.json ← Compressed detection cards (~41K tokens for ALL 490 patterns)
+Tier 1.5: DB/manifests/huntcards/*-huntcards.json ← Compressed detection cards (~55K tokens for ALL 451 patterns)
    ↓  
 Tier 2:   DB/manifests/<name>.json                ← Full pattern-level index with line ranges (11 manifests)
    ↓  
 Tier 3:   DB/**/*.md                              ← Vulnerability content. Read ONLY targeted line ranges.
 ```
 
-**Hunt Cards (Tier 1.5)**: Compressed 5-line cards with `grep` patterns and one-line detection rules. Load `DB/manifests/huntcards/all-huntcards.json` to fit ALL patterns in context. For each card, grep target code → on hit, read full entry via `read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])`.
+**Hunt Cards (Tier 1.5)**: Compressed detection cards with `grep` patterns, one-line detection rules, category tags, and `neverPrune` flags for CRITICAL patterns. Load `DB/manifests/huntcards/all-huntcards.json` to fit ALL patterns in context. For each card, grep target code → on hit (or if `neverPrune`), read full entry via `read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])`.
 
 For the full search guide, see `DB/SEARCH_GUIDE.md`.
 
@@ -44,7 +44,7 @@ Read `DB/index.json` (~330 lines). It contains:
 ### Step 2: Load Hunt Cards (Preferred) or Manifests
 
 **For bulk scanning (audits)**: Load hunt cards instead of full manifests:
-- `DB/manifests/huntcards/all-huntcards.json` — ALL 490 patterns (~41K tokens)
+- `DB/manifests/huntcards/all-huntcards.json` — ALL 451 patterns (~55K tokens)
 - `DB/manifests/huntcards/<manifest>-huntcards.json` — per-manifest cards
 
 Each card has a `grep` field for searching target code and `ref` + `lines` for reading the full DB entry on hit.
@@ -144,9 +144,10 @@ Load manifest → filter patterns where severity includes "HIGH" or "CRITICAL"
 ### Bulk Hunt (Audit Mode — Recommended for Full Audits)
 ```
 1. Identify protocol type → Read index.json protocolContext
-2. Load hunt cards for resolved manifests (or all-huntcards.json for ~41K tokens)
-3. For each card, grep target code: grep -rn "card.grep" <target_path>
-4. Prune cards with zero grep hits (removes ~60-80% of patterns)
+2. Load hunt cards for resolved manifests (or all-huntcards.json for ~55K tokens)
+3. For each card, grep target code: `grep -rn "card.grep" <target_path>`
+4. Cards with `neverPrune: true` always survive (CRITICAL safety net)
+5. Prune cards with zero grep hits (removes ~60-80% of patterns)
 5. For remaining hits, read full DB entry: read_file(card.ref, card.lines[0], card.lines[1])
 6. Validate each match against target code (true/false positive)
 ```
@@ -167,7 +168,7 @@ python3 generate_manifests.py
 | File | Purpose |
 |------|---------|
 | `DB/index.json` | **START HERE** — Lean router to manifests + hunt cards |
-| `DB/manifests/huntcards/all-huntcards.json` | **ALL hunt cards** — 490 compressed detection cards (~41K tokens) |
+| `DB/manifests/huntcards/all-huntcards.json` | **ALL hunt cards** — 451 compressed detection cards (~55K tokens) |
 | `DB/manifests/huntcards/<name>-huntcards.json` | Per-manifest hunt cards |
 | `DB/manifests/*.json` | Full pattern-level indexes with line ranges |
 | `DB/SEARCH_GUIDE.md` | Detailed search guide for agents |
