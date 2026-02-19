@@ -1116,9 +1116,51 @@ def main():
     print(f"\n🎯 Building hunt cards (Tier 1.5)...")
     huntcard_info, total_huntcards = build_all_huntcards(manifests)
 
+    # Enrich hunt cards with micro-directives
+    print(f"\n🔬 Enriching hunt cards with micro-directives...")
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
+        from generate_micro_directives import enrich_huntcard_file
+        total_enriched = 0
+        all_enriched_cards = []
+        for hc_file in sorted(HUNTCARDS_DIR.glob("*-huntcards.json")):
+            if hc_file.name == "all-huntcards.json":
+                continue
+            stats = enrich_huntcard_file(hc_file, hc_file)
+            total_enriched += stats["enriched"]
+            with open(hc_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                all_enriched_cards.extend(data["cards"])
+            print(f"   → {hc_file.name}: {stats['enriched']}/{stats['total']} enriched")
+        # Write combined enriched all-huntcards.json
+        combined = {
+            "meta": {
+                "description": "ALL enriched hunt cards — compressed detection rules with micro-directives for direct verification",
+                "totalCards": len(all_enriched_cards),
+                "enriched": total_enriched,
+                "manifests": list(sorted(manifests.keys())),
+                "usage": (
+                    "Load this single file for all vulnerability detection cards. For each card: "
+                    "grep target code for card.grep. On hit: execute card.check steps directly against "
+                    "grep hit locations. Only read full DB entry (card.ref + card.lines) for confirmed "
+                    "true/likely positives."
+                ),
+            },
+            "cards": all_enriched_cards,
+        }
+        combined_path = HUNTCARDS_DIR / "all-huntcards.json"
+        with open(combined_path, "w", encoding="utf-8") as f:
+            json.dump(combined, f, indent=2, ensure_ascii=False)
+        combined_size = os.path.getsize(combined_path)
+        print(f"   → all-huntcards.json: {len(all_enriched_cards)} cards, {combined_size:,} bytes (enriched)")
+    except ImportError:
+        print("   ⚠ Skipping enrichment (scripts/generate_micro_directives.py not found)")
+    except Exception as e:
+        print(f"   ⚠ Enrichment failed: {e}")
+
     # Add hunt card references to router
     router["huntcards"] = {
-        "description": "Compressed pattern cards for bulk scanning. Each card has a grep pattern + one-line detection rule. Load all-huntcards.json to fit ALL patterns (~15K tokens) in context simultaneously.",
+        "description": "Enriched detection cards with grep patterns, micro-directives (check steps, antipattern, securePattern), and one-line detection rules. Load all-huntcards.json for ALL patterns. For each card: grep target code → on hit, execute card.check steps directly → only read .md for confirmed positives.",
         "allInOne": "DB/manifests/huntcards/all-huntcards.json",
         "totalCards": total_huntcards,
         "perManifest": huntcard_info,

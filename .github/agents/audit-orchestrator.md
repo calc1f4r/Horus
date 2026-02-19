@@ -231,7 +231,7 @@ Or load all at once (~55K tokens):
 DB/manifests/huntcards/all-huntcards.json
 ```
 
-Each card is a compressed 5-line detection record:
+Each card is a compressed detection record with micro-directives:
 ```json
 {
   "id": "oracle-staleness-001",
@@ -239,9 +239,22 @@ Each card is a compressed 5-line detection record:
   "severity": ["MEDIUM"],
   "grep": "latestRoundData|getPriceUnsafe|getPrice|publishTime|updatedAt",
   "detect": "No freshness validation on oracle price data.",
+  "check": [
+    "VERIFY: updatedAt is checked against reasonable threshold",
+    "Check startedAt > 0 validation exists",
+    "LOOK FOR: latestRoundData() with ignored updatedAt"
+  ],
+  "antipattern": "No validation of updatedAt timestamp",
+  "securePattern": "Full validation of all return values",
   "ref": "DB/oracle/pyth/PYTH_ORACLE_VULNERABILITIES.md",
   "lines": [93, 248]
 }
+```
+
+New fields:
+- `check` — 1-5 verification steps the agent can execute directly against grep hit locations (no .md read needed)
+- `antipattern` — one-line vulnerable code shape for quick positive matching
+- `securePattern` — one-line secure code shape for quick false-positive elimination
 ```
 
 ### Step 2: Grep-Prune Pass (Critical — Eliminates 60-80% of Patterns)
@@ -289,19 +302,27 @@ Hunt for vulnerability patterns in the target codebase.
 TARGET CODEBASE: <path>
 PROTOCOL TYPE: <detected types>
 
-PRE-PRUNED HUNT CARDS (grep-verified against target code):
+PRE-PRUNED ENRICHED HUNT CARDS (grep-verified against target code):
 <paste surviving cards from hunt-card-hits.json>
 
 Read audit-output/02-invariants.md for invariant specifications.
 
 These cards have already been grep-matched against the codebase — every card
 has at least one keyword hit. Your job:
-1. Read the full DB entry for each card (use ref + lines)
-2. Process in batches of 30-40 cards to stay within context limits
-3. Build precise vulnerability patterns from the DB content
-4. Hunt for each pattern in the target code at the grep hit locations
-5. Validate: true positive / likely positive / false positive
-6. Write checkpoint after each batch to audit-output/hunt-state.json
+
+1. PASS 1 — MICRO-DIRECTIVE EXECUTION (no .md reads):
+   For each card, read the TARGET CODE at grep hit locations and
+   execute the card's `check` steps directly:
+   - Use `antipattern` for quick positive matching
+   - Use `securePattern` for quick negative matching
+   - Classify: true positive / likely positive / false positive
+
+2. PASS 2 — EVIDENCE LOOKUP (only for true/likely positives):
+   For confirmed hits, read the full DB entry: read_file(card.ref, card.lines[0], card.lines[1])
+   Extract vulnerable patterns, attack scenarios, and recommended fixes.
+
+3. Process in batches of 50-60 cards
+4. Write checkpoint after each batch to audit-output/hunt-state.json
 
 Write findings to audit-output/03-findings-raw.md using this format per finding:
 ### F-NNN: [Title]
@@ -323,7 +344,8 @@ Write findings to audit-output/03-findings-raw.md using this format per finding:
 |----------|----------------|----------|
 | Old: Load all manifests | ~384K | Full but exceeds context |
 | Old: Load all .md content | ~1.1M | Impossible |
-| **New: Hunt cards + grep-prune** | **~20-40K cards + ~30K per batch** | **Full coverage, fits context** |
+| Hunt cards + grep-prune (v1) | ~55K cards + ~100K per batch | Full coverage, tight on context |
+| **Enriched hunt cards + micro-directives** | **~100K cards + ~10-20K for evidence** | **Full coverage, 80% less .md reads** |
 
 ---
 

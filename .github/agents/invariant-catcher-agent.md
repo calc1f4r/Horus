@@ -49,37 +49,50 @@ If `audit-output/hunt-state.json` exists, read it to resume from where you left 
 
 If the file exists, skip already-completed cards and continue from the current batch. If it doesn't exist, start fresh.
 
-### Step 1: Load Hunt Cards (Tier 1.5)
+### Step 1: Load Enriched Hunt Cards (Tier 1.5)
 
-Hunt cards are **compressed detection rules** (~55K tokens for ALL 451 patterns). They solve the context window problem by letting you hold all patterns simultaneously.
+Hunt cards are **compressed detection rules with micro-directives** (~100K tokens for ALL 451 patterns). They contain everything you need to verify a vulnerability pattern **without reading the full .md DB entry**.
 
 #### Quick Start
 
 1. Read `DB/index.json` (~350 lines) → identify manifest list from `protocolContext`
 2. Load hunt cards for those manifests:
    - **If ≤ 4 manifests**: Load per-manifest cards from `DB/manifests/huntcards/<name>-huntcards.json`
-   - **If > 4 manifests or full audit**: Load `DB/manifests/huntcards/all-huntcards.json` (~55K tokens)
+   - **If > 4 manifests or full audit**: Load `DB/manifests/huntcards/all-huntcards.json`
 
-Each hunt card:
+Each enriched hunt card:
 ```json
 {
-  "id": "general-defi-1-empty-market-exchange-rate-inflation-000",
-  "title": "Empty Market Exchange Rate Inflation",
-  "severity": "CRITICAL",
-  "grep": "redeemUnderlying|totalSupply|transfer",
-  "detect": "When a CompoundV2-fork cToken market has extremely low totalSupply...",
-  "cat": "defi",
-  "ref": "DB/general/vault-inflation-attack/defihacklabs-vault-inflation-patterns.md",
-  "lines": [66, 174],
-  "neverPrune": true
+  "id": "oracle-chainlink-price-feed-1-staleness-vulnerabilities-000",
+  "title": "1. Staleness Vulnerabilities",
+  "severity": "MEDIUM",
+  "grep": "latestRoundData|updatedAt|getPrice",
+  "detect": "Protocols call latestRoundData() but ignore the updatedAt return value...",
+  "check": [
+    "VERIFY: updatedAt is checked against reasonable threshold",
+    "Check startedAt > 0 validation exists",
+    "Verify answeredInRound >= roundId check",
+    "Confirm heartbeat thresholds match Chainlink feed configuration",
+    "LOOK FOR: latestRoundData() with ignored updatedAt"
+  ],
+  "antipattern": "No validation of updatedAt timestamp",
+  "securePattern": "Full validation of all return values",
+  "cat": ["oracle", "price-feed", "data-freshness"],
+  "ref": "DB/oracle/chainlink/CHAINLINK_PRICE_FEED_VULNERABILITIES.md",
+  "lines": [133, 289],
+  "neverPrune": false
 }
 ```
 
 **Key fields:**
-- `grep` — pipe-separated keywords for target code scanning (always 2+ keywords)
+- `grep` — pipe-separated keywords for target code scanning
 - `detect` — one-line detection rule explaining what to look for
-- `cat` — category tag (oracle, defi, proxy, amm, etc.) for grouping
-- `neverPrune` — if `true`, this CRITICAL card must **never be pruned** by grep, even with zero hits
+- `check` — **1-5 ordered verification steps** to execute directly against grep hit locations (NO .md read needed)
+- `antipattern` — one-line code shape indicating vulnerability (quick positive match)
+- `securePattern` — one-line code shape indicating safe code (quick negative match)
+- `cat` — category tags for grouping
+- `neverPrune` — if `true`, card always survives grep-prune (CRITICAL patterns)
+- `ref` + `lines` — read full .md entry **ONLY for confirmed true/likely positives**
 
 #### Available Hunt Cards
 
@@ -115,31 +128,59 @@ rg -l "keyword1|keyword2|keyword3" <target_path>
 - Card grep has **zero hits** in target → **PRUNE** (skip entirely)
 - Card grep has hits → **KEEP** (proceed to Step 3)
 
-Organize surviving cards by `ref` file (group cards that reference the same DB file together — you'll read that file section once instead of multiple times). You can also group by `cat` field to process related vulnerability categories together.
+Organize surviving cards by `ref` file (group cards that reference the same DB file together). You can also group by `cat` field to process related vulnerability categories together.
 
 **If you received pre-pruned cards from the orchestrator**, skip this step — they're already filtered.
 
-### Step 3: Read DB Entries for Surviving Cards (Batched)
+### Step 3: Execute Micro-Directives (Two-Pass Verification)
 
-Process surviving cards in **batches of 30-40** to stay within context limits:
+**This replaces the old "read full .md entry" approach.** Most cards now include `check`, `antipattern`, and `securePattern` fields that let you verify patterns directly.
 
-1. **Group cards** by `ref` file path
-2. **For each batch**:
-   a. Read the full DB entry for each card: `read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])`
-   b. From each entry, extract:
-      - **Vulnerable code patterns** — the specific code shapes that indicate the bug
-      - **Detection patterns** — regex or structural patterns documented in the entry
-      - **Secure implementations** — to distinguish true from false positives
-   c. Search target codebase for those specific patterns
-   d. Record findings
-3. **Update checkpoint** after each batch:
-   ```json
-   // Write to audit-output/hunt-state.json
-   { "completed_card_ids": [...], "pending_card_ids": [...], "findings_count": N, "current_batch": M }
-   ```
-4. **Append findings** to `audit-output/03-findings-raw.md` after each batch (don't wait until the end)
+#### Pass 1: Micro-Directive Execution (NO .md read needed)
 
-**Context management**: After processing a batch, you don't need to keep the DB entry content in memory. The key facts are captured in your findings. Move to the next batch.
+For each surviving card with `check` steps:
+
+1. **Read the target code** at the grep hit locations (the files/lines where `card.grep` matched)
+2. **Execute each `card.check` step** against the target code at those locations:
+   - `VERIFY:` steps → check if the described condition holds in the target code
+   - `LOOK FOR:` steps → search for the described code pattern
+   - `ANTIPATTERN:` steps → check if the target code matches the vulnerable shape
+   - Checklist items → perform the described validation
+3. **Quick-match with `card.antipattern`** → if the target code at the grep hit location matches this description, it's a **likely positive**
+4. **Quick-reject with `card.securePattern`** → if the target code matches this description, it's a **false positive** (code is safe)
+5. **Classify each card**:
+   - **True positive**: Target code matches antipattern AND fails ≥2 check steps
+   - **Likely positive**: Target code fails 1+ check steps but has mitigating factors
+   - **False positive**: Target code matches securePattern OR passes all check steps
+
+#### Pass 2: Evidence Lookup (ONLY for true/likely positives)
+
+For cards classified as true/likely positive in Pass 1:
+
+1. **Read the full DB entry**: `read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])`
+2. **Extract**: vulnerable code examples, attack scenario, impact analysis, recommended fix
+3. **Validate**: compare the DB's vulnerable pattern against the target code for final confirmation
+4. **Record the finding** with DB evidence
+
+**Context savings**: Instead of reading 50-200 lines per card for ALL surviving cards (~100 cards × ~100 lines = ~10,000 lines), you only read .md entries for confirmed hits (~10-20 cards × ~100 lines = ~1,000-2,000 lines). **80-90% context reduction.**
+
+#### Checkpoint After Each Batch
+
+Process cards in **batches of 50-60** (larger batches possible since Pass 1 is lightweight):
+
+```json
+// Write to audit-output/hunt-state.json after each batch
+{
+  "completed_card_ids": [...],
+  "pending_card_ids": [...],
+  "findings_count": N,
+  "current_batch": M,
+  "pass1_positives": P,
+  "pass2_confirmed": C
+}
+```
+
+**Append findings** to `audit-output/03-findings-raw.md` after each batch.
 
 Build a pattern library linking each pattern to its source:
 
@@ -213,14 +254,16 @@ Testing only with valid users → missing bypass when `userId = null` matches `r
 
 ## Key Principles
 
-1. **Hunt-cards-first** — load hunt cards (Tier 1.5) before full manifests; grep-prune before reading DB content
-2. **Batch processing** — process cards in batches of 30-40 to stay within context limits
-3. **Checkpoint progress** — write `hunt-state.json` after each batch so work survives context resets
-4. **Use line ranges** — read only targeted sections using card.ref + card.lines
-5. **Start specific** — first pattern matches exactly the known bug
-6. **Document everything** — all findings go to `invariants-caught/` or `audit-output/`
-7. **Link to sources** — every finding references its DB origin (card ID)
-8. **Search entire codebase** — never limit scope to one module
+1. **Hunt-cards-first** — load enriched hunt cards before full manifests; grep-prune before verification
+2. **Micro-directives first** — execute `check` steps directly against target code before reading any .md files
+3. **Two-pass verification** — Pass 1 uses micro-directives (cheap), Pass 2 reads .md only for confirmed hits (expensive)
+4. **Batch processing** — process cards in batches of 50-60 (larger since Pass 1 is lightweight)
+5. **Checkpoint progress** — write `hunt-state.json` after each batch so work survives context resets
+6. **Quick-match/reject** — use `antipattern` for fast positive matching, `securePattern` for fast negative matching
+7. **Use line ranges** — read only targeted sections using card.ref + card.lines (Pass 2 only)
+8. **Document everything** — all findings go to `invariants-caught/` or `audit-output/`
+9. **Link to sources** — every finding references its DB origin (card ID)
+10. **Search entire codebase** — never limit scope to one module
 
 ---
 

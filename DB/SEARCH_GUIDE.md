@@ -41,9 +41,12 @@ Each hunt card:
 **Key fields:**
 - `grep` — pipe-delimited regex for `grep -rn` or `rg` against target code
 - `detect` — one-line rule describing what makes code vulnerable
+- `check` — 1-5 ordered verification steps to execute directly against grep hit locations (no .md read needed)
+- `antipattern` — one-line code shape indicating vulnerability (quick positive match)
+- `securePattern` — one-line code shape indicating safe code (quick false-positive elimination)
 - `cat` — category tags for grouping (e.g., `defi`, `oracle`, `amm`, `bridge`)
 - `neverPrune` — if `true`, card survives grep-prune even with zero hits (CRITICAL patterns)
-- `ref` + `lines` — read full entry only when grep hits (or `neverPrune`): `read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])`
+- `ref` + `lines` — read full entry only for confirmed true/likely positives: `read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])`
 
 **Files:**
 - `DB/manifests/huntcards/all-huntcards.json` — ALL 451 cards in one file
@@ -148,11 +151,40 @@ Each hunt card:
 **Example**: Auditing an ERC4626 vault
 ```
 → index.json: vault_yield → manifests: ["tokens", "general-defi", "oracle", "unique"]
-→ Load hunt cards for those 4 manifests (241 cards, ~20K tokens)
+→ Load hunt cards for those 4 manifests (241 cards)
 → Grep target code for each card's grep pattern
 → Card "First Depositor / Inflation Attack" grep "totalSupply|convertToShares|totalAssets" → HIT in Vault.sol:45
-→ read_file("DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md", 151, 393) ← full vulnerability content
+→ Execute card.check steps against Vault.sol:45 → card.antipattern matches! (no .md read yet)
+→ PASS 2: read_file("DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md", 151, 393) ← full evidence
 → Compare against Vault.sol:45 → True positive!
+```
+
+### Workflow F: Micro-Directive Execution (Recommended for Full Audits)
+
+**When**: Hunt cards have been grep-pruned and you want to verify surviving patterns efficiently
+
+```
+1. After grep-pruning, you have 80-120 surviving cards
+2. For each surviving card with `check` steps:
+   a. Read TARGET CODE at grep hit locations
+   b. Execute each card.check step against the target code
+   c. Quick-match with card.antipattern (vulnerable code shape)
+   d. Quick-reject with card.securePattern (safe code shape)
+   e. Classify: true positive / likely positive / false positive
+3. ONLY for true/likely positives: read full .md entry via card.ref + card.lines
+4. This cuts .md reads from ~100 to ~10-20 (80-90% reduction)
+```
+
+**Example**: Processing an oracle staleness card
+```
+→ Card: "Missing Staleness Check"
+  grep hit in PriceOracle.sol:42
+  check[0]: "VERIFY: updatedAt is checked against reasonable threshold"
+  → Read PriceOracle.sol:35-55 → no updatedAt comparison found! FAIL
+  check[1]: "Check startedAt > 0 validation exists" → FAIL
+  antipattern: "No validation of updatedAt timestamp" → MATCH
+  → Classified: TRUE POSITIVE
+  → Now read DB/oracle/chainlink/CHAINLINK_PRICE_FEED_VULNERABILITIES.md:133-289 for evidence
 ```
 
 ---
@@ -284,26 +316,30 @@ The orchestrator manages context budget by loading manifests one at a time, extr
 Instead of loading manifests one at a time, use hunt cards for maximum coverage with minimal context:
 
 ```
-1. Load all hunt cards for resolved manifests (~20-55K tokens)
+1. Load all hunt cards for resolved manifests (~100K tokens with micro-directives)
 2. Batch grep: for each card, search target code for card.grep:
    grep -rn "keyword1|keyword2" <path> --include="*.sol"
 3. Cards with `neverPrune: true` always survive (CRITICAL safety net)
 4. Prune: discard remaining cards with zero grep hits (typically 60-80%)
-5. For remaining cards (typically 30-80): read full DB entries using card.ref + card.lines
-5. Validate each hit against target code
+5. PASS 1: Execute card.check steps against target code at grep hit locations
+   - Use card.antipattern for quick positive matching
+   - Use card.securePattern for quick false-positive elimination
+6. PASS 2: For confirmed hits only, read full DB entries using card.ref + card.lines
+7. Validate each confirmed hit against target code
 ```
 
-This approach lets an agent hold ALL vulnerability detection patterns in context simultaneously — impossible with full manifests.
+This approach lets an agent hold ALL vulnerability detection patterns AND verification logic in context simultaneously — impossible with full manifests.
 
 ### Context Cost (Hunt Card Approach)
 
 | Action | Tokens | Notes |
 |--------|--------|-------|
 | Read index.json | ~3K | One-time routing |
-| Load all hunt cards (1 file) | ~55K | ALL 451 patterns |
+| Load all hunt cards (1 file) | ~100K | ALL 451 patterns with micro-directives |
 | Grep target code | 0 | Run in terminal |
-| Read matched DB entries | ~5-15K | Only for hits (~20-40 patterns) |
-| **Total** | **~50-60K** | Leaves room for target codebase |
+| Pass 1: micro-directive execution | 0 | Uses card.check against already-read target code |
+| Pass 2: read matched DB entries | ~5-15K | Only for confirmed hits (~10-20 patterns) |
+| **Total** | **~105-120K** | Leaves room for target codebase |
 
 ---
 

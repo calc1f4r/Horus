@@ -4,7 +4,8 @@
     "description": "Compressed hunt cards for general-governance — one-line detection rules for bulk scanning",
     "totalCards": 37,
     "skipped": 34,
-    "usage": "Load all cards into context. For each card, grep target code for card.grep pattern. On hit, read full DB entry via read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])."
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "enriched": 37
   },
   "cards": [
     {
@@ -25,7 +26,12 @@
         65,
         117
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: When governance voting power is determined by token balances at the time of vote (snapshot-less) or uses LP tokens that...",
+        "ANTIPATTERN: emergencyCommit allows same-tx proposal execution"
+      ],
+      "antipattern": "emergencyCommit allows same-tx proposal execution"
     },
     {
       "id": "general-governance-defihacklabs-governa-2-low-quorum-governance-exploi-001",
@@ -45,7 +51,12 @@
         118,
         165
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: When governance quorum requirements are set too low (or vote delegation concentrates power), an attacker with a...",
+        "ANTIPATTERN: Low quorum allows malicious proposal to pass"
+      ],
+      "antipattern": "Low quorum allows malicious proposal to pass"
     },
     {
       "id": "general-governance-defihacklabs-governa-3-proxy-re-initialization-atta-002",
@@ -65,7 +76,12 @@
         166,
         217
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: When governance, staking, and delegate manager contracts are deployed behind proxies (UUPS or Transparent), the...",
+        "ANTIPATTERN: governance proxy initialize() can be called again"
+      ],
+      "antipattern": "governance proxy initialize() can be called again"
     },
     {
       "id": "general-governance-defihacklabs-governa-4-dao-module-oracle-self-answe-003",
@@ -85,7 +101,12 @@
         218,
         270
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: When a DAO uses Gnosis Safe Modules with Reality.",
+        "ANTIPATTERN: SafeSnap DAO Module allows anyone to add proposals"
+      ],
+      "antipattern": "SafeSnap DAO Module allows anyone to add proposals"
     },
     {
       "id": "general-governance-defihacklabs-governa-5-governance-treasury-drain-vi-004",
@@ -105,7 +126,12 @@
         271,
         319
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: When governance token supply is small or concentrated, and the governance system has no minimum quorum percentage...",
+        "ANTIPATTERN: No meaningful quorum — single holder can pass proposals"
+      ],
+      "antipattern": "No meaningful quorum — single holder can pass proposals"
     },
     {
       "id": "general-governance-governance-takeover-1-51-attack-via-arbitrary-exec-000",
@@ -124,7 +150,13 @@
       "lines": [
         84,
         230
-      ]
+      ],
+      "check": [
+        "VERIFY: Governance systems often designate certain assets as \"precious\" or \"protected\" - they shouldn't be transferable through...",
+        "ANTIPATTERN: Higher threshold but still allows arbitrary execution"
+      ],
+      "antipattern": "Higher threshold but still allows arbitrary execution",
+      "securePattern": "Verify precious assets still owned after execution"
     },
     {
       "id": "general-governance-governance-takeover-2-loss-of-veto-power-enabling--001",
@@ -143,7 +175,13 @@
       "lines": [
         231,
         329
-      ]
+      ],
+      "check": [
+        "VERIFY: Veto power transfer or renunciation is not adequately protected:",
+        "ANTIPATTERN: Guardian can be removed through governance"
+      ],
+      "antipattern": "Guardian can be removed through governance",
+      "securePattern": "Guardian changes require timelock AND guardian approval"
     },
     {
       "id": "general-governance-governance-takeover-3-centralized-governance-contr-002",
@@ -163,7 +201,13 @@
         330,
         459
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Protocol design concentrates too much power in single addresses:",
+        "ANTIPATTERN: Single address has total control"
+      ],
+      "antipattern": "Single address has total control",
+      "securePattern": "Critical functions require multi-sig + timelock"
     },
     {
       "id": "general-governance-governance-takeover-4-emergency-function-abuse-003",
@@ -182,7 +226,13 @@
       "lines": [
         460,
         558
-      ]
+      ],
+      "check": [
+        "VERIFY: Emergency functions bypass normal governance security:",
+        "ANTIPATTERN: Emergency withdraw available during voting"
+      ],
+      "antipattern": "Emergency withdraw available during voting",
+      "securePattern": "Emergency withdraw checks for active governance"
     },
     {
       "id": "general-governance-governance-takeover-5-unrestricted-deployment-elec-004",
@@ -202,7 +252,13 @@
         559,
         641
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: No access control on critical deployment or election functions:",
+        "ANTIPATTERN: Anyone can deploy new election master"
+      ],
+      "antipattern": "Anyone can deploy new election master",
+      "securePattern": "Only pre-approved bytecode can be deployed"
     },
     {
       "id": "general-governance-proposal-lifecycle-m-1-unrestricted-proposal-cancel-000",
@@ -222,7 +278,13 @@
         87,
         207
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: `cancel()` function lacks proper access control, allowing anyone (or a broader class of users than intended) to...",
+        "ANTIPATTERN: Uses current voting power, not snapshot"
+      ],
+      "antipattern": "Uses current voting power, not snapshot",
+      "securePattern": "Check voting power at proposal creation snapshot"
     },
     {
       "id": "general-governance-proposal-lifecycle-m-2-proposal-threshold-bypass-fo-001",
@@ -241,7 +303,13 @@
       "lines": [
         208,
         312
-      ]
+      ],
+      "check": [
+        "VERIFY: Threshold is checked at proposal creation time using current voting power.",
+        "ANTIPATTERN: Only checks threshold at creation, no ongoing requirement"
+      ],
+      "antipattern": "Only checks threshold at creation, no ongoing requirement",
+      "securePattern": "Guardian can cancel spam proposals"
     },
     {
       "id": "general-governance-proposal-lifecycle-m-3-proposal-expiration-logic-er-002",
@@ -260,7 +328,13 @@
       "lines": [
         313,
         411
-      ]
+      ],
+      "check": [
+        "VERIFY: Expiration timestamp calculation errors:",
+        "ANTIPATTERN: Uses startTime instead of endTime"
+      ],
+      "antipattern": "Uses startTime instead of endTime",
+      "securePattern": "Proper expiration based on voting end time"
     },
     {
       "id": "general-governance-proposal-lifecycle-m-4-state-machine-transition-vul-003",
@@ -279,7 +353,13 @@
       "lines": [
         412,
         480
-      ]
+      ],
+      "check": [
+        "VERIFY: State machine implementation errors:\n\n- Missing state checks before transitions\n\n- Wrong state returned from state()...",
+        "ANTIPATTERN: Can execute without going through queue"
+      ],
+      "antipattern": "Can execute without going through queue",
+      "securePattern": "Proper state machine with all transitions validated"
     },
     {
       "id": "general-governance-proposal-lifecycle-m-5-proposal-execution-vulnerabi-004",
@@ -299,7 +379,13 @@
         481,
         556
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Execution-related issues:\n\n- Proposal content modified after creation\n\n- Execution without proper state checks\n\n-...",
+        "ANTIPATTERN: Proposal data not immutable"
+      ],
+      "antipattern": "Proposal data not immutable",
+      "securePattern": "Proposal content stored by hash"
     },
     {
       "id": "general-governance-quorum-manipulation-1-quorum-lowering-via-delegati-000",
@@ -318,7 +404,13 @@
       "lines": [
         82,
         208
-      ]
+      ],
+      "check": [
+        "VERIFY: Quorum is calculated based on total adjusted supply at a snapshot block.",
+        "ANTIPATTERN: Adjusted supply can change after proposal creation"
+      ],
+      "antipattern": "Adjusted supply can change after proposal creation",
+      "securePattern": "Quorum based on total token supply, not adjusted"
     },
     {
       "id": "general-governance-quorum-manipulation-2-dynamic-quorum-manipulation-001",
@@ -337,7 +429,13 @@
       "lines": [
         209,
         271
-      ]
+      ],
+      "check": [
+        "VERIFY: Automatic quorum adjustment algorithms that lower quorum when participation drops can be gamed by coordinated...",
+        "ANTIPATTERN: Quorum decreases based on low participation"
+      ],
+      "antipattern": "Quorum decreases based on low participation",
+      "securePattern": "Quorum has a minimum floor"
     },
     {
       "id": "general-governance-quorum-manipulation-3-quorum-threshold-miscalculat-002",
@@ -356,7 +454,13 @@
       "lines": [
         272,
         366
-      ]
+      ],
+      "check": [
+        "VERIFY: Mathematical errors in quorum calculation - using wrong base values, missing percentage conversions, or comparing...",
+        "ANTIPATTERN: Quorum checked against FOR votes only, not total participation"
+      ],
+      "antipattern": "Quorum checked against FOR votes only, not total participation",
+      "securePattern": "Proper majority calculation"
     },
     {
       "id": "general-governance-quorum-manipulation-4-quorum-not-enforced-in-state-003",
@@ -375,7 +479,13 @@
       "lines": [
         367,
         449
-      ]
+      ],
+      "check": [
+        "VERIFY: `state()` function determines proposal outcome but fails to check quorum in the success path, or quorum check is...",
+        "ANTIPATTERN: Quorum not checked for SUCCEEDED state"
+      ],
+      "antipattern": "Quorum not checked for SUCCEEDED state",
+      "securePattern": "Quorum enforced in state transitions"
     },
     {
       "id": "general-governance-quorum-manipulation-5-tie-handling-vulnerabilities-004",
@@ -394,7 +504,13 @@
       "lines": [
         450,
         537
-      ]
+      ],
+      "check": [
+        "VERIFY: Using `>=` instead of `>` when comparing FOR votes to AGAINST votes causes ties to pass.",
+        "ANTIPATTERN: Doesn't require strict majority"
+      ],
+      "antipattern": "Doesn't require strict majority",
+      "securePattern": "Explicit tie handling"
     },
     {
       "id": "general-governance-timelock-bypass-1-timelock-bypass-via-privileg-000",
@@ -414,7 +530,13 @@
         86,
         219
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Critical governance functions that control the timelock parameters (delay, governor, admin) can be called directly by...",
+        "ANTIPATTERN: Governor can set new governor immediately"
+      ],
+      "antipattern": "Governor can set new governor immediately",
+      "securePattern": "All administrative actions go through timelock"
     },
     {
       "id": "general-governance-timelock-bypass-2-zero-minimal-delay-vulnerabi-001",
@@ -433,7 +555,13 @@
       "lines": [
         220,
         285
-      ]
+      ],
+      "check": [
+        "VERIFY: Constructor or initialization code sets the delay to zero, or validation logic allows zero/minimal delays, effectively...",
+        "ANTIPATTERN: Delay hardcoded to 0 despite parameter"
+      ],
+      "antipattern": "Delay hardcoded to 0 despite parameter",
+      "securePattern": "Minimum delay enforced"
     },
     {
       "id": "general-governance-timelock-bypass-3-timelock-reduction-during-ac-002",
@@ -452,7 +580,13 @@
       "lines": [
         286,
         348
-      ]
+      ],
+      "check": [
+        "VERIFY: Timelock end timestamp is calculated as `block.timestamp + timelockLength` every time a minting/locking function is...",
+        "ANTIPATTERN: Always overwrites timelock, even if shorter"
+      ],
+      "antipattern": "Always overwrites timelock, even if shorter",
+      "securePattern": "Only extend timelock, never reduce"
     },
     {
       "id": "general-governance-timelock-bypass-4-canceled-proposal-still-exec-003",
@@ -471,7 +605,13 @@
       "lines": [
         349,
         439
-      ]
+      ],
+      "check": [
+        "VERIFY: `cancel()` function in the governance contract only updates the governance state but does not call `cancel()` on...",
+        "ANTIPATTERN: Cancel only updates governance state, not timelock"
+      ],
+      "antipattern": "Cancel only updates governance state, not timelock",
+      "securePattern": "Cancel propagates to timelock"
     },
     {
       "id": "general-governance-timelock-bypass-5-storage-collision-attacks-004",
@@ -491,7 +631,13 @@
         440,
         518
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: `cancel()` function takes a raw `bytes32` id as input without validation.",
+        "ANTIPATTERN: cancel() takes raw id, allowing storage manipulation"
+      ],
+      "antipattern": "cancel() takes raw id, allowing storage manipulation",
+      "securePattern": "ID is computed, not provided directly"
     },
     {
       "id": "general-governance-voting-power-manipul-1-double-voting-via-delegation-000",
@@ -510,7 +656,13 @@
       "lines": [
         88,
         263
-      ]
+      ],
+      "check": [
+        "VERIFY: When a user delegates their voting power and later withdraws/transfers their stake, there are no restrictions...",
+        "ANTIPATTERN: This is a storage reference - modifies previous checkpoint!"
+      ],
+      "antipattern": "This is a storage reference - modifies previous checkpoint!",
+      "securePattern": "Use memory to read checkpoint, only write new one"
     },
     {
       "id": "general-governance-voting-power-manipul-2-flash-loan-voting-attacks-001",
@@ -530,7 +682,13 @@
         264,
         360
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Voting power is calculated based on current token balance at vote time, rather than a historical snapshot taken before...",
+        "ANTIPATTERN: Voting allowed immediately after receiving tokens"
+      ],
+      "antipattern": "Voting allowed immediately after receiving tokens",
+      "securePattern": "Voting power based on snapshot at proposal creation"
     },
     {
       "id": "general-governance-voting-power-manipul-3-unlimited-vote-minting-002",
@@ -549,7 +707,13 @@
       "lines": [
         361,
         448
-      ]
+      ],
+      "check": [
+        "VERIFY: Public initialization functions that mint voting tokens lack proper access control or single-use enforcement, allowing...",
+        "ANTIPATTERN: Can be called multiple times to mint infinite votes"
+      ],
+      "antipattern": "Can be called multiple times to mint infinite votes",
+      "securePattern": "Only allow initialization once per beneficiary"
     },
     {
       "id": "general-governance-voting-power-manipul-4-missing-voting-power-snapsho-003",
@@ -568,7 +732,13 @@
       "lines": [
         449,
         529
-      ]
+      ],
+      "check": [
+        "VERIFY: governance contract uses current voting power (`getVotingPower(msg.sender)`) instead of historical voting power at...",
+        "ANTIPATTERN: Uses current voting power, not snapshot"
+      ],
+      "antipattern": "Uses current voting power, not snapshot",
+      "securePattern": "Use snapshot from proposal creation"
     },
     {
       "id": "general-governance-voting-power-manipul-5-delegation-logic-errors-004",
@@ -587,7 +757,11 @@
       "lines": [
         530,
         556
-      ]
+      ],
+      "check": [
+        "VERIFY: Self-delegation toggles community power"
+      ],
+      "antipattern": "Self-delegation toggles community power"
     },
     {
       "id": "general-governance-stablecoin-vulnerabi-vulnerability-description-000",
@@ -606,7 +780,12 @@
       "lines": [
         66,
         144
-      ]
+      ],
+      "check": [
+        "VERIFY: Stablecoins are treated as permanently pegged to $1 (or to another stablecoin) without real-time price validation.",
+        "ANTIPATTERN: Mints 1:1 without checking decimals or depeg risk"
+      ],
+      "antipattern": "Mints 1:1 without checking decimals or depeg risk"
     },
     {
       "id": "general-governance-rug-pull-detection-p-rug-pull-malicious-contract-de-000",
@@ -625,6 +804,9 @@
       "lines": [
         46,
         76
+      ],
+      "check": [
+        "VERIFY: Malicious contracts contain intentionally hidden functionality that allows the contract deployer (or privileged..."
       ]
     },
     {
@@ -644,7 +826,13 @@
       "lines": [
         41,
         333
-      ]
+      ],
+      "check": [
+        "VERIFY: Flash Loan Callback Without Origin Validation**: MEV bots implement flash loan callback interfaces (Balancer...",
+        "ANTIPATTERN: MEV Bot at 0x00000000000a47b1298f18cf67de547bbe0d723f"
+      ],
+      "antipattern": "MEV Bot at 0x00000000000a47b1298f18cf67de547bbe0d723f",
+      "securePattern": "Only process self-initiated flash loans"
     },
     {
       "id": "general-governance-mev-bot-vulnerabilit-vulnerability-categories-001",
@@ -663,6 +851,9 @@
       "lines": [
         56,
         74
+      ],
+      "check": [
+        "VERIFY: Privileged functions accessible without proper authentication."
       ]
     },
     {
@@ -683,7 +874,12 @@
         75,
         278
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Open callback function without access control"
+      ],
+      "antipattern": "Open callback function without access control",
+      "securePattern": "Validate callback caller"
     },
     {
       "id": "general-governance-weak-randomness-vuln-vulnerability-categories-001",
@@ -702,6 +898,9 @@
       "lines": [
         57,
         75
+      ],
+      "check": [
+        "VERIFY: Using `block.timestamp`, `block.number`, `block.difficulty` as randomness."
       ]
     },
     {
@@ -722,7 +921,13 @@
         76,
         404
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Predictable randomness from block.",
+        "ANTIPATTERN: RFB uses on-chain pseudorandom fee for buy/sell taxes"
+      ],
+      "antipattern": "RFB uses on-chain pseudorandom fee for buy/sell taxes",
+      "securePattern": "Proper commit-reveal with time locks"
     }
   ]
 }

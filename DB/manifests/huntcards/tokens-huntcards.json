@@ -4,7 +4,8 @@
     "description": "Compressed hunt cards for tokens — one-line detection rules for bulk scanning",
     "totalCards": 29,
     "skipped": 4,
-    "usage": "Load all cards into context. For each card, grep target code for card.grep pattern. On hit, read full DB entry via read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])."
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "enriched": 29
   },
   "cards": [
     {
@@ -23,7 +24,16 @@
       "lines": [
         130,
         280
-      ]
+      ],
+      "check": [
+        "VERIFY: ERC20 standard specifies that `transfer()` and `transferFrom()` should return a boolean indicating success.",
+        "Is SafeERC20 (OpenZeppelin) used for all token transfers?",
+        "If using Solmate, is contract existence checked for dynamic tokens?",
+        "Are state changes made before or after the transfer call?",
+        "LOOK FOR: Pattern 1: Direct .transfer() or .transferFrom() calls without SafeERC20"
+      ],
+      "antipattern": "USDT returns no value, this will revert or misbehave",
+      "securePattern": "Check contract exists before using Solmate"
     },
     {
       "id": "tokens-erc20-token-vulnerab-2-approval-allowance-vulnerabi-001",
@@ -41,7 +51,16 @@
       "lines": [
         281,
         444
-      ]
+      ],
+      "check": [
+        "VERIFY: Race Condition**: The `approve()` function doesn't protect against front-running when changing allowance from non-zero...",
+        "Does the protocol use increaseAllowance/decreaseAllowance?",
+        "Are USDT-like tokens (require approve 0 first) supported?",
+        "Is safeApprove() being used correctly (only when allowance is 0)?",
+        "LOOK FOR: Pattern 1: Direct approve() calls without checking current allowance"
+      ],
+      "antipattern": "USDT requires approve(0) before setting new allowance",
+      "securePattern": "Prevents front-running by using relative changes"
     },
     {
       "id": "tokens-erc20-token-vulnerab-3-decimals-precision-vulnerabi-002",
@@ -60,7 +79,16 @@
         445,
         641
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Hardcoded 18 Decimals**: Using `1e18` or `10**18` as scaling factor regardless of actual token decimals",
+        "Does the protocol query token.decimals() for each token?",
+        "Are calculations normalized to a common precision?",
+        "Is multiplication performed before division?",
+        "LOOK FOR: Pattern 1: Hardcoded 1e18, 10**18, or similar constants in calculations"
+      ],
+      "antipattern": "Precision loss due to division before multiplication",
+      "securePattern": "Use battle-tested fixed-point library"
     },
     {
       "id": "tokens-erc20-token-vulnerab-4-fee-on-transfer-token-vulner-003",
@@ -78,7 +106,16 @@
       "lines": [
         642,
         886
-      ]
+      ],
+      "check": [
+        "VERIFY: Balance Tracking Mismatch**: Protocol tracks transferred amount instead of actual received amount",
+        "Does the protocol use balance-before/after pattern for deposits?",
+        "Are fee-on-transfer tokens explicitly supported or rejected?",
+        "Is there a token whitelist/blacklist mechanism?",
+        "LOOK FOR: Pattern 1: transferFrom() followed by += amount (without balance check)"
+      ],
+      "antipattern": "Collateral amount recorded exceeds actual tokens held",
+      "securePattern": "Full implementation with proper accounting"
     },
     {
       "id": "tokens-erc20-token-vulnerab-5-rebasing-token-vulnerabiliti-004",
@@ -96,7 +133,16 @@
       "lines": [
         887,
         1144
-      ]
+      ],
+      "check": [
+        "VERIFY: Cached Balance**: Storing balanceOf() result and using cached value later",
+        "Does the protocol use share-based accounting?",
+        "Are rebasing tokens explicitly supported or rejected?",
+        "Is balanceOf() called at withdrawal time (not cached)?",
+        "LOOK FOR: Pattern 1: Caching balanceOf() result in storage for later use"
+      ],
+      "antipattern": "Using aToken amount directly without share conversion",
+      "securePattern": "Track proportional shares, not absolute amounts"
     },
     {
       "id": "tokens-erc20-token-vulnerab-6-erc777-reentrancy-vulnerabil-005",
@@ -115,7 +161,16 @@
         1145,
         1407
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Hidden Callbacks**: ERC777 transfers trigger hooks that execute arbitrary code",
+        "Do all functions follow Checks-Effects-Interactions pattern?",
+        "Is ReentrancyGuard applied to all state-changing functions?",
+        "Are ERC777 tokens explicitly supported or rejected?",
+        "LOOK FOR: Pattern 1: State updates AFTER token.transfer() or token.transferFrom()"
+      ],
+      "antipattern": "Stake and immediately unstake via reentrancy",
+      "securePattern": "Update state BEFORE external calls"
     },
     {
       "id": "tokens-erc20-token-vulnerab-7-blacklist-pausable-token-vul-006",
@@ -133,7 +188,16 @@
       "lines": [
         1408,
         1714
-      ]
+      ],
+      "check": [
+        "VERIFY: Assumed Transferability**: Protocols assume transfers will always succeed",
+        "Does the protocol use pull-over-push pattern?",
+        "Can users specify alternative recipients for withdrawals?",
+        "Are there try-catch wrappers around transfers?",
+        "LOOK FOR: Pattern 1: Direct transfer() to user addresses without fallback"
+      ],
+      "antipattern": "Collateral permanently locked if user gets blacklisted",
+      "securePattern": "Anyone can cancel orders for blacklisted makers"
     },
     {
       "id": "tokens-erc20-token-vulnerab-8-inflation-first-depositor-at-007",
@@ -152,7 +216,16 @@
         1715,
         2009
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Share Price Manipulation**: First depositor can inflate share price by donating tokens",
+        "Does the vault use virtual shares/assets offset?",
+        "Is totalAssets() based on internal accounting (not balanceOf)?",
+        "Are minimum deposit amounts enforced?",
+        "LOOK FOR: Pattern 1: ERC4626 or share-based vaults without virtual offset"
+      ],
+      "antipattern": "Standard share calculation without protection",
+      "securePattern": "Track assets internally, ignore donations"
     },
     {
       "id": "tokens-erc20-token-vulnerab-9-mint-burn-vulnerabilities-008",
@@ -171,7 +244,15 @@
         2010,
         2158
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Missing Access Control**: Mint/burn functions without proper authorization",
+        "Are mint/burn functions properly access controlled?",
+        "Is there a maximum supply cap?",
+        "Are self-transfer edge cases handled?"
+      ],
+      "antipattern": "Burns shares but doesn't update internal accounting",
+      "securePattern": "Prevent self-referential operations"
     },
     {
       "id": "tokens-erc20-token-vulnerab-10-comprehensive-keyword-index-009",
@@ -189,6 +270,9 @@
       "lines": [
         2159,
         2230
+      ],
+      "check": [
+        "VERIFY: This section provides keywords optimized for vector search to help auditors find relevant vulnerability patterns."
       ]
     },
     {
@@ -208,7 +292,10 @@
         2231,
         2262
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Summary & Quick Reference"
+      ]
     },
     {
       "id": "tokens-erc4626-vault-vulner-1-first-depositor-inflation-at-000",
@@ -227,7 +314,16 @@
         151,
         393
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: ERC4626 share calculation formula is:",
+        "Check if vault uses virtual shares (decimal offset)",
+        "Verify totalAssets() doesn't rely solely on balanceOf",
+        "Ensure zero shares cannot be minted",
+        "LOOK FOR: totalAssets() using balanceOf(address(this))"
+      ],
+      "antipattern": "totalAssets relies on balanceOf which can be manipulated",
+      "securePattern": "Use virtual shares to prevent inflation attack"
     },
     {
       "id": "tokens-erc4626-vault-vulner-2-erc4626-compliance-issues-001",
@@ -245,7 +341,15 @@
       "lines": [
         394,
         570
-      ]
+      ],
+      "check": [
+        "VERIFY: ERC4626 specifies exact behavior for all functions including:",
+        "Verify all 8 core functions are implemented (deposit, mint, withdraw, redeem + previews)",
+        "Check max* functions return 0 when operations disabled",
+        "Ensure preview* functions match actual execution including fees"
+      ],
+      "antipattern": "Different logic for deposit vs mint on first deposit",
+      "securePattern": "Same logic for first deposit in both functions"
     },
     {
       "id": "tokens-erc4626-vault-vulner-3-rounding-direction-vulnerabi-002",
@@ -264,7 +368,15 @@
         571,
         698
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: ERC4626 rounding rules:\n\n- **Round DOWN** (favor vault): `convertToShares`, `previewDeposit`, `previewRedeem`\n\n-...",
+        "Verify convertToShares rounds DOWN",
+        "Verify previewDeposit rounds DOWN",
+        "Verify previewRedeem rounds DOWN"
+      ],
+      "antipattern": "Mints 'amount' instead of 'shares'",
+      "securePattern": "Mint the correct number of shares"
     },
     {
       "id": "tokens-erc4626-vault-vulner-4-fee-handling-vulnerabilities-003",
@@ -282,7 +394,13 @@
       "lines": [
         699,
         790
-      ]
+      ],
+      "check": [
+        "VERIFY: Different fee calculations for deposit vs mint",
+        "ANTIPATTERN: Doesn't account for underlying vault's deposit fees"
+      ],
+      "antipattern": "Doesn't account for underlying vault's deposit fees",
+      "securePattern": "Check actual shares received and adjust accounting"
     },
     {
       "id": "tokens-erc4626-vault-vulner-5-slippage-protection-issues-004",
@@ -300,7 +418,12 @@
       "lines": [
         791,
         895
-      ]
+      ],
+      "check": [
+        "VERIFY: User has no control over minimum shares received"
+      ],
+      "antipattern": "User has no control over minimum shares received",
+      "securePattern": "Add deadline to prevent stale transactions"
     },
     {
       "id": "tokens-erc4626-vault-vulner-6-exchange-rate-manipulation-005",
@@ -318,7 +441,12 @@
       "lines": [
         896,
         976
-      ]
+      ],
+      "check": [
+        "VERIFY: Donation can inflate totalAssets"
+      ],
+      "antipattern": "Donation can inflate totalAssets",
+      "securePattern": "Track assets internally"
     },
     {
       "id": "tokens-erc4626-vault-vulner-7-decimal-handling-issues-006",
@@ -336,7 +464,13 @@
       "lines": [
         977,
         1045
-      ]
+      ],
+      "check": [
+        "VERIFY: Assumes all tokens have 18 decimals",
+        "ANTIPATTERN: No scaling between different decimal tokens"
+      ],
+      "antipattern": "No scaling between different decimal tokens",
+      "securePattern": "Handle decimals dynamically"
     },
     {
       "id": "tokens-erc4626-vault-vulner-8-reentrancy-vulnerabilities-007",
@@ -354,7 +488,12 @@
       "lines": [
         1046,
         1170
-      ]
+      ],
+      "check": [
+        "VERIFY: Balance cached before transfer with ERC777 token"
+      ],
+      "antipattern": "Balance cached before transfer with ERC777 token",
+      "securePattern": "Global lock across related contracts"
     },
     {
       "id": "tokens-erc4626-vault-vulner-9-token-compatibility-issues-008",
@@ -372,7 +511,12 @@
       "lines": [
         1171,
         1232
-      ]
+      ],
+      "check": [
+        "VERIFY: Assumes transferred amount equals requested amount"
+      ],
+      "antipattern": "Assumes transferred amount equals requested amount",
+      "securePattern": "Revert if fee-on-transfer detected"
     },
     {
       "id": "tokens-erc4626-vault-vulner-10-access-control-state-manage-009",
@@ -390,7 +534,12 @@
       "lines": [
         1233,
         1280
-      ]
+      ],
+      "check": [
+        "VERIFY: Returns max even when paused"
+      ],
+      "antipattern": "Returns max even when paused",
+      "securePattern": "max* reflects actual state"
     },
     {
       "id": "tokens-erc721-nft-vulnerabi-1-transfer-safety-vulnerabilit-001",
@@ -408,7 +557,13 @@
       "lines": [
         68,
         152
-      ]
+      ],
+      "check": [
+        "VERIFY: No check if receiver can handle ERC721",
+        "ANTIPATTERN: Vault token minted without safety check"
+      ],
+      "antipattern": "Vault token minted without safety check",
+      "securePattern": "Validates receiver can handle ERC721"
     },
     {
       "id": "tokens-erc721-nft-vulnerabi-2-reentrancy-via-nft-callbacks-002",
@@ -427,7 +582,13 @@
         153,
         308
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: State updated after callback",
+        "ANTIPATTERN: Base token transfer before fractional balance update"
+      ],
+      "antipattern": "Base token transfer before fractional balance update",
+      "securePattern": "State updated before external call + reentrancy guard"
     },
     {
       "id": "tokens-erc721-nft-vulnerabi-3-approval-and-access-control--003",
@@ -445,7 +606,12 @@
       "lines": [
         309,
         400
-      ]
+      ],
+      "check": [
+        "VERIFY: Approval persists across transfers"
+      ],
+      "antipattern": "Approval persists across transfers",
+      "securePattern": "Boolean parameter allows revocation"
     },
     {
       "id": "tokens-erc721-nft-vulnerabi-4-voting-and-delegation-vulner-004",
@@ -463,7 +629,12 @@
       "lines": [
         401,
         533
-      ]
+      ],
+      "check": [
+        "VERIFY: Self-delegation doubles voting power"
+      ],
+      "antipattern": "Self-delegation doubles voting power",
+      "securePattern": "Use delegates() function for actual delegate"
     },
     {
       "id": "tokens-erc721-nft-vulnerabi-5-royalty-manipulation-005",
@@ -482,7 +653,12 @@
         534,
         595
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Royalty queried twice, can change between calls"
+      ],
+      "antipattern": "Royalty queried twice, can change between calls",
+      "securePattern": "Calculate and pay royalties in single pass"
     },
     {
       "id": "tokens-erc721-nft-vulnerabi-6-erc-721-standard-compliance--006",
@@ -500,7 +676,13 @@
       "lines": [
         596,
         677
-      ]
+      ],
+      "check": [
+        "VERIFY: Returns value for non-existent tokens",
+        "ANTIPATTERN: Overflow protection fails in edge case"
+      ],
+      "antipattern": "Overflow protection fails in edge case",
+      "securePattern": "Reverts for non-existent tokens per EIP-721"
     },
     {
       "id": "tokens-erc721-nft-vulnerabi-7-nft-liquidation-and-collater-007",
@@ -518,7 +700,12 @@
       "lines": [
         678,
         719
-      ]
+      ],
+      "check": [
+        "VERIFY: NFT stuck if owner blocks transfer"
+      ],
+      "antipattern": "NFT stuck if owner blocks transfer",
+      "securePattern": "Users pull NFTs instead of automatic push"
     },
     {
       "id": "tokens-erc721-nft-vulnerabi-8-self-transfer-edge-cases-008",
@@ -536,7 +723,12 @@
       "lines": [
         720,
         771
-      ]
+      ],
+      "check": [
+        "VERIFY: Self-transfer corrupts state",
+        "ANTIPATTERN: Self-transfer corrupts state"
+      ],
+      "antipattern": "Self-transfer corrupts state"
     }
   ]
 }

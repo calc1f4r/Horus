@@ -4,7 +4,8 @@
     "description": "Compressed hunt cards for general-defi — one-line detection rules for bulk scanning",
     "totalCards": 91,
     "skipped": 108,
-    "usage": "Load all cards into context. For each card, grep target code for card.grep pattern. On hit, read full DB entry via read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])."
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "enriched": 91
   },
   "cards": [
     {
@@ -24,7 +25,12 @@
         91,
         726
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: No validation of flash loan initiator",
+        "ANTIPATTERN: exitMarket can be called during ETH transfer callback"
+      ],
+      "antipattern": "exitMarket can be called during ETH transfer callback"
     },
     {
       "id": "general-defi-flash-loan-vulnerabi-vulnerability-description-000",
@@ -42,7 +48,12 @@
       "lines": [
         66,
         215
-      ]
+      ],
+      "check": [
+        "VERIFY: Flash loan handlers are often implemented as “special-case” entry points.",
+        "ANTIPATTERN: balanceBefore recorded before transfer; repayment check requires extra funds"
+      ],
+      "antipattern": "balanceBefore recorded before transfer; repayment check requires extra funds"
     },
     {
       "id": "general-defi-slippage-protection-vulnerable-code-patterns-001",
@@ -60,7 +71,12 @@
       "lines": [
         76,
         212
-      ]
+      ],
+      "check": [
+        "VERIFY: Reference**: [h-31-unused-slippage-params.",
+        "ANTIPATTERN: Using block.timestamp defeats the purpose of deadline"
+      ],
+      "antipattern": "Using block.timestamp defeats the purpose of deadline"
     },
     {
       "id": "general-defi-defihacklabs-vault-i-1-empty-market-exchange-rate-i-000",
@@ -79,7 +95,12 @@
         66,
         174
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: When a CompoundV2-fork cToken market has extremely low `totalSupply` (e.",
+        "ANTIPATTERN: CompoundV2 exchangeRate inflated by direct donation to empty market"
+      ],
+      "antipattern": "CompoundV2 exchangeRate inflated by direct donation to empty market"
     },
     {
       "id": "general-defi-defihacklabs-vault-i-2-share-price-inflation-via-do-001",
@@ -98,7 +119,12 @@
         175,
         287
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Protocols that track asset balances using variables like `pseudoTotalPool` are vulnerable when the actual token balance...",
+        "ANTIPATTERN: donating cbETH to Position Manager inflates currentIndex"
+      ],
+      "antipattern": "donating cbETH to Position Manager inflates currentIndex"
     },
     {
       "id": "general-defi-vault-inflation-atta-vulnerability-description-001",
@@ -116,6 +142,9 @@
       "lines": [
         111,
         156
+      ],
+      "check": [
+        "VERIFY: fundamental issue stems from the share minting formula used in vault-based systems:"
       ]
     },
     {
@@ -134,7 +163,12 @@
       "lines": [
         157,
         299
-      ]
+      ],
+      "check": [
+        "VERIFY: Standard ERC4626 without inflation protection",
+        "ANTIPATTERN: Attacker can inflate tickCollateral via create_loan + repay cycles"
+      ],
+      "antipattern": "Attacker can inflate tickCollateral via create_loan + repay cycles"
     },
     {
       "id": "general-defi-yield-strategy-vulne-1-first-depositor-inflation-at-000",
@@ -152,7 +186,16 @@
       "lines": [
         179,
         315
-      ]
+      ],
+      "check": [
+        "VERIFY: ERC4626 and similar vault implementations calculate shares as `assets * totalSupply / totalAssets`.",
+        "Check for virtual shares/assets implementation",
+        "Verify minimum initial deposit requirements",
+        "Ensure vault cannot be reset to zero supply state",
+        "LOOK FOR: ERC4626 implementation without virtual offsets"
+      ],
+      "antipattern": "No protection against first depositor attack",
+      "securePattern": "Virtual offset makes inflation expensive"
     },
     {
       "id": "general-defi-yield-strategy-vulne-2-exchange-rate-manipulation-v-001",
@@ -170,7 +213,13 @@
       "lines": [
         316,
         388
-      ]
+      ],
+      "check": [
+        "VERIFY: Vault exchange rates are calculated from on-chain balances that can be artificially inflated through direct token...",
+        "ANTIPATTERN: Exchange rate based on actual balance"
+      ],
+      "antipattern": "Exchange rate based on actual balance",
+      "securePattern": "Track deposits internally, ignore donations"
     },
     {
       "id": "general-defi-yield-strategy-vulne-3-reward-distribution-edge-cas-002",
@@ -188,7 +237,13 @@
       "lines": [
         389,
         448
-      ]
+      ],
+      "check": [
+        "VERIFY: Reward-per-token calculations use `lastUpdated` timestamps that aren't updated when `totalSupply == 0`, causing reward...",
+        "ANTIPATTERN: lastUpdated not updated when totalSupply is 0"
+      ],
+      "antipattern": "lastUpdated not updated when totalSupply is 0",
+      "securePattern": "Update timestamp even with zero supply"
     },
     {
       "id": "general-defi-yield-strategy-vulne-4-stale-reward-accumulator-sta-003",
@@ -206,7 +261,12 @@
       "lines": [
         449,
         489
-      ]
+      ],
+      "check": [
+        "VERIFY: Rewards not updated before stake change"
+      ],
+      "antipattern": "Rewards not updated before stake change",
+      "securePattern": "Always update before balance changes"
     },
     {
       "id": "general-defi-yield-strategy-vulne-5-flash-loan-lp-fee-extraction-004",
@@ -224,7 +284,13 @@
       "lines": [
         490,
         551
-      ]
+      ],
+      "check": [
+        "VERIFY: No timelock between deposits and withdrawals allows attackers to front-run legitimate transactions with flash-loaned...",
+        "ANTIPATTERN: Deposit and withdraw in same block"
+      ],
+      "antipattern": "Deposit and withdraw in same block",
+      "securePattern": "Enforce minimum holding period"
     },
     {
       "id": "general-defi-yield-strategy-vulne-6-cross-function-reentrancy-in-005",
@@ -243,7 +309,13 @@
         552,
         623
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Hooks read state at start of transfer but external calls allow that state to be modified before the hook completes...",
+        "ANTIPATTERN: External calls during array iteration"
+      ],
+      "antipattern": "External calls during array iteration",
+      "securePattern": "Move logic to after hook with reentrancy protection"
     },
     {
       "id": "general-defi-yield-strategy-vulne-7-read-only-reentrancy-in-orac-006",
@@ -261,7 +333,13 @@
       "lines": [
         624,
         679
-      ]
+      ],
+      "check": [
+        "VERIFY: Balancer (and similar AMMs) update BPT supply before updating token balances during joins.",
+        "ANTIPATTERN: No reentrancy guard check on Balancer Vault"
+      ],
+      "antipattern": "No reentrancy guard check on Balancer Vault",
+      "securePattern": "Verify Vault is not mid-operation"
     },
     {
       "id": "general-defi-yield-strategy-vulne-8-partial-withdrawal-token-fre-007",
@@ -279,7 +357,13 @@
       "lines": [
         680,
         752
-      ]
+      ],
+      "check": [
+        "VERIFY: Provider contracts transfer full requested share amount from user but underlying withdrawal may only consume partial...",
+        "ANTIPATTERN: Doesn't return unused shares"
+      ],
+      "antipattern": "Doesn't return unused shares",
+      "securePattern": "Track and return unused shares"
     },
     {
       "id": "general-defi-yield-strategy-vulne-9-reward-multiplication-via-me-008",
@@ -298,7 +382,13 @@
         753,
         825
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Claimable rewards are calculated based on current balance at claim time.",
+        "ANTIPATTERN: Claims based on current balance, not claim history"
+      ],
+      "antipattern": "Claims based on current balance, not claim history",
+      "securePattern": "Track claimed rewards independently"
     },
     {
       "id": "general-defi-yield-strategy-vulne-10-state-machine-hijacking-009",
@@ -316,7 +406,13 @@
       "lines": [
         826,
         889
-      ]
+      ],
+      "check": [
+        "VERIFY: State machines allow transitions from completed/error states back to initial states, and the function allowing...",
+        "ANTIPATTERN: Anyone can take over existing pools"
+      ],
+      "antipattern": "Anyone can take over existing pools",
+      "securePattern": "Only original owner can re-create"
     },
     {
       "id": "general-defi-yield-strategy-vulne-11-penalty-and-fee-bypass-via--010",
@@ -334,7 +430,13 @@
       "lines": [
         890,
         949
-      ]
+      ],
+      "check": [
+        "VERIFY: transfer() and transferFrom() functions not disabled or overridden to apply penalties/fees, allowing penalty-free exit...",
+        "ANTIPATTERN: Standard ERC20 transfer bypasses penalty"
+      ],
+      "antipattern": "Standard ERC20 transfer bypasses penalty",
+      "securePattern": "Apply penalties on transfer"
     },
     {
       "id": "general-defi-yield-strategy-vulne-12-claim-function-arithmetic-u-011",
@@ -352,7 +454,13 @@
       "lines": [
         950,
         1013
-      ]
+      ],
+      "check": [
+        "VERIFY: After the first user claims post-period, `lastUpdateTime` is set beyond `periodFinish`.",
+        "ANTIPATTERN: Can underflow after period ends"
+      ],
+      "antipattern": "Can underflow after period ends",
+      "securePattern": "Check before subtraction"
     },
     {
       "id": "general-defi-yield-strategy-vulne-13-missing-slippage-protection-012",
@@ -370,7 +478,12 @@
       "lines": [
         1014,
         1062
-      ]
+      ],
+      "check": [
+        "VERIFY: No minimum output specified"
+      ],
+      "antipattern": "No minimum output specified",
+      "securePattern": "Calculate minimum from oracle with tolerance"
     },
     {
       "id": "general-defi-yield-strategy-vulne-14-incorrect-share-calculation-013",
@@ -388,7 +501,12 @@
       "lines": [
         1063,
         1105
-      ]
+      ],
+      "check": [
+        "VERIFY: Division by zero possible"
+      ],
+      "antipattern": "Division by zero possible",
+      "securePattern": "Handle all edge cases"
     },
     {
       "id": "general-defi-yield-strategy-vulne-15-reward-lockup-on-period-tra-014",
@@ -406,7 +524,11 @@
       "lines": [
         1106,
         1132
-      ]
+      ],
+      "check": [
+        "VERIFY: Old rewards potentially lost"
+      ],
+      "antipattern": "Old rewards potentially lost"
     },
     {
       "id": "general-defi-yield-strategy-vulne-16-vault-accounting-desync-015",
@@ -424,7 +546,12 @@
       "lines": [
         1133,
         1167
-      ]
+      ],
+      "check": [
+        "VERIFY: Doesn't account for rebases"
+      ],
+      "antipattern": "Doesn't account for rebases",
+      "securePattern": "Use actual balance for rebasing tokens"
     },
     {
       "id": "general-defi-yield-strategy-vulne-17-external-call-context-confu-016",
@@ -442,7 +569,13 @@
       "lines": [
         1168,
         1220
-      ]
+      ],
+      "check": [
+        "VERIFY: `this.function()` makes an external call with the contract as msg.",
+        "ANTIPATTERN: this.offer() makes msg.sender = RubiconMarket address"
+      ],
+      "antipattern": "this.offer() makes msg.sender = RubiconMarket address",
+      "securePattern": "Internal call preserves original msg.sender context"
     },
     {
       "id": "general-defi-yield-strategy-vulne-18-deposit-withdrawal-same-blo-017",
@@ -460,7 +593,12 @@
       "lines": [
         1221,
         1262
-      ]
+      ],
+      "check": [
+        "VERIFY: Same block operations allowed"
+      ],
+      "antipattern": "Same block operations allowed",
+      "securePattern": "Different block required"
     },
     {
       "id": "general-defi-yield-strategy-vulne-19-strategy-migration-token-lo-018",
@@ -478,7 +616,12 @@
       "lines": [
         1263,
         1296
-      ]
+      ],
+      "check": [
+        "VERIFY: May leave tokens in old strategy"
+      ],
+      "antipattern": "May leave tokens in old strategy",
+      "securePattern": "Withdraw everything before migration"
     },
     {
       "id": "general-defi-yield-strategy-vulne-20-compound-interest-manipulat-019",
@@ -496,7 +639,12 @@
       "lines": [
         1297,
         1330
-      ]
+      ],
+      "check": [
+        "VERIFY: No limit on compound frequency"
+      ],
+      "antipattern": "No limit on compound frequency",
+      "securePattern": "Rate-limited compounding"
     },
     {
       "id": "general-defi-yield-strategy-vulne-21-time-weighted-voting-power--020",
@@ -514,7 +662,12 @@
       "lines": [
         1331,
         1362
-      ]
+      ],
+      "check": [
+        "VERIFY: Can lock and vote in same transaction"
+      ],
+      "antipattern": "Can lock and vote in same transaction",
+      "securePattern": "Lock must exist before voting"
     },
     {
       "id": "general-defi-yield-strategy-vulne-22-emergency-withdrawal-accoun-021",
@@ -532,7 +685,13 @@
       "lines": [
         1363,
         1397
-      ]
+      ],
+      "check": [
+        "VERIFY: Accounting not updated",
+        "ANTIPATTERN: Accounting not updated"
+      ],
+      "antipattern": "Accounting not updated",
+      "securePattern": "Update all relevant state"
     },
     {
       "id": "general-defi-yield-strategy-vulne-23-yield-aggregator-fund-isola-022",
@@ -550,7 +709,12 @@
       "lines": [
         1398,
         1434
-      ]
+      ],
+      "check": [
+        "VERIFY: All vaults share same strategy balance"
+      ],
+      "antipattern": "All vaults share same strategy balance",
+      "securePattern": "Each vault has own strategy instance"
     },
     {
       "id": "general-defi-yield-strategy-vulne-24-vote-manipulation-via-dupli-023",
@@ -569,7 +733,13 @@
         1435,
         1499
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Vote function doesn't validate that pools in the array are unique.",
+        "ANTIPATTERN: No duplicate pool check"
+      ],
+      "antipattern": "No duplicate pool check",
+      "securePattern": "Prevent duplicate entries"
     },
     {
       "id": "general-defi-yield-strategy-vulne-25-vesting-contract-interface--024",
@@ -588,7 +758,13 @@
         1500,
         1556
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Claim function accepts any address as \"DAO contract\" and reads token address, contribution amounts, and vesting...",
+        "ANTIPATTERN: Trusts arbitrary contract as data source"
+      ],
+      "antipattern": "Trusts arbitrary contract as data source",
+      "securePattern": "Only allow registered DAOs"
     },
     {
       "id": "general-defi-yield-strategy-vulne-26-unbounded-reward-accrual-af-025",
@@ -606,7 +782,13 @@
       "lines": [
         1557,
         1615
-      ]
+      ],
+      "check": [
+        "VERIFY: getRewardPerToken() continues calculating rewards when `lastUpdateTime < periodFinish` regardless of whether...",
+        "ANTIPATTERN: Keeps calculating after period ends"
+      ],
+      "antipattern": "Keeps calculating after period ends",
+      "securePattern": "Return 0 after period ends"
     },
     {
       "id": "general-defi-yield-strategy-vulne-27-precision-library-mismatch-026",
@@ -624,7 +806,13 @@
       "lines": [
         1616,
         1670
-      ]
+      ],
+      "check": [
+        "VERIFY: Rate is set using PreciseMathUtils (10^27 divisor) but calculated using MathUtils (10^6 divisor), causing result to be...",
+        "ANTIPATTERN: require(PreciseMathUtils.validPerc(_cutRate));  // Valid if < 10**27"
+      ],
+      "antipattern": "require(PreciseMathUtils.validPerc(_cutRate));  // Valid if < 10**27",
+      "securePattern": "Use same precision library"
     },
     {
       "id": "general-defi-yield-strategy-vulne-28-unbounded-loop-dos-via-arra-027",
@@ -642,7 +830,13 @@
       "lines": [
         1671,
         1729
-      ]
+      ],
+      "check": [
+        "VERIFY: vest() allows anyone to create vestments for any beneficiary without minimum amount.",
+        "ANTIPATTERN: Anyone can vest for anyone, no minimum"
+      ],
+      "antipattern": "Anyone can vest for anyone, no minimum",
+      "securePattern": "Minimum amount and self-vest only"
     },
     {
       "id": "general-defi-yield-strategy-vulne-29-minimum-deposit-bypass-via--028",
@@ -660,7 +854,13 @@
       "lines": [
         1730,
         1789
-      ]
+      ],
+      "check": [
+        "VERIFY: Deposit function checks MIN_INITIAL_DEPOSIT when totalSupply == 0, but withdraw doesn't prevent reducing supply below...",
+        "ANTIPATTERN: Deposit checks minimum but withdraw doesn't"
+      ],
+      "antipattern": "Deposit checks minimum but withdraw doesn't",
+      "securePattern": "Prevent reduction below minimum"
     },
     {
       "id": "general-defi-yield-strategy-vulne-30-strategy-migration-state-lo-029",
@@ -678,7 +878,13 @@
       "lines": [
         1790,
         1849
-      ]
+      ],
+      "check": [
+        "VERIFY: setInterestRateStrategy() replaces strategy contract but new contract has zeroed vault-specific parameters...",
+        "ANTIPATTERN: No state migration"
+      ],
+      "antipattern": "No state migration",
+      "securePattern": "Copy state to new strategy"
     },
     {
       "id": "general-defi-yield-strategy-vulne-31-double-subtraction-accounti-030",
@@ -696,7 +902,13 @@
       "lines": [
         1850,
         1906
-      ]
+      ],
+      "check": [
+        "VERIFY: Function retrieves totalStaked which already has totalFrozen subtracted, then subtracts totalFrozen again, resulting in...",
+        "ANTIPATTERN: Subtracts again"
+      ],
+      "antipattern": "Subtracts again",
+      "securePattern": "Don't subtract twice"
     },
     {
       "id": "general-defi-yield-strategy-vulne-32-reentrancy-lock-bypass-via--031",
@@ -714,7 +926,13 @@
       "lines": [
         1907,
         1970
-      ]
+      ],
+      "check": [
+        "VERIFY: Lock set in regular storage before activation.",
+        "ANTIPATTERN: External activation changes lock storage"
+      ],
+      "antipattern": "External activation changes lock storage",
+      "securePattern": "Switch takes effect next block"
     },
     {
       "id": "general-defi-yield-strategy-vulne-33-timestamp-boundary-conditio-032",
@@ -732,7 +950,13 @@
       "lines": [
         1971,
         2025
-      ]
+      ],
+      "check": [
+        "VERIFY: `_wasActiveAt()` returns true when `disabledTime >= timestamp`.",
+        "ANTIPATTERN: >= includes exact disable time"
+      ],
+      "antipattern": ">= includes exact disable time",
+      "securePattern": "Disabled at timestamp means inactive"
     },
     {
       "id": "general-defi-yield-strategy-vulne-34-first-depositor-market-bric-033",
@@ -750,7 +974,13 @@
       "lines": [
         2026,
         2089
-      ]
+      ],
+      "check": [
+        "VERIFY: Utilization rate formula allows results > 100% when `borrows > cash + borrows - reserves`.",
+        "ANTIPATTERN: Utilization can exceed 100%"
+      ],
+      "antipattern": "Utilization can exceed 100%",
+      "securePattern": "Bound utilization to 100%"
     },
     {
       "id": "general-defi-yield-strategy-vulne-35-collateral-rebalancing-gaps-034",
@@ -768,7 +998,13 @@
       "lines": [
         2090,
         2157
-      ]
+      ],
+      "check": [
+        "VERIFY: setRatio() changes target allocation but only affects new deposits.",
+        "ANTIPATTERN: Changes ratio without rebalancing"
+      ],
+      "antipattern": "Changes ratio without rebalancing",
+      "securePattern": "Allow admin to rebalance"
     },
     {
       "id": "general-defi-defihacklabs-deflati-defihacklabs-deflationary-toke-000",
@@ -787,7 +1023,12 @@
         38,
         270
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Farm credits `amount` deposited, not actual tokens received"
+      ],
+      "antipattern": "Farm credits `amount` deposited, not actual tokens received",
+      "securePattern": "Validate no transfer fee exists before allowing token in pool"
     },
     {
       "id": "general-defi-fee-on-transfer-toke-vulnerable-pattern-examples-002",
@@ -805,7 +1046,11 @@
       "lines": [
         150,
         258
-      ]
+      ],
+      "check": [
+        "VERIFY: Uses _amount for accounting without measuring actual received"
+      ],
+      "antipattern": "Uses _amount for accounting without measuring actual received"
     },
     {
       "id": "general-defi-defihacklabs-reflect-reflection-tax-token-exploit-p-000",
@@ -823,6 +1068,9 @@
       "lines": [
         71,
         105
+      ],
+      "check": [
+        "VERIFY: All reflection token exploits share a fundamental architectural flaw: **the AMM pair's reserve tracking (`reserve0`,..."
       ]
     },
     {
@@ -842,7 +1090,12 @@
         106,
         251
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Example 1: FDP — deliver() Inflates Pair Balance ($16 WBNB, Feb 2023)** [CRITICAL] `@audit` [FDP-POC]",
+        "ANTIPATTERN: uint256 swapAmount = amountin * 9975 * bnbReserve / (oldOlifeReserve * 10_000 + amountin * 9975);"
+      ],
+      "antipattern": "uint256 swapAmount = amountin * 9975 * bnbReserve / (oldOlifeReserve * 10_000 + amountin * 9975);"
     },
     {
       "id": "general-defi-defihacklabs-reflect-variant-2-burn-sync-pattern-2--002",
@@ -861,7 +1114,12 @@
         252,
         312
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Example 6: BIGFI — Public burn() Collapses Pair Balance ($200K USDT, Mar 2023)** [CRITICAL] `@audit` [BIGFI-POC]",
+        "ANTIPATTERN: while (SHEEP.balanceOf(address(Pair)) > 2) {"
+      ],
+      "antipattern": "while (SHEEP.balanceOf(address(Pair)) > 2) {"
     },
     {
       "id": "general-defi-defihacklabs-reflect-variant-3-self-transfer-balanc-003",
@@ -880,7 +1138,12 @@
         313,
         381
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Example 8: GPU — 87 Self-Transfers Double Balance Each Time ($32K, May 2024)** [HIGH] `@audit` [GPU-POC]",
+        "ANTIPATTERN: while (SSS.balanceOf(address(this)) < targetBal) {"
+      ],
+      "antipattern": "while (SSS.balanceOf(address(this)) < targetBal) {"
     },
     {
       "id": "general-defi-defihacklabs-reflect-variant-4-deflationary-pair-bu-004",
@@ -898,7 +1161,12 @@
       "lines": [
         382,
         445
-      ]
+      ],
+      "check": [
+        "VERIFY: Example 10: 3913 Token — burnPairs() Drains LP ($31K, Nov 2023)** [HIGH] `@audit` [3913-POC]",
+        "ANTIPATTERN: router.swapExactTokensForTokens(10 ether, 0, path, address(this), block.timestamp + 100);"
+      ],
+      "antipattern": "router.swapExactTokensForTokens(10 ether, 0, path, address(this), block.timestamp + 100);"
     },
     {
       "id": "general-defi-defihacklabs-reflect-variant-5-tax-reflection-to-pa-005",
@@ -916,7 +1184,12 @@
       "lines": [
         446,
         497
-      ]
+      ],
+      "check": [
+        "VERIFY: Example 12: MARS — Tax Reflections Accumulate in Pair ($100K, Apr 2024)** [HIGH] `@audit` [MARS-POC]",
+        "ANTIPATTERN: MARS.balanceOf(address(this)) > 1000 ether ? 1000 ether : MARS.balanceOf(address(this)),"
+      ],
+      "antipattern": "MARS.balanceOf(address(this)) > 1000 ether ? 1000 ether : MARS.balanceOf(address(this)),"
     },
     {
       "id": "general-defi-non-standard-token-v-1-reflection-token-vulnerabili-001",
@@ -935,7 +1208,12 @@
         139,
         267
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: AMM pairs (Uniswap V2 style) track reserves via the `sync()` function which updates `reserve0`/`reserve1` to match `balanceOf()`.",
+        "ANTIPATTERN: AMM pair holding reflection token"
+      ],
+      "antipattern": "AMM pair holding reflection token"
     },
     {
       "id": "general-defi-non-standard-token-v-2-deflationary-token-vulnerabi-002",
@@ -953,7 +1231,12 @@
       "lines": [
         268,
         409
-      ]
+      ],
+      "check": [
+        "VERIFY: When deflationary tokens are transferred TO a pair:",
+        "ANTIPATTERN: Skim-to-self loop with deflationary token"
+      ],
+      "antipattern": "Skim-to-self loop with deflationary token"
     },
     {
       "id": "general-defi-non-standard-token-v-3-erc777-erc667-callback-reent-003",
@@ -972,7 +1255,12 @@
         410,
         538
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Lending protocols (Compound forks like Agave, Hundred Finance) perform state updates AFTER external calls to token...",
+        "ANTIPATTERN: Lending pool without reentrancy guard on borrow"
+      ],
+      "antipattern": "Lending pool without reentrancy guard on borrow"
     },
     {
       "id": "general-defi-non-standard-token-v-4-rebasing-token-vulnerabiliti-004",
@@ -990,7 +1278,12 @@
       "lines": [
         539,
         669
-      ]
+      ],
+      "check": [
+        "VERIFY: OHM-style staking contracts convert tokens to \"staked\" tokens (sOHM) at a dynamic exchange rate.",
+        "ANTIPATTERN: No rate limiting between stake/unstake"
+      ],
+      "antipattern": "No rate limiting between stake/unstake"
     },
     {
       "id": "general-defi-non-standard-token-v-5-self-transfer-edge-cases-005",
@@ -1009,7 +1302,12 @@
         670,
         804
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Faulty `_transfer()` implementation that doesn't handle `from == to`:",
+        "ANTIPATTERN: Balance doubles on self-transfer"
+      ],
+      "antipattern": "Balance doubles on self-transfer"
     },
     {
       "id": "general-defi-non-standard-token-v-6-low-no-decimals-token-issues-006",
@@ -1027,7 +1325,12 @@
       "lines": [
         805,
         839
-      ]
+      ],
+      "check": [
+        "VERIFY: Precision loss with low decimal tokens",
+        "ANTIPATTERN: Division before multiplication with 0 decimal token"
+      ],
+      "antipattern": "Division before multiplication with 0 decimal token"
     },
     {
       "id": "general-defi-non-standard-token-v-7-pausable-blacklistable-token-007",
@@ -1045,7 +1348,12 @@
       "lines": [
         840,
         875
-      ]
+      ],
+      "check": [
+        "VERIFY: No handling for paused tokens",
+        "ANTIPATTERN: Protocol address can be blacklisted"
+      ],
+      "antipattern": "Protocol address can be blacklisted"
     },
     {
       "id": "general-defi-defihacklabs-precisi-1-empty-market-exchange-rate-i-000",
@@ -1064,7 +1372,12 @@
         84,
         163
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: When Compound V2 fork cToken markets are newly deployed with zero total supply, the `exchangeRate = totalCash / totalSupply` formula becomes exploitab",
+        "ANTIPATTERN: Compound fork with unvalidated liquidation + exchange rate manipulation"
+      ],
+      "antipattern": "Compound fork with unvalidated liquidation + exchange rate manipulation"
     },
     {
       "id": "general-defi-defihacklabs-precisi-2-elastic-base-rebase-math-rou-001",
@@ -1083,7 +1396,12 @@
         164,
         216
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Kashi-based lending protocols (BentoBox/DegenBox) track debt using an elastic/base rebase structure where `elastic`...",
+        "ANTIPATTERN: CauldronV4 (Kashi lending) elastic/base ratio manipulation"
+      ],
+      "antipattern": "CauldronV4 (Kashi lending) elastic/base ratio manipulation"
     },
     {
       "id": "general-defi-defihacklabs-precisi-3-liquidityindex-inflation-via-002",
@@ -1102,7 +1420,12 @@
         217,
         273
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Aave V2 fork lending pools that allow flash loans from their own pool create a recursive amplification vector.",
+        "ANTIPATTERN: Aave V2 fork allows flash loans from own pool → liquidityIndex inflation"
+      ],
+      "antipattern": "Aave V2 fork allows flash loans from own pool → liquidityIndex inflation"
     },
     {
       "id": "general-defi-defihacklabs-precisi-4-scaling-factor-precision-los-003",
@@ -1121,7 +1444,12 @@
         274,
         329
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Balancer V2 ComposableStablePools use scaling factors to normalize token amounts with different decimals or wrapped...",
+        "ANTIPATTERN: FixedPoint.mulDown truncation in StableMath._calcInGivenOut"
+      ],
+      "antipattern": "FixedPoint.mulDown truncation in StableMath._calcInGivenOut"
     },
     {
       "id": "general-defi-defihacklabs-precisi-5-share-price-inflation-via-di-004",
@@ -1140,7 +1468,12 @@
         330,
         412
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: When vault or lending protocols use `totalAssets() / totalShares()` for share pricing and rely on the contract's token...",
+        "ANTIPATTERN: Share price inflatable via donation to underlying controller"
+      ],
+      "antipattern": "Share price inflatable via donation to underlying controller"
     },
     {
       "id": "general-defi-defihacklabs-precisi-6-virtual-balance-math-manipul-005",
@@ -1159,7 +1492,12 @@
         413,
         454
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Multi-asset pools using virtual balance models (e.",
+        "ANTIPATTERN: Virtual balance pool with 8 LST assets"
+      ],
+      "antipattern": "Virtual balance pool with 8 LST assets"
     },
     {
       "id": "general-defi-precision-loss-round-vulnerability-categories-001",
@@ -1177,6 +1515,9 @@
       "lines": [
         136,
         147
+      ],
+      "check": [
+        "VERIFY: Vulnerability Categories"
       ]
     },
     {
@@ -1195,6 +1536,9 @@
       "lines": [
         35,
         92
+      ],
+      "check": [
+        "VERIFY: Reference**: m-26-imprecise-calculations-in-launchfor-lead-to-less-liquidity-be-added-to-the-."
       ]
     },
     {
@@ -1213,7 +1557,12 @@
       "lines": [
         83,
         312
-      ]
+      ],
+      "check": [
+        "VERIFY: Severity**: 🟠 HIGH | **Loss**: ~$50K | **Protocol**: VTF Token | **Chain**: BSC",
+        "ANTIPATTERN: require(SNOOD.transferFrom(address(uniLP), address(this), balance - 1));"
+      ],
+      "antipattern": "require(SNOOD.transferFrom(address(uniLP), address(this), balance - 1));"
     },
     {
       "id": "general-defi-incorrect-calculatio-vulnerability-categories-001",
@@ -1231,6 +1580,9 @@
       "lines": [
         152,
         164
+      ],
+      "check": [
+        "VERIFY: Vulnerability Categories"
       ]
     },
     {
@@ -1250,7 +1602,13 @@
         38,
         268
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: In Solidity < 0.8.0, arithmetic operations silently overflow/underflow:",
+        "ANTIPATTERN: transferProxy has unchecked addition overflow in fee calculation"
+      ],
+      "antipattern": "transferProxy has unchecked addition overflow in fee calculation",
+      "securePattern": "Solidity 0.8+ automatically reverts on overflow/underflow"
     },
     {
       "id": "general-defi-integer-overflow-vul-vulnerability-categories-001",
@@ -1268,6 +1626,9 @@
       "lines": [
         55,
         73
+      ],
+      "check": [
+        "VERIFY: Operations without SafeMath in older Solidity versions."
       ]
     },
     {
@@ -1287,7 +1648,13 @@
         74,
         309
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: No SafeMath, underflow possible",
+        "ANTIPATTERN: Integer underflow in ERC404 implementation"
+      ],
+      "antipattern": "Integer underflow in ERC404 implementation",
+      "securePattern": "Check before unchecked arithmetic"
     },
     {
       "id": "general-defi-defi-business-logic--defi-business-logic-flaw-vulne-000",
@@ -1306,7 +1673,10 @@
         48,
         76
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Business logic flaws are the most prevalent vulnerability class in DeFi, encompassing errors in protocol state machine..."
+      ]
     },
     {
       "id": "general-defi-defi-business-logic--complete-incident-reference-20-009",
@@ -1324,6 +1694,9 @@
       "lines": [
         828,
         983
+      ],
+      "check": [
+        "VERIFY: Complete Incident Reference (2022-2025)"
       ]
     },
     {
@@ -1343,7 +1716,12 @@
         94,
         169
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Euler's `donateToReserves()` function allowed a borrower to donate their own eTokens (collateral tokens) to the protocol reserves.",
+        "ANTIPATTERN: donateToReserves() allows borrower to destroy own collateral"
+      ],
+      "antipattern": "donateToReserves() allows borrower to destroy own collateral"
     },
     {
       "id": "general-defi-defihacklabs-busines-2-tick-boundary-precision-erro-001",
@@ -1362,7 +1740,12 @@
         170,
         249
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: KyberSwap's concentrated liquidity AMM (Elastic) had a precision error in the `computeSwapStep()` function when...",
+        "ANTIPATTERN: computeSwapStep() precision error at tick boundaries"
+      ],
+      "antipattern": "computeSwapStep() precision error at tick boundaries"
     },
     {
       "id": "general-defi-defihacklabs-busines-3-unprotected-burnfrom-transfe-002",
@@ -1381,7 +1764,12 @@
         250,
         292
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: DEI stablecoin's `burnFrom()` function was callable by anyone with zero amount (`burnFrom(pair, 0)`), which...",
+        "ANTIPATTERN: Public burnFrom() manipulates approvals on the liquidity pair"
+      ],
+      "antipattern": "Public burnFrom() manipulates approvals on the liquidity pair"
     },
     {
       "id": "general-defi-defihacklabs-busines-4-duplicate-array-elements-in--003",
@@ -1400,7 +1788,12 @@
         293,
         352
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Level Finance's `LevelReferralControllerV2.claimMultiple()` function accepted an array of epoch IDs to claim rewards...",
+        "ANTIPATTERN: claimMultiple() does not check for duplicate epoch IDs"
+      ],
+      "antipattern": "claimMultiple() does not check for duplicate epoch IDs"
     },
     {
       "id": "general-defi-defihacklabs-busines-5-emergency-withdraw-without-n-004",
@@ -1418,7 +1811,12 @@
       "lines": [
         353,
         408
-      ]
+      ],
+      "check": [
+        "VERIFY: BNO's staking pool had an `emergencyWithdraw()` function that reset a user's staked token balance but did not reclaim...",
+        "ANTIPATTERN: emergencyWithdraw() resets token balance but doesn't lock/burn NFTs"
+      ],
+      "antipattern": "emergencyWithdraw() resets token balance but doesn't lock/burn NFTs"
     },
     {
       "id": "general-defi-defihacklabs-busines-6-flash-loan-liquidity-manipul-005",
@@ -1436,7 +1834,12 @@
       "lines": [
         409,
         458
-      ]
+      ],
+      "check": [
+        "VERIFY: Palmswap's liquidity event contract allowed users to purchase PLP tokens at a 1:1 ratio with USDP, but the withdrawal...",
+        "ANTIPATTERN: Withdrawal exchange rate depends on current vault reserves"
+      ],
+      "antipattern": "Withdrawal exchange rate depends on current vault reserves"
     },
     {
       "id": "general-defi-defihacklabs-busines-7-convertdusttoearned-price-ma-006",
@@ -1454,7 +1857,12 @@
       "lines": [
         459,
         501
-      ]
+      ],
+      "check": [
+        "VERIFY: BEARNDAO's Bvaults strategy had a public `convertDustToEarned()` function that swapped residual \"dust\" tokens to the...",
+        "ANTIPATTERN: Public convertDustToEarned() allows sandwich attack"
+      ],
+      "antipattern": "Public convertDustToEarned() allows sandwich attack"
     },
     {
       "id": "general-defi-defihacklabs-busines-8-flash-loan-bad-debt-creation-007",
@@ -1473,7 +1881,12 @@
         502,
         534
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Platypus Finance's lending system allowed users to borrow the protocol's stablecoin (USP) against staked LP tokens.",
+        "ANTIPATTERN: Borrow → emergencyWithdraw creates unrecoverable bad debt"
+      ],
+      "antipattern": "Borrow → emergencyWithdraw creates unrecoverable bad debt"
     },
     {
       "id": "general-defi-defihacklabs-busines-secure-implementations-008",
@@ -1492,7 +1905,11 @@
         535,
         590
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: // ✅ SECURE: Check solvency AFTER donation"
+      ],
+      "securePattern": "Emergency withdraw handles all state including NFTs and debt"
     },
     {
       "id": "general-defi-defihacklabs-busines-1-dangling-approval-after-oper-000",
@@ -1511,7 +1928,12 @@
         68,
         124
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: When a protocol's `create` function pulls tokens via `transferFrom()` and stores them, a corresponding `cancel`...",
+        "ANTIPATTERN: Approval not revoked when campaign is cancelled"
+      ],
+      "antipattern": "Approval not revoked when campaign is cancelled"
     },
     {
       "id": "general-defi-defihacklabs-busines-2-repeated-withdrawal-without--001",
@@ -1530,7 +1952,12 @@
         125,
         174
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: When a withdrawal or redemption function processes a tranche/position but fails to burn, delete, or otherwise...",
+        "ANTIPATTERN: withdrawWithoutHedge() does NOT invalidate the tranche after withdrawal"
+      ],
+      "antipattern": "withdrawWithoutHedge() does NOT invalidate the tranche after withdrawal"
     },
     {
       "id": "general-defi-defihacklabs-busines-3-uninitialized-uups-proxy-tak-002",
@@ -1549,7 +1976,12 @@
         175,
         228
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: UUPS (Universal Upgradeable Proxy Standard) proxies require `initialize()` to be called after deployment to set the...",
+        "ANTIPATTERN: UUPS proxy deployed without calling initialize()"
+      ],
+      "antipattern": "UUPS proxy deployed without calling initialize()"
     },
     {
       "id": "general-defi-defihacklabs-protoco-vulnerability-description-001",
@@ -1567,6 +1999,9 @@
       "lines": [
         71,
         118
+      ],
+      "check": [
+        "VERIFY: Protocol logic flaws arise when the contract's state machine allows transitions that violate implicit invariants."
       ]
     },
     {
@@ -1586,7 +2021,12 @@
         119,
         464
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Severity**: 🔴 CRITICAL | **Loss**: 3,087 ETH (~$3.87M) | **Protocol**: XCarnival | **Chain**: Ethereum",
+        "ANTIPATTERN: function BiswapCall(address sender, uint256 baseAmount, uint256 quoteAmount, bytes calldata data) external {"
+      ],
+      "antipattern": "function BiswapCall(address sender, uint256 baseAmount, uint256 quoteAmount, bytes calldata data) external {"
     },
     {
       "id": "general-defi-defihacklabs-share-a-defihacklabs-share-fee-account-000",
@@ -1605,7 +2045,13 @@
         40,
         398
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Sorbetto Fragola (concentrated liquidity optimizer)",
+        "ANTIPATTERN: Mint calculation uses balanceOf(this) which can be inflated via donation"
+      ],
+      "antipattern": "Mint calculation uses balanceOf(this) which can be inflated via donation",
+      "securePattern": "Update fee accounting on every transfer"
     },
     {
       "id": "general-defi-defihacklabs-solvenc-1-missing-solvency-check-on-do-000",
@@ -1624,7 +2070,12 @@
         63,
         127
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Euler Finance's `donateToReserves()` function allowed users to move their eTokens (collateral) to the protocol's...",
+        "ANTIPATTERN: donateToReserves() has NO solvency check"
+      ],
+      "antipattern": "donateToReserves() has NO solvency check"
     },
     {
       "id": "general-defi-defihacklabs-solvenc-2-precision-loss-in-concentrat-001",
@@ -1643,7 +2094,12 @@
         128,
         190
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: KyberSwap's concentrated liquidity implementation had numeric precision errors in the tick-crossing calculation.",
+        "ANTIPATTERN: Precision errors in tick crossing calculations"
+      ],
+      "antipattern": "Precision errors in tick crossing calculations"
     },
     {
       "id": "general-defi-defihacklabs-solvenc-3-internal-vs-actual-balance-d-002",
@@ -1661,7 +2117,12 @@
       "lines": [
         191,
         241
-      ]
+      ],
+      "check": [
+        "VERIFY: ElasticSwap tracked internal balances (`baseTokenReserveQty`, `quoteTokenReserveQty`, `kLast`) separately from actual ERC20 token balances.",
+        "ANTIPATTERN: Internal balance tracking diverges from actual ERC20 balance"
+      ],
+      "antipattern": "Internal balance tracking diverges from actual ERC20 balance"
     },
     {
       "id": "general-defi-defihacklabs-solvenc-4-unchecked-swap-router-callba-003",
@@ -1680,7 +2141,12 @@
         242,
         291
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: SushiSwap's RouteProcessor2 accepted arbitrary `route` bytes that could specify any contract address as a \"pool\" for...",
+        "ANTIPATTERN: RouteProcessor2 trusts arbitrary contract as swap pool"
+      ],
+      "antipattern": "RouteProcessor2 trusts arbitrary contract as swap pool"
     }
   ]
 }

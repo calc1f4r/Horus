@@ -4,7 +4,8 @@
     "description": "Compressed hunt cards for solana — one-line detection rules for bulk scanning",
     "totalCards": 40,
     "skipped": 0,
-    "usage": "Load all cards into context. For each card, grep target code for card.grep pattern. On hit, read full DB entry via read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])."
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "enriched": 40
   },
   "cards": [
     {
@@ -23,7 +24,16 @@
         215,
         440
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Programs fail to verify that:\n\n1. **Signer**: The account actually signed the transaction\n\n2. **Owner**: The account is...",
+        "All authority accounts verify is_signer",
+        "All program-owned accounts verify owner",
+        "All PDAs validated against expected seeds",
+        "LOOK FOR: AccountInfo used without is_signer check"
+      ],
+      "antipattern": "No signer validation - anyone can call as any account",
+      "securePattern": "Anchor Account type validates owner automatically"
     },
     {
       "id": "solana-solana-program-secur-2-account-data-reallocation-vu-001",
@@ -40,7 +50,16 @@
       "lines": [
         441,
         555
-      ]
+      ],
+      "check": [
+        "VERIFY: Programs fail to:\n\n1. Zero-initialize newly allocated memory regions\n\n2. Handle allocation failures gracefully\n\n3....",
+        "All realloc calls use zero_init=true OR manually zero-initialize",
+        "All realloc calls handle errors properly",
+        "No reading from newly allocated memory before initialization",
+        "LOOK FOR: realloc(..., false) without manual zero-initialization"
+      ],
+      "antipattern": "No error handling for reallocation failure",
+      "securePattern": "Zero-initialize new memory regions"
     },
     {
       "id": "solana-solana-program-secur-3-lamports-transfer-from-pda-v-002",
@@ -58,7 +77,16 @@
         556,
         683
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Transferring lamports without checking rent-exempt threshold",
+        "All lamport deductions from PDAs check rent-exempt balance",
+        "Direct lamport manipulation used (not system_program::transfer) for PDAs",
+        "Rent calculation uses correct account data length",
+        "LOOK FOR: try_borrow_mut_lamports without rent-exempt check"
+      ],
+      "antipattern": "System program cannot deduct from non-system-owned accounts",
+      "securePattern": "Direct lamport manipulation for program-owned accounts"
     },
     {
       "id": "solana-solana-program-secur-4-cpi-cross-program-invocation-003",
@@ -76,7 +104,16 @@
         684,
         881
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Arbitrary program invocation without validation",
+        "All CPI targets validated against known program IDs",
+        "All signer seeds include correct bump value",
+        "Seed order matches original PDA derivation",
+        "LOOK FOR: invoke() or CpiContext::new() with unvalidated program address"
+      ],
+      "antipattern": "Missing bump value causes signature verification failure",
+      "securePattern": "Anchor CPI types ensure correct ordering"
     },
     {
       "id": "solana-solana-program-secur-5-unvalidated-account-vulnerab-004",
@@ -94,7 +131,16 @@
         882,
         1090
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Token program not validated against expected ID",
+        "Token program validated against SPL Token/Token-2022 ID",
+        "All sysvars use Sysvar<'info, T> type",
+        "Token accounts verify ownership matches expected authority",
+        "LOOK FOR: AccountInfo for token_program without key validation"
+      ],
+      "antipattern": "Lamports can be donated to uninitialized accounts",
+      "securePattern": "Anchor validates token program automatically"
     },
     {
       "id": "solana-solana-program-secur-6-account-reloading-vulnerabil-005",
@@ -111,7 +157,16 @@
       "lines": [
         1091,
         1183
-      ]
+      ],
+      "check": [
+        "VERIFY: After a CPI that modifies an account, the program continues using the stale local copy instead of refreshing the...",
+        "All accounts modified by CPI are reloaded before subsequent use",
+        "State-dependent logic follows reload() calls",
+        "No stale data used in calculations post-CPI",
+        "LOOK FOR: Account field access after CPI without reload()"
+      ],
+      "antipattern": "Using stale balance after transfer",
+      "securePattern": "Reload account after CPI"
     },
     {
       "id": "solana-solana-program-secur-7-account-closure-vulnerabilit-006",
@@ -129,7 +184,16 @@
         1184,
         1331
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Missing authorization for account closure",
+        "All closures verify authority/owner",
+        "Destination address validated (usually should be authority)",
+        "Data cleared before closure",
+        "LOOK FOR: close = destination without authority validation"
+      ],
+      "antipattern": "No authorization check for closure",
+      "securePattern": "Validate destination matches authority"
     },
     {
       "id": "solana-solana-program-secur-8-dos-attack-vectors-007",
@@ -146,7 +210,16 @@
       "lines": [
         1332,
         1444
-      ]
+      ],
+      "check": [
+        "VERIFY: Using `init` instead of `init_if_needed` for ATA creation",
+        "ATAs use init_if_needed",
+        "Predictable PDAs use init_if_needed with validation",
+        "Front-running scenarios considered",
+        "LOOK FOR: init constraint on ATAs"
+      ],
+      "antipattern": "Predictable seeds allow front-running",
+      "securePattern": "Handle pre-created accounts with validation"
     },
     {
       "id": "solana-solana-program-secur-9-mint-token-extension-vulnera-008",
@@ -163,7 +236,16 @@
       "lines": [
         1445,
         1591
-      ]
+      ],
+      "check": [
+        "VERIFY: Not checking for close authority extension",
+        "Close authority validated on mints",
+        "Freeze authority checked when relevant",
+        "Transfer fees handled in accounting",
+        "LOOK FOR: Mint accepted without close_authority check"
+      ],
+      "antipattern": "Fee-on-transfer tokens cause accounting errors",
+      "securePattern": "Use transfer_checked for fee-enabled tokens"
     },
     {
       "id": "solana-solana-program-secur-10-event-emission-vulnerabilit-009",
@@ -181,7 +263,13 @@
         1592,
         1679
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Emitting incorrect data in events",
+        "ANTIPATTERN: Event reports wrong amount"
+      ],
+      "antipattern": "Event reports wrong amount",
+      "securePattern": "Event for critical state change"
     },
     {
       "id": "solana-solana-program-secur-11-arithmetic-and-data-handlin-010",
@@ -198,7 +286,13 @@
       "lines": [
         1680,
         1766
-      ]
+      ],
+      "check": [
+        "VERIFY: Unchecked arithmetic operations",
+        "ANTIPATTERN: Can overflow in release builds"
+      ],
+      "antipattern": "Can overflow in release builds",
+      "securePattern": "Check for zero before division"
     },
     {
       "id": "solana-solana-program-secur-12-seed-collision-vulnerabilit-011",
@@ -215,7 +309,16 @@
       "lines": [
         1774,
         1865
-      ]
+      ],
+      "check": [
+        "VERIFY: Simple/short seed prefixes",
+        "Each account type has unique seed prefix",
+        "User-specific accounts include user pubkey in seeds",
+        "Session/instance accounts include creator pubkey",
+        "LOOK FOR: Short or common seed prefixes (b\"user\", b\"vote\", b\"data\")"
+      ],
+      "antipattern": "Vote sessions and user votes could collide",
+      "securePattern": "Distinct prefixes and full context"
     },
     {
       "id": "solana-solana-program-secur-13-account-type-confusion-vuln-012",
@@ -232,7 +335,13 @@
       "lines": [
         1866,
         1917
-      ]
+      ],
+      "check": [
+        "VERIFY: Using raw Borsh deserialization instead of Anchor's `try_deserialize`",
+        "ANTIPATTERN: Uses Borsh deserialize without discriminator check"
+      ],
+      "antipattern": "Uses Borsh deserialize without discriminator check",
+      "securePattern": "Use Anchor's try_deserialize with discriminator check"
     },
     {
       "id": "solana-solana-program-secur-14-ed25519-instruction-introsp-013",
@@ -250,7 +359,13 @@
         1918,
         2007
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Ed25519 program on Solana is flexible - it can read signature, public key, and message from different instruction...",
+        "ANTIPATTERN: Doesn't validate Ed25519 instruction structure"
+      ],
+      "antipattern": "Doesn't validate Ed25519 instruction structure",
+      "securePattern": "Comprehensive Ed25519 verification"
     },
     {
       "id": "solana-solana-program-secur-15-signature-replay-attack-vul-014",
@@ -267,7 +382,13 @@
       "lines": [
         2008,
         2101
-      ]
+      ],
+      "check": [
+        "VERIFY: No nonce tracking for signature-based operations",
+        "ANTIPATTERN: Same proof can be submitted multiple times"
+      ],
+      "antipattern": "Same proof can be submitted multiple times",
+      "securePattern": "Reset nonce when updating signing key"
     },
     {
       "id": "solana-solana-program-secur-16-unrestricted-cpi-vulnerabil-015",
@@ -285,7 +406,13 @@
         2102,
         2173
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Accepting arbitrary program IDs for CPI",
+        "ANTIPATTERN: Any swap program accepted"
+      ],
+      "antipattern": "Any swap program accepted",
+      "securePattern": "Restrict to allowlisted programs"
     },
     {
       "id": "solana-solana-program-secur-17-initialization-front-runnin-016",
@@ -302,7 +429,13 @@
       "lines": [
         2174,
         2267
-      ]
+      ],
+      "check": [
+        "VERIFY: PDA seeds derived from unauthenticated accounts",
+        "ANTIPATTERN: Anyone can become super_admin for any mint"
+      ],
+      "antipattern": "Anyone can become super_admin for any mint",
+      "securePattern": "create_key must sign the transaction"
     },
     {
       "id": "solana-solana-program-secur-18-create-account-pre-funding--017",
@@ -319,7 +452,13 @@
       "lines": [
         2268,
         2347
-      ]
+      ],
+      "check": [
+        "VERIFY: Using `create_account` instead of the more resilient pattern of separate fund, allocate, and assign operations.",
+        "ANTIPATTERN: Fails if account already has lamports"
+      ],
+      "antipattern": "Fails if account already has lamports",
+      "securePattern": "Handles pre-existing lamports"
     },
     {
       "id": "solana-solana-program-secur-19-rent-exemption-validation-e-018",
@@ -336,7 +475,13 @@
       "lines": [
         2348,
         2407
-      ]
+      ],
+      "check": [
+        "VERIFY: Using `account.lamports()` (which includes rent) in comparisons with values that don't include rent.",
+        "ANTIPATTERN: Compares lamports (with rent) to reserves (without rent)"
+      ],
+      "antipattern": "Compares lamports (with rent) to reserves (without rent)",
+      "securePattern": "Subtract rent before comparison"
     },
     {
       "id": "solana-solana-program-secur-20-liquidation-and-state-invar-019",
@@ -354,7 +499,16 @@
         2408,
         2540
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Sentinel encoding mismatch**: treating `0` as “no tick exists” even when tick `0` is valid.",
+        "Tick sentinel encoding distinguishes \"unset\" from valid tick 0",
+        "All reserve mint and vault_id checks run before path-specific early returns",
+        "Full liquidation paths zero debt and synchronize all derived fields",
+        "LOOK FOR: sentinel checks that map 0 -> no value for signed domains where 0 is valid"
+      ],
+      "antipattern": "saturation hides overflow and produces underpriced assets",
+      "securePattern": "enforce reserve/token-vault consistency before any early return"
     },
     {
       "id": "solana-solana-program-secur-21-cpi-policy-and-program-upgr-020",
@@ -371,7 +525,16 @@
       "lines": [
         2541,
         2627
-      ]
+      ],
+      "check": [
+        "VERIFY: CPI policy stores digest/operator rules for an instruction payload but not upgradeability guarantees for `program_id`.",
+        "Every allowlisted CPI target is immutable or has `upgrade_authority == None`",
+        "Policy stores `program_id` and rejects digest reuse across different programs",
+        "Built-in programs are explicitly handled as trusted immutable exceptions",
+        "LOOK FOR: CPI digest/allowlist updates that omit checks for bpf_loader_upgradeable ownership"
+      ],
+      "antipattern": "invoke path relies on stale trust from old digest registration",
+      "securePattern": "reject upgradeable targets unless upgrade authority is None"
     },
     {
       "id": "solana-token-2022-extension-1-mintcloseauthority-extension-000",
@@ -389,7 +552,16 @@
         153,
         320
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: When a protocol accepts any Token-2022 mint without checking for the `MintCloseAuthority` extension:",
+        "Check for MintCloseAuthority extension before accepting mints",
+        "Validate that decimals-based calculations cannot be exploited",
+        "Consider storing mint address and re-fetching decimals on each operation",
+        "LOOK FOR: InterfaceAccount<Mint> without extension validation"
+      ],
+      "antipattern": "Accepts any mint without checking close authority",
+      "securePattern": "Full mint validation for Token-2022"
     },
     {
       "id": "solana-token-2022-extension-2-freeze-authority-vulnerabili-001",
@@ -406,7 +578,16 @@
       "lines": [
         321,
         467
-      ]
+      ],
+      "check": [
+        "VERIFY: Protocols accept mints with freeze authority set, allowing the mint authority to:",
+        "All accepted mints checked for freeze_authority == None",
+        "Consider allowlisting specific mints for high-value protocols",
+        "Document risks if freeze authority mints are intentionally supported",
+        "LOOK FOR: InterfaceAccount<Mint> without freeze_authority check"
+      ],
+      "antipattern": "Escrow can be frozen, blocking all bridge operations",
+      "securePattern": "Check freeze authority before accepting mint"
     },
     {
       "id": "solana-token-2022-extension-3-transfer-fee-extension-vulne-002",
@@ -423,7 +604,16 @@
       "lines": [
         468,
         646
-      ]
+      ],
+      "check": [
+        "VERIFY: Protocols assume `transfer(amount)` results in recipient receiving exactly `amount`.",
+        "Check for TransferFeeConfig extension on accepted mints",
+        "Use balance-before/after pattern for fee tokens",
+        "Or explicitly reject transfer fee tokens",
+        "LOOK FOR: token::transfer used without balance checks before/after"
+      ],
+      "antipattern": "Doesn't account for transfer fees",
+      "securePattern": "Explicitly reject transfer fee tokens"
     },
     {
       "id": "solana-token-2022-extension-4-permanent-delegate-extension-003",
@@ -441,7 +631,13 @@
         647,
         714
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: permanent delegate can:\n\n1. Transfer tokens from any token account holding that mint\n\n2. Burn tokens from any...",
+        "ANTIPATTERN: Permanent delegate can drain vault"
+      ],
+      "antipattern": "Permanent delegate can drain vault",
+      "securePattern": "Reject mints with permanent delegate"
     },
     {
       "id": "solana-token-2022-extension-5-token-account-size-vulnerabi-004",
@@ -458,7 +654,13 @@
       "lines": [
         715,
         784
-      ]
+      ],
+      "check": [
+        "VERIFY: Hardcoding `space = 165` for token accounts fails for Token-2022 because:",
+        "ANTIPATTERN: Hardcoded size fails for Token-2022"
+      ],
+      "antipattern": "Hardcoded size fails for Token-2022",
+      "securePattern": "Let Anchor/Token program handle sizing"
     },
     {
       "id": "solana-token-2022-extension-6-default-account-state-extens-005",
@@ -475,7 +677,12 @@
       "lines": [
         785,
         828
-      ]
+      ],
+      "check": [
+        "VERIFY: Doesn't handle frozen default state"
+      ],
+      "antipattern": "Doesn't handle frozen default state",
+      "securePattern": "Validate default state is not frozen"
     },
     {
       "id": "solana-token-2022-extension-7-transfer-hook-extension-vuln-006",
@@ -492,7 +699,13 @@
       "lines": [
         829,
         887
-      ]
+      ],
+      "check": [
+        "VERIFY: Transfer hooks can:\n\n1. Reject transfers arbitrarily\n\n2. Cause DOS by reverting\n\n3. Introduce reentrancy through...",
+        "ANTIPATTERN: Hook can cause unexpected failures"
+      ],
+      "antipattern": "Hook can cause unexpected failures",
+      "securePattern": "Validate transfer hook presence"
     },
     {
       "id": "solana-token-2022-extension-8-interest-bearing-extension-v-007",
@@ -509,7 +722,14 @@
       "lines": [
         888,
         984
-      ]
+      ],
+      "check": [
+        "VERIFY: With interest-bearing tokens:\n\n1. `token_account.amount` returns the base amount, not the actual balance with...",
+        "LOOK FOR: Direct reads of token_account.amount without interest adjustment",
+        "LOOK FOR: Balance comparisons that don't account for time-based changes"
+      ],
+      "antipattern": "Doesn't account for accrued interest",
+      "securePattern": "Reject if protocol can't handle interest calculations"
     },
     {
       "id": "solana-token-2022-extension-9-confidential-transfer-vulner-008",
@@ -526,7 +746,14 @@
       "lines": [
         985,
         1045
-      ]
+      ],
+      "check": [
+        "VERIFY: With confidential transfers:\n\n1. Public balance (`amount`) may be 0 or a pending balance waiting for transfer\n\n2....",
+        "Protocol rejects mints with ConfidentialTransferMint extension",
+        "Or protocol explicitly handles confidential balances with ZK proofs",
+        "No reliance on public balance for security-critical decisions"
+      ],
+      "securePattern": "Reject for protocols requiring balance visibility"
     },
     {
       "id": "solana-token-2022-extension-10-general-token-2022-integrat-009",
@@ -543,7 +770,11 @@
       "lines": [
         1046,
         1120
-      ]
+      ],
+      "check": [
+        "VERIFY: use spl_token_2022::extension::*;"
+      ],
+      "securePattern": "Comprehensive Token-2022 safety check"
     },
     {
       "id": "solana-token-2022-extension-11-non-transferable-token-exte-010",
@@ -560,7 +791,13 @@
       "lines": [
         1142,
         1215
-      ]
+      ],
+      "check": [
+        "VERIFY: Protocols that accept arbitrary Token-2022 mints may:",
+        "ANTIPATTERN: Accepts non-transferable tokens"
+      ],
+      "antipattern": "Accepts non-transferable tokens",
+      "securePattern": "Reject non-transferable tokens"
     },
     {
       "id": "solana-token-2022-extension-12-confidential-transfer-exten-011",
@@ -577,7 +814,13 @@
       "lines": [
         1216,
         1271
-      ]
+      ],
+      "check": [
+        "VERIFY: With confidential transfers:\n\n1. On-chain balance is encrypted and cannot be read directly\n\n2. Traditional balance...",
+        "ANTIPATTERN: Assumes balance is readable"
+      ],
+      "antipattern": "Assumes balance is readable",
+      "securePattern": "Reject confidential transfer tokens if balance visibility required"
     },
     {
       "id": "solana-token-2022-extension-13-metadata-pointer-extension--012",
@@ -594,7 +837,11 @@
       "lines": [
         1272,
         1310
-      ]
+      ],
+      "check": [
+        "VERIFY: Protocols may:\n\n1. Assume metadata is stored in Metaplex metadata accounts\n\n2. Fail to follow the metadata pointer to..."
+      ],
+      "securePattern": "Follow metadata pointer correctly"
     },
     {
       "id": "solana-token-2022-extension-14-group-and-group-member-exte-013",
@@ -611,7 +858,11 @@
       "lines": [
         1311,
         1345
-      ]
+      ],
+      "check": [
+        "VERIFY: Group Pointer and Group Member Pointer extensions enable token grouping functionality."
+      ],
+      "securePattern": "Check for group extensions"
     },
     {
       "id": "solana-token-2022-extension-15-cpi-guard-extension-vulnera-014",
@@ -628,7 +879,13 @@
       "lines": [
         1346,
         1421
-      ]
+      ],
+      "check": [
+        "VERIFY: Protocols may:\n\n1. Fail to account for CPI Guard being enabled on user accounts\n\n2. Attempt restricted CPI operations...",
+        "ANTIPATTERN: May fail if CPI Guard is enabled on source account"
+      ],
+      "antipattern": "May fail if CPI Guard is enabled on source account",
+      "securePattern": "Check for CPI Guard and handle appropriately"
     },
     {
       "id": "solana-token-2022-extension-16-required-memo-extension-vul-015",
@@ -645,7 +902,11 @@
       "lines": [
         1422,
         1486
-      ]
+      ],
+      "check": [
+        "VERIFY: When transferring to accounts with Required Memo extension:"
+      ],
+      "securePattern": "Reject accounts requiring memo if not supported"
     },
     {
       "id": "solana-token-2022-extension-17-immutable-owner-extension-v-016",
@@ -662,6 +923,9 @@
       "lines": [
         1487,
         1501
+      ],
+      "check": [
+        "VERIFY: Immutable Owner extension prevents the owner of a token account from being changed."
       ]
     },
     {
@@ -679,6 +943,9 @@
       "lines": [
         1502,
         1604
+      ],
+      "check": [
+        "VERIFY: For high-security protocols, the safest approach is to explicitly whitelist only the extensions you support rather than..."
       ]
     },
     {
@@ -696,7 +963,11 @@
       "lines": [
         1605,
         1648
-      ]
+      ],
+      "check": [
+        "VERIFY: Token accounts (not just mints) can also have extensions in Token-2022."
+      ],
+      "securePattern": "Validate token account extensions"
     }
   ]
 }

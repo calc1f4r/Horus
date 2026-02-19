@@ -84,24 +84,27 @@ Read these files:
   - audit-output/03-findings-raw.md (existing DB-matched findings — to avoid duplication)
 ```
 
-### Step 2: Extract Reasoning Seeds from DB
+### Step 2: Extract Reasoning Seeds from Enriched Hunt Cards
 
-For EACH manifest in the resolved manifest list:
+Instead of reading full manifest JSONs, use **enriched hunt cards** which contain `check`, `antipattern`, and `securePattern` micro-directives.
 
-1. **Load the manifest JSON** from `DB/manifests/<name>.json`
-2. **For each pattern**, extract the `rootCause` field
-3. **Generalize the root cause** — remove protocol-specific details:
+1. **Load enriched hunt cards** for resolved manifests from `DB/manifests/huntcards/<name>-huntcards.json`
+2. **For each card**, extract reasoning seeds from:
+   - `detect` field → the core vulnerability condition
+   - `check` array → specific verification steps (these ARE the structured assumptions to test)
+   - `antipattern` field → the vulnerable code shape
+3. **Generalize each seed** — remove protocol-specific details:
    ```
-   SPECIFIC: "Missing staleness check on Chainlink latestRoundData()"
+   CARD CHECK: "VERIFY: updatedAt is checked against reasonable threshold"
    GENERALIZED: "External data consumed without temporal validation"
    
-   SPECIFIC: "First depositor can inflate share price by donating tokens"
-   GENERALIZED: "Share/asset ratio manipulable when total supply approaches zero"
+   CARD ANTIPATTERN: "No validation of updatedAt timestamp"
+   GENERALIZED: "External call result consumed without freshness check"
    
-   SPECIFIC: "Unchecked return value from ERC20 transfer"
-   GENERALIZED: "External call result consumed without success validation"
+   CARD CHECK: "Confirm heartbeat thresholds match Chainlink feed configuration"
+   GENERALIZED: "Hardcoded parameter doesn't match external system's actual configuration"
    ```
-4. **Deduplicate** generalized seeds — many DB patterns share the same generalized root cause
+4. **Deduplicate** generalized seeds — many cards share the same generalized root cause
 5. **Organize seeds by assumption layer**:
    - Input seeds (parameter validation, bounds)
    - State seeds (invariant maintenance, consistency)

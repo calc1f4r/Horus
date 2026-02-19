@@ -4,7 +4,8 @@
     "description": "Compressed hunt cards for cosmos — one-line detection rules for bulk scanning",
     "totalCards": 15,
     "skipped": 12,
-    "usage": "Load all cards into context. For each card, grep target code for card.grep pattern. On hit, read full DB entry via read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])."
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "enriched": 15
   },
   "cards": [
     {
@@ -22,7 +23,12 @@
       "lines": [
         58,
         204
-      ]
+      ],
+      "check": [
+        "VERIFY: fundamental issues arise from:\n\n1. **Unmetered iteration**: `BeginBlock`/`EndBlock` iterate over user-controlled...",
+        "ANTIPATTERN: Errors logged but loop continues with partial state"
+      ],
+      "antipattern": "Errors logged but loop continues with partial state"
     },
     {
       "id": "cosmos-abci-vote-extensions-vulnerability-description-000",
@@ -39,7 +45,12 @@
       "lines": [
         53,
         125
-      ]
+      ],
+      "check": [
+        "VERIFY: `ValidateVoteExtensions` function relies on data injected by the proposer (`extCommit.Votes`), which can be manipulated to:",
+        "ANTIPATTERN: Using current height data with previous height vote extensions"
+      ],
+      "antipattern": "Using current height data with previous height vote extensions"
     },
     {
       "id": "cosmos-evm-gas-handling-vulnerability-description-000",
@@ -56,7 +67,12 @@
       "lines": [
         55,
         165
-      ]
+      ],
+      "check": [
+        "VERIFY: fundamental issues arise from:\n\n1. **Missing intrinsic gas charges**: EIP-2930 access list costs not being charged...",
+        "ANTIPATTERN: Infinite gas if ANY message is privileged"
+      ],
+      "antipattern": "Infinite gas if ANY message is privileged"
     },
     {
       "id": "cosmos-governance-voting-ma-vulnerability-description-000",
@@ -73,7 +89,12 @@
       "lines": [
         56,
         205
-      ]
+      ],
+      "check": [
+        "VERIFY: fundamental issues are:\n\n1. **Quorum calculated at proposal creation** - Allows manipulation before snapshot\n\n2....",
+        "ANTIPATTERN: Quorum locked at proposal creation, can be manipulated"
+      ],
+      "antipattern": "Quorum locked at proposal creation, can be manipulated"
     },
     {
       "id": "cosmos-malicious-hook-callb-vulnerability-description-000",
@@ -91,7 +112,12 @@
         56,
         190
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: fundamental issue is that **hook/callback execution is on the critical path** of important operations (token...",
+        "ANTIPATTERN: No validation that hook address is a valid contract"
+      ],
+      "antipattern": "No validation that hook address is a valid contract"
     },
     {
       "id": "cosmos-ibc-middleware-vulne-vulnerability-description-000",
@@ -108,7 +134,12 @@
       "lines": [
         55,
         198
-      ]
+      ],
+      "check": [
+        "VERIFY: fundamental issues arise from:\n\n1. **Missing sender/channel authentication**: `OnRecvPacket` handlers process...",
+        "ANTIPATTERN: Returns original version, not negotiated finalVersion"
+      ],
+      "antipattern": "Returns original version, not negotiated finalVersion"
     },
     {
       "id": "cosmos-cross-module-fund-ac-vulnerability-description-000",
@@ -125,7 +156,12 @@
       "lines": [
         66,
         142
-      ]
+      ],
+      "check": [
+        "VERIFY: fundamental issues are:\n\n\n\n1. **Incorrect iteration over coin amounts** - Processing entire `sdk.Coins` instead of...",
+        "ANTIPATTERN: Sends entire 'amount' instead of 'coin'"
+      ],
+      "antipattern": "Sends entire 'amount' instead of 'coin'"
     },
     {
       "id": "cosmos-cross-module-fund-ac-vulnerable-pattern-examples-001",
@@ -142,7 +178,12 @@
       "lines": [
         143,
         229
-      ]
+      ],
+      "check": [
+        "VERIFY: // Sends entire amount instead of individual coin",
+        "ANTIPATTERN: fn execute_stake(deps: DepsMut, info: MessageInfo) -> Result<Response, ContractError> {"
+      ],
+      "antipattern": "fn execute_stake(deps: DepsMut, info: MessageInfo) -> Result<Response, ContractError> {"
     },
     {
       "id": "cosmos-evm-precompile-vulne-vulnerability-description-000",
@@ -160,7 +201,12 @@
         56,
         183
       ],
-      "neverPrune": true
+      "neverPrune": true,
+      "check": [
+        "VERIFY: fundamental issues arise from:\n\n1. **DELEGATECALL not blocked**: State-changing precompiles accept delegatecall,...",
+        "ANTIPATTERN: EVM state changes not committed before Cosmos action"
+      ],
+      "antipattern": "EVM state changes not committed before Cosmos action"
     },
     {
       "id": "cosmos-epoch-snapshot-timin-vulnerability-description-000",
@@ -177,6 +223,9 @@
       "lines": [
         91,
         154
+      ],
+      "check": [
+        "VERIFY: fundamental issues arise from:\n\n\n\n1. **Missing Epoch Validation**: Functions that cache or calculate stake values..."
       ]
     },
     {
@@ -194,7 +243,12 @@
       "lines": [
         155,
         367
-      ]
+      ],
+      "check": [
+        "VERIFY: No validation that epoch is not in the future",
+        "ANTIPATTERN: operatorLockedStake not incremented after node registration"
+      ],
+      "antipattern": "operatorLockedStake not incremented after node registration"
     },
     {
       "id": "cosmos-slashing-evasion-byp-root-cause-000",
@@ -211,6 +265,9 @@
       "lines": [
         70,
         82
+      ],
+      "check": [
+        "VERIFY: fundamental issues stem from:\n\n\n\n1. **Mempool visibility**: Slash transactions are visible in the mempool before..."
       ]
     },
     {
@@ -228,6 +285,9 @@
       "lines": [
         83,
         131
+      ],
+      "check": [
+        "VERIFY: Malicious staker commits slashable offense"
       ]
     },
     {
@@ -245,7 +305,12 @@
       "lines": [
         132,
         255
-      ]
+      ],
+      "check": [
+        "VERIFY: Slash can be frontrun with exit",
+        "ANTIPATTERN: Missing whenNotPaused allows cooldown during emergency"
+      ],
+      "antipattern": "Missing whenNotPaused allows cooldown during emergency"
     },
     {
       "id": "cosmos-staking-state-manage-vulnerability-description-000",
@@ -262,7 +327,12 @@
       "lines": [
         57,
         216
-      ]
+      ],
+      "check": [
+        "VERIFY: fundamental issues arise from:\n\n1. **Silent error handling in EndBlocker**: Stake removal errors swallowed, leading...",
+        "ANTIPATTERN: Assumes ordered completion times based on queue order"
+      ],
+      "antipattern": "Assumes ordered completion times based on queue order"
     }
   ]
 }

@@ -25,7 +25,7 @@ Tier 2:   DB/manifests/<name>.json                ← Full pattern-level index w
 Tier 3:   DB/**/*.md                              ← Vulnerability content. Read ONLY targeted line ranges.
 ```
 
-**Hunt Cards (Tier 1.5)**: Compressed detection cards with `grep` patterns, one-line detection rules, category tags, and `neverPrune` flags for CRITICAL patterns. Load `DB/manifests/huntcards/all-huntcards.json` to fit ALL patterns in context. For each card, grep target code → on hit (or if `neverPrune`), read full entry via `read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])`.
+**Hunt Cards (Tier 1.5)**: Enriched detection cards with `grep` patterns, one-line detection rules, **micro-directives** (`check` steps, `antipattern`, `securePattern`), category tags, and `neverPrune` flags for CRITICAL patterns. Load `DB/manifests/huntcards/all-huntcards.json` to fit ALL patterns in context. For each card: grep target code → on hit, execute `card.check` steps directly against the target code. Only read full .md entry (`card.ref` + `card.lines`) for confirmed true/likely positives.
 
 For the full search guide, see `DB/SEARCH_GUIDE.md`.
 
@@ -144,12 +144,15 @@ Load manifest → filter patterns where severity includes "HIGH" or "CRITICAL"
 ### Bulk Hunt (Audit Mode — Recommended for Full Audits)
 ```
 1. Identify protocol type → Read index.json protocolContext
-2. Load hunt cards for resolved manifests (or all-huntcards.json for ~55K tokens)
+2. Load enriched hunt cards for resolved manifests (or all-huntcards.json)
 3. For each card, grep target code: `grep -rn "card.grep" <target_path>`
 4. Cards with `neverPrune: true` always survive (CRITICAL safety net)
 5. Prune cards with zero grep hits (removes ~60-80% of patterns)
-5. For remaining hits, read full DB entry: read_file(card.ref, card.lines[0], card.lines[1])
-6. Validate each match against target code (true/false positive)
+6. PASS 1: Execute card.check steps directly against target code at grep hit locations
+   - Use card.antipattern for quick positive matching
+   - Use card.securePattern for quick false-positive elimination
+7. PASS 2: For confirmed hits only, read full DB entry: read_file(card.ref, card.lines[0], card.lines[1])
+8. Validate each confirmed match against target code (true/false positive)
 ```
 
 ---
