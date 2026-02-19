@@ -105,11 +105,14 @@ Match output against the detection tables in [protocol-detection.md](resources/p
 
 ### Step 4: Load the Router
 
-Read `DB/index.json` (~330 lines). This is the entry point to the entire vulnerability database.
+Read `DB/index.json` (~330 lines). This is the entry point to the entire vulnerability database. It includes:
+- `protocolContext` — maps protocol types to relevant manifests
+- `manifests` — lists all 11 manifest files
+- `huntcards` — paths to compressed detection cards (Tier 1.5) for bulk scanning
 
-### Step 5: Resolve Manifests
+### Step 5: Resolve Manifests & Hunt Cards
 
-From `protocolContext.mappings`, collect manifests for ALL matched protocol types and deduplicate.
+From `protocolContext.mappings`, collect manifests for ALL matched protocol types and deduplicate. Note the corresponding hunt card files from `index.json.huntcards.perManifest` — these will be used in Phase 4 for grep-pruning.
 
 **Always include**:
 - `general-security` — baseline for all audits
@@ -211,36 +214,73 @@ If sub-agent fails, extract the "Invariant Candidates" section from `audit-outpu
 
 ## Phase 4: DB-Powered Vulnerability Hunting
 
-**Agent**: Self (DB search) + `invariant-catcher` sub-agent
+**Agent**: Self (hunt card pruning) + `invariant-catcher` sub-agent
 **Output**: `audit-output/03-findings-raw.md`
 
-This is the core vulnerability discovery phase. It runs in two parallel tracks:
+This is the core vulnerability discovery phase. It uses **hunt cards** (Tier 1.5) to prune irrelevant patterns before spawning the sub-agent, drastically reducing context usage.
 
-### Track A: Self-Driven Exhaustive DB Search
+### Step 1: Load Hunt Cards
 
-For EACH manifest in the resolved manifest list:
+Load hunt cards for each resolved manifest:
+```
+DB/manifests/huntcards/<manifest>-huntcards.json
+```
 
-1. **Load the manifest** JSON file
-2. **Extract all patterns** with their `codeKeywords`
-3. **Search target codebase** for each keyword set:
-   ```bash
-   grep -rn "keyword1\|keyword2\|keyword3" <path> --include="*.sol"
-   ```
-4. **Score matches**:
-   - Exact `codeKeyword` match + matching function structure → **HIGH** relevance
-   - Partial keyword match → **MEDIUM** relevance
-   - Root cause description similarity → **LOW** relevance
-5. **For HIGH-relevance hits**, read the DB vulnerability content:
-   ```
-   read_file("DB/<category>/<file>.md", startLine=<lineStart>, endLine=<lineEnd>)
-   ```
-6. **Record** in the pattern hit list:
-   | Pattern ID | DB Source | Target File | Target Line | Keyword | Relevance |
-   |------------|-----------|-------------|-------------|---------|-----------|
+Or load all at once (~41K tokens):
+```
+DB/manifests/huntcards/all-huntcards.json
+```
 
-### Track B: Invariant Catcher Sub-Agent
+Each card is a compressed 5-line detection record:
+```json
+{
+  "id": "oracle-staleness-001",
+  "title": "Missing Staleness Check",
+  "severity": ["MEDIUM"],
+  "grep": "latestRoundData|getPriceUnsafe|getPrice|publishTime|updatedAt",
+  "detect": "No freshness validation on oracle price data.",
+  "ref": "DB/oracle/pyth/PYTH_ORACLE_VULNERABILITIES.md",
+  "lines": [93, 248]
+}
+```
 
-Spawn `invariant-catcher` with the pattern hit list from Track A:
+### Step 2: Grep-Prune Pass (Critical — Eliminates 60-80% of Patterns)
+
+For EACH hunt card, run its `grep` pattern against the target codebase:
+```bash
+grep -rn "card.grep" <path> --include="*.sol" --include="*.rs" -l
+```
+
+- **Hit** → card survives (pattern is relevant to this codebase)
+- **No hit** → card is **discarded** (pattern cannot apply)
+
+This typically eliminates 60-80% of cards. Track results:
+```
+Total cards loaded:    490
+Cards with grep hits:  127   ← only these go to the sub-agent
+Cards pruned:          363
+```
+
+Write the surviving card list and grep hit locations to `audit-output/hunt-card-hits.json`:
+```json
+{
+  "totalCards": 490,
+  "survivingCards": 127,
+  "prunedCards": 363,
+  "hits": [
+    {
+      "id": "oracle-staleness-001",
+      "ref": "DB/oracle/pyth/PYTH_ORACLE_VULNERABILITIES.md",
+      "lines": [93, 248],
+      "grepHits": ["src/Oracle.sol:45", "src/PriceFeed.sol:112"]
+    }
+  ]
+}
+```
+
+### Step 3: Spawn Invariant Catcher with Pre-Pruned Cards
+
+Spawn `invariant-catcher` with ONLY the surviving cards:
 
 ```
 Hunt for vulnerability patterns in the target codebase.
@@ -248,17 +288,19 @@ Hunt for vulnerability patterns in the target codebase.
 TARGET CODEBASE: <path>
 PROTOCOL TYPE: <detected types>
 
-PATTERN HIT LIST (pre-identified by DB keyword scan):
-<paste pattern hit list from Track A>
+PRE-PRUNED HUNT CARDS (grep-verified against target code):
+<paste surviving cards from hunt-card-hits.json>
 
 Read audit-output/02-invariants.md for invariant specifications.
 
-Perform your full 5-step workflow (map → read DB → build patterns → hunt → report).
-
-For each pattern hit, validate whether the code is actually vulnerable:
-- True positive: matches pattern AND has required preconditions
-- Likely positive: matches but needs manual verification
-- False positive: matches syntactically but not exploitable
+These cards have already been grep-matched against the codebase — every card
+has at least one keyword hit. Your job:
+1. Read the full DB entry for each card (use ref + lines)
+2. Process in batches of 30-40 cards to stay within context limits
+3. Build precise vulnerability patterns from the DB content
+4. Hunt for each pattern in the target code at the grep hit locations
+5. Validate: true positive / likely positive / false positive
+6. Write checkpoint after each batch to audit-output/hunt-state.json
 
 Write findings to audit-output/03-findings-raw.md using this format per finding:
 ### F-NNN: [Title]
@@ -274,9 +316,13 @@ Write findings to audit-output/03-findings-raw.md using this format per finding:
 (include vulnerable code snippet and recommended fix)
 ```
 
-### Combine Results
+### Why This Works
 
-Merge Track A keyword hits (as candidate findings) with Track B validated findings. Remove duplicates.
+| Approach | Tokens Required | Coverage |
+|----------|----------------|----------|
+| Old: Load all manifests | ~384K | Full but exceeds context |
+| Old: Load all .md content | ~1.1M | Impossible |
+| **New: Hunt cards + grep-prune** | **~20-40K cards + ~30K per batch** | **Full coverage, fits context** |
 
 ---
 

@@ -1,0 +1,479 @@
+{
+  "meta": {
+    "manifest": "general-security",
+    "description": "Compressed hunt cards for general-security — one-line detection rules for bulk scanning",
+    "totalCards": 39,
+    "skipped": 48,
+    "usage": "Load all cards into context. For each card, grep target code for card.grep pattern. On hit, read full DB entry via read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])."
+  },
+  "cards": [
+    {
+      "id": "general-security-vulnerability-categories-001",
+      "title": "Vulnerability Categories",
+      "severity": "LOW",
+      "grep": "initialize|init",
+      "detect": "Vulnerability Categories",
+      "ref": "DB/general/access-control/access-control-vulnerabilities.md",
+      "lines": [
+        54,
+        77
+      ]
+    },
+    {
+      "id": "general-security-vulnerable-code-patterns-002",
+      "title": "Vulnerable Code Patterns",
+      "severity": "CRITICAL",
+      "grep": "performAction|emergencyExit|transferFrom|sync|mint|init",
+      "detect": "Vulnerable Code Patterns",
+      "ref": "DB/general/access-control/access-control-vulnerabilities.md",
+      "lines": [
+        78,
+        360
+      ]
+    },
+    {
+      "id": "general-security-complete-exploit-list-by-year-003",
+      "title": "Complete Exploit List by Year",
+      "severity": "UNKNOWN",
+      "grep": "Complete|Exploit|List|Year",
+      "detect": "Complete Exploit List by Year",
+      "ref": "DB/general/access-control/access-control-vulnerabilities.md",
+      "lines": [
+        361,
+        468
+      ]
+    },
+    {
+      "id": "general-security-semgrep-detection-rules-007",
+      "title": "Semgrep Detection Rules",
+      "severity": "UNKNOWN",
+      "grep": "initialize|mint",
+      "detect": "Semgrep Detection Rules",
+      "ref": "DB/general/access-control/access-control-vulnerabilities.md",
+      "lines": [
+        657,
+        706
+      ]
+    },
+    {
+      "id": "general-security-real-world-examples-summary-008",
+      "title": "Real-World Examples Summary",
+      "severity": "UNKNOWN",
+      "grep": "Real|World|Summary",
+      "detect": "Real-World Examples Summary",
+      "ref": "DB/general/access-control/access-control-vulnerabilities.md",
+      "lines": [
+        707,
+        723
+      ]
+    },
+    {
+      "id": "general-security-vulnerability-description-001",
+      "title": "Vulnerability Description",
+      "severity": "LOW",
+      "grep": "ownerWithdrawAllTo(attacker|onlyOwner|onlyAdmin|initialized|initialize|mint",
+      "detect": "Vulnerability Description",
+      "ref": "DB/general/access-control/defihacklabs-access-control-2021-2022-patterns.md",
+      "lines": [
+        70,
+        99
+      ]
+    },
+    {
+      "id": "general-security-1-public-mint-public-burn-on-token-contr-000",
+      "title": "1. Public Mint + Public Burn on Token Contract (SafeMoon $8.9M)",
+      "severity": "CRITICAL",
+      "grep": "pancakeCall|pair.sync|doBurnHack|onlyOwner|sync|mint",
+      "detect": "SafeMoon's token contract had `mint()` and `burn()` functions that were callable by anyone — no...",
+      "ref": "DB/general/access-control/defihacklabs-access-control-2023-patterns.md",
+      "lines": [
+        85,
+        152
+      ]
+    },
+    {
+      "id": "general-security-2-public-fee-transfer-function-on-dex-pa-001",
+      "title": "2. Public Fee Transfer Function on DEX Pair (LeetSwap $630K)",
+      "severity": "HIGH",
+      "grep": "_transferFeesSupportingTaxTokens|testExploit",
+      "detect": "LeetSwap's pair contract had a public `_transferFeesSupportingTaxTokens()` function that allowed...",
+      "ref": "DB/general/access-control/defihacklabs-access-control-2023-patterns.md",
+      "lines": [
+        153,
+        206
+      ]
+    },
+    {
+      "id": "general-security-3-aggregator-arbitrary-sender-swap-swapx-002",
+      "title": "3. Aggregator Arbitrary-Sender Swap (SwapX $1M)",
+      "severity": "CRITICAL",
+      "grep": "testExploit|from",
+      "detect": "SwapX aggregator's swap function accepted a `from` address parameter, allowing the caller to...",
+      "ref": "DB/general/access-control/defihacklabs-access-control-2023-patterns.md",
+      "lines": [
+        207,
+        262
+      ]
+    },
+    {
+      "id": "general-security-4-token-lock-claim-with-migration-vulner-003",
+      "title": "4. Token Lock/Claim with Migration Vulnerability (SHIDO $230K)",
+      "severity": "HIGH",
+      "grep": "LockAndClaimToken|DPPFlashLoanCall",
+      "detect": "SHIDO's token migration system allowed users to lock SHIDOINU tokens and claim SHIDO tokens.",
+      "ref": "DB/general/access-control/defihacklabs-access-control-2023-patterns.md",
+      "lines": [
+        263,
+        306
+      ]
+    },
+    {
+      "id": "general-security-5-router-bot-authorization-failures-maes-004",
+      "title": "5. Router/Bot Authorization Failures (Maestro $630K, UniBot $84K)",
+      "severity": "HIGH",
+      "grep": "Router|Authorization|Failures|Maestro",
+      "detect": "Trading bot routers (MaestroRouter, UniBot) processed swap transactions on behalf of users but...",
+      "ref": "DB/general/access-control/defihacklabs-access-control-2023-patterns.md",
+      "lines": [
+        307,
+        340
+      ]
+    },
+    {
+      "id": "general-security-secure-implementations-005",
+      "title": "Secure Implementations",
+      "severity": "UNKNOWN",
+      "grep": "_transferFees|swap|mint|burn",
+      "detect": "Secure Implementations",
+      "ref": "DB/general/access-control/defihacklabs-access-control-2023-patterns.md",
+      "lines": [
+        341,
+        385
+      ]
+    },
+    {
+      "id": "general-security-1-missing-access-control-on-module-initi-000",
+      "title": "1. Missing Access Control on Module Initialization",
+      "severity": "CRITICAL",
+      "grep": "initializeModuleCore|issueNewDs|onlyOwner|onlyAdmin|initializer",
+      "detect": "When a protocol's core module initialization function (`initializeModuleCore()`) lacks an access...",
+      "ref": "DB/general/access-control/defihacklabs-access-control-2024-2025.md",
+      "lines": [
+        69,
+        119
+      ]
+    },
+    {
+      "id": "general-security-2-missing-caller-restriction-on-core-exe-001",
+      "title": "2. Missing Caller Restriction on Core Execution Function",
+      "severity": "CRITICAL",
+      "grep": "type(int128).max|velocore__execute|execute|int128",
+      "detect": "When a DEX or AMM exposes an `execute()` function that performs token swaps, liquidity operations,...",
+      "ref": "DB/general/access-control/defihacklabs-access-control-2024-2025.md",
+      "lines": [
+        120,
+        173
+      ]
+    },
+    {
+      "id": "general-security-3-public-mint-function-on-collateral-tok-002",
+      "title": "3. Public Mint Function on Collateral Token",
+      "severity": "CRITICAL",
+      "grep": "onlyMinter|onlyOwner|mint",
+      "detect": "When a protocol's collateral token contract exposes a `mint()` function without an `onlyOwner` or...",
+      "ref": "DB/general/access-control/defihacklabs-access-control-2024-2025.md",
+      "lines": [
+        174,
+        225
+      ]
+    },
+    {
+      "id": "general-security-4-unverified-contract-with-external-tran-003",
+      "title": "4. Unverified Contract with External Transfer Proxy",
+      "severity": "CRITICAL",
+      "grep": "Unverified|Contract|with|External",
+      "detect": "Unverified (non-open-source) contracts on blockchain explorers can hide malicious or vulnerable...",
+      "ref": "DB/general/access-control/defihacklabs-access-control-2024-2025.md",
+      "lines": [
+        226,
+        259
+      ]
+    },
+    {
+      "id": "general-security-5-missing-msg-sender-validation-in-pool--004",
+      "title": "5. Missing msg.sender Validation in Pool Exit",
+      "severity": "CRITICAL",
+      "grep": "exitPool|user",
+      "detect": "When a liquidity pool's `exitPool()` function accepts a `user` parameter to specify whose liquidity...",
+      "ref": "DB/general/access-control/defihacklabs-access-control-2024-2025.md",
+      "lines": [
+        260,
+        312
+      ]
+    },
+    {
+      "id": "general-security-1-unprotected-token-mint-burn-000",
+      "title": "1. Unprotected Token Mint / Burn",
+      "severity": "CRITICAL",
+      "grep": "bridgeBurnAddress|uniswapV2Pair|doBurnHack|onlyOwner|onlyRole|sync",
+      "detect": "When ERC20 token contracts expose `mint()` and `burn()` functions without access control modifiers...",
+      "ref": "DB/general/access-control/defihacklabs-access-control-patterns.md",
+      "lines": [
+        64,
+        122
+      ]
+    },
+    {
+      "id": "general-security-2-unprotected-migration-function-001",
+      "title": "2. Unprotected Migration Function",
+      "severity": "CRITICAL",
+      "grep": "migrateWithdraw|migrateStake|oldStaking",
+      "detect": "When staking or vault contracts implement `migrateStake()` functions for protocol upgrades, these...",
+      "ref": "DB/general/access-control/defihacklabs-access-control-patterns.md",
+      "lines": [
+        123,
+        158
+      ]
+    },
+    {
+      "id": "general-security-3-unprotected-configuration-setter-002",
+      "title": "3. Unprotected Configuration Setter",
+      "severity": "HIGH",
+      "grep": "setRewardToken|setToken|setPool|withdraw|stake",
+      "detect": "When staking or reward contracts expose configuration functions like `setToken()`,...",
+      "ref": "DB/general/access-control/defihacklabs-access-control-patterns.md",
+      "lines": [
+        159,
+        203
+      ]
+    },
+    {
+      "id": "general-security-4-missing-token-registry-validation-003",
+      "title": "4. Missing Token Registry Validation",
+      "severity": "HIGH",
+      "grep": "underlying|redeem|expiry|token|burn",
+      "detect": "When bond teller or similar contracts accept a `token` parameter in `redeem()` without validating...",
+      "ref": "DB/general/access-control/defihacklabs-access-control-patterns.md",
+      "lines": [
+        204,
+        247
+      ]
+    },
+    {
+      "id": "general-security-vulnerability-categories-001",
+      "title": "Vulnerability Categories",
+      "severity": "LOW",
+      "grep": "Categories",
+      "detect": "Vulnerability Categories",
+      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
+      "lines": [
+        62,
+        83
+      ]
+    },
+    {
+      "id": "general-security-1-unvalidated-callto-calldata-in-swap-ro-000",
+      "title": "1. Unvalidated callTo/callData in Swap/Route Structs",
+      "severity": "CRITICAL",
+      "grep": "transferFrom|getRouteData|getCallData|callData|callTo|call",
+      "detect": "Many DeFi protocols (routers, aggregators, bridges) accept user-supplied swap instructions...",
+      "ref": "DB/general/arbitrary-call/defihacklabs-arbitrary-call-2024-2025.md",
+      "lines": [
+        76,
+        148
+      ]
+    },
+    {
+      "id": "general-security-2-unrestricted-external-call-actions-ope-001",
+      "title": "2. Unrestricted External Call Actions (OPERATION_CALL)",
+      "severity": "CRITICAL",
+      "grep": "OPERATION_CALL|transferFrom",
+      "detect": "Multi-action contracts (like Kashi/Chamberss) implement an `OPERATION_CALL` action type that allows...",
+      "ref": "DB/general/arbitrary-call/defihacklabs-arbitrary-call-2024-2025.md",
+      "lines": [
+        149,
+        219
+      ]
+    },
+    {
+      "id": "general-security-3-bridge-signer-validation-bypass-002",
+      "title": "3. Bridge Signer Validation Bypass",
+      "severity": "CRITICAL",
+      "grep": "withdraw",
+      "detect": "Cross-chain bridges use multi-signature validation on withdrawal requests — requiring N of M...",
+      "ref": "DB/general/arbitrary-call/defihacklabs-arbitrary-call-2024-2025.md",
+      "lines": [
+        220,
+        260
+      ]
+    },
+    {
+      "id": "general-security-4-yul-integer-overflow-calldata-corrupti-003",
+      "title": "4. Yul Integer Overflow Calldata Corruption",
+      "severity": "CRITICAL",
+      "grep": "interactionLength|add",
+      "detect": "Contracts using Yul assembly for calldata manipulation are vulnerable to integer overflow, as Yul's...",
+      "ref": "DB/general/arbitrary-call/defihacklabs-arbitrary-call-2024-2025.md",
+      "lines": [
+        261,
+        314
+      ]
+    },
+    {
+      "id": "general-security-5-unverified-aggregator-proxy-forwarding-004",
+      "title": "5. Unverified Aggregator Proxy Forwarding",
+      "severity": "CRITICAL",
+      "grep": "Unverified|Aggregator|Proxy|Forwarding",
+      "detect": "Trade aggregator proxies that accept raw calldata and forward it to external contracts create a...",
+      "ref": "DB/general/arbitrary-call/defihacklabs-arbitrary-call-2024-2025.md",
+      "lines": [
+        315,
+        347
+      ]
+    },
+    {
+      "id": "general-security-1-unvalidated-router-address-calldata-in-000",
+      "title": "1. Unvalidated Router Address + Calldata in Swap Functions",
+      "severity": "CRITICAL",
+      "grep": "router.call(data|routerCallNative|balanceOf|transfer|calldata|router",
+      "detect": "Swap aggregator and cross-chain proxy contracts often need to interact with multiple DEX routers.",
+      "ref": "DB/general/arbitrary-call/defihacklabs-arbitrary-call-patterns.md",
+      "lines": [
+        68,
+        234
+      ]
+    },
+    {
+      "id": "general-security-2-additional-arbitrary-call-patterns-202-001",
+      "title": "2. Additional Arbitrary Call Patterns (2022)",
+      "severity": "CRITICAL",
+      "grep": "mintToPayable|balanceOf|collateral",
+      "detect": "write() accepts arbitrary callData and executes it",
+      "ref": "DB/general/arbitrary-call/defihacklabs-arbitrary-call-patterns.md",
+      "lines": [
+        235,
+        360
+      ]
+    },
+    {
+      "id": "general-security-vulnerability-pattern-categories-001",
+      "title": "VULNERABILITY PATTERN CATEGORIES",
+      "severity": "UNKNOWN",
+      "grep": "executeOnAdapter|setFeeCollector|callExternal|address(0|initialize",
+      "detect": "No zero address check",
+      "ref": "DB/general/missing-validations/MISSING_VALIDATION_TEMPLATE.md",
+      "lines": [
+        53,
+        622
+      ]
+    },
+    {
+      "id": "general-security-input-validation-vulnerabilities-defihac-000",
+      "title": "Input Validation Vulnerabilities — DeFiHackLabs Patterns",
+      "severity": "CRITICAL",
+      "grep": "anySwapOutUnderlyingWithPermit|token.call(swapExtraData|uniswapV3SwapCallback|token.underlying|swapExtraData|performAction",
+      "detect": "The root causes fall into several distinct categories:\n\n\n\n1.",
+      "ref": "DB/general/missing-validations/defihacklabs-input-validation-patterns.md",
+      "lines": [
+        43,
+        441
+      ]
+    },
+    {
+      "id": "general-security-slippage-input-validation-vulnerabilitie-000",
+      "title": "Slippage & Input Validation Vulnerabilities",
+      "severity": "LOW",
+      "grep": "buyTokensAndDepositOnBehalf|execute|swap",
+      "detect": "The root causes fall into several distinct categories:\n\n\n\n1.",
+      "ref": "DB/general/validation/slippage-input-validation-vulnerabilities.md",
+      "lines": [
+        39,
+        675
+      ]
+    },
+    {
+      "id": "general-security-defihacklabs-unprotected-initialization--000",
+      "title": "DeFiHackLabs Unprotected Initialization Compendium",
+      "severity": "CRITICAL",
+      "grep": "emergencyWithdraw|setRewards|selfdestruct|onlyOwner|flashLoan|initialized",
+      "detect": "init() has NO access control — anyone can re-set depositToken",
+      "ref": "DB/general/initialization/defihacklabs-initialization-patterns.md",
+      "lines": [
+        36,
+        290
+      ]
+    },
+    {
+      "id": "general-security-vulnerability-categories-001",
+      "title": "Vulnerability Categories",
+      "severity": "CRITICAL",
+      "grep": "Categories",
+      "detect": "Vulnerability Categories",
+      "ref": "DB/general/initialization/initialization-vulnerabilities.md",
+      "lines": [
+        56,
+        74
+      ]
+    },
+    {
+      "id": "general-security-real-world-exploits-summary-003",
+      "title": "Real-World Exploits Summary",
+      "severity": "UNKNOWN",
+      "grep": "Real|World|Exploits|Summary",
+      "detect": "Real-World Exploits Summary",
+      "ref": "DB/general/initialization/initialization-vulnerabilities.md",
+      "lines": [
+        362,
+        372
+      ]
+    },
+    {
+      "id": "general-security-secure-implementation-guidelines-004",
+      "title": "Secure Implementation Guidelines",
+      "severity": "LOW",
+      "grep": "initializeV3|initializeV2|createVault|initialize",
+      "detect": "Secure Implementation Guidelines",
+      "ref": "DB/general/initialization/initialization-vulnerabilities.md",
+      "lines": [
+        373,
+        447
+      ]
+    },
+    {
+      "id": "general-security-vulnerability-categories-001",
+      "title": "Vulnerability Categories",
+      "severity": "LOW",
+      "grep": "Categories",
+      "detect": "Vulnerability Categories",
+      "ref": "DB/general/signature/signature-verification-vulnerabilities.md",
+      "lines": [
+        55,
+        73
+      ]
+    },
+    {
+      "id": "general-security-real-world-exploits-summary-003",
+      "title": "Real-World Exploits Summary",
+      "severity": "UNKNOWN",
+      "grep": "Real|World|Exploits|Summary",
+      "detect": "Real-World Exploits Summary",
+      "ref": "DB/general/signature/signature-verification-vulnerabilities.md",
+      "lines": [
+        355,
+        367
+      ]
+    },
+    {
+      "id": "general-security-secure-implementation-guidelines-004",
+      "title": "Secure Implementation Guidelines",
+      "severity": "UNKNOWN",
+      "grep": "executeWithSignature|getMessageHash",
+      "detect": "Secure Implementation Guidelines",
+      "ref": "DB/general/signature/signature-verification-vulnerabilities.md",
+      "lines": [
+        368,
+        415
+      ]
+    }
+  ]
+}

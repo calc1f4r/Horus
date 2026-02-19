@@ -7,22 +7,55 @@
 
 ## Architecture Overview
 
-The database uses a **3-tier search architecture** that progressively narrows from broad categories to exact line ranges:
+The database uses a **4-tier search architecture** that progressively narrows from broad categories to exact line ranges:
 
 ```
-Tier 1: DB/index.json           (Router — 330 lines, ~10KB)
-   ↓    Identifies which manifests to load
-Tier 2: DB/manifests/<name>.json (Manifest — 30-130KB each)
-   ↓    Finds specific patterns with line ranges  
-Tier 3: DB/**/*.md               (Vulnerability files — read only relevant lines)
+Tier 1:   DB/index.json                          (Router — ~350 lines, ~12KB)
+   ↓      Identifies which manifests/huntcards to load
+Tier 1.5: DB/manifests/huntcards/*-huntcards.json  (Hunt Cards — compressed detection rules)
+   ↓      ALL 490 patterns fit in ~41K tokens. Grep-based bulk scanning.
+Tier 2:   DB/manifests/<name>.json                 (Manifest — 30-130KB each)
+   ↓      Full pattern metadata with line ranges, keywords, root causes
+Tier 3:   DB/**/*.md                               (Vulnerability files — read only relevant lines)
 ```
+
+### Tier 1.5: Hunt Cards (New)
+
+Hunt cards are **compressed detection rules** — one card per vulnerability pattern, each ~5 lines. They solve the context window problem: instead of loading 200KB+ manifests to decide which patterns are relevant, an agent loads all hunt cards (~41K tokens) and greps the target codebase to prune irrelevant patterns.
+
+Each hunt card:
+```json
+{
+  "id": "general-defi-1-empty-market-exchange-rate-inflation-000",
+  "title": "Empty Market Exchange Rate Inflation",
+  "severity": "CRITICAL",
+  "grep": "redeemUnderlying|totalSupply|transfer",
+  "detect": "When a CompoundV2-fork cToken market has extremely low totalSupply...",
+  "ref": "DB/general/vault-inflation-attack/defihacklabs-vault-inflation-patterns.md",
+  "lines": [66, 174]
+}
+```
+
+**Key fields:**
+- `grep` — pipe-delimited regex for `grep -rn` or `rg` against target code
+- `detect` — one-line rule describing what makes code vulnerable
+- `ref` + `lines` — read full entry only when grep hits: `read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])`
+
+**Files:**
+- `DB/manifests/huntcards/all-huntcards.json` — ALL 490 cards in one file
+- `DB/manifests/huntcards/<manifest>-huntcards.json` — per-manifest cards
 
 ### Why This Matters
 
-| Approach | Lines Read | Precision |
-|----------|-----------|-----------|
-| Old: Read index.json + full files | 5,000-15,000 | Low (noise dilutes findings) |
-| New: Router → Manifest → Targeted read | 200-500 | High (exact pattern + line range) |
+| Approach | Context Cost | Precision |
+|----------|-------------|----------|
+| Old: Read index.json + full files | 5,000-15,000 lines | Low (noise dilutes findings) |
+| Manifests: Router → Manifest → Targeted read | 200-500 lines | High (exact pattern + line range) |
+| Hunt cards: Router → Hunt cards → Grep → Targeted read | 50-200 lines | Very High (only actual hits) |
+
+| Scenario | Without Hunt Cards | With Hunt Cards |
+|----------|-------------------|----------------|
+| vault_yield audit (4 manifests) | ~384KB manifest JSON + 27K lines vuln content | ~20K tokens hunt cards → grep → read only hits |
 
 ---
 
@@ -89,6 +122,32 @@ Tier 3: DB/**/*.md               (Vulnerability files — read only relevant lin
 1. Load relevant manifest
 2. Filter patterns where severity includes "HIGH" or "CRITICAL"
 3. Read matching line ranges
+```
+
+### Workflow E: Bulk Hunt (Audit Mode — Recommended)
+
+**When**: Running a full audit and need to check ALL relevant patterns against target code
+
+```
+1. Read DB/index.json → protocolContext.mappings.<protocol_type>
+2. Get manifest list
+3. Load hunt cards for those manifests:
+   - Option A: Load per-manifest cards: DB/manifests/huntcards/<name>-huntcards.json
+   - Option B: Load ALL cards: DB/manifests/huntcards/all-huntcards.json (~41K tokens)
+4. For each card, grep target codebase for card.grep pattern:
+   grep -rn "card.grep" <target_path> --include="*.sol"
+5. For hits: read full DB entry via read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])
+6. Validate: compare vulnerable pattern against target code
+```
+
+**Example**: Auditing an ERC4626 vault
+```
+→ index.json: vault_yield → manifests: ["tokens", "general-defi", "oracle", "unique"]
+→ Load hunt cards for those 4 manifests (241 cards, ~20K tokens)
+→ Grep target code for each card's grep pattern
+→ Card "First Depositor / Inflation Attack" grep "totalSupply|convertToShares|totalAssets" → HIT in Vault.sol:45
+→ read_file("DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md", 151, 393) ← full vulnerability content
+→ Compare against Vault.sol:45 → True positive!
 ```
 
 ---
@@ -215,6 +274,31 @@ For each loaded manifest:
 
 The orchestrator manages context budget by loading manifests one at a time, extracting keywords, then discarding the manifest before loading the next.
 
+### Recommended: Hunt Card Approach for Exhaustive Audit
+
+Instead of loading manifests one at a time, use hunt cards for maximum coverage with minimal context:
+
+```
+1. Load all hunt cards for resolved manifests (~20-41K tokens)
+2. Batch grep: for each card, search target code for card.grep:
+   grep -rn "keyword1|keyword2" <path> --include="*.sol"
+3. Prune: discard cards with zero grep hits (typically 60-80%)
+4. For remaining cards (typically 30-80): read full DB entries using card.ref + card.lines
+5. Validate each hit against target code
+```
+
+This approach lets an agent hold ALL vulnerability detection patterns in context simultaneously — impossible with full manifests.
+
+### Context Cost (Hunt Card Approach)
+
+| Action | Tokens | Notes |
+|--------|--------|-------|
+| Read index.json | ~3K | One-time routing |
+| Load all hunt cards (1 file) | ~41K | ALL 490 patterns |
+| Grep target code | 0 | Run in terminal |
+| Read matched DB entries | ~5-15K | Only for hits (~20-40 patterns) |
+| **Total** | **~50-60K** | Leaves room for target codebase |
+
 ---
 
 ## Regenerating Manifests
@@ -228,5 +312,6 @@ python3 generate_manifests.py
 This will:
 1. Re-parse all `.md` files in `DB/`
 2. Re-generate all manifests with updated patterns and line ranges
-3. Update the router `index.json`
-4. Back up the previous index
+3. Re-generate all hunt cards in `DB/manifests/huntcards/`
+4. Update the router `index.json`
+5. Back up the previous index

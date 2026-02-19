@@ -1,0 +1,395 @@
+{
+  "meta": {
+    "manifest": "amm",
+    "description": "Compressed hunt cards for amm — one-line detection rules for bulk scanning",
+    "totalCards": 32,
+    "skipped": 35,
+    "usage": "Load all cards into context. For each card, grep target code for card.grep pattern. On hit, read full DB entry via read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])."
+  },
+  "cards": [
+    {
+      "id": "amm-vulnerability-description-000",
+      "title": "Vulnerability Description",
+      "severity": "HIGH",
+      "grep": "validateMinOut|deposit|_swap",
+      "detect": "This vulnerability exists because **swap operations set amountOutMinimum to 0 or use ineffective...",
+      "ref": "DB/amm/concentrated-liquidity/slippage-sandwich-frontrun.md",
+      "lines": [
+        73,
+        190
+      ]
+    },
+    {
+      "id": "amm-1-first-depositor-inflation-attacks-000",
+      "title": "1. First Depositor / Inflation Attacks",
+      "severity": "HIGH",
+      "grep": "_addLiquidity|totalSupply|addQuote|sync|burn",
+      "detect": "LP tokens are calculated as:",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        302,
+        478
+      ]
+    },
+    {
+      "id": "amm-2-slippage-protection-vulnerabilities-001",
+      "title": "2. Slippage Protection Vulnerabilities",
+      "severity": "HIGH",
+      "grep": "executeTrade|amountOutMin|reinvest|swap",
+      "detect": "Functions that swap tokens or add/remove liquidity don't validate that the received amount meets...",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        479,
+        594
+      ]
+    },
+    {
+      "id": "amm-3-sandwich-mev-attacks-002",
+      "title": "3. Sandwich & MEV Attacks",
+      "severity": "HIGH",
+      "grep": "rebalance|withdraw",
+      "detect": "Withdrawal swaps without protection",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        595,
+        642
+      ]
+    },
+    {
+      "id": "amm-4-spot-price-manipulation-slot0-003",
+      "title": "4. Spot Price Manipulation (slot0)",
+      "severity": "HIGH",
+      "grep": "validatePrice|getReserves|getLPValue|getPrice|slot0",
+      "detect": "`slot0` returns the current tick and sqrtPriceX96 which reflect the most recent swap.",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        643,
+        731
+      ]
+    },
+    {
+      "id": "amm-5-deadline-vulnerabilities-004",
+      "title": "5. Deadline Vulnerabilities",
+      "severity": "MEDIUM",
+      "grep": "swap",
+      "detect": "No deadline - transaction can execute anytime",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        732,
+        783
+      ]
+    },
+    {
+      "id": "amm-6-reserve-manipulation-attacks-005",
+      "title": "6. Reserve Manipulation Attacks",
+      "severity": "HIGH",
+      "grep": "calculateImpermanentLoss",
+      "detect": "IL calculation uses manipulatable reserves",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        784,
+        821
+      ]
+    },
+    {
+      "id": "amm-7-lp-token-calculation-issues-006",
+      "title": "7. LP Token Calculation Issues",
+      "severity": "HIGH",
+      "grep": "getLPValue",
+      "detect": "Assumes 18 decimals for all tokens",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        822,
+        864
+      ]
+    },
+    {
+      "id": "amm-8-callback-reentrancy-attacks-007",
+      "title": "8. Callback & Reentrancy Attacks",
+      "severity": "CRITICAL",
+      "grep": "uniswapV3SwapCallback|uniswapV3MintCallback|initiateWithdraw|_executeTrade|swapCallback|redeemNative",
+      "detect": "No access control on callback",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        865,
+        981
+      ]
+    },
+    {
+      "id": "amm-9-factory-pool-creation-attacks-008",
+      "title": "9. Factory & Pool Creation Attacks",
+      "severity": "HIGH",
+      "grep": "getOrCreatePoolAndAddLiquidity|createLaunchPad|_existsPairPool|_deployToken|deployToken|poolExists",
+      "detect": "Deterministic token address",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        982,
+        1135
+      ]
+    },
+    {
+      "id": "amm-10-decimal-math-calculation-issues-009",
+      "title": "10. Decimal & Math Calculation Issues",
+      "severity": "CRITICAL",
+      "grep": "_getTimeWeightedPrimaryBalance|getCErc20Price|getAmountOut",
+      "detect": "Assumes both tokens have same decimals",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        1136,
+        1222
+      ]
+    },
+    {
+      "id": "amm-11-liquidity-migration-protocol-upgrade--010",
+      "title": "11. Liquidity Migration & Protocol Upgrade Attacks",
+      "severity": "HIGH",
+      "grep": "receiveFromBootstrap|moveLiquidity|reLP",
+      "detect": "Uses raw balanceOf for calculations",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        1223,
+        1308
+      ]
+    },
+    {
+      "id": "amm-12-flash-loan-based-graduation-threshold-011",
+      "title": "12. Flash Loan-Based Graduation/Threshold Manipulation",
+      "severity": "MEDIUM",
+      "grep": "unwrapToken|_graduate|buy",
+      "detect": "Atomic unwrap allows flash loan closure",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        1309,
+        1372
+      ]
+    },
+    {
+      "id": "amm-13-detection-patterns-audit-checklist-012",
+      "title": "13. Detection Patterns & Audit Checklist",
+      "severity": "CRITICAL",
+      "grep": "balanceOf(address(this|impermanent_loss|constant_product|first_depositor|amountOutMin|getReserves",
+      "detect": "13. Detection Patterns & Audit Checklist",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        1373,
+        1412
+      ]
+    },
+    {
+      "id": "amm-13-imbalanced-liquidity-addition-exploit-013",
+      "title": "13. Imbalanced Liquidity Addition Exploitation",
+      "severity": "HIGH",
+      "grep": "initializeExternals|addLiquidity|onJoinPool",
+      "detect": "LP token calculation uses the minimum of two ratios:",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        1413,
+        1485
+      ]
+    },
+    {
+      "id": "amm-14-rebasing-token-integration-issues-014",
+      "title": "14. Rebasing Token Integration Issues",
+      "severity": "HIGH",
+      "grep": "getTokensForShares|getBalance|deposit",
+      "detect": "When depositing rebasing tokens, the initial balance equals the deposit amount.",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        1486,
+        1548
+      ]
+    },
+    {
+      "id": "amm-15-impermanent-loss-protection-abuse-015",
+      "title": "15. Impermanent Loss Protection Abuse",
+      "severity": "HIGH",
+      "grep": "burn",
+      "detect": "IL protection calculates losses by comparing initial deposit ratios to withdrawal ratios.",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        1549,
+        1604
+      ]
+    },
+    {
+      "id": "amm-16-protocol-invariant-breaking-016",
+      "title": "16. Protocol Invariant Breaking",
+      "severity": "HIGH",
+      "grep": "test_invariantBroken|removeLiquidity|checkInvariant",
+      "detect": "Rounding errors accumulate to break invariant",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        1605,
+        1646
+      ]
+    },
+    {
+      "id": "amm-17-dex-swap-slippage-accounting-discrepa-017",
+      "title": "17. DEX Swap Slippage Accounting Discrepancies",
+      "severity": "MEDIUM",
+      "grep": "rebalanceVaultsAssets",
+      "detect": "Uses expected amount, not actual received",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        1647,
+        1693
+      ]
+    },
+    {
+      "id": "amm-18-leftover-token-accumulation-in-autoco-018",
+      "title": "18. Leftover Token Accumulation in Autocompounding",
+      "severity": "HIGH",
+      "grep": "_tokenToPodLp|_getSwapAmt",
+      "detect": "Doesn't consider existing balance before swap",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        1694,
+        1741
+      ]
+    },
+    {
+      "id": "amm-19-weth-eth-pool-asset-mismatch-019",
+      "title": "19. WETH/ETH Pool Asset Mismatch",
+      "severity": "MEDIUM",
+      "grep": "_unstakeAndExitPool",
+      "detect": "Pool uses ETH but vault holds WETH",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        1742,
+        1783
+      ]
+    },
+    {
+      "id": "amm-20-single-sided-vs-proportional-exit-con-020",
+      "title": "20. Single-Sided vs Proportional Exit Confusion",
+      "severity": "HIGH",
+      "grep": "_unstakeAndExitPool|emergencyExit",
+      "detect": "Uses single-sided exit during emergency",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        1784,
+        1829
+      ]
+    },
+    {
+      "id": "amm-21-type-casting-integer-overflow-issues-021",
+      "title": "21. Type Casting & Integer Overflow Issues",
+      "severity": "CRITICAL",
+      "grep": "_findSlice|u64::MAX|uint8|i64",
+      "detect": "When casting from larger integer types to smaller ones without validation:",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        1830,
+        1931
+      ]
+    },
+    {
+      "id": "amm-22-spot-price-abuse-in-protocol-swaps-022",
+      "title": "22. Spot Price Abuse in Protocol Swaps",
+      "severity": "CRITICAL",
+      "grep": "reimburseLiquidityFees|getInGivenExpectedOut",
+      "detect": "Protocol contracts that:\n\n1.",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        1932,
+        2018
+      ]
+    },
+    {
+      "id": "amm-23-lp-token-burn-hijack-attacks-023",
+      "title": "23. LP Token Burn/Hijack Attacks",
+      "severity": "HIGH",
+      "grep": "withdraw|burn",
+      "detect": "1.",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        2019,
+        2104
+      ]
+    },
+    {
+      "id": "amm-24-constant-sum-amm-arbitrage-024",
+      "title": "24. Constant Sum AMM Arbitrage",
+      "severity": "HIGH",
+      "grep": "swap",
+      "detect": "Constant sum invariant: `k = a + b`",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        2105,
+        2174
+      ]
+    },
+    {
+      "id": "amm-25-state-accounting-discrepancies-025",
+      "title": "25. State Accounting Discrepancies",
+      "severity": "MEDIUM",
+      "grep": "getOhmEmissions|withdraw|removed|deposit|minted",
+      "detect": "State variables are updated incorrectly:\n\n- Subtraction from wrong counter (e.",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        2175,
+        2259
+      ]
+    },
+    {
+      "id": "amm-26-incorrect-liquidity-ownership-assumpt-026",
+      "title": "26. Incorrect Liquidity Ownership Assumptions",
+      "severity": "HIGH",
+      "grep": "lpToRemove|reLP",
+      "detect": "Protocol calculates:",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        2260,
+        2342
+      ]
+    },
+    {
+      "id": "amm-27-dividend-reward-gaming-027",
+      "title": "27. Dividend/Reward Gaming",
+      "severity": "HIGH",
+      "grep": "recordTrade|addTradeFee|addDividend",
+      "detect": "Dividend calculation uses short-term fee averages:\n\n- Only last N trades (e.",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        2343,
+        2427
+      ]
+    },
+    {
+      "id": "amm-28-missing-account-validation-solana-spe-028",
+      "title": "28. Missing Account Validation (Solana-Specific)",
+      "severity": "HIGH",
+      "grep": "Missing|Account|Validation|Solana",
+      "detect": "Solana accounts are passed as parameters; the program must verify:",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        2428,
+        2514
+      ]
+    },
+    {
+      "id": "amm-29-detection-patterns-audit-checklist-029",
+      "title": "29. Detection Patterns & Audit Checklist",
+      "severity": "CRITICAL",
+      "grep": "balanceOf(address(this|constant_product|dividend_gaming|amountOutMin|emergency_exit|constant_sum",
+      "detect": "29. Detection Patterns & Audit Checklist",
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        2515,
+        2589
+      ]
+    },
+    {
+      "id": "amm-defihacklabs-amm-calculation-errors-comp-000",
+      "title": "DeFiHackLabs AMM Calculation Errors Compendium",
+      "severity": "CRITICAL",
+      "grep": "exploit|swap",
+      "detect": "Fee uses 10000 base but K-check still uses 1000 base",
+      "ref": "DB/amm/constantproduct/defihacklabs-amm-calculation-errors.md",
+      "lines": [
+        38,
+        278
+      ]
+    }
+  ]
+}

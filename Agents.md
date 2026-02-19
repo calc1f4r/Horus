@@ -11,17 +11,21 @@ This document gives agent models (like you) practical guidance for making safe, 
 
 ---
 
-## Architecture: 3-Tier Search
+## Architecture: 4-Tier Search
 
-The database uses a **tiered architecture** for precision. Never read entire vulnerability files — use manifests to find exact line ranges.
+The database uses a **tiered architecture** for precision. Never read entire vulnerability files — use hunt cards or manifests to find exact line ranges.
 
 ```
-Tier 1: DB/index.json              ← Router (~330 lines). Start here.
+Tier 1:   DB/index.json                          ← Router (~350 lines). Start here.
    ↓  
-Tier 2: DB/manifests/<name>.json   ← Pattern-level index with line ranges (11 manifests)
+Tier 1.5: DB/manifests/huntcards/*-huntcards.json ← Compressed detection cards (~41K tokens for ALL 490 patterns)
    ↓  
-Tier 3: DB/**/*.md                 ← Vulnerability content. Read ONLY targeted line ranges.
+Tier 2:   DB/manifests/<name>.json                ← Full pattern-level index with line ranges (11 manifests)
+   ↓  
+Tier 3:   DB/**/*.md                              ← Vulnerability content. Read ONLY targeted line ranges.
 ```
+
+**Hunt Cards (Tier 1.5)**: Compressed 5-line cards with `grep` patterns and one-line detection rules. Load `DB/manifests/huntcards/all-huntcards.json` to fit ALL patterns in context. For each card, grep target code → on hit, read full entry via `read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])`.
 
 For the full search guide, see `DB/SEARCH_GUIDE.md`.
 
@@ -37,9 +41,15 @@ Read `DB/index.json` (~330 lines). It contains:
 - **`auditChecklist`** — quick security checks by category
 - **`keywordIndex`** — points to `DB/manifests/keywords.json` for keyword search
 
-### Step 2: Load the Right Manifest
+### Step 2: Load Hunt Cards (Preferred) or Manifests
 
-Based on the protocol type or keyword, load 1-3 relevant manifests:
+**For bulk scanning (audits)**: Load hunt cards instead of full manifests:
+- `DB/manifests/huntcards/all-huntcards.json` — ALL 490 patterns (~41K tokens)
+- `DB/manifests/huntcards/<manifest>-huntcards.json` — per-manifest cards
+
+Each card has a `grep` field for searching target code and `ref` + `lines` for reading the full DB entry on hit.
+
+**For browsing/targeted lookup**: Load 1-3 relevant manifests:
 
 | Manifest | Patterns | Focus |
 |----------|----------|-------|
@@ -122,12 +132,23 @@ Load manifest → filter patterns where severity includes "HIGH" or "CRITICAL"
 
 ## Workflow for Vulnerability Discovery
 
+### Standard (Browsing/Targeted)
 ```
 1. Identify protocol type → Read index.json protocolContext
 2. Load relevant manifests (1-3) → Browse patterns by title/severity/keywords
 3. Read exact line ranges → Get precise vulnerability content
 4. Check unique exploits → Load DB/manifests/unique.json
 5. Apply patterns → Match against target codebase
+```
+
+### Bulk Hunt (Audit Mode — Recommended for Full Audits)
+```
+1. Identify protocol type → Read index.json protocolContext
+2. Load hunt cards for resolved manifests (or all-huntcards.json for ~41K tokens)
+3. For each card, grep target code: grep -rn "card.grep" <target_path>
+4. Prune cards with zero grep hits (removes ~60-80% of patterns)
+5. For remaining hits, read full DB entry: read_file(card.ref, card.lines[0], card.lines[1])
+6. Validate each match against target code (true/false positive)
 ```
 
 ---
@@ -145,8 +166,10 @@ python3 generate_manifests.py
 
 | File | Purpose |
 |------|---------|
-| `DB/index.json` | **START HERE** — Lean router to manifests |
-| `DB/manifests/*.json` | Pattern-level indexes with line ranges |
+| `DB/index.json` | **START HERE** — Lean router to manifests + hunt cards |
+| `DB/manifests/huntcards/all-huntcards.json` | **ALL hunt cards** — 490 compressed detection cards (~41K tokens) |
+| `DB/manifests/huntcards/<name>-huntcards.json` | Per-manifest hunt cards |
+| `DB/manifests/*.json` | Full pattern-level indexes with line ranges |
 | `DB/SEARCH_GUIDE.md` | Detailed search guide for agents |
 | `TEMPLATE.md` | Structure for new vulnerability entries |
 | `Example.md` | Reference implementation of an entry |

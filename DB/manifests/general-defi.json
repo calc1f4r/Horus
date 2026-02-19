@@ -2,8 +2,8 @@
   "meta": {
     "category": "general-defi",
     "description": "DeFi-specific: flash loans, slippage, vaults, precision, calculations",
-    "fileCount": 22,
-    "totalPatterns": 175,
+    "fileCount": 24,
+    "totalPatterns": 199,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -2808,6 +2808,379 @@
               ]
             }
           ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/token-compatibility/defihacklabs-reflection-token-2023-2024-patterns.md",
+      "totalLines": 656,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "token_compatibility",
+        "vulnerability_type": "reflection_token_exploit_patterns_2023_2024",
+        "attack_type": "economic_exploit",
+        "affected_component": "reflection_token_contract",
+        "severity": "high",
+        "impact": "fund_loss",
+        "exploitability": "0.8",
+        "financial_impact": "high",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "15",
+        "total_losses": "\"$10M+\""
+      },
+      "patternCount": 11,
+      "patterns": [
+        {
+          "id": "general-defi-reflection-tax-token-exploit-patterns-20-000",
+          "title": "Reflection & Tax Token Exploit Patterns (2023-2024)",
+          "lineStart": 71,
+          "lineEnd": 105,
+          "lineCount": 35,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_transfer",
+            "balance",
+            "balanceOf",
+            "balanceOf(pair",
+            "burn",
+            "burnPairs",
+            "currentRate",
+            "deliver",
+            "getReserves",
+            "mint",
+            "rOwned",
+            "rTotal",
+            "reserve",
+            "reserve0",
+            "reserve1"
+          ],
+          "rootCause": "All reflection token exploits share a fundamental architectural flaw: **the AMM pair's reserve tracking (`reserve0`, `reserve1`) does not account for dynamic balance changes caused by reflection rate ",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 77,
+              "lineEnd": 105,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_transfer",
+                "balance",
+                "balanceOf",
+                "balanceOf(pair",
+                "burn",
+                "burnPairs",
+                "currentRate",
+                "deliver"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-variant-1-deliver-skim-pattern-7-15-expl-001",
+          "title": "Variant 1: deliver() + skim() Pattern (7/15 exploits)",
+          "lineStart": 106,
+          "lineEnd": 251,
+          "lineCount": 146,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "DPPFlashLoanCall",
+            "pancakeCall",
+            "receiveFlashLoan"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 108,
+              "lineEnd": 251,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall",
+                "pancakeCall",
+                "receiveFlashLoan"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-variant-2-burn-sync-pattern-2-15-exploit-002",
+          "title": "Variant 2: burn() + sync() Pattern (2/15 exploits)",
+          "lineStart": 252,
+          "lineEnd": 312,
+          "lineCount": 61,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "DPPFlashLoanCall",
+            "executeOperation"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 254,
+              "lineEnd": 312,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall",
+                "executeOperation"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-variant-3-self-transfer-balance-doubling-003",
+          "title": "Variant 3: Self-Transfer Balance Doubling (3/15 exploits)",
+          "lineStart": 313,
+          "lineEnd": 381,
+          "lineCount": 69,
+          "severity": [
+            "CRITICAL",
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "pancakeCall",
+            "testExploit"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 315,
+              "lineEnd": 381,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "pancakeCall",
+                "testExploit"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-variant-4-deflationary-pair-burn-2-15-ex-004",
+          "title": "Variant 4: Deflationary Pair Burn (2/15 exploits)",
+          "lineStart": 382,
+          "lineEnd": 445,
+          "lineCount": 64,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "DPPFlashLoanCall"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 384,
+              "lineEnd": 445,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-variant-5-tax-reflection-to-pair-1-15-ex-005",
+          "title": "Variant 5: Tax Reflection to Pair (1/15 exploits)",
+          "lineStart": 446,
+          "lineEnd": 497,
+          "lineCount": 52,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "pancakeV3FlashCallback"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 448,
+              "lineEnd": 497,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "pancakeV3FlashCallback"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-impact-analysis-006",
+          "title": "Impact Analysis",
+          "lineStart": 498,
+          "lineEnd": 523,
+          "lineCount": 26,
+          "severity": [],
+          "codeKeywords": [
+            "_transfer",
+            "burn",
+            "burnPairs",
+            "deliver"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Financial Impact",
+              "lineStart": 500,
+              "lineEnd": 505,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Impact by Pattern (15/15 exploits)",
+              "lineStart": 506,
+              "lineEnd": 514,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Affected Scenarios (15/15 exploits)",
+              "lineStart": 515,
+              "lineEnd": 523,
+              "severity": [],
+              "codeKeywords": [
+                "_transfer",
+                "burn",
+                "burnPairs",
+                "deliver"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-secure-implementation-007",
+          "title": "Secure Implementation",
+          "lineStart": 524,
+          "lineEnd": 572,
+          "lineCount": 49,
+          "severity": [],
+          "codeKeywords": [
+            "_transfer",
+            "burn",
+            "deliver"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Fix 1: Exclude Pair from Reflections",
+              "lineStart": 526,
+              "lineEnd": 538,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Fix 2: Restrict burn() and deliver()",
+              "lineStart": 539,
+              "lineEnd": 557,
+              "severity": [],
+              "codeKeywords": [
+                "burn",
+                "deliver"
+              ]
+            },
+            {
+              "title": "Fix 3: Handle Self-Transfer Edge Case",
+              "lineStart": 558,
+              "lineEnd": 572,
+              "severity": [],
+              "codeKeywords": [
+                "_transfer"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-detection-patterns-008",
+          "title": "Detection Patterns",
+          "lineStart": 573,
+          "lineEnd": 616,
+          "lineCount": 44,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_burn",
+            "_transfer",
+            "burn",
+            "burnPairs",
+            "deliver"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Static Analysis",
+              "lineStart": 575,
+              "lineEnd": 598,
+              "severity": [],
+              "codeKeywords": [
+                "_burn",
+                "_transfer",
+                "burn",
+                "burnPairs",
+                "deliver"
+              ]
+            },
+            {
+              "title": "Dynamic Analysis / Runtime Checks",
+              "lineStart": 599,
+              "lineEnd": 616,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-audit-checklist-009",
+          "title": "Audit Checklist",
+          "lineStart": 617,
+          "lineEnd": 631,
+          "lineCount": 15,
+          "severity": [],
+          "codeKeywords": [
+            "_transfer",
+            "burn",
+            "deliver",
+            "skim",
+            "sync",
+            "totalSupply"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-real-world-examples-010",
+          "title": "Real-World Examples",
+          "lineStart": 632,
+          "lineEnd": 653,
+          "lineCount": 22,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
@@ -5844,6 +6217,420 @@
               "codeKeywords": []
             }
           ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/business-logic/defihacklabs-business-logic-2023-patterns.md",
+      "totalLines": 675,
+      "frontmatter": {
+        "protocol": "\"generic\"",
+        "chain": "\"ethereum, arbitrum, bsc, polygon\"",
+        "category": "\"business_logic\"",
+        "vulnerability_type": "\"donate_self_liquidation, duplicate_array_claim, emergency_withdraw_logic, liquidity_calculation_error, unprotected_burn_transfer, convertDust_manipulation\"",
+        "attack_type": "\"logical_error\"",
+        "affected_component": "\"lending_protocol, referral_system, staking_pool, amm_liquidity, token_pair, yield_strategy\"",
+        "severity": "\"critical\"",
+        "impact": "\"fund_loss\"",
+        "exploitability": "0.85",
+        "financial_impact": "\"critical\"",
+        "language": "\"solidity\"",
+        "version": "\">=0.8.0\"",
+        "source": "DeFiHackLabs",
+        "total_exploits_analyzed": "9",
+        "total_losses": "\"$268M+\""
+      },
+      "patternCount": 13,
+      "patterns": [
+        {
+          "id": "general-defi-1-donate-to-reserves-self-liquidation-eu-000",
+          "title": "1. Donate-to-Reserves Self-Liquidation (Euler $200M)",
+          "lineStart": 94,
+          "lineEnd": 169,
+          "lineCount": 76,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "donateToReserves",
+            "liquidate",
+            "liquidator",
+            "mint",
+            "violator"
+          ],
+          "rootCause": "Euler's `donateToReserves()` function allowed a borrower to donate their own eTokens (collateral tokens) to the protocol reserves. This reduced the borrower's collateral below their debt, making them ",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 100,
+              "lineEnd": 112,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "donateToReserves",
+                "liquidate",
+                "liquidator",
+                "mint",
+                "violator"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 113,
+              "lineEnd": 169,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "liquidate",
+                "violator"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-2-tick-boundary-precision-error-kyberswa-001",
+          "title": "2. Tick Boundary Precision Error (KyberSwap $48M)",
+          "lineStart": 170,
+          "lineEnd": 249,
+          "lineCount": 80,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "_flashCallback",
+            "computeSwapStep",
+            "sqrtP"
+          ],
+          "rootCause": "KyberSwap's concentrated liquidity AMM (Elastic) had a precision error in the `computeSwapStep()` function when calculating at tick boundaries. When a swap moved the price exactly to a tick boundary, ",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 176,
+              "lineEnd": 185,
+              "severity": [],
+              "codeKeywords": [
+                "computeSwapStep",
+                "sqrtP"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 186,
+              "lineEnd": 249,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "_flashCallback"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-3-unprotected-burnfrom-transferfrom-dei--002",
+          "title": "3. Unprotected burnFrom + transferFrom (DEI $5.4M)",
+          "lineStart": 250,
+          "lineEnd": 292,
+          "lineCount": 43,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_approve",
+            "burnFrom",
+            "testExploit",
+            "transferFrom"
+          ],
+          "rootCause": "DEI stablecoin's `burnFrom()` function was callable by anyone with zero amount (`burnFrom(pair, 0)`), which inadvertently called `_approve()` with the caller's remaining allowance of 0. This set the p",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 256,
+              "lineEnd": 292,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "testExploit"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-4-duplicate-array-elements-in-reward-cla-003",
+          "title": "4. Duplicate Array Elements in Reward Claiming (Level $1M)",
+          "lineStart": 293,
+          "lineEnd": 352,
+          "lineCount": 60,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "DPPFlashLoanCall",
+            "LevelReferralControllerV2.claimMultiple",
+            "claimMultiple",
+            "claimReward"
+          ],
+          "rootCause": "Level Finance's `LevelReferralControllerV2.claimMultiple()` function accepted an array of epoch IDs to claim rewards for, but did not check for duplicate elements. An attacker could submit the same ep",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 299,
+              "lineEnd": 306,
+              "severity": [],
+              "codeKeywords": [
+                "claimMultiple"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 307,
+              "lineEnd": 352,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall",
+                "claimReward"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-5-emergency-withdraw-without-nft-unstake-004",
+          "title": "5. Emergency Withdraw Without NFT Unstake (BNO $505K)",
+          "lineStart": 353,
+          "lineEnd": 408,
+          "lineCount": 56,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "callEmergencyWithdraw",
+            "emergencyWithdraw",
+            "pancakeCall",
+            "unstakeNft"
+          ],
+          "rootCause": "BNO's staking pool had an `emergencyWithdraw()` function that reset a user's staked token balance but did not reclaim or lock the staked NFTs. After calling `emergencyWithdraw()`, the user could still",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 359,
+              "lineEnd": 408,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "callEmergencyWithdraw",
+                "pancakeCall"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-6-flash-loan-liquidity-manipulation-palm-005",
+          "title": "6. Flash Loan Liquidity Manipulation (Palmswap $900K)",
+          "lineStart": 409,
+          "lineEnd": 458,
+          "lineCount": 50,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "executeOperation"
+          ],
+          "rootCause": "Palmswap's liquidity event contract allowed users to purchase PLP tokens at a 1:1 ratio with USDP, but the withdrawal ratio was calculated based on the pool's current USDP reserves. By depositing a la",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 415,
+              "lineEnd": 458,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "executeOperation"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-7-convertdusttoearned-price-manipulation-006",
+          "title": "7. convertDustToEarned Price Manipulation (BEARNDAO $769K)",
+          "lineStart": 459,
+          "lineEnd": 501,
+          "lineCount": 43,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "convertDustToEarned",
+            "pancakeCall"
+          ],
+          "rootCause": "BEARNDAO's Bvaults strategy had a public `convertDustToEarned()` function that swapped residual \"dust\" tokens to the earned token via a DEX. An attacker could front-run this call by first buying the e",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 465,
+              "lineEnd": 501,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "pancakeCall"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-8-flash-loan-bad-debt-creation-platypus--007",
+          "title": "8. Flash Loan Bad Debt Creation (Platypus $10.5M Total, 3 Exploits)",
+          "lineStart": 502,
+          "lineEnd": 534,
+          "lineCount": 33,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "emergencyWithdraw"
+          ],
+          "rootCause": "Platypus Finance's lending system allowed users to borrow the protocol's stablecoin (USP) against staked LP tokens. The protocol did not properly account for flash-loan-inflated positions during the b",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 508,
+              "lineEnd": 534,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-secure-implementations-008",
+          "title": "Secure Implementations",
+          "lineStart": 535,
+          "lineEnd": 590,
+          "lineCount": 56,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "claimMultiple",
+            "donateToReserves",
+            "emergencyWithdraw"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Pattern 1: Donation with Solvency Check",
+              "lineStart": 537,
+              "lineEnd": 551,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "donateToReserves"
+              ]
+            },
+            {
+              "title": "Pattern 2: Deduplicated Batch Claims",
+              "lineStart": 552,
+              "lineEnd": 565,
+              "severity": [],
+              "codeKeywords": [
+                "claimMultiple"
+              ]
+            },
+            {
+              "title": "Pattern 3: Synchronized Emergency Withdraw",
+              "lineStart": 566,
+              "lineEnd": 590,
+              "severity": [],
+              "codeKeywords": [
+                "emergencyWithdraw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-impact-analysis-009",
+          "title": "Impact Analysis",
+          "lineStart": 591,
+          "lineEnd": 606,
+          "lineCount": 16,
+          "severity": [
+            "CRITICAL",
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-detection-patterns-010",
+          "title": "Detection Patterns",
+          "lineStart": 607,
+          "lineEnd": 642,
+          "lineCount": 36,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Static Analysis",
+              "lineStart": 609,
+              "lineEnd": 623,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Dynamic Testing",
+              "lineStart": 624,
+              "lineEnd": 642,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-audit-checklist-011",
+          "title": "Audit Checklist",
+          "lineStart": 643,
+          "lineEnd": 656,
+          "lineCount": 14,
+          "severity": [],
+          "codeKeywords": [
+            "burnFrom",
+            "convertDustToEarned",
+            "donateToReserves",
+            "emergencyWithdraw"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-real-world-examples-012",
+          "title": "Real-World Examples",
+          "lineStart": 657,
+          "lineEnd": 672,
+          "lineCount": 16,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },

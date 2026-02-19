@@ -31,7 +31,7 @@ User Input: @audit-orchestrator <path> [hint]
                ▼
 ┌─────────────────────────────────────┐
 │ Phase 4: DB-POWERED HUNTING         │  Self + Sub-agent: invariant-catcher
-│ Pattern matching against 537+ vulns │  Output: 03-findings-raw.md
+│ Hunt card grep-prune + batched scan │  Output: 03-findings-raw.md
 └──────────────┬──────────────────────┘
                │ rawFindings (F-NNN)
                ▼
@@ -90,9 +90,10 @@ User Input: @audit-orchestrator <path> [hint]
 5. If no hint → run auto-detection, collect all matches
 6. Read `DB/index.json` (~330 lines)
 7. Resolve manifest list from all matched protocol types (union + dedupe)
-8. Load `DB/manifests/keywords.json`, scan first 100 lines of target code for keyword hits to discover additional manifests
-9. For maximum depth: include all manifests from matched types + `general-security` + `unique` as baseline
-10. Write scope document to `audit-output/00-scope.md`
+8. Note corresponding hunt card files from `index.json` `huntcards.perManifest` — these are used in Phase 4
+9. Load `DB/manifests/keywords.json`, scan first 100 lines of target code for keyword hits to discover additional manifests
+10. For maximum depth: include all manifests from matched types + `general-security` + `unique` as baseline
+11. Write scope document to `audit-output/00-scope.md`
 
 **Transition**: Pass `filesInScope`, `protocolTypes`, `manifestList` to Phase 2.
 
@@ -166,21 +167,22 @@ Categories: Solvency, Access Control, State Machine, Arithmetic, Oracle, Cross-C
 
 | Attribute | Value |
 |-----------|-------|
-| **Agent** | Self (DB search) + `invariant-catcher` (sub-agent) |
+| **Agent** | Self (hunt card pruning) + `invariant-catcher` (sub-agent) |
 | **Input** | Manifest list + invariant specs + codebase path |
-| **Output** | `audit-output/03-findings-raw.md` |
-| **Estimated context** | Variable — depends on number of manifests |
+| **Output** | `audit-output/03-findings-raw.md` + `audit-output/hunt-card-hits.json` |
+| **Estimated context** | ~41K tokens (all hunt cards) + ~30K per read batch |
 
-**Self-driven DB search sequence**:
-1. For each manifest in `manifestList`:
-   a. Load the manifest JSON
-   b. For each pattern, extract `codeKeywords`
-   c. Search target codebase: `grep -r "keyword1\|keyword2" <path> --include="*.sol"`
-   d. For each hit: record manifest pattern ID, target file + line, keyword matched
-2. Score hits: exact keyword match → HIGH, partial → MEDIUM
-3. For HIGH-relevance hits, read the DB vulnerability content using `lineStart/lineEnd`:
-   `read_file("DB/<path>/<file>.md", startLine=<lineStart>, endLine=<lineEnd>)`
-4. Build a **pattern hit list** with: pattern ID, DB source, target locations, relevance score
+**Hunt card grep-prune sequence** (self-driven):
+1. Load hunt cards for resolved manifests:
+   - Per-manifest: `DB/manifests/huntcards/<manifest>-huntcards.json`
+   - Or all at once: `DB/manifests/huntcards/all-huntcards.json` (~41K tokens)
+2. For each card, run its `grep` pattern against the target codebase:
+   ```bash
+   grep -rn "card.grep" <path> --include="*.sol" --include="*.rs" -l
+   ```
+3. Cards with zero grep hits are **discarded** (pattern cannot apply to this codebase)
+4. This typically eliminates 60-80% of cards
+5. Write surviving cards + grep hit locations to `audit-output/hunt-card-hits.json`
 
 **Sub-agent prompt template**:
 ```
@@ -189,18 +191,20 @@ You are the invariant-catcher agent. Hunt for vulnerability patterns in the targ
 TARGET CODEBASE: <path>
 PROTOCOL TYPE: <detected types>
 
-PATTERN HIT LIST (from DB scan):
-<paste pattern hit list>
+PRE-PRUNED HUNT CARDS (grep-verified against target code):
+<paste surviving cards from hunt-card-hits.json>
 
 INVARIANT SPECS:
 Read audit-output/02-invariants.md
 
-Perform your full 5-step workflow (map → read DB → build patterns → hunt → report).
-
-For each pattern hit, validate whether the target code is actually vulnerable:
-- True positive: matches pattern AND has required preconditions
-- Likely positive: matches but needs manual verification
-- False positive: matches syntactically but not exploitable
+These cards have already been grep-matched — every card has at least one keyword hit.
+Your job:
+1. Read the full DB entry for each card (use ref + lines fields)
+2. Process in batches of 30-40 cards to stay within context limits
+3. Build precise vulnerability patterns from the DB content
+4. Hunt for each pattern at the grep hit locations in target code
+5. Validate: true positive / likely positive / false positive
+6. Write checkpoint after each batch to audit-output/hunt-state.json
 
 Write ALL findings to audit-output/03-findings-raw.md using the Finding Schema
 from resources/inter-agent-data-format.md.
@@ -208,7 +212,7 @@ from resources/inter-agent-data-format.md.
 
 **Transition**: Read raw findings, pass to Phase 4a alongside context.
 
-**Error handling**: If invariant-catcher sub-agent fails, use the self-driven DB search results as raw findings (lower confidence but still useful).
+**Error handling**: If invariant-catcher sub-agent fails, check `audit-output/hunt-state.json` for partial results from completed batches. Resume from last checkpoint if possible. As a last resort, use the grep hit locations from `hunt-card-hits.json` as low-confidence findings.
 
 ---
 
@@ -356,8 +360,8 @@ For each CRITICAL/HIGH finding:
 | 1 | 500 | Read index.json + targeted file listing |
 | 2 | Delegated | Sub-agent manages own context |
 | 3 | Delegated | Sub-agent manages own context |
-| 4 (self) | 2000 | Load manifests one at a time, discard after keyword extraction |
-| 4 (sub) | Delegated | Sub-agent manages own context |
+| 4 (self) | ~41K tokens | Load hunt cards, grep-prune, write surviving cards to hunt-card-hits.json |
+| 4 (sub) | ~30K per batch | Sub-agent reads DB entries in batches of 30-40 cards, checkpoints between batches |
 | 4a | Delegated | Sub-agent manages own context; spawns domain sub-agents |
 | 5 | Delegated | Sub-agent manages own context |
 | 6 | 1500 | Merge findings, deduplicate, triage |

@@ -630,9 +630,57 @@ def select_best_grep_keywords(keywords, max_count=6):
 
 
 def build_huntcard(pattern, file_path):
-    """Build a single compressed hunt card from a manifest pattern entry."""
+    """Build a single compressed hunt card from a manifest pattern entry.
+    Returns None if the pattern is not suitable for hunting (structural sections, etc.)."""
+    # Skip structural/non-vulnerability sections
+    title_lower = pattern["title"].lower().strip()
+    SKIP_TITLES = {
+        "overview", "secure implementation examples", "secure implementation",
+        "secure implementation patterns", "secure patterns",
+        "detection patterns", "detection checklist", "audit checklist",
+        "summary", "conclusion",
+        "references", "prevention guidelines", "testing requirements",
+        "code patterns to look for", "impact analysis", "technical impact",
+        "business impact", "affected scenarios", "known exploits",
+        "related cves/reports", "real-world examples", "table of contents",
+        "keywords for search", "related vulnerabilities",
+        "development best practices", "reference", "change log",
+        "security research", "technical documentation", "external links",
+        "appendix", "attack categories",
+        "vulnerable pattern examples", "vulnerable patterns",
+    }
+    if title_lower in SKIP_TITLES:
+        return None
+
+    # Skip defihacklabs index sections (reference lists, not patterns)
+    if title_lower.startswith("defihacklabs real-world"):
+        return None
+
+    # Skip sections that are too small to be meaningful vulnerability patterns
+    line_count = pattern.get("lineCount", pattern["lineEnd"] - pattern["lineStart"])
+    if line_count < 10:
+        return None
+
     # Select best keywords for grep
     grep_keywords = select_best_grep_keywords(pattern.get("codeKeywords", []))
+
+    # If no keywords from the pattern itself, try to extract from subsections
+    if not grep_keywords and pattern.get("subsections"):
+        all_sub_keywords = []
+        for sub in pattern["subsections"]:
+            all_sub_keywords.extend(sub.get("codeKeywords", []))
+        grep_keywords = select_best_grep_keywords(all_sub_keywords)
+
+    # If still empty, try to extract meaningful terms from the title
+    if not grep_keywords:
+        title_words = re.findall(r"[a-zA-Z][a-zA-Z0-9]{3,}", pattern["title"])
+        stop_words = {
+            "vulnerability", "vulnerabilities", "pattern", "patterns",
+            "attack", "example", "examples", "implementation", "secure",
+            "vulnerable", "description", "analysis", "impact", "overview",
+        }
+        grep_keywords = [w for w in title_words if w.lower() not in stop_words][:4]
+
     grep_pattern = "|".join(grep_keywords) if grep_keywords else ""
 
     # Build detection hint from rootCause or title
@@ -642,7 +690,6 @@ def build_huntcard(pattern, file_path):
     # Pick highest severity
     severities = pattern.get("severity", [])
     top_severity = severities[0] if severities else "UNKNOWN"
-    # Prefer CRITICAL > HIGH > MEDIUM > LOW
     severity_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
     if len(severities) > 1:
         severities_sorted = sorted(severities, key=lambda s: severity_order.get(s, 99))
@@ -660,17 +707,23 @@ def build_huntcard(pattern, file_path):
 
 
 def build_huntcards_for_manifest(manifest_name, manifest_data):
-    """Generate compressed hunt cards for all patterns in a manifest."""
+    """Generate compressed hunt cards for all patterns in a manifest.
+    Filters out structural sections that aren't actionable vulnerability patterns."""
     cards = []
+    skipped = 0
     for file_entry in manifest_data["files"]:
         for pattern in file_entry["patterns"]:
             card = build_huntcard(pattern, file_entry["file"])
-            cards.append(card)
+            if card is not None:
+                cards.append(card)
+            else:
+                skipped += 1
     return {
         "meta": {
             "manifest": manifest_name,
             "description": f"Compressed hunt cards for {manifest_name} — one-line detection rules for bulk scanning",
             "totalCards": len(cards),
+            "skipped": skipped,
             "usage": "Load all cards into context. For each card, grep target code for card.grep pattern. On hit, read full DB entry via read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1]).",
         },
         "cards": cards,
