@@ -140,12 +140,19 @@ Each hunt card:
 2. Get manifest list
 3. Load hunt cards for those manifests:
    - Option A: Load per-manifest cards: DB/manifests/huntcards/<name>-huntcards.json
-   - Option B: Load ALL cards: DB/manifests/huntcards/all-huntcards.json (~55K tokens)
+   - Option B: Load ALL cards: DB/manifests/huntcards/all-huntcards.json (~100K tokens)
 4. For each card, grep target codebase for card.grep pattern:
    grep -rn "card.grep" <target_path> --include="*.sol"
 5. Cards with `neverPrune: true` always survive (CRITICAL safety net)
-6. For hits + neverPrune cards: read full DB entry via read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])
-6. Validate: compare vulnerable pattern against target code
+6. Prune cards with zero grep hits (removes ~60-80% of patterns)
+7. PARTITION surviving cards into shards of 50-80 cards (grouped by cat tag)
+   - Separate neverPrune cards → duplicate to every shard
+   - Target: each shard fits comfortably in one agent's context
+8. SPAWN one sub-agent per shard (parallel):
+   - Each agent gets: its shard cards + neverPrune cards + full target code + invariants
+   - Each agent runs Pass 1 (micro-directives) + Pass 2 (evidence lookup)
+   - Each agent writes to audit-output/03-findings-shard-<id>.md
+9. MERGE all shard findings → deduplicate by root cause → 03-findings-raw.md
 ```
 
 **Example**: Auditing an ERC4626 vault

@@ -212,140 +212,79 @@ If sub-agent fails, extract the "Invariant Candidates" section from `audit-outpu
 
 ---
 
-## Phase 4: DB-Powered Vulnerability Hunting
+## Phase 4: DB-Powered Vulnerability Hunting (Parallel Fan-Out)
 
-**Agent**: Self (hunt card pruning) + `invariant-catcher` sub-agent
-**Output**: `audit-output/03-findings-raw.md`
+**Agent**: Self (grep-prune + partition + merge) + N × `invariant-catcher` sub-agents
+**Output**: `audit-output/03-findings-raw.md` (merged)
 
-This is the core vulnerability discovery phase. It uses **hunt cards** (Tier 1.5) to prune irrelevant patterns before spawning the sub-agent, drastically reducing context usage.
+For complete hunt card format, micro-directive workflow, and finding schema see [db-hunting-workflow.md](resources/db-hunting-workflow.md).
 
-### Step 1: Load Hunt Cards
+### Step 1: Grep-Prune Hunt Cards
 
-Load hunt cards for each resolved manifest:
-```
-DB/manifests/huntcards/<manifest>-huntcards.json
-```
-
-Or load all at once (~55K tokens):
-```
-DB/manifests/huntcards/all-huntcards.json
-```
-
-Each card is a compressed detection record with micro-directives:
-```json
-{
-  "id": "oracle-staleness-001",
-  "title": "Missing Staleness Check",
-  "severity": ["MEDIUM"],
-  "grep": "latestRoundData|getPriceUnsafe|getPrice|publishTime|updatedAt",
-  "detect": "No freshness validation on oracle price data.",
-  "check": [
-    "VERIFY: updatedAt is checked against reasonable threshold",
-    "Check startedAt > 0 validation exists",
-    "LOOK FOR: latestRoundData() with ignored updatedAt"
-  ],
-  "antipattern": "No validation of updatedAt timestamp",
-  "securePattern": "Full validation of all return values",
-  "ref": "DB/oracle/pyth/PYTH_ORACLE_VULNERABILITIES.md",
-  "lines": [93, 248]
-}
-```
-
-New fields:
-- `check` — 1-5 verification steps the agent can execute directly against grep hit locations (no .md read needed)
-- `antipattern` — one-line vulnerable code shape for quick positive matching
-- `securePattern` — one-line secure code shape for quick false-positive elimination
-```
-
-### Step 2: Grep-Prune Pass (Critical — Eliminates 60-80% of Patterns)
-
-For EACH hunt card, run its `grep` pattern against the target codebase:
 ```bash
-grep -rn "card.grep" <path> --include="*.sol" --include="*.rs" -l
+python3 scripts/grep_prune.py <target_path> DB/manifests/huntcards/all-huntcards.json \
+  --output audit-output/hunt-card-hits.json
 ```
 
-- **`neverPrune: true`** → card **always survives** (CRITICAL severity safety net)
-- **Hit** → card survives (pattern is relevant to this codebase)
-- **No hit** → card is **discarded** (pattern cannot apply)
+Pruning rules: cards with zero grep hits → pruned. Cards with `neverPrune: true` → always survive. Typically eliminates 60-80%.
 
-This typically eliminates 60-80% of cards. Track results:
-```
-Total cards loaded:    490
-Cards with grep hits:  127   ← only these go to the sub-agent
-Cards pruned:          363
-```
+### Step 2: Partition & Parallel Fan-Out
 
-Write the surviving card list and grep hit locations to `audit-output/hunt-card-hits.json`:
-```json
-{
-  "totalCards": 490,
-  "survivingCards": 127,
-  "prunedCards": 363,
-  "hits": [
-    {
-      "id": "oracle-staleness-001",
-      "ref": "DB/oracle/pyth/PYTH_ORACLE_VULNERABILITIES.md",
-      "lines": [93, 248],
-      "grepHits": ["src/Oracle.sol:45", "src/PriceFeed.sol:112"]
-    }
-  ]
-}
+```bash
+python3 scripts/partition_shards.py audit-output/hunt-card-hits.json \
+  --output audit-output/hunt-card-shards.json
+# Or use pre-computed: DB/manifests/bundles/<protocol_type>-shards.json
 ```
 
-### Step 3: Spawn Invariant Catcher with Pre-Pruned Cards
+Target: 50-80 cards per shard. `neverPrune` cards duplicated to every shard. See [db-hunting-workflow.md](resources/db-hunting-workflow.md) Step 2.
 
-Spawn `invariant-catcher` with ONLY the surviving cards:
+For EACH shard, spawn an `invariant-catcher` **in parallel**:
 
 ```
 Hunt for vulnerability patterns in the target codebase.
 
 TARGET CODEBASE: <path>
 PROTOCOL TYPE: <detected types>
+SHARD: <shard-id> (shard <M> of <N>)
 
-PRE-PRUNED ENRICHED HUNT CARDS (grep-verified against target code):
-<paste surviving cards from hunt-card-hits.json>
+YOUR CARDS (<card-count> cards, categories: <categories>):
+<paste full card content for this shard's cards>
+
+CRITICAL CARDS (duplicated across all shards — ALWAYS CHECK THESE):
+<paste all neverPrune cards>
 
 Read audit-output/02-invariants.md for invariant specifications.
-
-These cards have already been grep-matched against the codebase — every card
-has at least one keyword hit. Your job:
-
-1. PASS 1 — MICRO-DIRECTIVE EXECUTION (no .md reads):
-   For each card, read the TARGET CODE at grep hit locations and
-   execute the card's `check` steps directly:
-   - Use `antipattern` for quick positive matching
-   - Use `securePattern` for quick negative matching
-   - Classify: true positive / likely positive / false positive
-
-2. PASS 2 — EVIDENCE LOOKUP (only for true/likely positives):
-   For confirmed hits, read the full DB entry: read_file(card.ref, card.lines[0], card.lines[1])
-   Extract vulnerable patterns, attack scenarios, and recommended fixes.
-
-3. Process in batches of 50-60 cards
-4. Write checkpoint after each batch to audit-output/hunt-state.json
-
-Write findings to audit-output/03-findings-raw.md using this format per finding:
-### F-NNN: [Title]
-| Field | Value |
-|-------|-------|
-| Severity | CRITICAL / HIGH / MEDIUM / LOW |
-| Confidence | HIGH / MEDIUM / LOW |
-| Root Cause | [sentence] |
-| Impact | [concrete] |
-| Affected Code | file L-L |
-| DB Pattern Ref | pattern-id |
-| Attack Scenario | [steps] |
-(include vulnerable code snippet and recommended fix)
+Follow the 2-pass workflow from resources/db-hunting-workflow.md.
+Write findings to audit-output/03-findings-shard-<shard-id>.md
 ```
 
-### Why This Works
+Each sub-agent writes to its own **per-shard file** (`03-findings-shard-<shard-id>.md`), NOT to `03-findings-raw.md`.
 
-| Approach | Tokens Required | Coverage |
-|----------|----------------|----------|
-| Old: Load all manifests | ~384K | Full but exceeds context |
-| Old: Load all .md content | ~1.1M | Impossible |
-| Hunt cards + grep-prune (v1) | ~55K cards + ~100K per batch | Full coverage, tight on context |
-| **Enriched hunt cards + micro-directives** | **~100K cards + ~10-20K for evidence** | **Full coverage, 80% less .md reads** |
+### Step 3: Merge Shard Findings
+
+```bash
+python3 scripts/merge_shard_findings.py audit-output/
+```
+
+Deduplicates by root cause (same code line + same root cause → keep higher confidence). Renumbers F-001, F-002... Writes `03-findings-raw.md` + `03-merge-log.md`.
+
+### Step 4: Extract Reasoning Seeds for Phase 4a
+
+Before transitioning to Phase 4a, scan the surviving hunt cards and extract **generalized reasoning seeds** — root cause assumptions that the reasoning agent can test from first principles:
+
+```
+For each surviving card's `detect` + `check` fields:
+  1. Strip protocol-specific details
+  2. Generalize to assumption type (input/state/ordering/economic/environmental)
+  3. Deduplicate generalized seeds
+Write to audit-output/reasoning-seeds.md
+```
+
+This saves the reasoning agent from re-loading ~100K tokens of hunt cards.
+
+### Error Handling
+
+Shard K fails → retry once. Still fails → log, continue (other shards unaffected). All fail → fall back to single-agent mode.
 
 ---
 
@@ -359,31 +298,18 @@ This phase uses deep reasoning (not pattern matching) to discover vulnerabilitie
 ### Spawn Instructions
 
 ```
-Perform deep reasoning-based vulnerability discovery on the target codebase.
+Perform deep reasoning-based vulnerability discovery.
 
 TARGET CODEBASE: <path>
 PROTOCOL TYPE: <detected types>
 
-PIPELINE CONTEXT:
-  - Read audit-output/01-context.md for architecture and function analysis
-  - Read audit-output/02-invariants.md for invariant specifications
-  - Read audit-output/03-findings-raw.md for existing pattern-matched findings (avoid duplicates)
+Read: audit-output/01-context.md, 02-invariants.md, 03-findings-raw.md
+Reasoning seeds: audit-output/reasoning-seeds.md (pre-extracted from DB)
 
-MANIFEST LIST: <resolved manifests from Phase 1>
+Perform your full 6-phase workflow (A-F). Use reasoning-seeds.md instead
+of re-loading hunt cards. Only report MEDIUM+ with reachability proofs.
 
-Perform your full 6-phase workflow:
-  Phase A: Load context & extract reasoning seeds from DB root causes
-  Phase B: Decompose codebase into domains
-  Phase C: Round 1 — Standard per-domain analysis (spawn domain sub-agents)
-  Phase D: Round 2 — Cross-domain interaction analysis
-  Phase E: Round 3 — Edge cases and boundary conditions
-  Phase F: Round 4 — Completeness check and adversarial review
-
-SEVERITY FILTER: Only report MEDIUM, HIGH, or CRITICAL findings.
-Every finding MUST include a reachability proof.
-
-Write output to audit-output/04a-reasoning-findings.md using the Finding Schema
-from resources/inter-agent-data-format.md (Phase 4a section).
+Write to audit-output/04a-reasoning-findings.md
 ```
 
 ### Verify Output
@@ -407,29 +333,13 @@ If sub-agent fails, retry once with reduced scope (top 3 domains only, 2 rounds 
 ### Spawn Instructions
 
 ```
-Scan for input validation vulnerabilities in the target codebase.
-
+Scan for input validation vulnerabilities.
 TARGET CODEBASE: <path>
-Read audit-output/01-context.md for architecture and function analysis.
-
-Perform your full 5-phase workflow:
-1. Constructor and initializer audit
-2. Invariant identification
-3. Attack surface mapping
-4. Deep reasoning per attack vector
-5. Finding documentation
-
-Write findings to audit-output/04-validation-findings.md using the Finding Schema:
-### F-NNN: [Title]
-(same format as Phase 4)
-
-Focus areas: zero-address checks, stale oracle data, array length mismatches,
-numeric bounds, access control gaps, contract existence checks, re-initialization.
+Read audit-output/01-context.md for context.
+Perform your full 5-phase workflow. Write to audit-output/04-validation-findings.md
 ```
 
-### Merge with Phase 4
-
-After this sub-agent completes, merge its findings into the combined finding list. Renumber if needed to maintain sequential F-NNN IDs.
+Merge its findings into the combined list. Renumber if needed.
 
 ---
 
@@ -515,64 +425,16 @@ Write `audit-output/05-findings-triaged.md` with:
 
 Spawn these sub-agents (can run in parallel). Each is independent.
 
-### Medusa Fuzzing
+Spawn these independently (can run in parallel):
 
-```
-Generate Medusa fuzzing harnesses from invariant specifications.
+| Agent | Input | Output |
+|-------|-------|--------|
+| `medusa-fuzzing` | `02-invariants.md` + codebase | `audit-output/fuzzing/` |
+| `certora-verification` | `02-invariants.md` + codebase | `audit-output/certora/` |
+| `sherlock-judging` | `05-findings-triaged.md` | `audit-output/06-sherlock-validation.md` |
+| `cantina-judge` | `05-findings-triaged.md` | `audit-output/07-cantina-validation.md` |
 
-Read audit-output/02-invariants.md for the invariant specs.
-TARGET CODEBASE: <path>
-
-Generate harnesses and medusa.json config.
-Write output to audit-output/fuzzing/
-```
-
-### Certora Verification
-
-```
-Generate Certora CVL specifications from invariant specifications.
-
-Read audit-output/02-invariants.md for the invariant specs.
-TARGET CODEBASE: <path>
-
-Generate .spec and .conf files.
-Write output to audit-output/certora/
-```
-
-### Sherlock Judging
-
-```
-Validate these audit findings against Sherlock judging criteria.
-
-Read audit-output/05-findings-triaged.md for all findings.
-
-For each finding, assess:
-- Is it HIGH, MEDIUM, or INVALID by Sherlock rules?
-- Apply: definite loss threshold, DoS assessment, admin trust rules
-
-Write validation to audit-output/06-sherlock-validation.md as a table:
-| Finding | Agent Severity | Sherlock Severity | Rationale |
-```
-
-### Cantina Judging
-
-```
-Validate these audit findings against Cantina impact×likelihood matrix.
-
-Read audit-output/05-findings-triaged.md for all findings.
-
-For each finding, assess:
-- Impact level (Critical/High/Medium/Low)
-- Likelihood level (High/Medium/Low)
-- Cantina severity caps and PoC requirements
-
-Write validation to audit-output/07-cantina-validation.md as a table:
-| Finding | Agent Severity | Cantina Severity | Impact | Likelihood | Rationale |
-```
-
-### Error Handling
-
-If any downstream agent fails, note the failure in the final report. No downstream failure blocks report assembly — these are enhancement artifacts.
+Each agent has its own detailed instructions. Provide the input file paths and codebase path. If any fails, note in final report — no downstream failure blocks report assembly.
 
 ---
 
@@ -678,6 +540,7 @@ Final Verification:
 - **Domain decomposition**: [domain-decomposition.md](resources/domain-decomposition.md)
 - **Root cause analysis**: [root-cause-analysis.md](resources/root-cause-analysis.md)
 - **Vulnerability taxonomy**: [vulnerability-taxonomy.md](resources/vulnerability-taxonomy.md)
+- **DB hunting workflow**: [db-hunting-workflow.md](resources/db-hunting-workflow.md)
 - **DB search guide**: [DB/SEARCH_GUIDE.md](../../DB/SEARCH_GUIDE.md)
 - **DB router**: [DB/index.json](../../DB/index.json)
 

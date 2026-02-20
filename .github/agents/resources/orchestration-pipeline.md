@@ -163,56 +163,70 @@ Categories: Solvency, Access Control, State Machine, Arithmetic, Oracle, Cross-C
 
 ---
 
-### Phase 4: DB-Powered Hunting
+### Phase 4: DB-Powered Hunting (Parallel Fan-Out)
 
 | Attribute | Value |
 |-----------|-------|
-| **Agent** | Self (hunt card pruning) + `invariant-catcher` (sub-agent) |
+| **Agent** | Self (grep-prune + partition + merge) + **N × `invariant-catcher`** (parallel sub-agents) |
 | **Input** | Manifest list + invariant specs + codebase path |
-| **Output** | `audit-output/03-findings-raw.md` + `audit-output/hunt-card-hits.json` |
-| **Estimated context** | ~55K tokens (all hunt cards) + ~30K per read batch |
+| **Output** | `audit-output/03-findings-raw.md` (merged) + `audit-output/hunt-card-shards.json` + `audit-output/03-merge-log.md` |
+| **Estimated context** | ~80-96K tokens per shard sub-agent (cards + full code + invariants + reasoning) |
 
 **Hunt card grep-prune sequence** (self-driven):
 1. Load hunt cards for resolved manifests:
    - Per-manifest: `DB/manifests/huntcards/<manifest>-huntcards.json`
-   - Or all at once: `DB/manifests/huntcards/all-huntcards.json` (~55K tokens)
+   - Or all at once: `DB/manifests/huntcards/all-huntcards.json` (~100K tokens)
 2. For each card, run its `grep` pattern against the target codebase:
    ```bash
    grep -rn "card.grep" <path> --include="*.sol" --include="*.rs" -l
    ```
 3. Cards with zero grep hits are **discarded** (pattern cannot apply to this codebase)
-4. This typically eliminates 60-80% of cards
-5. Write surviving cards + grep hit locations to `audit-output/hunt-card-hits.json`
+4. Cards with `neverPrune: true` always survive
+5. This typically eliminates 60-80% of cards
+6. Write surviving cards + grep hit locations to `audit-output/hunt-card-hits.json`
 
-**Sub-agent prompt template**:
+**Card partitioning** (self-driven):
+1. Separate `neverPrune` cards into a "critical set" (duplicated to every shard)
+2. Group remaining cards by `cat` tag
+3. Target shard size: 50-80 cards. Split large groups, merge small groups.
+4. Write partition plan to `audit-output/hunt-card-shards.json`
+
+**Sub-agent spawn** (parallel, one per shard):
 ```
 You are the invariant-catcher agent. Hunt for vulnerability patterns in the target codebase.
 
 TARGET CODEBASE: <path>
 PROTOCOL TYPE: <detected types>
 
-PRE-PRUNED HUNT CARDS (grep-verified against target code):
-<paste surviving cards from hunt-card-hits.json>
+SHARD: <shard-id> (shard <M> of <N>)
+YOUR CARDS (<card-count> cards, categories: <categories>):
+<paste shard cards with full content>
+
+CRITICAL CARDS (duplicated across all shards — ALWAYS CHECK):
+<paste all neverPrune cards>
 
 INVARIANT SPECS:
 Read audit-output/02-invariants.md
 
-These cards have already been grep-matched — every card has at least one keyword hit.
+These cards have been grep-matched — every card has ≥1 keyword hit.
 Your job:
-1. Read the full DB entry for each card (use ref + lines fields)
-2. Process in batches of 30-40 cards to stay within context limits
-3. Build precise vulnerability patterns from the DB content
-4. Hunt for each pattern at the grep hit locations in target code
-5. Validate: true positive / likely positive / false positive
-6. Write checkpoint after each batch to audit-output/hunt-state.json
+1. PASS 1: Execute card.check steps at grep hit locations (no .md reads)
+   - antipattern → quick positive; securePattern → quick negative
+2. PASS 2: For true/likely positives only, read full DB entry via card.ref + card.lines
 
-Write ALL findings to audit-output/03-findings-raw.md using the Finding Schema
-from resources/inter-agent-data-format.md.
+Write ALL findings to audit-output/03-findings-shard-<shard-id>.md
 ```
+
+**Merge step** (self-driven, after all shards return):
+1. Read all `audit-output/03-findings-shard-*.md` files
+2. Deduplicate by root cause (same code line + same root cause → merge, keep higher confidence)
+3. Renumber findings sequentially: F-001, F-002, ...
+4. Write merged output to `audit-output/03-findings-raw.md`
+5. Write merge log to `audit-output/03-merge-log.md`
 
 **Transition**: Read raw findings, pass to Phase 4a alongside context.
 
-**Error handling**: If invariant-catcher sub-agent fails, check `audit-output/hunt-state.json` for partial results from completed batches. Resume from last checkpoint if possible. As a last resort, use the grep hit locations from `hunt-card-hits.json` as low-confidence findings.
+**Error handling**: If shard K fails, retry shard K once with same cards. If still fails, log and continue — other shard results are unaffected. If ALL shards fail, fall back to single-agent mode. Check `audit-output/03-findings-shard-*.md` for any partial results.
 
 ---
 

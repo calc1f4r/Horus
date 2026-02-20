@@ -9,13 +9,17 @@ Hunts for known vulnerability patterns in codebases by leveraging the Vulnerabil
 
 **Do NOT use for** initial codebase exploration (use `audit-context-building`), fix recommendations (use `issue-writer`), or general code review without a security focus.
 
-### Sub-agent Mode
+### Sub-agent Mode (Shard-Aware)
 
-When spawned by `audit-orchestrator`, you will receive either:
-- **A pre-pruned hunt card list** (preferred) — hunt cards already filtered by grep hits from the orchestrator
-- **A pre-computed pattern hit list** (legacy) — keyword matches from manifest scan
+When spawned by `audit-orchestrator`, you receive a **shard** — a subset of hunt cards grouped by category:
+- **`SHARD:` header** in your prompt identifies your shard ID and position (e.g., `shard-2-defi, shard 2 of 3`)
+- **`YOUR CARDS:`** section contains 50-80 cards assigned to this shard (full card content with `check`/`antipattern`/`securePattern`)
+- **`CRITICAL CARDS:`** section contains `neverPrune` cards duplicated across all shards — ALWAYS check these regardless of your shard assignment
+- **Output**: Write findings to `audit-output/03-findings-shard-<shard-id>.md` (NOT to `03-findings-raw.md` — the orchestrator merges all shard files)
 
-Write findings to `audit-output/03-findings-raw.md` using the Finding Schema from [inter-agent-data-format.md](resources/inter-agent-data-format.md). Validate each hit as true positive, likely positive, or false positive.
+Because each shard is 50-80 cards (not 450+), you have the full target codebase in context and ample reasoning capacity. **No checkpointing needed** — shards are small enough to process in a single pass.
+
+If you are NOT spawned with a `SHARD:` header (legacy/standalone mode), fall back to the standard workflow below and write to `audit-output/03-findings-raw.md` or `invariants-caught/`.
 
 ---
 
@@ -49,144 +53,37 @@ If `audit-output/hunt-state.json` exists, read it to resume from where you left 
 
 If the file exists, skip already-completed cards and continue from the current batch. If it doesn't exist, start fresh.
 
-### Step 1: Load Enriched Hunt Cards (Tier 1.5)
+## Workflow Modes
 
-Hunt cards are **compressed detection rules with micro-directives** (~100K tokens for ALL 451 patterns). They contain everything you need to verify a vulnerability pattern **without reading the full .md DB entry**.
+### A. Sub-Agent Mode (Parallel Shard Processing)
 
-#### Quick Start
+**This is the typical mode when called by `audit-orchestrator`.**
+You will receive a pre-pruned, pre-partitioned subset of hunt cards (~50-80 cards).
 
-1. Read `DB/index.json` (~350 lines) → identify manifest list from `protocolContext`
-2. Load hunt cards for those manifests:
-   - **If ≤ 4 manifests**: Load per-manifest cards from `DB/manifests/huntcards/<name>-huntcards.json`
-   - **If > 4 manifests or full audit**: Load `DB/manifests/huntcards/all-huntcards.json`
+1. Execute **Pass 1** (Micro-Directive Execution) and **Pass 2** (Evidence Lookup).
+2. Apply the **Quality Gate / Feedback Loop**:
+   - Zero HIGH/CRITICAL findings AND >50% cards processed? → Re-check top 10 highest-severity cards (may have filtered too aggressively).
+   - >20 true positives from 50 cards? → Too many matches. Re-apply `securePattern` filters more strictly.
+3. Write all findings from your shard to `audit-output/03-findings-shard-<shard-id>.md`.
+4. Return finding count to the orchestrator.
 
-Each enriched hunt card:
-```json
-{
-  "id": "oracle-chainlink-price-feed-1-staleness-vulnerabilities-000",
-  "title": "1. Staleness Vulnerabilities",
-  "severity": "MEDIUM",
-  "grep": "latestRoundData|updatedAt|getPrice",
-  "detect": "Protocols call latestRoundData() but ignore the updatedAt return value...",
-  "check": [
-    "VERIFY: updatedAt is checked against reasonable threshold",
-    "Check startedAt > 0 validation exists",
-    "Verify answeredInRound >= roundId check",
-    "Confirm heartbeat thresholds match Chainlink feed configuration",
-    "LOOK FOR: latestRoundData() with ignored updatedAt"
-  ],
-  "antipattern": "No validation of updatedAt timestamp",
-  "securePattern": "Full validation of all return values",
-  "cat": ["oracle", "price-feed", "data-freshness"],
-  "ref": "DB/oracle/chainlink/CHAINLINK_PRICE_FEED_VULNERABILITIES.md",
-  "lines": [133, 289],
-  "neverPrune": false
-}
-```
+### B. Standalone Mode (Manual Hunt)
 
-**Key fields:**
-- `grep` — pipe-separated keywords for target code scanning
-- `detect` — one-line detection rule explaining what to look for
-- `check` — **1-5 ordered verification steps** to execute directly against grep hit locations (NO .md read needed)
-- `antipattern` — one-line code shape indicating vulnerability (quick positive match)
-- `securePattern` — one-line code shape indicating safe code (quick negative match)
-- `cat` — category tags for grouping
-- `neverPrune` — if `true`, card always survives grep-prune (CRITICAL patterns)
-- `ref` + `lines` — read full .md entry **ONLY for confirmed true/likely positives**
+If acting standalone without the orchestrator, use the utility scripts to prepare your shards:
 
-#### Available Hunt Cards
+1. **Grep-Prune**: 
+   ```bash
+   python3 scripts/grep_prune.py <target> DB/manifests/huntcards/all-huntcards.json \
+     --output audit-output/hunt-card-hits.json
+   ```
+2. **Partition**: 
+   ```bash
+   python3 scripts/partition_shards.py audit-output/hunt-card-hits.json \
+     --output audit-output/shards.json
+   ```
+3. Process the output shards using the 2-pass workflow.
 
-| Manifest | Cards | Focus |
-|----------|-------|-------|
-| `oracle` | 58 | Chainlink, Pyth, price manipulation |
-| `amm` | 38 | Concentrated liquidity, constant product |
-| `bridge` | 34 | LayerZero, Wormhole, Hyperlane |
-| `tokens` | 29 | ERC20, ERC4626, ERC721 |
-| `cosmos` | 15 | Cosmos SDK, IBC, staking |
-| `solana` | 40 | Solana programs, Token-2022 |
-| `general-security` | 36 | Access control, signatures, validation |
-| `general-defi` | 91 | Flash loans, vaults, precision |
-| `general-infrastructure` | 44 | Proxies, reentrancy, storage |
-| `general-governance` | 37 | Governance, stablecoins, MEV |
-| `unique` | 29 | Protocol-specific unique exploits |
-
-For the full search guide, see `DB/SEARCH_GUIDE.md`.
-
-### Step 2: Grep-Prune Cards Against Target Codebase
-
-**This is the key step that eliminates 60-80% of patterns.** For each hunt card, grep the target codebase for its `grep` pattern:
-
-```bash
-# For each card, run:
-grep -rl "card.grep" <target_path> --include="*.sol"
-# Or batch multiple cards:
-rg -l "keyword1|keyword2|keyword3" <target_path>
-```
-
-**Pruning rules:**
-- Card has `neverPrune: true` → **ALWAYS KEEP** (CRITICAL patterns, never skip)
-- Card grep has **zero hits** in target → **PRUNE** (skip entirely)
-- Card grep has hits → **KEEP** (proceed to Step 3)
-
-Organize surviving cards by `ref` file (group cards that reference the same DB file together). You can also group by `cat` field to process related vulnerability categories together.
-
-**If you received pre-pruned cards from the orchestrator**, skip this step — they're already filtered.
-
-### Step 3: Execute Micro-Directives (Two-Pass Verification)
-
-**This replaces the old "read full .md entry" approach.** Most cards now include `check`, `antipattern`, and `securePattern` fields that let you verify patterns directly.
-
-#### Pass 1: Micro-Directive Execution (NO .md read needed)
-
-For each surviving card with `check` steps:
-
-1. **Read the target code** at the grep hit locations (the files/lines where `card.grep` matched)
-2. **Execute each `card.check` step** against the target code at those locations:
-   - `VERIFY:` steps → check if the described condition holds in the target code
-   - `LOOK FOR:` steps → search for the described code pattern
-   - `ANTIPATTERN:` steps → check if the target code matches the vulnerable shape
-   - Checklist items → perform the described validation
-3. **Quick-match with `card.antipattern`** → if the target code at the grep hit location matches this description, it's a **likely positive**
-4. **Quick-reject with `card.securePattern`** → if the target code matches this description, it's a **false positive** (code is safe)
-5. **Classify each card**:
-   - **True positive**: Target code matches antipattern AND fails ≥2 check steps
-   - **Likely positive**: Target code fails 1+ check steps but has mitigating factors
-   - **False positive**: Target code matches securePattern OR passes all check steps
-
-#### Pass 2: Evidence Lookup (ONLY for true/likely positives)
-
-For cards classified as true/likely positive in Pass 1:
-
-1. **Read the full DB entry**: `read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])`
-2. **Extract**: vulnerable code examples, attack scenario, impact analysis, recommended fix
-3. **Validate**: compare the DB's vulnerable pattern against the target code for final confirmation
-4. **Record the finding** with DB evidence
-
-**Context savings**: Instead of reading 50-200 lines per card for ALL surviving cards (~100 cards × ~100 lines = ~10,000 lines), you only read .md entries for confirmed hits (~10-20 cards × ~100 lines = ~1,000-2,000 lines). **80-90% context reduction.**
-
-#### Checkpoint After Each Batch
-
-Process cards in **batches of 50-60** (larger batches possible since Pass 1 is lightweight):
-
-```json
-// Write to audit-output/hunt-state.json after each batch
-{
-  "completed_card_ids": [...],
-  "pending_card_ids": [...],
-  "findings_count": N,
-  "current_batch": M,
-  "pass1_positives": P,
-  "pass2_confirmed": C
-}
-```
-
-**Append findings** to `audit-output/03-findings-raw.md` after each batch.
-
-Build a pattern library linking each pattern to its source:
-
-| Pattern Name | Card ID | Detection Regex | DB Source | Lines |
-|-------------|---------|----------------|-----------|-------|
-| {name} | {card.id} | {regex} | `{card.ref}` | L{start}-L{end} |
+> **CRITICAL REFERENCE**: For the complete hunt card JSON schema, grep rules, 2-pass analysis micro-directives, and finding schema, you MUST read **[db-hunting-workflow.md](resources/db-hunting-workflow.md)**.
 
 ### Step 4: Validate Findings in Target Codebase
 
@@ -254,16 +151,11 @@ Testing only with valid users → missing bypass when `userId = null` matches `r
 
 ## Key Principles
 
-1. **Hunt-cards-first** — load enriched hunt cards before full manifests; grep-prune before verification
-2. **Micro-directives first** — execute `check` steps directly against target code before reading any .md files
-3. **Two-pass verification** — Pass 1 uses micro-directives (cheap), Pass 2 reads .md only for confirmed hits (expensive)
-4. **Batch processing** — process cards in batches of 50-60 (larger since Pass 1 is lightweight)
-5. **Checkpoint progress** — write `hunt-state.json` after each batch so work survives context resets
-6. **Quick-match/reject** — use `antipattern` for fast positive matching, `securePattern` for fast negative matching
-7. **Use line ranges** — read only targeted sections using card.ref + card.lines (Pass 2 only)
-8. **Document everything** — all findings go to `invariants-caught/` or `audit-output/`
-9. **Link to sources** — every finding references its DB origin (card ID)
-10. **Search entire codebase** — never limit scope to one module
+1. **Hunt-cards-first** — never read full DB entries until Pass 2 confirms a likely positive.
+2. **Micro-directives first** — execute `check` steps directly against target code.
+3. **Search entire codebase** — never limit scope to one module.
+4. **Link to sources** — every finding must reference its DB origin (card ID).
+5. **Follow the Workflow** — Strictly adhere to [db-hunting-workflow.md](resources/db-hunting-workflow.md).
 
 ---
 

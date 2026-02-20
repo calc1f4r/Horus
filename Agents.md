@@ -148,11 +148,11 @@ Load manifest → filter patterns where severity includes "HIGH" or "CRITICAL"
 3. For each card, grep target code: `grep -rn "card.grep" <target_path>`
 4. Cards with `neverPrune: true` always survive (CRITICAL safety net)
 5. Prune cards with zero grep hits (removes ~60-80% of patterns)
-6. PASS 1: Execute card.check steps directly against target code at grep hit locations
-   - Use card.antipattern for quick positive matching
-   - Use card.securePattern for quick false-positive elimination
-7. PASS 2: For confirmed hits only, read full DB entry: read_file(card.ref, card.lines[0], card.lines[1])
-8. Validate each confirmed match against target code (true/false positive)
+6. PARTITION surviving cards into shards of 50-80 cards (grouped by cat tag)
+   - neverPrune cards are duplicated into every shard
+7. SPAWN one sub-agent per shard (parallel) — each gets shard cards + full target code
+8. Per-shard: PASS 1 (micro-directives) + PASS 2 (evidence lookup for true/likely positives)
+9. MERGE all shard findings → deduplicate by root cause → 03-findings-raw.md
 ```
 
 ---
@@ -197,7 +197,7 @@ The `audit-orchestrator` agent (`.github/agents/audit-orchestrator.md`) is the *
 Phase 1: Reconnaissance      → Protocol detection, scope, manifest resolution
 Phase 2: Context Building     → Sub-agent: audit-context-building
 Phase 3: Invariant Extraction → Sub-agent: invariant-writer
-Phase 4: DB-powered Hunting   → Self (DB search) + Sub-agent: invariant-catcher
+Phase 4: DB-powered Hunting   → Self (grep-prune + partition + merge) + N × Sub-agent: invariant-catcher (parallel shards)
 Phase 4a: Reasoning Discovery  → Sub-agent: protocol-reasoning-agent
 Phase 5: Validation Gaps      → Sub-agent: missing-validation-reasoning
 Phase 6: Triage & PoC         → Self + Sub-agent: poc-writing
@@ -217,9 +217,9 @@ Final:   Report Assembly      → Produces audit-output/AUDIT-REPORT.md
           │                        │                        │
           ▼                        ▼                        ▼
 ┌──────────────────┐  ┌────────────────────┐  ┌──────────────────────┐
-│ audit-context-   │  │ invariant-catcher  │  │ missing-validation-  │
-│ building         │  │                    │  │ reasoning            │
-└────────┬─────────┘  └────────────────────┘  └──────────────────────┘
+│ audit-context-   │  │ N × invariant-     │  │ missing-validation-  │
+│ building         │  │ catcher (parallel  │  │ reasoning            │
+└────────┬─────────┘  │ shards)            │  └──────────────────────┘
          │                                     
          ▼                                     ┌──────────────────────┐
 ┌──────────────────┐                           │ protocol-reasoning-  │
@@ -245,10 +245,10 @@ Post-triage:
 
 | Agent | Produces | Consumes |
 |-------|----------|----------|
-| `audit-orchestrator` | `00-scope.md`, `05-findings-triaged.md`, `AUDIT-REPORT.md` | All outputs |
+| `audit-orchestrator` | `00-scope.md`, `hunt-card-shards.json`, `03-findings-raw.md` (merged), `05-findings-triaged.md`, `AUDIT-REPORT.md` | All outputs |
 | `audit-context-building` | `01-context.md` | Scope |
 | `invariant-writer` | `02-invariants.md` | Context |
-| `invariant-catcher` | `03-findings-raw.md` | Manifests, invariants, pattern hit list |
+| `invariant-catcher` (×N shards) | `03-findings-shard-<id>.md` | Shard cards, invariants, target code |
 | `protocol-reasoning-agent` | `04a-reasoning-findings.md` | Context, invariants, raw findings, manifests |
 | `missing-validation-reasoning` | `04-validation-findings.md` | Context |
 | `poc-writing` | `pocs/F-NNN-poc.t.sol` | Individual findings |

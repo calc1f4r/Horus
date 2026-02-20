@@ -11,23 +11,27 @@ All pipeline artifacts go into `audit-output/` at the project root:
 
 ```
 audit-output/
-├── 00-scope.md              ← Phase 1: Reconnaissance
-├── 01-context.md            ← Phase 2: Context building
-├── 02-invariants.md         ← Phase 3: Invariant extraction This should be a folder as there are many invariants, e.g. `02-invariants/INV-001.md`, `02-invariants/INV-002.md`, etc. 
-├── 03-findings-raw.md       ← Phase 4: DB-powered hunting
-├── 04a-reasoning-findings.md ← Phase 4a: Reasoning-based discovery
-├── 04-validation-findings.md ← Phase 5: Validation gap analysis
-├── 05-findings-triaged.md   ← Phase 6: Triage & deduplication
-├── 06-sherlock-validation.md ← Phase 7: Sherlock judging
-├── 07-cantina-validation.md ← Phase 7: Cantina judging
-├── AUDIT-REPORT.md          ← Final assembled report
-├── pocs/                    ← PoC exploit tests
+├── 00-scope.md                        ← Phase 1: Reconnaissance
+├── 01-context.md                      ← Phase 2: Context building
+├── 02-invariants.md                   ← Phase 3: Invariant extraction
+├── hunt-card-hits.json                ← Phase 4: Grep-prune results
+├── hunt-card-shards.json              ← Phase 4: Partition plan
+├── 03-findings-shard-*.md             ← Phase 4: Per-shard findings (temporary)
+├── 03-findings-raw.md                 ← Phase 4: Merged findings (final)
+├── 03-merge-log.md                    ← Phase 4: Shard merge deduplication log
+├── 04a-reasoning-findings.md          ← Phase 4a: Reasoning-based discovery
+├── 04-validation-findings.md          ← Phase 5: Validation gap analysis
+├── 05-findings-triaged.md             ← Phase 6: Triage & deduplication
+├── 06-sherlock-validation.md          ← Phase 7: Sherlock judging
+├── 07-cantina-validation.md           ← Phase 7: Cantina judging
+├── AUDIT-REPORT.md                    ← Final assembled report
+├── pocs/                              ← PoC exploit tests
 │   ├── F-001-poc.t.sol
 │   └── ...
-├── fuzzing/                 ← Medusa harnesses
+├── fuzzing/                           ← Medusa harnesses
 │   ├── medusa.json
 │   └── ...
-└── certora/                 ← Certora specs
+└── certora/                           ← Certora specs
     ├── spec.conf
     └── ...
 ```
@@ -342,6 +346,9 @@ Phase 3 (Invariants) ←── reads invariantCandidates
          │──→ structured invariant specs (INV-*)
          │
 Phase 4 (Hunting) ←── reads manifestList + invariant specs
+         │  Self: grep-prune → partition into shards → spawn N sub-agents
+         │  N × invariant-catcher: per-shard findings → 03-findings-shard-*.md
+         │  Self: merge shards → deduplicate → 03-findings-raw.md
          │──→ raw findings (F-NNN)
          │
 Phase 4a (Reasoning) ←── reads context + invariants + raw findings + manifests

@@ -1024,6 +1024,172 @@ def build_all_huntcards(manifests):
     return per_manifest_info, total_cards
 
 
+def build_partition_bundles(manifests):
+    """Generate pre-computed shard partition bundles for each protocolContext mapping.
+    
+    For each protocol type (e.g., vault_yield, lending_protocol), collects all hunt cards
+    from the protocol's relevant manifests, then partitions them into shards of 50-80 cards
+    grouped by category tag. neverPrune cards are separated into a critical set that gets
+    duplicated into every shard.
+    
+    Outputs: DB/manifests/bundles/<protocol>-shards.json
+    """
+    BUNDLES_DIR = MANIFEST_DIR / "bundles"
+    BUNDLES_DIR.mkdir(parents=True, exist_ok=True)
+    
+    # Load all enriched hunt cards
+    all_hc_path = HUNTCARDS_DIR / "all-huntcards.json"
+    if not all_hc_path.exists():
+        print("   ⚠ all-huntcards.json not found, skipping partition bundles")
+        return
+    
+    with open(all_hc_path, "r", encoding="utf-8") as f:
+        all_huntcards = json.load(f)
+    
+    # Build card lookup by manifest name (from ref path: DB/<manifest>/...)
+    cards_by_manifest = defaultdict(list)
+    for card in all_huntcards["cards"]:
+        # Extract manifest name from ref path: "DB/oracle/..." → "oracle"
+        ref_parts = card.get("ref", "").split("/")
+        if len(ref_parts) >= 2:
+            manifest_key = ref_parts[1]
+            # Map "general" subfolder to sub-manifest names
+            if manifest_key == "general" and len(ref_parts) >= 3:
+                subfolder = ref_parts[2]
+                # Find which general-* sub-manifest this belongs to
+                for sub_name, sub_config in GENERAL_SUBCATEGORIES.items():
+                    if subfolder in sub_config["folders"]:
+                        manifest_key = sub_name
+                        break
+            cards_by_manifest[manifest_key].append(card)
+    
+    # Protocol context mappings (same as add_protocol_context)
+    protocol_mappings = {
+        "lending_protocol": ["oracle", "general-defi", "tokens", "general-security"],
+        "dex_amm": ["amm", "general-defi", "oracle"],
+        "vault_yield": ["tokens", "general-defi", "oracle", "unique"],
+        "governance_dao": ["general-governance"],
+        "cross_chain_bridge": ["bridge", "general-infrastructure"],
+        "cosmos_appchain": ["cosmos"],
+        "solana_program": ["solana"],
+        "perpetuals_derivatives": ["oracle", "general-defi", "amm"],
+        "token_launch": ["general-governance", "tokens", "general-security"],
+        "staking_liquid_staking": ["general-defi", "tokens", "oracle"],
+        "nft_marketplace": ["tokens", "general-infrastructure"],
+    }
+    
+    MAX_SHARD_SIZE = 80
+    MIN_GROUP_SIZE = 20
+    
+    for protocol_name, manifest_list in protocol_mappings.items():
+        # Collect all cards for this protocol's manifests
+        protocol_cards = []
+        seen_ids = set()
+        for manifest_name in manifest_list:
+            for card in cards_by_manifest.get(manifest_name, []):
+                if card["id"] not in seen_ids:
+                    protocol_cards.append(card)
+                    seen_ids.add(card["id"])
+        
+        if not protocol_cards:
+            continue
+        
+        # Separate neverPrune cards (critical set)
+        critical_cards = [c for c in protocol_cards if c.get("neverPrune", False)]
+        regular_cards = [c for c in protocol_cards if not c.get("neverPrune", False)]
+        
+        # Group regular cards by primary cat tag
+        groups = defaultdict(list)
+        for card in regular_cards:
+            primary_cat = card.get("cat", ["general"])[0] if card.get("cat") else "general"
+            groups[primary_cat].append(card)
+        
+        # Build shards: split large groups, merge small groups
+        shards = []
+        small_groups = []
+        
+        for cat_name, cards in sorted(groups.items(), key=lambda x: -len(x[1])):
+            if len(cards) > MAX_SHARD_SIZE:
+                # Split into sub-shards of ~60
+                for i in range(0, len(cards), 60):
+                    chunk = cards[i:i + 60]
+                    suffix = f"-{i // 60 + 1}" if len(cards) > 60 else ""
+                    shards.append({
+                        "id": f"shard-{len(shards) + 1}-{cat_name}{suffix}",
+                        "cardCount": len(chunk),
+                        "categories": [cat_name],
+                        "cardIds": [c["id"] for c in chunk],
+                    })
+            elif len(cards) < MIN_GROUP_SIZE:
+                small_groups.append((cat_name, cards))
+            else:
+                shards.append({
+                    "id": f"shard-{len(shards) + 1}-{cat_name}",
+                    "cardCount": len(cards),
+                    "categories": [cat_name],
+                    "cardIds": [c["id"] for c in cards],
+                })
+        
+        # Merge small groups into combined shards
+        if small_groups:
+            merged_cards = []
+            merged_cats = []
+            for cat_name, cards in small_groups:
+                merged_cards.extend(cards)
+                merged_cats.append(cat_name)
+                if len(merged_cards) >= 50:
+                    shards.append({
+                        "id": f"shard-{len(shards) + 1}-{'_'.join(merged_cats[:3])}",
+                        "cardCount": len(merged_cards),
+                        "categories": merged_cats[:],
+                        "cardIds": [c["id"] for c in merged_cards],
+                    })
+                    merged_cards = []
+                    merged_cats = []
+            # Remaining small groups
+            if merged_cards:
+                if shards and len(merged_cards) < 15:
+                    # Append to the last shard if very small
+                    shards[-1]["cardCount"] += len(merged_cards)
+                    shards[-1]["categories"].extend(merged_cats)
+                    shards[-1]["cardIds"].extend([c["id"] for c in merged_cards])
+                else:
+                    shards.append({
+                        "id": f"shard-{len(shards) + 1}-misc",
+                        "cardCount": len(merged_cards),
+                        "categories": merged_cats,
+                        "cardIds": [c["id"] for c in merged_cards],
+                    })
+        
+        # Write bundle
+        bundle = {
+            "meta": {
+                "protocol": protocol_name,
+                "description": f"Pre-computed shard partition for {protocol_name} audits",
+                "totalCards": len(protocol_cards),
+                "criticalCards": len(critical_cards),
+                "shardCount": len(shards),
+                "criticalCardIds": [c["id"] for c in critical_cards],
+                "usage": (
+                    "Load this file to get pre-computed shards for parallel fan-out. "
+                    "Each shard is assigned to one sub-agent. Critical cards (neverPrune) "
+                    "must be appended to every shard at spawn time."
+                ),
+            },
+            "shards": shards,
+        }
+        
+        bundle_path = BUNDLES_DIR / f"{protocol_name}-shards.json"
+        with open(bundle_path, "w", encoding="utf-8") as f:
+            json.dump(bundle, f, indent=2, ensure_ascii=False)
+        
+        total_shard_cards = sum(s["cardCount"] for s in shards)
+        print(f"   → {protocol_name}: {len(shards)} shards, "
+              f"{total_shard_cards} regular + {len(critical_cards)} critical cards")
+    
+    return True
+
+
 def build_general_sub_manifests():
     """Split general/ into focused sub-manifests for agent precision."""
     sub_manifests = {}
@@ -1157,6 +1323,10 @@ def main():
         print("   ⚠ Skipping enrichment (scripts/generate_micro_directives.py not found)")
     except Exception as e:
         print(f"   ⚠ Enrichment failed: {e}")
+
+    # Build partition bundles for parallel fan-out
+    print(f"\n📦 Building partition bundles for parallel fan-out...")
+    build_partition_bundles(manifests)
 
     # Add hunt card references to router
     router["huntcards"] = {
