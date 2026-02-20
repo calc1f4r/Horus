@@ -3,7 +3,7 @@ name: Sync main to master (no reports)
 on:
   push:
     branches:
-      - main
+      - hunt-cards
 
 permissions:
   contents: write
@@ -12,11 +12,11 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main
+      - name: Checkout branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: main
+          ref: ${{ github.ref_name }}
 
       - name: Configure git
         run: |
@@ -33,7 +33,7 @@ jobs:
 
       - name: Commit changes
         run: |
-          git commit -m "Sync DB and .github to master" --allow-empty
+          git commit -m "Sync DB and .github from ${{ github.ref_name }} to master" --allow-empty
 
       - name: Push to master
         run: |
