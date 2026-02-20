@@ -1,40 +1,68 @@
-name: Sync main to master (no reports)
+name: Emergency Manual Sync to Master
+
+# Manual fallback — use this when you need to force-sync master outside of
+# the normal hunt-cards push flow (e.g., after a hotfix or a rebased branch).
+# The automatic sync runs as Job 2 in regenerate-manifests.yml on every
+# hunt-cards push and should be preferred under normal circumstances.
 
 on:
-  push:
-    branches:
-      - hunt-cards
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Branch to sync from'
+        required: true
+        default: 'hunt-cards'
 
 permissions:
   contents: write
 
 jobs:
-  sync:
+  emergency-sync:
+    name: Manual sync → master
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout branch
+      - name: Checkout source branch (full history)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.event.inputs.source_branch }}
 
       - name: Configure git
         run: |
-          git config user.name "github-actions[bot]"
+          git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Remove all except DB and .github
-        run: |
-          git rm -r --cached .
-          git add DB/
-          git add Agents.md
-          git add README.md
-          git add .github/
+      - name: Fetch master
+        run: git fetch origin master
 
-      - name: Commit changes
-        run: |
-          git commit -m "Sync DB and .github from ${{ github.ref_name }} to master" --allow-empty
+      - name: Switch to master
+        run: git checkout master
 
-      - name: Push to master
+      - name: Overlay curated files from source branch
         run: |
-          git push origin HEAD:master --force
+          SRC="origin/${{ github.event.inputs.source_branch }}"
+
+          # ── Core database (manifests, hunt cards, vulnerability entries) ──
+          git checkout "$SRC" -- DB/
+
+          # ── Agent skill definitions (no workflows — they stay on hunt-cards) ──
+          git checkout "$SRC" -- .github/agents/
+
+          # ── Project definition files ──
+          git checkout "$SRC" -- \
+            Agents.md \
+            README.md \
+            LICENSE \
+            TEMPLATE.md \
+            Example.md \
+            CodebaseStructure.md \
+            CONTRIBUTING.md
+
+      - name: Commit & push to master
+        run: |
+          git add -A
+          git commit \
+            -m "sync(manual): ${{ github.event.inputs.source_branch }} → master ($(date -u '+%Y-%m-%d %H:%M UTC'))" \
+            --allow-empty
+          git push origin master --force

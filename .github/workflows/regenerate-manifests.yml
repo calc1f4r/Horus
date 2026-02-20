@@ -1,41 +1,125 @@
-name: Regenerate Manifests
+name: Regenerate Manifests & Sync to Master
+
+# Runs on every push to the hunt-cards working branch.
+# Job 1 (regenerate): rebuilds DB/index.json + DB/manifests/ (including hunt
+#   cards) only when vulnerability .md files or the generator script change.
+# Job 2 (sync-to-master): always runs after Job 1 and pushes the curated
+#   public-facing subset of the repo to the master branch.
 
 on:
   push:
     branches:
       - hunt-cards
-    paths:
-      - 'DB/**/*.md'
-      - 'generate_manifests.py'
 
 permissions:
   contents: write
 
 jobs:
+  # ── Job 1: Regenerate manifests & hunt cards ─────────────────────────────
   regenerate:
+    name: Regenerate manifests
     runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.diff.outputs.changed }}
+
     steps:
-      - name: Checkout
+      - name: Checkout hunt-cards
         uses: actions/checkout@v4
+        with:
+          ref: hunt-cards
+
+      - name: Detect manifest-affecting file changes
+        id: check_paths
+        run: |
+          # Compare pushed commits; || true so the step never fails on first push
+          CHANGED=$(git diff --name-only \
+            ${{ github.event.before }} ${{ github.sha }} 2>/dev/null \
+            | grep -E '^DB/.*\.md$|^generate_manifests\.py$' \
+            | wc -l || echo 0)
+          echo "paths_changed=$CHANGED" >> "$GITHUB_OUTPUT"
 
       - name: Set up Python
+        if: steps.check_paths.outputs.paths_changed != '0'
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
-      - name: Run manifest generator
+      - name: Install Python dependencies
+        if: steps.check_paths.outputs.paths_changed != '0'
+        run: pip install -r requirements.txt
+
+      - name: Run manifest & hunt-card generator
+        if: steps.check_paths.outputs.paths_changed != '0'
         run: python3 generate_manifests.py
 
-      - name: Check for changes
+      - name: Detect generated changes
         id: diff
+        if: steps.check_paths.outputs.paths_changed != '0'
         run: |
-          git diff --quiet DB/index.json DB/manifests/ && echo "changed=false" >> "$GITHUB_OUTPUT" || echo "changed=true" >> "$GITHUB_OUTPUT"
+          git diff --quiet DB/index.json DB/manifests/ \
+            && echo "changed=false" >> "$GITHUB_OUTPUT" \
+            || echo "changed=true"  >> "$GITHUB_OUTPUT"
 
-      - name: Commit and push
-        if: steps.diff.outputs.changed == 'true'
+      - name: Commit & push updated manifests
+        if: >
+          steps.check_paths.outputs.paths_changed != '0' &&
+          steps.diff.outputs.changed == 'true'
         run: |
-          git config user.name "github-actions[bot]"
+          git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add DB/index.json DB/manifests/
-          git commit -m "chore: regenerate manifests"
+          git commit -m "chore: regenerate manifests + hunt cards [skip ci]"
           git push
+
+  # ── Job 2: Sync curated subset → master ──────────────────────────────────
+  sync-to-master:
+    name: Sync to master
+    runs-on: ubuntu-latest
+    needs: regenerate   # ensures manifests are committed before we snapshot
+
+    steps:
+      - name: Checkout hunt-cards (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: hunt-cards
+
+      - name: Pull latest hunt-cards (picks up manifest commit if any)
+        run: git pull origin hunt-cards
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch master
+        run: git fetch origin master
+
+      - name: Switch to master
+        run: git checkout master
+
+      - name: Overlay curated files from hunt-cards
+        run: |
+          # ── Core database (manifests, hunt cards, vulnerability entries) ──
+          git checkout origin/hunt-cards -- DB/
+
+          # ── Agent skill definitions (no workflows — they stay on hunt-cards) ──
+          git checkout origin/hunt-cards -- .github/agents/
+
+          # ── Project definition files ──
+          git checkout origin/hunt-cards -- \
+            Agents.md \
+            README.md \
+            LICENSE \
+            TEMPLATE.md \
+            Example.md \
+            CodebaseStructure.md \
+            CONTRIBUTING.md
+
+      - name: Commit & push to master
+        run: |
+          git add -A
+          git commit \
+            -m "sync: hunt-cards → master ($(date -u '+%Y-%m-%d %H:%M UTC'))" \
+            --allow-empty
+          git push origin master --force
