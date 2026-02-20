@@ -1,0 +1,189 @@
+name: Validate Hunt Card Quality
+
+# Runs on every push to hunt-cards that touches DB entries or the generator.
+# Fails the push if hunt card quality degrades below acceptable thresholds:
+#   - Empty grep pattern ratio  > 15 %
+#   - Empty detect field ratio  > 20 %
+#   - Total card count drops by > 5 % from the last committed baseline
+#
+# A quality report is always printed to the workflow log regardless of
+# pass/fail, so regressions are easy to diagnose.
+
+on:
+  push:
+    branches:
+      - hunt-cards
+    paths:
+      - 'DB/**/*.md'
+      - 'generate_manifests.py'
+      - 'scripts/generate_micro_directives.py'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Hunt card quality gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout hunt-cards
+        uses: actions/checkout@v4
+        with:
+          ref: hunt-cards
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # ── Snapshot the committed baseline before regeneration ──────────────
+      - name: Capture baseline card count
+        id: baseline
+        run: |
+          BASELINE=0
+          if [ -f "DB/manifests/huntcards/all-huntcards.json" ]; then
+            BASELINE=$(python3 -c "
+          import json, sys
+          with open('DB/manifests/huntcards/all-huntcards.json') as f:
+              d = json.load(f)
+          print(d.get('meta', {}).get('totalCards', len(d.get('cards', []))))
+          ")
+          fi
+          echo "count=$BASELINE" >> "$GITHUB_OUTPUT"
+          echo "Baseline hunt card count: $BASELINE"
+
+      # ── Regenerate everything fresh ──────────────────────────────────────
+      - name: Regenerate manifests & hunt cards
+        run: python3 generate_manifests.py
+
+      # ── Quality validation ───────────────────────────────────────────────
+      - name: Run quality gate
+        env:
+          BASELINE_COUNT: ${{ steps.baseline.outputs.count }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, sys
+          from pathlib import Path
+
+          HUNTCARDS_DIR = Path("DB/manifests/huntcards")
+          ALL_HC       = HUNTCARDS_DIR / "all-huntcards.json"
+
+          if not ALL_HC.exists():
+              print("ERROR: all-huntcards.json not found after generation")
+              sys.exit(1)
+
+          with open(ALL_HC) as f:
+              data = json.load(f)
+
+          cards = data.get("cards", [])
+          total = len(cards)
+
+          # ── Per-card metrics ─────────────────────────────────────────────
+          empty_grep      = [c for c in cards if not c.get("grep", "").strip()]
+          empty_detect    = [c for c in cards if not c.get("detect", "").strip()]
+          no_severity     = [c for c in cards if not c.get("severity")]
+          never_prune     = [c for c in cards if c.get("neverPrune")]
+
+          # Enrichment (micro-directives)
+          has_check       = [c for c in cards if c.get("check")]
+          has_antipattern = [c for c in cards if c.get("antipattern")]
+          has_secure      = [c for c in cards if c.get("securePattern")]
+
+          # ── Per-manifest breakdown ────────────────────────────────────────
+          manifest_stats = {}
+          for hc_file in sorted(HUNTCARDS_DIR.glob("*-huntcards.json")):
+              if hc_file.name == "all-huntcards.json":
+                  continue
+              with open(hc_file) as f:
+                  mdata = json.load(f)
+              mc     = mdata.get("cards", [])
+              m_name = mdata.get("meta", {}).get("manifest", hc_file.stem.replace("-huntcards", ""))
+              m_empty_grep = sum(1 for c in mc if not c.get("grep", "").strip())
+              manifest_stats[m_name] = {
+                  "total":      len(mc),
+                  "empty_grep": m_empty_grep,
+                  "enriched":   sum(1 for c in mc if c.get("check")),
+              }
+
+          # ── Quality ratios ────────────────────────────────────────────────
+          empty_grep_ratio   = len(empty_grep)   / total if total else 0
+          empty_detect_ratio = len(empty_detect) / total if total else 0
+          enrichment_ratio   = len(has_check)    / total if total else 0
+
+          baseline = int(os.environ.get("BASELINE_COUNT", 0))
+          count_drop_ratio   = (baseline - total) / baseline if baseline > 0 else 0
+
+          # ── Report ────────────────────────────────────────────────────────
+          print("=" * 65)
+          print("  HUNT CARD QUALITY REPORT")
+          print("=" * 65)
+          print(f"  Total cards   : {total:>6}")
+          print(f"  Baseline      : {baseline:>6}  (committed before this push)")
+          print(f"  Delta         : {total - baseline:>+6}")
+          print(f"  Never-prune   : {len(never_prune):>6}  (CRITICAL safety-net cards)")
+          print()
+          print(f"  Empty grep    : {len(empty_grep):>6}  ({empty_grep_ratio*100:.1f}%)")
+          print(f"  Empty detect  : {len(empty_detect):>6}  ({empty_detect_ratio*100:.1f}%)")
+          print(f"  No severity   : {len(no_severity):>6}")
+          print()
+          print(f"  Enriched (check)       : {len(has_check):>6}  ({enrichment_ratio*100:.1f}%)")
+          print(f"  Enriched (antipattern) : {len(has_antipattern):>6}")
+          print(f"  Enriched (securePattern): {len(has_secure):>6}")
+          print()
+          print("  Per-manifest breakdown:")
+          print(f"  {'Manifest':<30} {'Cards':>6} {'EmptyGrep':>10} {'Enriched':>9}")
+          print(f"  {'-'*30} {'-'*6} {'-'*10} {'-'*9}")
+          for name, s in sorted(manifest_stats.items()):
+              flag = " ⚠" if s["empty_grep"] > 0 else ""
+              print(f"  {name:<30} {s['total']:>6} {s['empty_grep']:>10}{flag}  {s['enriched']:>8}")
+
+          # ── Failures ─────────────────────────────────────────────────────
+          failures = []
+
+          if empty_grep_ratio > 0.15:
+              failures.append(
+                  f"Empty grep ratio {empty_grep_ratio*100:.1f}% exceeds 15% threshold "
+                  f"({len(empty_grep)}/{total} cards). "
+                  f"Fix: ensure DB entries contain backtick-wrapped identifiers."
+              )
+
+          if empty_detect_ratio > 0.20:
+              failures.append(
+                  f"Empty detect ratio {empty_detect_ratio*100:.1f}% exceeds 20% threshold "
+                  f"({len(empty_detect)}/{total} cards). "
+                  f"Fix: ensure DB entry sections have a Root Cause subsection."
+              )
+
+          if baseline > 0 and count_drop_ratio > 0.05:
+              failures.append(
+                  f"Card count dropped {count_drop_ratio*100:.1f}% "
+                  f"({baseline} → {total}). "
+                  f"This may indicate .md files were removed or sections renamed. "
+                  f"Verify intentional."
+              )
+
+          # Cards with empty grep — list top offenders for quick fixing
+          if empty_grep:
+              print()
+              print(f"  Cards with empty grep (top 20):")
+              for c in empty_grep[:20]:
+                  print(f"    [{c.get('severity','?')}] {c['id']} — {c['title']}")
+
+          print()
+          print("=" * 65)
+
+          if failures:
+              print("  QUALITY GATE: FAILED")
+              print("=" * 65)
+              for i, f in enumerate(failures, 1):
+                  print(f"  [{i}] {f}")
+              print()
+              sys.exit(1)
+          else:
+              print("  QUALITY GATE: PASSED ✓")
+              print("=" * 65)
+          EOF

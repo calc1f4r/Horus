@@ -1,119 +1,230 @@
+<div align="center">
+
 # Vulnerability Database
 
-A curated, agent-optimized vulnerability pattern database for smart contract security audits. Aggregates findings from real-world audits and exploits into structured, searchable entries across EVM, Solana, and Cosmos ecosystems.
+**A production-grade, agent-optimized vulnerability pattern database for smart contract security.**
 
-## Quick Start
+Aggregates 815+ vulnerability patterns from real-world audits and on-chain exploits into a structured, tiered search system built for LLM-powered audit agents — covering EVM, Solana, and Cosmos ecosystems.
 
-```bash
-# Clone the repository
-git clone https://github.com/calc1f4r/Vulnerability-database.git
-cd Vulnerability-database
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Patterns](https://img.shields.io/badge/patterns-815%2B-brightgreen)](DB/manifests)
+[![Manifests](https://img.shields.io/badge/manifests-11-orange)](DB/manifests)
+[![Hunt Cards](https://img.shields.io/badge/hunt%20cards-451%2B-red)](DB/manifests/huntcards)
 
-# Set up Python environment (for fetching tools)
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+</div>
+
+---
+
+## Overview
+
+The Vulnerability Database is a curated knowledge base purpose-built for AI-assisted smart contract auditing. Rather than storing flat lists of findings, it uses a **4-tier precision architecture** that lets agents load only the context they need — reducing token usage by 60–80% compared to naive full-file reads.
+
+The database ships with a **13-agent audit pipeline** that can take an unfamiliar codebase from zero to a triaged report with PoCs, fuzzing harnesses, and formal verification specs — all powered by the patterns stored here.
+
+![Architecture diagram showing the full 4-tier search system and agent pipeline](./Architecture.png)
+
+---
+
+## 4-Tier Search Architecture
+
+```
+Tier 1    DB/index.json                            ← Lean router. ALWAYS start here.
+   ↓
+Tier 1.5  DB/manifests/huntcards/all-huntcards.json ← 451+ compressed detection cards
+   ↓                                                   with grep patterns & micro-directives
+Tier 2    DB/manifests/<name>.json                  ← Full pattern index with line ranges
+   ↓
+Tier 3    DB/**/*.md                                ← Vulnerability content.
+                                                       Read ONLY targeted line ranges.
 ```
 
-## Architecture Overview
+**Hunt Cards (Tier 1.5)** are the primary interface for bulk auditing. Each card contains:
+- `grep` — regex pattern to search target code
+- `detect` — one-line description of the root cause
+- `check` — micro-directives: exact steps to verify on a grep hit
+- `antipattern` — the vulnerable code pattern
+- `securePattern` — the correct implementation
+- `neverPrune` — `true` for CRITICAL patterns that always survive pruning
+- `ref` + `lines` — pointer to the full `.md` entry for confirmed positives
 
-![Full architecture diagram with all components and data flows](./Architecture.png)
+---
 
-### Search the Database
+## Vulnerability Coverage
 
-Start with `DB/index.json` — the master router that points to the right manifest for any protocol type or keyword:
+| Manifest | Patterns | Files | Focus |
+|---|---|---|---|
+| `oracle` | 78 | 11 | Chainlink, Pyth, price manipulation, staleness |
+| `general-defi` | 199 | 24 | Flash loans, vaults, slippage, precision, calculations |
+| `general-security` | 87 | 14 | Access control, signatures, input validation, initialization |
+| `general-infrastructure` | 85 | 14 | Proxies, reentrancy, storage collision, upgrades |
+| `general-governance` | 71 | 11 | DAOs, stablecoins, MEV, randomness, malicious patterns |
+| `unique` | 79 | 21 | Protocol-specific exploits from real-world incidents |
+| `amm` | 67 | 9 | Concentrated liquidity, constant product, sandwich attacks |
+| `bridge` | 49 | 7 | LayerZero, Wormhole, Hyperlane, custom cross-chain |
+| `solana` | 40 | 2 | Solana programs, Anchor, Token-2022, SPL |
+| `tokens` | 33 | 3 | ERC20, ERC4626, ERC721, token compatibility |
+| `cosmos` | 27 | 14 | Cosmos SDK, IBC, staking, app-chain invariants |
+| **Total** | **815+** | **130** | |
+
+---
+
+## Protocol-to-Manifest Mapping
+
+| Auditing | Load these manifests |
+|---|---|
+| Lending / Borrowing (Aave, Compound) | `oracle`, `general-defi`, `tokens`, `general-security` |
+| DEX / AMM (Uniswap, Curve) | `amm`, `general-defi`, `oracle` |
+| Vaults / Yield (ERC4626) | `tokens`, `general-defi`, `general-infrastructure` |
+| Governance / DAO | `general-governance`, `general-security` |
+| Cross-chain Bridges | `bridge`, `general-infrastructure`, `general-security` |
+| Cosmos App-chains | `cosmos`, `general-security` |
+| Solana Programs | `solana`, `general-security` |
+| Perpetuals / Derivatives | `oracle`, `general-defi`, `amm` |
+| Staking / Liquid Staking | `tokens`, `general-defi`, `general-governance` |
+
+---
+
+## Agent Ecosystem
+
+The `.github/agents/` directory contains 13 specialized agents that form a complete audit pipeline.
+
+### Entry Point
 
 ```
-DB/index.json → protocolContext → relevant manifests
-DB/manifests/<name>.json → pattern-level index with line ranges
-DB/**/*.md → vulnerability content (read only targeted line ranges)
+@audit-orchestrator <codebase-path> [protocol-hint]
 ```
 
-See [DB/SEARCH_GUIDE.md](DB/SEARCH_GUIDE.md) for the complete search guide.
+The `audit-orchestrator` runs a 7-phase pipeline, spawning sub-agents in parallel:
 
-### Fetch New Reports
-
-```bash
-source .venv/bin/activate
-python3 solodit_fetcher.py --keyword "<topic>" --output ./reports/<topic>_findings
 ```
+Phase 1  Reconnaissance       → Protocol detection, scope, manifest resolution
+Phase 2  Context Building     → audit-context-building
+Phase 3  Invariant Extraction → invariant-writer
+Phase 4  DB-powered Hunting   → N × invariant-catcher (parallel shards)
+Phase 4a Reasoning Discovery  → protocol-reasoning-agent
+Phase 5  Validation Gaps      → missing-validation-reasoning
+Phase 6  Triage & PoC         → poc-writing
+Phase 7  Downstream           → medusa-fuzzing, certora-verification,
+                                 sherlock-judging, cantina-judge
+```
+
+### All Agents
+
+| Agent | Role |
+|---|---|
+| `audit-orchestrator` | Entry point — orchestrates all 7 phases |
+| `audit-context-building` | Line-by-line codebase comprehension |
+| `invariant-writer` | Extracts all system invariants |
+| `invariant-catcher` | Hunts DB patterns against target code (parallel shards) |
+| `protocol-reasoning-agent` | Deep reasoning-based vulnerability discovery |
+| `missing-validation-reasoning` | Input validation scanner |
+| `poc-writer` | Writes compilable Foundry/Hardhat exploit tests |
+| `issue-writer` | Polishes findings for competition submission |
+| `medusa-fuzzing` | Generates Medusa fuzzing harnesses |
+| `certora-verification` | Generates Certora CVL formal specs |
+| `sherlock-judge` | Validates findings against Sherlock severity criteria |
+| `cantina-judge` | Validates findings against Cantina severity criteria |
+| `variant-template-writer` | Converts audit reports into DB entries |
+
+### DB Ingestion Agents
+
+| Agent | Role |
+|---|---|
+| `defihacklabs-indexer` | Indexes DeFiHackLabs exploit PoCs into DB entries |
+| `solodit-fetching` | Fetches raw findings from the Solodit/Cyfrin API |
+
+---
+
+## Searching the Database
+
+### By Protocol Type
+
+```
+1. Read DB/index.json → protocolContext.mappings.<type>
+2. Load the listed manifests
+3. Browse patterns by title / severity / codeKeywords
+4. Read targeted line ranges from the .md files
+```
+
+### By Keyword
+
+```
+1. Read DB/manifests/keywords.json → find your keyword
+2. Follow the pointer to the relevant manifest
+3. Find the pattern entry → read only lineStart–lineEnd
+```
+
+### Bulk Audit (Recommended for Full Audits)
+
+```
+1. Load DB/manifests/huntcards/all-huntcards.json  (~55K tokens for all 451+ cards)
+2. grep target code for each card.grep pattern
+3. Cards with neverPrune: true always kept regardless of grep hits
+4. Prune cards with zero hits  →  removes ~60-80% of cards
+5. Partition surviving cards into shards of 50-80
+6. Spawn one invariant-catcher sub-agent per shard (parallel)
+7. Merge shard findings  →  03-findings-raw.md
+```
+
+---
 
 ## Repository Structure
 
 ```
-├── DB/                              # Vulnerability database
-│   ├── index.json                   # Master router — start here
-│   ├── SEARCH_GUIDE.md              # Detailed search guide
-│   ├── manifests/                   # Pattern-level indexes (11 manifests)
-│   ├── oracle/                      # Oracle vulnerabilities (Chainlink, Pyth)
-│   ├── amm/                         # AMM vulnerabilities
-│   ├── bridge/                      # Cross-chain bridge vulnerabilities
-│   ├── tokens/                      # Token standard vulnerabilities
-│   ├── cosmos/                      # Cosmos SDK / IBC vulnerabilities
-│   ├── Solona-chain-specific/       # Solana program vulnerabilities
-│   ├── general/                     # General security patterns
-│   └── unique/                      # Protocol-specific unique exploits
-├── reports/                         # Raw audit findings (source data)
-├── DeFiHackLabs/                    # Real-world exploit PoCs (submodule)
-├── Variant-analysis/                # Semgrep/CodeQL detection templates
-├── .github/agents/                  # AI agent skill definitions
-├── TEMPLATE.md                      # Canonical entry structure
-├── Example.md                       # Reference implementation
-├── CONTRIBUTING.md                  # Contribution guidelines
-└── Agents.md                        # Agent guidance document
+Vulnerability-database/
+├── DB/
+│   ├── index.json                    # Master router — START HERE
+│   ├── SEARCH_GUIDE.md               # Full search guide for agents
+│   ├── manifests/
+│   │   ├── *.json                    # 11 pattern-level manifest indexes
+│   │   ├── keywords.json             # Keyword → manifest routing
+│   │   └── huntcards/
+│   │       ├── all-huntcards.json    # ALL 451+ hunt cards in one file
+│   │       └── *-huntcards.json      # Per-manifest hunt cards
+│   ├── oracle/                       # Chainlink, Pyth, price manipulation
+│   ├── amm/                          # Concentrated liquidity, constant product
+│   ├── bridge/                       # LayerZero, Wormhole, Hyperlane, custom
+│   ├── tokens/                       # ERC20, ERC4626, ERC721
+│   ├── cosmos/                       # Cosmos SDK, IBC, app-chains
+│   ├── Solona-chain-specific/        # Solana programs, Token-2022
+│   ├── general/                      # Access control, reentrancy, proxies, DeFi
+│   └── unique/                       # Protocol-specific real-world exploits
+├── .github/
+│   └── agents/                       # 13 audit agent skill definitions
+│       └── resources/                # Agent reference materials
+├── DeFiHackLabs/                     # Real-world exploit PoCs (submodule)
+├── TEMPLATE.md                       # Canonical DB entry structure
+├── Example.md                        # Reference implementation of an entry
+├── Agents.md                         # Agent guidance & workflow documentation
+├── CodebaseStructure.md              # Repository structure reference
+└── CONTRIBUTING.md                   # Contribution guidelines
 ```
 
-## 3-Tier Search Architecture
+---
 
-| Tier | File | Purpose |
-|------|------|---------|
-| 1 | `DB/index.json` | Lean router (~330 lines) — maps protocol types and keywords to manifests |
-| 2 | `DB/manifests/*.json` | Pattern-level indexes with line ranges (11 manifests, 500+ patterns) |
-| 3 | `DB/**/*.md` | Vulnerability content — read ONLY targeted line ranges from manifests |
+## Adding New Entries
 
-### Available Manifests
+```bash
+# 1. Fetch raw findings from Solodit
+python3 solodit_fetcher.py --keyword "<topic>" --output ./reports/<topic>_findings/
 
-| Manifest | Patterns | Focus |
-|----------|----------|-------|
-| `oracle` | 39 | Chainlink, Pyth, price manipulation |
-| `amm` | 65 | Concentrated liquidity, constant product |
-| `bridge` | 32 | LayerZero, Wormhole, Hyperlane |
-| `tokens` | 33 | ERC20, ERC4626, ERC721 |
-| `cosmos` | 26 | Cosmos SDK, IBC, staking |
-| `solana` | 38 | Solana programs, Token-2022 |
-| `general-security` | 31 | Access control, signatures, validation |
-| `general-defi` | 115 | Flash loans, vaults, precision |
-| `general-infrastructure` | 41 | Proxies, reentrancy, storage |
-| `general-governance` | 56 | Governance, stablecoins, MEV |
-| `unique` | 59 | Protocol-specific unique exploits |
+# 2. Use variant-template-writer agent or defihacklabs-indexer agent
+#    to synthesize findings into DB entries following TEMPLATE.md
 
-## AI Agent Ecosystem
+# 3. Regenerate all manifests and hunt cards
+python3 generate_manifests.py
+```
 
-Nine specialized agents in `.github/agents/` cover the full audit lifecycle:
+See [TEMPLATE.md](TEMPLATE.md) for the canonical entry structure and [Example.md](Example.md) for a reference implementation.
 
-| Agent | Purpose |
-|-------|---------|
-| `audit-context-building` | Deep, line-by-line codebase comprehension |
-| `invariant-catcher-agent` | Hunts for known vulnerability patterns using the DB |
-| `variant-template-writer` | Synthesizes audit reports into DB entries |
-| `defihacklabs-indexer` | Indexes real-world exploit PoCs into DB entries |
-| `solodit-fetching` | Fetches raw findings from Solodit API |
-| `missing-validation-reasoning` | Specialized input validation auditor |
-| `poc-writing` | Writes honest, compilable exploit PoCs |
-| `cantina-judge` | Validates findings against Cantina standards |
-| `sherlock-judging` | Validates findings against Sherlock standards |
-
-## Creating New Entries
-
-1. Fetch source reports: use `solodit-fetching` agent or `solodit_fetcher.py`
-2. Analyze patterns: use `variant-template-writer` or `defihacklabs-indexer` agent
-3. Follow [TEMPLATE.md](TEMPLATE.md) structure (see [Example.md](Example.md) for reference)
-4. Regenerate manifests: `python3 generate_manifests.py`
+---
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on adding vulnerability entries, improving agents, and maintaining the database.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on adding vulnerability entries, improving detection agents, and maintaining the database quality.
+
+---
 
 ## License
 
-This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
+MIT — see [LICENSE](LICENSE) for details.

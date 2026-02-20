@@ -1,0 +1,153 @@
+name: Scheduled Full Regeneration
+
+# Weekly unconditional regeneration every Sunday at 02:00 UTC.
+# This is a safety net that catches drift cases that the path-conditional
+# regenerate-manifests.yml cannot catch:
+#   - Changes to scripts/generate_micro_directives.py (enrichment logic)
+#   - Changes to the CATEGORY_MAP or GENERAL_SUBCATEGORIES in generate_manifests.py
+#     that don't touch DB/**/*.md files
+#   - Silent accumulation of struct drift in manifests over many small commits
+#   - Any external dependency or environment update affecting generation output
+#
+# Can also be triggered manually via workflow_dispatch for on-demand full rebuild.
+
+on:
+  schedule:
+    - cron: '0 2 * * 0'   # Every Sunday 02:00 UTC
+  workflow_dispatch:
+    inputs:
+      skip_sync:
+        description: 'Skip syncing to master after regeneration'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+permissions:
+  contents: write
+
+jobs:
+  # ── Job 1: Full unconditional regeneration ───────────────────────────────
+  full-regenerate:
+    name: Full regeneration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout hunt-cards
+        uses: actions/checkout@v4
+        with:
+          ref: hunt-cards
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run full manifest & hunt-card generator
+        run: python3 generate_manifests.py
+
+      - name: Print generation summary
+        run: |
+          python3 - <<'EOF'
+          import json
+          from pathlib import Path
+
+          DB = Path("DB")
+          hc_file = DB / "manifests" / "huntcards" / "all-huntcards.json"
+          idx_file = DB / "index.json"
+
+          if hc_file.exists():
+              with open(hc_file) as f:
+                  hc = json.load(f)
+              total_cards = hc.get("meta", {}).get("totalCards", len(hc.get("cards", [])))
+              enriched    = sum(1 for c in hc.get("cards", []) if c.get("check"))
+              never_prune = sum(1 for c in hc.get("cards", []) if c.get("neverPrune"))
+              print(f"Hunt cards  : {total_cards} total | {enriched} enriched | {never_prune} neverPrune")
+
+          manifest_dir = DB / "manifests"
+          manifests = [f for f in manifest_dir.glob("*.json") if not f.name.startswith("key")]
+          total_patterns = 0
+          for mf in sorted(manifests):
+              with open(mf) as f:
+                  data = json.load(f)
+              count = data.get("meta", {}).get("totalPatterns", 0)
+              total_patterns += count
+              print(f"  {mf.name:<40} {count:>4} patterns")
+          print(f"Total patterns: {total_patterns}")
+          EOF
+
+      - name: Check for changes
+        id: diff
+        run: |
+          git diff --quiet DB/index.json DB/manifests/ \
+            && echo "changed=false" >> "$GITHUB_OUTPUT" \
+            || echo "changed=true"  >> "$GITHUB_OUTPUT"
+
+      - name: Commit & push updated manifests
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add DB/index.json DB/manifests/
+          git commit -m "chore: scheduled full regeneration ($(date -u '+%Y-%m-%d')) [skip ci]"
+          git push
+
+  # ── Job 2: Sync to master (mirrors regenerate-manifests.yml Job 2) ───────
+  sync-to-master:
+    name: Sync to master
+    runs-on: ubuntu-latest
+    needs: full-regenerate
+    if: ${{ github.event.inputs.skip_sync != 'true' }}
+
+    steps:
+      - name: Checkout hunt-cards (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: hunt-cards
+
+      - name: Pull latest hunt-cards
+        run: git pull origin hunt-cards
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch master
+        run: git fetch origin master
+
+      - name: Switch to master
+        run: git checkout master
+
+      - name: Overlay curated files from hunt-cards
+        run: |
+          # ── Core database (manifests, hunt cards, vulnerability entries) ──
+          git checkout origin/hunt-cards -- DB/
+
+          # ── Agent skill definitions (no workflows — they stay on hunt-cards) ──
+          git checkout origin/hunt-cards -- .github/agents/
+
+          # ── Project definition files ──
+          git checkout origin/hunt-cards -- \
+            Agents.md \
+            README.md \
+            LICENSE \
+            TEMPLATE.md \
+            Example.md \
+            CodebaseStructure.md \
+            CONTRIBUTING.md \
+            Architecture.png
+
+      - name: Commit & push to master
+        run: |
+          git add -A
+          git commit \
+            -m "sync: scheduled full regen → master ($(date -u '+%Y-%m-%d %H:%M UTC'))" \
+            --allow-empty
+          git push origin master --force
