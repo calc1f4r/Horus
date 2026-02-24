@@ -2,12 +2,508 @@
   "meta": {
     "manifest": "bridge",
     "description": "Compressed hunt cards for bridge — one-line detection rules for bulk scanning",
-    "totalCards": 34,
-    "skipped": 15,
+    "totalCards": 64,
+    "skipped": 18,
     "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 34
+    "enriched": 64
   },
   "cards": [
+    {
+      "id": "bridge-axelar-integration-v-1-gateway-validation-bypass-000",
+      "title": "1. Gateway Validation Bypass",
+      "severity": "CRITICAL",
+      "grep": "gateway.validateContractCall|validateContractCall|AxelarExecutable|sourceAddress|sourceChain|commandId",
+      "detect": "The `execute()` function in `AxelarExecutable` calls `_execute()` which is overridden by the child contract.",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/axelar/axelar-integration-vulnerabilities.md",
+      "lines": [
+        103,
+        208
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: `execute()` function in `AxelarExecutable` calls `_execute()` which is overridden by the child contract.",
+        "ANTIPATTERN: No gateway validation — anyone can call execute"
+      ],
+      "antipattern": "No gateway validation — anyone can call execute",
+      "securePattern": "AxelarExecutable handles validation automatically"
+    },
+    {
+      "id": "bridge-axelar-integration-v-2-source-chain-address-spoofin-001",
+      "title": "2. Source Chain & Address Spoofing",
+      "severity": "HIGH",
+      "grep": "setTrustedSender|sourceAddress|sourceChain|_execute",
+      "detect": "Accepts from any source chain/address",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/axelar/axelar-integration-vulnerabilities.md",
+      "lines": [
+        209,
+        289
+      ],
+      "check": [
+        "VERIFY: Accepts from any source chain/address"
+      ],
+      "antipattern": "Accepts from any source chain/address",
+      "securePattern": "Allowlist with proper string handling"
+    },
+    {
+      "id": "bridge-axelar-integration-v-3-token-burn-but-call-fails-002",
+      "title": "3. Token Burn-but-Call-Fails",
+      "severity": "HIGH",
+      "grep": "recoverFailedTransfer|callContractWithToken|_executeWithToken",
+      "detect": "Revert after token burn on source = fund loss",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/axelar/axelar-integration-vulnerabilities.md",
+      "lines": [
+        290,
+        358
+      ],
+      "check": [
+        "VERIFY: Revert after token burn on source = fund loss"
+      ],
+      "antipattern": "Revert after token burn on source = fund loss",
+      "securePattern": "Handle all failures gracefully"
+    },
+    {
+      "id": "bridge-axelar-integration-v-4-express-execution-front-runn-003",
+      "title": "4. Express Execution Front-Running",
+      "severity": "HIGH",
+      "grep": "_execute|VulnerableExpressReceiver|SecureExpressReceiver|ExpressExecutable",
+      "detect": "No check if express already processed",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/axelar/axelar-integration-vulnerabilities.md",
+      "lines": [
+        359,
+        411
+      ],
+      "check": [
+        "VERIFY: No check if express already processed"
+      ],
+      "antipattern": "No check if express already processed",
+      "securePattern": "ExpressExecutable handles express vs standard coordination"
+    },
+    {
+      "id": "bridge-axelar-integration-v-5-its-token-manager-misconfigu-004",
+      "title": "5. ITS Token Manager Misconfiguration",
+      "severity": "CRITICAL",
+      "grep": "UnlimitedITSToken|TokenManagers|ITokenManager|setFlowLimit",
+      "detect": "Lock-Unlock TokenManager on non-origin chains",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/axelar/axelar-integration-vulnerabilities.md",
+      "lines": [
+        412,
+        466
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Lock-Unlock TokenManager on non-origin chains"
+      ],
+      "antipattern": "Lock-Unlock TokenManager on non-origin chains",
+      "securePattern": "Mint-Burn on remote chains + flow limits"
+    },
+    {
+      "id": "bridge-axelar-integration-v-6-gas-service-payment-issues-005",
+      "title": "6. Gas Service Payment Issues",
+      "severity": "HIGH",
+      "grep": "AxelarGasService.payNativeGasForContractCall|setGasEstimate|sendMessage",
+      "detect": "Message sent without gas payment — stuck forever",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/axelar/axelar-integration-vulnerabilities.md",
+      "lines": [
+        467,
+        549
+      ],
+      "check": [
+        "VERIFY: Message sent without gas payment — stuck forever",
+        "ANTIPATTERN: Hardcoded gas doesn't account for destination chain costs"
+      ],
+      "antipattern": "Hardcoded gas doesn't account for destination chain costs",
+      "securePattern": "Estimate gas based on destination and payload"
+    },
+    {
+      "id": "bridge-axelar-integration-v-7-string-based-chain-matching-006",
+      "title": "7. String-Based Chain Matching",
+      "severity": "MEDIUM",
+      "grep": "setAllowedChain|_execute",
+      "detect": "Different representations of same chain",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/axelar/axelar-integration-vulnerabilities.md",
+      "lines": [
+        550,
+        601
+      ],
+      "check": [
+        "VERIFY: Different representations of same chain"
+      ],
+      "antipattern": "Different representations of same chain",
+      "securePattern": "Store and compare using Axelar's exact chain IDs"
+    },
+    {
+      "id": "bridge-axelar-integration-v-8-executable-contract-reentran-007",
+      "title": "8. Executable Contract Reentrancy",
+      "severity": "HIGH",
+      "grep": "_executeWithToken|ReentrantTokenReceiver|SecureTokenReceiver|AxelarExecutable",
+      "detect": "Reentrancy in _executeWithToken",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/axelar/axelar-integration-vulnerabilities.md",
+      "lines": [
+        602,
+        656
+      ],
+      "check": [
+        "VERIFY: Reentrancy in _executeWithToken",
+        "ANTIPATTERN: Reentrancy in _executeWithToken"
+      ],
+      "antipattern": "Reentrancy in _executeWithToken",
+      "securePattern": "Checks-Effects-Interactions + ReentrancyGuard"
+    },
+    {
+      "id": "bridge-axelar-integration-v-9-governance-proposal-replay-008",
+      "title": "9. Governance Proposal Replay",
+      "severity": "HIGH",
+      "grep": "_execute|execute",
+      "detect": "No tracking of executed governance commands",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/axelar/axelar-integration-vulnerabilities.md",
+      "lines": [
+        657,
+        715
+      ],
+      "check": [
+        "VERIFY: No tracking of executed governance commands"
+      ],
+      "antipattern": "No tracking of executed governance commands",
+      "securePattern": "Track all executed governance commands"
+    },
+    {
+      "id": "bridge-axelar-integration-v-10-command-id-collision-009",
+      "title": "10. Command ID Collision",
+      "severity": "MEDIUM",
+      "grep": "_executeWithToken|commandId|_execute",
+      "detect": "Same commandId space for different message types",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/axelar/axelar-integration-vulnerabilities.md",
+      "lines": [
+        716,
+        771
+      ],
+      "check": [
+        "VERIFY: Same commandId space for different message types"
+      ],
+      "antipattern": "Same commandId space for different message types",
+      "securePattern": "Separate tracking per message type"
+    },
+    {
+      "id": "bridge-ccip-integration-vul-1-router-message-validation-000",
+      "title": "1. Router Message Validation",
+      "severity": "CRITICAL",
+      "grep": "Client.Any2EVMMessage|IAny2EVMMessageReceiver|sourceChainSelector|_ccipReceive|CCIPReceiver|ccipReceive",
+      "detect": "Contracts implementing `IAny2EVMMessageReceiver` expose `ccipReceive()` as a public/external function but omit the...",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/ccip/ccip-integration-vulnerabilities.md",
+      "lines": [
+        112,
+        206
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Contracts implementing `IAny2EVMMessageReceiver` expose `ccipReceive()` as a public/external function but omit the...",
+        "ANTIPATTERN: Router address can be changed to attacker-controlled contract"
+      ],
+      "antipattern": "Router address can be changed to attacker-controlled contract",
+      "securePattern": "CCIPReceiver enforces msg.sender == i_router"
+    },
+    {
+      "id": "bridge-ccip-integration-vul-2-fee-estimation-errors-001",
+      "title": "2. Fee Estimation Errors",
+      "severity": "HIGH",
+      "grep": "Router.getFee|sendWithLink|sendMessage",
+      "detect": "Hardcoded fee doesn't track actual CCIP costs",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/ccip/ccip-integration-vulnerabilities.md",
+      "lines": [
+        207,
+        311
+      ],
+      "check": [
+        "VERIFY: Hardcoded fee doesn't track actual CCIP costs"
+      ],
+      "antipattern": "Hardcoded fee doesn't track actual CCIP costs",
+      "securePattern": "Quote fee and validate payment"
+    },
+    {
+      "id": "bridge-ccip-integration-vul-3-token-pool-configuration-002",
+      "title": "3. Token Pool Configuration",
+      "severity": "HIGH",
+      "grep": "releaseTokens|releaseOrMint|lockTokens|lockOrBurn",
+      "detect": "No tracking of locked vs released amounts",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/ccip/ccip-integration-vulnerabilities.md",
+      "lines": [
+        312,
+        394
+      ],
+      "check": [
+        "VERIFY: No tracking of locked vs released amounts"
+      ],
+      "antipattern": "No tracking of locked vs released amounts",
+      "securePattern": "Rate-limited pool with supply tracking"
+    },
+    {
+      "id": "bridge-ccip-integration-vul-4-extra-args-gas-limit-misconf-003",
+      "title": "4. Extra Args & Gas Limit Misconfiguration",
+      "severity": "HIGH",
+      "grep": "_buildMessage|_estimateGas|extraArgs",
+      "detect": "Empty extraArgs defaults to 200k gas",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/ccip/ccip-integration-vulnerabilities.md",
+      "lines": [
+        395,
+        464
+      ],
+      "check": [
+        "VERIFY: Empty extraArgs defaults to 200k gas",
+        "ANTIPATTERN: Using V1 when V2 is needed (missing strict sequencing control)"
+      ],
+      "antipattern": "Using V1 when V2 is needed (missing strict sequencing control)",
+      "securePattern": "Right gas limit with V2 extra args"
+    },
+    {
+      "id": "bridge-ccip-integration-vul-5-lane-allowlist-bypass-004",
+      "title": "5. Lane Allowlist Bypass",
+      "severity": "HIGH",
+      "grep": "setAllowedSender|_ccipReceive",
+      "detect": "Accepts messages from ANY chain",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/ccip/ccip-integration-vulnerabilities.md",
+      "lines": [
+        465,
+        537
+      ],
+      "check": [
+        "VERIFY: Accepts messages from ANY chain",
+        "ANTIPATTERN: Accepts from any sender on allowed chain"
+      ],
+      "antipattern": "Accepts from any sender on allowed chain",
+      "securePattern": "Validate both chain and sender"
+    },
+    {
+      "id": "bridge-ccip-integration-vul-6-manual-execution-replay-005",
+      "title": "6. Manual Execution Replay",
+      "severity": "HIGH",
+      "grep": "retryFailedMessage|_ccipReceive",
+      "detect": "Same message can be manually executed multiple times",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/ccip/ccip-integration-vulnerabilities.md",
+      "lines": [
+        538,
+        598
+      ],
+      "check": [
+        "VERIFY: Same message can be manually executed multiple times"
+      ],
+      "antipattern": "Same message can be manually executed multiple times",
+      "securePattern": "Idempotent message processing"
+    },
+    {
+      "id": "bridge-ccip-integration-vul-7-sender-receiver-validation-006",
+      "title": "7. Sender & Receiver Validation",
+      "severity": "HIGH",
+      "grep": "sourceChainSelector|sendTokensWithData|setExpectedSender|_ccipReceive",
+      "detect": "Incorrect sender decoding",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/ccip/ccip-integration-vulnerabilities.md",
+      "lines": [
+        599,
+        669
+      ],
+      "check": [
+        "VERIFY: Incorrect sender decoding",
+        "ANTIPATTERN: Sending tokens + data to receiver that can't handle both"
+      ],
+      "antipattern": "Sending tokens + data to receiver that can't handle both",
+      "securePattern": "Validate sender format and content"
+    },
+    {
+      "id": "bridge-ccip-integration-vul-8-rate-limiter-griefing-007",
+      "title": "8. Rate Limiter Griefing",
+      "severity": "MEDIUM",
+      "grep": "lockTokens|TieredRateLimitPool|GlobalRateLimitPool|UserLimit",
+      "detect": "Global rate limit shared by all users",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/ccip/ccip-integration-vulnerabilities.md",
+      "lines": [
+        670,
+        725
+      ],
+      "check": [
+        "VERIFY: Global rate limit shared by all users"
+      ],
+      "antipattern": "Global rate limit shared by all users",
+      "securePattern": "Tiered rate limiting"
+    },
+    {
+      "id": "bridge-ccip-integration-vul-9-off-ramp-processing-failures-008",
+      "title": "9. Off-Ramp Processing Failures",
+      "severity": "HIGH",
+      "grep": "retryFailedMessage|_ccipReceive|ccipReceive",
+      "detect": "Revert causes tokens to be stuck in receiver contract",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/ccip/ccip-integration-vulnerabilities.md",
+      "lines": [
+        726,
+        799
+      ],
+      "check": [
+        "VERIFY: Revert causes tokens to be stuck in receiver contract"
+      ],
+      "antipattern": "Revert causes tokens to be stuck in receiver contract",
+      "securePattern": "Never revert, store failed messages for recovery"
+    },
+    {
+      "id": "bridge-ccip-integration-vul-10-token-amount-validation-009",
+      "title": "10. Token Amount Validation",
+      "severity": "HIGH",
+      "grep": "_ccipReceive|tokenAmounts",
+      "detect": "Trusts message.",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/ccip/ccip-integration-vulnerabilities.md",
+      "lines": [
+        800,
+        847
+      ],
+      "check": [
+        "ANTIPATTERN: Trusts message.data instead of actual tokenAmounts"
+      ],
+      "antipattern": "Trusts message.data instead of actual tokenAmounts",
+      "securePattern": "Validate against actual received tokens"
+    },
+    {
+      "id": "bridge-ccip-integration-vul-11-message-size-limit-violatio-010",
+      "title": "11. Message Size Limit Violations",
+      "severity": "MEDIUM",
+      "grep": "sendBatchOperation|ccipSend",
+      "detect": "No size check on dynamically built payload",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/ccip/ccip-integration-vulnerabilities.md",
+      "lines": [
+        848,
+        909
+      ],
+      "check": [
+        "VERIFY: No size check on dynamically built payload"
+      ],
+      "antipattern": "No size check on dynamically built payload",
+      "securePattern": "Check size before sending"
+    },
+    {
+      "id": "bridge-ccip-integration-vul-12-self-service-token-registra-011",
+      "title": "12. Self-Service Token Registration Issues",
+      "severity": "CRITICAL",
+      "grep": "releaseOrMint|UnlimitedBurnMintPool|Registration|Coordination",
+      "detect": "Lock-release pool on BOTH chains means no burn/mint",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/ccip/ccip-integration-vulnerabilities.md",
+      "lines": [
+        910,
+        960
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Lock-release pool on BOTH chains means no burn/mint",
+        "ANTIPATTERN: No flow limit means entire supply can migrate to one chain"
+      ],
+      "antipattern": "No flow limit means entire supply can migrate to one chain",
+      "securePattern": "Correct pool type per chain"
+    },
     {
       "id": "bridge-cross-chain-general--1-cross-chain-replay-attacks-000",
       "title": "1. Cross-Chain Replay Attacks",
@@ -663,6 +1159,183 @@
       ],
       "antipattern": "MIN_FALLBACK_RESERVE doesn't cover all overhead",
       "securePattern": "Let users specify higher gas if needed"
+    },
+    {
+      "id": "bridge-stargate-integration-1-sgreceive-out-of-gas-000",
+      "title": "1. sgReceive Out-of-Gas",
+      "severity": "HIGH",
+      "grep": "recoverStuckTokens|retryRevert|sgReceive",
+      "detect": "Complex multi-step logic can run out of gas",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/stargate/stargate-integration-vulnerabilities.md",
+      "lines": [
+        102,
+        188
+      ],
+      "check": [
+        "VERIFY: Complex multi-step logic can run out of gas"
+      ],
+      "antipattern": "Complex multi-step logic can run out of gas",
+      "securePattern": "Reserve gas for catch block + token recovery"
+    },
+    {
+      "id": "bridge-stargate-integration-2-router-swap-slippage-001",
+      "title": "2. Router Swap Slippage",
+      "severity": "HIGH",
+      "grep": "bridgeWithSlippage|bridgeViaStargate|minAmountOut",
+      "detect": "Zero slippage protection — sandwich attackable",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/stargate/stargate-integration-vulnerabilities.md",
+      "lines": [
+        189,
+        264
+      ],
+      "check": [
+        "VERIFY: Zero slippage protection — sandwich attackable"
+      ],
+      "antipattern": "Zero slippage protection — sandwich attackable",
+      "securePattern": "Slippage in shared decimals + user-configurable"
+    },
+    {
+      "id": "bridge-stargate-integration-3-pool-credit-imbalance-002",
+      "title": "3. Pool Credit Imbalance",
+      "severity": "MEDIUM",
+      "grep": "deltaCredit|bridge",
+      "detect": "No credit check before swap — reverts confusingly",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/stargate/stargate-integration-vulnerabilities.md",
+      "lines": [
+        265,
+        311
+      ],
+      "check": [
+        "VERIFY: No credit check before swap — reverts confusingly"
+      ],
+      "antipattern": "No credit check before swap — reverts confusingly",
+      "securePattern": "Check available liquidity before swap"
+    },
+    {
+      "id": "bridge-stargate-integration-4-stargate-v2-compose-failures-003",
+      "title": "4. Stargate V2 Compose Failures",
+      "severity": "HIGH",
+      "grep": "lzCompose|bridge_crosschain_findings|ExchangeStargateV2Adapter|OFTComposeMsgCodec",
+      "detect": "No error handling in lzCompose",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/stargate/stargate-integration-vulnerabilities.md",
+      "lines": [
+        312,
+        372
+      ],
+      "check": [
+        "VERIFY: No error handling in lzCompose"
+      ],
+      "antipattern": "No error handling in lzCompose",
+      "securePattern": "Always handle compose failures gracefully"
+    },
+    {
+      "id": "bridge-stargate-integration-5-dstgasforcall-misconfigurati-004",
+      "title": "5. dstGasForCall Misconfiguration",
+      "severity": "HIGH",
+      "grep": "bridgeWithCallback|dstGasForCall|sgReceive|lzTxObj",
+      "detect": "dstGasForCall = 0 uses default 200k gas",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/stargate/stargate-integration-vulnerabilities.md",
+      "lines": [
+        373,
+        429
+      ],
+      "check": [
+        "VERIFY: dstGasForCall = 0 uses default 200k gas"
+      ],
+      "antipattern": "dstGasForCall = 0 uses default 200k gas",
+      "securePattern": "Gas tailored to destination operation"
+    },
+    {
+      "id": "bridge-stargate-integration-6-destination-address-mismatch-005",
+      "title": "6. Destination Address Mismatch",
+      "severity": "HIGH",
+      "grep": "abi.encodePacked(address|participate",
+      "detect": "Destination set to msg.",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/stargate/stargate-integration-vulnerabilities.md",
+      "lines": [
+        430,
+        486
+      ],
+      "check": [
+        "VERIFY: Destination set to msg.",
+        "ANTIPATTERN: Destination set to msg.sender instead of helper contract"
+      ],
+      "antipattern": "Destination set to msg.sender instead of helper contract",
+      "securePattern": "Send to destination helper contract"
+    },
+    {
+      "id": "bridge-stargate-integration-7-fee-layer-exploitation-006",
+      "title": "7. Fee Layer Exploitation",
+      "severity": "MEDIUM",
+      "grep": "estimateAndBridge|quoteLayerZeroFee|IStargateRouter|encodePacked",
+      "detect": "quoteLayerZeroFee with different payload than actual swap",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/stargate/stargate-integration-vulnerabilities.md",
+      "lines": [
+        487,
+        554
+      ],
+      "check": [
+        "VERIFY: quoteLayerZeroFee with different payload than actual swap"
+      ],
+      "antipattern": "quoteLayerZeroFee with different payload than actual swap",
+      "securePattern": "Quote with exact same parameters as swap"
+    },
+    {
+      "id": "bridge-stargate-integration-8-amount-trimming-decimal-dust-007",
+      "title": "8. Amount Trimming & Decimal Dust",
+      "severity": "MEDIUM",
+      "grep": "_convertToSharedDecimals|_convertToLocalDecimals|bridgeTokens",
+      "detect": "Dust stays in bridge contract",
+      "cat": [
+        "bridge",
+        "cross-chain",
+        "messaging"
+      ],
+      "ref": "DB/bridge/stargate/stargate-integration-vulnerabilities.md",
+      "lines": [
+        555,
+        610
+      ],
+      "check": [
+        "VERIFY: Dust stays in bridge contract"
+      ],
+      "antipattern": "Dust stays in bridge contract",
+      "securePattern": "Only take the normalizable amount from user"
     },
     {
       "id": "bridge-wormhole-integration-1-vaa-parsing-vulnerabilities-000",
