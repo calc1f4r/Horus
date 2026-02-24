@@ -2,11 +2,785 @@
   "meta": {
     "category": "bridge",
     "description": "Pattern-level index for bridge vulnerabilities",
-    "fileCount": 7,
-    "totalPatterns": 49,
+    "fileCount": 10,
+    "totalPatterns": 82,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
   },
   "files": [
+    {
+      "file": "DB/bridge/axelar/axelar-integration-vulnerabilities.md",
+      "totalLines": 813,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "bridge",
+        "vulnerability_type": "axelar_integration",
+        "attack_type": "gateway_bypass|source_spoofing|express_frontrun|its_misconfiguration",
+        "affected_component": "Gateway|GasService|ITS|AxelarExecutable|InterchainTokenService",
+        "bridge_provider": "axelar",
+        "bridge_attack_vector": "gateway_validation|source_chain_spoofing|express_execution|its_flow_limit|gas_underpayment",
+        "severity": "high|medium|low",
+        "impact": "fund_loss|token_stuck|unlimited_minting|state_corruption",
+        "exploitability": "0.70",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 11,
+      "patterns": [
+        {
+          "id": "bridge-axelar-integration-v-1-gateway-validation-bypass-000",
+          "title": "1. Gateway Validation Bypass",
+          "lineStart": 103,
+          "lineEnd": 208,
+          "lineCount": 106,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "AxelarExecutable",
+            "_execute",
+            "commandId",
+            "execute",
+            "gateway.validateContractCall",
+            "payload",
+            "sourceAddress",
+            "sourceChain",
+            "validateContractCall"
+          ],
+          "rootCause": "The `execute()` function in `AxelarExecutable` calls `_execute()` which is overridden by the child contract. If the child contract doesn't call `gateway.validateContractCall()` (either by not inheriti",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 109,
+              "lineEnd": 121,
+              "severity": [],
+              "codeKeywords": [
+                "AxelarExecutable",
+                "_execute",
+                "commandId",
+                "execute",
+                "gateway.validateContractCall",
+                "payload",
+                "sourceAddress",
+                "sourceChain"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 122,
+              "lineEnd": 160,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_execute",
+                "execute"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-axelar-integration-v-2-source-chain-address-spoofin-001",
+          "title": "2. Source Chain & Address Spoofing",
+          "lineStart": 209,
+          "lineEnd": 289,
+          "lineCount": 81,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_execute",
+            "setTrustedSender",
+            "sourceAddress",
+            "sourceChain"
+          ],
+          "rootCause": "Accepts from any source chain/address",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 215,
+              "lineEnd": 255,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_execute"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-axelar-integration-v-3-token-burn-but-call-fails-002",
+          "title": "3. Token Burn-but-Call-Fails",
+          "lineStart": 290,
+          "lineEnd": 358,
+          "lineCount": 69,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_executeWithToken",
+            "callContractWithToken",
+            "recoverFailedTransfer"
+          ],
+          "rootCause": "Revert after token burn on source = fund loss",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 296,
+              "lineEnd": 320,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_executeWithToken"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-axelar-integration-v-4-express-execution-front-runn-003",
+          "title": "4. Express Execution Front-Running",
+          "lineStart": 359,
+          "lineEnd": 411,
+          "lineCount": 53,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_execute"
+          ],
+          "rootCause": "No check if express already processed",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 365,
+              "lineEnd": 384,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_execute"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-axelar-integration-v-5-its-token-manager-misconfigu-004",
+          "title": "5. ITS Token Manager Misconfiguration",
+          "lineStart": 412,
+          "lineEnd": 466,
+          "lineCount": 55,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": "Lock-Unlock TokenManager on non-origin chains",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 418,
+              "lineEnd": 444,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "bridge-axelar-integration-v-6-gas-service-payment-issues-005",
+          "title": "6. Gas Service Payment Issues",
+          "lineStart": 467,
+          "lineEnd": 549,
+          "lineCount": 83,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "AxelarGasService.payNativeGasForContractCall",
+            "sendMessage",
+            "setGasEstimate"
+          ],
+          "rootCause": "Message sent without gas payment — stuck forever",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 473,
+              "lineEnd": 511,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "sendMessage"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-axelar-integration-v-7-string-based-chain-matching-006",
+          "title": "7. String-Based Chain Matching",
+          "lineStart": 550,
+          "lineEnd": 601,
+          "lineCount": 52,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_execute",
+            "setAllowedChain"
+          ],
+          "rootCause": "Different representations of same chain",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 556,
+              "lineEnd": 574,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "bridge-axelar-integration-v-8-executable-contract-reentran-007",
+          "title": "8. Executable Contract Reentrancy",
+          "lineStart": 602,
+          "lineEnd": 656,
+          "lineCount": 55,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_executeWithToken"
+          ],
+          "rootCause": "Reentrancy in _executeWithToken",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 608,
+              "lineEnd": 632,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_executeWithToken"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-axelar-integration-v-9-governance-proposal-replay-008",
+          "title": "9. Governance Proposal Replay",
+          "lineStart": 657,
+          "lineEnd": 715,
+          "lineCount": 59,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_execute",
+            "execute"
+          ],
+          "rootCause": "No tracking of executed governance commands",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 663,
+              "lineEnd": 683,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_execute"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-axelar-integration-v-10-command-id-collision-009",
+          "title": "10. Command ID Collision",
+          "lineStart": 716,
+          "lineEnd": 771,
+          "lineCount": 56,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_execute",
+            "_executeWithToken",
+            "commandId"
+          ],
+          "rootCause": "Same commandId space for different message types",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 722,
+              "lineEnd": 744,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_execute",
+                "_executeWithToken"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-axelar-integration-v-detection-patterns-010",
+          "title": "Detection Patterns",
+          "lineStart": 772,
+          "lineEnd": 801,
+          "lineCount": 30,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/bridge/ccip/ccip-integration-vulnerabilities.md",
+      "totalLines": 1006,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "bridge",
+        "vulnerability_type": "ccip_integration",
+        "attack_type": "message_validation|fee_miscalculation|token_pool_bypass|rate_limit_griefing",
+        "affected_component": "Router|OnRamp|OffRamp|TokenPool|RateLimiter|Client",
+        "bridge_provider": "chainlink_ccip",
+        "bridge_attack_vector": "router_validation|fee_estimation|token_pool_config|extra_args|lane_allowlist|manual_execution|rate_limiter",
+        "severity": "high|medium|low",
+        "impact": "fund_loss|message_replay|dos|token_stuck|fee_loss",
+        "exploitability": "0.75",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 13,
+      "patterns": [
+        {
+          "id": "bridge-ccip-integration-vul-1-router-message-validation-000",
+          "title": "1. Router Message Validation",
+          "lineStart": 112,
+          "lineEnd": 206,
+          "lineCount": 95,
+          "severity": [
+            "CRITICAL",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "CCIPReceiver",
+            "Client.Any2EVMMessage",
+            "IAny2EVMMessageReceiver",
+            "_ccipReceive",
+            "ccipReceive",
+            "data",
+            "sender",
+            "setRouter",
+            "sourceChainSelector"
+          ],
+          "rootCause": "Contracts implementing `IAny2EVMMessageReceiver` expose `ccipReceive()` as a public/external function but omit the critical `msg.sender == getRouter()` check, or fail to inherit from `CCIPReceiver` wh",
+          "subsections": [
+            {
+              "title": "Vulnerability Description",
+              "lineStart": 118,
+              "lineEnd": 131,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "CCIPReceiver",
+                "Client.Any2EVMMessage",
+                "IAny2EVMMessageReceiver",
+                "ccipReceive",
+                "data",
+                "sender",
+                "sourceChainSelector"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 132,
+              "lineEnd": 166,
+              "severity": [
+                "CRITICAL",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_ccipReceive",
+                "ccipReceive",
+                "setRouter"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-ccip-integration-vul-2-fee-estimation-errors-001",
+          "title": "2. Fee Estimation Errors",
+          "lineStart": 207,
+          "lineEnd": 311,
+          "lineCount": 105,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "Router.getFee",
+            "sendMessage",
+            "sendWithLink"
+          ],
+          "rootCause": "Hardcoded fee doesn't track actual CCIP costs",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 213,
+              "lineEnd": 269,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "sendMessage",
+                "sendWithLink"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-ccip-integration-vul-3-token-pool-configuration-002",
+          "title": "3. Token Pool Configuration",
+          "lineStart": 312,
+          "lineEnd": 394,
+          "lineCount": 83,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "lockOrBurn",
+            "lockTokens",
+            "releaseOrMint",
+            "releaseTokens"
+          ],
+          "rootCause": "No tracking of locked vs released amounts",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 318,
+              "lineEnd": 354,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "lockTokens",
+                "releaseOrMint",
+                "releaseTokens"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-ccip-integration-vul-4-extra-args-gas-limit-misconf-003",
+          "title": "4. Extra Args & Gas Limit Misconfiguration",
+          "lineStart": 395,
+          "lineEnd": 464,
+          "lineCount": 70,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_buildMessage",
+            "_estimateGas",
+            "extraArgs"
+          ],
+          "rootCause": "Empty extraArgs defaults to 200k gas",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 401,
+              "lineEnd": 434,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "bridge-ccip-integration-vul-5-lane-allowlist-bypass-004",
+          "title": "5. Lane Allowlist Bypass",
+          "lineStart": 465,
+          "lineEnd": 537,
+          "lineCount": 73,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_ccipReceive",
+            "setAllowedSender"
+          ],
+          "rootCause": "Accepts messages from ANY chain",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 471,
+              "lineEnd": 503,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_ccipReceive"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-ccip-integration-vul-6-manual-execution-replay-005",
+          "title": "6. Manual Execution Replay",
+          "lineStart": 538,
+          "lineEnd": 598,
+          "lineCount": 61,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_ccipReceive",
+            "retryFailedMessage"
+          ],
+          "rootCause": "Same message can be manually executed multiple times",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 544,
+              "lineEnd": 560,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_ccipReceive"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-ccip-integration-vul-7-sender-receiver-validation-006",
+          "title": "7. Sender & Receiver Validation",
+          "lineStart": 599,
+          "lineEnd": 669,
+          "lineCount": 71,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_ccipReceive",
+            "bytes",
+            "sendTokensWithData",
+            "sender",
+            "setExpectedSender",
+            "sourceChainSelector"
+          ],
+          "rootCause": "Incorrect sender decoding",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 605,
+              "lineEnd": 642,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_ccipReceive",
+                "sendTokensWithData"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-ccip-integration-vul-8-rate-limiter-griefing-007",
+          "title": "8. Rate Limiter Griefing",
+          "lineStart": 670,
+          "lineEnd": 725,
+          "lineCount": 56,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "lockTokens"
+          ],
+          "rootCause": "Global rate limit shared by all users",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 676,
+              "lineEnd": 694,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "lockTokens"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-ccip-integration-vul-9-off-ramp-processing-failures-008",
+          "title": "9. Off-Ramp Processing Failures",
+          "lineStart": 726,
+          "lineEnd": 799,
+          "lineCount": 74,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_ccipReceive",
+            "ccipReceive",
+            "retryFailedMessage"
+          ],
+          "rootCause": "Revert causes tokens to be stuck in receiver contract",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 732,
+              "lineEnd": 750,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_ccipReceive"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-ccip-integration-vul-10-token-amount-validation-009",
+          "title": "10. Token Amount Validation",
+          "lineStart": 800,
+          "lineEnd": 847,
+          "lineCount": 48,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_ccipReceive",
+            "tokenAmounts"
+          ],
+          "rootCause": "Trusts message.data instead of actual tokenAmounts",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 806,
+              "lineEnd": 824,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_ccipReceive"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-ccip-integration-vul-11-message-size-limit-violatio-010",
+          "title": "11. Message Size Limit Violations",
+          "lineStart": 848,
+          "lineEnd": 909,
+          "lineCount": 62,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "ccipSend",
+            "sendBatchOperation"
+          ],
+          "rootCause": "No size check on dynamically built payload",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 854,
+              "lineEnd": 881,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "sendBatchOperation"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-ccip-integration-vul-12-self-service-token-registra-011",
+          "title": "12. Self-Service Token Registration Issues",
+          "lineStart": 910,
+          "lineEnd": 960,
+          "lineCount": 51,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "releaseOrMint"
+          ],
+          "rootCause": "Lock-release pool on BOTH chains means no burn/mint",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 916,
+              "lineEnd": 944,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "releaseOrMint"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-ccip-integration-vul-detection-patterns-012",
+          "title": "Detection Patterns",
+          "lineStart": 961,
+          "lineEnd": 994,
+          "lineCount": 34,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
     {
       "file": "DB/bridge/custom/cross-chain-general-vulnerabilities.md",
       "totalLines": 890,
@@ -1412,6 +2186,273 @@
           "severity": [
             "LOW"
           ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/bridge/stargate/stargate-integration-vulnerabilities.md",
+      "totalLines": 651,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "bridge",
+        "vulnerability_type": "stargate_integration",
+        "attack_type": "gas_exhaustion|slippage_bypass|credit_imbalance|compose_failure",
+        "affected_component": "Router|Pool|sgReceive|lzCompose|StargateAdapter",
+        "bridge_provider": "stargate",
+        "bridge_attack_vector": "sgreceive_oog|router_slippage|pool_credit|compose_failure|fee_exploitation",
+        "severity": "high|medium|low",
+        "impact": "fund_loss|token_stuck|dos|slippage_exploitation",
+        "exploitability": "0.75",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 9,
+      "patterns": [
+        {
+          "id": "bridge-stargate-integration-1-sgreceive-out-of-gas-000",
+          "title": "1. sgReceive Out-of-Gas",
+          "lineStart": 102,
+          "lineEnd": 188,
+          "lineCount": 87,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "recoverStuckTokens",
+            "retryRevert",
+            "sgReceive"
+          ],
+          "rootCause": "Complex multi-step logic can run out of gas",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 112,
+              "lineEnd": 155,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "retryRevert",
+                "sgReceive"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-stargate-integration-2-router-swap-slippage-001",
+          "title": "2. Router Swap Slippage",
+          "lineStart": 189,
+          "lineEnd": 264,
+          "lineCount": 76,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "bridgeViaStargate",
+            "bridgeWithSlippage",
+            "minAmountOut"
+          ],
+          "rootCause": "Zero slippage protection — sandwich attackable",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 195,
+              "lineEnd": 234,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "bridgeViaStargate",
+                "bridgeWithSlippage"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-stargate-integration-3-pool-credit-imbalance-002",
+          "title": "3. Pool Credit Imbalance",
+          "lineStart": 265,
+          "lineEnd": 311,
+          "lineCount": 47,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "bridge",
+            "deltaCredit"
+          ],
+          "rootCause": "No credit check before swap — reverts confusingly",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 271,
+              "lineEnd": 288,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "bridge"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-stargate-integration-4-stargate-v2-compose-failures-003",
+          "title": "4. Stargate V2 Compose Failures",
+          "lineStart": 312,
+          "lineEnd": 372,
+          "lineCount": 61,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "lzCompose"
+          ],
+          "rootCause": "No error handling in lzCompose",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 321,
+              "lineEnd": 343,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "lzCompose"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-stargate-integration-5-dstgasforcall-misconfigurati-004",
+          "title": "5. dstGasForCall Misconfiguration",
+          "lineStart": 373,
+          "lineEnd": 429,
+          "lineCount": 57,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "bridgeWithCallback",
+            "dstGasForCall",
+            "lzTxObj",
+            "sgReceive"
+          ],
+          "rootCause": "dstGasForCall = 0 uses default 200k gas",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 382,
+              "lineEnd": 400,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "bridge-stargate-integration-6-destination-address-mismatch-005",
+          "title": "6. Destination Address Mismatch",
+          "lineStart": 430,
+          "lineEnd": 486,
+          "lineCount": 57,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "abi.encodePacked(address",
+            "msg.sender",
+            "participate",
+            "swap"
+          ],
+          "rootCause": "Destination set to msg.sender instead of helper contract",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 439,
+              "lineEnd": 461,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "participate"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-stargate-integration-7-fee-layer-exploitation-006",
+          "title": "7. Fee Layer Exploitation",
+          "lineStart": 487,
+          "lineEnd": 554,
+          "lineCount": 68,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "estimateAndBridge"
+          ],
+          "rootCause": "quoteLayerZeroFee with different payload than actual swap",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 493,
+              "lineEnd": 517,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "estimateAndBridge"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-stargate-integration-8-amount-trimming-decimal-dust-007",
+          "title": "8. Amount Trimming & Decimal Dust",
+          "lineStart": 555,
+          "lineEnd": 610,
+          "lineCount": 56,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_convertToLocalDecimals",
+            "_convertToSharedDecimals",
+            "bridgeTokens"
+          ],
+          "rootCause": "Dust stays in bridge contract",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 564,
+              "lineEnd": 583,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "bridgeTokens"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-stargate-integration-detection-patterns-008",
+          "title": "Detection Patterns",
+          "lineStart": 611,
+          "lineEnd": 640,
+          "lineCount": 30,
+          "severity": [],
           "codeKeywords": [],
           "rootCause": null,
           "subsections": null
