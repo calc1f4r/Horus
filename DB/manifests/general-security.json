@@ -2,8 +2,8 @@
   "meta": {
     "category": "general-security",
     "description": "Access control, input validation, signatures, initialization",
-    "fileCount": 14,
-    "totalPatterns": 87,
+    "fileCount": 15,
+    "totalPatterns": 93,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -2383,6 +2383,246 @@
           "lineCount": 24,
           "severity": [],
           "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/arbitrary-call/dex-aggregator-unvalidated-call-data.md",
+      "totalLines": 462,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "arbitrary_call",
+        "vulnerability_type": "dex_aggregator_unvalidated_calldata",
+        "attack_type": "fund_theft",
+        "affected_component": "dex_aggregator_integration",
+        "severity": "high",
+        "impact": "fund_loss",
+        "exploitability": "0.85",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "all",
+        "source": "solodit + audit-reports"
+      },
+      "patternCount": 6,
+      "patterns": [
+        {
+          "id": "general-security-dex-aggregator-unval-overview-000",
+          "title": "Overview",
+          "lineStart": 76,
+          "lineEnd": 87,
+          "lineCount": 12,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-dex-aggregator-unval-root-cause-analysis-001",
+          "title": "Root Cause Analysis",
+          "lineStart": 88,
+          "lineEnd": 115,
+          "lineCount": 28,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "amount",
+            "claimRewards",
+            "fromToken",
+            "receiver",
+            "remaining_accounts",
+            "swapExactTokensForETH",
+            "toToken"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Variant A — Liquidation with Arbitrary Router Call (5 reports)",
+              "lineStart": 90,
+              "lineEnd": 95,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "swapExactTokensForETH"
+              ]
+            },
+            {
+              "title": "Variant B — Swap CPI/Call Without Account & Data Validation (2 reports)",
+              "lineStart": 96,
+              "lineEnd": 101,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "remaining_accounts"
+              ]
+            },
+            {
+              "title": "Variant C — Off-Chain Generated Calldata Not Validated On-Chain (2 reports)",
+              "lineStart": 102,
+              "lineEnd": 107,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "amount",
+                "fromToken",
+                "receiver",
+                "toToken"
+              ]
+            },
+            {
+              "title": "Variant D — Cross-Contract Reentrancy via Custom Swap Executor (1 report)",
+              "lineStart": 108,
+              "lineEnd": 115,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "claimRewards"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-dex-aggregator-unval-attack-scenarios-002",
+          "title": "Attack Scenarios",
+          "lineStart": 116,
+          "lineEnd": 153,
+          "lineCount": 38,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "Base.swap(params.data",
+            "ERC5115Form",
+            "FakeErc20",
+            "FakeErc20.transfer",
+            "FakePool",
+            "PARMinerV2",
+            "PARMinerV2.sol",
+            "ParticlePositionManager",
+            "PendleCurveUsdd3CrvSY.claimRewards(ERC5115Form",
+            "attackerContract",
+            "attackerContract.receive",
+            "buy_state_rebalance",
+            "dexTxnData",
+            "liquidate",
+            "liquidatePosition"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Scenario 1 — Collateral Theft via ETH Callback During Liquidation (Mimo DeFi)",
+              "lineStart": 118,
+              "lineEnd": 127,
+              "severity": [],
+              "codeKeywords": [
+                "PARMinerV2",
+                "PARMinerV2.sol",
+                "attackerContract",
+                "attackerContract.receive",
+                "dexTxnData",
+                "liquidate"
+              ]
+            },
+            {
+              "title": "Scenario 2 — Borrower Profit Theft via Fake Pool During Liquidation (Particle Protocol)",
+              "lineStart": 128,
+              "lineEnd": 135,
+              "severity": [],
+              "codeKeywords": [
+                "Base.swap(params.data",
+                "FakeErc20",
+                "FakeErc20.transfer",
+                "FakePool",
+                "ParticlePositionManager",
+                "liquidatePosition"
+              ]
+            },
+            {
+              "title": "Scenario 3 — Fee Drain Without Actual Swap (Symmetry / Solana)",
+              "lineStart": 136,
+              "lineEnd": 143,
+              "severity": [],
+              "codeKeywords": [
+                "buy_state_rebalance",
+                "pda_token_account",
+                "pda_usdc_account"
+              ]
+            },
+            {
+              "title": "Scenario 4 — Reward Theft via Custom 1inch Executor (Superform)",
+              "lineStart": 144,
+              "lineEnd": 153,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "ERC5115Form",
+                "PendleCurveUsdd3CrvSY.claimRewards(ERC5115Form"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-dex-aggregator-unval-vulnerable-pattern-examples-003",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 154,
+          "lineEnd": 277,
+          "lineCount": 124,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_directDepositIntoVault",
+            "liquidate",
+            "liquidatePosition",
+            "performActionWithOneInch"
+          ],
+          "rootCause": "attacker controls dexTxnData — can encode swapExactTokensForETH",
+          "subsections": null
+        },
+        {
+          "id": "general-security-dex-aggregator-unval-impact-analysis-004",
+          "title": "Impact Analysis",
+          "lineStart": 278,
+          "lineEnd": 301,
+          "lineCount": 24,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-dex-aggregator-unval-secure-implementation-005",
+          "title": "Secure Implementation",
+          "lineStart": 302,
+          "lineEnd": 405,
+          "lineCount": 104,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_directDepositIntoVault",
+            "liquidateWithSwap",
+            "performActionWithOneInch"
+          ],
           "rootCause": null,
           "subsections": null
         }
