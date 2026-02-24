@@ -2,8 +2,8 @@
   "meta": {
     "category": "oracle",
     "description": "Pattern-level index for oracle vulnerabilities",
-    "fileCount": 11,
-    "totalPatterns": 78,
+    "fileCount": 12,
+    "totalPatterns": 84,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
   },
   "files": [
@@ -2264,6 +2264,222 @@
               ]
             }
           ]
+        }
+      ]
+    },
+    {
+      "file": "DB/oracle/price-manipulation/dex-amm-oracle-price-manipulation.md",
+      "totalLines": 468,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "oracle",
+        "vulnerability_type": "dex_amm_oracle_price_manipulation",
+        "attack_type": "economic_exploit",
+        "affected_component": "dex_based_price_oracle",
+        "oracle_provider": "uniswap_twap",
+        "oracle_attack_vector": "manipulation",
+        "severity": "high",
+        "impact": "incorrect_pricing",
+        "exploitability": "0.75",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "all",
+        "source": "solodit + audit-reports"
+      },
+      "patternCount": 6,
+      "patterns": [
+        {
+          "id": "oracle-dex-amm-oracle-price-overview-000",
+          "title": "Overview",
+          "lineStart": 77,
+          "lineEnd": 88,
+          "lineCount": 12,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "getReserves"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "oracle-dex-amm-oracle-price-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 89,
+          "lineEnd": 116,
+          "lineCount": 28,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "pair.getReserves"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Variant A — Short TWAP Window on Low-Liquidity Pools (2 reports)",
+              "lineStart": 91,
+              "lineEnd": 96,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Variant B — LP Token Price Using Manipulable Pool Reserves (2 reports)",
+              "lineStart": 97,
+              "lineEnd": 102,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "pair.getReserves"
+              ]
+            },
+            {
+              "title": "Variant C — Multi-Pool Deviation Check Bypass via Single Low-TVL Pool (1 report)",
+              "lineStart": 103,
+              "lineEnd": 108,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Variant D — Price Bin Updated After Swap Creates Manipulation Window (1 report)",
+              "lineStart": 109,
+              "lineEnd": 116,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "oracle-dex-amm-oracle-price-attack-scenarios-002",
+          "title": "Attack Scenarios",
+          "lineStart": 117,
+          "lineEnd": 162,
+          "lineCount": 46,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "MagicLpAggregator.latestAnswer",
+            "baseReserve",
+            "getPrice",
+            "minPrice",
+            "pair.getReserves",
+            "quoteReserve"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Scenario 1 — Flash Loan Attack on LP Reserve-Based Oracle (Abracadabra)",
+              "lineStart": 119,
+              "lineEnd": 133,
+              "severity": [],
+              "codeKeywords": [
+                "MagicLpAggregator.latestAnswer",
+                "baseReserve",
+                "pair.getReserves",
+                "quoteReserve"
+              ]
+            },
+            {
+              "title": "Scenario 2 — Single Low-TVL Pool Bypasses Multi-Pool Anchor Check (f(x) v2)",
+              "lineStart": 134,
+              "lineEnd": 142,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "getPrice",
+                "minPrice"
+              ]
+            },
+            {
+              "title": "Scenario 3 — Short TWAP Window on Low-Liquidity Collateral (Ouroboros/Aloe)",
+              "lineStart": 143,
+              "lineEnd": 151,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Scenario 4 — Uniswap Fee Manipulation to Inflate Implied Volatility (Aloe)",
+              "lineStart": 152,
+              "lineEnd": 162,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "oracle-dex-amm-oracle-price-vulnerable-pattern-examples-003",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 163,
+          "lineEnd": 289,
+          "lineCount": 127,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_getReserves",
+            "getLPTokenValue",
+            "getPrice",
+            "latestAnswer",
+            "swap"
+          ],
+          "rootCause": "uses live pool reserves — manipulable via flash loan in same tx",
+          "subsections": null
+        },
+        {
+          "id": "oracle-dex-amm-oracle-price-impact-analysis-004",
+          "title": "Impact Analysis",
+          "lineStart": 290,
+          "lineEnd": 311,
+          "lineCount": 22,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "oracle-dex-amm-oracle-price-secure-implementation-005",
+          "title": "Secure Implementation",
+          "lineStart": 312,
+          "lineEnd": 413,
+          "lineCount": 102,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "getPrice",
+            "latestAnswer",
+            "swap"
+          ],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },

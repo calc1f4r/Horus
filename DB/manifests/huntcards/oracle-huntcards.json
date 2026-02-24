@@ -2,10 +2,10 @@
   "meta": {
     "manifest": "oracle",
     "description": "Compressed hunt cards for oracle — one-line detection rules for bulk scanning",
-    "totalCards": 58,
-    "skipped": 20,
+    "totalCards": 60,
+    "skipped": 24,
     "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 58
+    "enriched": 60
   },
   "cards": [
     {
@@ -1098,6 +1098,48 @@
       ],
       "antipattern": "Cream uses yUSD vault's pricePerShare() to value crYUSD collateral",
       "securePattern": "Track reserves internally, don't use balanceOf for withdrawal calc"
+    },
+    {
+      "id": "oracle-dex-amm-oracle-price-attack-scenarios-002",
+      "title": "Attack Scenarios",
+      "severity": "LOW",
+      "grep": "MagicLpAggregator.latestAnswer|pair.getReserves|quoteReserve|baseReserve|minPrice|getPrice",
+      "detect": "Attacker takes flash loan of large amounts of base or quote token",
+      "cat": [
+        "oracle",
+        "price-feed",
+        "data-freshness"
+      ],
+      "ref": "DB/oracle/price-manipulation/dex-amm-oracle-price-manipulation.md",
+      "lines": [
+        117,
+        162
+      ],
+      "check": [
+        "VERIFY: Attacker takes flash loan of large amounts of base or quote token"
+      ]
+    },
+    {
+      "id": "oracle-dex-amm-oracle-price-vulnerable-pattern-examples-003",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "HIGH",
+      "grep": "getLPTokenValue|_getReserves|latestAnswer|getPrice",
+      "detect": "uses live pool reserves — manipulable via flash loan in same tx",
+      "cat": [
+        "oracle",
+        "price-feed",
+        "data-freshness"
+      ],
+      "ref": "DB/oracle/price-manipulation/dex-amm-oracle-price-manipulation.md",
+      "lines": [
+        163,
+        289
+      ],
+      "check": [
+        "VERIFY: uses live pool reserves — manipulable via flash loan in same tx",
+        "ANTIPATTERN: only one pool needs to be manipulated to affect minPrice/maxPrice"
+      ],
+      "antipattern": "only one pool needs to be manipulated to affect minPrice/maxPrice"
     },
     {
       "id": "oracle-flash-loan-oracle-ma-flash-loan-oracle-manipulation-000",

@@ -2,10 +2,10 @@
   "meta": {
     "manifest": "general-security",
     "description": "Compressed hunt cards for general-security — one-line detection rules for bulk scanning",
-    "totalCards": 36,
-    "skipped": 51,
+    "totalCards": 38,
+    "skipped": 55,
     "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 36
+    "enriched": 38
   },
   "cards": [
     {
@@ -663,6 +663,49 @@
         "ANTIPATTERN: Zapper.zapIn() accepts ZapData with arbitrary swapTarget + callData"
       ],
       "antipattern": "Zapper.zapIn() accepts ZapData with arbitrary swapTarget + callData"
+    },
+    {
+      "id": "general-security-dex-aggregator-unval-root-cause-analysis-001",
+      "title": "Root Cause Analysis",
+      "severity": "HIGH",
+      "grep": "swapExactTokensForETH|remaining_accounts|claimRewards|fromToken|toToken",
+      "detect": "The protocol calls a DEX aggregator as part of a liquidation or position-close flow, passing user-supplied `bytes...",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/dex-aggregator-unvalidated-call-data.md",
+      "lines": [
+        88,
+        115
+      ],
+      "check": [
+        "VERIFY: protocol calls a DEX aggregator as part of a liquidation or position-close flow, passing user-supplied `bytes..."
+      ]
+    },
+    {
+      "id": "general-security-dex-aggregator-unval-vulnerable-pattern-examples-003",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "HIGH",
+      "grep": "_directDepositIntoVault|performActionWithOneInch|liquidatePosition|liquidate",
+      "detect": "attacker controls dexTxnData — can encode swapExactTokensForETH",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/dex-aggregator-unvalidated-call-data.md",
+      "lines": [
+        154,
+        277
+      ],
+      "check": [
+        "VERIFY: attacker controls dexTxnData — can encode swapExactTokensForETH"
+      ],
+      "antipattern": "attacker controls dexTxnData — can encode swapExactTokensForETH"
     },
     {
       "id": "general-security-missing-validation-t-vulnerability-pattern-categori-001",

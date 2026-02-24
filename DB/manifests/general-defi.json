@@ -2,8 +2,8 @@
   "meta": {
     "category": "general-defi",
     "description": "DeFi-specific: flash loans, slippage, vaults, precision, calculations",
-    "fileCount": 24,
-    "totalPatterns": 199,
+    "fileCount": 25,
+    "totalPatterns": 205,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -461,6 +461,168 @@
               ]
             }
           ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/slippage-protection/dex-aggregator-slippage-balance-bypass.md",
+      "totalLines": 356,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "slippage_protection",
+        "vulnerability_type": "dex_aggregator_slippage_check_bypass",
+        "attack_type": "economic_exploit",
+        "affected_component": "swap_output_validation",
+        "severity": "medium",
+        "impact": "fund_loss",
+        "exploitability": "0.6",
+        "financial_impact": "medium",
+        "language": "solidity",
+        "version": "all",
+        "source": "solodit + audit-reports"
+      },
+      "patternCount": 6,
+      "patterns": [
+        {
+          "id": "general-defi-dex-aggregator-slipp-overview-000",
+          "title": "Overview",
+          "lineStart": 62,
+          "lineEnd": 73,
+          "lineCount": 12,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "balanceOf(outputToken",
+            "minAmountOut"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-dex-aggregator-slipp-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 74,
+          "lineEnd": 103,
+          "lineCount": 30,
+          "severity": [],
+          "codeKeywords": [
+            "assetOut"
+          ],
+          "rootCause": "The typical slippage check pattern in aggregator integrations is:\n\n\n\n```solidity\n\naggregator.call(swapData);\n\nrequire(IERC20(assetOut).balanceOf(address(this)) >= minAmountOut, \"Slippage\");\n\n```\n\n\n\nTh",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 76,
+              "lineEnd": 94,
+              "severity": [],
+              "codeKeywords": [
+                "assetOut"
+              ]
+            },
+            {
+              "title": "When Does Pre-Existing Balance Occur?",
+              "lineStart": 95,
+              "lineEnd": 103,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-dex-aggregator-slipp-attack-scenarios-002",
+          "title": "Attack Scenarios",
+          "lineStart": 104,
+          "lineEnd": 132,
+          "lineCount": 29,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "expectedAmount",
+            "holdToken",
+            "minAmountOut"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Scenario 1 — Residual Balance Masks Bad Swap (Fyde May)",
+              "lineStart": 106,
+              "lineEnd": 114,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "Scenario 2 — Flash Loan Excess Amount Breaks Callback (WagmiLeverage V2)",
+              "lineStart": 115,
+              "lineEnd": 122,
+              "severity": [],
+              "codeKeywords": [
+                "expectedAmount",
+                "holdToken"
+              ]
+            },
+            {
+              "title": "Scenario 3 — Fee-on-Transfer Token Accounting Error (Swappee)",
+              "lineStart": 123,
+              "lineEnd": 132,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "minAmountOut"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-dex-aggregator-slipp-vulnerable-pattern-examples-003",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 133,
+          "lineEnd": 216,
+          "lineCount": 84,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "holdTokenFlashCallback",
+            "swap",
+            "swapOn1INCH"
+          ],
+          "rootCause": "slippage check uses ABSOLUTE balance, not delta",
+          "subsections": null
+        },
+        {
+          "id": "general-defi-dex-aggregator-slipp-impact-analysis-004",
+          "title": "Impact Analysis",
+          "lineStart": 217,
+          "lineEnd": 236,
+          "lineCount": 20,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-dex-aggregator-slipp-secure-implementation-005",
+          "title": "Secure Implementation",
+          "lineStart": 237,
+          "lineEnd": 318,
+          "lineCount": 82,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "holdTokenFlashCallback",
+            "swap",
+            "swapOn1INCH"
+          ],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },

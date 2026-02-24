@@ -2,10 +2,10 @@
   "meta": {
     "manifest": "general-defi",
     "description": "Compressed hunt cards for general-defi — one-line detection rules for bulk scanning",
-    "totalCards": 91,
-    "skipped": 108,
+    "totalCards": 92,
+    "skipped": 113,
     "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 91
+    "enriched": 92
   },
   "cards": [
     {
@@ -54,6 +54,29 @@
         "ANTIPATTERN: balanceBefore recorded before transfer; repayment check requires extra funds"
       ],
       "antipattern": "balanceBefore recorded before transfer; repayment check requires extra funds"
+    },
+    {
+      "id": "general-defi-dex-aggregator-slipp-vulnerable-pattern-examples-003",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "MEDIUM",
+      "grep": "holdTokenFlashCallback|swapOn1INCH",
+      "detect": "slippage check uses ABSOLUTE balance, not delta",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/slippage-protection/dex-aggregator-slippage-balance-bypass.md",
+      "lines": [
+        133,
+        216
+      ],
+      "check": [
+        "VERIFY: slippage check uses ABSOLUTE balance, not delta",
+        "ANTIPATTERN: uses nominal amount for swap approval, not actual received amount"
+      ],
+      "antipattern": "uses nominal amount for swap approval, not actual received amount"
     },
     {
       "id": "general-defi-slippage-protection-vulnerable-code-patterns-001",
