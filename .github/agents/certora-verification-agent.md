@@ -1,8 +1,8 @@
 ---
 name: certora-verification
 description: 'Converts structured invariant specifications into Certora CVL .spec and .conf files. Handles compilation, Python environment, and configuration issues proactively. Produces general specifications that catch edge cases, handles admin conditions correctly, avoids vacuous rules, supports mutation testing via Gambit, and generates satisfy statements for every rule. Outputs to certora/specs/ and certora/conf/ in the target project. Use when setting up Certora formal verification, converting invariant specs to CVL, or running mutation testing with Gambit.'
-tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent']
----
+tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent','todo']
+------
 
 # Certora Formal Verification Agent
 
