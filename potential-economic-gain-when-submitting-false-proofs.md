@@ -1,0 +1,123 @@
+---
+# Core Classification
+protocol: Taiko
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 36008
+audit_firm: SigmaPrime
+contest_link: https://github.com/sigp/public-audits/blob/master/reports/taiko/review.pdf
+source_link: https://github.com/sigp/public-audits/blob/master/reports/taiko/review.pdf
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - nft_marketplace
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - Sigma Prime
+---
+
+## Vulnerability Title
+
+Potential Economic Gain When Submitting False Proofs
+
+### Overview
+
+
+The bug report describes a potential vulnerability in the Taiko platform where a malicious user could exploit the system by submitting a false proof for a valid optimistic transition. This would allow them to win half of the original validity bond, resulting in a net gain of 250 TKO. The issue is rated as low likelihood, but if it were to occur, the malicious user could continually exploit the system for their own gain. To resolve this issue, it is recommended to prevent a contester from immediately submitting a higher proof and instead give the prover a chance to submit a higher proof themselves. The Taiko team has already implemented changes to the tier system to address this vulnerability.
+
+### Original Finding Content
+
+## Description
+
+An attacker would stand to gain by submitting a false ZK plus SGZ proof to contest a valid optimistic transition. 
+
+Say a prover submits a valid transition which has an optimistic proof. The prover pays the liveness bond plus 1,000 TKO as the validity bond. 
+
+Now, let’s assume a malicious user is able to create a false proof for the `TIER_SGX_AND_PSE_ZKEVM`. If the malicious user submits this false proof by calling `proverBlock()`, they would immediately contest and win against the optimistic proof. By winning a contest, the malicious user will be awarded half of the original validity bond. 
+
+The cost to the malicious user is 250 TKO as the validity bond for `TIER_SGX_AND_PSE_ZKEVM`. The reward for the malicious user is 500 TKO for contesting and then winning the proof against the optimistic prover. The net gain for the malicious user is 250 TKO. 
+
+```solidity
+reward = ts.validityBond / 4;
+
+// It's important to note that the contester is set to zero
+// for the tier-0 transition. Consequently, we only grant a
+// reward to the contester if it is not a zero-address.
+if (ts.contester != address(0)) {
+    tko.transfer(ts.contester, reward + ts.contestBond);
+} else {
+    // The prover is also the contester, so the reward is
+    // sent to him.
+    tko.transfer(msg.sender, reward); //@audit first reward for malicious prover
+}
+
+// Given that the contester emerges as the winner, the
+// previous blockHash and signalRoot are considered
+// incorrect, and we must replace them with the correct
+// values.
+ts.blockHash = tran.blockHash;
+ts.signalRoot = tran.signalRoot;
+}
+
+// Reward this prover.
+// In theory, the reward can also be zero for certain tiers if
+// their validity bonds are set to zero.
+tko.transfer(msg.sender, reward); // @audit second reward for malicious prover
+```
+
+The issue is rated as very low likelihood as it requires creating a fraudulent proof at the `TIER_SGX_AND_PSE_ZKEVM` tier, which requires breaking both ZK and SGX in the same manner. However, if this issue were to occur, the malicious user could continually contest with fake proofs for each pending optimistic transition, gaining 250 TKO per fake proof. 
+
+## Recommendations
+
+To resolve the issue, consider preventing a contester from immediately submitting a higher proof. Allow the prover a chance to submit a higher proof themselves before other users may submit a proof. 
+
+## Resolution
+
+The tier system has been updated such that higher tiers require a larger bond. The changes have been reflected in PR #15587.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | SigmaPrime |
+| Protocol | Taiko |
+| Report Date | N/A |
+| Finders | Sigma Prime |
+
+### Source Links
+
+- **Source**: https://github.com/sigp/public-audits/blob/master/reports/taiko/review.pdf
+- **GitHub**: N/A
+- **Contest**: https://github.com/sigp/public-audits/blob/master/reports/taiko/review.pdf
+
+### Keywords for Search
+
+`vulnerability`
+
