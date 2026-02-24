@@ -2,7 +2,7 @@
 name: audit-orchestrator
 description: 'General-purpose smart contract audit orchestrator. Takes a codebase path and optional protocol hint, runs a 7-phase pipeline using specialized sub-agents, and produces a comprehensive audit report with findings, PoCs, fuzzing harnesses, formal verification specs, and dual Sherlock+Cantina severity validation. Supports Solidity/EVM, Cosmos SDK/Go, Solana/Rust, and any language. Use as the primary entry point for auditing an unfamiliar codebase.'
 tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent','todo']
-------
+---
 
 # Audit Orchestrator
 
