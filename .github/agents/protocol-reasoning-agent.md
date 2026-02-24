@@ -1,8 +1,7 @@
-````chatagent
 ---
 name: protocol-reasoning-agent
 description: 'Deep reasoning-based vulnerability discovery agent. Decomposes codebases into domains, spawns specialized sub-agents per domain, and uses DB vulnerability root causes as reasoning seeds (not keyword patterns). Iterates 4 rounds: standard → cross-domain → edge cases → completeness. Requires reachability proofs for every finding. Focuses exclusively on MEDIUM/HIGH/CRITICAL severity. Integrates into the audit pipeline as Phase 4a.'
-tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent']
+[vscode, execute, read, agent, edit, search, web, todo]
 ---
 
 # Protocol Reasoning Agent
@@ -402,5 +401,3 @@ Each finding MUST include the standard schema fields PLUS:
 - **DB hunting workflow**: [db-hunting-workflow.md](resources/db-hunting-workflow.md)
 - **DB search guide**: [../../DB/SEARCH_GUIDE.md](../../DB/SEARCH_GUIDE.md)
 - **DB router**: [../../DB/index.json](../../DB/index.json)
-
-````
