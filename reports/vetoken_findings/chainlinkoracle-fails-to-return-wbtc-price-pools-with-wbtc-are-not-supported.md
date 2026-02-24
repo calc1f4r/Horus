@@ -1,0 +1,107 @@
+---
+# Core Classification
+protocol: Conic Finance
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 29916
+audit_firm: MixBytes
+contest_link: none
+source_link: https://github.com/mixbytes/audits_public/blob/master/Conic%20Finance/Conic%20Finance%20v2/README.md#6-chainlinkoracle-fails-to-return-wbtc-price-pools-with-wbtc-are-not-supported
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - MixBytes
+---
+
+## Vulnerability Title
+
+ChainlinkOracle fails to return WBTC price, pools with WBTC are not supported
+
+### Overview
+
+
+The bug report describes an issue with the `oracle.getUSDPrice()` function, which returns an error when trying to add Curve pools with WBTC. This is contradictory to the mention of pools with WBTC in tests and the existence of many Curve pools with WBTC, some of which are supported by Convex. The report suggests implementing additional calculations in two specific functions to resolve this issue.
+
+### Original Finding Content
+
+##### Description
+
+`oracle.getUSDPrice(wbtc)` returns the error `"token not supported"`
+As the result, it is impossible to add Curve pools with WBTC.
+
+But, Conic mentions pools with WBTC in tests:
+https://github.com/ConicFinance/protocol/blob/7a66d26ef84f93059a811a189655e17c11d95f5c/test/ConicTest.sol#L39
+```
+...
+address internal constant REN_BTC = 0x9305...895B;
+address internal constant BBTC = 0x071c...8F4b;
+...
+```
+
+Also, there are many Curve pools with WBTC, some of them supported by Convex as well. 
+BTC is a reserved denomination with the address: `0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB`
+- https://github.com/smartcontractkit/chainlink/blob/55c7baa1181aaa04026b4a1043117596c4e31e5a/contracts/src/v0.8/Denominations.sol#L7
+
+So WBTC price feed can be received only by:
+```
+WBTC = 0x514910771AF9Ca656af840dff83E8264EcF986CA
+BTC = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB
+wbtcbtc = _feedRegistry.getFeed(WBTC, BTC)
+```
+It will be WBTC/BTC price; then it must be adjusted to BTC/USD price:
+```
+BTC = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB
+USD = address(840)
+btcusd = _feedRegistry.getFeed(WBTC, BTC)
+```
+
+##### Recommendation
+
+We recommend implementing additional calculations in `ChainlinkOracle._getPrice()` and `ChainlinkOracle.isTokenSupported()` in order to support Curve Pools with WBTC.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | MixBytes |
+| Protocol | Conic Finance |
+| Report Date | N/A |
+| Finders | MixBytes |
+
+### Source Links
+
+- **Source**: https://github.com/mixbytes/audits_public/blob/master/Conic%20Finance/Conic%20Finance%20v2/README.md#6-chainlinkoracle-fails-to-return-wbtc-price-pools-with-wbtc-are-not-supported
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+

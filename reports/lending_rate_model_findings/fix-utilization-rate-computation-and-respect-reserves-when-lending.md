@@ -1,0 +1,140 @@
+---
+# Core Classification
+protocol: dForce Lending Protocol Review
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 13518
+audit_firm: ConsenSys
+contest_link: none
+source_link: https://consensys.net/diligence/audits/2021/03/dforce-lending-protocol-review/
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - liquid_staking
+  - dexes
+  - cdp
+  - services
+  - cross_chain
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - Heiko Fisch
+  - Alexander Wade
+---
+
+## Vulnerability Title
+
+Fix utilization rate computation and respect reserves when lending
+
+### Overview
+
+
+A bug report was filed concerning the utilization rate (UR) calculation in the InterestRateModel.sol contract. This rate is defined as the ratio of borrows to (borrows + cash - reserves). The report notes that the system does not guarantee that reserves will never exceed cash, which can cause the UR to be higher than 1, which is not conceptually sensible and has undesirable technical consequences. 
+
+The report recommends avoiding this situation whenever possible, and if it does occur, the UR computation should return 1 unless borrows are 0, in which case it should return 0. It also notes that internally, the UR and other fractional values are scaled by 1e18, and when making changes to the code, care must be taken to apply the scaling.
+
+The dForce team has addressed this issue in commits 2a0e974 and c11fa9b.
+
+### Original Finding Content
+
+#### Resolution
+
+
+
+The dForce team has informed us that the only two interest rate models that are still in use are `StablecoinInterestRateModel` and `StandardInterestRateModel`. For these, recommendation 2 has been addressed in commits [2a0e974](https://github.com/dforce-network/LendingContracts/commit/2a0e974858e8041f9603d84c2b984b852a3f48f4) and [c11fa9b](https://github.com/dforce-network/LendingContracts/commit/c11fa9b284c4bf61ffbc06c9aa5e3f48e3f93b7f).
+
+
+#### Description
+
+
+The utilization rate `UR` of an asset forms the basis for interest calculations and is defined as `borrows / ( borrows + cash - reserves)`.
+
+
+**code/contracts/InterestRateModel/InterestRateModel.sol:L72-L88**
+
+
+
+```
+/\*\*
+ \* @notice Calculate the utilization rate: `\_borrows / (\_cash + \_borrows - \_reserves)`
+ \* @param \_cash Asset balance
+ \* @param \_borrows Asset borrows
+ \* @param \_reserves Asset reserves
+ \* @return Asset utilization [0, 1e18]
+ \*/
+function utilizationRate(
+    uint256 \_cash,
+    uint256 \_borrows,
+    uint256 \_reserves
+) internal pure returns (uint256) {
+    // Utilization rate is 0 when there are no borrows
+    if (\_borrows == 0) return 0;
+
+    return \_borrows.mul(BASE).div(\_cash.add(\_borrows).sub(\_reserves));
+}
+
+```
+The implicit assumption here is that `reserves <= cash`; in this case — and if we define `UR` as `0` for `borrows == 0` — we have `0 <= UR <=1`. We can view `cash - reserves` as “available cash”.
+However, the system does not guarantee that `reserves` never exceeds `cash`. If `reserves > cash` (and `borrows + cash - reserves > 0`), the formula for `UR` above gives a utilization rate above `1`. This doesn’t make much sense conceptually and has undesirable technical consequences; an especially severe one is analyzed in [issue 4.4](#if-base_updateinterest-fails-the-entire-system-will-halt).
+
+
+#### Recommendation
+
+
+If `reserves > cash` — or, in other words, available cash is negative — this means part of the reserves have been borrowed, which ideally shouldn’t happen in the first place. However, the `reserves` grow automatically over time, so it might be difficult to avoid this entirely. We recommend (1) avoiding this situation whenever it is possible and (2) fixing the `UR` computation such that it deals more gracefully with this scenario. More specifically:
+
+
+1. Loan amounts should not be checked to be smaller than or equal to `cash` but `cash - reserves` (which might be negative). Note that the current check against `cash` happens more or less implicitly because the transfer just fails for insufficient `cash`.
+2. Make the utilization rate computation return `1` if `reserves > cash` (unless `borrows == 0`, in which case return `0` as is already the case).
+
+
+#### Remark
+
+
+Internally, the utilization rate and other fractional values are scaled by `1e18`. The discussion above has a more conceptual than technical perspective, so we used unscaled numbers. When making changes to the code, care must be taken to apply the scaling.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | ConsenSys |
+| Protocol | dForce Lending Protocol Review |
+| Report Date | N/A |
+| Finders | Heiko Fisch, Alexander Wade |
+
+### Source Links
+
+- **Source**: https://consensys.net/diligence/audits/2021/03/dforce-lending-protocol-review/
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+

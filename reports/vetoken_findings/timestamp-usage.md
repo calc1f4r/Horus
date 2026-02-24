@@ -1,0 +1,90 @@
+---
+# Core Classification
+protocol: Golem Network Token (GNT) Audit
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 12174
+audit_firm: OpenZeppelin
+contest_link: none
+source_link: https://blog.openzeppelin.com/golem-network-token-gnt-audit-edfa4a45bc32/
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - liquid_staking
+  - bridge
+  - services
+  - launchpad
+  - payments
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - OpenZeppelin
+---
+
+## Vulnerability Title
+
+Timestamp usage
+
+### Overview
+
+
+This bug report concerns the use of timestamps and `now` (alias for `block.timestamp`) for contract logic in the GNTAllocation contract. It is recommended to use `block.number` instead, as miners can manipulate the timestamps. While the risk of this is low, and the potential damage limited, it is still advised to switch to `block.number` if necessary. The Token.sol file is correctly using `block.number`. For more information, there is a link to a Stack Exchange question on the topic.
+
+### Original Finding Content
+
+There’s a problem with using timestamps and `now` (alias for `block.timestamp`) for contract logic, based on the fact that miners can perform some manipulation. In general, [it’s better not to rely on timestamps for contract logic](https://github.com/ConsenSys/smart-contract-best-practices#timestamp-dependence). The solutions is to use `block.number` instead, and approximate dates with expected block heights and time periods with expected block amounts.
+
+
+The GNTAllocation contract uses timestamps at [several](https://github.com/imapp-pl/golem-crowdfunding/blob/50100b27a7c6841ed430a028d100f5d45ba08fb1/contracts/GNTAllocation.sol#L22) [points](https://github.com/imapp-pl/golem-crowdfunding/blob/50100b27a7c6841ed430a028d100f5d45ba08fb1/contracts/GNTAllocation.sol#L56). The risk of miner manipulation, though, is really low. The potential damage is also limited: miners could only slightly manipulate the developer lock period duration. We recommend the team to consider the potential risk and switch to `block.number` if necessary.
+
+
+For more info on this topic, see [this stack exchange question](https://ethereum.stackexchange.com/questions/413/can-a-contract-safely-rely-on-block-timestamp).
+
+
+`block.number` is correctly used in the Token.sol file.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | OpenZeppelin |
+| Protocol | Golem Network Token (GNT) Audit |
+| Report Date | N/A |
+| Finders | OpenZeppelin |
+
+### Source Links
+
+- **Source**: https://blog.openzeppelin.com/golem-network-token-gnt-audit-edfa4a45bc32/
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+

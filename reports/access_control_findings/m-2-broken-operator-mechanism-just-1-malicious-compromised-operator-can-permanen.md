@@ -1,0 +1,122 @@
+---
+# Core Classification
+protocol: Fair Funding by Alchemix & Unstoppable
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 6536
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/42
+source_link: none
+github_link: https://github.com/sherlock-audit/2023-02-fair-funding-judging/issues/46
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 1.00
+financial_impact: medium
+
+# Scoring
+quality_score: 5
+rarity_score: 4
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - dexes
+  - cdp
+  - services
+  - cross_chain
+  - leveraged_farming
+
+# Audit Details
+report_date: unknown
+finders_count: 6
+finders:
+  - csanuragjain
+  - ABA
+  - hickuphh3
+  - 0xSmartContract
+  - rvierdiiev
+---
+
+## Vulnerability Title
+
+M-2: Broken Operator Mechanism: Just 1 malicious / compromised operator can permanently break functionality
+
+### Overview
+
+
+This bug report is about the vulnerability of the access control structure for vault operators in the Fair Funding protocol. It is possible for one malicious or compromised operator to permanently break the protocol functionality, with no possible remediation. This can be done by setting the `alchemist` contract to any address, stealing last auction funds, and removing himself as an operator. The impact of this vulnerability is DoS (Denial of Service) and holding users' funds hostage. The code snippet mentioned in the report can be found in the Github repository. The recommended solution is to add an additional access control layer on top of operators, such as an `owner` that will be held by a multisig or DAO that is able to add and remove operators. This bug report was found by weeeh\_, hickuphh3, ABA, 0xSmartContract, rvierdiiev, and csanuragjain, and was discussed in the Unstoppable-DeFi Github repository.
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2023-02-fair-funding-judging/issues/46 
+
+## Found by 
+weeeh\_, hickuphh3, ABA, 0xSmartContract, rvierdiiev, csanuragjain
+
+## Summary
+Operator access control isn't sufficiently resilient against a malicious or compromised actor.
+
+## Vulnerability Detail
+I understand that we can assume all privileged roles to be trusted, but this is about the access control structure for the vault operators. The key thing here is that you can have multiple operators who can add or remove each other. As the saying goes, _"you are as strong as your weakest link"_, so all it required is for 1 malicious or compromised operator to permanently break protocol functionality, with no possible remediation as he's able to kick out all other honest operators, _including himself_
+
+The vault operator can do the following:
+1) Set the `alchemist` contract to any address (except null) of his choosing. He can therefore permanently brick the claiming and liquidation process, resulting in the permanent locking of token holders' funds in Alchemix.
+2) Steal last auction funds. WETH approval is given to the `alchemist` contract every time `register_deposit` is called, and with the fact that anyone can settle the contract, the malicious operator is able to do the following atomically:
+    - set the alchemist contract to a malicious implementation
+       - contract returns a no-op + arbitrary `shares_issued` value when the `depositUnderlying()` function is called
+    - settle the last auction (assuming it hasn't been)
+    - pull auction funds from approval given
+3) Do (1) and remove himself as an operator (ie. there are no longer any operators), permanently preventing any possible remediation.
+
+## Impact
+DoS / holding the users' funds hostage.
+
+## Code Snippet
+https://github.com/sherlock-audit/2023-02-fair-funding/blob/main/fair-funding/contracts/Vault.vy#L292-L300
+https://github.com/sherlock-audit/2023-02-fair-funding/blob/main/fair-funding/contracts/Vault.vy#L589-L614
+
+## Tool used
+Manual Review
+
+## Recommendation
+Add an additional access control layer on top of operators: an `owner` that will be held by a multisig / DAO that's able to add / remove operators. 
+
+## Discussion
+
+**Unstoppable-DeFi**
+
+https://github.com/Unstoppable-DeFi/fair-funding/pull/10
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 5/5 |
+| Rarity Score | 4/5 |
+| Audit Firm | Sherlock |
+| Protocol | Fair Funding by Alchemix & Unstoppable |
+| Report Date | N/A |
+| Finders | csanuragjain, ABA, hickuphh3, 0xSmartContract, rvierdiiev, weeeh\_ |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2023-02-fair-funding-judging/issues/46
+- **Contest**: https://app.sherlock.xyz/audits/contests/42
+
+### Keywords for Search
+
+`vulnerability`
+
