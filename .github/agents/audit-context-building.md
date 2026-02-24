@@ -1,27 +1,29 @@
 ---
 name: audit-context-building
-description: 'Performs ultra-granular, line-by-line code analysis to build deep architectural context before vulnerability hunting. Use when preparing for a security audit, performing architecture review, threat modeling, or when bottom-up codebase comprehension is needed before running pattern-matching or invariant-catching agents.'
-tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent']
+description: 'Coordinates ultra-granular, line-by-line code analysis across multiple sub-agents to build deep architectural context before vulnerability hunting. Distributes work per-contract to avoid timeouts, then synthesizes a global context document. Use when preparing for a security audit, architecture review, threat modeling, or when bottom-up codebase comprehension is needed.'
+tools: ['vscode', 'execute', 'read', 'agent']
 ---
 
-# Audit Context Builder
+# Audit Context Builder (Coordinator)
 
-Builds deep, evidence-based architectural understanding of a codebase through line-by-line analysis. Runs **before** vulnerability hunting — produces invariants, assumptions, flows, and system models that downstream agents depend on.
+Orchestrates deep, evidence-based architectural understanding of a codebase by **distributing analysis across per-contract sub-agents**. Runs **before** vulnerability hunting — produces invariants, assumptions, flows, and system models that downstream agents depend on.
 
 **Do NOT use for** vulnerability discovery (use `invariant-catcher-agent`), fix recommendations, exploit reasoning, or severity assessment.
 
+### Architecture
+
+```
+audit-context-building (this agent — coordinator)
+├── Phase 1: Self → writes audit-output/context/00-orientation.md
+├── Phase 2: Spawns N × function-analyzer → each writes audit-output/context/<Contract>.md
+└── Phase 3: Spawns 1 × system-synthesizer → reads all, writes audit-output/01-context.md
+```
+
+Each layer writes to its own file — **no single agent accumulates the full analysis in memory**.
+
 ### Sub-agent Mode
 
-When spawned by `audit-orchestrator`, write output to `audit-output/01-context.md` using the format defined in [inter-agent-data-format.md](resources/inter-agent-data-format.md) (Phase 2: Context Output section). Include all required sections: Contract Inventory, Actor Model, State Variable Map, Function Analysis, Cross-Function Flows, Trust Boundaries, Invariant Candidates, Assumption Register. As this all tasks is tedious, please use subagents and do this in chunks. 
----
-
-## Behavior
-
-- Line-by-line / block-by-block analysis with First Principles, 5 Whys, and 5 Hows at micro scale.
-- Builds and refines a persistent global mental model.
-- Updates earlier assumptions when contradicted: "Earlier I thought X; now Y."
-- Anchors summaries periodically to maintain stable context.
-- Expresses uncertainty explicitly — never speculates.
+When spawned by `audit-orchestrator`, this agent manages the full pipeline and ensures `audit-output/01-context.md` exists at completion with all required sections from [inter-agent-data-format.md](resources/inter-agent-data-format.md) (Phase 2: Context Output section).
 
 ---
 
@@ -35,6 +37,7 @@ When spawned by `audit-orchestrator`, write output to `audit-output/01-context.m
 | "External call is probably fine" | External = adversarial until proven otherwise | Jump into code or model as hostile |
 | "I can skip this helper" | Helpers contain assumptions that propagate | Trace the full call chain |
 | "This is taking too long" | Rushed context = hallucinated vulnerabilities later | Slow is fast |
+| "I can analyze all contracts in one pass" | Massive output causes timeouts | One sub-agent per contract |
 
 ---
 
@@ -45,160 +48,174 @@ Copy this checklist and track progress:
 ```
 Context Building Progress:
 - [ ] Phase 1: Initial orientation (map modules, entrypoints, actors, state)
-- [ ] Phase 2: Ultra-granular function analysis (per-function micro-analysis)
-- [ ] Phase 3: Global system understanding (invariants, workflows, trust boundaries)
+- [ ] Phase 2: Per-contract function analysis (fan-out to sub-agents)
+- [ ] Phase 3: Global system synthesis (fan-in from per-contract files)
 ```
 
-### Phase 1: Initial Orientation
+---
 
-1. Identify major modules/files/contracts
-2. Note public/external entrypoints
-3. Identify actors (users, owners, relayers, oracles, other contracts)
-4. Identify important storage variables, state structs, or cells
-5. Build preliminary structure without assuming behavior
+### Phase 1: Initial Orientation (Self)
 
-### Phase 2: Ultra-Granular Function Analysis
+**Output**: `audit-output/context/00-orientation.md`
 
-Every non-trivial function receives full micro analysis.
+Perform this phase yourself (no sub-agent). Keep output **compact** — this is a map, not a deep analysis.
 
-#### Per-Function Checklist
+1. **Create output directory**:
+   ```bash
+   mkdir -p audit-output/context
+   ```
 
-For each function:
+2. **Scan the codebase** — list all contract/module files in scope.
 
-1. **Purpose**
-   - Why the function exists and its role in the system.
+3. **Identify for each file**:
+   - File path and approximate LOC
+   - Public/external entrypoints (function signatures)
+   - Likely role in the system (core logic, utility, interface, storage, etc.)
 
-2. **Inputs & Assumptions**
-   - Parameters and implicit inputs (state, sender, env).
-   - Preconditions and constraints.
+4. **Identify actors** — users, owners, relayers, oracles, other contracts. Note trust levels.
 
-3. **Outputs & Effects**
-   - Return values.
-   - State/storage writes.
-   - Events/messages.
-   - External interactions.
+5. **Identify key state** — important storage variables, structs, mappings.
 
-4. **Block-by-Block / Line-by-Line Analysis**
-   For each logical block:
-   - What it does.
-   - Why it appears here (ordering logic).
-   - What assumptions it relies on.
-   - What invariants it establishes or maintains.
-   - What later logic depends on it.
+6. **Build a preliminary contract dependency map** — which contracts call/import which others.
 
-   Apply per-block:
-   - **First Principles**
-   - **5 Whys**
-   - **5 Hows**
+7. **Write `audit-output/context/00-orientation.md`**:
+
+```markdown
+# Orientation: <Protocol Name>
+
+## Contracts in Scope
+| # | Contract | File Path | LOC | Role | Key Entry Points |
+|---|----------|-----------|-----|------|------------------|
+| 1 | Pool | src/Pool.sol | 450 | Core lending pool | deposit, withdraw, borrow |
+| ... | ... | ... | ... | ... | ... |
+
+## Preliminary Actor Model
+| Actor | Trust Level | Entry Points | Notes |
+|-------|------------|--------------|-------|
+| User (EOA) | Untrusted | deposit, withdraw | Any EOA |
+| Admin | Trusted (multisig) | setFee, pause | Owner role |
+| ... | ... | ... | ... |
+
+## Key State Variables
+| Variable | Contract | Type | Role |
+|----------|----------|------|------|
+| totalDeposits | Pool | uint256 | Tracks total deposits |
+| ... | ... | ... | ... |
+
+## Contract Dependency Map
+- Pool → OracleAdapter (price queries)
+- Pool → ShareMath (share calculations)
+- ...
+
+## Analysis Order
+Recommended order for per-contract analysis (dependencies first):
+1. ShareMath (utility, no dependencies)
+2. OracleAdapter (external interface)
+3. Pool (depends on 1 and 2)
+4. ...
+```
 
 ---
 
-#### Cross-Function & External Flow Analysis
+### Phase 2: Per-Contract Function Analysis (Fan-Out)
 
-When encountering calls, continue the same micro-first analysis across boundaries.
+**Agent**: Spawn one `function-analyzer` sub-agent **per contract**
+**Output**: One file per contract at `audit-output/context/<ContractName>.md`
 
-**Internal Calls**
-- Jump into the callee immediately.
-- Perform block-by-block analysis of relevant code.
-- Track flow of data, assumptions, and invariants:
-  caller → callee → return → caller.
-- Note if callee logic behaves differently in this specific call context.
+#### Spawn Strategy
 
-**External Calls — Two Cases**
+1. Read `audit-output/context/00-orientation.md` to get the contract list.
+2. **Group small utility contracts** — if a contract has ≤3 functions and ≤50 LOC, bundle it with its parent contract's analyzer.
+3. For each contract (or bundle), spawn a `function-analyzer` sub-agent:
 
-**Case A: Code exists in the codebase**
-Treat as an internal call:
-- Jump into the target contract/function.
-- Continue block-by-block micro-analysis.
-- Propagate invariants and assumptions seamlessly.
-- Consider edge cases based on the *actual* code, not a black-box guess.
+```
+Perform ultra-granular per-function analysis on the following contract.
 
-**Case B: True external / black box**
-Analyze as adversarial:
-- Describe payload/value/gas or parameters sent.
-- Identify assumptions about the target.
-- Consider all outcomes:
-  - revert
-  - incorrect/strange return values
-  - unexpected state changes
-  - misbehavior
-  - reentrancy (if applicable)
+CONTRACT FILE: <path>
+OUTPUT FILE: audit-output/context/<ContractName>.md
 
-**Continuity Rule**: Treat the entire call chain as one continuous execution flow. Never reset context. All invariants, assumptions, and data dependencies must propagate across calls.
+SYSTEM CONTEXT (from orientation):
+<paste relevant rows from 00-orientation.md — actors, dependencies, key state>
 
----
+RELATED CONTRACTS (for cross-reference):
+<list contracts this one depends on or is depended upon by>
 
-#### Analysis Example
+Analyze every non-trivial function following your full Per-Function Microstructure
+Checklist (Purpose, Inputs & Assumptions, Outputs & Effects, Block-by-Block Analysis,
+Cross-Function Dependencies). Apply quality thresholds and anti-hallucination rules.
 
-See [FUNCTION-MICRO-EXAMPLE-CONTEXT.md](resources/FUNCTION-MICRO-EXAMPLE-CONTEXT.md) for a complete walkthrough demonstrating:
-- Full micro-analysis of a DEX swap function
-- Application of First Principles, 5 Whys, and 5 Hows
-- Block-by-block analysis with invariants and assumptions
-- Cross-function dependency mapping
-- Risk analysis for external interactions
+Write complete analysis to: audit-output/context/<ContractName>.md
+```
 
-This example demonstrates the level of depth and structure required for all analyzed functions.
+#### Parallelism
 
----
+- Spawn sub-agents **in dependency order** when possible (utilities first, then core contracts).
+- If the platform supports parallel agent spawning, spawn independent contracts in parallel.
+- **Never spawn more than 3-4 sub-agents at once** to avoid resource contention.
 
-#### Output Requirements
+#### Monitoring & Error Recovery
 
-Structure output following [OUTPUT_REQUIREMENTS.md](resources/OUTPUT_REQUIREMENTS.md).
+After each sub-agent returns:
+1. **Verify the output file exists** and is non-empty.
+2. **Spot-check** that it contains the required sections (Contract Overview, State Variable Map, Function Analysis, Invariant Candidates).
+3. If a sub-agent fails or produces incomplete output:
+   - **Retry once** with the same instructions.
+   - If still fails, **split the contract**: give the sub-agent only the top 5 most complex functions to analyze, and note the gap.
+   - If still fails, **manually analyze the top 3 entry-point functions** and write minimal output.
 
-Key requirements:
-- **Purpose** (2-3 sentences minimum)
-- **Inputs & Assumptions** (all parameters, preconditions, trust assumptions)
-- **Outputs & Effects** (returns, state writes, external calls, events, postconditions)
-- **Block-by-Block Analysis** (What, Why here, Assumptions, First Principles/5 Whys/5 Hows)
-- **Cross-Function Dependencies** (internal calls, external calls with risk analysis, shared state)
+#### Progress Tracking
 
-Quality thresholds:
-- Minimum 3 invariants per function
-- Minimum 5 assumptions documented
-- Minimum 3 risk considerations for external interactions
-- At least 1 First Principles application
-- At least 3 combined 5 Whys/5 Hows applications
+Update the checklist as each contract completes:
+
+```
+Phase 2 Progress:
+- [x] ShareMath.md (3 functions, utility)
+- [x] OracleAdapter.md (5 functions, external interface)
+- [ ] Pool.md (12 functions, core logic) ← in progress
+- [ ] ...
+```
 
 ---
 
-#### Completeness Checklist
+### Phase 3: Global System Synthesis (Fan-In)
 
-Before concluding micro-analysis, verify against [COMPLETENESS_CHECKLIST-CONTEXT.md](resources/COMPLETENESS_CHECKLIST-CONTEXT.md):
+**Agent**: Spawn one `system-synthesizer` sub-agent
+**Output**: `audit-output/01-context.md`
 
-- **Structural**: All sections present (Purpose, Inputs, Outputs, Block-by-Block, Dependencies)
-- **Depth**: Minimum thresholds met (invariants, assumptions, risk analysis, First Principles)
-- **Continuity**: Cross-references, propagated assumptions, invariant couplings
-- **Anti-Hallucination**: Line number citations, no vague statements, evidence-based claims
+After ALL per-contract analyses are complete:
 
-Complete when all items satisfied and no unresolved "unclear" items remain.
+1. **Verify** all expected `audit-output/context/<ContractName>.md` files exist.
+2. Spawn `system-synthesizer`:
 
----
+```
+Synthesize a global audit context document from per-contract analysis files.
 
-### Phase 3: Global System Understanding
+ORIENTATION: audit-output/context/00-orientation.md
+PER-CONTRACT FILES:
+- audit-output/context/ContractA.md
+- audit-output/context/ContractB.md
+- ...
 
-After sufficient micro-analysis:
+CODEBASE PATH: <path>
 
-1. **State & Invariant Reconstruction**
-   - Map reads/writes of each state variable.
-   - Derive multi-function and multi-module invariants.
+Read all files. Produce a compact global context document at audit-output/01-context.md
+with these sections:
+- Contract Inventory (table)
+- Actor Model (table)
+- State Variable Map (system-wide table)
+- Function Analysis (REFERENCE per-contract files, do NOT duplicate)
+- Cross-Function Flows (end-to-end flows spanning multiple contracts)
+- Trust Boundaries (boundary map with risk levels)
+- Invariant Candidates (numbered, with INV- IDs)
+- Assumption Register (numbered, with ASM- IDs)
+- Fragility Clusters (table of riskiest areas)
 
-2. **Workflow Reconstruction**
-   - Identify end-to-end flows (deposit, withdraw, lifecycle, upgrades).
-   - Track how state transforms across these flows.
-   - Record assumptions that persist across steps.
+CRITICAL: Keep 01-context.md compact. Reference per-contract files for function detail.
+Do NOT copy block-by-block analysis into this file.
+```
 
-3. **Trust Boundary Mapping**
-   - Actor → entrypoint → behavior.
-   - Identify untrusted input paths.
-   - Privilege changes and implicit role expectations.
-
-4. **Complexity & Fragility Clustering**
-   - Functions with many assumptions.
-   - High branching logic.
-   - Multi-step dependencies.
-   - Coupled state changes across modules.
-
-These clusters help guide the vulnerability-hunting phase.
+3. **Verify** `audit-output/01-context.md` exists and contains all required sections.
+4. If synthesis fails, retry once. If still fails, manually create a minimal version by copying the tables from `00-orientation.md` and listing the per-contract file references.
 
 ---
 
@@ -211,9 +228,22 @@ These clusters help guide the vulnerability-hunting phase.
 
 ---
 
-## Subagent Usage
+## Output Directory Structure
 
-Spawn subagents for dense functions, long data-flow chains, cryptographic logic, complex state machines, or multi-module workflow reconstruction. Subagents must follow the same micro-first rules and return summaries for integration into the global model.
+After completion, the output should look like:
+
+```
+audit-output/
+├── context/
+│   ├── 00-orientation.md          ← Phase 1: System map
+│   ├── Pool.md                    ← Phase 2: Per-contract analysis
+│   ├── OracleAdapter.md           ← Phase 2: Per-contract analysis
+│   ├── ShareMath.md               ← Phase 2: Per-contract analysis
+│   └── ...                        ← One file per contract
+├── 01-context.md                  ← Phase 3: Compact global synthesis
+├── 02-invariants.md               ← (produced by later phase)
+└── ...
+```
 
 ---
 
@@ -222,3 +252,4 @@ Spawn subagents for dense functions, long data-flow chains, cryptographic logic,
 - **Function analysis example**: [FUNCTION-MICRO-EXAMPLE-CONTEXT.md](resources/FUNCTION-MICRO-EXAMPLE-CONTEXT.md)
 - **Output format**: [OUTPUT_REQUIREMENTS.md](resources/OUTPUT_REQUIREMENTS.md)
 - **Completeness checklist**: [COMPLETENESS_CHECKLIST-CONTEXT.md](resources/COMPLETENESS_CHECKLIST-CONTEXT.md)
+- **Inter-agent data format**: [inter-agent-data-format.md](resources/inter-agent-data-format.md)
