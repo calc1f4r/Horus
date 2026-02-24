@@ -1,0 +1,113 @@
+{
+  "meta": {
+    "manifest": "account-abstraction",
+    "description": "Compressed hunt cards for account-abstraction — one-line detection rules for bulk scanning",
+    "totalCards": 4,
+    "skipped": 0,
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "enriched": 4
+  },
+  "cards": [
+    {
+      "id": "account-abstraction-aa-erc7579-module-sy-erc-7579-module-system-registr-000",
+      "title": "ERC-7579 Module System — Registry Bypass, moduleType Confusion, Hook PostCheck Skip, Fallback Flaws",
+      "severity": "LOW",
+      "grep": "INexus.checkERC7739Support|checkNestingERC7739Support|_handleFallbackWithHook|_getEnableModeDataHash|MODULE_TYPE_VALIDATOR|emergencyUninstallHook",
+      "detect": "ERC-7579 module management has multiple independent failure modes:",
+      "cat": [
+        "account-abstraction",
+        "ERC-4337",
+        "ERC-7579",
+        "smart-wallet",
+        "paymaster",
+        "session-key"
+      ],
+      "ref": "DB/account-abstraction/aa-erc7579-module-system-enable-mode.md",
+      "lines": [
+        83,
+        260
+      ],
+      "check": [
+        "VERIFY: ERC-7579 module management has multiple independent failure modes:",
+        "ANTIPATTERN: Fallback handler can be called directly by anyone via the fallback function"
+      ],
+      "antipattern": "Fallback handler can be called directly by anyone via the fallback function"
+    },
+    {
+      "id": "account-abstraction-aa-paymaster-gas-acc-aa-paymaster-gas-accounting-pr-000",
+      "title": "AA Paymaster Gas Accounting — Prefund Errors, Duplicate Snapshots, Stake Bypass, and Fee Escape",
+      "severity": "HIGH",
+      "grep": "feeRefundTokenGasPriceFactor|validatePaymasterUserOp|paymaster.addStake|_validatePrepayment|verificationGasLimit|paymasterAndData",
+      "detect": "Gas accounting in ERC-4337 is a multi-phase process (validation → execution → postOp) with several hand-off points...",
+      "cat": [
+        "account-abstraction",
+        "ERC-4337",
+        "ERC-7579",
+        "smart-wallet",
+        "paymaster",
+        "session-key"
+      ],
+      "ref": "DB/account-abstraction/aa-paymaster-gas-accounting-vulnerabilities.md",
+      "lines": [
+        83,
+        238
+      ],
+      "check": [
+        "VERIFY: Gas accounting in ERC-4337 is a multi-phase process (validation → execution → postOp) with several hand-off points...",
+        "ANTIPATTERN: preGas reused from before-validation for before-postOp measurement"
+      ],
+      "antipattern": "preGas reused from before-validation for before-postOp measurement"
+    },
+    {
+      "id": "account-abstraction-aa-session-key-permi-session-key-abuse-spend-limit--000",
+      "title": "Session Key Abuse — Spend Limit Bypass, Cross-Wallet Consumption, Permission Overwrite, PermissionId Frontrun",
+      "severity": "CRITICAL",
+      "grep": "_validateSingleCall|userOp.signature|_validateBatchCall|CredibleAccountModule|updateKeyPermissions|ERC20.approve",
+      "detect": "Session key security depends on correct enforcement of four invariants:",
+      "cat": [
+        "account-abstraction",
+        "ERC-4337",
+        "ERC-7579",
+        "smart-wallet",
+        "paymaster",
+        "session-key"
+      ],
+      "ref": "DB/account-abstraction/aa-session-key-permission-abuse.md",
+      "lines": [
+        71,
+        271
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Session key security depends on correct enforcement of four invariants:",
+        "ANTIPATTERN: permissionId decoded from userOp.signature which is NOT signed by EntryPoint"
+      ],
+      "antipattern": "permissionId decoded from userOp.signature which is NOT signed by EntryPoint"
+    },
+    {
+      "id": "account-abstraction-aa-signature-replay--aa-signature-replay-missing-bi-000",
+      "title": "AA Signature Replay — Missing Binding Fields in UserOperation and Enable Mode Hashes",
+      "severity": "HIGH",
+      "grep": "getPackedUserOperationHash|_getEnableModeDataHash|enableModeSignature|_hashExecution|validateUserOp|_enableMode",
+      "detect": "This vulnerability exists because **inner EIP-712 hashes computed by the smart account omit one or more domain-binding...",
+      "cat": [
+        "account-abstraction",
+        "ERC-4337",
+        "ERC-7579",
+        "smart-wallet",
+        "paymaster",
+        "session-key"
+      ],
+      "ref": "DB/account-abstraction/aa-signature-replay-attacks.md",
+      "lines": [
+        71,
+        248
+      ],
+      "check": [
+        "VERIFY: **inner EIP-712 hashes computed by the smart account omit one or more domain-binding...",
+        "ANTIPATTERN: Co-signer signs only (target, value, calldata) without nonce or chainId"
+      ],
+      "antipattern": "Co-signer signs only (target, value, calldata) without nonce or chainId"
+    }
+  ]
+}

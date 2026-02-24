@@ -34,6 +34,7 @@ CATEGORY_MAP = {
     "solana": ["Solona-chain-specific"],
     "general": ["general"],
     "unique": ["unique"],
+    "account-abstraction": ["account-abstraction"],
 }
 
 
@@ -590,6 +591,7 @@ MANIFEST_CATEGORY_MAP = {
     "general-infrastructure": ["proxy", "reentrancy", "storage", "upgradeable"],
     "general-security": ["access-control", "signature", "validation", "input"],
     "unique": ["protocol-specific", "unique"],
+    "account-abstraction": ["account-abstraction", "ERC-4337", "ERC-7579", "smart-wallet", "paymaster", "session-key"],
 }
 
 
