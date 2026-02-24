@@ -1,7 +1,7 @@
 ---
 name: invariant-writer
 description: 'Extracts and documents all system invariants, properties, and constraints from a smart contract codebase into a single structured plaintext file. Uses context from audit-context-building agent output. Produces invariants consumed by fuzzing agents (Echidna, Medusa, Foundry) and formal verification tools (Certora, Halmos). Use when preparing invariant suites, writing property specifications, or before fuzzing campaign setup.'
-tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent']
+tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent','todo']
 ---
 
 # Invariant Writer Agent

@@ -1,7 +1,7 @@
 ---
 name: medusa-fuzzing
 description: 'Translates structured invariant specifications into compilable Medusa-compatible Solidity test harnesses and medusa.json configuration. Consumes output from invariant-writer agent. Produces property tests (property_ prefix), assertion tests, ghost variable tracking, actor proxies, and bounding utilities. Enforces compile-first workflow via forge build. Use when setting up a Medusa fuzzing campaign, converting invariant specs to harness code, or generating property test suites.'
-tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent']
+tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent','todo']
 ---
 
 # Medusa Fuzzing Harness Writer
