@@ -1,7 +1,7 @@
 ---
 name: audit-orchestrator
 description: 'General-purpose smart contract audit orchestrator. Takes a codebase path and optional protocol hint, runs a 7-phase pipeline using specialized sub-agents, and produces a comprehensive audit report with findings, PoCs, fuzzing harnesses, formal verification specs, and dual Sherlock+Cantina severity validation. Supports Solidity/EVM, Cosmos SDK/Go, Solana/Rust, and any language. Use as the primary entry point for auditing an unfamiliar codebase.'
-tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent']
+tools: ['vscode', 'execute', 'read', 'agent']
 ---
 
 # Audit Orchestrator
@@ -132,9 +132,14 @@ Write `audit-output/00-scope.md` using the format from [inter-agent-data-format.
 
 ## Phase 2: Deep Context Building
 
-**Agent**: Spawn `audit-context-building` sub-agent
+**Agent**: Spawn `audit-context-building` sub-agent (coordinator)
 **Input**: Scope document + codebase path
-**Output**: `audit-output/01-context.md`
+**Output**: `audit-output/context/` (per-contract files) + `audit-output/01-context.md` (synthesis)
+
+The `audit-context-building` agent is a **coordinator** that internally manages three phases:
+1. **Orientation** (self) → `audit-output/context/00-orientation.md`
+2. **Per-contract analysis** (spawns `function-analyzer` sub-agents) → `audit-output/context/<Contract>.md`
+3. **Global synthesis** (spawns `system-synthesizer`) → `audit-output/01-context.md`
 
 ### Spawn Instructions
 
@@ -149,25 +154,25 @@ FILES IN SCOPE:
 
 PROTOCOL TYPE: <detected types>
 
-Perform your full 3-phase workflow:
-1. Initial orientation (map modules, entrypoints, actors, state)
-2. Ultra-granular function analysis (per-function micro-analysis)
-3. Global system understanding (invariants, workflows, trust boundaries)
+Perform your full 3-phase coordinator workflow:
+1. Initial orientation — write audit-output/context/00-orientation.md
+2. Per-contract function analysis — spawn function-analyzer per contract,
+   each writes to audit-output/context/<ContractName>.md
+3. Global synthesis — spawn system-synthesizer to produce audit-output/01-context.md
 
-Write complete output to audit-output/01-context.md with these sections:
-- Contract Inventory (table: contract, purpose, LOC, entry points, state vars)
-- Actor Model (table: actor, trust level, callable functions)
-- State Variable Map (table: variable, type, writers, readers, invariants)
-- Function Analysis (per-function: purpose, inputs, outputs, block-by-block, dependencies)
-- Cross-Function Flows (end-to-end user journeys)
-- Trust Boundaries (boundary map with risk levels)
-- Invariant Candidates (numbered list of candidate properties)
-- Assumption Register (numbered list with confidence levels)
+Ensure audit-output/01-context.md contains these sections:
+- Contract Inventory, Actor Model, State Variable Map
+- Function Analysis (references to per-contract files)
+- Cross-Function Flows, Trust Boundaries
+- Invariant Candidates, Assumption Register, Fragility Clusters
 ```
 
 ### Verify Output
 
-After sub-agent returns, verify `audit-output/01-context.md` exists and contains the required sections. If missing critical sections, log the gap and continue — partial context is better than none.
+After sub-agent returns, verify:
+1. `audit-output/context/` directory exists with per-contract `.md` files
+2. `audit-output/01-context.md` exists and contains the required sections
+3. If missing critical sections, log the gap and continue — partial context is better than none
 
 ### Error Recovery
 

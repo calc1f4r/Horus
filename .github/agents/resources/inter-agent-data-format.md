@@ -12,7 +12,13 @@ All pipeline artifacts go into `audit-output/` at the project root:
 ```
 audit-output/
 ├── 00-scope.md                        ← Phase 1: Reconnaissance
-├── 01-context.md                      ← Phase 2: Context building
+├── context/                           ← Phase 2: Per-contract context (sharded)
+│   ├── 00-orientation.md              ←   System map & contract inventory
+│   ├── Pool.md                        ←   Per-contract function analysis
+│   ├── OracleAdapter.md               ←   Per-contract function analysis
+│   ├── ShareMath.md                   ←   Per-contract function analysis
+│   └── ...                            ←   One file per contract
+├── 01-context.md                      ← Phase 2: Compact global synthesis
 ├── 02-invariants.md                   ← Phase 3: Invariant extraction
 ├── hunt-card-hits.json                ← Phase 4: Grep-prune results
 ├── hunt-card-shards.json              ← Phase 4: Partition plan
@@ -75,9 +81,86 @@ audit-output/
 
 ---
 
-## Phase 2: Context Output (`01-context.md`)
+## Phase 2: Context Output
 
-Produced by `audit-context-building`. Must contain these sections:
+Produced by `audit-context-building` coordinator using a 3-step pipeline:
+
+### Step 1: Orientation (`context/00-orientation.md`)
+
+Written by the coordinator itself. Compact system map:
+
+```markdown
+# Orientation: <Protocol Name>
+
+## Contracts in Scope
+| # | Contract | File Path | LOC | Role | Key Entry Points |
+|---|----------|-----------|-----|------|------------------|
+
+## Preliminary Actor Model
+| Actor | Trust Level | Entry Points | Notes |
+|-------|------------|--------------|-------|
+
+## Key State Variables
+| Variable | Contract | Type | Role |
+|----------|----------|------|------|
+
+## Contract Dependency Map
+- Pool → OracleAdapter (price queries)
+- ...
+
+## Analysis Order
+1. ShareMath (utility, no dependencies)
+2. ...
+```
+
+### Step 2: Per-Contract Analysis (`context/<ContractName>.md`)
+
+Written by `function-analyzer` sub-agents (one per contract):
+
+```markdown
+# Context Analysis: <ContractName>
+
+## Contract Overview
+- **File**: <path>
+- **LOC**: <count>
+- **Entry Points**: <count>
+- **State Variables**: <count>
+
+## State Variable Map
+| Variable | Type | Visibility | Writers | Readers | Invariants |
+|----------|------|------------|---------|---------|------------|
+
+## Function Analysis
+
+### <functionName>(<params>)
+#### Purpose
+...
+#### Inputs & Assumptions
+...
+#### Outputs & Effects
+...
+#### Block-by-Block Analysis
+...
+#### Cross-Function Dependencies
+...
+#### Invariants
+...
+
+(repeat for every non-trivial function)
+
+## Contract-Level Invariant Candidates
+1. ...
+
+## Contract-Level Assumptions
+1. ...
+
+## Open Questions
+- ...
+```
+
+### Step 3: Global Synthesis (`01-context.md`)
+
+Written by `system-synthesizer` sub-agent. Compact summary referencing per-contract files:
 
 ```markdown
 # Audit Context
@@ -85,32 +168,20 @@ Produced by `audit-context-building`. Must contain these sections:
 ## Contract Inventory
 | Contract | Purpose | LOC | Entry Points | State Variables |
 |----------|---------|-----|--------------|-----------------|
-| Pool.sol | Main lending pool | 450 | 12 | 8 |
-| ... | ... | ... | ... | ... |
 
 ## Actor Model
 | Actor | Trust Level | Can Call | Notes |
 |-------|------------|---------|-------|
-| User (EOA) | Untrusted | deposit, withdraw, borrow | Any EOA |
-| Admin | Trusted | setFee, pause | Multi-sig |
-| Oracle | Semi-trusted | updatePrice | Chainlink |
-| Liquidator | Untrusted | liquidate | Any EOA |
 
 ## State Variable Map
-| Variable | Type | Writers | Readers | Invariants |
-|----------|------|---------|---------|------------|
-| totalDeposits | uint256 | deposit, withdraw | borrow, getRate | >= sum of user balances |
-| ... | ... | ... | ... | ... |
+| Variable | Contract | Type | Writers | Readers | Invariants |
+|----------|----------|------|---------|---------|------------|
 
 ## Function Analysis
-### Contract.functionName()
-- **Purpose**: ...
-- **Inputs & Assumptions**: ...
-- **Outputs & Effects**: ...
-- **Block-by-Block Analysis**: ...
-- **Cross-Function Dependencies**: ...
-- **Invariants Identified**: ...
-(repeat for every non-trivial function)
+> Per-contract analysis files in `audit-output/context/`:
+> - `Pool.md` — Core lending pool (12 functions)
+> - `OracleAdapter.md` — Price feed adapter (5 functions)
+> - ...
 
 ## Cross-Function Flows
 ### Flow: Deposit → Borrow → Repay → Withdraw
@@ -125,15 +196,21 @@ Produced by `audit-context-building`. Must contain these sections:
 | Pool → Oracle | Contract call | Price data | Staleness, manipulation |
 
 ## Invariant Candidates
-1. `totalDeposits >= totalBorrowed` (solvency)
-2. `sharePrice * totalShares == totalAssets` (accounting)
+1. INV-S-001: `totalDeposits >= totalBorrowed` (solvency)
+2. INV-A-001: `sharePrice * totalShares == totalAssets` (accounting)
 ...
 
 ## Assumption Register
-1. Oracle returns prices within 1 hour freshness
-2. Admin multi-sig has 3/5 threshold
+1. ASM-001: Oracle returns prices within 1 hour freshness
+2. ASM-002: Admin multi-sig has 3/5 threshold
 ...
+
+## Fragility Clusters
+| Cluster | Contracts | Functions | Risk Factors |
+|---------|-----------|-----------|--------------|
 ```
+
+> **Note**: The Function Analysis section in `01-context.md` references per-contract files rather than duplicating block-by-block analysis. Downstream agents needing function-level detail should read the individual `context/<ContractName>.md` files.
 
 ---
 
