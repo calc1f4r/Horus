@@ -35,6 +35,7 @@ CATEGORY_MAP = {
     "general": ["general"],
     "unique": ["unique"],
     "account-abstraction": ["account-abstraction"],
+    "zk-rollup": ["zk-rollup"],
 }
 
 
@@ -592,6 +593,7 @@ MANIFEST_CATEGORY_MAP = {
     "general-security": ["access-control", "signature", "validation", "input"],
     "unique": ["protocol-specific", "unique"],
     "account-abstraction": ["account-abstraction", "ERC-4337", "ERC-7579", "smart-wallet", "paymaster", "session-key"],
+    "zk-rollup": ["zk-rollup", "circuit", "fraud-proof", "rollup", "sequencer", "batch-processing", "reorg", "zksync", "optimism", "arbitrum"],
 }
 
 

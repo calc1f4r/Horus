@@ -1,0 +1,2640 @@
+{
+  "meta": {
+    "category": "zk-rollup",
+    "description": "Pattern-level index for zk-rollup vulnerabilities",
+    "fileCount": 10,
+    "totalPatterns": 100,
+    "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
+  },
+  "files": [
+    {
+      "file": "DB/zk-rollup/batch-processing.md",
+      "totalLines": 400,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "optimism|scroll|taiko|arbitrum|ethereum",
+        "category": "zk_rollup_batch_processing",
+        "vulnerability_type": "batch_decoding_error|blob_incompatibility|dos|consensus_split|incorrect_finalization|basefee_error",
+        "attack_type": "dos|consensus_split|finalization_failure|block_stuffing|incorrect_fee_calculation",
+        "affected_component": "batcher|sequencer|node|blob_submission|batch_commitment|finalization|l1_block_submission",
+        "severity": "high",
+        "impact": "chain_halt|dos|consensus_split|incorrect_fees|fund_loss",
+        "exploitability": "0.3",
+        "financial_impact": "high",
+        "language": "solidity|go",
+        "version": "all"
+      },
+      "patternCount": 10,
+      "patterns": [
+        {
+          "id": "zk-rollup-batch-processing-batch-decoding-and-blob-issues-000",
+          "title": "Batch Decoding and Blob Issues",
+          "lineStart": 56,
+          "lineEnd": 64,
+          "lineCount": 9,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-batch-processing-batch-hashing-and-commitment-b-001",
+          "title": "Batch Hashing and Commitment Bugs",
+          "lineStart": 65,
+          "lineEnd": 76,
+          "lineCount": 12,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-batch-processing-vulnerability-description-002",
+          "title": "Vulnerability Description",
+          "lineStart": 87,
+          "lineEnd": 98,
+          "lineCount": 12,
+          "severity": [],
+          "codeKeywords": [
+            "inChallenge",
+            "revertBatch"
+          ],
+          "rootCause": "1. **Frame decoding ambiguity**: Different op-node implementations (or versions) may decode the same batch frame differently when edge cases are hit (e.g., trailing bytes, channel size limits), splitt",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 89,
+              "lineEnd": 98,
+              "severity": [],
+              "codeKeywords": [
+                "inChallenge",
+                "revertBatch"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-batch-processing-pattern-1-batcher-frame-decodi-003",
+          "title": "Pattern 1: Batcher Frame Decoding Inconsistency Causes Consensus Split",
+          "lineStart": 99,
+          "lineEnd": 141,
+          "lineCount": 43,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": "Optimism's batch decoding in `op-node` and node software must implement the exact same frame-decoding logic. If there is any discrepancy (e.g., one implementation accepts a malformed frame that anothe",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 103,
+              "lineEnd": 141,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-batch-processing-pattern-2-eip-4844-blob-incomp-004",
+          "title": "Pattern 2: EIP-4844 Blob Incompatibility Halts Block Processing",
+          "lineStart": 142,
+          "lineEnd": 188,
+          "lineCount": 47,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "blob_versioned_hash",
+            "submitBlobBatch"
+          ],
+          "rootCause": "EIP-4844 blobs use `blob_versioned_hash` (prefix `0x01`) to address blob data. Rollup implementations that parse blob versioned hashes incorrectly (e.g., treating them as calldata hashes, or using a s",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 146,
+              "lineEnd": 188,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "blob_versioned_hash",
+                "submitBlobBatch"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-batch-processing-pattern-3-rollup-cannot-split--005",
+          "title": "Pattern 3: Rollup Cannot Split Batches Across Blobs → Block Stuffing",
+          "lineStart": 189,
+          "lineEnd": 229,
+          "lineCount": 41,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "submitBatch"
+          ],
+          "rootCause": "EIP-4844 blobs have a fixed maximum size (128KB). If the batch encoding logic cannot split a large batch across multiple blobs, then a large transaction/block can force the batch to be larger than a s",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 193,
+              "lineEnd": 229,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "submitBatch"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-batch-processing-pattern-4-malformed-blob-trans-006",
+          "title": "Pattern 4: Malformed Blob Transaction Crashes Validator Nodes",
+          "lineStart": 230,
+          "lineEnd": 253,
+          "lineCount": 24,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": "Some L2 validator clients (e.g., Nethermind) have latent bugs in their EIP-4844 blob transaction parsing that surface only on specific malformed input. An attacker constructs a blob transaction with p",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 234,
+              "lineEnd": 253,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-batch-processing-pattern-5-memory-corruption-ca-007",
+          "title": "Pattern 5: Memory Corruption Causing Incorrect Batch Hashes (Scroll)",
+          "lineStart": 254,
+          "lineEnd": 304,
+          "lineCount": 51,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_hashBatchHeader",
+            "dataHash"
+          ],
+          "rootCause": "In Scroll's batch hashing implementation, batch header data was assembled in memory with an off-by-one error in the field packing, causing some bytes from one field to overlap with the next. The resul",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 258,
+              "lineEnd": 304,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_hashBatchHeader",
+                "dataHash"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-batch-processing-pattern-6-incorrect-basefee-ca-008",
+          "title": "Pattern 6: Incorrect basefee Calculation on Taiko Rollup",
+          "lineStart": 305,
+          "lineEnd": 332,
+          "lineCount": 28,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "getBasefee"
+          ],
+          "rootCause": "Taiko's L2 basefee follows EIP-1559 but adjusts based on two inputs: actual L2 gas used and configured gas target. A miscalculation (e.g., using the wrong gas target, integer truncation, or incorrect ",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 309,
+              "lineEnd": 332,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "getBasefee"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-batch-processing-pattern-7-inchallenge-incorrec-009",
+          "title": "Pattern 7: inChallenge Incorrectly Reset in revertBatch",
+          "lineStart": 333,
+          "lineEnd": 369,
+          "lineCount": 37,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "false",
+            "inChallenge",
+            "revertBatch"
+          ],
+          "rootCause": "The `inChallenge` flag is used to gate new batch commitments and prevent race conditions during challenge periods. In `revertBatch()`, if `inChallenge` is set to `false` before all conditions are veri",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 337,
+              "lineEnd": 369,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "false",
+                "inChallenge",
+                "revertBatch"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/zk-rollup/bridge-vulnerabilities.md",
+      "totalLines": 452,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "zk_rollup_bridge",
+        "vulnerability_type": "bridge_reentrancy|token_accounting|message_replay|wrong_token_order|censorship|owner_rug|selector_mismatch",
+        "attack_type": "reentrancy|replay_attack|fund_theft|signature_replay|censorship|dos",
+        "affected_component": "token_bridge|l1_bridge|l2_bridge|message_channel|router|relayer|adapter",
+        "severity": "high",
+        "impact": "fund_theft|accounting_corruption|bridge_dos|censorship|locked_funds",
+        "exploitability": "0.35",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 12,
+      "patterns": [
+        {
+          "id": "zk-rollup-bridge-vulnerabiliti-token-accounting-and-token-map-000",
+          "title": "Token Accounting and Token Mapping Errors",
+          "lineStart": 56,
+          "lineEnd": 67,
+          "lineCount": 12,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-bridge-vulnerabiliti-signature-replay-and-message-r-001",
+          "title": "Signature Replay and Message Replay",
+          "lineStart": 68,
+          "lineEnd": 76,
+          "lineCount": 9,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-bridge-vulnerabiliti-usdc-and-adapter-vulnerabiliti-002",
+          "title": "USDC and Adapter Vulnerabilities",
+          "lineStart": 77,
+          "lineEnd": 83,
+          "lineCount": 7,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-bridge-vulnerabiliti-message-channel-dos-and-censor-003",
+          "title": "Message Channel DoS and Censorship",
+          "lineStart": 84,
+          "lineEnd": 94,
+          "lineCount": 11,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-bridge-vulnerabiliti-starknet-specific-bridge-issue-004",
+          "title": "Starknet-Specific Bridge Issues",
+          "lineStart": 95,
+          "lineEnd": 103,
+          "lineCount": 9,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-bridge-vulnerabiliti-vulnerability-description-005",
+          "title": "Vulnerability Description",
+          "lineStart": 114,
+          "lineEnd": 126,
+          "lineCount": 13,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "safeTransferFrom"
+          ],
+          "rootCause": "1. **Reentrancy in token accounting**: Bridge contracts update internal accounting after external calls, allowing re-entrant calls to exploit inconsistent state\n\n2. **Token pair ordering**: Bridges th",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 116,
+              "lineEnd": 126,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "safeTransferFrom"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-bridge-vulnerabiliti-pattern-1-token-bridge-reentra-006",
+          "title": "Pattern 1: Token Bridge Reentrancy Corrupts Accounting",
+          "lineStart": 127,
+          "lineEnd": 184,
+          "lineCount": 58,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "deposit"
+          ],
+          "rootCause": "Bridge processes deposit with external call before state update",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 131,
+              "lineEnd": 184,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "deposit"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-bridge-vulnerabiliti-pattern-2-wrong-token-order-in-007",
+          "title": "Pattern 2: Wrong Token Order in Bridge Causes Incorrect Routing",
+          "lineStart": 185,
+          "lineEnd": 233,
+          "lineCount": 49,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_initiateERC20Deposit"
+          ],
+          "rootCause": "Bridges that handle token pairs (e.g., yield-bearing USD tokens: USDB/USDW) sometimes accept token A and B as arguments but switch their positions internally. When bridging from L1 to L2, the bridge m",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 189,
+              "lineEnd": 233,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_initiateERC20Deposit"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-bridge-vulnerabiliti-pattern-3-router-signatures-re-008",
+          "title": "Pattern 3: Router Signatures Replay Across Chains",
+          "lineStart": 234,
+          "lineEnd": 288,
+          "lineCount": 55,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_domainSeparator",
+            "chainId",
+            "executeMessage",
+            "verifyingContract"
+          ],
+          "rootCause": "Cross-chain routers use off-chain signatures to authorize message execution. If the signed message digest doesn't include a domain separator (containing `chainId` + `verifyingContract`), the same sign",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 238,
+              "lineEnd": 288,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_domainSeparator",
+                "chainId",
+                "executeMessage",
+                "verifyingContract"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-bridge-vulnerabiliti-pattern-4-wrong-erc1155-select-009",
+          "title": "Pattern 4: Wrong ERC1155 Selector Locks Tokens in Bridge",
+          "lineStart": 289,
+          "lineEnd": 328,
+          "lineCount": 40,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "safeBatchTransferFrom(...",
+            "withdrawERC1155"
+          ],
+          "rootCause": "ERC1155 has two transfer functions: `safeTransferFrom(address,address,uint256,uint256,bytes)` and `safeBatchTransferFrom(...)`. If a bridge uses the wrong 4-byte function selector when calling the tok",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 293,
+              "lineEnd": 328,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "safeBatchTransferFrom(...",
+                "withdrawERC1155"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-bridge-vulnerabiliti-pattern-5-usdc-blacklist-perma-010",
+          "title": "Pattern 5: USDC Blacklist Permanently Locks Bridge Funds",
+          "lineStart": 329,
+          "lineEnd": 378,
+          "lineCount": 50,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_to",
+            "claimTo",
+            "transfer",
+            "withdrawTokens"
+          ],
+          "rootCause": "USDC has a blacklist mechanism: blacklisted addresses cannot receive USDC transfers (the `transfer` call reverts). Bridge adapters that forward USDC to a `_to` address without checking whether `_to` i",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 333,
+              "lineEnd": 378,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_to",
+                "claimTo",
+                "transfer",
+                "withdrawTokens"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-bridge-vulnerabiliti-pattern-6-single-reverting-wit-011",
+          "title": "Pattern 6: Single Reverting Withdrawal Blocks Entire Queue",
+          "lineStart": 379,
+          "lineEnd": 420,
+          "lineCount": 42,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "processWithdrawals"
+          ],
+          "rootCause": "Vault or bridge withdrawal queues are processed in order (FIFO). If any single withdrawal in the queue causes the processing loop to revert (e.g., token transfer fails for a specific user), the entire",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 383,
+              "lineEnd": 420,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "processWithdrawals"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/zk-rollup/circuit-constraints.md",
+      "totalLines": 442,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "zk_circuit",
+        "vulnerability_type": "underconstrained_circuit|missing_constraint|arithmetic_overflow|hash_constraint",
+        "attack_type": "proof_forgery|state_manipulation|execution_hijack",
+        "affected_component": "circuit_constraints|pil_file|zkasm|air_constraints|binary_state_machine",
+        "severity": "critical",
+        "impact": "proof_forgery|fund_theft|state_corruption|execution_hijack",
+        "exploitability": "0.30",
+        "financial_impact": "critical",
+        "language": "rust|circom|plonk|PIL",
+        "version": "all"
+      },
+      "patternCount": 12,
+      "patterns": [
+        {
+          "id": "zk-rollup-circuit-constraints-missing-pil-air-constraints-000",
+          "title": "Missing PIL / AIR Constraints",
+          "lineStart": 57,
+          "lineEnd": 66,
+          "lineCount": 10,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-circuit-constraints-opcode-arithmetic-constraints-001",
+          "title": "Opcode Arithmetic Constraints",
+          "lineStart": 67,
+          "lineEnd": 75,
+          "lineCount": 9,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-circuit-constraints-risc-v-vm-circuit-constraints-002",
+          "title": "RISC-V / VM Circuit Constraints",
+          "lineStart": 76,
+          "lineEnd": 82,
+          "lineCount": 7,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-circuit-constraints-hash-circuit-constraints-003",
+          "title": "Hash Circuit Constraints",
+          "lineStart": 83,
+          "lineEnd": 91,
+          "lineCount": 9,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-circuit-constraints-vulnerability-description-004",
+          "title": "Vulnerability Description",
+          "lineStart": 102,
+          "lineEnd": 116,
+          "lineCount": 15,
+          "severity": [],
+          "codeKeywords": [
+            "alloc_without_values",
+            "false",
+            "true"
+          ],
+          "rootCause": "In ZK proof systems, soundness requires that **every wire and intermediate value be fully constrained** by the circuit's polynomial identities. When a constraint is missing or incomplete, an adversary",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 104,
+              "lineEnd": 116,
+              "severity": [],
+              "codeKeywords": [
+                "alloc_without_values",
+                "false",
+                "true"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-circuit-constraints-pattern-1-missing-pil-constrai-005",
+          "title": "Pattern 1: Missing PIL Constraint for SMT Inclusion",
+          "lineStart": 117,
+          "lineEnd": 150,
+          "lineCount": 34,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "storage.pil"
+          ],
+          "rootCause": "storage.pil - Missing constraint on SMT sibling node relationship",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 121,
+              "lineEnd": 150,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "storage.pil"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-circuit-constraints-pattern-2-underconstrained-car-006",
+          "title": "Pattern 2: Underconstrained Carry Value in Binary State Machine",
+          "lineStart": 151,
+          "lineEnd": 182,
+          "lineCount": 32,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": "binary.pil - carry bit not range-constrained",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 155,
+              "lineEnd": 182,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-circuit-constraints-pattern-3-missing-range-constr-007",
+          "title": "Pattern 3: Missing Range Constraint on Division Remainder (zkEVM Opcode)",
+          "lineStart": 183,
+          "lineEnd": 234,
+          "lineCount": 52,
+          "severity": [
+            "CRITICAL",
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": "When implementing integer division (`a / b = q, remainder r`) in a ZK circuit, the standard approach allocates witness variables for `q` and `r`, then constrains: `q * b + r = a`. A critical additiona",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 191,
+              "lineEnd": 234,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-circuit-constraints-pattern-4-isltarraysubair-soun-008",
+          "title": "Pattern 4: IsLtArraySubAir Soundness Issue (RISC-V Circuit)",
+          "lineStart": 235,
+          "lineEnd": 266,
+          "lineCount": 32,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "IsLtArraySubAir",
+            "diff_marker",
+            "true"
+          ],
+          "rootCause": "The `IsLtArraySubAir` circuit is supposed to compare two arrays lexicographically and output `true` if the first is strictly less than the second. The circuit tracks a `diff_marker` that selects the f",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 239,
+              "lineEnd": 266,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "IsLtArraySubAir",
+                "diff_marker",
+                "true"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-circuit-constraints-pattern-5-sha256-air-unconstra-009",
+          "title": "Pattern 5: SHA256 AIR Unconstrained final_hash at Last Block",
+          "lineStart": 267,
+          "lineEnd": 295,
+          "lineCount": 29,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "final_hash",
+            "sha256"
+          ],
+          "rootCause": "The `sha256-air` processes input data in 64-byte blocks. The `final_hash` column is constrained to the running hash state for all blocks **except the last one**. The `sha256` chip extension then reads",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 271,
+              "lineEnd": 295,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "final_hash",
+                "sha256"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-circuit-constraints-pattern-6-partial-sha256-var-i-010",
+          "title": "Pattern 6: partial_sha256_var_interstitial Hash Collision (Undersized Input)",
+          "lineStart": 296,
+          "lineEnd": 319,
+          "lineCount": 24,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "partial_sha256_var_interstitial"
+          ],
+          "rootCause": "`partial_sha256_var_interstitial` hashes `BLOCK_SIZE * floor(N / BLOCK_SIZE)` bytes, not `N` bytes. When `N < message_size` and `N mod BLOCK_SIZE != 0`, the last incomplete block is silently dropped. ",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 300,
+              "lineEnd": 319,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "partial_sha256_var_interstitial"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-circuit-constraints-pattern-7-jalr-imm-sign-uncons-011",
+          "title": "Pattern 7: JALR imm_sign Unconstrained (RISC-V zkVM)",
+          "lineStart": 320,
+          "lineEnd": 346,
+          "lineCount": 27,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "imm_sign"
+          ],
+          "rootCause": "In the JALR opcode circuit, there is an `imm_sign` flag that controls whether the 12-bit immediate is sign-extended. This flag is declared as a witness column but is **never constrained** to match the",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 324,
+              "lineEnd": 346,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "imm_sign"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/zk-rollup/evm-incompatibilities.md",
+      "totalLines": 388,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "zksync|scroll|linea|taiko",
+        "category": "zk_rollup_evm_compat",
+        "vulnerability_type": "create2_incompatibility|opcode_divergence|precompile_difference|nonce_handling|address_derivation|msg_sender_preservation|bytecode_compression",
+        "attack_type": "deployment_failure|address_collision|authentication_bypass|state_corruption",
+        "affected_component": "create_opcode|create2_opcode|ecrecover_precompile|extcodehash|nonce_tracker|bytecode_compressor|msg_sender",
+        "severity": "medium",
+        "impact": "deployment_failure|authentication_bypass|silent_wrong_behavior|state_corruption",
+        "exploitability": "0.60",
+        "financial_impact": "medium",
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 11,
+      "patterns": [
+        {
+          "id": "zk-rollup-evm-incompatibilitie-create-create2-create3-incompa-000",
+          "title": "CREATE / CREATE2 / CREATE3 Incompatibilities",
+          "lineStart": 57,
+          "lineEnd": 67,
+          "lineCount": 11,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-evm-incompatibilitie-opcode-and-precompile-divergen-001",
+          "title": "Opcode and Precompile Divergences",
+          "lineStart": 68,
+          "lineEnd": 79,
+          "lineCount": 12,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-evm-incompatibilitie-nonce-and-account-behavior-002",
+          "title": "Nonce and Account Behavior",
+          "lineStart": 80,
+          "lineEnd": 88,
+          "lineCount": 9,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-evm-incompatibilitie-msg-sender-and-context-differe-003",
+          "title": "msg.sender and Context Differences",
+          "lineStart": 89,
+          "lineEnd": 98,
+          "lineCount": 10,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-evm-incompatibilitie-bytecode-compression-004",
+          "title": "Bytecode Compression",
+          "lineStart": 99,
+          "lineEnd": 108,
+          "lineCount": 10,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-evm-incompatibilitie-vulnerability-description-005",
+          "title": "Vulnerability Description",
+          "lineStart": 119,
+          "lineEnd": 129,
+          "lineCount": 11,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "CREATE2",
+            "CREATE3",
+            "delegatecall",
+            "ecrecover",
+            "keccak256(bytecode",
+            "keccak256(initcode",
+            "msg.sender"
+          ],
+          "rootCause": "1. **CREATE2 address derivation**: On ZKSync, `CREATE2` uses `keccak256(bytecode)` while Ethereum uses `keccak256(initcode)`. Protocols computing expected deployment addresses off-chain (via pool addr",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 121,
+              "lineEnd": 129,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "CREATE2",
+                "CREATE3",
+                "delegatecall",
+                "ecrecover",
+                "keccak256(bytecode",
+                "keccak256(initcode",
+                "msg.sender"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-evm-incompatibilitie-pattern-1-create2-address-deri-006",
+          "title": "Pattern 1: CREATE2 Address Derivation Differs on ZKSync",
+          "lineStart": 130,
+          "lineEnd": 179,
+          "lineCount": 50,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "CREATE2",
+            "bytecode",
+            "computePoolAddress",
+            "initcode"
+          ],
+          "rootCause": "Uniswap V3-style pool address computation",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 134,
+              "lineEnd": 179,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "CREATE2",
+                "bytecode",
+                "computePoolAddress",
+                "initcode"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-evm-incompatibilitie-pattern-2-ecrecover-discrepanc-007",
+          "title": "Pattern 2: ecrecover Discrepancy in delegatecall Context on ZKSync",
+          "lineStart": 180,
+          "lineEnd": 224,
+          "lineCount": 45,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "delegatecall",
+            "ecrecover",
+            "recoverSigner",
+            "verify"
+          ],
+          "rootCause": "On Ethereum, when contract A `delegatecall`s contract B, and B calls the `ecrecover` precompile, the call context (including caller identity) is correctly preserved. On ZKSync Era, `ecrecover` is impl",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 184,
+              "lineEnd": 224,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "delegatecall",
+                "ecrecover",
+                "recoverSigner",
+                "verify"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-evm-incompatibilitie-pattern-3-unauthorized-precomp-008",
+          "title": "Pattern 3: Unauthorized Precompile Authorization Bypass via delegatecall",
+          "lineStart": 225,
+          "lineEnd": 250,
+          "lineCount": 26,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "bypassPrecompile",
+            "caller",
+            "delegatecall",
+            "msg.sender"
+          ],
+          "rootCause": "ZKSync system contracts have an authorization mechanism allowing only certain callers to invoke restricted precompile functions. The check verifies `msg.sender` (or `caller` in assembly). However, whe",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 229,
+              "lineEnd": 250,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "bypassPrecompile",
+                "caller",
+                "delegatecall",
+                "msg.sender"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-evm-incompatibilitie-pattern-4-nonce-doesn-t-increm-009",
+          "title": "Pattern 4: Nonce Doesn't Increment for Reverted Child Deployments",
+          "lineStart": 251,
+          "lineEnd": 278,
+          "lineCount": 28,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "CREATE"
+          ],
+          "rootCause": "On Ethereum (post-EIP-161), a contract's deployment nonce is incremented **before** the inner `CREATE` executes, so a reverted deployment still increments the parent's nonce. On ZKSync, the nonce is o",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 255,
+              "lineEnd": 278,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "CREATE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-evm-incompatibilitie-pattern-5-block-number-returns-010",
+          "title": "Pattern 5: block.number Returns L1 Block Number on Arbitrum (Not L2)",
+          "lineStart": 279,
+          "lineEnd": 323,
+          "lineCount": 45,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "accruedInterest",
+            "block.number"
+          ],
+          "rootCause": "On Arbitrum, `block.number` returns the **L1 block number** (approximately every 15 seconds), not the L2 block number (which advances with every L2 transaction). Protocols using `block.number` for rat",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 283,
+              "lineEnd": 323,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "accruedInterest",
+                "block.number"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/zk-rollup/fraud-proofs.md",
+      "totalLines": 386,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "optimism|arbitrum|taiko|scroll",
+        "category": "zk_rollup_fraud_proof",
+        "vulnerability_type": "dispute_game_manipulation|challenge_game_bypass|bond_slashing_error|output_root_attack|mips_vm_panic|bisection_attack",
+        "attack_type": "fund_theft|chain_freeze|dos|incorrect_resolution|proof_bypass",
+        "affected_component": "dispute_game|fault_game_factory|bisection_protocol|output_root|mips_vm|challenge_period|l2_output_oracle",
+        "severity": "high",
+        "impact": "chain_freeze|fund_theft|incorrect_resolution|unchallenged_invalid_output",
+        "exploitability": "0.25",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 9,
+      "patterns": [
+        {
+          "id": "zk-rollup-fraud-proofs-dispute-game-manipulation-000",
+          "title": "Dispute Game Manipulation",
+          "lineStart": 56,
+          "lineEnd": 66,
+          "lineCount": 11,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-fraud-proofs-state-root-and-batch-challenge-001",
+          "title": "State Root and Batch Challenge Issues",
+          "lineStart": 67,
+          "lineEnd": 80,
+          "lineCount": 14,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-fraud-proofs-vulnerability-description-002",
+          "title": "Vulnerability Description",
+          "lineStart": 91,
+          "lineEnd": 102,
+          "lineCount": 12,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "prevStateRoot"
+          ],
+          "rootCause": "1. **Event monitoring gaps**: Challengers rely on on-chain events to detect fraudulent claims. If key events are not emitted or emitted incorrectly, challengers miss malicious executions.\n\n2. **Bisect",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 93,
+              "lineEnd": 102,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "prevStateRoot"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-fraud-proofs-pattern-1-attacker-freezes-cha-003",
+          "title": "Pattern 1: Attacker Freezes Chain via Fake prevStateRoot",
+          "lineStart": 103,
+          "lineEnd": 156,
+          "lineCount": 54,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "commitBatch",
+            "prevStateRoot"
+          ],
+          "rootCause": "Rollup contract doesn't validate prevStateRoot exists in history",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 107,
+              "lineEnd": 156,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "commitBatch",
+                "prevStateRoot"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-fraud-proofs-pattern-2-challenger-misses-di-004",
+          "title": "Pattern 2: Challenger Misses Discrepancy Events → Malicious Execution",
+          "lineStart": 157,
+          "lineEnd": 191,
+          "lineCount": 35,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "verifyExecution"
+          ],
+          "rootCause": "The challenger (fraud proof monitor) relies on on-chain events to detect discrepancies between proposed state transitions and the actual L2 computation. If the event emission logic has a bug (e.g., ev",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 161,
+              "lineEnd": 191,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "verifyExecution"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-fraud-proofs-pattern-3-opfaultverifier-inge-005",
+          "title": "Pattern 3: opFaultVerifier Ingests Games That Resolve Incorrectly",
+          "lineStart": 192,
+          "lineEnd": 239,
+          "lineCount": 48,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "FaultDisputeGame",
+            "OPFaultVerifier",
+            "checkWithdrawal"
+          ],
+          "rootCause": "The `OPFaultVerifier` (or similar finalization contract) reads the outcome of a `FaultDisputeGame` to determine if a proposed output root should be accepted. If it doesn't verify that the game resolve",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 196,
+              "lineEnd": 239,
+              "severity": [
+                "CRITICAL",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "FaultDisputeGame",
+                "OPFaultVerifier",
+                "checkWithdrawal"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-fraud-proofs-pattern-4-mips-vm-panic-causes-006",
+          "title": "Pattern 4: MIPS VM Panic Causes Unchallengeable Output Root",
+          "lineStart": 240,
+          "lineEnd": 281,
+          "lineCount": 42,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "panic",
+            "step"
+          ],
+          "rootCause": "The optimistic rollup's fault proof uses an on-chain MIPS VM to simulate a single disputed instruction. If executing that instruction in the MIPS VM causes a Solidity `panic` (e.g., array out-of-bound",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 244,
+              "lineEnd": 281,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "panic",
+                "step"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-fraud-proofs-pattern-5-bond-slashed-for-cor-007",
+          "title": "Pattern 5: Bond Slashed for Correct/Honest Assertion",
+          "lineStart": 282,
+          "lineEnd": 307,
+          "lineCount": 26,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "slash"
+          ],
+          "rootCause": "In assertion-based fraud proof systems (e.g., Arbitrum BOLD), each participant puts up a bond that can be slashed if their assertion is proven wrong. If the bond slashing logic has an error (e.g., inc",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 286,
+              "lineEnd": 307,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "slash"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-fraud-proofs-pattern-6-batches-committed-du-008",
+          "title": "Pattern 6: Batches Committed During Challenge Avoid Being Challenged",
+          "lineStart": 308,
+          "lineEnd": 337,
+          "lineCount": 30,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "challengeBatch",
+            "commitBatch",
+            "inChallenge"
+          ],
+          "rootCause": "Some rollup implementations use an `inChallenge` flag to prevent commitment of new batches while a challenge is ongoing. However, if new batches CAN be committed during a challenge, those batches are ",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 312,
+              "lineEnd": 337,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "challengeBatch",
+                "commitBatch",
+                "inChallenge"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/zk-rollup/gas-accounting.md",
+      "totalLines": 364,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "zksync|optimism|arbitrum|scroll",
+        "category": "zk_rollup_gas_accounting",
+        "vulnerability_type": "gas_theft|fee_manipulation|gas_dos|incorrect_fee_calculation|underpriced_sequencer|gas_bypass",
+        "attack_type": "fund_theft|resource_dos|fee_bypass|underpayment",
+        "affected_component": "gas_tracking|pubdata_gas|l1_l2_gas|bootloader|fee_model|bytecode_compression|batch_fees|paymaster",
+        "severity": "high",
+        "impact": "fund_theft|resource_dos|underpayment|fee_bypass",
+        "exploitability": "0.4",
+        "financial_impact": "high",
+        "language": "solidity|yul",
+        "version": "all"
+      },
+      "patternCount": 10,
+      "patterns": [
+        {
+          "id": "zk-rollup-gas-accounting-gas-calculation-errors-000",
+          "title": "Gas Calculation Errors",
+          "lineStart": 56,
+          "lineEnd": 65,
+          "lineCount": 10,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-gas-accounting-fee-theft-and-manipulation-001",
+          "title": "Fee Theft and Manipulation",
+          "lineStart": 66,
+          "lineEnd": 78,
+          "lineCount": 13,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-gas-accounting-vulnerability-description-002",
+          "title": "Vulnerability Description",
+          "lineStart": 89,
+          "lineEnd": 100,
+          "lineCount": 12,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "commitScalar",
+            "spentOnPubdata"
+          ],
+          "rootCause": "1. **Pubdata gas not burned**: If `spentOnPubdata` (the gas consumed by L1 pubdata costs) is refunded to users or paymasters instead of being burned, the protocol subsidizes L1 costs from treasury fun",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 91,
+              "lineEnd": 100,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "commitScalar",
+                "spentOnPubdata"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-gas-accounting-pattern-1-paymaster-refunds-sp-003",
+          "title": "Pattern 1: Paymaster Refunds spentOnPubdata Instead of Burning",
+          "lineStart": 101,
+          "lineEnd": 133,
+          "lineCount": 33,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "spentOnPubdata"
+          ],
+          "rootCause": "In ZKSync, `spentOnPubdata` represents the gas consumed by posting state diffs to L1 (pubdata). This cost must be **burned** (not returned), because the protocol uses it to pay L1 validators. If the p",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 105,
+              "lineEnd": 133,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "spentOnPubdata"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-gas-accounting-pattern-2-operator-steals-all--004",
+          "title": "Pattern 2: Operator Steals All Gas Provided for L1→L2 Transactions",
+          "lineStart": 134,
+          "lineEnd": 176,
+          "lineCount": 43,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "gasLimit",
+            "gasPerPubdataByte",
+            "gasPerPubdataByteLimit",
+            "requestL2Transaction"
+          ],
+          "rootCause": "When a user sends an L1→L2 transaction, they specify `gasLimit` and `gasPerPubdataByte`. The operator (sequencer) reads these values from the L1 call. If the operator can set these values for their ow",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 138,
+              "lineEnd": 176,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "gasLimit",
+                "gasPerPubdataByte",
+                "gasPerPubdataByteLimit",
+                "requestL2Transaction"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-gas-accounting-pattern-3-gas-calculation-uses-005",
+          "title": "Pattern 3: Gas Calculation Uses Unchecked Free Variables",
+          "lineStart": 177,
+          "lineEnd": 203,
+          "lineCount": 27,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "executeOp"
+          ],
+          "rootCause": "In STARK/ZK proof systems compiled from high-level languages, some intermediate variables in gas calculations may not be constrained by the proof (they are \"free\" or \"witness\" values). If the prover/o",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 181,
+              "lineEnd": 203,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "executeOp"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-gas-accounting-pattern-4-burning-user-gas-in--006",
+          "title": "Pattern 4: Burning User Gas in sendCompressedBytecode",
+          "lineStart": 204,
+          "lineEnd": 227,
+          "lineCount": 24,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "sendCompressedBytecode"
+          ],
+          "rootCause": "When a new contract is deployed on ZKSync Era, the bytecode may need to be compressed and sent to L1 as part of pubdata. The `sendCompressedBytecode()` system function adds pubdata costs. If this func",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 208,
+              "lineEnd": 227,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "sendCompressedBytecode"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-gas-accounting-pattern-5-incorrect-commitscal-007",
+          "title": "Pattern 5: Incorrect commitScalar Underpays Sequencer",
+          "lineStart": 228,
+          "lineEnd": 264,
+          "lineCount": 37,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "calculateBatchFee",
+            "commitScalar"
+          ],
+          "rootCause": "When computing how much the protocol should reimburse the sequencer for posting batch commitments to L1, a `commitScalar` constant is used (representing the approximate L1 gas cost per batch commitmen",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 232,
+              "lineEnd": 264,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "calculateBatchFee",
+                "commitScalar"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-gas-accounting-pattern-6-batch-fees-multiplie-008",
+          "title": "Pattern 6: Batch Fees Multiplier Cap Bypassed with Multiple Calls",
+          "lineStart": 265,
+          "lineEnd": 306,
+          "lineCount": 42,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "updateFeeMultiplier"
+          ],
+          "rootCause": "A batch fee multiplier is used to limit fee escalation. A per-call cap prevents the multiplier from being raised beyond a threshold in a single call. However, if the cap is applied per-call (not per-b",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 269,
+              "lineEnd": 306,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "updateFeeMultiplier"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-gas-accounting-pattern-7-bytecode-compression-009",
+          "title": "Pattern 7: Bytecode Compression Bypass Completeness Checks",
+          "lineStart": 307,
+          "lineEnd": 333,
+          "lineCount": 27,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "compress",
+            "convert",
+            "publishCompressedBytecode"
+          ],
+          "rootCause": "Bytecode compression in ZKSync involves two steps: `convert` (encode dictionary) and `compress` (apply encoding). The completeness check ensures all original bytecode chunks appeared in the dictionary",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 311,
+              "lineEnd": 333,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "compress",
+                "convert",
+                "publishCompressedBytecode"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/zk-rollup/l1-l2-messaging.md",
+      "totalLines": 400,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "zksync|scroll|optimism|arbitrum|taiko|linea|base",
+        "category": "zk_rollup_messaging",
+        "vulnerability_type": "l1_l2_message_failure|l2_l1_withdrawal_block|gas_theft|address_aliasing|message_ordering|eth_locked",
+        "attack_type": "fund_loss|dos|gas_theft|message_ordering|eth_lock",
+        "affected_component": "l1_l2_bridge|mailbox|bootloader|l2_to_l1_message_passer|messenger|value_simulator",
+        "severity": "high",
+        "impact": "fund_loss|dos|gas_theft|eth_locked",
+        "exploitability": "0.40",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 11,
+      "patterns": [
+        {
+          "id": "zk-rollup-l1-l2-messaging-l1-l2-transaction-failures-000",
+          "title": "L1 → L2 Transaction Failures",
+          "lineStart": 56,
+          "lineEnd": 66,
+          "lineCount": 11,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-l1-l2-messaging-paymaster-and-value-simulator--001",
+          "title": "Paymaster and Value Simulator Issues",
+          "lineStart": 67,
+          "lineEnd": 73,
+          "lineCount": 7,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-l1-l2-messaging-address-aliasing-issues-002",
+          "title": "Address Aliasing Issues",
+          "lineStart": 74,
+          "lineEnd": 80,
+          "lineCount": 7,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-l1-l2-messaging-l2-l1-withdrawal-issues-003",
+          "title": "L2 → L1 Withdrawal Issues",
+          "lineStart": 81,
+          "lineEnd": 96,
+          "lineCount": 16,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-l1-l2-messaging-vulnerability-description-004",
+          "title": "Vulnerability Description",
+          "lineStart": 107,
+          "lineEnd": 118,
+          "lineCount": 12,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": "1. **Failed bootloader handling**: When an L1→L2 tx fails mid-execution on the L2 bootloader, the refund logic may not correctly return all ETH/gas to the original sender\n\n2. **Address aliasing**: Eth",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 109,
+              "lineEnd": 118,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-l1-l2-messaging-pattern-1-loss-of-funds-when-l-005",
+          "title": "Pattern 1: Loss of Funds When L1→L2 Transaction Fails in Bootloader",
+          "lineStart": 119,
+          "lineEnd": 170,
+          "lineCount": 52,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "requestL2Transaction",
+            "requestL2TransactionSafe"
+          ],
+          "rootCause": "L1 Mailbox doesn't guarantee refund on L2 execution failure",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 123,
+              "lineEnd": 170,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "requestL2Transaction",
+                "requestL2TransactionSafe"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-l1-l2-messaging-pattern-2-msgvaluesimulator-no-006",
+          "title": "Pattern 2: MsgValueSimulator Non-Zero Value Calls Sender Itself",
+          "lineStart": 171,
+          "lineEnd": 200,
+          "lineCount": 30,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "MsgValueSimulator",
+            "msg.sender",
+            "msg.value",
+            "simulate"
+          ],
+          "rootCause": "In ZKSync's system contract `MsgValueSimulator`, when a call is made with non-zero `msg.value`, the simulator is supposed to forward ETH and then call the target contract. Due to a bug in the implemen",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 175,
+              "lineEnd": 200,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "MsgValueSimulator",
+                "msg.sender",
+                "msg.value",
+                "simulate"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-l1-l2-messaging-pattern-3-address-aliasing-loc-007",
+          "title": "Pattern 3: Address Aliasing Locks ETH",
+          "lineStart": 201,
+          "lineEnd": 249,
+          "lineCount": 49,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "msg.sender",
+            "onL1Deposit",
+            "requestL2Transaction",
+            "undoL1ToL2Alias"
+          ],
+          "rootCause": "When L1 contracts send ETH to L2 via `requestL2Transaction`, Ethereum applies \"address aliasing\": the L2 `msg.sender` is the L1 contract address + `0x1111000000000000000000000000000000001111`. If an L",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 205,
+              "lineEnd": 249,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "msg.sender",
+                "onL1Deposit",
+                "requestL2Transaction",
+                "undoL1ToL2Alias"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-l1-l2-messaging-pattern-4-attacker-fills-l2tol-008",
+          "title": "Pattern 4: Attacker Fills L2ToL1MessagePasser Merkle Tree",
+          "lineStart": 250,
+          "lineEnd": 276,
+          "lineCount": 27,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "L2ToL1MessagePasser",
+            "initiateWithdrawal"
+          ],
+          "rootCause": "The Optimism `L2ToL1MessagePasser` contract stores all L2→L1 withdrawal messages in a Merkle trie for later L1 proof verification. This trie has a maximum depth (or fixed array size). An attacker can ",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 254,
+              "lineEnd": 276,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "L2ToL1MessagePasser",
+                "initiateWithdrawal"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-l1-l2-messaging-pattern-5-paymaster-refunds-sp-009",
+          "title": "Pattern 5: Paymaster Refunds spentOnPubdata to User",
+          "lineStart": 277,
+          "lineEnd": 318,
+          "lineCount": 42,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_refundUser",
+            "spentOnPubdata"
+          ],
+          "rootCause": "In ZKSync, `spentOnPubdata` represents gas consumed for L1 data availability publishing. This amount should be **burned** (not refunded) since the L2 operator already paid the corresponding L1 cost. A",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 281,
+              "lineEnd": 318,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_refundUser",
+                "spentOnPubdata"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-l1-l2-messaging-pattern-6-crossdomainmessenger-010",
+          "title": "Pattern 6: CrossDomainMessenger Cannot Guarantee Replayability",
+          "lineStart": 319,
+          "lineEnd": 349,
+          "lineCount": 31,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "CrossDomainMessenger",
+            "relayMessage"
+          ],
+          "rootCause": "The `CrossDomainMessenger` is supposed to allow failed L1→L2 messages to be replayed. However, if the message consumes more gas than estimated, it fails the `require(gasleft() >= gasLimit)` check and ",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 323,
+              "lineEnd": 349,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "CrossDomainMessenger",
+                "relayMessage"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/zk-rollup/proof-verification.md",
+      "totalLines": 396,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "zk_proof_verification",
+        "vulnerability_type": "missing_verification|fiat_shamir_weakness|vk_root_untrusted|randomness_bias|witness_leakage",
+        "attack_type": "proof_forgery|zkp_bypass|economic_exploit|privacy_violation",
+        "affected_component": "on_chain_verifier|fiat_shamir_challenge|verification_key|randomness_generation",
+        "severity": "critical",
+        "impact": "proof_forgery|fund_theft|privacy_violation|economic_exploit",
+        "exploitability": "0.25",
+        "financial_impact": "critical",
+        "language": "solidity|rust|circom|move",
+        "version": "all"
+      },
+      "patternCount": 9,
+      "patterns": [
+        {
+          "id": "zk-rollup-proof-verification-missing-bypassed-on-chain-veri-000",
+          "title": "Missing / Bypassed On-Chain Verification",
+          "lineStart": 53,
+          "lineEnd": 59,
+          "lineCount": 7,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-proof-verification-cryptographic-weaknesses-in-pr-001",
+          "title": "Cryptographic Weaknesses in Proof Systems",
+          "lineStart": 60,
+          "lineEnd": 72,
+          "lineCount": 13,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-proof-verification-vulnerability-description-002",
+          "title": "Vulnerability Description",
+          "lineStart": 83,
+          "lineEnd": 95,
+          "lineCount": 13,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": "ZK proof verification bugs arise from:\n\n1. **Missing verification**: Code branches that unconditionally set `is_verified = true` without checking a ZK proof\n\n2. **Weak randomness**: Fiat-Shamir challe",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 85,
+              "lineEnd": 95,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-proof-verification-pattern-1-missing-on-chain-zk--003",
+          "title": "Pattern 1: Missing On-Chain ZK Proof Verification",
+          "lineStart": 96,
+          "lineEnd": 137,
+          "lineCount": 42,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "SIGNED_USING_ZK_WALLET",
+            "verify_signature"
+          ],
+          "rootCause": "library.move - verify_signature()",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 100,
+              "lineEnd": 137,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "SIGNED_USING_ZK_WALLET",
+                "verify_signature"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-proof-verification-pattern-2-incorrect-randomness-004",
+          "title": "Pattern 2: Incorrect Randomness Computation Allows Proof Forgery",
+          "lineStart": 138,
+          "lineEnd": 189,
+          "lineCount": 52,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": "In interactive proof systems converted to non-interactive via Fiat-Shamir, the \"random\" challenge must be derived from all previous transcript values. If the randomness computation is incorrect — for ",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 146,
+              "lineEnd": 189,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-proof-verification-pattern-3-plonk-groth16-verifi-005",
+          "title": "Pattern 3: Plonk/Groth16 Verifiers Accept Untrusted Recursion VK Root",
+          "lineStart": 190,
+          "lineEnd": 231,
+          "lineCount": 42,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "verify"
+          ],
+          "rootCause": "In recursive proof systems (e.g., Groth16 with Fflonk recursion, Plonk with proof composition), the inner verifier circuit uses a \"verification key root\" to identify which set of circuits is being ver",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 194,
+              "lineEnd": 231,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "verify"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-proof-verification-pattern-4-weak-fiat-shamir-in--006",
+          "title": "Pattern 4: Weak Fiat-Shamir in LogUp Phase Enables Backdoored Circuits",
+          "lineStart": 232,
+          "lineEnd": 255,
+          "lineCount": 24,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": "LogUp (a lookup argument used in STARK/Plonky2 proofs) uses Fiat-Shamir to generate challenges for the LogUp sum-check. If the prover can influence the LogUp challenge — for example, by choosing value",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 236,
+              "lineEnd": 255,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-proof-verification-pattern-5-verifier-side-dos-vi-007",
+          "title": "Pattern 5: Verifier-Side DoS via Unbounded Public Inputs",
+          "lineStart": 256,
+          "lineEnd": 289,
+          "lineCount": 34,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "uint256"
+          ],
+          "rootCause": "ZK verifier contracts or APIs that accept public inputs as `uint256` decimal strings (rather than validated field elements) may not check that values are less than the field prime. Supplying a value ≥",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 260,
+              "lineEnd": 289,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "uint256"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-proof-verification-pattern-6-malicious-verifier-r-008",
+          "title": "Pattern 6: Malicious Verifier Recovers Private Witness Values",
+          "lineStart": 290,
+          "lineEnd": 316,
+          "lineCount": 27,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": "In some ZK proof systems (particularly those using interactive protocols or weak Fiat-Shamir), a verifier that can choose its own challenges can extract private witness values. This breaks the zero-kn",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 294,
+              "lineEnd": 316,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/zk-rollup/reorg-attacks.md",
+      "totalLines": 340,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "ethereum|l2_rollup",
+        "category": "reorg_attack",
+        "vulnerability_type": "reorg_frontrun|factory_reorg|create_address_collision|lp_fund_theft|deployment_griefing",
+        "attack_type": "fund_theft|frontrun|address_collision|impersonation|deployment_hijack",
+        "affected_component": "factory_contract|create2_deployment|liquidity_pool|questFactory|deployment_addresses",
+        "severity": "high",
+        "impact": "fund_theft|deployment_hijack|lp_theft|griefing",
+        "exploitability": "0.2",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 7,
+      "patterns": [
+        {
+          "id": "zk-rollup-reorg-attacks-factory-reorg-attacks-000",
+          "title": "Factory Reorg Attacks",
+          "lineStart": 55,
+          "lineEnd": 65,
+          "lineCount": 11,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-reorg-attacks-liquidity-pool-reorg-attack-001",
+          "title": "Liquidity Pool Reorg Attack",
+          "lineStart": 66,
+          "lineEnd": 73,
+          "lineCount": 8,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-reorg-attacks-vulnerability-description-002",
+          "title": "Vulnerability Description",
+          "lineStart": 84,
+          "lineEnd": 102,
+          "lineCount": 19,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "CREATE",
+            "CREATE2"
+          ],
+          "rootCause": "1. **CREATE-based address predictability**: `CREATE` produces an address based on `keccak256(deployer_address, nonce)`. If a factory's nonce is predictable (or the factory call is replayed from a reor",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 86,
+              "lineEnd": 102,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "CREATE",
+                "CREATE2"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-reorg-attacks-pattern-1-questfactory-reorg-a-003",
+          "title": "Pattern 1: questFactory Reorg Attack",
+          "lineStart": 103,
+          "lineEnd": 158,
+          "lineCount": 56,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "createQuest",
+            "questFactory.createQuest(..."
+          ],
+          "rootCause": "Factory uses CREATE (nonce-based address) for Quest deployment",
+          "subsections": [
+            {
+              "title": "Attack Description",
+              "lineStart": 107,
+              "lineEnd": 158,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "createQuest",
+                "questFactory.createQuest(..."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-reorg-attacks-pattern-2-stealing-liquidity-p-004",
+          "title": "Pattern 2: Stealing Liquidity Pool Funds via Reorg",
+          "lineStart": 159,
+          "lineEnd": 215,
+          "lineCount": 57,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "createPool",
+            "createPoolAndAddLiquidity"
+          ],
+          "rootCause": "Pool deployed in one tx, funded in another",
+          "subsections": [
+            {
+              "title": "Attack Description",
+              "lineStart": 163,
+              "lineEnd": 215,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "createPool",
+                "createPoolAndAddLiquidity"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-reorg-attacks-pattern-3-general-factory-crea-005",
+          "title": "Pattern 3: General Factory.create Reorg (Multiple Protocols)",
+          "lineStart": 216,
+          "lineEnd": 260,
+          "lineCount": 45,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "block.prevrandao",
+            "block.timestamp",
+            "deployProxy",
+            "initialize",
+            "msg.sender",
+            "tx.origin"
+          ],
+          "rootCause": "Any factory that:  \n\n(a) deploys a contract with a nonce-predictable or salt-predictable address, AND  \n\n(b) relies on users sending funds to the predicted address in a subsequent transaction\n\n\n\n...is",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 220,
+              "lineEnd": 260,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "block.prevrandao",
+                "block.timestamp",
+                "deployProxy",
+                "initialize",
+                "msg.sender",
+                "tx.origin"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-reorg-attacks-pattern-4-create-vs-create2-re-006",
+          "title": "Pattern 4: CREATE vs CREATE2 Reorg Risk Comparison",
+          "lineStart": 261,
+          "lineEnd": 287,
+          "lineCount": 27,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "CREATE",
+            "CREATE2",
+            "msg.sender"
+          ],
+          "rootCause": null,
+          "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/zk-rollup/sequencer-issues.md",
+      "totalLines": 405,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "arbitrum|optimism|base|zksync|scroll|linea",
+        "category": "zk_rollup_sequencer",
+        "vulnerability_type": "sequencer_downtime_dos|sequencer_censorship|sequencer_centralization|l2_timestamp_manipulation|sequencer_underpayment",
+        "attack_type": "denial_of_service|economic_exploit|censorship|front_running",
+        "affected_component": "sequencer|l2_block_proposer|forced_inclusion|batch_submission|forced_transactions",
+        "severity": "high",
+        "impact": "dos|censorship|fund_loss|unfair_liquidation|economic_loss",
+        "exploitability": "0.40",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 9,
+      "patterns": [
+        {
+          "id": "zk-rollup-sequencer-issues-protocol-functions-breaking-du-000",
+          "title": "Protocol Functions Breaking During Sequencer Downtime",
+          "lineStart": 53,
+          "lineEnd": 63,
+          "lineCount": 11,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-sequencer-issues-sequencer-centralization-and-c-001",
+          "title": "Sequencer Centralization and Censorship",
+          "lineStart": 64,
+          "lineEnd": 72,
+          "lineCount": 9,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-sequencer-issues-sequencer-economic-issues-002",
+          "title": "Sequencer Economic Issues",
+          "lineStart": 73,
+          "lineEnd": 85,
+          "lineCount": 13,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "zk-rollup-sequencer-issues-vulnerability-description-003",
+          "title": "Vulnerability Description",
+          "lineStart": 96,
+          "lineEnd": 107,
+          "lineCount": 12,
+          "severity": [],
+          "codeKeywords": [
+            "block.timestamp",
+            "commitScalar"
+          ],
+          "rootCause": "1. **Downtime blindness**: Protocols assume L2 is always live and use `block.timestamp` without checking if the sequencer is operational\n\n2. **No grace period logic**: After sequencer restart, there i",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 98,
+              "lineEnd": 107,
+              "severity": [],
+              "codeKeywords": [
+                "block.timestamp",
+                "commitScalar"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-sequencer-issues-pattern-1-access-controlled-fu-004",
+          "title": "Pattern 1: Access-Controlled Functions Fail During Sequencer Downtime",
+          "lineStart": 108,
+          "lineEnd": 164,
+          "lineCount": 57,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "emergencyRepay",
+            "liquidate"
+          ],
+          "rootCause": "emergencyRepay() can only be called on L2",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 112,
+              "lineEnd": 164,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "emergencyRepay",
+                "liquidate"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-sequencer-issues-pattern-2-dutch-auctions-and-o-005",
+          "title": "Pattern 2: Dutch Auctions and Options Expire at Bad Prices During Downtime",
+          "lineStart": 165,
+          "lineEnd": 215,
+          "lineCount": 51,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "block.timestamp",
+            "buy",
+            "getCurrentPrice"
+          ],
+          "rootCause": "Dutch auction price depends on block.timestamp",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 169,
+              "lineEnd": 215,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "block.timestamp",
+                "buy",
+                "getCurrentPrice"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-sequencer-issues-pattern-3-linea-sequencer-cens-006",
+          "title": "Pattern 3: Linea / Sequencer Censorship Locking User Funds",
+          "lineStart": 216,
+          "lineEnd": 258,
+          "lineCount": 43,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "denylist",
+            "forceWithdraw",
+            "submitL2ToL1Message"
+          ],
+          "rootCause": "On some L2 chains (e.g., early Linea), the sequencer has a `denylist` or role-based exclusion mechanism. A malicious or compromised sequencer operator can add a user's address to the denylist, prevent",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 220,
+              "lineEnd": 258,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "denylist",
+                "forceWithdraw",
+                "submitL2ToL1Message"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-sequencer-issues-pattern-4-sequencer-underpaid--007",
+          "title": "Pattern 4: Sequencer Underpaid Due to Incorrect commitScalar",
+          "lineStart": 259,
+          "lineEnd": 295,
+          "lineCount": 37,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "calculateL2Fee",
+            "commitScalar"
+          ],
+          "rootCause": "ZK rollup sequencers (or keepers who submit proofs) are compensated for L1 gas costs via a `commitScalar` parameter encoded in transaction fee calculations. If `commitScalar` is set incorrectly (too l",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 263,
+              "lineEnd": 295,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "calculateL2Fee",
+                "commitScalar"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "zk-rollup-sequencer-issues-pattern-5-front-running-finali-008",
+          "title": "Pattern 5: Front-Running finalizeBlocks in Decentralized Sequencer Mode",
+          "lineStart": 296,
+          "lineEnd": 339,
+          "lineCount": 44,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "finalizeBlocks"
+          ],
+          "rootCause": "In decentralized sequencer systems where multiple proposers can submit `finalizeBlocks`, the ordering of finalization transactions can be manipulated. A malicious actor can observe a `finalizeBlocks` ",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 300,
+              "lineEnd": 339,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "finalizeBlocks"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
