@@ -148,6 +148,12 @@ reports/<topic>_findings/
 ```
 
 **Naming convention**: `[severity]-[issue-number]-[description].md`
+
+**Automated Category Branches**: 
+A GitHub Actions workflow (`split-reports.yml`) automatically isolates each subdirectory in the `reports/` folder into its own Git branch (e.g., `reports/<topic>`). This allows agents and users to clone just the reports they need for specific domains using:
+```bash
+git clone -b reports/<topic> --single-branch https://github.com/calc1f4r/Vulnerability-database.git
+```
 - Severity prefixes: `c-` (Critical), `h-` (High), `m-` (Medium), `l-` (Low)
 
 ---

@@ -128,6 +128,13 @@ Load manifest → filter patterns where severity includes "HIGH" or "CRITICAL"
 | `staking_liquid_staking` | Staking protocols, liquid staking |
 | `nft_marketplace` | NFT platforms, ERC721 marketplaces |
 
+### Dynamic Context Pruning (Category Branches)
+When fetching reference files or raw audits, agents should be mindful of token limits. A GitHub Action automatically creates isolated branches for every category in the `reports/` directory. Rather than loading the entire `reports` context, agents or workflows can fetch and mount specific vulnerabilities:
+```bash
+# Example: Fetching only ERC4626 vault reports
+git clone -b reports/erc4626 --single-branch https://github.com/calc1f4r/Vulnerability-database.git
+```
+
 ---
 
 ## Workflow for Vulnerability Discovery
