@@ -385,21 +385,50 @@ for i, (lbl, bg) in enumerate([
         E.extend(mk_arrow(ex-20, IY2+112, ex, IY2+112, "#00838F", sw=2))
 
 # ═══════════════════════════════════════════════════════════════════
-# J : LEGEND   y 4060 → 4200
+# J : CATEGORY BRANCHES (CONTEXT PRUNING)   y 4060 → 4240
 # ═══════════════════════════════════════════════════════════════════
-JY2 = 4060; JH2 = 140
-rid, r = mk_rect(P, JY2, CW, JH2, stroke="#9E9E9E", dash=True, bg="transparent"); E.append(r)
-E.extend(badge(P+5, JY2-13, 120, "LEGEND", bg="#616161"))
+JY2 = 4060; JH2 = 180
+rid, r = mk_rect(P, JY2, CW, JH2, stroke="#F57C00", dash=True, bg="transparent"); E.append(r)
+E.extend(badge(P+5, JY2-13, 500, "⑨ TARGETED ACCESS — AUTOMATED CATEGORY BRANCHES", bg="#F57C00"))
+
+E.extend(box(P+40, JY2+40, 400, 100, 
+    "reports/ Directory\n\nContains raw audit findings\nMassive folder (heavy token context)", 
+    bg="#FFE0B2", stroke="#F57C00", sz=13))
+
+E.extend(mk_arrow(P+450, JY2+90, P+550, JY2+90, "#F57C00", sw=3))
+
+E.extend(box(P+560, JY2+40, 250, 100, 
+    "split-reports.yml\n\nGitHub Actions Workflow\n(Subtree Split)", 
+    bg="#FFCC80", stroke="#EF6C00", sz=13, bold=True))
+
+E.extend(mk_arrow(P+820, JY2+90, P+920, JY2+90, "#F57C00", sw=3))
+
+bw2 = (CW - 920 - 60) // 3
+for i, (lbl, bg) in enumerate([
+    ("reports/erc4626\nBranch", "#FFF3E0"),
+    ("reports/chainlink\nBranch", "#FFF3E0"),
+    ("reports/amm\nBranch", "#FFF3E0"),
+]):
+    bx = P+920 + i*(bw2+20)
+    E.extend(box(bx, JY2+40, bw2, 100, lbl + "\n\nIsolated Git branch\nClone only what's needed", bg=bg, stroke="#FB8C00", sz=12))
+
+# ═══════════════════════════════════════════════════════════════════
+# K : LEGEND   y 4280 → 4420
+# ═══════════════════════════════════════════════════════════════════
+KY2 = 4280; KH2 = 140
+rid, r = mk_rect(P, KY2, CW, KH2, stroke="#9E9E9E", dash=True, bg="transparent"); E.append(r)
+E.extend(badge(P+5, KY2-13, 120, "LEGEND", bg="#616161"))
 
 for i, (bg, lbl) in enumerate([
     ("#c8e6c9","Data Source"), ("#fff3e0","Processing Script"),
     ("#E8EAF6","AI Agent"),   ("#BBDEFB","DB Tier / Search"),
     ("#FFECB3","Pipeline Phase"), ("#FFCCBC","Triage / Output"),
     ("#EDE7F6","Fan-Out Component"), ("#EFEBE9","Resource File"),
+    ("#FFCC80","Workflow / Context")
 ]):
     col = i % 4
     row = i // 4
-    E.extend(box(P+40+col*270, JY2+25+row*50, 230, 38, lbl, bg=bg, stroke="#BDBDBD", sz=13))
+    E.extend(box(P+40+col*270, KY2+25+row*50, 230, 38, lbl, bg=bg, stroke="#BDBDBD", sz=13))
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -413,11 +442,11 @@ diagram = {
     "files": {}
 }
 
-out = "/home/calc1f4r/vuln-database/Architecture-Diagram.excalidraw"
+out = "/home/calc1f4r/Vulnerability-database/Architecture-Diagram.excalidraw"
 with open(out, "w") as f:
     json.dump(diagram, f, indent=2)
 
 print(f"✅ {out}")
 print(f"   Elements: {len(E)}")
-print(f"   Canvas: {W} × 4200 px")
-print(f"   10 sections, ALL vertically stacked")
+print(f"   Canvas: {W} × 4460 px")
+print(f"   11 sections, ALL vertically stacked")
