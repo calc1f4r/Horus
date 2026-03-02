@@ -1,0 +1,49 @@
+name: Split Reports to Branches
+
+on:
+  push:
+    branches:
+      - hunt-cards
+    paths:
+      - 'reports/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  split-reports:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Split and push branches
+        run: |
+          for dir in reports/*/; do
+            if [ -d "$dir" ]; then
+              # Extract the folder name
+              foldername=$(basename "$dir")
+              
+              # Remove the '_findings' suffix to match your example (e.g., erc4626)
+              # If a folder doesn't have '_findings', it stays as is.
+              clean_name=${foldername%_findings}
+              branchname="reports/$clean_name"
+              
+              echo "Processing reports/$foldername into branch $branchname..."
+              
+              # Create a split branch containing only the folder's history and contents
+              # Using subtree split preserves the git history for the files
+              git subtree split --prefix="reports/$foldername" -b "$branchname"
+              
+              # Push the split branch to the remote repository
+              git push origin "$branchname" --force
+            fi
+          done
