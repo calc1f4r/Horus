@@ -189,6 +189,7 @@ Vulnerability-database/
 │   ├── Solona-chain-specific/        # Solana programs, Token-2022
 │   ├── general/                      # Access control, reentrancy, proxies, DeFi
 │   └── unique/                       # Protocol-specific real-world exploits
+├── reports/                          # Raw audit findings and source data
 ├── .github/
 │   └── agents/                       # 13 audit agent skill definitions
 │       └── resources/                # Agent reference materials
@@ -198,6 +199,20 @@ Vulnerability-database/
 ├── Agents.md                         # Agent guidance & workflow documentation
 ├── CodebaseStructure.md              # Repository structure reference
 └── CONTRIBUTING.md                   # Contribution guidelines
+```
+
+---
+
+## ⚡ Targeted Access via Category Branches
+
+To preserve API context length and simplify fetching raw vulnerability reporting data, our `reports/` directory is automatically split. A GitHub Actions workflow isolates each subdirectory in the `reports/` folder into its own dedicated Git branch. This allows you to clone exactly the domains you need without fetching the entire history:
+
+```bash
+# General syntax:
+git clone -b reports/<topic> --single-branch https://github.com/calc1f4r/Vulnerability-database.git
+
+# Example: Fetching only ERC4626 vault audit reports
+git clone -b reports/erc4626 --single-branch https://github.com/calc1f4r/Vulnerability-database.git
 ```
 
 ---
