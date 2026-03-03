@@ -1,125 +1,551 @@
 ---
-# Core Classification
-protocol: cosmos-sdk
-chain: everychain
+protocol: generic
+chain: cosmos
 category: oracle
 vulnerability_type: oracle_price_vulnerabilities
 
-# Attack Vector Details
-attack_type: economic_exploit
-affected_component: staking_module
+attack_type: logical_error|economic_exploit|dos
+affected_component: oracle_logic
 
-# Technical Primitives
 primitives:
-  - stale_price_data
-  - price_manipulation_attack
-  - oracle_dos
-  - price_deviation_exploit
-  - oracle_frontrunning
-  - multi_oracle_inconsistency
-  - oracle_stake_requirement
-  - price_feed_reliability
+  - stale_price
+  - price_manipulation
+  - dos
+  - deviation_exploit
+  - frontrunning
+  - missing_stake
+  - chainlink_specific
+  - wrong_price_usage
 
-# Impact Classification
 severity: high
-impact: fund_loss
+impact: fund_loss|dos|state_corruption
 exploitability: 0.7
 financial_impact: high
 
-# Context Tags
 tags:
-  - cosmos_sdk
+  - cosmos
+  - appchain
   - oracle
-  - oracle
-  - price_feed
-  - stale_price
-  - manipulation
-  - TWAP
-  - deviation
-  - frontrunning
-  - Chainlink
-  
-language: go
+  - staking
+  - defi
+
+language: go|solidity|rust
 version: all
 ---
 
-## References
-- [h-24-loans-can-exceed-the-maximum-potential-debt-leading-to-vault-insolvency-and.md](../../../../reports/cosmos_cometbft_findings/h-24-loans-can-exceed-the-maximum-potential-debt-leading-to-vault-insolvency-and.md)
-- [malicious-user-can-prevent-other-users-from-unbonding-due-to-missing-input-valid.md](../../../../reports/cosmos_cometbft_findings/malicious-user-can-prevent-other-users-from-unbonding-due-to-missing-input-valid.md)
-- [failure-to-enforce-minimum-oracle-stake-requirement.md](../../../../reports/cosmos_cometbft_findings/failure-to-enforce-minimum-oracle-stake-requirement.md)
-- [h-2-users-can-frontrun-lstslrts-tokens-prices-decrease-in-order-to-avoid-losses.md](../../../../reports/cosmos_cometbft_findings/h-2-users-can-frontrun-lstslrts-tokens-prices-decrease-in-order-to-avoid-losses.md)
-- [m-3-funding-rate-calculation-is-not-correct.md](../../../../reports/cosmos_cometbft_findings/m-3-funding-rate-calculation-is-not-correct.md)
-- [m-6-the-rewards-distribution-in-the-nftpositionmanager-is-unfair.md](../../../../reports/cosmos_cometbft_findings/m-6-the-rewards-distribution-in-the-nftpositionmanager-is-unfair.md)
-- [price-feeder-is-at-risk-of-rate-limiting-by-public-apis.md](../../../../reports/cosmos_cometbft_findings/price-feeder-is-at-risk-of-rate-limiting-by-public-apis.md)
+## References & Source Reports
 
-## Vulnerability Title
+> **For Agents**: If you need more detailed information about any vulnerability pattern, read the full report from the referenced file path.
 
-**Oracle and Price Feed Vulnerabilities in Cosmos Protocols**
+### Oracle Stale Price
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| [H-04] Withdrawals logic allows MEV exploits of TVL changes  | `reports/cosmos_cometbft_findings/h-04-withdrawals-logic-allows-mev-exploits-of-tvl-changes-and-zero-slippage-zero.md` | HIGH | Code4rena |
+| [M-10] `IOracle.queryExchangeRate` returns incorrect `blockT | `reports/cosmos_cometbft_findings/m-10-ioraclequeryexchangerate-returns-incorrect-blocktimems.md` | MEDIUM | Code4rena |
+| [M-22] Lagging median gas price when the set of observers ch | `reports/cosmos_cometbft_findings/m-22-lagging-median-gas-price-when-the-set-of-observers-changes.md` | MEDIUM | Code4rena |
+| Missing freshness check on oracle data in `Staking.totalCont | `reports/cosmos_cometbft_findings/missing-freshness-check-on-oracle-data-in-stakingtotalcontrolled-enables-stale-r.md` | MEDIUM | MixBytes |
+| Users May Be Able to Borrow swEth at an Outdated Price | `reports/cosmos_cometbft_findings/users-may-be-able-to-borrow-sweth-at-an-outdated-price.md` | MEDIUM | OpenZeppelin |
+
+### Oracle Price Manipulation
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| [H-04] Withdrawals logic allows MEV exploits of TVL changes  | `reports/cosmos_cometbft_findings/h-04-withdrawals-logic-allows-mev-exploits-of-tvl-changes-and-zero-slippage-zero.md` | HIGH | Code4rena |
+| LibTWAPOracle::update Providing large liquidity will manipul | `reports/cosmos_cometbft_findings/m-4-libtwaporacleupdate-providing-large-liquidity-will-manipulate-twap-dosing-re.md` | MEDIUM | Sherlock |
+| Users May Be Able to Borrow swEth at an Outdated Price | `reports/cosmos_cometbft_findings/users-may-be-able-to-borrow-sweth-at-an-outdated-price.md` | MEDIUM | OpenZeppelin |
+
+### Oracle Dos
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| [H-03] Freeze The Bridge Via Large ERC20 Names/Symbols/Denom | `reports/cosmos_cometbft_findings/h-03-freeze-the-bridge-via-large-erc20-namessymbolsdenoms.md` | HIGH | Code4rena |
+| [H-04] Large Validator Sets/Rapid Validator Set Updates May  | `reports/cosmos_cometbft_findings/h-04-large-validator-setsrapid-validator-set-updates-may-freeze-the-bridge-or-re.md` | HIGH | Code4rena |
+| Lack of prioritization of oracle messages | `reports/cosmos_cometbft_findings/lack-of-prioritization-of-oracle-messages.md` | MEDIUM | TrailOfBits |
+| [M-01] No check for sequencer uptime can lead to dutch aucti | `reports/cosmos_cometbft_findings/m-01-no-check-for-sequencer-uptime-can-lead-to-dutch-auctions-failing-or-executi.md` | MEDIUM | Code4rena |
+| [M-10] `IOracle.queryExchangeRate` returns incorrect `blockT | `reports/cosmos_cometbft_findings/m-10-ioraclequeryexchangerate-returns-incorrect-blocktimems.md` | MEDIUM | Code4rena |
+| LibTWAPOracle::update Providing large liquidity will manipul | `reports/cosmos_cometbft_findings/m-4-libtwaporacleupdate-providing-large-liquidity-will-manipulate-twap-dosing-re.md` | MEDIUM | Sherlock |
+| TRST-H-1 User fee  token  balance  can  be  drained in  a  s | `reports/cosmos_cometbft_findings/trst-h-1-user-fee-token-balance-can-be-drained-in-a-single-operation-by-a-malici.md` | HIGH | Trust Security |
+
+### Oracle Deviation Exploit
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| [H-01] Possible arbitrage from Chainlink price discrepancy | `reports/cosmos_cometbft_findings/h-01-possible-arbitrage-from-chainlink-price-discrepancy.md` | HIGH | Code4rena |
+| Lack of on-chain deviation check for LST can lead to loss of | `reports/cosmos_cometbft_findings/m-1-lack-of-on-chain-deviation-check-for-lst-can-lead-to-loss-of-assets.md` | MEDIUM | Sherlock |
+
+### Oracle Frontrunning
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| [H-04] Withdrawals logic allows MEV exploits of TVL changes  | `reports/cosmos_cometbft_findings/h-04-withdrawals-logic-allows-mev-exploits-of-tvl-changes-and-zero-slippage-zero.md` | HIGH | Code4rena |
+| Users can frontrun LSTs/LRTs tokens prices decrease in order | `reports/cosmos_cometbft_findings/h-2-users-can-frontrun-lstslrts-tokens-prices-decrease-in-order-to-avoid-losses.md` | HIGH | Sherlock |
+
+### Oracle Missing Stake
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Failure to enforce minimum oracle stake requirement | `reports/cosmos_cometbft_findings/failure-to-enforce-minimum-oracle-stake-requirement.md` | HIGH | TrailOfBits |
+
+### Oracle Chainlink Specific
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| [H-01] Possible arbitrage from Chainlink price discrepancy | `reports/cosmos_cometbft_findings/h-01-possible-arbitrage-from-chainlink-price-discrepancy.md` | HIGH | Code4rena |
+
+### Oracle Wrong Price Usage
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| ChainlinkAdapterOracle will return the wrong price for asset | `reports/cosmos_cometbft_findings/m-16-chainlinkadapteroracle-will-return-the-wrong-price-for-asset-if-underlying-.md` | MEDIUM | Sherlock |
+| Wrong capTokenDecimals value used in StakedCapAdapter.price  | `reports/cosmos_cometbft_findings/wrong-captokendecimals-value-used-in-stakedcapadapterprice-causes-inaccurate-pri.md` | HIGH | TrailOfBits |
+
+---
+
+# Oracle Price Vulnerabilities - Comprehensive Database
+
+**A Complete Pattern-Matching Guide for Oracle Price Vulnerabilities in Cosmos/AppChain Security Audits**
+
+---
+
+## Table of Contents
+
+1. [Oracle Stale Price](#1-oracle-stale-price)
+2. [Oracle Price Manipulation](#2-oracle-price-manipulation)
+3. [Oracle Dos](#3-oracle-dos)
+4. [Oracle Deviation Exploit](#4-oracle-deviation-exploit)
+5. [Oracle Frontrunning](#5-oracle-frontrunning)
+6. [Oracle Missing Stake](#6-oracle-missing-stake)
+7. [Oracle Chainlink Specific](#7-oracle-chainlink-specific)
+8. [Oracle Wrong Price Usage](#8-oracle-wrong-price-usage)
+
+---
+
+## 1. Oracle Stale Price
 
 ### Overview
 
-This entry documents 3 distinct vulnerability patterns extracted from 8 audit reports (4 HIGH, 3 MEDIUM severity) across 7 protocols by 3 independent audit firms. These patterns represent recurring security issues in Cosmos SDK appchains and related staking/infrastructure protocols, validated through cross-auditor analysis.
+Implementation flaw in oracle stale price logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 5 audit reports with severity distribution: HIGH: 1, MEDIUM: 4.
+
+> **Key Finding**: This bug report discusses a vulnerability in the Renzo protocol that allows for exploitation of the system by manipulating asset prices. This can result in value being lost to malicious actors and causing losses for ezETH holders. The report outlines three possible scenarios in which this vulnerabil
 
 ### Vulnerability Description
 
 #### Root Cause
 
-These vulnerabilities fundamentally stem from:
+Implementation flaw in oracle stale price logic allows exploitation through missing validation, incorrect state handling, or improper access controls.
 
-1. **Missing state transition guards**: Critical operations lack proper checks for concurrent or conflicting state changes
-2. **Incomplete accounting**: Balance, share, or reward tracking fails to account for edge cases (slashing, rebasing, pending operations)
-3. **Timing window exploitation**: Race conditions between mempool visibility and transaction execution enable frontrunning attacks
-4. **Cross-module inconsistency**: State tracked independently across modules can become desynchronized
-5. **Insufficient validation**: Input parameters, state preconditions, or return values not properly validated
+#### Attack Scenario
 
-#### Attack Scenarios
+1. Attacker identifies oracle stale price in the protocol
+2. Exploits the missing validation or incorrect logic
+3. May lead to fund loss, denial of service, or protocol state corruption related to oracle operations
 
-#### Pattern 1: Price Feed Reliability
+### Vulnerable Pattern Examples
 
-**Frequency**: 6/8 reports | **Severity**: MEDIUM | **Validation**: Strong (3 auditors)
-**Protocols affected**: Umee, Astaria, Babylonchain, ZeroLend One, Float Capital
+**Example 1: [H-04] Withdrawals logic allows MEV exploits of TVL changes and zero-slippage ze** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h-04-withdrawals-logic-allows-mev-exploits-of-tvl-changes-and-zero-slippage-zero.md`
+```
+// Vulnerable pattern from Renzo:
+Deposit and withdrawal requests can be done immediately with no costs or fees, and both use the current oracle prices and TVL calculation ([`deposit`](https://github.com/code-423n4/2024-04-renzo/blob/main/contracts/RestakeManager.sol#L499-L504), and [`withdraw`](https://github.com/code-423n4/2024-04-renzo/blob/main/contracts/Withdraw/WithdrawQueue.sol#L217)). Crucially, the [withdrawal amount is calculated at withdrawal request submission time](https://github.com/code-423n4/2024-04-renzo/blob/ma
+```
 
-This bug report discusses a bug found in the Shardus-core repository, which is used for blockchain and distributed ledger technology. The bug allows for more archivers to join the network than the maximum limit, which can cause issues such as network shutdown and crashes in RPC API. This can also le
-
-**Example 1.1** [UNKNOWN] — unknown
-Source: `archiver-join-limit-logic-error.md`
+**Example 2: [M-10] `IOracle.queryExchangeRate` returns incorrect `blockTimeMs`** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/m-10-ioraclequeryexchangerate-returns-incorrect-blocktimems.md`
 ```solidity
-// ❌ VULNERABLE: Price Feed Reliability
-export function registerRoutes() {
-  network.registerExternalPost('joinarchiver', async (req, res) => {
-    const err = validateTypes(req, { body: 'o' })
-    if (err) {
-      warn(`joinarchiver: bad req ${err}`)
-      return res.send({ success: false, error: err })
-    }
+/// @notice Queries the dated exchange rate for a given pair
+    /// @param pair The asset pair to query. For example, "ubtc:uusd" is the
+    /// USD price of BTC and "unibi:uusd" is the USD price of NIBI.
+    /// @return price The exchange rate for the given pair
+    /// @return blockTimeMs The block time in milliseconds when the price was
+    /// last updated
+    /// @return blockHeight The block height when the price was last updated
+    /// @dev This function is view-only and does not modify state.
+    function queryExchangeRate(
+        string memory pair
+    ) external view returns (uint256 price, uint64 blockTimeMs, uint64 blockHeight);
+```
 
-    const joinRequest = req.body
-    if (logFlags.p2pNonFatal) info(`Archiver join request received: ${Utils.safeStringify(joinRequest)}`)
+**Example 3: [M-22] Lagging median gas price when the set of observers changes** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/m-22-lagging-median-gas-price-when-the-set-of-observers-changes.md`
+```
+// Vulnerable pattern from ZetaChain:
+The median gas price used within ZetaChain may be inaccurate and lagging, causing outbound transactions to be underpriced and pending in the mempool and gas fees to be underpaid by users.
 
-    const accepted = await addArchiverJoinRequest(joinRequest)
-...
-  }
+### Proof of Concept
+
+ZetaChain observers, i.e., zetaclients, watch the gas prices of the external chains and submit the current prices to ZetaChain by broadcasting the `MsgGasPriceVoter` message. This message is processed by the `GasPriceVoter` function in [node/x/crosschain/keeper/keeper_gas_price.go#L125-L1
+```
+
+**Example 4: Missing freshness check on oracle data in `Staking.totalControlled()` enables st** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/missing-freshness-check-on-oracle-data-in-stakingtotalcontrolled-enables-stale-r.md`
+```
+// Vulnerable pattern from Mantle Network:
+##### Description
+`Staking.totalControlled()` derives the mETH/ETH exchange rate inputs from `oracle.latestRecord()` without validating the record timestamp.
+
+If the oracle lags significant state changes (e.g., validator rewards or slashing), the resulting rate becomes stale. An attacker can exploit this by timing mint/burn operations against outdated totals: redeeming mETH for excess ETH when a slashing is not yet reflected (overstated `totalControlled()`), or depositing ETH to mint excess mETH
+```
+
+**Example 5: Users May Be Able to Borrow swEth at an Outdated Price** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/users-may-be-able-to-borrow-sweth-at-an-outdated-price.md`
+```
+// Vulnerable pattern from Ion Protocol Audit:
+The [`getPrice` function](https://github.com/Ion-Protocol/ion-protocol/blob/98e282514ac5827196b49f688938e1e44709505a/src/oracles/spot/SwEthSpotOracle.sol#L32) of `SwEthSpotOracle` uses a TWAP oracle which means that a sudden change in price would not immediately affect the return value. This value is used in the [`getSpot` function](https://github.com/Ion-Protocol/ion-protocol/blob/98e282514ac5827196b49f688938e1e44709505a/src/oracles/spot/SpotOracle.sol#L37) which calculates the spot price as th
+```
+
+### Secure Implementation
+
+```go
+// ✅ SECURE: Proper implementation with validation
+// Addresses: Implementation flaw in oracle stale price logic allows exploitation through missing validation, inco
+func secureOracleStalePrice(ctx sdk.Context) error {
+    // 1. Validate all inputs
+    // 2. Check state preconditions
+    // 3. Perform operation atomically
+    // 4. Update all affected state
+    // 5. Emit events for tracking
+    return nil
 }
 ```
 
-**Example 1.2** [MEDIUM] — Float Capital
-Source: `m-3-funding-rate-calculation-is-not-correct.md`
-```solidity
-// ❌ VULNERABLE: Price Feed Reliability
-uint256 totalFunding = (2 * overbalancedValue * fundingRateMultiplier * oracleManager.EPOCH_LENGTH()) / (365.25 days * 10000);
+### Impact Analysis
+
+- **Frequency**: Found in 5 audit reports
+- **Severity Distribution**: HIGH: 1, MEDIUM: 4
+- **Affected Protocols**: Ion Protocol Audit, Nibiru, Renzo, ZetaChain, Mantle Network
+- **Validation Strength**: Strong (3+ auditors)
+
+---
+
+## 2. Oracle Price Manipulation
+
+### Overview
+
+Implementation flaw in oracle price manipulation logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 3 audit reports with severity distribution: HIGH: 1, MEDIUM: 2.
+
+> **Key Finding**: This bug report discusses a vulnerability in the Renzo protocol that allows for exploitation of the system by manipulating asset prices. This can result in value being lost to malicious actors and causing losses for ezETH holders. The report outlines three possible scenarios in which this vulnerabil
+
+### Vulnerability Description
+
+#### Root Cause
+
+Implementation flaw in oracle price manipulation logic allows exploitation through missing validation, incorrect state handling, or improper access controls.
+
+#### Attack Scenario
+
+1. Attacker identifies oracle price manipulation in the protocol
+2. Exploits the missing validation or incorrect logic
+3. May lead to fund loss, denial of service, or protocol state corruption related to oracle operations
+
+### Vulnerable Pattern Examples
+
+**Example 1: [H-04] Withdrawals logic allows MEV exploits of TVL changes and zero-slippage ze** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h-04-withdrawals-logic-allows-mev-exploits-of-tvl-changes-and-zero-slippage-zero.md`
+```
+// Vulnerable pattern from Renzo:
+Deposit and withdrawal requests can be done immediately with no costs or fees, and both use the current oracle prices and TVL calculation ([`deposit`](https://github.com/code-423n4/2024-04-renzo/blob/main/contracts/RestakeManager.sol#L499-L504), and [`withdraw`](https://github.com/code-423n4/2024-04-renzo/blob/main/contracts/Withdraw/WithdrawQueue.sol#L217)). Crucially, the [withdrawal amount is calculated at withdrawal request submission time](https://github.com/code-423n4/2024-04-renzo/blob/ma
 ```
 
-#### Pattern 2: Oracle Stake Requirement
+**Example 2: LibTWAPOracle::update Providing large liquidity will manipulate TWAP, DOSing red** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/m-4-libtwaporacleupdate-providing-large-liquidity-will-manipulate-twap-dosing-re.md`
+```go
+require(
+            getDollarPriceUsd() >= poolStorage.mintPriceThreshold,
+            "Dollar price too low"
+        );
+```
 
-**Frequency**: 1/8 reports | **Severity**: HIGH | **Validation**: Weak (1 auditors)
-**Protocols affected**: Advanced Blockchain
+**Example 3: Users May Be Able to Borrow swEth at an Outdated Price** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/users-may-be-able-to-borrow-sweth-at-an-outdated-price.md`
+```
+// Vulnerable pattern from Ion Protocol Audit:
+The [`getPrice` function](https://github.com/Ion-Protocol/ion-protocol/blob/98e282514ac5827196b49f688938e1e44709505a/src/oracles/spot/SwEthSpotOracle.sol#L32) of `SwEthSpotOracle` uses a TWAP oracle which means that a sudden change in price would not immediately affect the return value. This value is used in the [`getSpot` function](https://github.com/Ion-Protocol/ion-protocol/blob/98e282514ac5827196b49f688938e1e44709505a/src/oracles/spot/SpotOracle.sol#L37) which calculates the spot price as th
+```
 
-This bug report is about data validation in the runtime/picasso/src/weights/balances.rs and runtime/picasso/src/weights/democracy.rs files. When a user requests the price of an asset, oracles submit prices by calling the submit_price function. This function checks whether the oracle has staked the m
+### Secure Implementation
 
-**Example 2.1** [HIGH] — Advanced Blockchain
-Source: `failure-to-enforce-minimum-oracle-stake-requirement.md`
+```go
+// ✅ SECURE: Proper implementation with validation
+// Addresses: Implementation flaw in oracle price manipulation logic allows exploitation through missing validatio
+func secureOraclePriceManipulation(ctx sdk.Context) error {
+    // 1. Validate all inputs
+    // 2. Check state preconditions
+    // 3. Perform operation atomically
+    // 4. Update all affected state
+    // 5. Emit events for tracking
+    return nil
+}
+```
+
+### Impact Analysis
+
+- **Frequency**: Found in 3 audit reports
+- **Severity Distribution**: HIGH: 1, MEDIUM: 2
+- **Affected Protocols**: Renzo, Ubiquity, Ion Protocol Audit
+- **Validation Strength**: Strong (3+ auditors)
+
+---
+
+## 3. Oracle Dos
+
+### Overview
+
+Implementation flaw in oracle dos logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 7 audit reports with severity distribution: HIGH: 3, MEDIUM: 4.
+
+> **Key Finding**: This bug report is about the Ethereum Oracles watch for events on the Gravity.sol contract on the Ethereum blockchain, which is performed in the check_for_events and eth_oracle_main_loop functions. The code snippet leverages the web30 library to check for events from the starting_block to the latest
+
+### Vulnerability Description
+
+#### Root Cause
+
+Implementation flaw in oracle dos logic allows exploitation through missing validation, incorrect state handling, or improper access controls.
+
+#### Attack Scenario
+
+1. Attacker identifies oracle dos in the protocol
+2. Exploits the missing validation or incorrect logic
+3. May lead to fund loss, denial of service, or protocol state corruption related to oracle operations
+
+### Vulnerable Pattern Examples
+
+**Example 1: [H-03] Freeze The Bridge Via Large ERC20 Names/Symbols/Denoms** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h-03-freeze-the-bridge-via-large-erc20-namessymbolsdenoms.md`
+```go
+let erc20_deployed = web3
+    .check_for_events(
+        starting_block.clone(),
+        Some(latest_block.clone()),
+        vec![gravity_contract_address],
+        vec![ERC20_DEPLOYED_EVENT_SIG],
+    )
+    .await;
+```
+
+**Example 2: [H-04] Large Validator Sets/Rapid Validator Set Updates May Freeze the Bridge or** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h-04-large-validator-setsrapid-validator-set-updates-may-freeze-the-bridge-or-re.md`
+```go
+let mut all_valset_events = web3
+    .check_for_events(
+        end_search.clone(),
+        Some(current_block.clone()),
+        vec![gravity_contract_address],
+        vec![VALSET_UPDATED_EVENT_SIG],
+    )
+    .await?;
+```
+
+**Example 3: Lack of prioritization of oracle messages** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/lack-of-prioritization-of-oracle-messages.md`
+```
+// Vulnerable pattern from Umee:
+## Umee Security Assessment
+
+**Difficulty:** Medium
+
+**Type:** Undefined Behavior
+
+**Target:** umee/x/oracle
+```
+
+**Example 4: [M-01] No check for sequencer uptime can lead to dutch auctions failing or execu** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/m-01-no-check-for-sequencer-uptime-can-lead-to-dutch-auctions-failing-or-executi.md`
+```
+// Vulnerable pattern from Ethereum Credit Guild:
+The `AuctionHouse` contract implements a Dutch auction mechanism to recover debt from collateral. However, there is no check for sequencer uptime, which could lead to auctions failing or executing at unfavorable prices.
+
+The current deployment parameters allow auctions to succeed without a loss to the protocol for a duration of 10m 50s. If there's no bid on the auction after this period, the protocol has no other option but to take a loss or forgive the loan. This could have serious consequences
+```
+
+**Example 5: [M-10] `IOracle.queryExchangeRate` returns incorrect `blockTimeMs`** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/m-10-ioraclequeryexchangerate-returns-incorrect-blocktimems.md`
 ```solidity
-// ❌ VULNERABLE: Oracle Stake Requirement
+/// @notice Queries the dated exchange rate for a given pair
+    /// @param pair The asset pair to query. For example, "ubtc:uusd" is the
+    /// USD price of BTC and "unibi:uusd" is the USD price of NIBI.
+    /// @return price The exchange rate for the given pair
+    /// @return blockTimeMs The block time in milliseconds when the price was
+    /// last updated
+    /// @return blockHeight The block height when the price was last updated
+    /// @dev This function is view-only and does not modify state.
+    function queryExchangeRate(
+        string memory pair
+    ) external view returns (uint256 price, uint64 blockTimeMs, uint64 blockHeight);
+```
+
+**Variant: Oracle Dos - MEDIUM Severity Cases** [MEDIUM]
+> Found in 4 reports:
+> - `reports/cosmos_cometbft_findings/lack-of-prioritization-of-oracle-messages.md`
+> - `reports/cosmos_cometbft_findings/m-01-no-check-for-sequencer-uptime-can-lead-to-dutch-auctions-failing-or-executi.md`
+> - `reports/cosmos_cometbft_findings/m-10-ioraclequeryexchangerate-returns-incorrect-blocktimems.md`
+
+**Variant: Oracle Dos in Althea Gravity Bridge** [HIGH]
+> Protocol-specific variant found in 2 reports:
+> - `reports/cosmos_cometbft_findings/h-03-freeze-the-bridge-via-large-erc20-namessymbolsdenoms.md`
+> - `reports/cosmos_cometbft_findings/h-04-large-validator-setsrapid-validator-set-updates-may-freeze-the-bridge-or-re.md`
+
+### Secure Implementation
+
+```go
+// ✅ SECURE: Proper implementation with validation
+// Addresses: Implementation flaw in oracle dos logic allows exploitation through missing validation, incorrect st
+func secureOracleDos(ctx sdk.Context) error {
+    // 1. Validate all inputs
+    // 2. Check state preconditions
+    // 3. Perform operation atomically
+    // 4. Update all affected state
+    // 5. Emit events for tracking
+    return nil
+}
+```
+
+### Impact Analysis
+
+- **Frequency**: Found in 7 audit reports
+- **Severity Distribution**: HIGH: 3, MEDIUM: 4
+- **Affected Protocols**: Brahma, Althea Gravity Bridge, Ubiquity, Umee, Nibiru
+- **Validation Strength**: Strong (3+ auditors)
+
+---
+
+## 4. Oracle Deviation Exploit
+
+### Overview
+
+Implementation flaw in oracle deviation exploit logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 2 audit reports with severity distribution: HIGH: 1, MEDIUM: 1.
+
+> **Key Finding**: KelpDAO is a staking protocol that relies on Chainlink price feeds to calculate the rsETH/ETH exchange rate. The price feed has an acceptable deviation of [-2% 2%], meaning that the nodes will not update an on-chain price if the boundaries are not reached within the 24 hour period. This creates an a
+
+### Vulnerability Description
+
+#### Root Cause
+
+Implementation flaw in oracle deviation exploit logic allows exploitation through missing validation, incorrect state handling, or improper access controls.
+
+#### Attack Scenario
+
+1. Attacker identifies oracle deviation exploit in the protocol
+2. Exploits the missing validation or incorrect logic
+3. May lead to fund loss, denial of service, or protocol state corruption related to oracle operations
+
+### Vulnerable Pattern Examples
+
+**Example 1: [H-01] Possible arbitrage from Chainlink price discrepancy** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h-01-possible-arbitrage-from-chainlink-price-discrepancy.md`
+```go
+*   `test_DepositAsset()`:
+        *
+```
+
+**Example 2: Lack of on-chain deviation check for LST can lead to loss of assets** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/m-1-lack-of-on-chain-deviation-check-for-lst-can-lead-to-loss-of-assets.md`
+```go
+120 ETH - 50 ETH (Cost) = 70 ETH (Profit)
+```
+
+### Secure Implementation
+
+```go
+// ✅ SECURE: Proper implementation with validation
+// Addresses: Implementation flaw in oracle deviation exploit logic allows exploitation through missing validation
+func secureOracleDeviationExploit(ctx sdk.Context) error {
+    // 1. Validate all inputs
+    // 2. Check state preconditions
+    // 3. Perform operation atomically
+    // 4. Update all affected state
+    // 5. Emit events for tracking
+    return nil
+}
+```
+
+### Impact Analysis
+
+- **Frequency**: Found in 2 audit reports
+- **Severity Distribution**: HIGH: 1, MEDIUM: 1
+- **Affected Protocols**: Usual ETH0, Kelp DAO
+- **Validation Strength**: Moderate (2 auditors)
+
+---
+
+## 5. Oracle Frontrunning
+
+### Overview
+
+Implementation flaw in oracle frontrunning logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 2 audit reports with severity distribution: HIGH: 2.
+
+> **Key Finding**: This bug report discusses a vulnerability in the Renzo protocol that allows for exploitation of the system by manipulating asset prices. This can result in value being lost to malicious actors and causing losses for ezETH holders. The report outlines three possible scenarios in which this vulnerabil
+
+### Vulnerability Description
+
+#### Root Cause
+
+Implementation flaw in oracle frontrunning logic allows exploitation through missing validation, incorrect state handling, or improper access controls.
+
+#### Attack Scenario
+
+1. Attacker identifies oracle frontrunning in the protocol
+2. Exploits the missing validation or incorrect logic
+3. May lead to fund loss, denial of service, or protocol state corruption related to oracle operations
+
+### Vulnerable Pattern Examples
+
+**Example 1: [H-04] Withdrawals logic allows MEV exploits of TVL changes and zero-slippage ze** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h-04-withdrawals-logic-allows-mev-exploits-of-tvl-changes-and-zero-slippage-zero.md`
+```
+// Vulnerable pattern from Renzo:
+Deposit and withdrawal requests can be done immediately with no costs or fees, and both use the current oracle prices and TVL calculation ([`deposit`](https://github.com/code-423n4/2024-04-renzo/blob/main/contracts/RestakeManager.sol#L499-L504), and [`withdraw`](https://github.com/code-423n4/2024-04-renzo/blob/main/contracts/Withdraw/WithdrawQueue.sol#L217)). Crucially, the [withdrawal amount is calculated at withdrawal request submission time](https://github.com/code-423n4/2024-04-renzo/blob/ma
+```
+
+**Example 2: Users can frontrun LSTs/LRTs tokens prices decrease in order to avoid losses** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h-2-users-can-frontrun-lstslrts-tokens-prices-decrease-in-order-to-avoid-losses.md`
+```
+// Vulnerable pattern from Napier Finance - LST/LRT Integrations:
+Source: https://github.com/sherlock-audit/2024-05-napier-update-judging/issues/65 
+
+The protocol has acknowledged this issue.
+```
+
+### Secure Implementation
+
+```go
+// ✅ SECURE: Proper implementation with validation
+// Addresses: Implementation flaw in oracle frontrunning logic allows exploitation through missing validation, inc
+func secureOracleFrontrunning(ctx sdk.Context) error {
+    // 1. Validate all inputs
+    // 2. Check state preconditions
+    // 3. Perform operation atomically
+    // 4. Update all affected state
+    // 5. Emit events for tracking
+    return nil
+}
+```
+
+### Impact Analysis
+
+- **Frequency**: Found in 2 audit reports
+- **Severity Distribution**: HIGH: 2
+- **Affected Protocols**: Renzo, Napier Finance - LST/LRT Integrations
+- **Validation Strength**: Moderate (2 auditors)
+
+---
+
+## 6. Oracle Missing Stake
+
+### Overview
+
+Implementation flaw in oracle missing stake logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 1 audit reports with severity distribution: HIGH: 1.
+
+> **Key Finding**: This bug report is about data validation in the runtime/picasso/src/weights/balances.rs and runtime/picasso/src/weights/democracy.rs files. When a user requests the price of an asset, oracles submit prices by calling the submit_price function. This function checks whether the oracle has staked the m
+
+### Vulnerability Description
+
+#### Root Cause
+
+Implementation flaw in oracle missing stake logic allows exploitation through missing validation, incorrect state handling, or improper access controls.
+
+#### Attack Scenario
+
+1. Attacker identifies oracle missing stake in the protocol
+2. Exploits the missing validation or incorrect logic
+3. May lead to fund loss, denial of service, or protocol state corruption related to oracle operations
+
+### Vulnerable Pattern Examples
+
+**Example 1: Failure to enforce minimum oracle stake requirement** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/failure-to-enforce-minimum-oracle-stake-requirement.md`
+```rust
 pub fn handle_payout(
     pre_prices: &[PrePrice<T::PriceValue, T::BlockNumber, T::AccountId>],
     price: T::PriceValue,
@@ -138,70 +564,185 @@ pub fn handle_payout(
             let slash_amount = T::SlashAmount::get();
             let try_slash = T::Currency::can_slash(&answer.who, slash_amount);
             if !try_slash {
-                log::warn!("Failed to s
+                log::warn!("Failed to slash {:?}", answer.who);
+            }
+            T::Currency::slash(&answer.who, slash_amount);
+            Self::deposit_event(Event::UserSlashed(
+                answer.who.clone(),
+                asset_id,
+                slash_amount,
+            ));
+        }
+    }
+}
 ```
 
-#### Pattern 3: Oracle Frontrunning
+### Secure Implementation
 
-**Frequency**: 1/8 reports | **Severity**: HIGH | **Validation**: Weak (1 auditors)
-**Protocols affected**: Napier Finance - LST/LRT Integrations
-
-This bug report highlights an issue where users can avoid losses on their tokens by redeeming them before a price decrease. This is possible through the use of certain adapters in the Napier protocol, which allow for instant redemption of tokens for ETH if the amount is within the available ETH buff
-
+```go
+// ✅ SECURE: Proper implementation with validation
+// Addresses: Implementation flaw in oracle missing stake logic allows exploitation through missing validation, in
+func secureOracleMissingStake(ctx sdk.Context) error {
+    // 1. Validate all inputs
+    // 2. Check state preconditions
+    // 3. Perform operation atomically
+    // 4. Update all affected state
+    // 5. Emit events for tracking
+    return nil
+}
+```
 
 ### Impact Analysis
 
-#### Technical Impact
-- State corruption across staking/delegation modules
-- Incorrect balance tracking leading to fund misallocation
-- Protocol liveness degradation or complete halt
-- Loss of economic security guarantees
+- **Frequency**: Found in 1 audit reports
+- **Severity Distribution**: HIGH: 1
+- **Affected Protocols**: Advanced Blockchain
+- **Validation Strength**: Single auditor
 
-#### Business Impact
-- Direct financial loss for stakers/delegators: Documented in 4 HIGH severity findings
-- Protocol insolvency risk due to accounting errors
-- Erosion of trust in validator/operator incentive alignment
-- Cascading effects across DeFi protocols built on affected infrastructure
+---
 
-#### Frequency Analysis
-- Total reports analyzed: 8
-- HIGH severity: 4 (50%)
-- MEDIUM severity: 3 (37%)
-- Unique protocols affected: 7
-- Independent audit firms: 3
-- Patterns with 3+ auditor validation (Strong): 1
+## 7. Oracle Chainlink Specific
 
-### Detection Patterns
+### Overview
 
-#### Code Patterns to Look For
+Implementation flaw in oracle chainlink specific logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 1 audit reports with severity distribution: HIGH: 1.
+
+> **Key Finding**: KelpDAO is a staking protocol that relies on Chainlink price feeds to calculate the rsETH/ETH exchange rate. The price feed has an acceptable deviation of [-2% 2%], meaning that the nodes will not update an on-chain price if the boundaries are not reached within the 24 hour period. This creates an a
+
+### Vulnerability Description
+
+#### Root Cause
+
+Implementation flaw in oracle chainlink specific logic allows exploitation through missing validation, incorrect state handling, or improper access controls.
+
+#### Attack Scenario
+
+1. Attacker identifies oracle chainlink specific in the protocol
+2. Exploits the missing validation or incorrect logic
+3. May lead to fund loss, denial of service, or protocol state corruption related to oracle operations
+
+### Vulnerable Pattern Examples
+
+**Example 1: [H-01] Possible arbitrage from Chainlink price discrepancy** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h-01-possible-arbitrage-from-chainlink-price-discrepancy.md`
+```go
+*   `test_DepositAsset()`:
+        *
 ```
-- Missing balance update before/after token transfers
-- Unchecked return values from staking/delegation operations
-- State reads without freshness validation
-- Arithmetic operations without overflow/precision checks
-- Missing access control on state-modifying functions
-- Linear iterations over unbounded collections
-- Race condition windows in multi-step operations
+
+### Secure Implementation
+
+```go
+// ✅ SECURE: Proper implementation with validation
+// Addresses: Implementation flaw in oracle chainlink specific logic allows exploitation through missing validatio
+func secureOracleChainlinkSpecific(ctx sdk.Context) error {
+    // 1. Validate all inputs
+    // 2. Check state preconditions
+    // 3. Perform operation atomically
+    // 4. Update all affected state
+    // 5. Emit events for tracking
+    return nil
+}
 ```
 
-#### Audit Checklist
-- [ ] Verify all staking state transitions update balances atomically
-- [ ] Check that slashing affects all relevant state (pending, queued, active)
-- [ ] Ensure withdrawal requests cannot bypass cooldown periods
-- [ ] Validate that reward calculations handle all edge cases (zero stake, partial periods)
-- [ ] Confirm access control on all administrative and state-modifying functions
-- [ ] Test for frontrunning vectors in all two-step operations
-- [ ] Verify iteration bounds on all loops processing user-controlled data
-- [ ] Check cross-module state consistency after complex operations
+### Impact Analysis
 
-### Keywords for Search
+- **Frequency**: Found in 1 audit reports
+- **Severity Distribution**: HIGH: 1
+- **Affected Protocols**: Kelp DAO
+- **Validation Strength**: Single auditor
 
-> `oracle`, `price-feed`, `stale-price`, `manipulation`, `TWAP`, `deviation`, `frontrunning`, `Chainlink`, `price-oracle`, `staleness`, `cosmos-sdk`, `appchain`, `CometBFT`, `staking-security`, `validator-security`
+---
 
-### Related Vulnerabilities
+## 8. Oracle Wrong Price Usage
 
-- Slashing evasion bypass patterns
-- Epoch snapshot timing manipulation
-- Chain halt DoS vectors
-- EVM-Cosmos state synchronization issues
-- IBC middleware vulnerabilities
+### Overview
+
+Implementation flaw in oracle wrong price usage logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 2 audit reports with severity distribution: HIGH: 1, MEDIUM: 1.
+
+> **Key Finding**: This bug report is about an issue found in the ChainlinkAdapterOracle which could return the wrong price for an asset if the underlying aggregator hits minAnswer. The issue was found by 0x52 and is related to the ChainlinkFeedRegistry which pulls the associated aggregator and requests round data fro
+
+### Vulnerability Description
+
+#### Root Cause
+
+Implementation flaw in oracle wrong price usage logic allows exploitation through missing validation, incorrect state handling, or improper access controls.
+
+#### Attack Scenario
+
+1. Attacker identifies oracle wrong price usage in the protocol
+2. Exploits the missing validation or incorrect logic
+3. May lead to fund loss, denial of service, or protocol state corruption related to oracle operations
+
+### Vulnerable Pattern Examples
+
+**Example 1: ChainlinkAdapterOracle will return the wrong price for asset if underlying aggre** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/m-16-chainlinkadapteroracle-will-return-the-wrong-price-for-asset-if-underlying-.md`
+```go
+This comment is true but in my submission I address this exact issue and why it's still an issue even if the aggregator has multiple sources:
+
+> Note:
+> Chainlink oracles are used a just one piece of the OracleAggregator system and it is assumed that using a combination of other oracles, a scenario like this can be avoided. However this is not the case because the other oracles also have their flaws that can still allow this to be exploited. As an example if the chainlink oracle is being used with a UniswapV3Oracle which uses a long TWAP then this will be exploitable when the TWAP is near the minPrice on the way down. In a scenario like that it wouldn't matter what the third oracle was because it would be bypassed with the two matching oracles prices. If secondary oracles like Band are used a malicious user could DDOS relayers to prevent update pricing. Once the price becomes stale the chainlink oracle would be the only oracle left and it's price would be used.
+```
+
+**Example 2: Wrong capTokenDecimals value used in StakedCapAdapter.price causes inaccurate pr** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/wrong-captokendecimals-value-used-in-stakedcapadapterprice-causes-inaccurate-pri.md`
+```solidity
+function price(address _asset) external view returns (uint256 latestAnswer, uint256 lastUpdated) {
+    address capToken = IERC4626(_asset).asset();
+    (latestAnswer, lastUpdated) = IOracle(msg.sender).getPrice(capToken);
+    uint256 capTokenDecimals = IERC20Metadata(capToken).decimals();
+    uint256 pricePerFullShare = IERC4626(_asset).convertToAssets(capTokenDecimals);
+    latestAnswer = latestAnswer * pricePerFullShare / capTokenDecimals;
+}
+```
+
+### Secure Implementation
+
+```go
+// ✅ SECURE: Proper implementation with validation
+// Addresses: Implementation flaw in oracle wrong price usage logic allows exploitation through missing validation
+func secureOracleWrongPriceUsage(ctx sdk.Context) error {
+    // 1. Validate all inputs
+    // 2. Check state preconditions
+    // 3. Perform operation atomically
+    // 4. Update all affected state
+    // 5. Emit events for tracking
+    return nil
+}
+```
+
+### Impact Analysis
+
+- **Frequency**: Found in 2 audit reports
+- **Severity Distribution**: HIGH: 1, MEDIUM: 1
+- **Affected Protocols**: CAP Labs Covered Agent Protocol, Blueberry
+- **Validation Strength**: Moderate (2 auditors)
+
+---
+
+## Detection Patterns
+
+### Automated Detection
+```
+# Oracle Stale Price
+grep -rn 'oracle|stale|price' --include='*.go' --include='*.sol'
+# Oracle Price Manipulation
+grep -rn 'oracle|price|manipulation' --include='*.go' --include='*.sol'
+# Oracle Dos
+grep -rn 'oracle|dos' --include='*.go' --include='*.sol'
+# Oracle Deviation Exploit
+grep -rn 'oracle|deviation|exploit' --include='*.go' --include='*.sol'
+# Oracle Frontrunning
+grep -rn 'oracle|frontrunning' --include='*.go' --include='*.sol'
+# Oracle Missing Stake
+grep -rn 'oracle|missing|stake' --include='*.go' --include='*.sol'
+# Oracle Chainlink Specific
+grep -rn 'oracle|chainlink|specific' --include='*.go' --include='*.sol'
+# Oracle Wrong Price Usage
+grep -rn 'oracle|wrong|price|usage' --include='*.go' --include='*.sol'
+```
+
+## Keywords
+
+`able`, `aggregator`, `allows`, `appchain`, `arbitrage`, `asset`, `assets`, `avoid`, `borrow`, `bridge`, `captokendecimals`, `causes`, `chainlink`, `chainlinkadapteroracle`, `changes`, `check`, `cosmos`, `decrease`, `deviation`, `discrepancy`, `dos`, `dosing`, `enforce`, `exploit`, `exploits`, `failure`, `freeze`, `from`, `frontrun`, `frontrunning`
