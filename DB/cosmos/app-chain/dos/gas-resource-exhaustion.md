@@ -1,100 +1,136 @@
 ---
-# Core Classification
-protocol: cosmos-sdk
-chain: everychain
+protocol: generic
+chain: cosmos
 category: dos
 vulnerability_type: gas_resource_exhaustion
 
-# Attack Vector Details
-attack_type: economic_exploit
-affected_component: staking_module
+attack_type: logical_error|economic_exploit|dos
+affected_component: dos_logic
 
-# Technical Primitives
 primitives:
   - gas_limit_exploit
   - gas_metering_bypass
   - memory_exhaustion
   - storage_exhaustion
-  - large_payload_dos
-  - gas_refund_exploit
-  - precompile_gas_exploit
-  - cross_chain_gas_mismatch
+  - large_payload
 
-# Impact Classification
-severity: medium
-impact: fund_loss
+severity: high
+impact: fund_loss|dos|state_corruption
 exploitability: 0.7
 financial_impact: high
 
-# Context Tags
 tags:
-  - cosmos_sdk
+  - cosmos
+  - appchain
   - dos
-  - gas_exhaustion
-  - resource_exhaustion
-  - DoS
-  - gas_limit
-  - memory_exhaustion
-  - storage_bloat
-  - payload_size
-  - gas_metering
-  
-language: go
+  - staking
+  - defi
+
+language: go|solidity|rust
 version: all
 ---
 
-## References
-- [dos-can-close-a-channel-by-abusing-different-gas-limits-between-chains.md](../../../../reports/cosmos_cometbft_findings/dos-can-close-a-channel-by-abusing-different-gas-limits-between-chains.md)
-- [h-04-gas-is-not-consumed-when-precompile-method-fail-allowing-resource-consumpti.md](../../../../reports/cosmos_cometbft_findings/h-04-gas-is-not-consumed-when-precompile-method-fail-allowing-resource-consumpti.md)
-- [h-06-explicit-gas-limit-on-low-level-solidity-calls-can-be-bypassed-by-dispatche.md](../../../../reports/cosmos_cometbft_findings/h-06-explicit-gas-limit-on-low-level-solidity-calls-can-be-bypassed-by-dispatche.md)
-- [h-07-evm-stack-overflow-error-leads-to-no-gas-being-charged-which-can-be-exploit.md](../../../../reports/cosmos_cometbft_findings/h-07-evm-stack-overflow-error-leads-to-no-gas-being-charged-which-can-be-exploit.md)
-- [h-07-failed-job-cant-be-recovered-nft-may-be-lost.md](../../../../reports/cosmos_cometbft_findings/h-07-failed-job-cant-be-recovered-nft-may-be-lost.md)
-- [unchecked-block-gas-limit.md](../../../../reports/cosmos_cometbft_findings/unchecked-block-gas-limit.md)
-- [h-2-malicious-user-can-use-an-excessively-large-_toaddress-in-oftcoresendfrom-to.md](../../../../reports/cosmos_cometbft_findings/h-2-malicious-user-can-use-an-excessively-large-_toaddress-in-oftcoresendfrom-to.md)
-- [h-6-canceling-an-auction-does-not-refund-the-current-highest-bidder.md](../../../../reports/cosmos_cometbft_findings/h-6-canceling-an-auction-does-not-refund-the-current-highest-bidder.md)
-- [raptorcast-combined-memory-exhaustion-attack.md](../../../../reports/cosmos_cometbft_findings/raptorcast-combined-memory-exhaustion-attack.md)
-- [dos-with-block-gas-limit.md](../../../../reports/cosmos_cometbft_findings/dos-with-block-gas-limit.md)
-- [m-03-gas-used-mismatch-in-failed-contract-calls-can-lead-to-wrong-gas-deductions.md](../../../../reports/cosmos_cometbft_findings/m-03-gas-used-mismatch-in-failed-contract-calls-can-lead-to-wrong-gas-deductions.md)
-- [m-04-gas-refunds-use-block-gas-instead-of-transaction-gas-leading-to-incorrect-r.md](../../../../reports/cosmos_cometbft_findings/m-04-gas-refunds-use-block-gas-instead-of-transaction-gas-leading-to-incorrect-r.md)
-- [dos-on-stake-accounting-functions-by-bloating-operatornodesarray-with-irremovabl.md](../../../../reports/cosmos_cometbft_findings/dos-on-stake-accounting-functions-by-bloating-operatornodesarray-with-irremovabl.md)
-- [m-18-a-single-malicious-observer-can-fill-the-block-space-with-msggaspricevoter-.md](../../../../reports/cosmos_cometbft_findings/m-18-a-single-malicious-observer-can-fill-the-block-space-with-msggaspricevoter-.md)
-- [m-26-zrc20-token-pause-check-bypass.md](../../../../reports/cosmos_cometbft_findings/m-26-zrc20-token-pause-check-bypass.md)
-- [m-12-the-pool-verification-in-napierrouter-is-prone-to-collision-attacks.md](../../../../reports/cosmos_cometbft_findings/m-12-the-pool-verification-in-napierrouter-is-prone-to-collision-attacks.md)
-- [misplaced-stake-limit-validation-in-stake-function-of-lockedstakingpools-contrac.md](../../../../reports/cosmos_cometbft_findings/misplaced-stake-limit-validation-in-stake-function-of-lockedstakingpools-contrac.md)
+## References & Source Reports
 
-## Vulnerability Title
+> **For Agents**: If you need more detailed information about any vulnerability pattern, read the full report from the referenced file path.
 
-**Gas and Resource Exhaustion DoS Vulnerabilities**
+### Dos Gas Limit Exploit
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| DoS Can Close a Channel by Abusing Different Gas Limits Betw | `reports/cosmos_cometbft_findings/dos-can-close-a-channel-by-abusing-different-gas-limits-between-chains.md` | HIGH | Quantstamp |
+| DOS WITH BLOCK GAS LIMIT | `reports/cosmos_cometbft_findings/dos-with-block-gas-limit.md` | MEDIUM | Halborn |
+| [H-04] Gas is not consumed when precompile method fail, allo | `reports/cosmos_cometbft_findings/h-04-gas-is-not-consumed-when-precompile-method-fail-allowing-resource-consumpti.md` | HIGH | Code4rena |
+| [H-06] Explicit gas limit on low-level Solidity calls can be | `reports/cosmos_cometbft_findings/h-06-explicit-gas-limit-on-low-level-solidity-calls-can-be-bypassed-by-dispatche.md` | HIGH | Code4rena |
+| [H-06] Hardcoded gas used in ERC20 queries allows for block  | `reports/cosmos_cometbft_findings/h-06-hardcoded-gas-used-in-erc20-queries-allows-for-block-production-halt-from-i.md` | HIGH | Code4rena |
+| [H-07] EVM stack overflow error leads to no gas being charge | `reports/cosmos_cometbft_findings/h-07-evm-stack-overflow-error-leads-to-no-gas-being-charged-which-can-be-exploit.md` | HIGH | Code4rena |
+| [H-07] Failed job can't be recovered. NFT may be lost. | `reports/cosmos_cometbft_findings/h-07-failed-job-cant-be-recovered-nft-may-be-lost.md` | HIGH | Code4rena |
+| Iterations over slashes ✓ Addressed | `reports/cosmos_cometbft_findings/iterations-over-slashes-addressed.md` | MEDIUM | ConsenSys |
+
+### Dos Gas Metering Bypass
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| Denial Of Slashing | `reports/cosmos_cometbft_findings/denial-of-slashing.md` | HIGH | OtterSec |
+| [H-04] Gas is not consumed when precompile method fail, allo | `reports/cosmos_cometbft_findings/h-04-gas-is-not-consumed-when-precompile-method-fail-allowing-resource-consumpti.md` | HIGH | Code4rena |
+| [H-07] EVM stack overflow error leads to no gas being charge | `reports/cosmos_cometbft_findings/h-07-evm-stack-overflow-error-leads-to-no-gas-being-charged-which-can-be-exploit.md` | HIGH | Code4rena |
+| [H01] Incorrect prefund calculation [core] | `reports/cosmos_cometbft_findings/h01-incorrect-prefund-calculation-core.md` | HIGH | OpenZeppelin |
+| [M-03] Beaming job might freeze on dest chain under some con | `reports/cosmos_cometbft_findings/m-03-beaming-job-might-freeze-on-dest-chain-under-some-conditions-leading-to-own.md` | MEDIUM | Code4rena |
+| [M-03] Gas used mismatch in failed contract calls can lead t | `reports/cosmos_cometbft_findings/m-03-gas-used-mismatch-in-failed-contract-calls-can-lead-to-wrong-gas-deductions.md` | MEDIUM | Code4rena |
+| Slashing mechanism grants exponentially more rewards than ex | `reports/cosmos_cometbft_findings/slashing-mechanism-grants-exponentially-more-rewards-than-expected.md` | HIGH | OpenZeppelin |
+
+### Dos Memory Exhaustion
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| RaptorCast Combined Memory Exhaustion Attack | `reports/cosmos_cometbft_findings/raptorcast-combined-memory-exhaustion-attack.md` | HIGH | Spearbit |
+
+### Dos Storage Exhaustion
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| [M-02] Denial of Service via Large Payload Storage Exhaustio | `reports/cosmos_cometbft_findings/m-02-denial-of-service-via-large-payload-storage-exhaustion.md` | MEDIUM | Shieldify |
+| [M-04] Retry Payload Channel Collision | `reports/cosmos_cometbft_findings/m-04-retry-payload-channel-collision.md` | MEDIUM | Shieldify |
+
+### Dos Large Payload
+| Report | Path | Severity | Audit Firm |
+|--------|------|----------|------------|
+| [H-02] `L1->L2` token deposits can be DoS’ed by purposefully | `reports/cosmos_cometbft_findings/h-02-l1-l2-token-deposits-can-be-dosed-by-purposefully-providing-a-large-data-fi.md` | HIGH | Code4rena |
+| [H-03] Freeze The Bridge Via Large ERC20 Names/Symbols/Denom | `reports/cosmos_cometbft_findings/h-03-freeze-the-bridge-via-large-erc20-namessymbolsdenoms.md` | HIGH | Code4rena |
+| [H-04] Large Validator Sets/Rapid Validator Set Updates May  | `reports/cosmos_cometbft_findings/h-04-large-validator-setsrapid-validator-set-updates-may-freeze-the-bridge-or-re.md` | HIGH | Code4rena |
+| [M-02] Denial of Service via Large Payload Storage Exhaustio | `reports/cosmos_cometbft_findings/m-02-denial-of-service-via-large-payload-storage-exhaustion.md` | MEDIUM | Shieldify |
+| max_tx_bytes default 1MB can be exceeded in PrepareProposal( | `reports/cosmos_cometbft_findings/max_tx_bytes-default-1mb-can-be-exceeded-in-prepareproposal.md` | MEDIUM | Spearbit |
+| Network Shutdown Due To Transaction Limit Overflow | `reports/cosmos_cometbft_findings/network-shutdown-due-to-transaction-limit-overflow.md` | HIGH | OtterSec |
+
+---
+
+# Gas Resource Exhaustion - Comprehensive Database
+
+**A Complete Pattern-Matching Guide for Gas Resource Exhaustion in Cosmos/AppChain Security Audits**
+
+---
+
+## Table of Contents
+
+1. [Dos Gas Limit Exploit](#1-dos-gas-limit-exploit)
+2. [Dos Gas Metering Bypass](#2-dos-gas-metering-bypass)
+3. [Dos Memory Exhaustion](#3-dos-memory-exhaustion)
+4. [Dos Storage Exhaustion](#4-dos-storage-exhaustion)
+5. [Dos Large Payload](#5-dos-large-payload)
+
+---
+
+## 1. Dos Gas Limit Exploit
 
 ### Overview
 
-This entry documents 7 distinct vulnerability patterns extracted from 20 audit reports (9 HIGH, 10 MEDIUM severity) across 14 protocols by 9 independent audit firms. These patterns represent recurring security issues in Cosmos SDK appchains and related staking/infrastructure protocols, validated through cross-auditor analysis.
+Implementation flaw in dos gas limit exploit logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 16 audit reports with severity distribution: HIGH: 9, MEDIUM: 7.
+
+> **Key Finding**: The client has acknowledged an important issue with the cross-chain protocol. The problem occurs when a packet times out instead of being executed, which can lead to a denial of service attack. This is because different chains have different gas limits, causing one chain to run out of gas while proc
 
 ### Vulnerability Description
 
 #### Root Cause
 
-These vulnerabilities fundamentally stem from:
+Implementation flaw in dos gas limit exploit logic allows exploitation through missing validation, incorrect state handling, or improper access controls.
 
-1. **Missing state transition guards**: Critical operations lack proper checks for concurrent or conflicting state changes
-2. **Incomplete accounting**: Balance, share, or reward tracking fails to account for edge cases (slashing, rebasing, pending operations)
-3. **Timing window exploitation**: Race conditions between mempool visibility and transaction execution enable frontrunning attacks
-4. **Cross-module inconsistency**: State tracked independently across modules can become desynchronized
-5. **Insufficient validation**: Input parameters, state preconditions, or return values not properly validated
+#### Attack Scenario
 
-#### Attack Scenarios
+1. Attacker identifies dos gas limit exploit in the protocol
+2. Exploits the missing validation or incorrect logic
+3. May lead to fund loss, denial of service, or protocol state corruption related to dos operations
 
-#### Pattern 1: Gas Limit Exploit
+### Vulnerable Pattern Examples
 
-**Frequency**: 9/20 reports | **Severity**: HIGH | **Validation**: Strong (4 auditors)
-**Protocols affected**: Datachain - IBC, Initia, Skip Protocol Block-SDK, Exchange Contracts, Nibiru
+**Example 1: DoS Can Close a Channel by Abusing Different Gas Limits Between Chains** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/dos-can-close-a-channel-by-abusing-different-gas-limits-between-chains.md`
+```
+// Vulnerable pattern from Datachain - IBC:
+**Update**
+Marked as "Acknowledged" by the client. Addressed in: `af68fc1feac5a4964538a1f295425810895479dd`. The client provided the following explanation:
 
-The client has acknowledged an important issue with the cross-chain protocol. The problem occurs when a packet times out instead of being executed, which can lead to a denial of service attack. This is because different chains have different gas limits, causing one chain to run out of gas while proc
+> This is indeed an important issue for the cross-chain protocol. However, it is difficut to address this within the TAO layer defined in the IBC, as the TAO layer does not support validation based on additional counterparty chain information. Therefore, we believe it is appropriate to resolve this issue in the App layer (i.e., the module co
+```
 
-**Example 1.1** [MEDIUM] — Exchange Contracts
-Source: `dos-with-block-gas-limit.md`
+**Example 2: DOS WITH BLOCK GAS LIMIT** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/dos-with-block-gas-limit.md`
 ```solidity
-// ❌ VULNERABLE: Gas Limit Exploit
 function distribute() public {
     require(vestingEnabled, "TreasuryVester::distribute: vesting is not enabled");
     require(
@@ -115,13 +151,27 @@ function distribute() public {
         } else if (slash < 30) {
             _vestingPercentage -= 10;
         } else {
-           revert("TreasuryVester::distribut
+           revert("TreasuryVester::distribute: vesting is over");
+        }
+        _vestingAmount = getVestingAmount();
+    }
+    step++;
+
+    // distributes _vestingAmount of tokens to recipients based on their allocation
+    for (uint i; i < _recipientsLength; i++) {
+        Recipient memory recipient = _recipients[i];
+        uint amount = recipient.allocation * _vestingAmount / DENOMINATOR;
+        if (!recipient.isMiniChef) {
+            // simply mints or transfer tokens to regular recipients
+            vestedToken.mint(recipient.account, amount);
+        } else {
+            // calls fund rewards of minichef after minting tokens to self
+// ... (truncated)
 ```
 
-**Example 1.2** [HIGH] — Nibiru
-Source: `h-04-gas-is-not-consumed-when-precompile-method-fail-allowing-resource-consumpti.md`
-```solidity
-// ❌ VULNERABLE: Gas Limit Exploit
+**Example 3: [H-04] Gas is not consumed when precompile method fail, allowing resource consum** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h-04-gas-is-not-consumed-when-precompile-method-fail-allowing-resource-consumpti.md`
+```go
 if err != nil {
     return nil, err
 }
@@ -130,112 +180,317 @@ if err != nil {
 contract.UseGas(startResult.CacheCtx.GasMeter().GasConsumed())
 ```
 
-#### Pattern 2: Memory Exhaustion
-
-**Frequency**: 4/20 reports | **Severity**: MEDIUM | **Validation**: Strong (3 auditors)
-**Protocols affected**: Napier, Blastoff, Monad
-
-This report discusses a vulnerability found in the Shardeum blockchain repository on GitHub. This vulnerability can lead to a complete shutdown of the network, causing a direct loss of funds for users and preventing new transactions from being confirmed. The vulnerability is caused by a lack of inpu
-
-**Example 2.1** [UNKNOWN] — unknown
-Source: `improper-input-validation-in-fixdeserializedwra.md`
-```solidity
-// ❌ VULNERABLE: Memory Exhaustion
-2.  Switch to NodeJS 18.16.1, which is the version used by Shardeum in `dev.Dockerfile` and its various library requirements. For example, using asdf (https://asdf-vm.com/):
-```
-
-**Example 2.2** [MEDIUM] — Napier
-Source: `m-12-the-pool-verification-in-napierrouter-is-prone-to-collision-attacks.md`
-```solidity
-// ❌ VULNERABLE: Memory Exhaustion
-And then use it in the `NapierRouter::_verifyCallback` function in place of the computed address comparison logic:
-```
-
-#### Pattern 3: Cross Chain Gas Mismatch
-
-**Frequency**: 3/20 reports | **Severity**: MEDIUM | **Validation**: Moderate (2 auditors)
-**Protocols affected**: UXD Protocol, ZetaChain
-
-This bug report is about an issue found in the OFTCore#sendFrom contract, which is part of the LayerZero protocol. The issue is that malicious users can use an excessively large _toAddress input to OFTCore#sendFrom, which is a bytes calldata of any arbitrary size, to break communication between netw
-
-**Example 3.1** [MEDIUM] — ZetaChain
-Source: `m-18-a-single-malicious-observer-can-fill-the-block-space-with-msggaspricevoter-.md`
-```solidity
-// ❌ VULNERABLE: Cross Chain Gas Mismatch
-125: func (k msgServer) GasPriceVoter(goCtx context.Context, msg *types.MsgGasPriceVoter) (*types.MsgGasPriceVoterResponse, error) {
+**Example 4: [H-06] Explicit gas limit on low-level Solidity calls can be bypassed by dispatc** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h-06-explicit-gas-limit-on-low-level-solidity-calls-can-be-bypassed-by-dispatche.md`
+```go
+491: func (k Keeper) dispatchMessage(parentCtx sdk.Context, request types.ExecuteRequest) (logs types.Logs, err error) {
 ... 	// [...]
-173:
-174: 	gasUsed, err := k.fungibleKeeper.SetGasPrice(
-175: 		ctx,
-176: 		chainIDBigINT,
-177: 		math.NewUint(gasPrice.Prices[gasPrice.MedianIndex]).BigInt(),
-178: 	)
-179: 	if err != nil {
-180: 		return nil, err
-181: 	}
-182:
-183: 	// reset the gas count
-184: ❌ k.ResetGasMeterAndConsumeGas(ctx, gasUsed)
-185:
-186: 	return &types.MsgGasPriceVoterResponse{}, nil
-187: }
+547:
+548: 	// find the handler
+549: 	handler := k.msgRouter.Handler(msg)
+550: 	if handler == nil {
+551: 		err = types.ErrNotSupportedCosmosMessage
+552: 		return
+553: 	}
+554:
+555: 	// and execute it
+556: 	res, err := handler(ctx, msg)
+557: 	if err != nil {
+558: 		return
+559: 	}
+560:
+561: 	// emit events
+562: 	ctx.EventManager().EmitEvents(res.GetEvents())
+563:
+564: 	// extract logs
+565: 	dispatchLogs, err := types.ExtractLogsFromResponse(res.Data, sdk.MsgTypeURL(msg))
+566: 	if err != nil {
+567: 		return
+568: 	}
+569:
+570: 	// append logs
+571: 	logs = append(logs, dispatchLogs...)
+572:
+573: 	return
+574: }
 ```
 
-**Example 3.2** [MEDIUM] — ZetaChain
-Source: `m-18-a-single-malicious-observer-can-fill-the-block-space-with-msggaspricevoter-.md`
+**Example 5: [H-07] Failed job can't be recovered. NFT may be lost.** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h-07-failed-job-cant-be-recovered-nft-may-be-lost.md`
 ```solidity
-// ❌ VULNERABLE: Cross Chain Gas Mismatch
-206: // ResetGasMeterAndConsumeGas reset first the gas meter consumed value to zero and set it back to the new value
-207: // 'gasUsed'
-208: func (k *Keeper) ResetGasMeterAndConsumeGas(ctx sdk.Context, gasUsed uint64) {
-209: 	// reset the gas count
-210: 	ctx.GasMeter().RefundGas(ctx.GasMeter().GasConsumed(), "reset the gas count")
-211: 	ctx.GasMeter().ConsumeGas(gasUsed, "apply evm transaction")
-212: }
+function executeJob(bytes calldata bridgeInRequestPayload) external payable {
+...
+delete _operatorJobs[hash];
+...
+    try
+      HolographOperatorInterface(address(this)).nonRevertingBridgeCall{value: msg.value}(
+        msg.sender,
+        bridgeInRequestPayload
+      )
+    {
+      /// @dev do nothing
+    } catch {
+      _failedJobs[hash] = true;
+      emit FailedOperatorJob(hash);
+    }
+}
 ```
 
-#### Pattern 4: Large Payload Dos
+**Variant: Dos Gas Limit Exploit - MEDIUM Severity Cases** [MEDIUM]
+> Found in 7 reports:
+> - `reports/cosmos_cometbft_findings/dos-with-block-gas-limit.md`
+> - `reports/cosmos_cometbft_findings/iterations-over-slashes-addressed.md`
+> - `reports/cosmos_cometbft_findings/m-03-gas-used-mismatch-in-failed-contract-calls-can-lead-to-wrong-gas-deductions.md`
 
-**Frequency**: 1/20 reports | **Severity**: MEDIUM | **Validation**: Weak (1 auditors)
-**Protocols affected**: Suzaku Core
+**Variant: Dos Gas Limit Exploit in Nibiru** [HIGH]
+> Protocol-specific variant found in 4 reports:
+> - `reports/cosmos_cometbft_findings/h-04-gas-is-not-consumed-when-precompile-method-fail-allowing-resource-consumpti.md`
+> - `reports/cosmos_cometbft_findings/h-06-hardcoded-gas-used-in-erc20-queries-allows-for-block-production-halt-from-i.md`
+> - `reports/cosmos_cometbft_findings/m-03-gas-used-mismatch-in-failed-contract-calls-can-lead-to-wrong-gas-deductions.md`
 
-This bug report describes an issue where an operator is unable to remove a node from the system, leading to an inconsistent state and potential denial of service attacks. This occurs when the removal of a node and the confirmation of that removal happen in the same epoch, causing the node to remain 
+**Variant: Dos Gas Limit Exploit in Initia** [HIGH]
+> Protocol-specific variant found in 2 reports:
+> - `reports/cosmos_cometbft_findings/h-06-explicit-gas-limit-on-low-level-solidity-calls-can-be-bypassed-by-dispatche.md`
+> - `reports/cosmos_cometbft_findings/h-07-evm-stack-overflow-error-leads-to-no-gas-being-charged-which-can-be-exploit.md`
 
-**Example 4.1** [MEDIUM] — Suzaku Core
-Source: `dos-on-stake-accounting-functions-by-bloating-operatornodesarray-with-irremovabl.md`
-```solidity
-// ❌ VULNERABLE: Large Payload Dos
-if (nodePendingRemoval[valID] && …) {
-         _removeNodeFromArray(operator,nodeId);
-         nodePendingRemoval[valID] = false;
-     }
+### Secure Implementation
+
+```go
+// ✅ SECURE: Proper implementation with validation
+// Addresses: Implementation flaw in dos gas limit exploit logic allows exploitation through missing validation, i
+func secureDosGasLimitExploit(ctx sdk.Context) error {
+    // 1. Validate all inputs
+    // 2. Check state preconditions
+    // 3. Perform operation atomically
+    // 4. Update all affected state
+    // 5. Emit events for tracking
+    return nil
+}
 ```
 
-**Example 4.2** [MEDIUM] — Suzaku Core
-Source: `dos-on-stake-accounting-functions-by-bloating-operatornodesarray-with-irremovabl.md`
+### Impact Analysis
+
+- **Frequency**: Found in 16 audit reports
+- **Severity Distribution**: HIGH: 9, MEDIUM: 7
+- **Affected Protocols**: Interplanetary Consensus (Ipc), ZetaChain Cross-Chain, Datachain - IBC, Optimism, Nibiru
+- **Validation Strength**: Strong (3+ auditors)
+
+---
+
+## 2. Dos Gas Metering Bypass
+
+### Overview
+
+Implementation flaw in dos gas metering bypass logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 7 audit reports with severity distribution: HIGH: 5, MEDIUM: 2.
+
+> **Key Finding**: This report discusses a vulnerability in the verifyDoubleSigning function, which can be exploited by a malicious operator to evade slashing. This vulnerability is due to the linear complexity of the function, which can be increased indefinitely by repeatedly calling the updateDelegation function. Th
+
+### Vulnerability Description
+
+#### Root Cause
+
+Implementation flaw in dos gas metering bypass logic allows exploitation through missing validation, incorrect state handling, or improper access controls.
+
+#### Attack Scenario
+
+1. Attacker identifies dos gas metering bypass in the protocol
+2. Exploits the missing validation or incorrect logic
+3. May lead to fund loss, denial of service, or protocol state corruption related to dos operations
+
+### Vulnerable Pattern Examples
+
+**Example 1: Denial Of Slashing** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/denial-of-slashing.md`
 ```solidity
-// ❌ VULNERABLE: Large Payload Dos
-delete $._registeredValidators[validator.nodeID];
+function verifyDoubleSigning(
+    address operator,
+    DoubleSigningEvidence memory e
+) external {
+    [...]
+    for (uint256 i = 0; i < delegatedValidators.length; i++) {
+        [...]
+        if (EthosAVSUtils.compareStrings(delegatedValidators[i].validatorPubkey,
+                                          e.validatorPubkey) &&
+            isDelegationSlashable(delegatedValidators[i].endTimestamp))
+        {
+            timestampValid = true;
+            stake = EthosAVSUtils.maxUint96(stake, delegatedValidators[i].stake);
+        }
+    }
+    [...]
+}
 ```
 
-#### Pattern 5: Gas Refund Exploit
+**Example 2: [H-04] Gas is not consumed when precompile method fail, allowing resource consum** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h-04-gas-is-not-consumed-when-precompile-method-fail-allowing-resource-consumpti.md`
+```go
+if err != nil {
+    return nil, err
+}
 
-**Frequency**: 1/20 reports | **Severity**: HIGH | **Validation**: Weak (1 auditors)
-**Protocols affected**: Astaria
+// Gas consumed by a local gas meter
+contract.UseGas(startResult.CacheCtx.GasMeter().GasConsumed())
+```
 
-This bug report is about an issue with the AuctionHouse.sol code in the 2022-10-astaria-judging project on Github. The issue is that when an auction is canceled and outstanding debt is repaid, the current highest bidder is not refunded and will lose their funds. This can be exploited by a malicious 
+**Example 3: [H-07] EVM stack overflow error leads to no gas being charged, which can be expl** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h-07-evm-stack-overflow-error-leads-to-no-gas-being-charged-which-can-be-exploit.md`
+```go
+// evm sometimes return 0 gasRemaining, but it's not an out of gas error.
+if gasRemaining == 0 && err != nil && err != vm.ErrOutOfGas {
+	return nil, common.Address{}, nil, types.ErrEVMCreateFailed.Wrap(err.Error())
+}
+```
 
-#### Pattern 6: Storage Exhaustion
+**Example 4: [H01] Incorrect prefund calculation [core]** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h01-incorrect-prefund-calculation-core.md`
+```
+// Vulnerable pattern from EIP-4337 – Ethereum Account Abstraction Audit:
+In order to ensure a user operation can be financed, the maximum amount of gas it could consume is calculated. This depends on the individual gas limits specified in the transaction. Since the paymaster may use `verificationGas` to limit up to three function calls, operations that have a paymaster should multiply `verificationGas` by 3 when calculating the maximum gas. However, the [calculation is inverted](https://github.com/eth-infinitism/account-abstraction/blob/8832d6e04b9f4f706f612261c6e46b
+```
 
-**Frequency**: 1/20 reports | **Severity**: MEDIUM | **Validation**: Weak (1 auditors)
-**Protocols affected**: Toki Bridge
+**Example 5: [M-03] Beaming job might freeze on dest chain under some conditions, leading to ** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/m-03-beaming-job-might-freeze-on-dest-chain-under-some-conditions-leading-to-own.md`
+```
+// Vulnerable pattern from Holograph:
+[HolographOperator.sol#L255](https://github.com/code-423n4/2022-10-holograph/blob/f8c2eae866280a1acfdc8a8352401ed031be1373/src/HolographOperator.sol#L255)<br>
 
-The report highlights a bug in the bridge that allows an attacker to block cross-chain transfers by sending a malicious transaction. This happens when the bridge tries to store a 10KB payload on-chain, which requires a lot of gas and can cause the transaction to fail. This blocks the entire channel,
+If the following conditions have been met:
 
-**Example 6.1** [MEDIUM] — Toki Bridge
-Source: `m-02-denial-of-service-via-large-payload-storage-exhaustion.md`
+*   The selected operator doesn't complete the job, either intentionally (they're sacrificing their bonded amount to harm the token owner) or innocently (hardware failure that caused a loss of access to the wallet)
+*   Gas price has spiked, and isn't going down than the `gasPrice` set by the use
+```
+
+**Variant: Dos Gas Metering Bypass - MEDIUM Severity Cases** [MEDIUM]
+> Found in 2 reports:
+> - `reports/cosmos_cometbft_findings/m-03-beaming-job-might-freeze-on-dest-chain-under-some-conditions-leading-to-own.md`
+> - `reports/cosmos_cometbft_findings/m-03-gas-used-mismatch-in-failed-contract-calls-can-lead-to-wrong-gas-deductions.md`
+
+**Variant: Dos Gas Metering Bypass in Nibiru** [HIGH]
+> Protocol-specific variant found in 2 reports:
+> - `reports/cosmos_cometbft_findings/h-04-gas-is-not-consumed-when-precompile-method-fail-allowing-resource-consumpti.md`
+> - `reports/cosmos_cometbft_findings/m-03-gas-used-mismatch-in-failed-contract-calls-can-lead-to-wrong-gas-deductions.md`
+
+### Secure Implementation
+
+```go
+// ✅ SECURE: Proper implementation with validation
+// Addresses: Implementation flaw in dos gas metering bypass logic allows exploitation through missing validation,
+func secureDosGasMeteringBypass(ctx sdk.Context) error {
+    // 1. Validate all inputs
+    // 2. Check state preconditions
+    // 3. Perform operation atomically
+    // 4. Update all affected state
+    // 5. Emit events for tracking
+    return nil
+}
+```
+
+### Impact Analysis
+
+- **Frequency**: Found in 7 audit reports
+- **Severity Distribution**: HIGH: 5, MEDIUM: 2
+- **Affected Protocols**: EIP-4337 – Ethereum Account Abstraction Audit, Ethos EVM, Nibiru, UMA DVM 2.0 Audit, Holograph
+- **Validation Strength**: Strong (3+ auditors)
+
+---
+
+## 3. Dos Memory Exhaustion
+
+### Overview
+
+Implementation flaw in dos memory exhaustion logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 1 audit reports with severity distribution: HIGH: 1.
+
+> **Key Finding**: A memory exhaustion vulnerability has been identified in RaptorCast, a program that allows for the transmission of data over a network. This vulnerability can be exploited by a malicious user to consume large amounts of memory by sending incomplete messages. This can lead to system crashes and perfo
+
+### Vulnerability Description
+
+#### Root Cause
+
+Implementation flaw in dos memory exhaustion logic allows exploitation through missing validation, incorrect state handling, or improper access controls.
+
+#### Attack Scenario
+
+1. Attacker identifies dos memory exhaustion in the protocol
+2. Exploits the missing validation or incorrect logic
+3. May lead to fund loss, denial of service, or protocol state corruption related to dos operations
+
+### Vulnerable Pattern Examples
+
+**Example 1: RaptorCast Combined Memory Exhaustion Attack** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/raptorcast-combined-memory-exhaustion-attack.md`
+```go
+// udp.rs:135 - Unbounded cache enabling unlimited decoder instances
+pending_message_cache: LruCache::unbounded(),
+
+// udp.rs:316-327 - Per-decoder memory allocation based on attacker-controlled app_message_len
+let num_source_symbols = app_message_len.div_ceil(symbol_len).max(SOURCE_SYMBOLS_MIN);
+let encoded_symbol_capacity = MAX_REDUNDANCY
+    .scale(num_source_symbols)
+    .expect("redundancy-scaled num_source_symbols doesn't fit in usize");
+ManagedDecoder::new(num_source_symbols, encoded_symbol_capacity, symbol_len)
+    .map(|decoder| DecoderState {
+        decoder,
+        recipient_chunks: BTreeMap::new(),
+        encoded_symbol_capacity,
+        seen_esis: bitvec![usize, Lsb0; 0; encoded_symbol_capacity], // Large per-decoder allocation
+    });
+
+// udp.rs:386-389 - Automatic cleanup only occurs on successful decoding
+let decoded_state = self
+    .pending_message_cache
+    .pop(&key) // Cleanup only happens here, after successful decode
+    .expect("decoder exists");
+```
+
+### Secure Implementation
+
+```go
+// ✅ SECURE: Proper implementation with validation
+// Addresses: Implementation flaw in dos memory exhaustion logic allows exploitation through missing validation, i
+func secureDosMemoryExhaustion(ctx sdk.Context) error {
+    // 1. Validate all inputs
+    // 2. Check state preconditions
+    // 3. Perform operation atomically
+    // 4. Update all affected state
+    // 5. Emit events for tracking
+    return nil
+}
+```
+
+### Impact Analysis
+
+- **Frequency**: Found in 1 audit reports
+- **Severity Distribution**: HIGH: 1
+- **Affected Protocols**: Monad
+- **Validation Strength**: Single auditor
+
+---
+
+## 4. Dos Storage Exhaustion
+
+### Overview
+
+Implementation flaw in dos storage exhaustion logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 2 audit reports with severity distribution: MEDIUM: 2.
+
+> **Key Finding**: The report highlights a bug in the bridge that allows an attacker to block cross-chain transfers by sending a malicious transaction. This happens when the bridge tries to store a 10KB payload on-chain, which requires a lot of gas and can cause the transaction to fail. This blocks the entire channel,
+
+### Vulnerability Description
+
+#### Root Cause
+
+Implementation flaw in dos storage exhaustion logic allows exploitation through missing validation, incorrect state handling, or improper access controls.
+
+#### Attack Scenario
+
+1. Attacker identifies dos storage exhaustion in the protocol
+2. Exploits the missing validation or incorrect logic
+3. May lead to fund loss, denial of service, or protocol state corruption related to dos operations
+
+### Vulnerable Pattern Examples
+
+**Example 1: [M-02] Denial of Service via Large Payload Storage Exhaustion** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/m-02-denial-of-service-via-large-payload-storage-exhaustion.md`
 ```solidity
-// ❌ VULNERABLE: Storage Exhaustion
 function calcFee( uint256 peerChainId, uint256 peerPoolId, address from, uint256 amountLD ) external view returns (ITransferPoolFeeCalculator.FeeInfo memory feeInfo) {
     // code
     uint256 gas = gasUsed;
@@ -259,126 +514,183 @@ function calcFee( uint256 peerChainId, uint256 peerPoolId, address from, uint256
 }
 ```
 
-**Example 6.2** [MEDIUM] — Toki Bridge
-Source: `m-02-denial-of-service-via-large-payload-storage-exhaustion.md`
-```solidity
-// ❌ VULNERABLE: Storage Exhaustion
-function _outServiceCallCore(
-    string memory dstChannel,
-    uint256 srcChainId,
-    uint64 sequence,
-    address token,
-    uint256 amount,
-    address to,
-    uint256 refuelAmount,
-    IBCUtils.ExternalInfo memory externalInfo,
-    bool doRefuel,
-    uint256 lastValidHeightOrZero
-) internal {
-    // code
-
-    // External call with user-specified gas limit
-    if (externalInfo.payload.length > 0 && to.code.length > 0) {
-        try
-            ITokiOuterServiceReceiverV1_1(to).onReceivePool{
-                gas: externalInfo.dstOuterGas  // Up to 5M gas
-            }(dstChannel, sequence, token, amount, externalInfo.payload)
-        returns (bool successOuter) {
-            if (!successOuter) {
-                errorFlag += 2;
-            }
-        } catch {
-            errorFlag += 2;
-
+**Example 2: [M-04] Retry Payload Channel Collision** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/m-04-retry-payload-channel-collision.md`
+```go
+mapping(uint256 => mapping(uint64 => bytes)) revertReceive; // [chainId][sequence] = payload
 ```
 
-#### Pattern 7: Gas Metering Bypass
+### Secure Implementation
 
-**Frequency**: 1/20 reports | **Severity**: MEDIUM | **Validation**: Weak (1 auditors)
-**Protocols affected**: ZetaChain
-
-The ZetaChain blockchain can be disrupted by a single observer who can send a transaction that consumes a lot of gas, possibly preventing other transactions from being processed. This is due to the use of an infinite gas meter for certain types of messages, which can be exploited by including other 
-
-**Example 7.1** [MEDIUM] — ZetaChain
-Source: `m-10-a-single-malicious-observer-can-exploit-the-infinite-gas-meter-to-grief-zet.md`
-```solidity
-// ❌ VULNERABLE: Gas Metering Bypass
-056: func NewAnteHandler(options ethante.HandlerOptions) (sdk.AnteHandler, error) {
-... 		// [...]
-092:
-093: 		// handle as totally normal Cosmos SDK tx
-094: 		switch tx.(type) {
-095: 		case sdk.Tx:
-096: 			found := false
-097: 			for _, msg := range tx.GetMsgs() {
-098: 				switch msg.(type) {
-099: 				// treat these two msg types differently because they might call EVM which results in massive gas consumption
-100: 				// For these two msg types, we don't check gas limit by using a different ante handler
-101: 				case *cctxtypes.MsgGasPriceVoter, *cctxtypes.MsgVoteOnObservedInboundTx:
-102: 					found = true
-103: 					break
-104: 				}
-105: 			}
-106: 			if found {
-107: 				// this differs newCosmosAnteHandler only in that it doesn't check gas limit
-108: 				// by using an Infinite Gas Meter.
-
+```go
+// ✅ SECURE: Proper implementation with validation
+// Addresses: Implementation flaw in dos storage exhaustion logic allows exploitation through missing validation, 
+func secureDosStorageExhaustion(ctx sdk.Context) error {
+    // 1. Validate all inputs
+    // 2. Check state preconditions
+    // 3. Perform operation atomically
+    // 4. Update all affected state
+    // 5. Emit events for tracking
+    return nil
+}
 ```
-
 
 ### Impact Analysis
 
-#### Technical Impact
-- State corruption across staking/delegation modules
-- Incorrect balance tracking leading to fund misallocation
-- Protocol liveness degradation or complete halt
-- Loss of economic security guarantees
+- **Frequency**: Found in 2 audit reports
+- **Severity Distribution**: MEDIUM: 2
+- **Affected Protocols**: Toki Bridge
+- **Validation Strength**: Single auditor
 
-#### Business Impact
-- Direct financial loss for stakers/delegators: Documented in 9 HIGH severity findings
-- Protocol insolvency risk due to accounting errors
-- Erosion of trust in validator/operator incentive alignment
-- Cascading effects across DeFi protocols built on affected infrastructure
+---
 
-#### Frequency Analysis
-- Total reports analyzed: 20
-- HIGH severity: 9 (45%)
-- MEDIUM severity: 10 (50%)
-- Unique protocols affected: 14
-- Independent audit firms: 9
-- Patterns with 3+ auditor validation (Strong): 2
+## 5. Dos Large Payload
 
-### Detection Patterns
+### Overview
 
-#### Code Patterns to Look For
+Implementation flaw in dos large payload logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 6 audit reports with severity distribution: HIGH: 4, MEDIUM: 2.
+
+> **Key Finding**: In the report, it is mentioned that there is a bug in the L2 system where the `MsgFinalizeTokenDeposit` must be relayed in strict sequence. This means that if a specific L1 sequence is not processed successfully, subsequent deposits from L1 to L2 cannot be processed. This can lead to a denial of ser
+
+### Vulnerability Description
+
+#### Root Cause
+
+Implementation flaw in dos large payload logic allows exploitation through missing validation, incorrect state handling, or improper access controls.
+
+#### Attack Scenario
+
+1. Attacker identifies dos large payload in the protocol
+2. Exploits the missing validation or incorrect logic
+3. May lead to fund loss, denial of service, or protocol state corruption related to dos operations
+
+### Vulnerable Pattern Examples
+
+**Example 1: [H-02] `L1->L2` token deposits can be DoS’ed by purposefully providing a large `** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h-02-l1-l2-token-deposits-can-be-dosed-by-purposefully-providing-a-large-data-fi.md`
+```go
+385:     finalizedL1Sequence, err := ms.GetNextL1Sequence(ctx)
+386:     if err != nil {
+387:         return nil, err
+388:     }
+389:
+390:     if req.Sequence < finalizedL1Sequence {
+391:         // No op instead of returning an error
+392:         return &types.MsgFinalizeTokenDepositResponse{Result: types.NOOP}, nil
+393:     } else if req.Sequence > finalizedL1Sequence {
+394:         return nil, types.ErrInvalidSequence
+395:     }
 ```
-- Missing balance update before/after token transfers
-- Unchecked return values from staking/delegation operations
-- State reads without freshness validation
-- Arithmetic operations without overflow/precision checks
-- Missing access control on state-modifying functions
-- Linear iterations over unbounded collections
-- Race condition windows in multi-step operations
+
+**Example 2: [H-03] Freeze The Bridge Via Large ERC20 Names/Symbols/Denoms** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h-03-freeze-the-bridge-via-large-erc20-namessymbolsdenoms.md`
+```go
+let erc20_deployed = web3
+    .check_for_events(
+        starting_block.clone(),
+        Some(latest_block.clone()),
+        vec![gravity_contract_address],
+        vec![ERC20_DEPLOYED_EVENT_SIG],
+    )
+    .await;
 ```
 
-#### Audit Checklist
-- [ ] Verify all staking state transitions update balances atomically
-- [ ] Check that slashing affects all relevant state (pending, queued, active)
-- [ ] Ensure withdrawal requests cannot bypass cooldown periods
-- [ ] Validate that reward calculations handle all edge cases (zero stake, partial periods)
-- [ ] Confirm access control on all administrative and state-modifying functions
-- [ ] Test for frontrunning vectors in all two-step operations
-- [ ] Verify iteration bounds on all loops processing user-controlled data
-- [ ] Check cross-module state consistency after complex operations
+**Example 3: [H-04] Large Validator Sets/Rapid Validator Set Updates May Freeze the Bridge or** [HIGH]
+> 📖 Reference: `reports/cosmos_cometbft_findings/h-04-large-validator-setsrapid-validator-set-updates-may-freeze-the-bridge-or-re.md`
+```go
+let mut all_valset_events = web3
+    .check_for_events(
+        end_search.clone(),
+        Some(current_block.clone()),
+        vec![gravity_contract_address],
+        vec![VALSET_UPDATED_EVENT_SIG],
+    )
+    .await?;
+```
 
-### Keywords for Search
+**Example 4: [M-02] Denial of Service via Large Payload Storage Exhaustion** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/m-02-denial-of-service-via-large-payload-storage-exhaustion.md`
+```solidity
+function calcFee( uint256 peerChainId, uint256 peerPoolId, address from, uint256 amountLD ) external view returns (ITransferPoolFeeCalculator.FeeInfo memory feeInfo) {
+    // code
+    uint256 gas = gasUsed;
+    if (
+        messageType == MessageType._TYPE_TRANSFER_POOL ||
+        messageType == MessageType._TYPE_TRANSFER_TOKEN
+    ) {
+        gas +=
+            gasPerPayloadLength *
+            externalInfo.payload.length +
+            externalInfo.dstOuterGas;
+    }
+    relayerFee.fee =
+        (gas *
+            relayerFee.dstGasPrice *
+            premiumBPS *
+            relayerFee.dstTokenPrice *
+            decimalRatioNumerator) /
+        (10000 * relayerFee.srcTokenPrice * decimalRatioDenominator);
+    // code
+}
+```
 
-> `gas-exhaustion`, `resource-exhaustion`, `DoS`, `gas-limit`, `memory-exhaustion`, `storage-bloat`, `payload-size`, `gas-metering`, `cosmos-sdk`, `appchain`, `CometBFT`, `staking-security`, `validator-security`
+**Example 5: max_tx_bytes default 1MB can be exceeded in PrepareProposal()** [MEDIUM]
+> 📖 Reference: `reports/cosmos_cometbft_findings/max_tx_bytes-default-1mb-can-be-exceeded-in-prepareproposal.md`
+```
+// Vulnerable pattern from Berachain Beaconkit:
+## Medium Risk Report
+```
 
-### Related Vulnerabilities
+**Variant: Dos Large Payload - MEDIUM Severity Cases** [MEDIUM]
+> Found in 2 reports:
+> - `reports/cosmos_cometbft_findings/m-02-denial-of-service-via-large-payload-storage-exhaustion.md`
+> - `reports/cosmos_cometbft_findings/max_tx_bytes-default-1mb-can-be-exceeded-in-prepareproposal.md`
 
-- Slashing evasion bypass patterns
-- Epoch snapshot timing manipulation
-- Chain halt DoS vectors
-- EVM-Cosmos state synchronization issues
-- IBC middleware vulnerabilities
+**Variant: Dos Large Payload in Althea Gravity Bridge** [HIGH]
+> Protocol-specific variant found in 2 reports:
+> - `reports/cosmos_cometbft_findings/h-03-freeze-the-bridge-via-large-erc20-namessymbolsdenoms.md`
+> - `reports/cosmos_cometbft_findings/h-04-large-validator-setsrapid-validator-set-updates-may-freeze-the-bridge-or-re.md`
+
+### Secure Implementation
+
+```go
+// ✅ SECURE: Proper implementation with validation
+// Addresses: Implementation flaw in dos large payload logic allows exploitation through missing validation, incor
+func secureDosLargePayload(ctx sdk.Context) error {
+    // 1. Validate all inputs
+    // 2. Check state preconditions
+    // 3. Perform operation atomically
+    // 4. Update all affected state
+    // 5. Emit events for tracking
+    return nil
+}
+```
+
+### Impact Analysis
+
+- **Frequency**: Found in 6 audit reports
+- **Severity Distribution**: HIGH: 4, MEDIUM: 2
+- **Affected Protocols**: Althea Gravity Bridge, Berachain Beaconkit, Sei EVM, Toki Bridge, Initia
+- **Validation Strength**: Strong (3+ auditors)
+
+---
+
+## Detection Patterns
+
+### Automated Detection
+```
+# Dos Gas Limit Exploit
+grep -rn 'dos|gas|limit|exploit' --include='*.go' --include='*.sol'
+# Dos Gas Metering Bypass
+grep -rn 'dos|gas|metering|bypass' --include='*.go' --include='*.sol'
+# Dos Memory Exhaustion
+grep -rn 'dos|memory|exhaustion' --include='*.go' --include='*.sol'
+# Dos Storage Exhaustion
+grep -rn 'dos|storage|exhaustion' --include='*.go' --include='*.sol'
+# Dos Large Payload
+grep -rn 'dos|large|payload' --include='*.go' --include='*.sol'
+```
+
+## Keywords
+
+`abusing`, `allowing`, `appchain`, `attack`, `being`, `between`, `block`, `bridge`, `bypass`, `calls`, `chain`, `chains`, `channel`, `close`, `collision`, `combined`, `consumed`, `consumption`, `cosmos`, `denial`, `deposits`, `different`, `dispatching`, `dos`, `error`, `exhaustion`, `exploit`, `exploited`, `field`, `freeze`
