@@ -1,8 +1,8 @@
 {
   "meta": {
     "description": "ALL enriched hunt cards — compressed detection rules with micro-directives for direct verification",
-    "totalCards": 1065,
-    "enriched": 1058,
+    "totalCards": 1163,
+    "enriched": 1156,
     "manifests": [
       "account-abstraction",
       "amm",
@@ -18316,7 +18316,7 @@
       "id": "sui-move-move-access-control--pattern-6-unverified-object-po-006",
       "title": "Pattern 6: Unverified Object/Pool Instance in Operations — move-acl-006",
       "severity": "HIGH",
-      "grep": "create_signer_with_capability|SignerCapability|authorization|OwnerCap|AdminCap|capability",
+      "grep": "transfer_collateral|calculate_reward|supply_pool_id|burn_from_pool",
       "detect": "Doesn't verify correct SupplyPool instance",
       "cat": [
         "general"
@@ -18324,17 +18324,260 @@
       "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
       "lines": [
         415,
-        511
+        461
       ],
       "check": [
-        "VERIFY: Doesn't verify correct SupplyPool instance",
+        "VERIFY: Doesn't verify correct SupplyPool instance"
+      ],
+      "antipattern": "Doesn't verify correct SupplyPool instance",
+      "securePattern": "Verify supply pool matches position's expected pool"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-7-publicly-exposed-sig-007",
+      "title": "Pattern 7: Publicly Exposed Signer Capability Enables Fund Theft — move-acl-007",
+      "severity": "CRITICAL",
+      "grep": "primary_fungible_store::withdraw|SignerCapability|coin::withdraw",
+      "detect": "Any caller can get the signer for any distribution",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        462,
+        497
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Any caller can get the signer for any distribution"
+      ],
+      "antipattern": "Any caller can get the signer for any distribution",
+      "securePattern": "Restrict signer access to friend modules only"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-8-excessive-admin-priv-008",
+      "title": "Pattern 8: Excessive Admin Privileges Beyond Intended Scope — move-acl-008",
+      "severity": "MEDIUM",
+      "grep": "set_reserve_configuration_with_guard|set_reserve_configuration|is_asset_listing_admin|ReserveConfigMap",
+      "detect": "Listing admin gets full config modify power",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        498,
+        541
+      ],
+      "check": [
+        "VERIFY: Listing admin gets full config modify power"
+      ],
+      "antipattern": "Listing admin gets full config modify power",
+      "securePattern": "Separate paths for different admin scopes"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-9-inverted-assertion-l-009",
+      "title": "Pattern 9: Inverted Assertion Logic Allows Prohibited Actions — move-acl-009",
+      "severity": "MEDIUM",
+      "grep": "add_wallet_by_investor|is_special_wallet|register_wallet|wallet_addr",
+      "detect": "Assertion is backwards — only special wallets pass",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        542,
+        576
+      ],
+      "check": [
+        "VERIFY: Assertion is backwards — only special wallets pass"
+      ],
+      "antipattern": "Assertion is backwards — only special wallets pass",
+      "securePattern": "Negated check blocks special wallets"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-10-signature-replay-in-010",
+      "title": "Pattern 10: Signature Replay in Claim Functions — move-acl-010",
+      "severity": "MEDIUM",
+      "grep": "claim_with_signature_safe|claim_with_signature|borrow_global_mut|verify_signature",
+      "detect": "No nonce prevents replaying the same signature",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        577,
+        630
+      ],
+      "check": [
+        "VERIFY: No nonce prevents replaying the same signature"
+      ],
+      "antipattern": "No nonce prevents replaying the same signature",
+      "securePattern": "Include nonce in signature and track used nonces"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-11-cumulative-claim-ex-011",
+      "title": "Pattern 11: Cumulative Claim Exceeds Entitlement — move-acl-011",
+      "severity": "CRITICAL",
+      "grep": "ENotEnoughBalanceUnlocked|tokens_transferred|calculate_unlocked|unlocked_tokens",
+      "detect": "Checks per-call, not cumulative",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        631,
+        672
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Checks per-call, not cumulative"
+      ],
+      "antipattern": "Checks per-call, not cumulative",
+      "securePattern": "Check cumulative claims against total unlocked"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-12-permissionless-func-012",
+      "title": "Pattern 12: Permissionless Function Before Time-Based Gate — move-acl-012",
+      "severity": "HIGH",
+      "grep": "prepare_fulfill_winner_safe|prepare_fulfill_winner|process_fulfillment|EDeadlineIsPassed",
+      "detect": "No identity check before penalty period",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        673,
+        713
+      ],
+      "check": [
+        "VERIFY: No identity check before penalty period"
+      ],
+      "antipattern": "No identity check before penalty period",
+      "securePattern": "Always enforce driver identity"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-13-missing-capability--013",
+      "title": "Pattern 13: Missing Capability-to-Object Ownership Validation — move-acl-013",
+      "severity": "MEDIUM",
+      "grep": "update_vault_version_safe|update_vault_version|vault_owner_cap|VaultOwnerCap",
+      "detect": "No check that cap belongs to this specific vault",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        714,
+        752
+      ],
+      "check": [
+        "VERIFY: No check that cap belongs to this specific vault"
+      ],
+      "antipattern": "No check that cap belongs to this specific vault",
+      "securePattern": "Validate cap ownership against vault"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-14-missing-approval-re-014",
+      "title": "Pattern 14: Missing Approval Revocation Mechanism — move-acl-014",
+      "severity": "LOW",
+      "grep": "generate_proof_as_depositor|balance_manager_id|borrow_global_mut|revoke_approval",
+      "detect": "Can add allowances but never remove them",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        753,
+        802
+      ],
+      "check": [
+        "VERIFY: Can add allowances but never remove them",
+        "ANTIPATTERN: Cap is created but never added to revocable list"
+      ],
+      "antipattern": "Cap is created but never added to revocable list",
+      "securePattern": "Track and allow revocation of approvals"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-15-front-running-paylo-015",
+      "title": "Pattern 15: Front-Running Payload Consumption to Block Legitimate Users — move-acl-015",
+      "severity": "MEDIUM",
+      "grep": "validate_and_store_payload|decode_mint_amount|verify_signatures|mint_with_payload",
+      "detect": "Anyone can call this to mark a payload as used",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        803,
+        851
+      ],
+      "check": [
+        "VERIFY: Anyone can call this to mark a payload as used"
+      ],
+      "antipattern": "Anyone can call this to mark a payload as used",
+      "securePattern": "Inline validation into the minting function"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-16-emergency-withdrawa-016",
+      "title": "Pattern 16: Emergency Withdrawal Bypasses Access Restrictions — move-acl-016",
+      "severity": "HIGH",
+      "grep": "create_resource_account|primary_fungible_store|emergency_withdrawal|resource_signer",
+      "detect": "Creator can bypass emergency restrictions via FA API",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        852,
+        887
+      ],
+      "check": [
+        "VERIFY: Creator can bypass emergency restrictions via FA API"
+      ],
+      "antipattern": "Creator can bypass emergency restrictions via FA API",
+      "securePattern": "Use a non-creator resource account as the store owner"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-17-group-role-id-reuse-017",
+      "title": "Pattern 17: Group/Role ID Reuse After Deletion — move-acl-017",
+      "severity": "LOW",
+      "grep": "add_group_safe|next_group_id|TokenPolicy|group_name",
+      "detect": "Group IDs can be reused after removal",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        888,
+        922
+      ],
+      "check": [
+        "VERIFY: Group IDs can be reused after removal"
+      ],
+      "antipattern": "Group IDs can be reused after removal",
+      "securePattern": "Use monotonically increasing IDs that are never reused"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-18-irrevocable-token-f-018",
+      "title": "Pattern 18: Irrevocable Token Freeze Without Unfreeze — move-acl-018",
+      "severity": "LOW",
+      "grep": "create_signer_with_capability|coin::freeze_coin_store|SignerCapability|authorization|OwnerCap|AdminCap",
+      "detect": "No corresponding unfreeze function",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        923,
+        1013
+      ],
+      "check": [
+        "VERIFY: No corresponding unfreeze function",
         "All public functions returning signers are friend-only or internal",
         "Every state-modifying public function has authorization check",
         "Role checks use AND for higher privilege, not OR",
         "LOOK FOR: Pattern 1: `public fun` returning `signer` or exposing signer capability"
       ],
-      "antipattern": "Doesn't verify correct SupplyPool instance",
-      "securePattern": "Verify supply pool matches position's expected pool"
+      "antipattern": "No corresponding unfreeze function",
+      "securePattern": "Provide both freeze and unfreeze capabilities"
     },
     {
       "id": "sui-move-move-arithmetic-prec-move-arithmetic-and-precision--000",
@@ -18347,8 +18590,8 @@
       ],
       "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
       "lines": [
-        51,
-        71
+        54,
+        74
       ],
       "check": [
         "VERIFY: Move uses unsigned integers (u8, u64, u128, u256) that abort on overflow/underflow rather than wrapping."
@@ -18365,8 +18608,8 @@
       ],
       "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
       "lines": [
-        72,
-        158
+        75,
+        161
       ],
       "neverPrune": true,
       "check": [
@@ -18387,8 +18630,8 @@
       ],
       "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
       "lines": [
-        159,
-        213
+        162,
+        216
       ],
       "check": [
         "VERIFY: Division before multiplication loses precision"
@@ -18407,8 +18650,8 @@
       ],
       "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
       "lines": [
-        214,
-        279
+        217,
+        282
       ],
       "check": [
         "VERIFY: No guard against zero reserve in division",
@@ -18428,8 +18671,8 @@
       ],
       "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
       "lines": [
-        280,
-        343
+        283,
+        346
       ],
       "check": [
         "VERIFY: Rounding to 1 causes overpayment",
@@ -18449,8 +18692,8 @@
       ],
       "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
       "lines": [
-        344,
-        389
+        347,
+        392
       ],
       "check": [
         "VERIFY: Overflow when token_amount * fee_bips exceeds u64::MAX"
@@ -18469,8 +18712,8 @@
       ],
       "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
       "lines": [
-        390,
-        464
+        393,
+        467
       ],
       "neverPrune": true,
       "check": [
@@ -18491,8 +18734,8 @@
       ],
       "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
       "lines": [
-        465,
-        508
+        468,
+        511
       ],
       "neverPrune": true,
       "check": [
@@ -18505,25 +18748,311 @@
       "id": "sui-move-move-arithmetic-prec-pattern-8-fee-accounting-denom-008",
       "title": "Pattern 8: Fee Accounting Denomination Errors — move-arith-008",
       "severity": "HIGH",
-      "grep": "safe_mul_div|MAX_U64|truncation|mul_div|arithmetic|underflow",
+      "grep": "calculate_deep_fee|calculate_base_fee|pay_with_deep|deep_quantity",
       "detect": "Fallthrough when deep_quantity is zero",
       "cat": [
         "general"
       ],
       "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
       "lines": [
-        509,
-        618
+        512,
+        567
       ],
       "check": [
         "VERIFY: Fallthrough when deep_quantity is zero",
+        "ANTIPATTERN: Returns 0 when fee_bips == MAX_FEE_BIPS"
+      ],
+      "antipattern": "Returns 0 when fee_bips == MAX_FEE_BIPS",
+      "securePattern": "Handle all fee denomination cases explicitly"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-9-rounding-assertion-f-009",
+      "title": "Pattern 9: Rounding Assertion Failure in Token Conversions — move-arith-009",
+      "severity": "MEDIUM",
+      "grep": "EInvalidCTokenRatio|convert_to_ctokens|amount_to_recall|recalled_amount",
+      "detect": "Strict inequality doesn't account for rounding",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        568,
+        626
+      ],
+      "check": [
+        "VERIFY: Strict inequality doesn't account for rounding",
+        "ANTIPATTERN: Two branches with different scaling yield different results"
+      ],
+      "antipattern": "Two branches with different scaling yield different results",
+      "securePattern": "Use tolerance-based comparison or consistent scaling"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-10-overestimation-from-010",
+      "title": "Pattern 10: Overestimation from Rounding Up in Deposit Calculations — move-arith-010",
+      "severity": "MEDIUM",
+      "grep": "mul_div_up|tokens_to_deposit_safe|tokens_to_deposit|safe_mul_div_up",
+      "detect": "safe_mul_div_up rounds up, causing overestimation",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        627,
+        673
+      ],
+      "check": [
+        "VERIFY: safe_mul_div_up rounds up, causing overestimation"
+      ],
+      "antipattern": "safe_mul_div_up rounds up, causing overestimation",
+      "securePattern": "Round down for amounts taken from users"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-11-fee-calculation-ove-011",
+      "title": "Pattern 11: Fee Calculation Overflow in Basis Point Multiplication — move-arith-011",
+      "severity": "MEDIUM",
+      "grep": "calculate_available_dividends|distributor_address|token_transferred|unlocked_supply",
+      "detect": "u64 multiplication overflows for large amounts",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        674,
+        718
+      ],
+      "check": [
+        "VERIFY: u64 multiplication overflows for large amounts"
+      ],
+      "antipattern": "u64 multiplication overflows for large amounts",
+      "securePattern": "Use u128 intermediate calculation"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-12-overpayment-from-mi-012",
+      "title": "Pattern 12: Overpayment from Minimum Share Rounding — move-arith-012",
+      "severity": "HIGH",
+      "grep": "compute_unstake_shares_safe|compute_unstake_shares|exchange_rate|Overpayment",
+      "detect": "Setting shares to 1 overpays at high exchange rates",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        719,
+        756
+      ],
+      "check": [
+        "VERIFY: Setting shares to 1 overpays at high exchange rates"
+      ],
+      "antipattern": "Setting shares to 1 overpays at high exchange rates",
+      "securePattern": "Abort on zero shares instead of rounding up"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-13-subtraction-underfl-013",
+      "title": "Pattern 13: Subtraction Underflow in Time/Balance Difference Calculations — move-arith-013",
+      "severity": "LOW",
+      "grep": "get_compliance_transferable_tokens_safe|get_compliance_transferable_tokens|old_epoch_used_capacity|deny_list_size",
+      "detect": "Subtraction executes before guard check",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        757,
+        798
+      ],
+      "check": [
+        "VERIFY: Subtraction executes before guard check",
+        "ANTIPATTERN: deny_list_size may exceed old_epoch_used_capacity"
+      ],
+      "antipattern": "deny_list_size may exceed old_epoch_used_capacity",
+      "securePattern": "Check before subtracting"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-14-mutable-local-copy--014",
+      "title": "Pattern 14: Mutable Local Copy Instead of Dereference in State Update — move-arith-014",
+      "severity": "CRITICAL",
+      "grep": "mint_and_transfer_safe|EMintLimitExceeded|mint_and_transfer|get_cap_mut",
+      "detect": "`mut left` is a local copy, not a mutable reference",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        799,
+        842
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: `mut left` is a local copy, not a mutable reference"
+      ],
+      "antipattern": "`mut left` is a local copy, not a mutable reference",
+      "securePattern": "Dereference to update stored value"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-15-variable-shadowing--015",
+      "title": "Pattern 15: Variable Shadowing Corrupts Recorded Values — move-arith-015",
+      "severity": "MEDIUM",
+      "grep": "_value|create_issuance_information|PendingLtvChanged|pending_ltv_set",
+      "detect": "`let value = 0` shadows the `_value` parameter",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        843,
+        894
+      ],
+      "check": [
+        "VERIFY: `let value = 0` shadows the `_value` parameter"
+      ],
+      "antipattern": "`let value = 0` shadows the `_value` parameter",
+      "securePattern": "Assign to existing variable instead of re-declaring"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-16-negative-to-unsigne-016",
+      "title": "Pattern 16: Negative-to-Unsigned Conversion Produces Incorrect Magnitude — move-arith-016",
+      "severity": "HIGH",
+      "grep": "ifixed::to_balance|ifixed|base",
+      "detect": "Negative `base` produces inflated u64 from to_balance",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        895,
+        937
+      ],
+      "check": [
+        "VERIFY: Negative `base` produces inflated u64 from to_balance",
+        "ANTIPATTERN: Accumulated slippage can make balance_to_withdraw negative"
+      ],
+      "antipattern": "Accumulated slippage can make balance_to_withdraw negative",
+      "securePattern": "Check sign before conversion"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-17-division-by-zero-in-017",
+      "title": "Pattern 17: Division by Zero in Pool/Staking Operations — move-arith-017",
+      "severity": "MEDIUM",
+      "grep": "calculate_capacity_vote_safe|calculate_capacity_vote|tokens_to_deposit|safe_mul_div_up",
+      "detect": "weight can be 0 for low-stake nodes",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        938,
+        981
+      ],
+      "check": [
+        "VERIFY: weight can be 0 for low-stake nodes",
+        "ANTIPATTERN: reserve_a can be 0 if pool is fully drained"
+      ],
+      "antipattern": "reserve_a can be 0 if pool is fully drained",
+      "securePattern": "Guard against zero denominators"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-18-incorrect-round-up--018",
+      "title": "Pattern 18: Incorrect `round_up` Division Overflow — move-arith-018",
+      "severity": "LOW",
+      "grep": "u256::MAX|u128::MAX|round_up",
+      "detect": "a + b - 1 can overflow",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        982,
+        1014
+      ],
+      "check": [
+        "VERIFY: a + b - 1 can overflow"
+      ],
+      "antipattern": "a + b - 1 can overflow",
+      "securePattern": "Avoid intermediate overflow"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-19-overflow-in-signed--019",
+      "title": "Pattern 19: Overflow in Signed Fixed-Point Multiplication Check — move-arith-019",
+      "severity": "MEDIUM",
+      "grep": "GREATEST_BIT|from_u256balance_safe|from_u256balance|scaling_factor",
+      "detect": "Treats sign bit as overflow",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        1015,
+        1058
+      ],
+      "check": [
+        "VERIFY: Treats sign bit as overflow"
+      ],
+      "antipattern": "Treats sign bit as overflow",
+      "securePattern": "Separate overflow check from sign handling"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-20-zero-mint-after-fix-020",
+      "title": "Pattern 20: Zero Mint After Fixed-Point Precision Loss — move-arith-020",
+      "severity": "LOW",
+      "grep": "end_deposit_session_safe|end_deposit_session|mint_lp_balance|to_balance",
+      "detect": "Non-zero fixed-point can become zero after conversion",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        1059,
+        1097
+      ],
+      "check": [
+        "VERIFY: Non-zero fixed-point can become zero after conversion"
+      ],
+      "antipattern": "Non-zero fixed-point can become zero after conversion",
+      "securePattern": "Check after conversion to actual balance"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-21-faulty-constant-def-021",
+      "title": "Pattern 21: Faulty Constant Definition Corrupts Bit Manipulation — move-arith-021",
+      "severity": "HIGH",
+      "grep": "MAX_U64|least_significant_bit|test_max_u64|Manipulation",
+      "detect": "15 hex chars instead of 16",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        1098,
+        1142
+      ],
+      "check": [
+        "VERIFY: 15 hex chars instead of 16"
+      ],
+      "antipattern": "15 hex chars instead of 16",
+      "securePattern": "Verified constant with proper digit count"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-22-excess-recall-withd-022",
+      "title": "Pattern 22: Excess Recall/Withdrawal Rounded Beyond Available Reserves — move-arith-022",
+      "severity": "MEDIUM",
+      "grep": "ifixed::to_balance(negative_value|ifixed::to_balance|mul_div_up|MAX_U64|dereference|mul_div",
+      "detect": "Rounding up can exceed available funds",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        1143,
+        1253
+      ],
+      "check": [
+        "VERIFY: Rounding up can exceed available funds",
         "Verify scaling functions are applied exactly once per calculation path",
         "Check all division operations have zero-denominator guards",
         "Confirm multiplication happens before division in multi-step calculations",
         "LOOK FOR: Pattern 1: `upscale` or `scale` called more than once on same variable"
       ],
-      "antipattern": "Returns 0 when fee_bips == MAX_FEE_BIPS",
-      "securePattern": "Handle all fee denomination cases explicitly"
+      "antipattern": "Rounding up can exceed available funds",
+      "securePattern": "Cap rounded amount to available reserves"
     },
     {
       "id": "sui-move-move-cross-chain-bri-move-cross-chain-and-bridge-vu-000",
@@ -18652,7 +19181,7 @@
       "id": "sui-move-move-cross-chain-bri-pattern-6-fund-loss-via-object-006",
       "title": "Pattern 6: Fund Loss via Object ID Transfer — move-bridge-006",
       "severity": "HIGH",
-      "grep": "validate_and_store_payload|transfer::public_transfer|configure_validator_set|verify_signature|lz_receive|layerzero",
+      "grep": "transfer::public_transfer|is_valid_user_address|public_transfer|id_to_address",
       "detect": "Gas recipient may be an object ID, not an address",
       "cat": [
         "general"
@@ -18660,17 +19189,138 @@
       "ref": "DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
       "lines": [
         412,
-        518
+        467
       ],
       "check": [
-        "VERIFY: Gas recipient may be an object ID, not an address",
+        "VERIFY: Gas recipient may be an object ID, not an address"
+      ],
+      "antipattern": "Gas recipient may be an object ID, not an address",
+      "securePattern": "Validate recipient is a user address, not object ID"
+    },
+    {
+      "id": "sui-move-move-cross-chain-bri-pattern-7-missing-version-chec-007",
+      "title": "Pattern 7: Missing Version Check in Admin Functions — move-bridge-007",
+      "severity": "HIGH",
+      "grep": "borrow_global_mut|peer_address|BridgeState|set_peer",
+      "detect": "No version gate on admin function",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        468,
+        499
+      ],
+      "check": [
+        "VERIFY: No version gate on admin function"
+      ],
+      "antipattern": "No version gate on admin function",
+      "securePattern": "Version-gated admin function"
+    },
+    {
+      "id": "sui-move-move-cross-chain-bri-pattern-8-cross-chain-replay-f-008",
+      "title": "Pattern 8: Cross-Chain Replay from Missing Chain ID — move-bridge-008",
+      "severity": "CRITICAL",
+      "grep": "mint_bridged_tokens|verify_signatures|receive_message|decode_transfer",
+      "detect": "No chain ID in message verification",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        500,
+        545
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: No chain ID in message verification"
+      ],
+      "antipattern": "No chain ID in message verification",
+      "securePattern": "Validate destination chain ID"
+    },
+    {
+      "id": "sui-move-move-cross-chain-bri-pattern-9-transceiver-id-overf-009",
+      "title": "Pattern 9: Transceiver ID Overflow Past Bitmap Limit — move-bridge-009",
+      "severity": "HIGH",
+      "grep": "register_transceiver|next_transceiver_id|enabled_bitmap|ManagerState",
+      "detect": "No check that ID fits in bitmap",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        546,
+        585
+      ],
+      "check": [
+        "VERIFY: No check that ID fits in bitmap"
+      ],
+      "antipattern": "No check that ID fits in bitmap",
+      "securePattern": "Validate transceiver ID fits in bitmap"
+    },
+    {
+      "id": "sui-move-move-cross-chain-bri-pattern-10-inconsistent-deadli-010",
+      "title": "Pattern 10: Inconsistent Deadline Checks Across Chains — move-bridge-010",
+      "severity": "MEDIUM",
+      "grep": "epoch_timestamp_ms|current_time_s|fulfill_order|process_swap",
+      "detect": "Deadline comparison uses wrong time unit",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        586,
+        618
+      ],
+      "check": [
+        "VERIFY: Deadline comparison uses wrong time unit"
+      ],
+      "antipattern": "Deadline comparison uses wrong time unit",
+      "securePattern": "Normalize time units before comparison"
+    },
+    {
+      "id": "sui-move-move-cross-chain-bri-pattern-11-zero-value-burn-wit-011",
+      "title": "Pattern 11: Zero-Value Burn Without Supply Validation — move-bridge-011",
+      "severity": "MEDIUM",
+      "grep": "emit_cross_chain_message|min_bridge_amount|burn_and_bridge|BridgeState",
+      "detect": "Zero-value burn emits valid cross-chain message",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        619,
+        661
+      ],
+      "check": [
+        "VERIFY: Zero-value burn emits valid cross-chain message"
+      ],
+      "antipattern": "Zero-value burn emits valid cross-chain message",
+      "securePattern": "Require minimum burn amount"
+    },
+    {
+      "id": "sui-move-move-cross-chain-bri-pattern-12-deserialization-acc-012",
+      "title": "Pattern 12: Deserialization Access Control Bypass — move-bridge-012",
+      "severity": "HIGH",
+      "grep": "validate_and_store_payload|transfer::public_transfer|configure_validator_set|clock::timestamp_ms|decode_message|timestamp_ms",
+      "detect": "Public deserialization without authentication",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        662,
+        767
+      ],
+      "check": [
+        "VERIFY: Public deserialization without authentication",
         "Payload validation and minting are atomic (single function)",
         "Validator set checks: no duplicates, key length, threshold ≤ total weight",
         "All incoming cross-chain messages validated for schema and source",
         "LOOK FOR: Pattern 1: `public fun validate_and_store_payload` separate from mint"
       ],
-      "antipattern": "Gas recipient may be an object ID, not an address",
-      "securePattern": "Validate recipient is a user address, not object ID"
+      "antipattern": "Public deserialization without authentication",
+      "securePattern": "Deserialization is friend-only; execution requires proof"
     },
     {
       "id": "sui-move-move-defi-protocol-l-move-defi-protocol-logic-vulne-000",
@@ -18861,7 +19511,7 @@
       "id": "sui-move-move-defi-protocol-l-pattern-9-incorrect-withdrawal-009",
       "title": "Pattern 9: Incorrect Withdrawal/Vesting Abort Conditions — move-defi-009",
       "severity": "HIGH",
-      "grep": "timestamp::now_seconds|to_balance|to_u64|withdraw|upscale|auction",
+      "grep": "get_minimum_pending_inactive|minimum_pending_inactive|process_withdrawal|withdrawal_count",
       "detect": "Assumes amount > minimum_pending_inactive threshold",
       "cat": [
         "general"
@@ -18869,17 +19519,279 @@
       "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
       "lines": [
         562,
-        682
+        624
       ],
       "check": [
-        "VERIFY: Assumes amount > minimum_pending_inactive threshold",
+        "VERIFY: Assumes amount > minimum_pending_inactive threshold"
+      ],
+      "antipattern": "Assumes amount > minimum_pending_inactive threshold",
+      "securePattern": "Validate amount > 0, handle edge cases"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-10-reward-accumulation-010",
+      "title": "Pattern 10: Reward Accumulation During Inactive/Paused Periods — move-defi-010",
+      "severity": "MEDIUM",
+      "grep": "update_reward_infos|rewards_per_second|reward_per_seconds|current_timestamp",
+      "detect": "Inactive time included in reward calculation",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        625,
+        668
+      ],
+      "check": [
+        "VERIFY: Inactive time included in reward calculation"
+      ],
+      "antipattern": "Inactive time included in reward calculation",
+      "securePattern": "Reset last_update_time when restarting rewards"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-11-tolerance-check-byp-011",
+      "title": "Pattern 11: Tolerance Check Bypass via Forced Withdrawal Path — move-defi-011",
+      "severity": "CRITICAL",
+      "grep": "close_all_positions_with_market_orders|process_force_withdraw_safe|calculate_final_balance|process_force_withdraw",
+      "detect": "Force withdraw skips tolerance validation",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        669,
+        710
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Force withdraw skips tolerance validation"
+      ],
+      "antipattern": "Force withdraw skips tolerance validation",
+      "securePattern": "Enforce tolerance even in forced withdrawal"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-12-lp-fee-manipulation-012",
+      "title": "Pattern 12: LP Fee Manipulation via Split/Merge Rounding — move-defi-012",
+      "severity": "MEDIUM",
+      "grep": "provided_value_usd|current_vault_value|split_user_lp_coin|total_lp_supply",
+      "detect": "Repeated splits cause rounding loss in provided_value_usd",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        711,
+        752
+      ],
+      "check": [
+        "VERIFY: Repeated splits cause rounding loss in provided_value_usd"
+      ],
+      "antipattern": "Repeated splits cause rounding loss in provided_value_usd",
+      "securePattern": "Use actual LP balance ratio at withdrawal time for fees"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-13-boolean-logic-error-013",
+      "title": "Pattern 13: Boolean Logic Error in Time/Condition Checks — move-defi-013",
+      "severity": "CRITICAL",
+      "grep": "is_block_flowback_end_time_ok|block_flowback_end_time|now_seconds|end_time",
+      "detect": "|| makes the function always return true when end_time !",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        753,
+        787
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: || makes the function always return true when end_time !"
+      ],
+      "antipattern": "|| makes the function always return true when end_time != 0",
+      "securePattern": "Use AND to require both conditions"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-14-buffer-pool-drainag-014",
+      "title": "Pattern 14: Buffer/Pool Drainage from Asymmetric Mint-Burn Accounting — move-defi-014",
+      "severity": "HIGH",
+      "grep": "amount_needed|ensure_minimum_amounts_from_buffer|ensure_minimum_amounts_safe|min_pending_inactive",
+      "detect": "Burns `amount_needed` but mints `amount_needed - fee`",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        788,
+        831
+      ],
+      "check": [
+        "VERIFY: Burns `amount_needed` but mints `amount_needed - fee`"
+      ],
+      "antipattern": "Burns `amount_needed` but mints `amount_needed - fee`",
+      "securePattern": "Symmetric mint and burn amounts"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-15-validator-operator--015",
+      "title": "Pattern 15: Validator/Operator Removal Without Stake Migration — move-defi-015",
+      "severity": "HIGH",
+      "grep": "get_validator_total_stake|remove_validator_safe|borrow_global_mut|remove_validator",
+      "detect": "No stake migration when validator is removed",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        832,
+        871
+      ],
+      "check": [
+        "VERIFY: No stake migration when validator is removed"
+      ],
+      "antipattern": "No stake migration when validator is removed",
+      "securePattern": "Migrate stakes before removal"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-16-price-boundary-chec-016",
+      "title": "Pattern 16: Price Boundary Check Allows Swap Beyond Limits — move-defi-016",
+      "severity": "MEDIUM",
+      "grep": "current_sqrt_price|sqrt_price_limit|min_sqrt_price|max_sqrt_price",
+      "detect": ">= allows price at exact boundary",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        872,
+        919
+      ],
+      "check": [
+        "VERIFY: >= allows price at exact boundary"
+      ],
+      "antipattern": ">= allows price at exact boundary",
+      "securePattern": "Strict inequalities prevent boundary state"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-17-incorrect-commissio-017",
+      "title": "Pattern 17: Incorrect Commission/Fee Rate Applied During Epoch Transitions — move-defi-017",
+      "severity": "HIGH",
+      "grep": "pending_commission_rate|transfer_commission|advance_epoch_safe|commission_rate",
+      "detect": "Applies new commission rate to current epoch rewards",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        920,
+        959
+      ],
+      "check": [
+        "VERIFY: Applies new commission rate to current epoch rewards"
+      ],
+      "antipattern": "Applies new commission rate to current epoch rewards",
+      "securePattern": "Calculate with old rate, then update"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-18-stake-threshold-byp-018",
+      "title": "Pattern 18: Stake Threshold Bypass via Post-Registration Withdrawal — move-defi-018",
+      "severity": "MEDIUM",
+      "grep": "update|new_staked_amount|minimum_threshold|staked_amount",
+      "detect": "update doesn't validate minimum threshold",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        960,
+        1006
+      ],
+      "check": [
+        "VERIFY: update doesn't validate minimum threshold"
+      ],
+      "antipattern": "update doesn't validate minimum threshold",
+      "securePattern": "Enforce threshold on update"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-19-uncapped-minting-dr-019",
+      "title": "Pattern 19: Uncapped Minting Drains Reward Pools — move-defi-019",
+      "severity": "MEDIUM",
+      "grep": "acc_rewards_per_share|primary_fungible_store|update_epoch_minted|minted_this_epoch",
+      "detect": "No cap or rate limit on minting",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        1007,
+        1048
+      ],
+      "check": [
+        "VERIFY: No cap or rate limit on minting"
+      ],
+      "antipattern": "No cap or rate limit on minting",
+      "securePattern": "Rate-limited minting per epoch"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-20-snapshot-integrity--020",
+      "title": "Pattern 20: Snapshot Integrity Compromised by Token Merge During Capture — move-defi-020",
+      "severity": "HIGH",
+      "grep": "is_snapshot_active|SharedToken|join_safe|Compromised",
+      "detect": "No lock on token operations during snapshot",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        1049,
+        1087
+      ],
+      "check": [
+        "VERIFY: No lock on token operations during snapshot"
+      ],
+      "antipattern": "No lock on token operations during snapshot",
+      "securePattern": "Block merges during active snapshots"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-21-frontrunning-pool-c-021",
+      "title": "Pattern 21: Frontrunning Pool Creation for Matched Funds — move-defi-021",
+      "severity": "MEDIUM",
+      "grep": "create_pool_safe|get_pool_count|register_pool|total_supply",
+      "detect": "No limit on pools per address",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        1088,
+        1130
+      ],
+      "check": [
+        "VERIFY: No limit on pools per address"
+      ],
+      "antipattern": "No limit on pools per address",
+      "securePattern": "Limit pools per address"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-22-cliff-timestamp-not-022",
+      "title": "Pattern 22: Cliff Timestamp Not Included in Fully-Unlocked Calculation — move-defi-022",
+      "severity": "MEDIUM",
+      "grep": "fully_unlocked_timestamp|cancel_schedule_interval|timestamp::now_seconds|cliff_timestamp|to_balance|to_u64",
+      "detect": "Ignores cliff_timestamp in fully-unlocked calculation",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        1131,
+        1228
+      ],
+      "check": [
+        "VERIFY: Ignores cliff_timestamp in fully-unlocked calculation",
         "Reward programs snapshot accumulated state before restart",
         "All withdrawal paths check post-withdrawal solvency",
         "Flashloan repayment compared at same scaling level",
         "LOOK FOR: Pattern 1: Reward initialization with `timestamp::now_seconds()` in add_program"
       ],
-      "antipattern": "Assumes amount > minimum_pending_inactive threshold",
-      "securePattern": "Validate amount > 0, handle edge cases"
+      "antipattern": "Ignores cliff_timestamp in fully-unlocked calculation",
+      "securePattern": "Include cliff in fully-unlocked calculation"
     },
     {
       "id": "sui-move-move-denial-of-servi-move-denial-of-service-vulnera-000",
@@ -19048,7 +19960,7 @@
       "id": "sui-move-move-denial-of-servi-pattern-8-missing-parameter-va-008",
       "title": "Pattern 8: Missing Parameter Validation Causing Protocol Halt — move-dos-008",
       "severity": "HIGH",
-      "grep": "primary_fungible_store::ensure_primary_store_exists|create_resource_account|SmartTable|event::emit|griefing|DoS",
+      "grep": "set_commission_rate|set_node_capacity|commission_rate|node_capacity",
       "detect": "Commission rate not bounded",
       "cat": [
         "general"
@@ -19056,17 +19968,523 @@
       "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
       "lines": [
         500,
-        598
+        544
       ],
       "check": [
-        "VERIFY: Commission rate not bounded",
+        "VERIFY: Commission rate not bounded"
+      ],
+      "antipattern": "Commission rate not bounded",
+      "securePattern": "Validate all parameters at entry"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-9-unbounded-map-growth-009",
+      "title": "Pattern 9: Unbounded Map Growth in Reward Tracking — move-dos-009",
+      "severity": "HIGH",
+      "grep": "SmartTable|SimpleMap",
+      "detect": "Unbounded map iterated during liquidation",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        545,
+        591
+      ],
+      "check": [
+        "VERIFY: Unbounded map iterated during liquidation"
+      ],
+      "antipattern": "Unbounded map iterated during liquidation",
+      "securePattern": "Paginated reward iteration with max per-call limit"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-10-hash-collision-buck-010",
+      "title": "Pattern 10: Hash Collision Bucket Overload — move-dos-010",
+      "severity": "HIGH",
+      "grep": "SmartTable|create_position_index|split_load_threshold|num_initial_buckets",
+      "detect": "SmartTable with user-controlled keys",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        592,
+        630
+      ],
+      "check": [
+        "VERIFY: SmartTable with user-controlled keys"
+      ],
+      "antipattern": "SmartTable with user-controlled keys",
+      "securePattern": "Use split_load_threshold to limit bucket depth"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-11-division-by-zero-on-011",
+      "title": "Pattern 11: Division by Zero on Empty State — move-dos-011",
+      "severity": "HIGH",
+      "grep": "total_collateral_tokens|calculate_exchange_rate|available_amount|total_supply",
+      "detect": "Division by total supply without zero-check",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        631,
+        664
+      ],
+      "check": [
+        "VERIFY: Division by total supply without zero-check"
+      ],
+      "antipattern": "Division by total supply without zero-check",
+      "securePattern": "Return 1:1 rate when supply is zero"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-12-front-running-deplo-012",
+      "title": "Pattern 12: Front-Running Deployment Blocking Initialization — move-dos-012",
+      "severity": "HIGH",
+      "grep": "create_resource_account|now_microseconds|resource_signer|movedrop_vault",
+      "detect": "Predictable seed allows front-running",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        665,
+        700
+      ],
+      "check": [
+        "VERIFY: Predictable seed allows front-running"
+      ],
+      "antipattern": "Predictable seed allows front-running",
+      "securePattern": "Include unpredictable component in seed"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-13-epoch-transition-im-013",
+      "title": "Pattern 13: Epoch Transition Imbalance Abort — move-dos-013",
+      "severity": "MEDIUM",
+      "grep": "pending_deposits|confirmed_stakes|advance_epoch|StakingPool",
+      "detect": "Assertion fails on transient imbalance",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        701,
+        737
+      ],
+      "check": [
+        "VERIFY: Assertion fails on transient imbalance"
+      ],
+      "antipattern": "Assertion fails on transient imbalance",
+      "securePattern": "Allow transient imbalance, reconcile during transition"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-14-unnecessary-asserti-014",
+      "title": "Pattern 14: Unnecessary Assertion Causing Protocol Lockup — move-dos-014",
+      "severity": "HIGH",
+      "grep": "process_withdrawal|HighRatioWarning|total_staked|total_shares",
+      "detect": "Ratio bound blocks normal operation",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        738,
+        772
+      ],
+      "check": [
+        "VERIFY: Ratio bound blocks normal operation"
+      ],
+      "antipattern": "Ratio bound blocks normal operation",
+      "securePattern": "Use ratio for validation, not hard abort"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-15-object-size-limit-e-015",
+      "title": "Pattern 15: Object Size Limit Exceeded — move-dos-015",
+      "severity": "MEDIUM",
+      "grep": "historical_members|CommitteeState|dynamic_field|current_epoch",
+      "detect": "Unbounded vector inside shared object",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        773,
+        815
+      ],
+      "check": [
+        "VERIFY: Unbounded vector inside shared object"
+      ],
+      "antipattern": "Unbounded vector inside shared object",
+      "securePattern": "Use dynamic fields or table for unbounded data"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-16-zero-value-deposit--016",
+      "title": "Pattern 16: Zero-Value Deposit Disabling Withdrawals — move-dos-016",
+      "severity": "HIGH",
+      "grep": "primary_fungible_store::balance|PrimaryFungibleStore",
+      "detect": "Zero-value deposit creates store, blocks withdrawals",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        816,
+        855
+      ],
+      "check": [
+        "VERIFY: Zero-value deposit creates store, blocks withdrawals"
+      ],
+      "antipattern": "Zero-value deposit creates store, blocks withdrawals",
+      "securePattern": "Check specific asset balance, ignore unrelated stores"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-17-mint-limit-exhausti-017",
+      "title": "Pattern 17: Mint Limit Exhaustion via Cycling — move-dos-017",
+      "severity": "HIGH",
+      "grep": "mint_bridged_token|minted_this_epoch|public_transfer|treasury_cap",
+      "detect": "Mint limit only checks cumulative mints, ignoring burns",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        856,
+        890
+      ],
+      "check": [
+        "VERIFY: Mint limit only checks cumulative mints, ignoring burns"
+      ],
+      "antipattern": "Mint limit only checks cumulative mints, ignoring burns",
+      "securePattern": "Track net mints (mints minus burns) against limit"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-18-commission-rate-ove-018",
+      "title": "Pattern 18: Commission Rate Overflow Blocking Epoch — move-dos-018",
+      "severity": "HIGH",
+      "grep": "primary_fungible_store::ensure_primary_store_exists|primary_fungible_store::balance|create_resource_account|primary_fungible_store|split_load_threshold|smart_table::borrow",
+      "detect": "Commission rate not bounded at entry",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        891,
+        998
+      ],
+      "check": [
+        "VERIFY: Commission rate not bounded at entry",
         "All vector iterations have bounded gas cost or pagination",
         "Resource account seeds include unpredictable components",
         "Event emission in loops bounded by constant or batch size",
         "LOOK FOR: Pattern 1: `while (i < vector::length(...))` in functions called by liquidate/withdraw"
       ],
-      "antipattern": "Commission rate not bounded",
-      "securePattern": "Validate all parameters at entry"
+      "antipattern": "Commission rate not bounded at entry",
+      "securePattern": "Bound commission rate at the setter"
+    },
+    {
+      "id": "sui-move-move-event-configura-pattern-1-missing-events-for-c-001",
+      "title": "Pattern 1: Missing Events for Critical State Changes — move-evtcfg-001",
+      "severity": "CRITICAL",
+      "grep": "LiquidationBonusChanged|update_interest_model|set_liquidation_bonus|liquidation_bonus",
+      "detect": "No event on critical admin change",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md",
+      "lines": [
+        64,
+        115
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: No event on critical admin change"
+      ],
+      "antipattern": "No event on critical admin change",
+      "securePattern": "Emit event for every critical change"
+    },
+    {
+      "id": "sui-move-move-event-configura-pattern-2-misleading-event-typ-002",
+      "title": "Pattern 2: Misleading Event Type in Emissions — move-evtcfg-002",
+      "severity": "LOW",
+      "grep": "coin_out_type|coin_in_type|amount_out|SwapEvent",
+      "detect": "Event uses wrong type for a field",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md",
+      "lines": [
+        116,
+        162
+      ],
+      "check": [
+        "VERIFY: Event uses wrong type for a field"
+      ],
+      "antipattern": "Event uses wrong type for a field",
+      "securePattern": "Event uses proper types"
+    },
+    {
+      "id": "sui-move-move-event-configura-pattern-3-event-emission-on-no-003",
+      "title": "Pattern 3: Event Emission on No-Op State Change — move-evtcfg-003",
+      "severity": "LOW",
+      "grep": "ReserveFactorChanged|set_reserve_factor|reserve_factor|old_factor",
+      "detect": "Event emitted even when value unchanged",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md",
+      "lines": [
+        163,
+        196
+      ],
+      "check": [
+        "VERIFY: Event emitted even when value unchanged"
+      ],
+      "antipattern": "Event emitted even when value unchanged",
+      "securePattern": "Only emit on actual state change"
+    },
+    {
+      "id": "sui-move-move-event-configura-pattern-4-fee-annotation-misma-004",
+      "title": "Pattern 4: Fee Annotation Mismatch with Actual Calculation — move-evtcfg-004",
+      "severity": "HIGH",
+      "grep": "calculate_fee|Calculation|Vulnerable|References",
+      "detect": "Fee labeled as bps but calculated differently",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md",
+      "lines": [
+        197,
+        230
+      ],
+      "check": [
+        "VERIFY: Fee labeled as bps but calculated differently"
+      ],
+      "antipattern": "Fee labeled as bps but calculated differently",
+      "securePattern": "Fee precision matches annotation"
+    },
+    {
+      "id": "sui-move-move-event-configura-pattern-5-liquidation-bonus-co-005",
+      "title": "Pattern 5: Liquidation Bonus Configuration Exceeding Bounds — move-evtcfg-005",
+      "severity": "HIGH",
+      "grep": "set_liquidation_params|liquidation_threshold|liquidation_bonus|threshold_bps",
+      "detect": "No upper bound on liquidation bonus",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md",
+      "lines": [
+        231,
+        274
+      ],
+      "check": [
+        "VERIFY: No upper bound on liquidation bonus"
+      ],
+      "antipattern": "No upper bound on liquidation bonus",
+      "securePattern": "Validate bonus + threshold don't exceed 100%"
+    },
+    {
+      "id": "sui-move-move-event-configura-pattern-6-cooldown-bypass-via--006",
+      "title": "Pattern 6: Cooldown Bypass via Timestamp Manipulation — move-evtcfg-006",
+      "severity": "MEDIUM",
+      "grep": "effective_cooldown|last_stake_time|cooldown_period|current_time",
+      "detect": "Cooldown checked with >= instead of >",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md",
+      "lines": [
+        275,
+        310
+      ],
+      "check": [
+        "VERIFY: Cooldown checked with >= instead of >"
+      ],
+      "antipattern": "Cooldown checked with >= instead of >",
+      "securePattern": "Strict inequality and minimum period"
+    },
+    {
+      "id": "sui-move-move-event-configura-pattern-7-missing-approval-rev-007",
+      "title": "Pattern 7: Missing Approval Revocation Function — move-evtcfg-007",
+      "severity": "MEDIUM",
+      "grep": "approved_operators|borrow_global_mut|OperatorApproved|approve_operator",
+      "detect": "Approval set but no revoke function exists",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md",
+      "lines": [
+        311,
+        350
+      ],
+      "check": [
+        "VERIFY: Approval set but no revoke function exists"
+      ],
+      "antipattern": "Approval set but no revoke function exists",
+      "securePattern": "Both approve and revoke available"
+    },
+    {
+      "id": "sui-move-move-event-configura-pattern-8-dispatchable-token-s-008",
+      "title": "Pattern 8: Dispatchable Token Store Missing withdraw/deposit Implementation — move-evtcfg-008",
+      "severity": "HIGH",
+      "grep": "withdraw|deposit",
+      "detect": "Custom functions defined but not registered as dispatch hooks",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md",
+      "lines": [
+        351,
+        392
+      ],
+      "check": [
+        "VERIFY: Custom functions defined but not registered as dispatch hooks"
+      ],
+      "antipattern": "Custom functions defined but not registered as dispatch hooks",
+      "securePattern": "Register dispatch hooks during initialization"
+    },
+    {
+      "id": "sui-move-move-event-configura-pattern-9-version-check-missin-009",
+      "title": "Pattern 9: Version Check Missing in Upgrade-Sensitive Functions — move-evtcfg-009",
+      "severity": "HIGH",
+      "grep": "total_deposits|ProtocolState|new_field_v2|Vulnerable",
+      "detect": "No version check on shared object access",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md",
+      "lines": [
+        393,
+        430
+      ],
+      "check": [
+        "VERIFY: No version check on shared object access"
+      ],
+      "antipattern": "No version check on shared object access",
+      "securePattern": "Version gate with migration"
+    },
+    {
+      "id": "sui-move-move-event-configura-pattern-10-two-step-ownership--010",
+      "title": "Pattern 10: Two-Step Ownership Transfer Missing — move-evtcfg-010",
+      "severity": "MEDIUM",
+      "grep": "transfer_ownership|propose_ownership|borrow_global_mut|accept_ownership",
+      "detect": "Single-step ownership transfer",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md",
+      "lines": [
+        431,
+        470
+      ],
+      "check": [
+        "VERIFY: Single-step ownership transfer",
+        "ANTIPATTERN: Single-step ownership transfer"
+      ],
+      "antipattern": "Single-step ownership transfer",
+      "securePattern": "Two-step transfer with acceptance"
+    },
+    {
+      "id": "sui-move-move-event-configura-pattern-11-reentrancy-via-exte-011",
+      "title": "Pattern 11: Reentrancy via External Module Callback — move-evtcfg-011",
+      "severity": "HIGH",
+      "grep": "flash_loan_active|public_transfer|total_borrows|from_balance",
+      "detect": "State updated after external callback",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md",
+      "lines": [
+        471,
+        510
+      ],
+      "check": [
+        "VERIFY: State updated after external callback"
+      ],
+      "antipattern": "State updated after external callback",
+      "securePattern": "Update state before external interaction"
+    },
+    {
+      "id": "sui-move-move-event-configura-pattern-12-hardcoded-batch-par-012",
+      "title": "Pattern 12: Hardcoded Batch Parameters in Event Emission — move-evtcfg-012",
+      "severity": "LOW",
+      "grep": "BatchProcessed|process_batch|total_items|batch_index",
+      "detect": "Hardcoded event batch limit",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md",
+      "lines": [
+        511,
+        574
+      ],
+      "check": [
+        "VERIFY: Hardcoded event batch limit"
+      ],
+      "antipattern": "Hardcoded event batch limit",
+      "securePattern": "Include batch index and total for off-chain reconciliation"
+    },
+    {
+      "id": "sui-move-move-event-configura-pattern-13-assertion-inconsist-013",
+      "title": "Pattern 13: Assertion Inconsistency Between Getter and Setter — move-evtcfg-013",
+      "severity": "MEDIUM",
+      "grep": "get_fee_amount|set_fee_rate|Inconsistency|fee_rate",
+      "detect": "Setter allows 10000 but getter rejects it",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md",
+      "lines": [
+        575,
+        615
+      ],
+      "check": [
+        "VERIFY: Setter allows 10000 but getter rejects it"
+      ],
+      "antipattern": "Setter allows 10000 but getter rejects it",
+      "securePattern": "Consistent bounds across setter and getter"
+    },
+    {
+      "id": "sui-move-move-event-configura-pattern-14-inability-to-withdr-014",
+      "title": "Pattern 14: Inability to Withdraw Collected Fees — move-evtcfg-014",
+      "severity": "HIGH",
+      "grep": "withdraw_fees|claim_fees",
+      "detect": "Fees collected but no withdrawal path",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md",
+      "lines": [
+        616,
+        656
+      ],
+      "check": [
+        "VERIFY: Fees collected but no withdrawal path"
+      ],
+      "antipattern": "Fees collected but no withdrawal path",
+      "securePattern": "Fee withdrawal function for authorized parties"
+    },
+    {
+      "id": "sui-move-move-event-configura-pattern-15-front-running-publi-015",
+      "title": "Pattern 15: Front-Running Public Validation for Initialization — move-evtcfg-015",
+      "severity": "HIGH",
+      "grep": "fungible_asset::register_dispatch_functions|liquidation_bonus|borrow_global_mut|approve_operator|FEE_PRECISION|fungible_asset",
+      "detect": "Public validation can be front-run",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md",
+      "lines": [
+        657,
+        767
+      ],
+      "check": [
+        "VERIFY: Public validation can be front-run",
+        "All admin parameter changes emit events with old + new values",
+        "Event field types match semantic meaning (TypeName for coins, address for users)",
+        "Events only emitted on actual state changes (skip no-ops)",
+        "LOOK FOR: Pattern 1: `borrow_global_mut` → mutation → no `event::emit` in same function"
+      ],
+      "antipattern": "Public validation can be front-run",
+      "securePattern": "Validation and initialization are atomic"
     },
     {
       "id": "sui-move-move-merkle-verifica-move-merkle-proof-verification-000",
@@ -19154,8 +20572,8 @@
     {
       "id": "sui-move-move-merkle-verifica-pattern-4-fee-bypass-at-maximu-004",
       "title": "Pattern 4: Fee Bypass at Maximum Fee Setting — move-merkle-004",
-      "severity": "CRITICAL",
-      "grep": "verify_merkle_proof|compare_vectors|MAX_FEE_BIPS|sha3_256|verify|claim",
+      "severity": "HIGH",
+      "grep": "calculate_fee|Distributors|fee_bips|EthSign",
       "detect": "Edge case at maximum fee setting",
       "cat": [
         "general"
@@ -19163,18 +20581,98 @@
       "ref": "DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md",
       "lines": [
         276,
-        358
+        311
+      ],
+      "check": [
+        "VERIFY: Edge case at maximum fee setting"
+      ],
+      "antipattern": "Edge case at maximum fee setting",
+      "securePattern": "MAX_FEE_BIPS returns full amount as fee"
+    },
+    {
+      "id": "sui-move-move-merkle-verifica-pattern-5-missing-domain-separ-005",
+      "title": "Pattern 5: Missing Domain Separation Between Leaf and Internal Nodes — move-merkle-005",
+      "severity": "CRITICAL",
+      "grep": "compare_vectors|combine_nodes|compute_leaf|to_bytes",
+      "detect": "No domain separation between leaf and internal nodes",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md",
+      "lines": [
+        312,
+        369
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Edge case at maximum fee setting",
+        "VERIFY: No domain separation between leaf and internal nodes"
+      ],
+      "antipattern": "No domain separation between leaf and internal nodes",
+      "securePattern": "Prefix-based domain separation"
+    },
+    {
+      "id": "sui-move-move-merkle-verifica-pattern-6-resource-index-colli-006",
+      "title": "Pattern 6: Resource Index Collision Enabling Claim Spoofing — move-merkle-006",
+      "severity": "HIGH",
+      "grep": "ClaimRegistry|verify_proof|compute_leaf|tx_context",
+      "detect": "Claim index derived from predictable sequence",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md",
+      "lines": [
+        370,
+        412
+      ],
+      "check": [
+        "VERIFY: Claim index derived from predictable sequence"
+      ],
+      "antipattern": "Claim index derived from predictable sequence",
+      "securePattern": "Claim tracking by address, not index"
+    },
+    {
+      "id": "sui-move-move-merkle-verifica-pattern-7-odd-length-proof-pad-007",
+      "title": "Pattern 7: Odd-Length Proof Padding Bypass — move-merkle-007",
+      "severity": "HIGH",
+      "grep": "combine_nodes|verify_proof|tree_depth|Vulnerable",
+      "detect": "Odd node hashed with itself",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md",
+      "lines": [
+        413,
+        457
+      ],
+      "check": [
+        "VERIFY: Odd node hashed with itself"
+      ],
+      "antipattern": "Odd node hashed with itself",
+      "securePattern": "Validate proof length matches tree depth"
+    },
+    {
+      "id": "sui-move-move-merkle-verifica-pattern-8-bitmap-claim-trackin-008",
+      "title": "Pattern 8: Bitmap Claim Tracking Overflow — move-merkle-008",
+      "severity": "MEDIUM",
+      "grep": "hash::sha3_256(data|verify_merkle_proof|compare_vectors|MAX_FEE_BIPS|verify_proof|sha3_256",
+      "detect": "No bounds check on bitmap index",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md",
+      "lines": [
+        458,
+        558
+      ],
+      "check": [
+        "VERIFY: No bounds check on bitmap index",
         "Leaf hash includes ALL claim parameters (index, address, amount, nonce)",
         "Merkle verification checks hash EQUALITY (not less-than or greater-than)",
         "`verify()` return value always wrapped in `assert!()`",
         "LOOK FOR: Pattern 1: `hash(address, amount)` without leaf_index in airdrop claims"
       ],
-      "antipattern": "Edge case at maximum fee setting",
-      "securePattern": "MAX_FEE_BIPS returns full amount as fee"
+      "antipattern": "No bounds check on bitmap index",
+      "securePattern": "Validate index bounds against known total claims"
     },
     {
       "id": "sui-move-move-oracle-pricing--move-oracle-and-pricing-vulner-000",
@@ -19340,7 +20838,7 @@
       "id": "sui-move-move-oracle-pricing--pattern-8-fixed-point-arithmet-008",
       "title": "Pattern 8: Fixed-Point Arithmetic Sign Bit Confusion — move-oracle-008",
       "severity": "HIGH",
-      "grep": "get_price(collateral_type|latest_round_data|AuthorityCap|MIN_TICK|MAX_TICK|MAX_U64",
+      "grep": "from_u256balance|is_negative|Vulnerable|Validation",
       "detect": "from_u256balance conflates sign bit with overflow",
       "cat": [
         "general"
@@ -19348,17 +20846,379 @@
       "ref": "DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md",
       "lines": [
         403,
-        491
+        435
       ],
       "check": [
-        "VERIFY: from_u256balance conflates sign bit with overflow",
+        "VERIFY: from_u256balance conflates sign bit with overflow"
+      ],
+      "antipattern": "from_u256balance conflates sign bit with overflow",
+      "securePattern": "Separate sign handling from overflow detection"
+    },
+    {
+      "id": "sui-move-move-oracle-pricing--pattern-9-oracle-not-updated-w-009",
+      "title": "Pattern 9: Oracle Not Updated When Tick Unchanged but Price Changes — move-oracle-009",
+      "severity": "MEDIUM",
+      "grep": "update_oracle_observation|compute_new_tick|zero_for_one|current_tick",
+      "detect": "Oracle updated only on tick change",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md",
+      "lines": [
+        436,
+        474
+      ],
+      "check": [
+        "VERIFY: Oracle updated only on tick change"
+      ],
+      "antipattern": "Oracle updated only on tick change",
+      "securePattern": "Update oracle on every price change, not just tick change"
+    },
+    {
+      "id": "sui-move-move-oracle-pricing--pattern-10-undervalued-collate-010",
+      "title": "Pattern 10: Undervalued Collateral from Naive LPT Pricing — move-oracle-010",
+      "severity": "HIGH",
+      "grep": "fair_reserve_b|fair_reserve_a|get_lpt_price|total_supply",
+      "detect": "LP token priced using spot reserves",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md",
+      "lines": [
+        475,
+        513
+      ],
+      "check": [
+        "VERIFY: LP token priced using spot reserves"
+      ],
+      "antipattern": "LP token priced using spot reserves",
+      "securePattern": "Use fair LP pricing (Alpha Homora / Chainlink method)"
+    },
+    {
+      "id": "sui-move-move-oracle-pricing--pattern-11-duplicate-source-id-011",
+      "title": "Pattern 11: Duplicate Source ID Corrupting Price Aggregation — move-oracle-011",
+      "severity": "MEDIUM",
+      "grep": "get_source_price|register_source|aggregate_price|compute_median",
+      "detect": "No duplicate source ID check",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md",
+      "lines": [
+        514,
+        558
+      ],
+      "check": [
+        "VERIFY: No duplicate source ID check"
+      ],
+      "antipattern": "No duplicate source ID check",
+      "securePattern": "Enforce source ID uniqueness"
+    },
+    {
+      "id": "sui-move-move-oracle-pricing--pattern-12-custom-price-exceed-012",
+      "title": "Pattern 12: Custom Price Exceeding Oracle Price Cap — move-oracle-012",
+      "severity": "MEDIUM",
+      "grep": "borrow_global_mut|set_custom_price|custom_prices|OracleState",
+      "detect": "No cap on custom price",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md",
+      "lines": [
+        559,
+        592
+      ],
+      "check": [
+        "VERIFY: No cap on custom price"
+      ],
+      "antipattern": "No cap on custom price",
+      "securePattern": "Cap custom price relative to recent oracle range"
+    },
+    {
+      "id": "sui-move-move-oracle-pricing--pattern-13-confidence-before-t-013",
+      "title": "Pattern 13: Confidence-Before-Timestamp Ordering Error — move-oracle-013",
+      "severity": "LOW",
+      "grep": "get_price(collateral_type|latest_round_data|AuthorityCap|MIN_TICK|MAX_TICK|MAX_U64",
+      "detect": "Confidence checked before staleness",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md",
+      "lines": [
+        593,
+        699
+      ],
+      "check": [
+        "VERIFY: Confidence checked before staleness",
         "All oracle price reads include maximum age validation",
         "TWAP/oracle observations updated on every price-changing event (not just tick change)",
         "Signed-to-unsigned conversions use absolute value correctly",
         "LOOK FOR: Pattern 1: `latest_round_data()` without timestamp age check"
       ],
-      "antipattern": "from_u256balance conflates sign bit with overflow",
-      "securePattern": "Separate sign handling from overflow detection"
+      "antipattern": "Confidence checked before staleness",
+      "securePattern": "Staleness check first, then confidence"
+    },
+    {
+      "id": "sui-move-move-state-managemen-move-state-management-data-int-000",
+      "title": "Move State Management & Data Integrity Vulnerabilities",
+      "severity": "UNKNOWN",
+      "grep": "Vulnerabilities|OtterSec|Management|Forgetting",
+      "detect": "State management bugs in Move arise from the language's ownership and copy semantics.",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md",
+      "lines": [
+        52,
+        61
+      ],
+      "check": [
+        "VERIFY: State management bugs in Move arise from the language's ownership and copy semantics."
+      ]
+    },
+    {
+      "id": "sui-move-move-state-managemen-pattern-1-local-copy-mutation--001",
+      "title": "Pattern 1: Local Copy Mutation Without Write-Back — move-state-001",
+      "severity": "HIGH",
+      "grep": "copy|update_mint_limit|borrow_global_mut|borrow_global",
+      "detect": "Local copy modified but never written back",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md",
+      "lines": [
+        62,
+        92
+      ],
+      "check": [
+        "VERIFY: Local copy modified but never written back"
+      ],
+      "antipattern": "Local copy modified but never written back",
+      "securePattern": "Mutate via borrow_global_mut"
+    },
+    {
+      "id": "sui-move-move-state-managemen-pattern-2-variable-shadowing-z-002",
+      "title": "Pattern 2: Variable Shadowing Zeroing State Values — move-state-002",
+      "severity": "HIGH",
+      "grep": "process_issuance|transfer_tokens|total_amount|Vulnerable",
+      "detect": "`amount` shadowed by new binding",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md",
+      "lines": [
+        93,
+        127
+      ],
+      "check": [
+        "VERIFY: `amount` shadowed by new binding"
+      ],
+      "antipattern": "`amount` shadowed by new binding",
+      "securePattern": "Unique variable names prevent shadowing"
+    },
+    {
+      "id": "sui-move-move-state-managemen-pattern-3-investor-count-arith-003",
+      "title": "Pattern 3: Investor Count Arithmetic Mismatch — move-state-003",
+      "severity": "MEDIUM",
+      "grep": "set_user_balance|get_user_balance|investor_count|new_balance",
+      "detect": "Counter decremented on partial withdrawal",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md",
+      "lines": [
+        128,
+        164
+      ],
+      "check": [
+        "VERIFY: Counter decremented on partial withdrawal"
+      ],
+      "antipattern": "Counter decremented on partial withdrawal",
+      "securePattern": "Only decrement when user fully exits"
+    },
+    {
+      "id": "sui-move-move-state-managemen-pattern-4-wallet-balance-track-004",
+      "title": "Pattern 4: Wallet Balance Tracking Desync — move-state-004",
+      "severity": "HIGH",
+      "grep": "dividend_per_share|borrow_global_mut|transfer_tokens|borrow_global",
+      "detect": "Direct transfer bypasses registry",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md",
+      "lines": [
+        165,
+        207
+      ],
+      "check": [
+        "VERIFY: Direct transfer bypasses registry"
+      ],
+      "antipattern": "Direct transfer bypasses registry",
+      "securePattern": "All transfers update registry atomically"
+    },
+    {
+      "id": "sui-move-move-state-managemen-pattern-5-resource-attribute-c-005",
+      "title": "Pattern 5: Resource Attribute Cleanup on Removal — move-state-005",
+      "severity": "MEDIUM",
+      "grep": "remove_group|member_attrs|member_list|some_group",
+      "detect": "Group removal doesn't clean up member attributes",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md",
+      "lines": [
+        208,
+        246
+      ],
+      "check": [
+        "VERIFY: Group removal doesn't clean up member attributes"
+      ],
+      "antipattern": "Group removal doesn't clean up member attributes",
+      "securePattern": "Clean up all references when removing group"
+    },
+    {
+      "id": "sui-move-move-state-managemen-pattern-6-group-id-reuse-after-006",
+      "title": "Pattern 6: Group ID Reuse After Deletion — move-state-006",
+      "severity": "MEDIUM",
+      "grep": "next_group_id|GroupManager|delete_group|create_group",
+      "detect": "Group ID reused after deletion",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md",
+      "lines": [
+        247,
+        296
+      ],
+      "check": [
+        "VERIFY: Group ID reused after deletion"
+      ],
+      "antipattern": "Group ID reused after deletion",
+      "securePattern": "Always increment, never reuse IDs"
+    },
+    {
+      "id": "sui-move-move-state-managemen-pattern-7-storage-split-accoun-007",
+      "title": "Pattern 7: Storage Split Accounting Inconsistency — move-state-007",
+      "severity": "HIGH",
+      "grep": "available_balance|uncollected_fees|staked_balance|collect_fees",
+      "detect": "Partial update of split accounting",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md",
+      "lines": [
+        297,
+        337
+      ],
+      "check": [
+        "VERIFY: Partial update of split accounting"
+      ],
+      "antipattern": "Partial update of split accounting",
+      "securePattern": "Double-entry bookkeeping"
+    },
+    {
+      "id": "sui-move-move-state-managemen-pattern-8-stale-share-rate-in--008",
+      "title": "Pattern 8: Stale Share Rate in Multi-Step Operations — move-state-008",
+      "severity": "HIGH",
+      "grep": "deposit_and_stake|accrue_interest|total_shares|total_assets",
+      "detect": "Rate cached before modification",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md",
+      "lines": [
+        338,
+        376
+      ],
+      "check": [
+        "VERIFY: Rate cached before modification"
+      ],
+      "antipattern": "Rate cached before modification",
+      "securePattern": "Refresh rate after each state-modifying step"
+    },
+    {
+      "id": "sui-move-move-state-managemen-pattern-9-missing-default-grou-009",
+      "title": "Pattern 9: Missing Default Group Assignment — move-state-009",
+      "severity": "MEDIUM",
+      "grep": "check_group_limit|register_user|current_count|max_members",
+      "detect": "No default group for new users",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md",
+      "lines": [
+        377,
+        420
+      ],
+      "check": [
+        "VERIFY: No default group for new users"
+      ],
+      "antipattern": "No default group for new users",
+      "securePattern": "Assign to default group on creation"
+    },
+    {
+      "id": "sui-move-move-state-managemen-pattern-10-last-modifier-track-010",
+      "title": "Pattern 10: Last Modifier Tracking Failure — move-state-010",
+      "severity": "LOW",
+      "grep": "last_modification_type|calculate_interest|accrue_interest|last_modifier",
+      "detect": "Internal operations don't update last_modifier",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md",
+      "lines": [
+        421,
+        458
+      ],
+      "check": [
+        "VERIFY: Internal operations don't update last_modifier"
+      ],
+      "antipattern": "Internal operations don't update last_modifier",
+      "securePattern": "Track modification source distinctly"
+    },
+    {
+      "id": "sui-move-move-state-managemen-pattern-11-pause-state-allowin-011",
+      "title": "Pattern 11: Pause State Allowing Partial Operations — move-state-011",
+      "severity": "MEDIUM",
+      "grep": "calculate_rewards|assert_not_paused|transfer_rewards|claim_rewards",
+      "detect": "Pause check missing on claim function",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md",
+      "lines": [
+        459,
+        503
+      ],
+      "check": [
+        "VERIFY: Pause check missing on claim function"
+      ],
+      "antipattern": "Pause check missing on claim function",
+      "securePattern": "Centralized pause check via helper"
+    },
+    {
+      "id": "sui-move-move-state-managemen-pattern-12-token-metadata-swap-012",
+      "title": "Pattern 12: Token Metadata Swap Between Objects — move-state-012",
+      "severity": "HIGH",
+      "grep": "pool.last_modifier|borrow_global_mut|accrue_interest|coin::transfer|table::remove",
+      "detect": "Treasury caps assigned to wrong tokens",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md",
+      "lines": [
+        504,
+        615
+      ],
+      "check": [
+        "VERIFY: Treasury caps assigned to wrong tokens",
+        "All state mutations use `borrow_global_mut`, not copied values",
+        "No variable shadowing in state-modifying functions",
+        "Counter decrements only on full exit (not partial withdrawal)",
+        "LOOK FOR: Pattern 1: `let x = *borrow_global<T>(@addr)` followed by mutation of `x` (local copy)"
+      ],
+      "antipattern": "Treasury caps assigned to wrong tokens",
+      "securePattern": "Explicitly typed capabilities prevent mix-up"
     },
     {
       "id": "sui-move-move-token-supply-in-move-token-supply-and-inflatio-000",
@@ -19486,8 +21346,8 @@
     {
       "id": "sui-move-move-token-supply-in-pattern-6-missing-activation-e-006",
       "title": "Pattern 6: Missing Activation Epoch Check in Staking — move-inflate-006",
-      "severity": "CRITICAL",
-      "grep": "unfreeze_coin_store|freeze_coin_store|total_reserves|total_supply|mint_to|unfreeze",
+      "severity": "HIGH",
+      "grep": "activation_epoch|StakedWal|Vulnerable|Validation",
       "detect": "No activation epoch validation on join",
       "cat": [
         "general"
@@ -19495,18 +21355,138 @@
       "ref": "DB/Sui-Move-specific/MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md",
       "lines": [
         375,
-        459
+        407
+      ],
+      "check": [
+        "VERIFY: No activation epoch validation on join"
+      ],
+      "antipattern": "No activation epoch validation on join",
+      "securePattern": "Validate matching epochs before join"
+    },
+    {
+      "id": "sui-move-move-token-supply-in-pattern-7-unbacked-equity-shar-007",
+      "title": "Pattern 7: Unbacked Equity Share Minting on Zero Registry — move-inflate-007",
+      "severity": "HIGH",
+      "grep": "total_shares|total_assets|TxContext|share_cap",
+      "detect": "Zero registry state allows unbacked share minting",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md",
+      "lines": [
+        408,
+        452
+      ],
+      "check": [
+        "VERIFY: Zero registry state allows unbacked share minting"
+      ],
+      "antipattern": "Zero registry state allows unbacked share minting",
+      "securePattern": "Prevent deposits when assets were redistributed"
+    },
+    {
+      "id": "sui-move-move-token-supply-in-pattern-8-debt-share-dilution--008",
+      "title": "Pattern 8: Debt Share Dilution on Zero Liability — move-inflate-008",
+      "severity": "MEDIUM",
+      "grep": "total_debt_shares|total_liability|LendingPool|debt_shares",
+      "detect": "Zero liability allows debt share manipulation",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md",
+      "lines": [
+        453,
+        499
+      ],
+      "check": [
+        "VERIFY: Zero liability allows debt share manipulation"
+      ],
+      "antipattern": "Zero liability allows debt share manipulation",
+      "securePattern": "Reset debt shares when liability reaches zero"
+    },
+    {
+      "id": "sui-move-move-token-supply-in-pattern-9-inflation-attack-on--009",
+      "title": "Pattern 9: Inflation Attack on Zero Total Stake — move-inflate-009",
+      "severity": "CRITICAL",
+      "grep": "exchange_rate|total_supply|total_staked|StakingPool",
+      "detect": "No minimum liquidity protection",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md",
+      "lines": [
+        500,
+        548
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: No activation epoch validation on join",
+        "VERIFY: No minimum liquidity protection"
+      ],
+      "antipattern": "No minimum liquidity protection",
+      "securePattern": "Lock minimum liquidity on first deposit"
+    },
+    {
+      "id": "sui-move-move-token-supply-in-pattern-10-peg-inconsistency-f-010",
+      "title": "Pattern 10: Peg Inconsistency from Unbounded Burn/Mint — move-inflate-010",
+      "severity": "MEDIUM",
+      "grep": "total_supply|total_staked|share_amount|Inconsistency",
+      "detect": "Burn amount can diverge from actual backing decrease",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md",
+      "lines": [
+        549,
+        590
+      ],
+      "check": [
+        "VERIFY: Burn amount can diverge from actual backing decrease"
+      ],
+      "antipattern": "Burn amount can diverge from actual backing decrease",
+      "securePattern": "Enforce peg invariant after each operation"
+    },
+    {
+      "id": "sui-move-move-token-supply-in-pattern-11-uncapped-derivative-011",
+      "title": "Pattern 11: Uncapped Derivative Token Minting — move-inflate-011",
+      "severity": "HIGH",
+      "grep": "xlpt_total_supply|max_xlpt_supply|current_supply|into_balance",
+      "detect": "No cap on derivative token minting",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md",
+      "lines": [
+        591,
+        625
+      ],
+      "check": [
+        "VERIFY: No cap on derivative token minting"
+      ],
+      "antipattern": "No cap on derivative token minting",
+      "securePattern": "Enforce supply cap on derivative token"
+    },
+    {
+      "id": "sui-move-move-token-supply-in-pattern-12-kapt-double-minting-012",
+      "title": "Pattern 12: kAPT Double Minting from Fee Mismatch — move-inflate-012",
+      "severity": "HIGH",
+      "grep": "provider::stake(amount|freeze_coin_store|total_reserves|total_backing|mint(amount|total_staked",
+      "detect": "Mints based on gross amount, not net-of-fee",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md",
+      "lines": [
+        626,
+        736
+      ],
+      "check": [
+        "VERIFY: Mints based on gross amount, not net-of-fee",
         "First deposit locks minimum liquidity (dead shares)",
         "All minting uses net-of-fee amounts for share calculation",
         "Total minted shares ≤ total backing invariant enforced",
         "LOOK FOR: Pattern 1: `if (total_supply == 0) { shares = amount }` without minimum liquidity lock"
       ],
-      "antipattern": "No activation epoch validation on join",
-      "securePattern": "Validate matching epochs before join"
+      "antipattern": "Mints based on gross amount, not net-of-fee",
+      "securePattern": "Calculate net staked amount after provider fee"
     },
     {
       "id": "sui-move-sui-cross-chain-brid-1-evm-state-persistence-despit-000",
