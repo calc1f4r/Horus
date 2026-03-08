@@ -465,6 +465,244 @@ public fun complete_swap(
 
 ---
 
+## Pattern 7: Missing Version Check in Admin Functions — move-bridge-007
+
+**Severity**: HIGH  
+**ID**: move-bridge-007  
+**References**: Wormhole NTT (OS-NTT-ADV-00)
+
+### Attack Scenario
+Bridge contracts use versioned upgrades, but admin functions (like setting peers, transceivers, or rate limits) don't check the current package version. If an admin calls a function designed for version N while the contract is at version N-1 (or N+1), the storage layout mismatch can corrupt state, disable the bridge, or allow unauthorized operations from an old version.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: No version gate on admin function
+public fun set_peer(admin: &signer, chain_id: u16, peer_address: vector<u8>) {
+    // ❌ Missing: assert!(state.version == CURRENT_VERSION)
+    let state = borrow_global_mut<BridgeState>(@bridge);
+    table::upsert(&mut state.peers, chain_id, peer_address);
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Version-gated admin function
+public fun set_peer(admin: &signer, chain_id: u16, peer_address: vector<u8>) {
+    let state = borrow_global_mut<BridgeState>(@bridge);
+    assert!(state.version == CURRENT_VERSION, E_VERSION_MISMATCH);
+    assert!(signer::address_of(admin) == state.admin, E_UNAUTHORIZED);
+    table::upsert(&mut state.peers, chain_id, peer_address);
+}
+```
+
+---
+
+## Pattern 8: Cross-Chain Replay from Missing Chain ID — move-bridge-008
+
+**Severity**: CRITICAL  
+**ID**: move-bridge-008  
+**References**: Wormhole NTT (OS-NTT-ADV-01), Mayan Sui (OS-MFI-ADV-01)
+
+### Attack Scenario
+Cross-chain messages don't include or validate the destination chain ID. An attacker replays a message intended for one chain (e.g., Ethereum) on a different chain (e.g., Sui), claiming tokens twice. Without chain ID binding, any valid message on one chain is valid on every chain served by the bridge.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: No chain ID in message verification
+public fun receive_message(
+    state: &mut BridgeState,
+    payload: vector<u8>,
+    signatures: vector<vector<u8>>
+) {
+    // ❌ Verifies signatures but doesn't check if message was intended for THIS chain
+    verify_signatures(&state.validators, &payload, &signatures);
+    let (sender, amount) = decode_transfer(payload);
+    // Processes transfer regardless of destination chain
+    mint_bridged_tokens(state, sender, amount);
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Validate destination chain ID
+public fun receive_message(
+    state: &mut BridgeState,
+    payload: vector<u8>,
+    signatures: vector<vector<u8>>
+) {
+    verify_signatures(&state.validators, &payload, &signatures);
+    let (sender, amount, dest_chain) = decode_transfer(payload);
+    // ✅ Reject messages not intended for this chain
+    assert!(dest_chain == state.chain_id, E_WRONG_CHAIN);
+    let nonce = extract_nonce(&payload);
+    assert!(!table::contains(&state.used_nonces, nonce), E_REPLAY);
+    table::add(&mut state.used_nonces, nonce, true);
+    mint_bridged_tokens(state, sender, amount);
+}
+```
+
+---
+
+## Pattern 9: Transceiver ID Overflow Past Bitmap Limit — move-bridge-009
+
+**Severity**: HIGH  
+**ID**: move-bridge-009  
+**References**: Wormhole NTT (OS-NTT-ADV-02)
+
+### Attack Scenario
+The bridge tracks registered transceivers using a bitmap (e.g., 64-bit). If the transceiver registration counter exceeds the bitmap capacity (64 for u64), new transceivers silently overflow and map to ID 0 or wrap around. This can cause false attestation matches, allowing messages attested by an unauthorized transceiver to be treated as validated.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: No check that ID fits in bitmap
+struct ManagerState has key {
+    next_transceiver_id: u8,
+    enabled_bitmap: u64,
+}
+
+public fun register_transceiver(state: &mut ManagerState) {
+    let id = state.next_transceiver_id;
+    // ❌ If id >= 64, the shift overflows: 1u64 << 64 is undefined
+    state.enabled_bitmap = state.enabled_bitmap | (1u64 << (id as u8));
+    state.next_transceiver_id = id + 1;
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Validate transceiver ID fits in bitmap
+const MAX_TRANSCEIVERS: u8 = 64;
+
+public fun register_transceiver(state: &mut ManagerState) {
+    let id = state.next_transceiver_id;
+    assert!(id < MAX_TRANSCEIVERS, E_MAX_TRANSCEIVERS);
+    state.enabled_bitmap = state.enabled_bitmap | (1u64 << (id as u8));
+    state.next_transceiver_id = id + 1;
+}
+```
+
+---
+
+## Pattern 10: Inconsistent Deadline Checks Across Chains — move-bridge-010
+
+**Severity**: MEDIUM  
+**ID**: move-bridge-010  
+**References**: Mayan Sui (OS-MFI-ADV-02)
+
+### Attack Scenario
+Cross-chain swap orders have deadlines, but the deadline interpretation differs across chains. The source chain uses block.timestamp (seconds), while the destination chain uses epoch_timestamp_ms (milliseconds). An order that expired on one chain may still appear valid on another, allowing late execution of stale orders at outdated rates.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Deadline comparison uses wrong time unit
+public fun fulfill_order(state: &mut State, order: &Order, clock: &Clock) {
+    let current_time = clock::timestamp_ms(clock);  // Milliseconds on Sui
+    // ❌ order.deadline was set in SECONDS on source chain (Ethereum)
+    assert!(current_time < order.deadline, E_EXPIRED);
+    // Passes check because ms >> seconds (e.g., 1700000000 ms < 1700000100 seconds)
+    process_swap(state, order);
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Normalize time units before comparison
+public fun fulfill_order(state: &mut State, order: &Order, clock: &Clock) {
+    let current_time_s = clock::timestamp_ms(clock) / 1000;  // Convert to seconds
+    assert!(current_time_s < order.deadline, E_EXPIRED);
+    process_swap(state, order);
+}
+```
+
+---
+
+## Pattern 11: Zero-Value Burn Without Supply Validation — move-bridge-011
+
+**Severity**: MEDIUM  
+**ID**: move-bridge-011  
+**References**: Lombard SUI (OS-LSI-ADV-02)
+
+### Attack Scenario
+A bridge accepts zero-value burn instructions, emitting a cross-chain message that claims tokens were burned. The source chain processes the message and releases tokens despite no actual value being locked. Repeated zero-burns can exhaust bridge reserves or create accounting inconsistencies between chains.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Zero-value burn emits valid cross-chain message
+public fun burn_and_bridge(
+    state: &mut BridgeState,
+    tokens: Coin<LBTC>,
+    dest_chain: u16,
+    ctx: &mut TxContext
+) {
+    let amount = coin::value(&tokens);
+    // ❌ No minimum amount check — zero-value burns generate messages
+    coin::burn(&mut state.burn_cap, tokens);
+    emit_cross_chain_message(state, dest_chain, amount, tx_context::sender(ctx));
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Require minimum burn amount
+public fun burn_and_bridge(
+    state: &mut BridgeState,
+    tokens: Coin<LBTC>,
+    dest_chain: u16,
+    ctx: &mut TxContext
+) {
+    let amount = coin::value(&tokens);
+    assert!(amount >= state.min_bridge_amount, E_BELOW_MINIMUM);
+    coin::burn(&mut state.burn_cap, tokens);
+    emit_cross_chain_message(state, dest_chain, amount, tx_context::sender(ctx));
+}
+```
+
+---
+
+## Pattern 12: Deserialization Access Control Bypass — move-bridge-012
+
+**Severity**: HIGH  
+**ID**: move-bridge-012  
+**References**: LayerZero Aptos (OS-LZA-ADV-00)
+
+### Attack Scenario
+Cross-chain message deserialization functions are public and don't verify the caller. An attacker can craft arbitrary byte payloads, call the deserialization function directly, and produce structs that bypass the normal message validation pipeline. This decouples message creation from message authentication.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Public deserialization without authentication
+public fun decode_message(payload: vector<u8>): TransferMessage {
+    // ❌ Anyone can call this to create a TransferMessage struct
+    let amount = bcs::peel_u64(&mut payload);
+    let recipient = bcs::peel_address(&mut payload);
+    TransferMessage { amount, recipient }
+}
+
+public fun execute_transfer(state: &mut State, msg: TransferMessage) {
+    // ❌ Assumes msg was authenticated, but attacker created it via decode_message
+    mint_tokens(state, msg.recipient, msg.amount);
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Deserialization is friend-only; execution requires proof
+public(friend) fun decode_message(payload: vector<u8>): TransferMessage {
+    let amount = bcs::peel_u64(&mut payload);
+    let recipient = bcs::peel_address(&mut payload);
+    TransferMessage { amount, recipient }
+}
+
+public fun execute_transfer(state: &mut State, payload: vector<u8>, attestation: vector<u8>) {
+    // ✅ Verify attestation first, then decode
+    assert!(verify_attestation(&state.validators, &payload, &attestation), E_INVALID_ATTESTATION);
+    let msg = decode_message(payload);
+    mint_tokens(state, msg.recipient, msg.amount);
+}
+```
+
+---
+
 ### Impact Analysis
 
 #### Technical Impact
@@ -496,6 +734,12 @@ public fun complete_swap(
 - Pattern 4: `public fun send_message` without signer or capability check
 - Pattern 5: `verify_signature` without marking nonce/hash as used
 - Pattern 6: `transfer::public_transfer(coin, address_from_message)` without address validation
+- Pattern 7: Admin functions without `assert!(state.version == CURRENT_VERSION)`
+- Pattern 8: Message verification without destination chain_id check
+- Pattern 9: `1u64 << (id as u8)` where id can exceed 63
+- Pattern 10: `clock::timestamp_ms` compared directly to seconds-based deadline
+- Pattern 11: `coin::burn` accepting zero-value coins
+- Pattern 12: `public fun decode_message` callable by anyone without attestation
 ```
 
 #### Audit Checklist
@@ -506,10 +750,15 @@ public fun complete_swap(
 - [ ] All signatures include nonce, marked as used after verification
 - [ ] Recipient addresses validated before transfer (not object IDs)
 - [ ] Admin functions on bridge check package version
+- [ ] Cross-chain messages include and validate destination chain ID
+- [ ] Transceiver/relayer IDs bounded to bitmap capacity
+- [ ] Deadline checks use consistent time units across chains
+- [ ] Minimum burn/bridge amount enforced
+- [ ] Message deserialization restricted to friend/internal modules
 
 ### Keywords for Search
 
-> `cross-chain bridge`, `bridge vulnerability`, `payload front-running`, `validate_and_store_payload`, `validator set`, `configure_validator_set`, `message validation`, `lz_receive`, `layerzero`, `wormhole`, `cross-chain messaging`, `unrestricted messaging`, `signature replay`, `nonce`, `object ID`, `transfer::public_transfer`, `gas recipient`, `fund loss`, `move bridge`, `sui bridge`, `aptos bridge`
+> `cross-chain bridge`, `bridge vulnerability`, `payload front-running`, `validate_and_store_payload`, `validator set`, `configure_validator_set`, `message validation`, `lz_receive`, `layerzero`, `wormhole`, `cross-chain messaging`, `unrestricted messaging`, `signature replay`, `nonce`, `object ID`, `transfer::public_transfer`, `gas recipient`, `fund loss`, `move bridge`, `sui bridge`, `aptos bridge`, `version check`, `package version`, `chain ID`, `destination chain`, `cross-chain replay`, `transceiver`, `bitmap overflow`, `timestamp_ms`, `deadline`, `time unit`, `zero burn`, `minimum amount`, `deserialization`, `decode_message`, `attestation`, `NTT`
 
 ### Related Vulnerabilities
 

@@ -309,6 +309,198 @@ public fun calculate_fee(amount: u64, fee_bips: u64): u64 {
 
 ---
 
+## Pattern 5: Missing Domain Separation Between Leaf and Internal Nodes — move-merkle-005
+
+**Severity**: CRITICAL  
+**ID**: move-merkle-005  
+**References**: EthSign Movedrop (OS-MTD-ADV-00), Movedrop L2 (OS-MDL-ADV-00)
+
+### Attack Scenario
+The Merkle tree hashes leaf nodes and internal nodes identically (same hash function, no prefix). An attacker constructs a proof where two leaf entries are interpreted as a single internal node, allowing them to forge a valid proof for an arbitrary claim. This is the classic "second preimage attack" on Merkle trees, enabling complete drainage of distribution funds.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: No domain separation between leaf and internal nodes
+public fun compute_leaf(addr: address, amount: u64): vector<u8> {
+    let data = bcs::to_bytes(&addr);
+    vector::append(&mut data, bcs::to_bytes(&amount));
+    // ❌ Same hash used for both leaves and internal combining
+    hash::sha3_256(data)
+}
+
+public fun combine_nodes(left: vector<u8>, right: vector<u8>): vector<u8> {
+    let combined = if (compare_vectors(&left, &right) < 0) {
+        vector::append(&mut left, right); left
+    } else {
+        vector::append(&mut right, left); right
+    };
+    // ❌ Identical hash — can't distinguish leaf from internal node
+    hash::sha3_256(combined)
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Prefix-based domain separation
+const LEAF_PREFIX: u8 = 0x00;
+const INTERNAL_PREFIX: u8 = 0x01;
+
+public fun compute_leaf(addr: address, amount: u64): vector<u8> {
+    let data = vector::singleton(LEAF_PREFIX);
+    vector::append(&mut data, bcs::to_bytes(&addr));
+    vector::append(&mut data, bcs::to_bytes(&amount));
+    hash::sha3_256(data)
+}
+
+public fun combine_nodes(left: vector<u8>, right: vector<u8>): vector<u8> {
+    let combined = vector::singleton(INTERNAL_PREFIX);
+    if (compare_vectors(&left, &right) < 0) {
+        vector::append(&mut combined, left);
+        vector::append(&mut combined, right);
+    } else {
+        vector::append(&mut combined, right);
+        vector::append(&mut combined, left);
+    };
+    hash::sha3_256(combined)
+}
+```
+
+---
+
+## Pattern 6: Resource Index Collision Enabling Claim Spoofing — move-merkle-006
+
+**Severity**: HIGH  
+**ID**: move-merkle-006  
+**References**: EthSign (OS-SIG-ADV-01)
+
+### Attack Scenario
+Claim tracking uses a resource index derived from transaction position or sequence number. An attacker can manipulate their transaction to collide with another user's claim index, either spoofing their claim or preventing the legitimate user from claiming. In Move, this manifests as writing to the same storage slot under a different signer.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Claim index derived from predictable sequence
+struct ClaimRegistry has key {
+    claims: Table<u64, bool>,  // ❌ Index can collide
+}
+
+public fun claim(registry: &mut ClaimRegistry, index: u64, proof: vector<vector<u8>>, amount: u64) {
+    // ❌ Attacker can use same `index` as another user
+    assert!(!table::contains(&registry.claims, index), E_ALREADY_CLAIMED);
+    // Verify proof...
+    table::add(&mut registry.claims, index, true);
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Claim tracking by address, not index
+struct ClaimRegistry has key {
+    claims: Table<address, u64>,  // Track claimed amount per address
+}
+
+public fun claim(registry: &mut ClaimRegistry, proof: vector<vector<u8>>, amount: u64, ctx: &TxContext) {
+    let sender = tx_context::sender(ctx);
+    assert!(!table::contains(&registry.claims, sender), E_ALREADY_CLAIMED);
+    // Verify that sender + amount are in the Merkle tree
+    let leaf = compute_leaf(sender, amount);
+    assert!(verify_proof(registry.root, leaf, proof), E_INVALID_PROOF);
+    table::add(&mut registry.claims, sender, amount);
+}
+```
+
+---
+
+## Pattern 7: Odd-Length Proof Padding Bypass — move-merkle-007
+
+**Severity**: HIGH  
+**ID**: move-merkle-007  
+**References**: Movedrop L2 (OS-MDL-ADV-01)
+
+### Attack Scenario
+When the number of leaves is not a power of two, the tree requires padding. If the verification logic doesn't properly handle odd-length layers, an attacker can append arbitrary proof elements that get hashed with the leftover node, producing a valid-looking root from an invalid leaf. This commonly occurs when the last proof element is simply copied instead of properly paired.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Odd node hashed with itself
+public fun verify_proof(root: vector<u8>, leaf: vector<u8>, proof: vector<vector<u8>>): bool {
+    let current = leaf;
+    let i = 0;
+    while (i < vector::length(&proof)) {
+        let sibling = *vector::borrow(&proof, i);
+        // ❌ If proof has extra elements for odd-length layer,
+        // they're silently included without validation
+        current = combine_nodes(current, sibling);
+        i = i + 1;
+    };
+    current == root
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Validate proof length matches tree depth
+public fun verify_proof(root: vector<u8>, leaf: vector<u8>, proof: vector<vector<u8>>, tree_depth: u64): bool {
+    assert!(vector::length(&proof) == tree_depth, E_INVALID_PROOF_LENGTH);
+    let current = leaf;
+    let i = 0;
+    while (i < tree_depth) {
+        let sibling = *vector::borrow(&proof, i);
+        assert!(vector::length(&sibling) == 32, E_INVALID_HASH_LENGTH);
+        current = combine_nodes(current, sibling);
+        i = i + 1;
+    };
+    current == root
+}
+```
+
+---
+
+## Pattern 8: Bitmap Claim Tracking Overflow — move-merkle-008
+
+**Severity**: MEDIUM  
+**ID**: move-merkle-008  
+**References**: EthSign Movedrop (OS-MTD-ADV-03)
+
+### Attack Scenario
+Claim tracking uses a bitmap (bit vector) where each bit represents a claim index. If the claim index exceeds the bitmap's allocated size, the bitmap access wraps around or accesses an arbitrary position, allowing an attacker to claim with an out-of-bounds index that maps to an already-cleared bit position. This enables double-claiming or bypassing the claim check entirely.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: No bounds check on bitmap index
+struct ClaimBitmap has key {
+    bitmap: vector<u8>,  // Fixed-size bitmap
+}
+
+public fun set_claimed(bitmap: &mut ClaimBitmap, index: u64) {
+    let byte_index = index / 8;
+    let bit_index = (index % 8) as u8;
+    // ❌ No check that byte_index < vector::length(&bitmap.bitmap)
+    let byte = vector::borrow_mut(&mut bitmap.bitmap, byte_index);
+    *byte = *byte | (1u8 << bit_index);
+}
+
+public fun is_claimed(bitmap: &ClaimBitmap, index: u64): bool {
+    let byte_index = index / 8;
+    let bit_index = (index % 8) as u8;
+    let byte = *vector::borrow(&bitmap.bitmap, byte_index);
+    (byte & (1u8 << bit_index)) != 0
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Validate index bounds against known total claims
+public fun set_claimed(bitmap: &mut ClaimBitmap, index: u64) {
+    assert!(index < bitmap.total_claims, E_INDEX_OUT_OF_BOUNDS);
+    let byte_index = index / 8;
+    let bit_index = (index % 8) as u8;
+    let byte = vector::borrow_mut(&mut bitmap.bitmap, byte_index);
+    *byte = *byte | (1u8 << bit_index);
+}
+```
+
+---
+
 ### Impact Analysis
 
 #### Technical Impact
@@ -338,6 +530,10 @@ public fun calculate_fee(amount: u64, fee_bips: u64): u64 {
 - Pattern 3: `merkle::verify(root, leaf, proof)` without `assert!()` wrapper
 - Pattern 4: `if (fee_bips == MAX)` with special-case return 0
 - Pattern 5: Custom `verify_merkle_proof` that doesn't check final hash == root
+- Pattern 6: `hash::sha3_256(data)` used identically for leaf and internal nodes (no prefix)
+- Pattern 7: `table::contains(&claims, index)` where index is user-provided (not address)
+- Pattern 8: Missing tree depth validation in `verify_proof` loop
+- Pattern 9: `vector::borrow(&bitmap, byte_index)` without bounds check against total claims
 ```
 
 #### Audit Checklist
@@ -347,10 +543,14 @@ public fun calculate_fee(amount: u64, fee_bips: u64): u64 {
 - [ ] Fee calculation works correctly at boundary values (0, MAX, MAX-1)
 - [ ] Claimed status uses address-based or unique key, not reusable index
 - [ ] Domain separator included in leaf hash (prevents cross-contract proof reuse)
+- [ ] Leaf and internal node hashing use different prefixes (0x00 vs 0x01)
+- [ ] Proof length == expected tree depth
+- [ ] Bitmap claim tracking validates index bounds
+- [ ] Proof element size validated (32 bytes for SHA3-256)
 
 ### Keywords for Search
 
-> `merkle proof`, `merkle tree`, `airdrop claim`, `proof replay`, `leaf index`, `verify_merkle_proof`, `compare_vectors`, `hash`, `sha3_256`, `proof verification`, `return value`, `unchecked return`, `token distribution`, `claim`, `domain separation`, `fee bypass`, `MAX_FEE_BIPS`, `move merkle`, `aptos airdrop`, `movement airdrop`
+> `merkle proof`, `merkle tree`, `airdrop claim`, `proof replay`, `leaf index`, `verify_merkle_proof`, `compare_vectors`, `hash`, `sha3_256`, `proof verification`, `return value`, `unchecked return`, `token distribution`, `claim`, `domain separation`, `fee bypass`, `MAX_FEE_BIPS`, `move merkle`, `aptos airdrop`, `movement airdrop`, `second preimage`, `leaf prefix`, `internal node`, `resource index`, `claim collision`, `bitmap`, `claim tracking`, `proof length`, `tree depth`, `out of bounds`, `bit vector`
 
 ### Related Vulnerabilities
 
