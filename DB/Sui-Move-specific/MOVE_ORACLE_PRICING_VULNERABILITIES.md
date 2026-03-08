@@ -433,6 +433,204 @@ public fun from_u256balance(x: u256, is_negative: bool): IFixed {
 
 ---
 
+## Pattern 9: Oracle Not Updated When Tick Unchanged but Price Changes — move-oracle-009
+
+**Severity**: MEDIUM  
+**ID**: move-oracle-009  
+**References**: Bluefin Spot (OS-BFS-ADV-02)
+
+### Attack Scenario
+An AMM only updates its on-chain oracle observation when the tick index changes. However, the sqrt price can change significantly within the same tick (especially in concentrated liquidity pools). This means the oracle reports a stale price despite actual trading activity, allowing arbitrageurs to exploit the lag. Any downstream protocol reading this TWAP gets a manipulable, outdated value.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Oracle updated only on tick change
+public fun swap(pool: &mut Pool, amount_in: u64, zero_for_one: bool) {
+    let old_tick = pool.current_tick;
+    // ... execute swap, compute new sqrt_price and new_tick ...
+    let new_tick = compute_new_tick(pool.sqrt_price);
+    
+    if (new_tick != old_tick) {
+        // ❌ Only updates when tick crosses — misses intra-tick price movement
+        update_oracle_observation(pool, new_tick);
+    };
+    pool.current_tick = new_tick;
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Update oracle on every price change, not just tick change
+public fun swap(pool: &mut Pool, amount_in: u64, zero_for_one: bool) {
+    // ... execute swap ...
+    let new_tick = compute_new_tick(pool.sqrt_price);
+    // ✅ Always update observation with current sqrt_price
+    update_oracle_observation(pool, new_tick, pool.sqrt_price);
+    pool.current_tick = new_tick;
+}
+```
+
+---
+
+## Pattern 10: Undervalued Collateral from Naive LPT Pricing — move-oracle-010
+
+**Severity**: HIGH  
+**ID**: move-oracle-010  
+**References**: Echelon LPT (OS-ELP-ADV-00)
+
+### Attack Scenario
+A lending protocol accepts LP tokens as collateral but prices them using total reserves divided by total supply. An attacker can manipulate the pool's spot reserves (via swap/flashloan) immediately before a collateral assessment, artifically deflating or inflating the LP token price. This enables borrowing against overvalued collateral or triggering unfair liquidations on undervalued positions.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: LP token priced using spot reserves
+public fun get_lpt_price(pool: &Pool, oracle: &PriceOracle): u64 {
+    let total_supply = pool.lp_supply;
+    let reserve_a = balance::value(&pool.reserve_a);
+    let reserve_b = balance::value(&pool.reserve_b);
+    // ❌ Spot reserves are manipulable via flash loan
+    let price_a = oracle::get_price(oracle, pool.token_a);
+    let price_b = oracle::get_price(oracle, pool.token_b);
+    (reserve_a * price_a + reserve_b * price_b) / total_supply
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Use fair LP pricing (Alpha Homora / Chainlink method)
+public fun get_lpt_price(pool: &Pool, oracle: &PriceOracle): u64 {
+    let total_supply = pool.lp_supply;
+    let price_a = oracle::get_price(oracle, pool.token_a);
+    let price_b = oracle::get_price(oracle, pool.token_b);
+    // ✅ Fair reserves computed from invariant, not spot
+    let fair_reserve_a = math::sqrt((pool.k * price_b) / price_a);
+    let fair_reserve_b = math::sqrt((pool.k * price_a) / price_b);
+    (fair_reserve_a * price_a + fair_reserve_b * price_b) / total_supply
+}
+```
+
+---
+
+## Pattern 11: Duplicate Source ID Corrupting Price Aggregation — move-oracle-011
+
+**Severity**: MEDIUM  
+**ID**: move-oracle-011  
+**References**: Thala Oracle (OS-TOP-ADV-00)
+
+### Attack Scenario
+A price aggregation oracle accepts multiple price sources but doesn't validate source ID uniqueness. A malicious or misconfigured source registers the same ID twice, so its price is double-counted in the median/average calculation. This skews the aggregated price, enabling profitable trades against protocols that consume it.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: No duplicate source ID check
+public fun register_source(oracle: &mut PriceOracle, source_id: u64, source_addr: address) {
+    // ❌ Same source_id can be registered multiple times
+    vector::push_back(&mut oracle.sources, SourceInfo { id: source_id, addr: source_addr });
+}
+
+public fun aggregate_price(oracle: &PriceOracle): u64 {
+    let prices = vector::empty<u64>();
+    let i = 0;
+    while (i < vector::length(&oracle.sources)) {
+        // ❌ Duplicate source contributes price twice to median
+        let source = vector::borrow(&oracle.sources, i);
+        vector::push_back(&mut prices, get_source_price(source));
+        i = i + 1;
+    };
+    compute_median(&prices)
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Enforce source ID uniqueness
+public fun register_source(oracle: &mut PriceOracle, source_id: u64, source_addr: address) {
+    let i = 0;
+    while (i < vector::length(&oracle.sources)) {
+        assert!(vector::borrow(&oracle.sources, i).id != source_id, E_DUPLICATE_SOURCE);
+        i = i + 1;
+    };
+    vector::push_back(&mut oracle.sources, SourceInfo { id: source_id, addr: source_addr });
+}
+```
+
+---
+
+## Pattern 12: Custom Price Exceeding Oracle Price Cap — move-oracle-012
+
+**Severity**: MEDIUM  
+**ID**: move-oracle-012  
+**References**: Aave Aptos V3 (OS-AAV-ADV-04)
+
+### Attack Scenario
+An oracle allows admin-set custom prices for assets that don't have external price feeds. However, there's no upper bound on the custom price. An admin (or compromised admin key) sets an extreme price, and borrowers use the overvalued collateral to drain the protocol's lending reserves.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: No cap on custom price
+public fun set_custom_price(admin: &signer, asset: address, price: u64) {
+    assert!(signer::address_of(admin) == @admin, E_UNAUTHORIZED);
+    let state = borrow_global_mut<OracleState>(@oracle);
+    // ❌ Admin can set price to u64::MAX
+    table::upsert(&mut state.custom_prices, asset, price);
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Cap custom price relative to recent oracle range
+public fun set_custom_price(admin: &signer, asset: address, price: u64) {
+    assert!(signer::address_of(admin) == @admin, E_UNAUTHORIZED);
+    let state = borrow_global_mut<OracleState>(@oracle);
+    let max_price = state.price_cap; // e.g., 10x last known oracle price
+    assert!(price > 0 && price <= max_price, E_PRICE_OUT_OF_RANGE);
+    table::upsert(&mut state.custom_prices, asset, price);
+}
+```
+
+---
+
+## Pattern 13: Confidence-Before-Timestamp Ordering Error — move-oracle-013
+
+**Severity**: LOW  
+**ID**: move-oracle-013  
+**References**: Aftermath Perps (OS-AMP-ADV-03)
+
+### Attack Scenario
+When consuming Pyth oracle data, the protocol checks confidence interval (price ± conf) before checking the timestamp freshness. If the price data is stale, the confidence check may pass on outdated data, leading to transactions processing at a price that no longer reflects market conditions. The correct order is: check freshness first, then validate confidence.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Confidence checked before staleness
+public fun get_validated_price(pyth_price: &Price): u64 {
+    let price = pyth::get_price(pyth_price);
+    let conf = pyth::get_conf(pyth_price);
+    // ❌ Checking confidence on potentially stale data
+    assert!(conf * 100 / price < MAX_CONF_PERCENTAGE, E_TOO_WIDE);
+    
+    let timestamp = pyth::get_timestamp(pyth_price);
+    assert!(clock::timestamp_ms(clock) / 1000 - timestamp < MAX_AGE, E_STALE);
+    price
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Staleness check first, then confidence
+public fun get_validated_price(pyth_price: &Price, clock: &Clock): u64 {
+    let timestamp = pyth::get_timestamp(pyth_price);
+    // ✅ Freshness first — reject before any other checks
+    assert!(clock::timestamp_ms(clock) / 1000 - timestamp < MAX_AGE, E_STALE);
+    
+    let price = pyth::get_price(pyth_price);
+    let conf = pyth::get_conf(pyth_price);
+    assert!(conf * 100 / price < MAX_CONF_PERCENTAGE, E_TOO_WIDE);
+    price
+}
+```
+
+---
+
 ### Impact Analysis
 
 #### Technical Impact
@@ -468,6 +666,11 @@ public fun from_u256balance(x: u256, is_negative: bool): IFixed {
 - Pattern 6: Large numeric constants — count digits manually
 - Pattern 7: `AuthorityCap<PACKAGE>` without second type parameter
 - Pattern 8: Sign bit check conflated with overflow in fixed-point math
+- Pattern 9: Oracle observation skipped when `new_tick == old_tick`
+- Pattern 10: `reserve_a * price_a / total_supply` for LP pricing (spot manipulation)
+- Pattern 11: `vector::push_back(&sources, ...)` without duplicate ID check
+- Pattern 12: `table::upsert(&custom_prices, asset, price)` without upper bound
+- Pattern 13: Confidence check before timestamp freshness check on Pyth data
 ```
 
 #### Audit Checklist
@@ -479,10 +682,15 @@ public fun from_u256balance(x: u256, is_negative: bool): IFixed {
 - [ ] All large numeric constants verified digit-by-digit
 - [ ] Price feed registration requires specific capability type
 - [ ] Fixed-point sign handling separated from overflow detection
+- [ ] Oracle updates on every swap, not gated by tick change
+- [ ] LP pricing uses fair reserves (invariant-based), not spot reserves
+- [ ] Oracle source IDs validated for uniqueness at registration
+- [ ] Custom/admin prices have upper bounds relative to oracle range
+- [ ] Pyth price validation: staleness → confidence → price (correct order)
 
 ### Keywords for Search
 
-> `oracle`, `price feed`, `stale price`, `staleness check`, `chainlink`, `pyth`, `latest_round_data`, `timestamp`, `TWAP`, `oracle observation`, `tick index`, `sqrtprice`, `SLTP`, `stop loss`, `take profit`, `position size`, `signed unsigned`, `collateral value`, `LPT`, `undervalued`, `tick boundary`, `MIN_TICK`, `MAX_TICK`, `MAX_U64`, `faulty constant`, `price feed registration`, `AuthorityCap`, `fixed point`, `sign bit`, `move oracle`, `sui oracle`, `aptos oracle`
+> `oracle`, `price feed`, `stale price`, `staleness check`, `chainlink`, `pyth`, `latest_round_data`, `timestamp`, `TWAP`, `oracle observation`, `tick index`, `sqrtprice`, `SLTP`, `stop loss`, `take profit`, `position size`, `signed unsigned`, `collateral value`, `LPT`, `undervalued`, `tick boundary`, `MIN_TICK`, `MAX_TICK`, `MAX_U64`, `faulty constant`, `price feed registration`, `AuthorityCap`, `fixed point`, `sign bit`, `move oracle`, `sui oracle`, `aptos oracle`, `intra-tick`, `same tick skip`, `LP pricing`, `fair reserves`, `spot reserves`, `flash loan`, `source ID`, `duplicate source`, `median`, `aggregation`, `custom price`, `price cap`, `confidence`, `pyth confidence`, `stale then confidence`
 
 ### Related Vulnerabilities
 
