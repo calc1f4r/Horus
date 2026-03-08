@@ -1,7 +1,7 @@
 ---
 name: defihacklabs-indexing
 description: 'Analyzes DeFiHackLabs exploit PoCs and README documentation to extract vulnerability patterns, attack vectors, and root causes. Creates TEMPLATE.md-compliant database entries with verified attack mechanics from real-world exploits. Use when indexing DeFi exploits from DeFiHackLabs, creating vulnerability entries from PoC code, or building pattern databases from historical incidents.'
-tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent','todo']
+tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 ---
 
 # DeFiHackLabs Exploit Indexer

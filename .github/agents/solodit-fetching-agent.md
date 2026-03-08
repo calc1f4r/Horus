@@ -1,7 +1,7 @@
 ---
 name: solodit-fetching
 description: 'Fetches vulnerability reports from the Solodit/Cyfrin API for a given topic and stores them in reports/<topic>/. Use when collecting raw audit findings for a new vulnerability topic, populating the reports/ directory with source data, or preparing input for the variant-template-writer agent.'
-tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
+tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent','todo']
 ---
 
 # Solodit Fetcher
