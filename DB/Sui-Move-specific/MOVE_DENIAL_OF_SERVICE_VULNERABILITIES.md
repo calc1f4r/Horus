@@ -542,6 +542,391 @@ public fun set_node_capacity(pool: &mut StakingPool, capacity: u64) {
 
 ---
 
+## Pattern 9: Unbounded Map Growth in Reward Tracking — move-dos-009
+
+**Severity**: HIGH  
+**ID**: move-dos-009  
+**References**: Aave Aptos V3 (OS-AAV-ADV-00)
+
+### Attack Scenario
+Reward tracking uses unbounded maps (e.g., `SmartTable` or `SimpleMap`) that grow per-user. When liquidation or withdrawal must iterate these maps, gas costs grow linearly. An attacker creates many reward entries, causing legitimate liquidation calls to exceed gas limits and permanently blocking the operation.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Unbounded map iterated during liquidation
+struct UserRewards has key {
+    // ❌ Map grows without bound as new reward tokens are added
+    rewards_map: SimpleMap<address, RewardData>,
+}
+
+public fun liquidate(user: address) {
+    let rewards = borrow_global<UserRewards>(user);
+    // ❌ Must iterate ALL reward entries to update accrued amounts
+    let keys = simple_map::keys(&rewards.rewards_map);
+    let i = 0;
+    while (i < vector::length(&keys)) {
+        update_reward(user, *vector::borrow(&keys, i));
+        i = i + 1;
+    };
+    // ... liquidation logic
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Paginated reward iteration with max per-call limit
+public fun liquidate(user: address, max_rewards: u64) {
+    let rewards = borrow_global_mut<UserRewards>(user);
+    let keys = simple_map::keys(&rewards.rewards_map);
+    let bound = math::min(vector::length(&keys), max_rewards);
+    let i = 0;
+    while (i < bound) {
+        update_reward(user, *vector::borrow(&keys, i));
+        i = i + 1;
+    };
+}
+```
+
+---
+
+## Pattern 10: Hash Collision Bucket Overload — move-dos-010
+
+**Severity**: HIGH  
+**ID**: move-dos-010  
+**References**: Aave Aptos V3 (OS-AAV-ADV-03)
+
+### Attack Scenario
+`SmartTable` uses hash-based bucketing. An attacker crafts keys that all map to the same bucket, converting O(1) lookups into O(n) scans. This degrades any function that reads from the table, causing gas exhaustion on core operations like borrowing, repaying, or liquidation.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: SmartTable with user-controlled keys
+struct PositionIndex has key {
+    // ❌ Attacker can craft keys to collide into same bucket
+    positions: SmartTable<address, PositionData>,
+}
+
+public fun get_position(index: &PositionIndex, user: address): &PositionData {
+    // ❌ If bucket has many collisions, this becomes O(n)
+    smart_table::borrow(&index.positions, user)
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Use split_load_threshold to limit bucket depth
+public fun create_position_index(): PositionIndex {
+    PositionIndex {
+        positions: smart_table::new_with_config<address, PositionData>(
+            4,   // num_initial_buckets
+            75,  // split_load_threshold percentage
+            100, // target_bucket_size
+        ),
+    }
+}
+```
+
+---
+
+## Pattern 11: Division by Zero on Empty State — move-dos-011
+
+**Severity**: HIGH  
+**ID**: move-dos-011  
+**References**: Solend on Sui (OS-SAM-ADV-05)
+
+### Attack Scenario
+When reserves or total supply are zero (e.g., after full withdrawal), division operations abort with a runtime error. Functions that compute exchange rates, utilization ratios, or share conversions fail, blocking all subsequent operations until a deposit restores the denominator.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Division by total supply without zero-check
+public fun calculate_exchange_rate(reserve: &Reserve): u64 {
+    let total_supply = reserve.total_collateral_tokens;
+    // ❌ If total_supply == 0 (all withdrawn), this aborts
+    let rate = (reserve.available_amount * PRECISION) / total_supply;
+    rate
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Return 1:1 rate when supply is zero
+public fun calculate_exchange_rate(reserve: &Reserve): u64 {
+    let total_supply = reserve.total_collateral_tokens;
+    if (total_supply == 0) {
+        return PRECISION  // 1:1 exchange rate for initial deposit
+    };
+    (reserve.available_amount * PRECISION) / total_supply
+}
+```
+
+---
+
+## Pattern 12: Front-Running Deployment Blocking Initialization — move-dos-012
+
+**Severity**: HIGH  
+**ID**: move-dos-012  
+**References**: EthSign Movedrop (OS-MTD-ADV-02)
+
+### Attack Scenario
+Protocol deployment uses `create_resource_account` with predictable seeds (e.g., literal strings). An attacker monitors the mempool, front-runs the deployment transaction with the same seed bytes, and creates a resource account at the target address. The legitimate deployment then aborts because the address already exists, permanently blocking the protocol from deploying.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Predictable seed allows front-running
+public fun initialize(admin: &signer) {
+    // ❌ Seed is a constant string — attacker can predict the address
+    let (resource_signer, _cap) = account::create_resource_account(
+        admin,
+        b"movedrop_vault"  // ❌ Deterministic, predictable
+    );
+    move_to(&resource_signer, VaultState { /* ... */ });
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Include unpredictable component in seed
+public fun initialize(admin: &signer, nonce: vector<u8>) {
+    let seed = b"movedrop_vault";
+    vector::append(&mut seed, nonce);
+    vector::append(&mut seed, bcs::to_bytes(&timestamp::now_microseconds()));
+    let (resource_signer, _cap) = account::create_resource_account(admin, seed);
+    move_to(&resource_signer, VaultState { /* ... */ });
+}
+```
+
+---
+
+## Pattern 13: Epoch Transition Imbalance Abort — move-dos-013
+
+**Severity**: MEDIUM  
+**ID**: move-dos-013  
+**References**: Kofi Finance (OS-KOF-ADV-03)
+
+### Attack Scenario
+During epoch transitions, a temporary imbalance between pending deposits and confirmed stakes triggers an assertion. If a user stakes or unstakes at the exact moment the epoch advances, the transition function aborts, halting protocol operation until the imbalance resolves. This is especially dangerous in delegated-staking protocols where epoch changes affect all users.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Assertion fails on transient imbalance
+public fun advance_epoch(pool: &mut StakingPool) {
+    let pending = pool.pending_deposits;
+    let confirmed = pool.confirmed_stakes;
+    // ❌ Temporary imbalance (from concurrent stake/unstake) aborts transition
+    assert!(pending == confirmed, E_IMBALANCE);
+    pool.epoch = pool.epoch + 1;
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Allow transient imbalance, reconcile during transition
+public fun advance_epoch(pool: &mut StakingPool) {
+    let difference = if (pool.pending_deposits > pool.confirmed_stakes) {
+        pool.pending_deposits - pool.confirmed_stakes
+    } else {
+        pool.confirmed_stakes - pool.pending_deposits
+    };
+    pool.pending_deposits = pool.confirmed_stakes; // Reconcile
+    pool.epoch = pool.epoch + 1;
+}
+```
+
+---
+
+## Pattern 14: Unnecessary Assertion Causing Protocol Lockup — move-dos-014
+
+**Severity**: HIGH  
+**ID**: move-dos-014  
+**References**: Kofi Finance (OS-KOF-ADV-05)
+
+### Attack Scenario
+An assertion bounds a value that naturally grows over time (e.g., a ratio between two quantities). When the protocol operates correctly but the ratio exceeds an arbitrary threshold, the assertion fires and locks the entire protocol. The assertion was intended as a sanity check but becomes a DoS vector under normal growth conditions.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Ratio bound blocks normal operation
+public fun process_withdrawal(pool: &mut Pool, amount: u64) {
+    let ratio = (pool.total_staked * PRECISION) / pool.total_shares;
+    // ❌ Ratio naturally increases as rewards accrue
+    assert!(ratio <= 2 * PRECISION, E_RATIO_TOO_HIGH);
+    // ... withdrawal logic
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Use ratio for validation, not hard abort
+public fun process_withdrawal(pool: &mut Pool, amount: u64) {
+    let ratio = (pool.total_staked * PRECISION) / pool.total_shares;
+    // ✅ Log warning but don't block withdrawals on high ratio
+    if (ratio > EXPECTED_MAX_RATIO) {
+        event::emit(HighRatioWarning { ratio });
+    };
+    // ... withdrawal logic proceeds regardless
+}
+```
+
+---
+
+## Pattern 15: Object Size Limit Exceeded — move-dos-015
+
+**Severity**: MEDIUM  
+**ID**: move-dos-015  
+**References**: Mysten Walrus (OS-MSW-ADV-05)
+
+### Attack Scenario
+Sui objects have a maximum BCS serialization size limit. If a data structure within an object grows unboundedly (e.g., a vector of committee members or event logs), the object exceeds the size limit and becomes unreadable, effectively destroying access to its data and locking funds.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Unbounded vector inside shared object
+struct CommitteeState has key {
+    id: UID,
+    // ❌ Each epoch appends members; never cleaned up
+    historical_members: vector<MemberRecord>,
+    treasury: Balance<SUI>,
+}
+
+public fun record_epoch(state: &mut CommitteeState, members: vector<MemberRecord>) {
+    // ❌ Eventually exceeds Sui object size limit
+    vector::append(&mut state.historical_members, members);
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Use dynamic fields or table for unbounded data
+struct CommitteeState has key {
+    id: UID,
+    current_epoch: u64,
+    treasury: Balance<SUI>,
+}
+
+public fun record_epoch(state: &mut CommitteeState, epoch: u64, members: vector<MemberRecord>) {
+    // ✅ Store per-epoch data in dynamic fields (no size limit on parent)
+    dynamic_field::add(&mut state.id, epoch, members);
+    state.current_epoch = epoch;
+}
+```
+
+---
+
+## Pattern 16: Zero-Value Deposit Disabling Withdrawals — move-dos-016
+
+**Severity**: HIGH  
+**ID**: move-dos-016  
+**References**: Securitize (OS-ASC-ADV-05)
+
+### Attack Scenario
+An attacker deposits a zero-value fungible asset to create a `PrimaryFungibleStore` on a target address. This changes the store's existence state, and subsequent withdrawal logic checks `primary_fungible_store::balance()` which returns 0, triggering an assertion that blocks legitimate withdrawals of other assets from the same account.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Zero-value deposit creates store, blocks withdrawals
+public fun withdraw(account: &signer, amount: u64) {
+    let addr = signer::address_of(account);
+    // ❌ Attacker created a zero-balance store via zero deposit
+    let balance = primary_fungible_store::balance(addr, metadata);
+    // ❌ Passes balance check but withdrawal of other assets fails
+    assert!(balance >= amount, E_INSUFFICIENT);
+    // ... withdrawal from a DIFFERENT store uses same existence check
+    let other_balance = primary_fungible_store::balance(addr, other_metadata);
+    assert!(other_balance > 0, E_NO_ASSETS);  // ❌ May abort if store was just created
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Check specific asset balance, ignore unrelated stores
+public fun withdraw(account: &signer, amount: u64, metadata: Object<Metadata>) {
+    let addr = signer::address_of(account);
+    if (!primary_fungible_store::store_exists(addr, metadata)) {
+        abort E_NO_STORE
+    };
+    let balance = primary_fungible_store::balance(addr, metadata);
+    assert!(balance >= amount, E_INSUFFICIENT);
+    primary_fungible_store::withdraw(account, metadata, amount)
+}
+```
+
+---
+
+## Pattern 17: Mint Limit Exhaustion via Cycling — move-dos-017
+
+**Severity**: HIGH  
+**ID**: move-dos-017  
+**References**: Lombard SUI (OS-LSI-ADV-01)
+
+### Attack Scenario
+A mint-limited bridge allows only a fixed amount per epoch. An attacker repeatedly mints-then-burns (or mints-then-transfers-back) to consume the entire mint limit without retaining tokens. Legitimate users are then unable to mint for the remainder of the epoch. The attacker effectively blocks all bridge inflows at minimal cost.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Mint limit only checks cumulative mints, ignoring burns
+public fun mint_bridged_token(state: &mut BridgeState, amount: u64, ctx: &mut TxContext) {
+    // ❌ Attacker can mint→burn→mint to exhaust limit
+    assert!(state.minted_this_epoch + amount <= state.mint_limit, E_LIMIT);
+    state.minted_this_epoch = state.minted_this_epoch + amount;
+    let tokens = coin::mint(&mut state.treasury_cap, amount, ctx);
+    transfer::public_transfer(tokens, tx_context::sender(ctx));
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Track net mints (mints minus burns) against limit
+public fun mint_bridged_token(state: &mut BridgeState, amount: u64, ctx: &mut TxContext) {
+    let net_minted = state.total_minted - state.total_burned;
+    assert!(net_minted + amount <= state.mint_limit, E_LIMIT);
+    state.total_minted = state.total_minted + amount;
+    let tokens = coin::mint(&mut state.treasury_cap, amount, ctx);
+    transfer::public_transfer(tokens, tx_context::sender(ctx));
+}
+```
+
+---
+
+## Pattern 18: Commission Rate Overflow Blocking Epoch — move-dos-018
+
+**Severity**: HIGH  
+**ID**: move-dos-018  
+**References**: Mysten Walrus (OS-MSW-ADV-06)
+
+### Attack Scenario
+A staking pool operator sets a commission rate to a value that, when multiplied by rewards during epoch processing, causes a u64 overflow. The epoch advancement function aborts, blocking all validators and delegators from accessing their funds until the commission rate is corrected — but correction may also require epoch advancement, creating a deadlock.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Commission rate not bounded at entry
+public fun set_commission(pool: &mut StakingPool, rate: u64) {
+    pool.commission_rate = rate;  // ❌ No upper bound check
+}
+
+public fun distribute_rewards(pool: &mut StakingPool, rewards: u64) {
+    // ❌ If commission_rate is very large, this overflows u64
+    let commission = (rewards * pool.commission_rate) / 10000;
+    pool.operator_balance = pool.operator_balance + commission;
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Bound commission rate at the setter
+public fun set_commission(pool: &mut StakingPool, rate: u64) {
+    assert!(rate <= 10000, E_INVALID_RATE); // Max 100%
+    pool.commission_rate = rate;
+}
+
+public fun distribute_rewards(pool: &mut StakingPool, rewards: u64) {
+    let commission = ((rewards as u128) * (pool.commission_rate as u128) / 10000u128) as u64;
+    pool.operator_balance = pool.operator_balance + commission;
+}
+```
+
+---
+
 ### Impact Analysis
 
 #### Technical Impact
@@ -575,6 +960,13 @@ public fun set_node_capacity(pool: &mut StakingPool, capacity: u64) {
 - Pattern 5: `(a * b) / c` without u128 cast for intermediate
 - Pattern 6: `assert!(ratio <= MAX)` on naturally growing values
 - Pattern 7: `primary_fungible_store::ensure_primary_store_exists` on attacker-reachable address
+- Pattern 8: `simple_map::keys()` iteration in gas-critical paths (liquidation, withdrawal)
+- Pattern 9: `smart_table::borrow()` with user-controlled keys and no bucket config
+- Pattern 10: Division by `total_supply` without zero-guard after full withdrawal
+- Pattern 11: `minted_this_epoch += amount` without tracking burns
+- Pattern 12: `(rewards * commission_rate)` without u128 intermediate or rate bound
+- Pattern 13: `vector::append()` inside shared objects without size cleanup
+- Pattern 14: `primary_fungible_store::balance()` after attacker zero-deposit
 ```
 
 #### Audit Checklist
@@ -586,10 +978,18 @@ public fun set_node_capacity(pool: &mut StakingPool, capacity: u64) {
 - [ ] Assertions don't block operations on naturally evolving metrics
 - [ ] Primary store creation handles pre-existing stores gracefully
 - [ ] Node/validator parameters (capacity, commission, key length) bounded
+- [ ] SimpleMap/SmartTable iteration paths bounded in gas-critical functions
+- [ ] SmartTable uses split_load_threshold configuration
+- [ ] Exchange rate calculation handles zero total supply
+- [ ] Mint limits track net mints (mints minus burns)
+- [ ] Commission rate validated at setter entry point
+- [ ] Shared object vectors have cleanup or migration to dynamic fields
+- [ ] Zero-value deposits cannot create stores that interfere with other asset paths
+- [ ] Epoch transition handles transient imbalances gracefully
 
 ### Keywords for Search
 
-> `denial of service`, `DoS`, `gas exhaustion`, `unbounded vector`, `linear scan`, `front-running creation`, `create_resource_account`, `predictable seed`, `event limit`, `object size limit`, `division by zero`, `overflow abort`, `u64 overflow`, `hash collision`, `SmartTable`, `epoch limit`, `mint limit`, `commission rate`, `node capacity`, `primary store`, `front-running`, `griefing`, `protocol halt`, `move dos`, `sui dos`, `aptos dos`
+> `denial of service`, `DoS`, `gas exhaustion`, `unbounded vector`, `linear scan`, `front-running creation`, `create_resource_account`, `predictable seed`, `event limit`, `object size limit`, `division by zero`, `overflow abort`, `u64 overflow`, `hash collision`, `SmartTable`, `epoch limit`, `mint limit`, `commission rate`, `node capacity`, `primary store`, `front-running`, `griefing`, `protocol halt`, `move dos`, `sui dos`, `aptos dos`, `bucket overload`, `split_load_threshold`, `zero supply`, `exchange rate abort`, `net mint tracking`, `epoch transition`, `imbalance abort`, `ratio assertion`, `BCS serialization`, `dynamic_field`, `mint exhaustion`, `cycling attack`, `commission overflow`, `zero deposit`, `primary_fungible_store`, `deadlock`
 
 ### Related Vulnerabilities
 
