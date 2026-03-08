@@ -1,6 +1,6 @@
 ---
 description: 'Hunts for vulnerability patterns in smart contract codebases using the Vulnerability Database (DB/). Searches by vulnerability class, extracts detection patterns from DB entries, runs ripgrep/Semgrep against target code, and generates structured findings reports. Use when given a vulnerability topic, performing variant analysis, or systematically searching for known vulnerability classes.'
-tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent','todo']
+tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 ---
 
 # Invariant Catcher Agent
