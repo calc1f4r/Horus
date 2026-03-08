@@ -405,6 +405,272 @@ public fun join(staked_a: &mut StakedWal, staked_b: StakedWal) {
 
 ---
 
+## Pattern 7: Unbacked Equity Share Minting on Zero Registry — move-inflate-007
+
+**Severity**: HIGH  
+**ID**: move-inflate-007  
+**References**: Kuna Labs (OS-KUL-SUG-00)
+
+### Attack Scenario
+When a protocol's total registry balance is zero (e.g., after redistribution or initialization), a new deposit mints shares based on a 1:1 ratio. However, if the underlying assets have already been distributed, the new shares are backed by nothing. The depositor receives equity in an empty pool, diluting subsequent depositors who contribute actual assets.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Zero registry state allows unbacked share minting
+public fun deposit(pool: &mut Pool, amount: u64, ctx: &mut TxContext): Coin<SHARE> {
+    let shares = if (pool.total_shares == 0 || pool.total_assets == 0) {
+        // ❌ When total_assets was zeroed by redistribution,
+        // minting at 1:1 creates unbacked shares
+        amount
+    } else {
+        (amount * pool.total_shares) / pool.total_assets
+    };
+    pool.total_shares = pool.total_shares + shares;
+    pool.total_assets = pool.total_assets + amount;
+    coin::mint(&mut pool.share_cap, shares, ctx)
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Prevent deposits when assets were redistributed
+public fun deposit(pool: &mut Pool, amount: u64, ctx: &mut TxContext): Coin<SHARE> {
+    assert!(pool.total_shares == 0 || pool.total_assets > 0, E_POOL_DRAINED);
+    let shares = if (pool.total_shares == 0) {
+        amount - MINIMUM_LIQUIDITY // Lock minimum on first deposit
+    } else {
+        (amount * pool.total_shares) / pool.total_assets
+    };
+    assert!(shares > 0, E_ZERO_SHARES);
+    pool.total_shares = pool.total_shares + shares;
+    pool.total_assets = pool.total_assets + amount;
+    coin::mint(&mut pool.share_cap, shares, ctx)
+}
+```
+
+---
+
+## Pattern 8: Debt Share Dilution on Zero Liability — move-inflate-008
+
+**Severity**: MEDIUM  
+**ID**: move-inflate-008  
+**References**: Kuna Labs (OS-KUL-SUG-03)
+
+### Attack Scenario
+When total liability reaches zero temporarily (all debts repaid), the next borrower's debt shares are calculated at a 1:1 ratio. If the protocol had accumulated interest that was distributed but the debt tracking wasn't reset, subsequent borrowers receive disproportionately few debt shares, effectively diluting existing debt obligations and allowing under-repayment.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Zero liability allows debt share manipulation
+public fun borrow(pool: &mut LendingPool, amount: u64): u64 {
+    let debt_shares = if (pool.total_debt_shares == 0) {
+        amount
+    } else {
+        // ❌ If total_liability == 0 but total_debt_shares > 0,
+        // this divides by zero
+        (amount * pool.total_debt_shares) / pool.total_liability
+    };
+    pool.total_debt_shares = pool.total_debt_shares + debt_shares;
+    pool.total_liability = pool.total_liability + amount;
+    debt_shares
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Reset debt shares when liability reaches zero
+public fun borrow(pool: &mut LendingPool, amount: u64): u64 {
+    if (pool.total_liability == 0) {
+        pool.total_debt_shares = 0; // Clean reset
+    };
+    let debt_shares = if (pool.total_debt_shares == 0) {
+        amount
+    } else {
+        (amount * pool.total_debt_shares) / pool.total_liability
+    };
+    assert!(debt_shares > 0, E_ZERO_DEBT_SHARES);
+    pool.total_debt_shares = pool.total_debt_shares + debt_shares;
+    pool.total_liability = pool.total_liability + amount;
+    debt_shares
+}
+```
+
+---
+
+## Pattern 9: Inflation Attack on Zero Total Stake — move-inflate-009
+
+**Severity**: CRITICAL  
+**ID**: move-inflate-009  
+**References**: Thala LSD (OS-LSD-ADV-00), Solend (OS-SAM-ADV-00)
+
+### Attack Scenario
+Classic vault inflation attack applied to Move staking protocols. When total staked amount is zero, an attacker can: (1) deposit 1 unit to get 1 share, (2) directly donate a large amount to the pool, (3) the exchange rate becomes extremely skewed, (4) the next depositor's deposit rounds down to 0 shares, losing their entire deposit to the attacker.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: No minimum liquidity protection
+public fun stake(pool: &mut StakingPool, amount: u64, ctx: &mut TxContext): Coin<thAPT> {
+    let shares = if (pool.total_supply == 0) {
+        amount  // ❌ First staker gets exact shares, no minimum lock
+    } else {
+        (amount * pool.total_supply) / pool.total_staked
+    };
+    // ❌ Attacker: stake(1) → donate(1M) → exchange_rate = 1M:1
+    // Next user: stake(999999) → shares = 999999 * 1 / 1000001 = 0
+    pool.total_supply = pool.total_supply + shares;
+    pool.total_staked = pool.total_staked + amount;
+    coin::mint(&mut pool.mint_cap, shares, ctx)
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Lock minimum liquidity on first deposit
+const MINIMUM_LIQUIDITY: u64 = 1000;
+
+public fun stake(pool: &mut StakingPool, amount: u64, ctx: &mut TxContext): Coin<thAPT> {
+    let shares = if (pool.total_supply == 0) {
+        assert!(amount > MINIMUM_LIQUIDITY, E_INITIAL_DEPOSIT_TOO_SMALL);
+        let dead_shares = MINIMUM_LIQUIDITY;
+        pool.total_supply = pool.total_supply + dead_shares; // Permanently locked
+        amount - dead_shares
+    } else {
+        (amount * pool.total_supply) / pool.total_staked
+    };
+    assert!(shares > 0, E_ZERO_SHARES);
+    pool.total_supply = pool.total_supply + shares;
+    pool.total_staked = pool.total_staked + amount;
+    coin::mint(&mut pool.mint_cap, shares, ctx)
+}
+```
+
+---
+
+## Pattern 10: Peg Inconsistency from Unbounded Burn/Mint — move-inflate-010
+
+**Severity**: MEDIUM  
+**ID**: move-inflate-010  
+**References**: Thala LSD (OS-LSD-ADV-02)
+
+### Attack Scenario
+A liquid staking token is designed to maintain a 1:1 peg with the underlying asset. However, the burn/mint mechanism doesn't enforce that total supply equals total backing. Over time, accumulated rounding errors in partial unstakes, fee deductions, or reward distributions cause the supply to drift from the peg, creating arbitrage opportunities at the expense of honest holders.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Burn amount can diverge from actual backing decrease
+public fun unstake(pool: &mut Pool, shares: Coin<thAPT>): u64 {
+    let share_amount = coin::value(&shares);
+    let underlying = (share_amount * pool.total_staked) / pool.total_supply;
+    // ❌ Rounding means total_supply * rate != total_staked after many operations
+    coin::burn(&mut pool.burn_cap, shares);
+    pool.total_supply = pool.total_supply - share_amount;
+    pool.total_staked = pool.total_staked - underlying;
+    underlying
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Enforce peg invariant after each operation
+public fun unstake(pool: &mut Pool, shares: Coin<thAPT>): u64 {
+    let share_amount = coin::value(&shares);
+    let underlying = (share_amount * pool.total_staked) / pool.total_supply;
+    coin::burn(&mut pool.burn_cap, shares);
+    pool.total_supply = pool.total_supply - share_amount;
+    pool.total_staked = pool.total_staked - underlying;
+    // ✅ Enforce: if supply == 0, staked must also be 0
+    if (pool.total_supply == 0) {
+        assert!(pool.total_staked == 0, E_PEG_BROKEN);
+    };
+    underlying
+}
+```
+
+---
+
+## Pattern 11: Uncapped Derivative Token Minting — move-inflate-011
+
+**Severity**: HIGH  
+**ID**: move-inflate-011  
+**References**: Thala Staked LPT (OS-TSL-ADV-00)
+
+### Attack Scenario
+A derivative token (e.g., xLPT wrapping LPT) has no mint cap or rate limit. An attacker can mint unlimited derivative tokens if they control sufficient underlying tokens, then use these to claim a disproportionate share of rewards or governance votes. The lack of a supply cap means the derivative's value approaches zero.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: No cap on derivative token minting
+public fun wrap(pool: &mut WrapPool, lpt: Coin<LPT>, ctx: &mut TxContext): Coin<xLPT> {
+    let amount = coin::value(&lpt);
+    balance::join(&mut pool.lpt_reserve, coin::into_balance(lpt));
+    // ❌ No maximum supply check — unlimited minting possible
+    coin::mint(&mut pool.xlpt_cap, amount, ctx)
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Enforce supply cap on derivative token
+public fun wrap(pool: &mut WrapPool, lpt: Coin<LPT>, ctx: &mut TxContext): Coin<xLPT> {
+    let amount = coin::value(&lpt);
+    let current_supply = pool.xlpt_total_supply;
+    assert!(current_supply + amount <= pool.max_xlpt_supply, E_CAP_EXCEEDED);
+    balance::join(&mut pool.lpt_reserve, coin::into_balance(lpt));
+    pool.xlpt_total_supply = current_supply + amount;
+    coin::mint(&mut pool.xlpt_cap, amount, ctx)
+}
+```
+
+---
+
+## Pattern 12: kAPT Double Minting from Fee Mismatch — move-inflate-012
+
+**Severity**: HIGH  
+**ID**: move-inflate-012  
+**References**: Kofi Finance (OS-KOF-ADV-01)
+
+### Attack Scenario
+When staking through a provider that charges fees, the protocol mints liquid staking tokens (kAPT) based on the gross deposit amount, but the actual staked amount is net of fees. This means more tokens are minted than backed by staked assets. Over time, the token becomes under-collateralized and holders cannot fully redeem.
+
+### Vulnerable Pattern Example
+```move
+// ❌ VULNERABLE: Mints based on gross amount, not net-of-fee
+public fun stake_with_provider(
+    pool: &mut Pool,
+    amount: u64,
+    provider: &StakingProvider,
+    ctx: &mut TxContext
+): Coin<kAPT> {
+    // Provider takes fee internally
+    provider::stake(provider, amount);
+    // ❌ Mints kAPT for full `amount`, but provider only staked (amount - fee)
+    let kapt_amount = amount;
+    pool.total_kapt = pool.total_kapt + kapt_amount;
+    coin::mint(&mut pool.kapt_cap, kapt_amount, ctx)
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Calculate net staked amount after provider fee
+public fun stake_with_provider(
+    pool: &mut Pool,
+    amount: u64,
+    provider: &StakingProvider,
+    ctx: &mut TxContext
+): Coin<kAPT> {
+    let pre_balance = provider::get_staked_balance(provider);
+    provider::stake(provider, amount);
+    let post_balance = provider::get_staked_balance(provider);
+    let net_staked = post_balance - pre_balance;
+    // ✅ Mint only for the amount actually staked
+    pool.total_kapt = pool.total_kapt + net_staked;
+    coin::mint(&mut pool.kapt_cap, net_staked, ctx)
+}
+```
+
+---
+
 ### Impact Analysis
 
 #### Technical Impact
@@ -437,6 +703,12 @@ public fun join(staked_a: &mut StakedWal, staked_b: StakedWal) {
 - Pattern 4: `freeze_coin_store` without corresponding `unfreeze_coin_store`
 - Pattern 5: `left = limit` or `remaining = limit` in epoch reset (check variable correctness)
 - Pattern 6: `join` or `merge` of staking objects without epoch/pool_id check
+- Pattern 7: `if (total_shares == 0 || total_assets == 0)` without checking if assets were redistributed
+- Pattern 8: `(amount * total_debt_shares) / total_liability` without zero-liability guard
+- Pattern 9: First deposit path without dead share lock (MINIMUM_LIQUIDITY)
+- Pattern 10: `total_supply * rate != total_staked` drift after many partial unstakes
+- Pattern 11: `coin::mint` for derivative token without max supply check
+- Pattern 12: `provider::stake(amount)` → `mint(amount)` without measuring net staked
 ```
 
 #### Audit Checklist
@@ -447,10 +719,15 @@ public fun join(staked_a: &mut StakedWal, staked_b: StakedWal) {
 - [ ] Epoch limit reset references correct configuration variable
 - [ ] Staking object merging validates matching epoch and pool
 - [ ] Zero-share mint prevented with explicit assertion
+- [ ] Pool cannot accept deposits when total_assets == 0 but total_shares > 0
+- [ ] Debt share system resets when total liability reaches zero
+- [ ] Derivative token minting has supply cap or rate limit
+- [ ] Peg invariant enforced: supply == 0 implies backing == 0
+- [ ] Staking fee deduction measured (pre/post balance) not assumed
 
 ### Keywords for Search
 
-> `inflation attack`, `first depositor`, `exchange rate manipulation`, `minimum liquidity`, `dead shares`, `double minting`, `fee misaccounting`, `net amount`, `gross amount`, `supply manipulation`, `mint burn`, `uncapped minting`, `depeg`, `permanent freeze`, `unfreeze`, `freeze_coin_store`, `epoch limit`, `mint limit`, `activation epoch`, `staking shares`, `share calculation`, `total_supply`, `total_reserves`, `move inflation`, `sui inflation`, `aptos inflation`
+> `inflation attack`, `first depositor`, `exchange rate manipulation`, `minimum liquidity`, `dead shares`, `double minting`, `fee misaccounting`, `net amount`, `gross amount`, `supply manipulation`, `mint burn`, `uncapped minting`, `depeg`, `permanent freeze`, `unfreeze`, `freeze_coin_store`, `epoch limit`, `mint limit`, `activation epoch`, `staking shares`, `share calculation`, `total_supply`, `total_reserves`, `move inflation`, `sui inflation`, `aptos inflation`, `unbacked shares`, `zero registry`, `debt share dilution`, `zero liability`, `peg inconsistency`, `derivative token`, `supply cap`, `kAPT`, `thAPT`, `xLPT`, `provider fee`, `net staked`, `total_staked`, `total_backing`
 
 ### Related Vulnerabilities
 

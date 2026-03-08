@@ -622,6 +622,552 @@ public fun withdraw(account: &signer, store: &mut TokenStore, amount: u64) {
 
 ---
 
+## Pattern 10: Reward Accumulation During Inactive/Paused Periods — move-defi-010
+
+**Frequency**: 2/29 reports (Bluefin Spot, Thala Staked LPT)
+**Severity consensus**: MEDIUM (lowest across auditors)
+**Validation**: Moderate — 2 independent protocols
+
+### Attack Scenario
+1. Reward distribution is paused or ended
+2. When restarted, the system includes the inactive gap in reward calculations
+3. `rewards_per_second * (current_time - last_update_time)` includes the gap
+4. LPs receive unearned excess rewards, depleting the reward pool faster
+
+### Vulnerable Pattern Example
+
+**Example: Bluefin Spot — Inactive Periods Counted in Reward Accrual** [MEDIUM]
+```move
+// ❌ VULNERABLE: Inactive time included in reward calculation
+public(friend) fun update_reward_infos(pool: &mut Pool, current_timestamp: u64): vector<u128> {
+    let reward_info = &mut pool.reward_infos[i];
+    if (current_timestamp > reward_info.last_update_time) {
+        let min_timestamp = math64::min(current_timestamp, reward_info.end_time);
+        if (pool.liquidity != 0 && min_timestamp > reward_info.last_update_time) {
+            // BUG: Includes gap between old end_time and new start_time
+            let rewards = (min_timestamp - reward_info.last_update_time) * reward_info.reward_per_seconds;
+            reward_info.growth_global = reward_info.growth_global + (rewards / pool.liquidity);
+        };
+        reward_info.last_update_time = current_timestamp;
+    };
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Reset last_update_time when restarting rewards
+public(friend) fun restart_rewards(pool: &mut Pool, new_start: u64, new_end: u64, rate: u128) {
+    let reward_info = &mut pool.reward_infos[i];
+    reward_info.last_update_time = new_start; // Skip the gap
+    reward_info.end_time = new_end;
+    reward_info.reward_per_seconds = rate;
+}
+```
+
+---
+
+## Pattern 11: Tolerance Check Bypass via Forced Withdrawal Path — move-defi-011
+
+**Frequency**: 1/29 reports (Aftermath MM)
+**Severity consensus**: CRITICAL (single auditor)
+**Validation**: Weak — single auditor, but Critical severity
+
+### Attack Scenario
+1. User sets unrealistically high minimum expected balance, locking the withdrawal session
+2. After a timeout, forced withdrawal path is triggered
+3. Forced withdrawal bypasses margin tolerance checks when closing positions
+4. Market orders execute without slippage control, exposing vault to significant losses
+
+### Vulnerable Pattern Example
+
+**Example: Aftermath MM — Forced Withdrawal Bypasses Margin Tolerance** [CRITICAL]
+```move
+// ❌ VULNERABLE: Force withdraw skips tolerance validation
+public fun process_force_withdraw<T>(vault: &mut Vault, clearing_house: &mut ClearingHouse<T>) {
+    // No tolerance check — market orders close all positions immediately
+    close_all_positions_with_market_orders(vault, clearing_house);
+    let balance = calculate_final_balance(vault);
+    // User gets whatever remains after uncontrolled execution
+    transfer_to_user(balance);
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Enforce tolerance even in forced withdrawal
+public fun process_force_withdraw_safe<T>(vault: &mut Vault, clearing_house: &mut ClearingHouse<T>) {
+    close_all_positions_with_market_orders(vault, clearing_house);
+    let balance = calculate_final_balance(vault);
+    assert!(
+        balance >= vault.min_expected_balance * TOLERANCE_FACTOR / 100,
+        E_SLIPPAGE_EXCEEDED
+    );
+    transfer_to_user(balance);
+}
+```
+
+---
+
+## Pattern 12: LP Fee Manipulation via Split/Merge Rounding — move-defi-012
+
+**Frequency**: 1/29 reports (Aftermath MM)
+**Severity consensus**: MEDIUM (single auditor)
+**Validation**: Weak — single auditor, but clear economic exploit
+
+### Attack Scenario
+1. LP coin tracks `provided_value_usd` for fee calculation at withdrawal
+2. Repeated split operations cause rounding errors that reduce `provided_value_usd`
+3. Attacker splits and rejoins LP coins, each time losing rounding dust from the tracker
+4. At withdrawal, reduced tracker means lower fees or even a profit
+
+### Vulnerable Pattern Example
+
+**Example: Aftermath MM — Split Rounding Erodes Fee Tracker** [MEDIUM]
+```move
+// ❌ VULNERABLE: Repeated splits cause rounding loss in provided_value_usd
+public(package) fun split_user_lp_coin<L>(user_lp: &mut UserLpCoin<L>, amount: u64): UserLpCoin<L> {
+    let split_ratio = ifixed::div(
+        ifixed::from_balance(amount, scaling),
+        ifixed::from_balance(user_lp.lp_balance.value(), scaling),
+    );
+    let new_provided = ifixed::mul(user_lp.provided_value_usd, split_ratio);
+    user_lp.provided_value_usd = user_lp.provided_value_usd - new_provided;
+    // Each split loses rounding dust from provided_value_usd
+    UserLpCoin { lp_balance: user_lp.lp_balance.split(amount), provided_value_usd: new_provided }
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Use actual LP balance ratio at withdrawal time for fees
+public fun calculate_fee(user_lp: &UserLpCoin, current_vault_value: u256): u256 {
+    let current_value = (user_lp.lp_balance.value() as u256) * current_vault_value / total_lp_supply;
+    if (current_value > user_lp.provided_value_usd) {
+        (current_value - user_lp.provided_value_usd) * FEE_RATE / PRECISION
+    } else { 0 }
+}
+```
+
+---
+
+## Pattern 13: Boolean Logic Error in Time/Condition Checks — move-defi-013
+
+**Frequency**: 3/29 reports (Aptos Securitize, Kofi Finance, Bluefin Spot)
+**Severity consensus**: HIGH (lowest across auditors)
+**Validation**: Strong — 3 independent auditors
+
+### Attack Scenario
+1. Time validation uses `||` (OR) where `&&` (AND) is required
+2. Condition always evaluates to true because one operand is trivially true
+3. Critical time-based restrictions are completely disabled
+4. Attackers bypass flowback periods, trading windows, or cooldowns
+
+### Vulnerable Pattern Example
+
+**Example: Aptos Securitize — OR Instead of AND Disables Time Check** [HIGH]
+```move
+// ❌ VULNERABLE: || makes the function always return true when end_time != 0
+fun is_block_flowback_end_time_ok(block_flowback_end_time: u256): bool {
+    block_flowback_end_time != 0
+        || (timestamp::now_seconds() as u256) < block_flowback_end_time
+    // Should be && — the timestamp check is never reached
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Use AND to require both conditions
+fun is_block_flowback_end_time_ok(block_flowback_end_time: u256): bool {
+    block_flowback_end_time != 0
+        && (timestamp::now_seconds() as u256) < block_flowback_end_time
+}
+```
+
+---
+
+## Pattern 14: Buffer/Pool Drainage from Asymmetric Mint-Burn Accounting — move-defi-014
+
+**Frequency**: 2/29 reports (Kofi Finance, Thala LSD)
+**Severity consensus**: HIGH (lowest across auditors)
+**Validation**: Moderate — 2 independent protocols
+
+### Attack Scenario
+1. Protocol mints derivative tokens for `amount - fee` but burns full `amount`
+2. The burn > mint discrepancy drains the buffer/vault on each operation
+3. After enough cycles, the buffer is empty and user withdrawals fail
+4. Protocol becomes insolvent despite no external attack
+
+### Vulnerable Pattern Example
+
+**Example: Kofi Finance — Buffer Burns More Than It Mints** [HIGH]
+```move
+// ❌ VULNERABLE: Burns `amount_needed` but mints `amount_needed - fee`
+public(friend) fun ensure_minimum_amounts_from_buffer(pool_address: address) {
+    let amount_needed = min_pending_inactive - pending_inactive;
+    delegation_pool::add_stake(&vault_signer, pool_address, amount_needed);
+    let add_stake_fee = delegation_pool::get_add_stake_fee(pool_address, amount_needed);
+    // Mints less than it burns
+    kAPT_coin::mint(buffer_addr, amount_needed - add_stake_fee);
+    delegation_pool::unlock(&vault_signer, pool_address, amount_needed);
+    kAPT_coin::burn(&buffer_signer, amount_needed); // Burns the full amount
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Symmetric mint and burn amounts
+public(friend) fun ensure_minimum_amounts_safe(pool_address: address) {
+    let amount_needed = min_pending_inactive - pending_inactive;
+    delegation_pool::add_stake(&vault_signer, pool_address, amount_needed);
+    let add_stake_fee = delegation_pool::get_add_stake_fee(pool_address, amount_needed);
+    let net_amount = amount_needed - add_stake_fee;
+    kAPT_coin::mint(buffer_addr, net_amount);
+    delegation_pool::unlock(&vault_signer, pool_address, net_amount);
+    kAPT_coin::burn(&buffer_signer, net_amount); // Burns same as minted
+}
+```
+
+---
+
+## Pattern 15: Validator/Operator Removal Without Stake Migration — move-defi-015
+
+**Frequency**: 2/29 reports (Kofi Finance, Mysten Walrus)
+**Severity consensus**: HIGH (lowest across auditors)
+**Validation**: Moderate — 2 independent protocols
+
+### Attack Scenario
+1. Admin removes a validator from the protocol's pool set
+2. Existing stakes on the removed validator have no migration path
+3. Staked funds become irretrievable — protocol is temporarily insolvent
+4. Users cannot unstake until the validator is re-added or emergency action is taken
+
+### Vulnerable Pattern Example
+
+**Example: Kofi Finance — Validator Removal Orphans Staked Funds** [HIGH]
+```move
+// ❌ VULNERABLE: No stake migration when validator is removed
+public entry fun remove_validator(admin: &signer, pool_address: address) {
+    assert!(is_admin(admin), ERR_UNAUTHORIZED);
+    let pools = borrow_global_mut<ValidatorPools>(@module);
+    vector::remove_value(&mut pools.active, pool_address);
+    // BUG: Existing stakes on this validator are now orphaned
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Migrate stakes before removal
+public entry fun remove_validator_safe(admin: &signer, pool_address: address) {
+    assert!(is_admin(admin), ERR_UNAUTHORIZED);
+    // First unstake all funds from this validator
+    let staked = get_validator_total_stake(pool_address);
+    assert!(staked == 0, E_VALIDATOR_HAS_ACTIVE_STAKES);
+    let pools = borrow_global_mut<ValidatorPools>(@module);
+    vector::remove_value(&mut pools.active, pool_address);
+}
+```
+
+---
+
+## Pattern 16: Price Boundary Check Allows Swap Beyond Limits — move-defi-016
+
+**Frequency**: 2/29 reports (Bluefin Spot, Solend Steamm)
+**Severity consensus**: MEDIUM (lowest across auditors)
+**Validation**: Moderate — 2 independent protocols
+
+### Attack Scenario
+1. Swap validates `sqrt_price_limit >= min_sqrt_price` using `>=` instead of `>`
+2. At the exact boundary, the swap can push the price to or beyond min/max tick
+3. Pool enters an invalid price state at tick boundaries
+4. Subsequent operations may fail or produce incorrect results
+
+### Vulnerable Pattern Example
+
+**Example: Bluefin Spot — Non-Strict Boundary Check** [MEDIUM]
+```move
+// ❌ VULNERABLE: >= allows price at exact boundary
+fun swap_in_pool(pool: &mut Pool, a2b: bool, amount: u64, sqrt_price_limit: u128) {
+    if (a2b) {
+        assert!(
+            pool.current_sqrt_price > sqrt_price_limit
+                && sqrt_price_limit >= tick_math::min_sqrt_price(), // BUG: >= allows boundary
+            E_INVALID_PRICE
+        );
+    } else {
+        assert!(
+            pool.current_sqrt_price < sqrt_price_limit
+                && sqrt_price_limit <= tick_math::max_sqrt_price(), // BUG: <= allows boundary
+            E_INVALID_PRICE
+        );
+    };
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Strict inequalities prevent boundary state
+if (a2b) {
+    assert!(
+        pool.current_sqrt_price > sqrt_price_limit
+            && sqrt_price_limit > tick_math::min_sqrt_price(),
+        E_INVALID_PRICE
+    );
+}
+```
+
+---
+
+## Pattern 17: Incorrect Commission/Fee Rate Applied During Epoch Transitions — move-defi-017
+
+**Frequency**: 2/29 reports (Mysten Walrus, Kofi Finance)
+**Severity consensus**: MEDIUM (lowest across auditors)
+**Validation**: Moderate — 2 independent protocols
+
+### Attack Scenario
+1. During epoch transition, protocol applies pending (future) commission rate for current epoch
+2. Operators receive rewards calculated at the wrong rate
+3. If new rate is higher, operators receive excess commission at stakers' expense
+4. If new rate is lower, operators lose legitimate commission
+
+### Vulnerable Pattern Example
+
+**Example: Mysten Walrus — Pending Rate Used Before Activation** [MEDIUM]
+```move
+// ❌ VULNERABLE: Applies new commission rate to current epoch rewards
+fun advance_epoch(pool: &mut StakingPool) {
+    // Update to pending rate first
+    pool.commission_rate = pool.pending_commission_rate;
+    // Then calculate rewards — uses the NEW rate, not the old one
+    let commission = pool.epoch_rewards * pool.commission_rate / RATE_SCALE;
+    transfer_commission(pool.operator, commission);
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Calculate with old rate, then update
+fun advance_epoch_safe(pool: &mut StakingPool) {
+    // Calculate rewards with current (old) rate
+    let commission = pool.epoch_rewards * pool.commission_rate / RATE_SCALE;
+    transfer_commission(pool.operator, commission);
+    // Then update to pending rate for next epoch
+    pool.commission_rate = pool.pending_commission_rate;
+}
+```
+
+---
+
+## Pattern 18: Stake Threshold Bypass via Post-Registration Withdrawal — move-defi-018
+
+**Frequency**: 1/29 reports (Mysten Walrus)
+**Severity consensus**: MEDIUM (single auditor)
+**Validation**: Weak — single auditor, but Medium severity
+
+### Attack Scenario
+1. Active set requires minimum stake threshold to join
+2. User stakes above threshold to enter the active set
+3. Immediately withdraws stake below threshold via `update` function
+4. `update` doesn't re-validate minimum threshold, so user stays in the active set
+
+### Vulnerable Pattern Example
+
+**Example: Mysten Walrus — No Threshold Re-Check on Update** [MEDIUM]
+```move
+// ❌ VULNERABLE: update doesn't validate minimum threshold
+public(package) fun update(set: &mut ActiveSet, node_id: ID, new_staked_amount: u64): bool {
+    let idx = find_node(set, node_id);
+    idx.do!(|i| {
+        set.total_stake = set.total_stake + new_staked_amount - set.nodes[i].staked_amount;
+        set.nodes[i].staked_amount = new_staked_amount;
+        // No check: new_staked_amount >= minimum_threshold
+    });
+    true
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Enforce threshold on update
+public(package) fun update_safe(set: &mut ActiveSet, node_id: ID, new_staked_amount: u64): bool {
+    if (new_staked_amount < set.minimum_threshold) {
+        remove_node(set, node_id);
+        return false
+    };
+    let idx = find_node(set, node_id);
+    idx.do!(|i| {
+        set.total_stake = set.total_stake + new_staked_amount - set.nodes[i].staked_amount;
+        set.nodes[i].staked_amount = new_staked_amount;
+    });
+    true
+}
+```
+
+---
+
+## Pattern 19: Uncapped Minting Drains Reward Pools — move-defi-019
+
+**Frequency**: 2/29 reports (Thala Staked LPT, Thala LSD)
+**Severity consensus**: MEDIUM (lowest across auditors)
+**Validation**: Moderate — 2 independent protocols (same ecosystem)
+
+### Attack Scenario
+1. Protocol allows unlimited minting of derivative tokens (xLPT, sthAPT)
+2. Attacker mints massive amount and stakes to capture disproportionate rewards
+3. `acc_rewards_per_share` dilution is insufficient because attacker controls majority
+4. Legitimate stakers receive negligible rewards
+
+### Vulnerable Pattern Example
+
+**Example: Thala Staked LPT — No Rate Limit on xLPT Minting** [MEDIUM]
+```move
+// ❌ VULNERABLE: No cap or rate limit on minting
+public entry fun mint_xlpt(user: &signer, amount: u64) acquires Farming {
+    let farming = borrow_global_mut<Farming>(@module);
+    // No limit check — user can mint any amount
+    let xlpt = fungible_asset::mint(&farming.mint_ref, amount);
+    primary_fungible_store::deposit(signer::address_of(user), xlpt);
+    // User now has disproportionate share of rewards
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Rate-limited minting per epoch
+public entry fun mint_xlpt_safe(user: &signer, amount: u64) acquires Farming {
+    let farming = borrow_global_mut<Farming>(@module);
+    let user_addr = signer::address_of(user);
+    let minted_this_epoch = get_epoch_minted(farming, user_addr);
+    assert!(minted_this_epoch + amount <= MAX_MINT_PER_EPOCH, E_RATE_LIMITED);
+    update_epoch_minted(farming, user_addr, minted_this_epoch + amount);
+    let xlpt = fungible_asset::mint(&farming.mint_ref, amount);
+    primary_fungible_store::deposit(user_addr, xlpt);
+}
+```
+
+---
+
+## Pattern 20: Snapshot Integrity Compromised by Token Merge During Capture — move-defi-020
+
+**Frequency**: 1/29 reports (Mysten Republic)
+**Severity consensus**: HIGH (single auditor)
+**Validation**: Weak — single auditor, but High severity
+
+### Attack Scenario
+1. Protocol takes a snapshot of token balances for dividend distribution
+2. During the snapshot process, users can merge (join) snapshotted tokens with non-snapshotted ones
+3. This alters total supply and individual balances mid-snapshot
+4. Dividend calculations from the corrupted snapshot are incorrect
+
+### Vulnerable Pattern Example
+
+**Example: Mysten Republic — Token Merge During Active Snapshot** [HIGH]
+```move
+// ❌ VULNERABLE: No lock on token operations during snapshot
+public fun join<T>(token_a: &mut SharedToken<T>, token_b: SharedToken<T>) {
+    // No check if a snapshot is in progress
+    let SharedToken { id, balance } = token_b;
+    token_a.balance = token_a.balance + balance;
+    object::delete(id);
+    // Snapshot data is now stale
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Block merges during active snapshots
+public fun join_safe<T>(token_a: &mut SharedToken<T>, token_b: SharedToken<T>) {
+    assert!(!is_snapshot_active<T>(), E_SNAPSHOT_IN_PROGRESS);
+    let SharedToken { id, balance } = token_b;
+    token_a.balance = token_a.balance + balance;
+    object::delete(id);
+}
+```
+
+---
+
+## Pattern 21: Frontrunning Pool Creation for Matched Funds — move-defi-021
+
+**Frequency**: 1/29 reports (Emojicoin)
+**Severity consensus**: MEDIUM (single auditor)
+**Validation**: Weak — single auditor, but clear economic exploit
+
+### Attack Scenario
+1. Protocol selects random pools for matched fund distribution (e.g., melee crank)
+2. Attacker creates many pools with small amounts to increase selection probability
+3. Before the crank selects, attacker buys into their own pool to drive up price
+4. If selected, attacker captures a disproportionate share of matched funds
+
+### Vulnerable Pattern Example
+
+**Example: Emojicoin — Uncapped Pool Creation Enables Crank Manipulation** [MEDIUM]
+```move
+// ❌ VULNERABLE: No limit on pools per address
+public entry fun create_pool(creator: &signer, emoji_bytes: vector<u8>) {
+    // Any user can create unlimited pools
+    let pool = Pool {
+        creator: signer::address_of(creator),
+        emoji_bytes,
+        total_supply: 0,
+    };
+    register_pool(pool);
+    // Attacker creates hundreds of pools to game the crank
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Limit pools per address
+public entry fun create_pool_safe(creator: &signer, emoji_bytes: vector<u8>) {
+    let creator_addr = signer::address_of(creator);
+    let count = get_pool_count(creator_addr);
+    assert!(count < MAX_POOLS_PER_ADDRESS, E_TOO_MANY_POOLS);
+    let pool = Pool { creator: creator_addr, emoji_bytes, total_supply: 0 };
+    register_pool(pool);
+}
+```
+
+---
+
+## Pattern 22: Cliff Timestamp Not Included in Fully-Unlocked Calculation — move-defi-022
+
+**Frequency**: 1/29 reports (Magna)
+**Severity consensus**: MEDIUM (single auditor)
+**Validation**: Weak — single auditor, but Medium severity
+
+### Attack Scenario
+1. `cancel_schedule_interval` calculates `fully_unlocked_timestamp` from unlock + periods
+2. Does not account for `cliff_timestamp` which may extend the actual lock period
+3. If cliff is set after the last period, function aborts prematurely
+4. Valid cancellations are incorrectly rejected — admin cannot recover unvested tokens
+
+### Vulnerable Pattern Example
+
+**Example: Magna — Cliff Not in Fully-Unlocked Calculation** [MEDIUM]
+```move
+// ❌ VULNERABLE: Ignores cliff_timestamp in fully-unlocked calculation
+public entry fun cancel_schedule_interval(admin: &signer, schedule: Object<Schedule>) {
+    let interval = borrow_global<Interval>(schedule_addr);
+    let fully_unlocked = interval.unlock_timestamp
+        + (interval.number_of_periods * interval.period_length);
+    // BUG: cliff_timestamp not considered — may be after fully_unlocked
+    assert!(now_seconds <= fully_unlocked, ERR_ALREADY_FULLY_UNLOCKED);
+}
+```
+
+### Secure Implementation
+```move
+// ✅ SECURE: Include cliff in fully-unlocked calculation
+public entry fun cancel_schedule_interval_safe(admin: &signer, schedule: Object<Schedule>) {
+    let interval = borrow_global<Interval>(schedule_addr);
+    let vesting_end = interval.unlock_timestamp
+        + (interval.number_of_periods * interval.period_length);
+    let fully_unlocked = math64::max(vesting_end, interval.cliff_timestamp);
+    assert!(now_seconds <= fully_unlocked, ERR_ALREADY_FULLY_UNLOCKED);
+}
+```
+
+---
+
 ### Impact Analysis
 
 #### Technical Impact
