@@ -36,6 +36,7 @@ CATEGORY_MAP = {
     "unique": ["unique"],
     "account-abstraction": ["account-abstraction"],
     "zk-rollup": ["zk-rollup"],
+    "sui-move": ["Sui-Move-specific"],
 }
 
 
@@ -448,6 +449,16 @@ def add_protocol_context(router):
                 "focusPatterns": [
                     "ERC721", "callback", "onERC721Received",
                     "reentrancy", "approval"
+                ],
+            },
+            "sui_move": {
+                "description": "Sui Move programs, DeFi on Sui, Sui object model",
+                "manifests": ["sui-move", "general-defi", "general-security"],
+                "focusPatterns": [
+                    "UID", "object_id", "dynamic_field", "kiosk",
+                    "overflow", "share_price", "package_upgrade",
+                    "public_package", "capability", "flash_receipt",
+                    "sui_bridge", "zetachain", "snap_rpc"
                 ],
             },
         },
@@ -1080,6 +1091,7 @@ def build_partition_bundles(manifests):
         "token_launch": ["general-governance", "tokens", "general-security"],
         "staking_liquid_staking": ["general-defi", "tokens", "oracle"],
         "nft_marketplace": ["tokens", "general-infrastructure"],
+        "sui_move": ["sui-move", "general-defi", "general-security"],
     }
     
     MAX_SHARD_SIZE = 80

@@ -1,8 +1,8 @@
 {
   "meta": {
     "description": "ALL enriched hunt cards — compressed detection rules with micro-directives for direct verification",
-    "totalCards": 923,
-    "enriched": 917,
+    "totalCards": 1065,
+    "enriched": 1058,
     "manifests": [
       "account-abstraction",
       "amm",
@@ -14,6 +14,7 @@
       "general-security",
       "oracle",
       "solana",
+      "sui-move",
       "tokens",
       "unique",
       "zk-rollup"
@@ -18133,6 +18134,2908 @@
         "VERIFY: Token accounts (not just mints) can also have extensions in Token-2022."
       ],
       "securePattern": "Validate token account extensions"
+    },
+    {
+      "id": "sui-move-artifact-index-downloaded-artifacts-summary-000",
+      "title": "Downloaded Artifacts Summary",
+      "severity": "LOW",
+      "grep": "AftermathFinance|MystenLabs|ZetaChain|ConsenSys",
+      "detect": "Downloaded Artifacts Summary",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/ARTIFACT_INDEX.md",
+      "lines": [
+        6,
+        26
+      ],
+      "check": [
+        "VERIFY: Downloaded Artifacts Summary"
+      ]
+    },
+    {
+      "id": "sui-move-artifact-index-protocol-coverage-002",
+      "title": "Protocol Coverage",
+      "severity": "HIGH",
+      "grep": "ZetaChain|DeepBook|BlueFin|Arithmetic",
+      "detect": "Protocol Coverage",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/ARTIFACT_INDEX.md",
+      "lines": [
+        36,
+        56
+      ]
+    },
+    {
+      "id": "sui-move-artifact-index-artifact-location-003",
+      "title": "Artifact Location",
+      "severity": "UNKNOWN",
+      "grep": "download_manifest.json|candidate_links.csv|summary.txt",
+      "detect": "All artifacts are stored in:",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/ARTIFACT_INDEX.md",
+      "lines": [
+        57,
+        67
+      ],
+      "check": [
+        "VERIFY: All artifacts are stored in:"
+      ]
+    },
+    {
+      "id": "sui-move-move-access-control--move-access-control-and-author-000",
+      "title": "Move Access Control and Authorization Vulnerabilities",
+      "severity": "CRITICAL",
+      "grep": "SignerCapability|Vulnerabilities|Comprehensive|Authorization",
+      "detect": "Move uses different access control paradigms per chain:",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        50,
+        75
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Move uses different access control paradigms per chain:"
+      ]
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-1-public-signer-capabi-001",
+      "title": "Pattern 1: Public Signer Capability Exposure — move-acl-001",
+      "severity": "CRITICAL",
+      "grep": "create_signer_with_capability|get_distribution_signer|create_resource_account|primary_fungible_store",
+      "detect": "Public function returns signer for any distributor",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        76,
+        147
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Public function returns signer for any distributor",
+        "ANTIPATTERN: Initialization uses signer-derived address, but access uses hardcoded"
+      ],
+      "antipattern": "Initialization uses signer-derived address, but access uses hardcoded",
+      "securePattern": "Make signer retrieval friend-only or internal"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-2-missing-authorizatio-002",
+      "title": "Pattern 2: Missing Authorization on Sensitive Functions — move-acl-002",
+      "severity": "CRITICAL",
+      "grep": "validate_and_store_payload|send_cross_chain_message|validate_signature|destination_chain",
+      "detect": "No access control on trading account retrieval",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        148,
+        225
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: No access control on trading account retrieval",
+        "ANTIPATTERN: No authorization check on cross-chain message sending"
+      ],
+      "antipattern": "No authorization check on cross-chain message sending",
+      "securePattern": "Move payload marking into treasury with access control"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-3-role-separation-viol-003",
+      "title": "Pattern 3: Role Separation Violations — move-acl-003",
+      "severity": "HIGH",
+      "grep": "get_ecaller_not_asset_listing_or_pool_admin|set_reserve_configuration_with_guard|set_reserve_configuration_internal|set_reserve_configuration",
+      "detect": "OR logic lets listing admin do pool admin actions",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        226,
+        300
+      ],
+      "check": [
+        "VERIFY: OR logic lets listing admin do pool admin actions",
+        "ANTIPATTERN: Some functions check issuer role, others check transfer_agent"
+      ],
+      "antipattern": "Some functions check issuer role, others check transfer_agent",
+      "securePattern": "Separate functions for separate roles"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-4-missing-capability-r-004",
+      "title": "Pattern 4: Missing Capability Revocation — move-acl-004",
+      "severity": "HIGH",
+      "grep": "generate_deposit_cap|revoke_deposit_cap|active_depositors|update_fee_rate",
+      "detect": "Caps can be generated but never revoked",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        301,
+        354
+      ],
+      "check": [
+        "VERIFY: Caps can be generated but never revoked",
+        "ANTIPATTERN: Parameter update doesn't update last_used timestamp"
+      ],
+      "antipattern": "Parameter update doesn't update last_used timestamp",
+      "securePattern": "Generate and revoke capabilities"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-5-missing-version-chec-005",
+      "title": "Pattern 5: Missing Version Checks on State Objects — move-acl-005",
+      "severity": "CRITICAL",
+      "grep": "migrate_version|update_version|update_config|GlobalConfig",
+      "detect": "Admin functions don't check state version",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        355,
+        414
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Admin functions don't check state version"
+      ],
+      "antipattern": "Admin functions don't check state version",
+      "securePattern": "Version check on all entry points"
+    },
+    {
+      "id": "sui-move-move-access-control--pattern-6-unverified-object-po-006",
+      "title": "Pattern 6: Unverified Object/Pool Instance in Operations — move-acl-006",
+      "severity": "HIGH",
+      "grep": "create_signer_with_capability|SignerCapability|authorization|OwnerCap|AdminCap|capability",
+      "detect": "Doesn't verify correct SupplyPool instance",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md",
+      "lines": [
+        415,
+        511
+      ],
+      "check": [
+        "VERIFY: Doesn't verify correct SupplyPool instance",
+        "All public functions returning signers are friend-only or internal",
+        "Every state-modifying public function has authorization check",
+        "Role checks use AND for higher privilege, not OR",
+        "LOOK FOR: Pattern 1: `public fun` returning `signer` or exposing signer capability"
+      ],
+      "antipattern": "Doesn't verify correct SupplyPool instance",
+      "securePattern": "Verify supply pool matches position's expected pool"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-move-arithmetic-and-precision--000",
+      "title": "Move Arithmetic and Precision Vulnerabilities",
+      "severity": "LOW",
+      "grep": "Vulnerabilities|Comprehensive|OtterSec|Arithmetic",
+      "detect": "Move uses unsigned integers (u8, u64, u128, u256) that abort on overflow/underflow rather than wrapping.",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        51,
+        71
+      ],
+      "check": [
+        "VERIFY: Move uses unsigned integers (u8, u64, u128, u256) that abort on overflow/underflow rather than wrapping."
+      ]
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-1-double-scaling-in-in-001",
+      "title": "Pattern 1: Double Scaling in Invariant Checks — move-arith-001",
+      "severity": "CRITICAL",
+      "grep": "upscale_metastable_amounts|get_upscaled_balances|funds_deployed_rate|convert_to_ctokens",
+      "detect": "Double upscaling in flashloan repayment validation",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        72,
+        158
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Double upscaling in flashloan repayment validation",
+        "ANTIPATTERN: Overly strict assertion doesn't account for rounding"
+      ],
+      "antipattern": "Overly strict assertion doesn't account for rounding",
+      "securePattern": "Apply metastable upscaling exactly once"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-2-division-before-mult-002",
+      "title": "Pattern 2: Division Before Multiplication Precision Loss — move-arith-002",
+      "severity": "HIGH",
+      "grep": "calculate_conversion_rate|calculate_token_x_amount|total_supply|Multiplication",
+      "detect": "Division before multiplication loses precision",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        159,
+        213
+      ],
+      "check": [
+        "VERIFY: Division before multiplication loses precision"
+      ],
+      "antipattern": "Division before multiplication loses precision",
+      "securePattern": "Multiplication before division preserves precision"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-3-division-by-zero-in--003",
+      "title": "Pattern 3: Division by Zero in Pool/Staking Operations — move-arith-003",
+      "severity": "HIGH",
+      "grep": "select_committee_and_calculate_votes|convert_to_wal_amount|tokens_to_deposit|node_capacity",
+      "detect": "No guard against zero reserve in division",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        214,
+        279
+      ],
+      "check": [
+        "VERIFY: No guard against zero reserve in division",
+        "ANTIPATTERN: Weight can be zero if node's stake is too low"
+      ],
+      "antipattern": "Weight can be zero if node's stake is too low",
+      "securePattern": "Check for zero before division"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-4-rounding-direction-e-004",
+      "title": "Pattern 4: Rounding Direction Exploits in Share Minting/Burning — move-arith-004",
+      "severity": "HIGH",
+      "grep": "tokens_to_deposit|safe_mul_div_up|shares_to_burn|deposit_amount",
+      "detect": "Rounding to 1 causes overpayment",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        280,
+        343
+      ],
+      "check": [
+        "VERIFY: Rounding to 1 causes overpayment",
+        "ANTIPATTERN: Rounding up causes users to supply more than needed"
+      ],
+      "antipattern": "Rounding up causes users to supply more than needed",
+      "securePattern": "Round DOWN on minting (fewer shares), round UP on burning (more tokens needed)"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-5-overflow-in-fee-rewa-005",
+      "title": "Pattern 5: Overflow in Fee/Reward Calculations — move-arith-005",
+      "severity": "HIGH",
+      "grep": "calculate_available_dividends|token_transferred|total_dividends|total_supply",
+      "detect": "Overflow when token_amount * fee_bips exceeds u64::MAX",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        344,
+        389
+      ],
+      "check": [
+        "VERIFY: Overflow when token_amount * fee_bips exceeds u64::MAX"
+      ],
+      "antipattern": "Overflow when token_amount * fee_bips exceeds u64::MAX",
+      "securePattern": "Cast to u128 for intermediate calculation"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-6-negative-value-misha-006",
+      "title": "Pattern 6: Negative Value Mishandling in Signed Arithmetic — move-arith-006",
+      "severity": "CRITICAL",
+      "grep": "get_transferable_tokens|end_withdraw_session|accumulated_slippage|withdrawal_balance",
+      "detect": "Negative balance converted to large positive",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        390,
+        464
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Negative balance converted to large positive",
+        "ANTIPATTERN: Subtraction can underflow if lock_time > current time"
+      ],
+      "antipattern": "Subtraction can underflow if lock_time > current time",
+      "securePattern": "Check sign before conversion"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-7-faulty-constant-defi-007",
+      "title": "Pattern 7: Faulty Constant Definitions — move-arith-007",
+      "severity": "CRITICAL",
+      "grep": "least_significant_bit|test_max_u64|Definitions|Vulnerable",
+      "detect": "Missing final digit in MAX_U64 constant",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        465,
+        508
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Missing final digit in MAX_U64 constant"
+      ],
+      "antipattern": "Missing final digit in MAX_U64 constant",
+      "securePattern": "Use compiler-checked maximum value"
+    },
+    {
+      "id": "sui-move-move-arithmetic-prec-pattern-8-fee-accounting-denom-008",
+      "title": "Pattern 8: Fee Accounting Denomination Errors — move-arith-008",
+      "severity": "HIGH",
+      "grep": "safe_mul_div|MAX_U64|truncation|mul_div|arithmetic|underflow",
+      "detect": "Fallthrough when deep_quantity is zero",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        509,
+        618
+      ],
+      "check": [
+        "VERIFY: Fallthrough when deep_quantity is zero",
+        "Verify scaling functions are applied exactly once per calculation path",
+        "Check all division operations have zero-denominator guards",
+        "Confirm multiplication happens before division in multi-step calculations",
+        "LOOK FOR: Pattern 1: `upscale` or `scale` called more than once on same variable"
+      ],
+      "antipattern": "Returns 0 when fee_bips == MAX_FEE_BIPS",
+      "securePattern": "Handle all fee denomination cases explicitly"
+    },
+    {
+      "id": "sui-move-move-cross-chain-bri-move-cross-chain-and-bridge-vu-000",
+      "title": "Move Cross-Chain and Bridge Vulnerabilities",
+      "severity": "CRITICAL",
+      "grep": "transfer::public_transfer|public_transfer|Vulnerabilities|Comprehensive",
+      "detect": "Comprehensive patterns for cross-chain messaging, bridge validation, payload front-running, validator set integrity,...",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        46,
+        66
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Comprehensive patterns for cross-chain messaging, bridge validation, payload front-running, validator set integrity,..."
+      ]
+    },
+    {
+      "id": "sui-move-move-cross-chain-bri-pattern-1-payload-front-runnin-001",
+      "title": "Pattern 1: Payload Front-Running via Public Validation — move-bridge-001",
+      "severity": "HIGH",
+      "grep": "validate_and_store_payload|validate_consortium_signature|decode_mint_payload|validate_and_mint",
+      "detect": "Anyone can call validate_and_store_payload",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        67,
+        134
+      ],
+      "check": [
+        "VERIFY: Anyone can call validate_and_store_payload"
+      ],
+      "antipattern": "Anyone can call validate_and_store_payload",
+      "securePattern": "Combine validation and minting into single atomic operation"
+    },
+    {
+      "id": "sui-move-move-cross-chain-bri-pattern-2-missing-validator-se-002",
+      "title": "Pattern 2: Missing Validator Set Integrity Checks — move-bridge-002",
+      "severity": "CRITICAL",
+      "grep": "assert_and_configure_validator_set|ValidatorInfo|destroy_empty|total_weight",
+      "detect": "Multiple missing checks",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        135,
+        204
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Multiple missing checks",
+        "ANTIPATTERN: Multiple missing checks"
+      ],
+      "antipattern": "Multiple missing checks",
+      "securePattern": "Complete validator set validation"
+    },
+    {
+      "id": "sui-move-move-cross-chain-bri-pattern-3-cross-chain-message--003",
+      "title": "Pattern 3: Cross-Chain Message Validation Bypass — move-bridge-003",
+      "severity": "CRITICAL",
+      "grep": "timelocked_asset_dump|decode_and_validate_message|process_incoming_asset|resource_account_addr",
+      "detect": "No validation on incoming cross-chain message",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        205,
+        292
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: No validation on incoming cross-chain message",
+        "ANTIPATTERN: Uses balance instead of message source for asset routing"
+      ],
+      "antipattern": "Uses balance instead of message source for asset routing",
+      "securePattern": "Validate incoming message schema and source"
+    },
+    {
+      "id": "sui-move-move-cross-chain-bri-pattern-4-unrestricted-cross-c-004",
+      "title": "Pattern 4: Unrestricted Cross-Chain Message Sending — move-bridge-004",
+      "severity": "HIGH",
+      "grep": "layerzero_endpoint|destination_eid|OAppAdminCap|send_message",
+      "detect": "Any user can send arbitrary cross-chain messages",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        293,
+        347
+      ],
+      "check": [
+        "VERIFY: Any user can send arbitrary cross-chain messages"
+      ],
+      "antipattern": "Any user can send arbitrary cross-chain messages",
+      "securePattern": "Capability-gated messaging"
+    },
+    {
+      "id": "sui-move-move-cross-chain-bri-pattern-5-signature-replay-in--005",
+      "title": "Pattern 5: Signature Replay in Cross-Chain Claims — move-bridge-005",
+      "severity": "HIGH",
+      "grep": "construct_claim_message|verify_signature|claim_on_behalf|process_claim",
+      "detect": "Valid signatures can be retransmitted",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        348,
+        411
+      ],
+      "check": [
+        "VERIFY: Valid signatures can be retransmitted"
+      ],
+      "antipattern": "Valid signatures can be retransmitted",
+      "securePattern": "Track used signatures"
+    },
+    {
+      "id": "sui-move-move-cross-chain-bri-pattern-6-fund-loss-via-object-006",
+      "title": "Pattern 6: Fund Loss via Object ID Transfer — move-bridge-006",
+      "severity": "HIGH",
+      "grep": "validate_and_store_payload|transfer::public_transfer|configure_validator_set|verify_signature|lz_receive|layerzero",
+      "detect": "Gas recipient may be an object ID, not an address",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        412,
+        518
+      ],
+      "check": [
+        "VERIFY: Gas recipient may be an object ID, not an address",
+        "Payload validation and minting are atomic (single function)",
+        "Validator set checks: no duplicates, key length, threshold ≤ total weight",
+        "All incoming cross-chain messages validated for schema and source",
+        "LOOK FOR: Pattern 1: `public fun validate_and_store_payload` separate from mint"
+      ],
+      "antipattern": "Gas recipient may be an object ID, not an address",
+      "securePattern": "Validate recipient is a user address, not object ID"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-move-defi-protocol-logic-vulne-000",
+      "title": "Move DeFi Protocol Logic Vulnerabilities",
+      "severity": "LOW",
+      "grep": "Vulnerabilities|Comprehensive|OtterSec|Conversion",
+      "detect": "Comprehensive patterns for reward miscalculation, solvency failures, withdrawal logic bugs, claim exploits, liquidation...",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        58,
+        78
+      ],
+      "check": [
+        "VERIFY: Comprehensive patterns for reward miscalculation, solvency failures, withdrawal logic bugs, claim exploits, liquidation..."
+      ]
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-1-incorrect-reward-ini-001",
+      "title": "Pattern 1: Incorrect Reward Initialization Timing — move-defi-001",
+      "severity": "HIGH",
+      "grep": "calculate_current_accumulated|accumulated_per_share|add_reward_program|reward_programs",
+      "detect": "New reward program starts all users at current time",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        79,
+        134
+      ],
+      "check": [
+        "VERIFY: New reward program starts all users at current time",
+        "ANTIPATTERN: Restart doesn't account for inactive period [t0, t1]"
+      ],
+      "antipattern": "Restart doesn't account for inactive period [t0, t1]",
+      "securePattern": "Snapshot accumulated_per_share before restart"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-2-missing-solvency-che-002",
+      "title": "Pattern 2: Missing Solvency Check on Withdrawals — move-defi-002",
+      "severity": "HIGH",
+      "grep": "calculate_health_factor|withdraw_collateral|transfer_to_user|remove_validator",
+      "detect": "No solvency check after withdrawal",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        135,
+        209
+      ],
+      "check": [
+        "VERIFY: No solvency check after withdrawal",
+        "ANTIPATTERN: Validator removed but staked funds not recovered"
+      ],
+      "antipattern": "Validator removed but staked funds not recovered",
+      "securePattern": "Validate solvency after withdrawal"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-3-flashloan-repayment--003",
+      "title": "Pattern 3: Flashloan Repayment Bypass via Double Scaling — move-defi-003",
+      "severity": "CRITICAL",
+      "grep": "upscale_metastable_amounts|balances_after_flashloan|expected_repay_y|expected_repay_x",
+      "detect": "balances_after_flashloan applies upscaling twice",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        210,
+        256
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: balances_after_flashloan applies upscaling twice"
+      ],
+      "antipattern": "balances_after_flashloan applies upscaling twice",
+      "securePattern": "Compare balances at same scaling level"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-4-excessive-claims-via-004",
+      "title": "Pattern 4: Excessive Claims via Missing Cumulative Tracking — move-defi-004",
+      "severity": "CRITICAL",
+      "grep": "tokens_transferred|calculate_unlocked|VestingSchedule|transfer_tokens",
+      "detect": "Each claim only checks current unlock, not cumulative",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        257,
+        318
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Each claim only checks current unlock, not cumulative"
+      ],
+      "antipattern": "Each claim only checks current unlock, not cumulative",
+      "securePattern": "Track cumulative claims"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-5-fee-accounting-misma-005",
+      "title": "Pattern 5: Fee Accounting Mismatch — move-defi-005",
+      "severity": "HIGH",
+      "grep": "calculate_staking_fee|calculate_quote_fee|split_user_lp_coin|provided_value_usd",
+      "detect": "Zero deep_quantity causes fee denomination switch",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        319,
+        389
+      ],
+      "check": [
+        "VERIFY: Zero deep_quantity causes fee denomination switch"
+      ],
+      "antipattern": "Zero deep_quantity causes fee denomination switch",
+      "securePattern": "Deduct fees before share calculation"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-6-forced-withdrawal-to-006",
+      "title": "Pattern 6: Forced Withdrawal Tolerance Bypass — move-defi-006",
+      "severity": "CRITICAL",
+      "grep": "end_withdraw_session|is_within_tolerance|execute_withdrawal|calculate_slippage",
+      "detect": "Tolerance check skipped when base is zero",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        390,
+        452
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Tolerance check skipped when base is zero",
+        "ANTIPATTERN: Signed-to-unsigned conversion flips negative to large positive"
+      ],
+      "antipattern": "Signed-to-unsigned conversion flips negative to large positive",
+      "securePattern": "Always enforce tolerance, handle signed values correctly"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-7-state-desynchronizat-007",
+      "title": "Pattern 7: State Desynchronization Between Modules — move-defi-007",
+      "severity": "HIGH",
+      "grep": "get_commission_for_epoch|distribute_rewards|create_obligation|commission_rate",
+      "detect": "Obligations created without Bank module awareness",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        453,
+        496
+      ],
+      "check": [
+        "VERIFY: Obligations created without Bank module awareness",
+        "ANTIPATTERN: Future commission rate used for current distribution"
+      ],
+      "antipattern": "Future commission rate used for current distribution",
+      "securePattern": "Use epoch-specific commission rate"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-8-permissionless-front-008",
+      "title": "Pattern 8: Permissionless Front-Running of Auctions/Orders — move-defi-008",
+      "severity": "HIGH",
+      "grep": "driver_exclusive_end|penalty_start|fulfill_order|execute_fill",
+      "detect": "Anyone can fulfill before penalty period starts",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        497,
+        561
+      ],
+      "check": [
+        "VERIFY: Anyone can fulfill before penalty period starts"
+      ],
+      "antipattern": "Anyone can fulfill before penalty period starts",
+      "securePattern": "Designated driver always has priority"
+    },
+    {
+      "id": "sui-move-move-defi-protocol-l-pattern-9-incorrect-withdrawal-009",
+      "title": "Pattern 9: Incorrect Withdrawal/Vesting Abort Conditions — move-defi-009",
+      "severity": "HIGH",
+      "grep": "timestamp::now_seconds|to_balance|to_u64|withdraw|upscale|auction",
+      "detect": "Assumes amount > minimum_pending_inactive threshold",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        562,
+        682
+      ],
+      "check": [
+        "VERIFY: Assumes amount > minimum_pending_inactive threshold",
+        "Reward programs snapshot accumulated state before restart",
+        "All withdrawal paths check post-withdrawal solvency",
+        "Flashloan repayment compared at same scaling level",
+        "LOOK FOR: Pattern 1: Reward initialization with `timestamp::now_seconds()` in add_program"
+      ],
+      "antipattern": "Assumes amount > minimum_pending_inactive threshold",
+      "securePattern": "Validate amount > 0, handle edge cases"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-move-denial-of-service-vulnera-000",
+      "title": "Move Denial of Service Vulnerabilities",
+      "severity": "CRITICAL",
+      "grep": "Vulnerabilities|Multiplication|Comprehensive|OtterSec",
+      "detect": "Comprehensive patterns for denial of service attacks in Move-based smart contracts, including unbounded storage growth,...",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        55,
+        75
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Comprehensive patterns for denial of service attacks in Move-based smart contracts, including unbounded storage growth,..."
+      ]
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-1-unbounded-vector-gro-001",
+      "title": "Pattern 1: Unbounded Vector Growth Causing Gas Exhaustion — move-dos-001",
+      "severity": "CRITICAL",
+      "grep": "claim_rewards_paginated|claim_rewards_internal|borrow_global_mut|process_reward",
+      "detect": "Vector-backed rewards map grows unbounded",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        76,
+        157
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Vector-backed rewards map grows unbounded",
+        "ANTIPATTERN: Zero-balance deposits/withdrawals still counted"
+      ],
+      "antipattern": "Zero-balance deposits/withdrawals still counted",
+      "securePattern": "Bounded rewards with cleanup"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-2-front-running-resour-002",
+      "title": "Pattern 2: Front-Running Resource/Account Creation — move-dos-002",
+      "severity": "HIGH",
+      "grep": "aptos_account::create_account|create_resource_account",
+      "detect": "Anyone can create a primary store at any address",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        158,
+        242
+      ],
+      "check": [
+        "VERIFY: Anyone can create a primary store at any address"
+      ],
+      "antipattern": "Anyone can create a primary store at any address",
+      "securePattern": "Use unpredictable seeds or handle existing accounts"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-3-event-object-limit-e-003",
+      "title": "Pattern 3: Event/Object Limit Exhaustion — move-dos-003",
+      "severity": "HIGH",
+      "grep": "force_withdraw_batch|pending_orders|force_withdraw|register_node",
+      "detect": "Each order cancellation emits events",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        243,
+        306
+      ],
+      "check": [
+        "VERIFY: Each order cancellation emits events",
+        "ANTIPATTERN: No length limit on public key stored in object"
+      ],
+      "antipattern": "No length limit on public key stored in object",
+      "securePattern": "Validate public key length"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-4-division-by-zero-in--004",
+      "title": "Pattern 4: Division by Zero in Pool/Epoch Operations — move-dos-004",
+      "severity": "HIGH",
+      "grep": "calculate_exchange_rate|convert_to_wal_amount|calculate_shards|total_reserves",
+      "detect": "No guard against zero reserves",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        307,
+        367
+      ],
+      "check": [
+        "VERIFY: No guard against zero reserves",
+        "ANTIPATTERN: Share amount can be manipulated to zero"
+      ],
+      "antipattern": "Share amount can be manipulated to zero",
+      "securePattern": "Guard all divisions against zero denominator"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-5-hash-collision-dos-i-005",
+      "title": "Pattern 5: Hash Collision DoS in Address-Keyed Tables — move-dos-005",
+      "severity": "MEDIUM",
+      "grep": "UserConfigurationMap|get_user_config|UserConfigs|smart_table",
+      "detect": "User-controlled address keys can collide",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        368,
+        402
+      ],
+      "check": [
+        "VERIFY: User-controlled address keys can collide"
+      ],
+      "antipattern": "User-controlled address keys can collide",
+      "securePattern": "Use Table (BTreeMap-based) instead of SmartTable for user-keyed data"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-6-overflow-abort-in-ar-006",
+      "title": "Pattern 6: Overflow Abort in Arithmetic Operations — move-dos-006",
+      "severity": "HIGH",
+      "grep": "calculate_available_dividends|check_conversion|total_dividends|calculate_fee",
+      "detect": "Large amount * fee_bips can overflow u64",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        403,
+        460
+      ],
+      "check": [
+        "VERIFY: Large amount * fee_bips can overflow u64"
+      ],
+      "antipattern": "Large amount * fee_bips can overflow u64",
+      "securePattern": "Use u128 intermediate for overflow prevention"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-7-mint-rate-limit-exha-007",
+      "title": "Pattern 7: Mint/Rate Limit Exhaustion — move-dos-007",
+      "severity": "HIGH",
+      "grep": "borrow_mut_with_default|update_epoch_limit|minted_this_epoch|user_minted",
+      "detect": "Wrap/unwrap count toward epoch limit",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        461,
+        499
+      ],
+      "check": [
+        "VERIFY: Wrap/unwrap count toward epoch limit"
+      ],
+      "antipattern": "Wrap/unwrap count toward epoch limit",
+      "securePattern": "Per-user rate limiting or separate internal/external limits"
+    },
+    {
+      "id": "sui-move-move-denial-of-servi-pattern-8-missing-parameter-va-008",
+      "title": "Pattern 8: Missing Parameter Validation Causing Protocol Halt — move-dos-008",
+      "severity": "HIGH",
+      "grep": "primary_fungible_store::ensure_primary_store_exists|create_resource_account|SmartTable|event::emit|griefing|DoS",
+      "detect": "Commission rate not bounded",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md",
+      "lines": [
+        500,
+        598
+      ],
+      "check": [
+        "VERIFY: Commission rate not bounded",
+        "All vector iterations have bounded gas cost or pagination",
+        "Resource account seeds include unpredictable components",
+        "Event emission in loops bounded by constant or batch size",
+        "LOOK FOR: Pattern 1: `while (i < vector::length(...))` in functions called by liquidate/withdraw"
+      ],
+      "antipattern": "Commission rate not bounded",
+      "securePattern": "Validate all parameters at entry"
+    },
+    {
+      "id": "sui-move-move-merkle-verifica-move-merkle-proof-verification-000",
+      "title": "Move Merkle Proof Verification Vulnerabilities",
+      "severity": "CRITICAL",
+      "grep": "OpenZeppelin|Vulnerabilities|Comprehensive|Verification",
+      "detect": "Comprehensive patterns for Merkle proof replay, verification bypass, unchecked return values, and domain separation...",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md",
+      "lines": [
+        42,
+        60
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Comprehensive patterns for Merkle proof replay, verification bypass, unchecked return values, and domain separation..."
+      ]
+    },
+    {
+      "id": "sui-move-move-merkle-verifica-pattern-1-merkle-proof-replay--001",
+      "title": "Pattern 1: Merkle Proof Replay via Missing Index in Hash — move-merkle-001",
+      "severity": "CRITICAL",
+      "grep": "verify_merkle_proof|transfer_tokens|AirdropConfig|leaf_index",
+      "detect": "leaf_index not part of the leaf hash",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md",
+      "lines": [
+        61,
+        132
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: leaf_index not part of the leaf hash"
+      ],
+      "antipattern": "leaf_index not part of the leaf hash",
+      "securePattern": "Include leaf_index in hash to prevent replay"
+    },
+    {
+      "id": "sui-move-move-merkle-verifica-pattern-2-flawed-merkle-proof--002",
+      "title": "Pattern 2: Flawed Merkle Proof Verification Logic — move-merkle-002",
+      "severity": "CRITICAL",
+      "grep": "compare_vectors|verify_merkle_proof|computed_hash|Verification",
+      "detect": "Checks less-than instead of equal",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md",
+      "lines": [
+        133,
+        208
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Checks less-than instead of equal"
+      ],
+      "antipattern": "Checks less-than instead of equal",
+      "securePattern": "Check equality, not ordering"
+    },
+    {
+      "id": "sui-move-move-merkle-verifica-pattern-3-unchecked-merkle-ver-003",
+      "title": "Pattern 3: Unchecked Merkle Verification Return Value — move-merkle-003",
+      "severity": "CRITICAL",
+      "grep": "verify|get_distribution_signer|primary_fungible_store|mark_claimed",
+      "detect": "Verification result ignored",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md",
+      "lines": [
+        209,
+        275
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Verification result ignored",
+        "ANTIPATTERN: Verification result ignored"
+      ],
+      "antipattern": "Verification result ignored",
+      "securePattern": "Assert verification result"
+    },
+    {
+      "id": "sui-move-move-merkle-verifica-pattern-4-fee-bypass-at-maximu-004",
+      "title": "Pattern 4: Fee Bypass at Maximum Fee Setting — move-merkle-004",
+      "severity": "CRITICAL",
+      "grep": "verify_merkle_proof|compare_vectors|MAX_FEE_BIPS|sha3_256|verify|claim",
+      "detect": "Edge case at maximum fee setting",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md",
+      "lines": [
+        276,
+        358
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Edge case at maximum fee setting",
+        "Leaf hash includes ALL claim parameters (index, address, amount, nonce)",
+        "Merkle verification checks hash EQUALITY (not less-than or greater-than)",
+        "`verify()` return value always wrapped in `assert!()`",
+        "LOOK FOR: Pattern 1: `hash(address, amount)` without leaf_index in airdrop claims"
+      ],
+      "antipattern": "Edge case at maximum fee setting",
+      "securePattern": "MAX_FEE_BIPS returns full amount as fee"
+    },
+    {
+      "id": "sui-move-move-oracle-pricing--move-oracle-and-pricing-vulner-000",
+      "title": "Move Oracle and Pricing Vulnerabilities",
+      "severity": "CRITICAL",
+      "grep": "Vulnerabilities|Comprehensive|Unauthorized|OtterSec",
+      "detect": "Comprehensive patterns for stale oracle prices, update skipping, SLTP clipping bugs, undervalued collateral, price...",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md",
+      "lines": [
+        49,
+        70
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Comprehensive patterns for stale oracle prices, update skipping, SLTP clipping bugs, undervalued collateral, price..."
+      ]
+    },
+    {
+      "id": "sui-move-move-oracle-pricing--pattern-1-missing-staleness-ch-001",
+      "title": "Pattern 1: Missing Staleness Check on Oracle Price — move-oracle-001",
+      "severity": "HIGH",
+      "grep": "latest_round_data|get_asset_price|feed_address|Vulnerable",
+      "detect": "No staleness check on oracle price",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md",
+      "lines": [
+        71,
+        124
+      ],
+      "check": [
+        "VERIFY: No staleness check on oracle price"
+      ],
+      "antipattern": "No staleness check on oracle price",
+      "securePattern": "Enforce maximum price age"
+    },
+    {
+      "id": "sui-move-move-oracle-pricing--pattern-2-oracle-update-skippe-002",
+      "title": "Pattern 2: Oracle Update Skipped on Same Tick — move-oracle-002",
+      "severity": "HIGH",
+      "grep": "update_oracle_observation|current_tick|compute_swap|amount_out",
+      "detect": "Update skipped when tick doesn't change",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md",
+      "lines": [
+        125,
+        176
+      ],
+      "check": [
+        "VERIFY: Update skipped when tick doesn't change"
+      ],
+      "antipattern": "Update skipped when tick doesn't change",
+      "securePattern": "Update oracle on every swap regardless of tick change"
+    },
+    {
+      "id": "sui-move-move-oracle-pricing--pattern-3-sltp-size-clipping-v-003",
+      "title": "Pattern 3: SLTP Size Clipping via Signed/Unsigned Conversion — move-oracle-003",
+      "severity": "HIGH",
+      "grep": "clip_sltp_size|position_size|base_amount|sltp_size",
+      "detect": "Negative base position becomes huge u64",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md",
+      "lines": [
+        177,
+        237
+      ],
+      "check": [
+        "VERIFY: Negative base position becomes huge u64"
+      ],
+      "antipattern": "Negative base position becomes huge u64",
+      "securePattern": "Use absolute value for position size comparison"
+    },
+    {
+      "id": "sui-move-move-oracle-pricing--pattern-4-undervalued-collater-004",
+      "title": "Pattern 4: Undervalued Collateral from Oracle Mispricing — move-oracle-004",
+      "severity": "HIGH",
+      "grep": "get_lpt_collateral_value|get_collateral_value|get_lpt_underlying|get_asset_price",
+      "detect": "Simple price lookup doesn't account for LPT mechanics",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md",
+      "lines": [
+        238,
+        295
+      ],
+      "check": [
+        "VERIFY: Simple price lookup doesn't account for LPT mechanics"
+      ],
+      "antipattern": "Simple price lookup doesn't account for LPT mechanics",
+      "securePattern": "Calculate LPT value from underlying components"
+    },
+    {
+      "id": "sui-move-move-oracle-pricing--pattern-5-incorrect-price-boun-005",
+      "title": "Pattern 5: Incorrect Price Boundary Checks — move-oracle-005",
+      "severity": "HIGH",
+      "grep": "tick_to_sqrt_price|validate_tick|sqrt_price|Vulnerable",
+      "detect": ">= and <= allow price to equal boundary",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md",
+      "lines": [
+        296,
+        325
+      ],
+      "check": [
+        "VERIFY: >= and <= allow price to equal boundary"
+      ],
+      "antipattern": ">= and <= allow price to equal boundary",
+      "securePattern": "Strict inequalities at boundaries"
+    },
+    {
+      "id": "sui-move-move-oracle-pricing--pattern-6-faulty-constant-defi-006",
+      "title": "Pattern 6: Faulty Constant Definition — move-oracle-006",
+      "severity": "CRITICAL",
+      "grep": "least_significant_bit|Vulnerable|Validation|Definition",
+      "detect": "Constant has wrong number of digits",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md",
+      "lines": [
+        326,
+        362
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Constant has wrong number of digits"
+      ],
+      "antipattern": "Constant has wrong number of digits",
+      "securePattern": "Correct constant"
+    },
+    {
+      "id": "sui-move-move-oracle-pricing--pattern-7-unauthorized-price-f-007",
+      "title": "Pattern 7: Unauthorized Price Feed Registration — move-oracle-007",
+      "severity": "HIGH",
+      "grep": "register_price_feed|authority_cap|OracleConfig|AuthorityCap",
+      "detect": "No specific authority verification",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md",
+      "lines": [
+        363,
+        402
+      ],
+      "check": [
+        "VERIFY: No specific authority verification"
+      ],
+      "antipattern": "No specific authority verification",
+      "securePattern": "Require specific authority type"
+    },
+    {
+      "id": "sui-move-move-oracle-pricing--pattern-8-fixed-point-arithmet-008",
+      "title": "Pattern 8: Fixed-Point Arithmetic Sign Bit Confusion — move-oracle-008",
+      "severity": "HIGH",
+      "grep": "get_price(collateral_type|latest_round_data|AuthorityCap|MIN_TICK|MAX_TICK|MAX_U64",
+      "detect": "from_u256balance conflates sign bit with overflow",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md",
+      "lines": [
+        403,
+        491
+      ],
+      "check": [
+        "VERIFY: from_u256balance conflates sign bit with overflow",
+        "All oracle price reads include maximum age validation",
+        "TWAP/oracle observations updated on every price-changing event (not just tick change)",
+        "Signed-to-unsigned conversions use absolute value correctly",
+        "LOOK FOR: Pattern 1: `latest_round_data()` without timestamp age check"
+      ],
+      "antipattern": "from_u256balance conflates sign bit with overflow",
+      "securePattern": "Separate sign handling from overflow detection"
+    },
+    {
+      "id": "sui-move-move-token-supply-in-move-token-supply-and-inflatio-000",
+      "title": "Move Token Supply and Inflation Vulnerabilities",
+      "severity": "CRITICAL",
+      "grep": "Vulnerabilities|Comprehensive|OtterSec|Categories",
+      "detect": "Comprehensive patterns for inflation attacks, double minting, supply manipulation, permanent freeze, and mint limit...",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md",
+      "lines": [
+        48,
+        67
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Comprehensive patterns for inflation attacks, double minting, supply manipulation, permanent freeze, and mint limit..."
+      ]
+    },
+    {
+      "id": "sui-move-move-token-supply-in-pattern-1-first-depositor-infl-001",
+      "title": "Pattern 1: First-Depositor Inflation Attack — move-inflate-001",
+      "severity": "CRITICAL",
+      "grep": "total_reserves|inflated_rate|total_supply|total_staked",
+      "detect": "No minimum liquidity requirement",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md",
+      "lines": [
+        68,
+        150
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: No minimum liquidity requirement"
+      ],
+      "antipattern": "No minimum liquidity requirement",
+      "securePattern": "Minimum liquidity lock + minimum shares check"
+    },
+    {
+      "id": "sui-move-move-token-supply-in-pattern-2-double-minting-via-f-002",
+      "title": "Pattern 2: Double Minting via Fee Misaccounting — move-inflate-002",
+      "severity": "CRITICAL",
+      "grep": "calculate_staking_fee|calculate_kapt_shares|calculate_lp_shares|total_apt_backing",
+      "detect": "kAPT minted for full amount, but APT staked is net-of-fee",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md",
+      "lines": [
+        151,
+        219
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: kAPT minted for full amount, but APT staked is net-of-fee"
+      ],
+      "antipattern": "kAPT minted for full amount, but APT staked is net-of-fee",
+      "securePattern": "Deduct fees before share calculation"
+    },
+    {
+      "id": "sui-move-move-token-supply-in-pattern-3-uncapped-share-token-003",
+      "title": "Pattern 3: Uncapped Share/Token Minting — move-inflate-003",
+      "severity": "HIGH",
+      "grep": "accrue_user_pool_reward|total_lpt_backing|burn_from_thapt|calculate_xlpt",
+      "detect": "No cap on xLPT minting rate",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md",
+      "lines": [
+        220,
+        282
+      ],
+      "check": [
+        "VERIFY: No cap on xLPT minting rate",
+        "ANTIPATTERN: Admin can burn and reconcile without supply check"
+      ],
+      "antipattern": "Admin can burn and reconcile without supply check",
+      "securePattern": "Cap minting and enforce supply invariants"
+    },
+    {
+      "id": "sui-move-move-token-supply-in-pattern-4-permanent-freeze-wit-004",
+      "title": "Pattern 4: Permanent Freeze Without Unfreeze — move-inflate-004",
+      "severity": "HIGH",
+      "grep": "freeze_thapt_coin_stores|unfreeze_coin_store|freeze_coin_store|EchelonToken",
+      "detect": "Freeze exists but no unfreeze",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md",
+      "lines": [
+        283,
+        329
+      ],
+      "check": [
+        "VERIFY: Freeze exists but no unfreeze"
+      ],
+      "antipattern": "Freeze exists but no unfreeze",
+      "securePattern": "Both freeze and unfreeze"
+    },
+    {
+      "id": "sui-move-move-token-supply-in-pattern-5-improper-mint-limit--005",
+      "title": "Pattern 5: Improper Mint Limit Reset Logic — move-inflate-005",
+      "severity": "CRITICAL",
+      "grep": "remaining_this_epoch|epoch_mint_limit|check_mint_limit|current_epoch",
+      "detect": "Incorrect variable reference on epoch boundary reset",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md",
+      "lines": [
+        330,
+        374
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Incorrect variable reference on epoch boundary reset"
+      ],
+      "antipattern": "Incorrect variable reference on epoch boundary reset",
+      "securePattern": "Explicit limit reset with correct reference"
+    },
+    {
+      "id": "sui-move-move-token-supply-in-pattern-6-missing-activation-e-006",
+      "title": "Pattern 6: Missing Activation Epoch Check in Staking — move-inflate-006",
+      "severity": "CRITICAL",
+      "grep": "unfreeze_coin_store|freeze_coin_store|total_reserves|total_supply|mint_to|unfreeze",
+      "detect": "No activation epoch validation on join",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md",
+      "lines": [
+        375,
+        459
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: No activation epoch validation on join",
+        "First deposit locks minimum liquidity (dead shares)",
+        "All minting uses net-of-fee amounts for share calculation",
+        "Total minted shares ≤ total backing invariant enforced",
+        "LOOK FOR: Pattern 1: `if (total_supply == 0) { shares = amount }` without minimum liquidity lock"
+      ],
+      "antipattern": "No activation epoch validation on join",
+      "securePattern": "Validate matching epochs before join"
+    },
+    {
+      "id": "sui-move-sui-cross-chain-brid-1-evm-state-persistence-despit-000",
+      "title": "1. EVM State Persistence Despite Sui Failure",
+      "severity": "HIGH",
+      "grep": "ProcessCrossChainTx|executeSuiDeposit|sui_move_findings|applyEVMChanges",
+      "detect": "The EVM side commits state changes before confirming the Sui-side transaction succeeded.",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        113,
+        181
+      ],
+      "check": [
+        "VERIFY: EVM side commits state changes before confirming the Sui-side transaction succeeded.",
+        "ANTIPATTERN: func ProcessCrossChainTx(ctx sdk.Context, cctx *types.CrossChainTx) error {"
+      ],
+      "antipattern": "func ProcessCrossChainTx(ctx sdk.Context, cctx *types.CrossChainTx) error {",
+      "securePattern": "Use two-phase commit or cache-and-commit pattern"
+    },
+    {
+      "id": "sui-move-sui-cross-chain-brid-2-outbound-nonce-manipulation--001",
+      "title": "2. Outbound Nonce Manipulation DoS",
+      "severity": "MEDIUM",
+      "grep": "ProcessOutboundWithRetry|GetNextOutboundNonce|sui_move_findings|SetOutboundNonce",
+      "detect": "Sequential nonce allows targeted blocking",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        182,
+        225
+      ],
+      "check": [
+        "VERIFY: Sequential nonce allows targeted blocking"
+      ],
+      "antipattern": "Sequential nonce allows targeted blocking",
+      "securePattern": "Use nonce gap handling or parallel nonce pools"
+    },
+    {
+      "id": "sui-move-sui-cross-chain-brid-3-sui-node-dos-blocks-intx-obs-002",
+      "title": "3. Sui Node DoS Blocks InTx Observation",
+      "severity": "MEDIUM",
+      "grep": "sui_move_findings|processEvents|SuiObserver|ObserveInTx",
+      "detect": "Single RPC endpoint, no failover",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        226,
+        280
+      ],
+      "check": [
+        "VERIFY: Single RPC endpoint, no failover"
+      ],
+      "antipattern": "Single RPC endpoint, no failover",
+      "securePattern": "Multiple RPC endpoints with failover"
+    },
+    {
+      "id": "sui-move-sui-cross-chain-brid-4-missing-receiver-module-vali-003",
+      "title": "4. Missing Receiver Module Validation",
+      "severity": "MEDIUM",
+      "grep": "CreateOutboundToSui|isValidSuiAddress|sui_move_findings|ProcessOutbound",
+      "detect": "Receiver not validated before creating outbound CCTX",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        281,
+        333
+      ],
+      "check": [
+        "VERIFY: Receiver not validated before creating outbound CCTX"
+      ],
+      "antipattern": "Receiver not validated before creating outbound CCTX",
+      "securePattern": "Validate Sui address format before processing"
+    },
+    {
+      "id": "sui-move-sui-cross-chain-brid-5-improper-coin-type-validatio-004",
+      "title": "5. Improper Coin Type Validation",
+      "severity": "MEDIUM",
+      "grep": "ValidateSuiCoinType|sui_move_findings|ZetaChain|fake_zeta",
+      "detect": "Partial string match allows coin type spoofing",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        334,
+        371
+      ],
+      "check": [
+        "VERIFY: Partial string match allows coin type spoofing"
+      ],
+      "antipattern": "Partial string match allows coin type spoofing",
+      "securePattern": "Validate full coin type path against known registry"
+    },
+    {
+      "id": "sui-move-sui-cross-chain-brid-6-duplicate-cctx-re-signing-005",
+      "title": "6. Duplicate CCTX Re-signing",
+      "severity": "MEDIUM",
+      "grep": "OutboundSignature|sui_move_findings|SignOutboundCCTX|HasSignature",
+      "detect": "No check for existing signature",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        372,
+        417
+      ],
+      "check": [
+        "VERIFY: No check for existing signature"
+      ],
+      "antipattern": "No check for existing signature",
+      "securePattern": "Check for existing signature before re-signing"
+    },
+    {
+      "id": "sui-move-sui-cross-chain-brid-7-tss-fund-drainage-via-gas-ma-006",
+      "title": "7. TSS Fund Drainage via Gas Manipulation",
+      "severity": "HIGH",
+      "grep": "sui_move_findings|BuildSuiOutbound|estimateSuiGas|NewTransaction",
+      "detect": "Gas coin amount not properly bounded",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        418,
+        464
+      ],
+      "check": [
+        "VERIFY: Gas coin amount not properly bounded"
+      ],
+      "antipattern": "Gas coin amount not properly bounded",
+      "securePattern": "Cap gas budget and validate against estimated cost"
+    },
+    {
+      "id": "sui-move-sui-cross-chain-brid-8-wrong-gas-price-for-outbound-007",
+      "title": "8. Wrong Gas Price for Outbound Transactions",
+      "severity": "MEDIUM",
+      "grep": "GetReferenceGasPrice|sui_move_findings|SetPostGasPrice|PostGasPrice",
+      "detect": "Uses EVM gas price model for Sui",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        465,
+        506
+      ],
+      "check": [
+        "VERIFY: Uses EVM gas price model for Sui"
+      ],
+      "antipattern": "Uses EVM gas price model for Sui",
+      "securePattern": "Use Sui-specific gas price query"
+    },
+    {
+      "id": "sui-move-sui-cross-chain-brid-9-epoch-transition-failure-via-008",
+      "title": "9. Epoch Transition Failure via Duplicate PubKey",
+      "severity": "HIGH",
+      "grep": "vec_map::insert|OtterSec|vec_map|Validation",
+      "detect": "The Sui Bridge committee management uses `vec_map::insert` which aborts on duplicate keys.",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        507,
+        519
+      ],
+      "check": [
+        "VERIFY: Sui Bridge committee management uses `vec_map::insert` which aborts on duplicate keys."
+      ]
+    },
+    {
+      "id": "sui-move-sui-cross-chain-brid-10-blocklist-iterator-state-bu-009",
+      "title": "10. Blocklist Iterator State Bug",
+      "severity": "MEDIUM",
+      "grep": "OtterSec|Validation|Frequency|Blocklist",
+      "detect": "The blocklist validation loop in Sui Bridge doesn't reset its iterator between list entries, causing incorrect...",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        520,
+        532
+      ],
+      "check": [
+        "VERIFY: blocklist validation loop in Sui Bridge doesn't reset its iterator between list entries, causing incorrect..."
+      ]
+    },
+    {
+      "id": "sui-move-sui-cross-chain-brid-11-cross-chain-flow-rate-direc-010",
+      "title": "11. Cross-Chain Flow Rate Direction Mismatch",
+      "severity": "HIGH",
+      "grep": "add_flow_out|add_flow_in",
+      "detect": "Axelar's cross-chain gateway on Sui tracks inbound and outbound token flows for rate limiting.",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        533,
+        545
+      ],
+      "check": [
+        "VERIFY: Axelar's cross-chain gateway on Sui tracks inbound and outbound token flows for rate limiting."
+      ]
+    },
+    {
+      "id": "sui-move-sui-cross-chain-brid-12-wrong-integration-function--011",
+      "title": "12. Wrong Integration Function Call",
+      "severity": "MEDIUM",
+      "grep": "add_flow_out|OtterSec|Integration|Validation",
+      "detect": "When integrating cross-chain message handling with flow limiters, calling the wrong function (e.",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md",
+      "lines": [
+        546,
+        558
+      ],
+      "check": [
+        "VERIFY: When integrating cross-chain message handling with flow limiters, calling the wrong function (e."
+      ]
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-1-public-vs-public-package-vis-000",
+      "title": "1. Public vs Public(package) Visibility Misuse",
+      "severity": "CRITICAL",
+      "grep": "public(package|public(friend|entry",
+      "detect": "Functions that modify protocol-critical state (cooldown periods, limits, prices) are declared `public` instead of...",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        146,
+        192
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Functions that modify protocol-critical state (cooldown periods, limits, prices) are declared `public` instead of...",
+        "ANTIPATTERN: Public function allows anyone to reset cooldown"
+      ],
+      "antipattern": "Public function allows anyone to reset cooldown",
+      "securePattern": "Restrict to same package only"
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-2-missing-owner-authority-chec-001",
+      "title": "2. Missing Owner/Authority Check",
+      "severity": "HIGH",
+      "grep": "tx_context::sender|unstake_and_withdraw|sui_move_findings|farming_position",
+      "detect": "Anyone can withdraw from another user's farming position",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        193,
+        247
+      ],
+      "check": [
+        "VERIFY: Anyone can withdraw from another user's farming position"
+      ],
+      "antipattern": "Anyone can withdraw from another user's farming position",
+      "securePattern": "Validate caller is position owner"
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-3-missing-object-uid-id-valida-002",
+      "title": "3. Missing Object UID/ID Validation",
+      "severity": "HIGH",
+      "grep": "parameters|sui_move_findings|deposit_to_vault|bluefin_bank",
+      "detect": "BlueFin accepts any BankV2 — doesn't check it matches the vault",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        248,
+        299
+      ],
+      "check": [
+        "VERIFY: BlueFin accepts any BankV2 — doesn't check it matches the vault"
+      ],
+      "antipattern": "BlueFin accepts any BankV2 — doesn't check it matches the vault",
+      "securePattern": "Validate all shared object identities"
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-4-trade-proof-capability-bypas-003",
+      "title": "4. Trade Proof / Capability Bypass",
+      "severity": "HIGH",
+      "grep": "generate_proof_as_owner|BalanceManager|TradeProof",
+      "detect": "Alternative proof generation path bypasses trader authorization",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        300,
+        342
+      ],
+      "check": [
+        "VERIFY: Alternative proof generation path bypasses trader authorization"
+      ],
+      "antipattern": "Alternative proof generation path bypasses trader authorization",
+      "securePattern": "Both paths should enforce the same authorization"
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-5-flash-loan-receipt-manipulat-004",
+      "title": "5. Flash Loan Receipt Manipulation",
+      "severity": "HIGH",
+      "grep": "sui_move_findings|repay_flash_loan|FlashReceipt|into_balance",
+      "detect": "Receipt doesn't bind to specific pool",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        343,
+        399
+      ],
+      "check": [
+        "VERIFY: Receipt doesn't bind to specific pool"
+      ],
+      "antipattern": "Receipt doesn't bind to specific pool",
+      "securePattern": "Receipt binds to specific pool"
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-6-missing-zk-proof-verificatio-005",
+      "title": "6. Missing ZK Proof Verification",
+      "severity": "HIGH",
+      "grep": "settlement_data_to_public_inputs|sui_move_findings|settle_perpetual|apply_settlement",
+      "detect": "ZK proof accepted without on-chain verification",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        400,
+        446
+      ],
+      "check": [
+        "VERIFY: ZK proof accepted without on-chain verification"
+      ],
+      "antipattern": "ZK proof accepted without on-chain verification",
+      "securePattern": "Verify ZK proof on-chain before applying state changes"
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-7-signature-length-format-vali-006",
+      "title": "7. Signature Length / Format Validation",
+      "severity": "HIGH",
+      "grep": "sui_move_findings|verify_signature|ed25519_verify|public_key",
+      "detect": "No length validation on signature bytes",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        447,
+        492
+      ],
+      "check": [
+        "VERIFY: No length validation on signature bytes"
+      ],
+      "antipattern": "No length validation on signature bytes",
+      "securePattern": "Validate signature and key lengths before verification"
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-8-security-level-constraint-by-007",
+      "title": "8. Security Level Constraint Bypass",
+      "severity": "HIGH",
+      "grep": "check_security_level|get_limit_for_level|get_security_level|emergency_withdraw",
+      "detect": "Security level check can be bypassed via alternative code path",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        493,
+        548
+      ],
+      "check": [
+        "VERIFY: Security level check can be bypassed via alternative code path"
+      ],
+      "antipattern": "Security level check can be bypassed via alternative code path",
+      "securePattern": "Enforce security level on ALL withdrawal paths"
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-9-unsafe-role-removal-008",
+      "title": "9. Unsafe Role Removal",
+      "severity": "MEDIUM",
+      "grep": "sui_move_findings|remove_member|tx_context|last_admin",
+      "detect": "Can remove any member, including the last admin",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        549,
+        586
+      ],
+      "check": [
+        "VERIFY: Can remove any member, including the last admin"
+      ],
+      "antipattern": "Can remove any member, including the last admin",
+      "securePattern": "Prevent removing last admin and validate member exists"
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-10-repeated-invocation-replay-009",
+      "title": "10. Repeated Invocation / Replay",
+      "severity": "HIGH",
+      "grep": "sui_move_findings|public_transfer|mark_claimed|claim_tokens",
+      "detect": "No tracking of whether user already claimed",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        587,
+        636
+      ],
+      "check": [
+        "VERIFY: No tracking of whether user already claimed"
+      ],
+      "antipattern": "No tracking of whether user already claimed",
+      "securePattern": "Track claims and prevent replay"
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-11-inconsistent-assert-conditi-010",
+      "title": "11. Inconsistent Assert Conditions",
+      "severity": "HIGH",
+      "grep": "calculate_min_margin|sui_move_findings|update_margin|min_margin",
+      "detect": "Assert condition is inverted",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        637,
+        673
+      ],
+      "check": [
+        "VERIFY: Assert condition is inverted"
+      ],
+      "antipattern": "Assert condition is inverted",
+      "securePattern": "Correct comparison direction"
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-12-missing-range-bounds-valida-011",
+      "title": "12. Missing Range / Bounds Validation",
+      "severity": "HIGH",
+      "grep": "name_record_ttl_mut|get_name_record_mut|sui_move_findings|open_position",
+      "detect": "TTL not checked against maximum",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        674,
+        729
+      ],
+      "check": [
+        "VERIFY: TTL not checked against maximum",
+        "ANTIPATTERN: Tick index not validated against tick spacing"
+      ],
+      "antipattern": "Tick index not validated against tick spacing",
+      "securePattern": "Validate all bounds"
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-13-mint-limit-exhaustion-dos-012",
+      "title": "13. Mint Limit Exhaustion DoS",
+      "severity": "MEDIUM",
+      "grep": "sui_move_findings|minted_this_epoch|public_transfer|epoch_limit",
+      "detect": "No minimum mint amount, attacker can exhaust limit with dust",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        730,
+        770
+      ],
+      "check": [
+        "VERIFY: No minimum mint amount, attacker can exhaust limit with dust"
+      ],
+      "antipattern": "No minimum mint amount, attacker can exhaust limit with dust",
+      "securePattern": "Enforce minimum mint amount"
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-14-excessive-gas-consumption-d-013",
+      "title": "14. Excessive Gas Consumption DoS",
+      "severity": "MEDIUM",
+      "grep": "sui_move_findings|pop_best_bid|match_orders|OrderBook",
+      "detect": "Order matching loop can process unlimited orders",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        771,
+        814
+      ],
+      "check": [
+        "VERIFY: Order matching loop can process unlimited orders"
+      ],
+      "antipattern": "Order matching loop can process unlimited orders",
+      "securePattern": "Limit matching iterations per transaction"
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-15-snapshot-integrity-bypass-014",
+      "title": "15. Snapshot Integrity Bypass",
+      "severity": "MEDIUM",
+      "grep": "finalize_snapshot_update|propose_snapshot_update|pending_root_activation|update_snapshot_root",
+      "detect": "Single admin can override snapshot root",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        815,
+        861
+      ],
+      "check": [
+        "VERIFY: Single admin can override snapshot root"
+      ],
+      "antipattern": "Single admin can override snapshot root",
+      "securePattern": "Require multi-sig or time-locked update"
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-16-missing-invariant-enforceme-015",
+      "title": "16. Missing Invariant Enforcement",
+      "severity": "HIGH",
+      "grep": "calculate_swap_output|sui_move_findings|into_balance|amount_out",
+      "detect": "LP supply not validated after swap",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        862,
+        906
+      ],
+      "check": [
+        "VERIFY: LP supply not validated after swap"
+      ],
+      "antipattern": "LP supply not validated after swap",
+      "securePattern": "Assert invariant after state mutation"
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-17-blocklist-implementation-fl-016",
+      "title": "17. Blocklist Implementation Flaws",
+      "severity": "UNKNOWN",
+      "grep": "Vulnerabilities|OtterSec|Validation|Frequency",
+      "detect": "Bridge and compliance systems use blocklists to prevent sanctioned addresses from transacting.",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        907,
+        918
+      ],
+      "check": [
+        "VERIFY: Bridge and compliance systems use blocklists to prevent sanctioned addresses from transacting."
+      ]
+    },
+    {
+      "id": "sui-move-sui-move-access-cont-18-price-manipulation-via-miss-017",
+      "title": "18. Price Manipulation via Missing Guards",
+      "severity": "MEDIUM",
+      "grep": "sui_move_findings|accounted_balance|get_share_price|actual_balance",
+      "detect": "Pool NAV manipulated by direct coin transfer",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md",
+      "lines": [
+        919,
+        958
+      ],
+      "check": [
+        "VERIFY: Pool NAV manipulated by direct coin transfer"
+      ],
+      "antipattern": "Pool NAV manipulated by direct coin transfer",
+      "securePattern": "Track \"virtual\" balance separately from actual balance"
+    },
+    {
+      "id": "sui-move-sui-move-arithmetic--1-clmm-sqrt-price-overflow-000",
+      "title": "1. CLMM Sqrt-Price Overflow",
+      "severity": "HIGH",
+      "grep": "checked_shlw|get_delta_b",
+      "detect": "`get_delta_b` computes `liquidity * (sqrt_price_b - sqrt_price_a)` which can overflow when liquidity is large and the tick range approaches extreme values.",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        128,
+        252
+      ],
+      "check": [
+        "VERIFY: `get_delta_b` computes `liquidity * (sqrt_price_b - sqrt_price_a)` which can overflow when liquidity is large and the tick range approaches extreme va",
+        "Verify all intermediate CLMM math uses u256 to prevent overflow",
+        "Test delta calculations at MIN_TICK and MAX_TICK boundaries",
+        "Check checked_shlw implementation for correct overflow detection",
+        "LOOK FOR: get_delta_a / get_delta_b using u128 multiplication"
+      ],
+      "antipattern": "checked_shlw does not properly detect overflow",
+      "securePattern": "Use u256 throughout and assert no truncation"
+    },
+    {
+      "id": "sui-move-sui-move-arithmetic--3-bigvector-container-size-ove-002",
+      "title": "3. BigVector / Container Size Overflow",
+      "severity": "MEDIUM",
+      "grep": "max_slice_size|max_fan_out",
+      "detect": "depth > 0 causes max_slice_size ^ (depth + 1) nodes",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        261,
+        292
+      ],
+      "check": [
+        "VERIFY: depth > 0 causes max_slice_size ^ (depth + 1) nodes"
+      ],
+      "antipattern": "depth > 0 causes max_slice_size ^ (depth + 1) nodes",
+      "securePattern": "Size parameters chosen to stay under 256KB at maximum depth"
+    },
+    {
+      "id": "sui-move-sui-move-arithmetic--4-accumulator-volume-counter-o-003",
+      "title": "4. Accumulator / Volume Counter Overflow",
+      "severity": "HIGH",
+      "grep": "sui_move_findings|execute_trade|total_volume|OtterSec",
+      "detect": "u64 volume accumulator overflows with high-volume pairs",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        293,
+        334
+      ],
+      "check": [
+        "VERIFY: u64 volume accumulator overflows with high-volume pairs"
+      ],
+      "antipattern": "u64 volume accumulator overflows with high-volume pairs",
+      "securePattern": "Use u128 or u256 for volume accumulators"
+    },
+    {
+      "id": "sui-move-sui-move-arithmetic--5-type-boundary-overflow-u64-u-004",
+      "title": "5. Type Boundary Overflow (u64 → u128)",
+      "severity": "MEDIUM",
+      "grep": "total_voting_power|sui_move_findings|calculate_share|voting_power",
+      "detect": "amount * PRECISION can exceed u64",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        335,
+        376
+      ],
+      "check": [
+        "VERIFY: amount * PRECISION can exceed u64",
+        "ANTIPATTERN: Stress test may use voting_power near u64 max"
+      ],
+      "antipattern": "Stress test may use voting_power near u64 max",
+      "securePattern": "Use u128 for intermediate calculations"
+    },
+    {
+      "id": "sui-move-sui-move-arithmetic--6-rpc-node-crash-overflow-005",
+      "title": "6. RPC / Node-Crash Overflow",
+      "severity": "HIGH",
+      "grep": "sui_move_findings|saturating_sub|select_coins|OtterSec",
+      "detect": "(Rust, Sui fullnode): Unchecked subtraction in select_coins",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        377,
+        418
+      ],
+      "check": [
+        "VERIFY: (Rust, Sui fullnode): Unchecked subtraction in select_coins",
+        "ANTIPATTERN: fn select_coins(coins: &[CoinData], amount: u64) -> Vec<ObjectID> {"
+      ],
+      "antipattern": "fn select_coins(coins: &[CoinData], amount: u64) -> Vec<ObjectID> {",
+      "securePattern": "Use saturating subtraction"
+    },
+    {
+      "id": "sui-move-sui-move-arithmetic--7-faulty-constant-definitions-006",
+      "title": "7. Faulty Constant Definitions",
+      "severity": "HIGH",
+      "grep": "sui_move_findings|test_max_u64|representation|OtterSec",
+      "detect": "Missing digit — value is 10x too small",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        419,
+        467
+      ],
+      "check": [
+        "VERIFY: Missing digit — value is 10x too small"
+      ],
+      "antipattern": "Missing digit — value is 10x too small",
+      "securePattern": "Use built-in constants or verify manually"
+    },
+    {
+      "id": "sui-move-sui-move-arithmetic--8-precision-loss-in-token-redi-007",
+      "title": "8. Precision Loss in Token Redistribution",
+      "severity": "MEDIUM",
+      "grep": "sui_move_findings|total_collateral|share_amount|Redistribution",
+      "detect": "Integer division truncates, losing dust",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        468,
+        517
+      ],
+      "check": [
+        "VERIFY: Integer division truncates, losing dust"
+      ],
+      "antipattern": "Integer division truncates, losing dust",
+      "securePattern": "Track cumulative distribution and handle remainder"
+    },
+    {
+      "id": "sui-move-sui-move-arithmetic--9-reward-calculation-rounding--008",
+      "title": "9. Reward Calculation Rounding Errors",
+      "severity": "MEDIUM",
+      "grep": "accumulated_reward_per_share|update_reward_per_share|calculate_epoch_reward|sui_move_findings",
+      "detect": "Accumulated rounding dust is silently lost each epoch",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        518,
+        567
+      ],
+      "check": [
+        "VERIFY: Accumulated rounding dust is silently lost each epoch"
+      ],
+      "antipattern": "Accumulated rounding dust is silently lost each epoch",
+      "securePattern": "Use scaled accumulator pattern"
+    },
+    {
+      "id": "sui-move-sui-move-arithmetic--10-share-price-inflation-first-009",
+      "title": "10. Share Price Inflation / First-Depositor Attack",
+      "severity": "HIGH",
+      "grep": "process_withdrawal|sui_move_findings|total_shares|total_assets",
+      "detect": "No minimum deposit, shares round to zero",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        568,
+        637
+      ],
+      "check": [
+        "VERIFY: No minimum deposit, shares round to zero",
+        "ANTIPATTERN: Persistent rounding errors inflate share price over time"
+      ],
+      "antipattern": "Persistent rounding errors inflate share price over time",
+      "securePattern": "Virtual offset prevents the first-depositor inflation attack"
+    },
+    {
+      "id": "sui-move-sui-move-arithmetic--11-share-to-asset-rounding-dir-010",
+      "title": "11. Share-to-Asset Rounding Direction",
+      "severity": "HIGH",
+      "grep": "get_sui_for_shares_round_up|get_sui_for_shares|sui_move_findings|total_shares",
+      "detect": "Rounds DOWN when calculating SUI needed for shares",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        638,
+        680
+      ],
+      "check": [
+        "VERIFY: Rounds DOWN when calculating SUI needed for shares"
+      ],
+      "antipattern": "Rounds DOWN when calculating SUI needed for shares",
+      "securePattern": "Round up when user is paying (deposit), round down when user is receiving"
+    },
+    {
+      "id": "sui-move-sui-move-arithmetic--12-incorrect-price-scaling-con-011",
+      "title": "12. Incorrect Price Scaling / Conversion",
+      "severity": "HIGH",
+      "grep": "sui_move_findings|oracle_price|get_price|OtterSec",
+      "detect": "Price feed uses 8 decimals but pool expects 18 decimals",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        681,
+        716
+      ],
+      "check": [
+        "VERIFY: Price feed uses 8 decimals but pool expects 18 decimals"
+      ],
+      "antipattern": "Price feed uses 8 decimals but pool expects 18 decimals",
+      "securePattern": "Explicit decimal conversion"
+    },
+    {
+      "id": "sui-move-sui-move-arithmetic--13-incorrect-quantity-calculat-012",
+      "title": "13. Incorrect Quantity Calculation in Order Books",
+      "severity": "HIGH",
+      "grep": "process_partial_fill|unfilled_quantity|sui_move_findings|original_quantity",
+      "detect": "Uses wrong quantity field in fill calculation",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        717,
+        762
+      ],
+      "check": [
+        "VERIFY: Uses wrong quantity field in fill calculation",
+        "ANTIPATTERN: quantity not updated correctly after partial fill"
+      ],
+      "antipattern": "quantity not updated correctly after partial fill",
+      "securePattern": "Track unfilled quantity independently"
+    },
+    {
+      "id": "sui-move-sui-move-arithmetic--14-reward-period-miscalculatio-013",
+      "title": "14. Reward Period Miscalculation",
+      "severity": "MEDIUM",
+      "grep": "sui_move_findings|calculate_rewards|last_claim_time|effective_start",
+      "detect": "Inclusive vs exclusive boundary error",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        763,
+        808
+      ],
+      "check": [
+        "VERIFY: Inclusive vs exclusive boundary error"
+      ],
+      "antipattern": "Inclusive vs exclusive boundary error",
+      "securePattern": "Clamp to reward period boundaries"
+    },
+    {
+      "id": "sui-move-sui-move-arithmetic--15-improper-integer-type-conve-014",
+      "title": "15. Improper Integer Type Conversion",
+      "severity": "HIGH",
+      "grep": "sui_move_findings|convert_amount|OtterSec|Intermediate",
+      "detect": "Intermediate u128 result truncated to u64",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md",
+      "lines": [
+        809,
+        844
+      ],
+      "check": [
+        "VERIFY: Intermediate u128 result truncated to u64"
+      ],
+      "antipattern": "Intermediate u128 result truncated to u64",
+      "securePattern": "Assert before truncation"
+    },
+    {
+      "id": "sui-move-sui-move-defi-logic--1-improper-stake-accounting-up-000",
+      "title": "1. Improper Stake Accounting Updates",
+      "severity": "MEDIUM",
+      "grep": "global_accumulator|update_user_stake|sui_move_findings|last_accumulator",
+      "detect": "The stake update function uses the wrong multiplier or doesn't account for compounding effects.",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        132,
+        173
+      ],
+      "check": [
+        "VERIFY: stake update function uses the wrong multiplier or doesn't account for compounding effects.",
+        "ANTIPATTERN: Uses absolute multiplier instead of relative"
+      ],
+      "antipattern": "Uses absolute multiplier instead of relative",
+      "securePattern": "Use relative accumulator pattern"
+    },
+    {
+      "id": "sui-move-sui-move-defi-logic--2-tank-stability-pool-value-up-001",
+      "title": "2. Tank/Stability Pool Value Update Errors",
+      "severity": "MEDIUM",
+      "grep": "total_collateral_reward|process_liquidation|sui_move_findings|collateral_gained",
+      "detect": "Updates tank total with deposited amount instead of net change",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        174,
+        213
+      ],
+      "check": [
+        "VERIFY: Updates tank total with deposited amount instead of net change"
+      ],
+      "antipattern": "Updates tank total with deposited amount instead of net change",
+      "securePattern": "Track stablecoin deposits and collateral rewards separately"
+    },
+    {
+      "id": "sui-move-sui-move-defi-logic--3-surplus-claim-logic-failure-002",
+      "title": "3. Surplus Claim Logic Failure",
+      "severity": "HIGH",
+      "grep": "total_deposit_snapshot|collateral_surplus|sui_move_findings|transfer_surplus",
+      "detect": "When total_deposit = 0, surplus cannot be distributed",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        214,
+        257
+      ],
+      "check": [
+        "VERIFY: When total_deposit = 0, surplus cannot be distributed"
+      ],
+      "antipattern": "When total_deposit = 0, surplus cannot be distributed",
+      "securePattern": "Handle zero total_deposit case for surplus distribution"
+    },
+    {
+      "id": "sui-move-sui-move-defi-logic--4-incorrect-flow-rate-tracking-003",
+      "title": "4. Incorrect Flow Rate Tracking",
+      "severity": "HIGH",
+      "grep": "process_outbound_transfer|process_inbound_transfer|sui_move_findings|outbound_limit",
+      "detect": "Inbound flow tracked as outbound (or vice versa)",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        258,
+        297
+      ],
+      "check": [
+        "VERIFY: Inbound flow tracked as outbound (or vice versa)"
+      ],
+      "antipattern": "Inbound flow tracked as outbound (or vice versa)",
+      "securePattern": "Track correct flow direction"
+    },
+    {
+      "id": "sui-move-sui-move-defi-logic--5-wrong-function-call-in-integ-004",
+      "title": "5. Wrong Function Call in Integration",
+      "severity": "MEDIUM",
+      "grep": "add_flow_out|add_flow_in",
+      "detect": "Calls wrong flow tracking function",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        298,
+        338
+      ],
+      "check": [
+        "VERIFY: Calls wrong flow tracking function"
+      ],
+      "antipattern": "Calls wrong flow tracking function",
+      "securePattern": "Correct function call matching the operation semantics"
+    },
+    {
+      "id": "sui-move-sui-move-defi-logic--6-reward-accumulation-during-i-005",
+      "title": "6. Reward Accumulation During Inactive Periods",
+      "severity": "MEDIUM",
+      "grep": "sui_move_findings|last_active_epoch|calculate_rewards|total_liquidity",
+      "detect": "Reward calculation doesn't exclude inactive periods",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        339,
+        389
+      ],
+      "check": [
+        "VERIFY: Reward calculation doesn't exclude inactive periods"
+      ],
+      "antipattern": "Reward calculation doesn't exclude inactive periods",
+      "securePattern": "Track active epochs explicitly"
+    },
+    {
+      "id": "sui-move-sui-move-defi-logic--7-reward-period-boundary-error-006",
+      "title": "7. Reward Period Boundary Errors",
+      "severity": "UNKNOWN",
+      "grep": "OtterSec|undercount|Validation|Arithmetic",
+      "detect": "Off-by-one errors in reward period boundary calculations cause rewards to either overcount (distributing beyond the...",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        390,
+        402
+      ],
+      "check": [
+        "VERIFY: Off-by-one errors in reward period boundary calculations cause rewards to either overcount (distributing beyond the..."
+      ]
+    },
+    {
+      "id": "sui-move-sui-move-defi-logic--8-liquid-staking-pending-coin--007",
+      "title": "8. Liquid Staking: Pending Coin Inclusion in Unstake",
+      "severity": "MEDIUM",
+      "grep": "get_total_sui_with_pending|sui_move_findings|confirmed_pending|filter_confirmed",
+      "detect": "Includes pending (not-yet-staked) SUI in total calculation",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        403,
+        442
+      ],
+      "check": [
+        "VERIFY: Includes pending (not-yet-staked) SUI in total calculation"
+      ],
+      "antipattern": "Includes pending (not-yet-staked) SUI in total calculation",
+      "securePattern": "Only count actively staked SUI in exchange rate"
+    },
+    {
+      "id": "sui-move-sui-move-defi-logic--9-liquid-staking-restake-routi-008",
+      "title": "9. Liquid Staking: Restake Routing Errors",
+      "severity": "MEDIUM",
+      "grep": "validator_distribution|sui_move_findings|validator_stakes|from_validator",
+      "detect": "Restake moves SUI but doesn't update validator distribution record",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        443,
+        495
+      ],
+      "check": [
+        "VERIFY: Restake moves SUI but doesn't update validator distribution record"
+      ],
+      "antipattern": "Restake moves SUI but doesn't update validator distribution record",
+      "securePattern": "Update all tracking state on restake"
+    },
+    {
+      "id": "sui-move-sui-move-defi-logic--10-liquid-staking-share-roundi-009",
+      "title": "10. Liquid Staking: Share Rounding Direction",
+      "severity": "LOW",
+      "grep": "OtterSec|Validation|Arithmetic|Precision",
+      "detect": "When converting between SUI and staking shares (voSUI/stSUI), the rounding direction must always favor the protocol.",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        496,
+        508
+      ],
+      "check": [
+        "VERIFY: When converting between SUI and staking shares (voSUI/stSUI), the rounding direction must always favor the protocol."
+      ]
+    },
+    {
+      "id": "sui-move-sui-move-defi-logic--11-order-book-base-quote-quant-010",
+      "title": "11. Order Book: Base/Quote Quantity Mismatch",
+      "severity": "HIGH",
+      "grep": "sui_move_findings|quote_qty|match_bid|OtterSec",
+      "detect": "Uses fill quantity where order quantity is expected",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        509,
+        546
+      ],
+      "check": [
+        "VERIFY: Uses fill quantity where order quantity is expected"
+      ],
+      "antipattern": "Uses fill quantity where order quantity is expected",
+      "securePattern": "Correctly compute base and quote quantities"
+    },
+    {
+      "id": "sui-move-sui-move-defi-logic--12-order-book-partial-fill-tra-011",
+      "title": "12. Order Book: Partial Fill Tracking",
+      "severity": "LOW",
+      "grep": "OtterSec|DeepBook|Validation|Arithmetic",
+      "detect": "Order books that allow partial fills must correctly track the unfilled quantity.",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        547,
+        559
+      ],
+      "check": [
+        "VERIFY: Order books that allow partial fills must correctly track the unfilled quantity."
+      ]
+    },
+    {
+      "id": "sui-move-sui-move-defi-logic--13-share-price-manipulation-vi-012",
+      "title": "13. Share Price Manipulation via Donation",
+      "severity": "MEDIUM",
+      "grep": "sui_move_findings|total_lp_supply|total_shares|total_assets",
+      "detect": "Pool's Net Asset Value is directly manipulable",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        560,
+        587
+      ],
+      "check": [
+        "VERIFY: Pool's Net Asset Value is directly manipulable"
+      ],
+      "antipattern": "Pool's Net Asset Value is directly manipulable"
+    },
+    {
+      "id": "sui-move-sui-move-defi-logic--14-share-price-inflation-via-r-013",
+      "title": "14. Share Price Inflation via Rounding Drift",
+      "severity": "MEDIUM",
+      "grep": "sui_move_findings|effective_shares|effective_assets|total_shares",
+      "detect": "Every withdrawal leaves dust, inflating share price",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        588,
+        631
+      ],
+      "check": [
+        "VERIFY: Every withdrawal leaves dust, inflating share price"
+      ],
+      "antipattern": "Every withdrawal leaves dust, inflating share price",
+      "securePattern": "Use virtual offset pattern to minimize rounding impact"
+    },
+    {
+      "id": "sui-move-sui-move-defi-logic--15-exchange-rate-manipulation--014",
+      "title": "15. Exchange Rate Manipulation at Low TVL",
+      "severity": "LOW",
+      "grep": "share_to_amount|amount_to_share|total_shares|total_sui",
+      "detect": "When a liquid staking or vault protocol has very low TVL, the exchange rate is sensitive to small deposits or...",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md",
+      "lines": [
+        632,
+        659
+      ],
+      "check": [
+        "VERIFY: When a liquid staking or vault protocol has very low TVL, the exchange rate is sensitive to small deposits or...",
+        "Check first-depositor protection (virtual offset or minimum initial deposit)",
+        "Verify rounding direction favors protocol on all operations",
+        "Test exchange rate manipulation at very low TVL (< 100 tokens)",
+        "LOOK FOR: Exchange rate calculation: total_sui / total_shares (or similar)"
+      ]
+    },
+    {
+      "id": "sui-move-sui-move-object-mode-1-uid-leak-object-identity-byp-000",
+      "title": "1. UID Leak / Object Identity Bypass",
+      "severity": "CRITICAL",
+      "grep": "id_leak_verifier|Bar",
+      "detect": "The verifier does not validate structures without a `key` capability.",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_OBJECT_MODEL_VULNERABILITIES.md",
+      "lines": [
+        126,
+        247
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: verifier does not validate structures without a `key` capability.",
+        "Verify all structs with UID field have `key` ability from initial publication",
+        "Check upgrade compatibility — no ability additions that bypass verifier",
+        "Ensure all shared object parameters have UID/ID validation",
+        "LOOK FOR: Structs without `key` ability that contain UID"
+      ],
+      "antipattern": "V0 - struct without key, verifier doesn't check UID packing",
+      "securePattern": "Verifier should reject adding key ability to existing structs during upgrade"
+    },
+    {
+      "id": "sui-move-sui-move-object-mode-2-dynamic-field-hash-collision-001",
+      "title": "2. Dynamic Field Hash Collision",
+      "severity": "CRITICAL",
+      "grep": "hash_type_and_key|k_tag_bytes|k_bytes|exists_|parent|Vector",
+      "detect": "The `hash_type_and_key` function concatenates `parent`, `k_bytes`, and `k_tag_bytes` without inserting length delimiters.",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_OBJECT_MODEL_VULNERABILITIES.md",
+      "lines": [
+        248,
+        310
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: `hash_type_and_key` function concatenates `parent`, `k_bytes`, and `k_tag_bytes` without inserting length delimiters.",
+        "LOOK FOR: Hash computations concatenating variable-length fields without separators",
+        "LOOK FOR: Custom hash_type_and_key implementations"
+      ],
+      "antipattern": "No length delimiters between components",
+      "securePattern": "Length-prefix each component to prevent cross-boundary collisions"
+    },
+    {
+      "id": "sui-move-sui-move-object-mode-3-package-digest-collision-002",
+      "title": "3. Package Digest Collision",
+      "severity": "HIGH",
+      "grep": "compute_digest_for_modules_and_deps|sui_move_findings|IntoIterator|final_digest",
+      "detect": "Sorting and concatenating without item boundaries",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_OBJECT_MODEL_VULNERABILITIES.md",
+      "lines": [
+        311,
+        359
+      ],
+      "check": [
+        "VERIFY: Sorting and concatenating without item boundaries"
+      ],
+      "antipattern": "Sorting and concatenating without item boundaries",
+      "securePattern": "Hash each module individually, then hash the concatenation of hashes"
+    },
+    {
+      "id": "sui-move-sui-move-object-mode-4-object-size-limit-dos-003",
+      "title": "4. Object Size Limit DoS",
+      "severity": "HIGH",
+      "grep": "claim_closed_vault_funds|calculate_user_share|sui_move_findings|distribute_funds",
+      "detect": "max_slice_size too large, leaf objects will exceed 256KB",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_OBJECT_MODEL_VULNERABILITIES.md",
+      "lines": [
+        360,
+        428
+      ],
+      "check": [
+        "VERIFY: max_slice_size too large, leaf objects will exceed 256KB"
+      ],
+      "antipattern": "max_slice_size too large, leaf objects will exceed 256KB",
+      "securePattern": "Use max_slice_size < 2000 to stay well under 256KB limit"
+    },
+    {
+      "id": "sui-move-sui-move-object-mode-5-kiosk-extension-fund-locking-004",
+      "title": "5. Kiosk Extension Fund Locking",
+      "severity": "MEDIUM",
+      "grep": "set_allow_extensions|uid_mut",
+      "detect": "Disabling extensions locks user funds",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_OBJECT_MODEL_VULNERABILITIES.md",
+      "lines": [
+        429,
+        464
+      ],
+      "check": [
+        "VERIFY: Disabling extensions locks user funds"
+      ],
+      "antipattern": "Disabling extensions locks user funds",
+      "securePattern": "Allow extension termination to recover funds even when disabled"
+    },
+    {
+      "id": "sui-move-sui-move-object-mode-6-missing-uid-validation-in-de-005",
+      "title": "6. Missing UID Validation in DeFi",
+      "severity": "UNKNOWN",
+      "grep": "BlueFin|Validation|Functions|Frequency",
+      "detect": "Sui DeFi protocols often accept shared objects (banks, pools, oracles) as function parameters without verifying their...",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_OBJECT_MODEL_VULNERABILITIES.md",
+      "lines": [
+        465,
+        485
+      ],
+      "check": [
+        "VERIFY: Sui DeFi protocols often accept shared objects (banks, pools, oracles) as function parameters without verifying their...",
+        "LOOK FOR: Functions accepting &mut Bank or &Pool without asserting object::id()",
+        "LOOK FOR: Shared objects passed as parameters without cross-referencing stored IDs"
+      ]
+    },
+    {
+      "id": "sui-move-sui-move-object-mode-7-committee-epoch-management-b-006",
+      "title": "7. Committee / Epoch Management Bugs",
+      "severity": "CRITICAL",
+      "grep": "EValidatorBlocklistContainsUnknownKey|existing_registrations|bridge_pubkey_bytes|sui_move_findings",
+      "detect": "member_idx not reset between iterations",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_OBJECT_MODEL_VULNERABILITIES.md",
+      "lines": [
+        486,
+        545
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: member_idx not reset between iterations",
+        "ANTIPATTERN: vec_map::insert fails on duplicate bridge_pubkey_bytes"
+      ],
+      "antipattern": "vec_map::insert fails on duplicate bridge_pubkey_bytes",
+      "securePattern": "Check for existing pubkey before registration"
+    },
+    {
+      "id": "sui-move-sui-move-object-mode-8-visibility-ability-misuse-vi-007",
+      "title": "8. Visibility / Ability Misuse via Upgrades",
+      "severity": "HIGH",
+      "grep": "public(package|public(friend",
+      "detect": "Public function allows arbitrary epoch manipulation",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_OBJECT_MODEL_VULNERABILITIES.md",
+      "lines": [
+        546,
+        591
+      ],
+      "check": [
+        "VERIFY: Public function allows arbitrary epoch manipulation",
+        "LOOK FOR: `public fun` on state-mutation functions that should be `public(friend)` or `public(package)`",
+        "LOOK FOR: Package upgrades adding abilities (key, store) to existing structs"
+      ],
+      "antipattern": "Public function allows arbitrary epoch manipulation"
+    },
+    {
+      "id": "sui-move-sui-move-object-mode-9-name-service-validation-fail-008",
+      "title": "9. Name Service Validation Failures",
+      "severity": "HIGH",
+      "grep": "name_record_default_domain_name|get_name_record_all_fields|name_record_ttl_mut|get_name_record_mut",
+      "detect": "ttl not validated against MAX_TTL",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_OBJECT_MODEL_VULNERABILITIES.md",
+      "lines": [
+        592,
+        627
+      ],
+      "check": [
+        "VERIFY: ttl not validated against MAX_TTL",
+        "ANTIPATTERN: Returns empty string for normal domains, unvalidated for reverse domains"
+      ],
+      "antipattern": "Returns empty string for normal domains, unvalidated for reverse domains"
+    },
+    {
+      "id": "sui-move-sui-move-object-mode-10-dynamic-field-access-limit--009",
+      "title": "10. Dynamic Field Access Limit DoS",
+      "severity": "UNKNOWN",
+      "grep": "set_vault_config_operator|Validation|Quantstamp|Functions",
+      "detect": "Sui enforces a strict limit of 1,000 dynamic field accesses per transaction.",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_MOVE_OBJECT_MODEL_VULNERABILITIES.md",
+      "lines": [
+        628,
+        647
+      ],
+      "check": [
+        "VERIFY: Sui enforces a strict limit of 1,000 dynamic field accesses per transaction.",
+        "Check for unbounded loops accessing dynamic fields",
+        "Verify that batch operations have pagination or limits",
+        "Ensure push-based distribution is replaced with pull-based claims"
+      ]
+    },
+    {
+      "id": "sui-move-sui-wallet-snap-vuln-1-markdown-control-character-i-000",
+      "title": "1. Markdown/Control Character Injection in Transaction Rendering",
+      "severity": "CRITICAL",
+      "grep": "renderSignTransaction|sui_move_findings|SuiTransaction|ConsenSys",
+      "detect": "The `renderSignTransaction` function interpolates raw transaction data into dialog text without escaping Markdown...",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_WALLET_SNAP_VULNERABILITIES.md",
+      "lines": [
+        112,
+        145
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: `renderSignTransaction` function interpolates raw transaction data into dialog text without escaping Markdown...",
+        "ANTIPATTERN: Raw transaction data rendered in Markdown dialog"
+      ],
+      "antipattern": "Raw transaction data rendered in Markdown dialog"
+    },
+    {
+      "id": "sui-move-sui-wallet-snap-vuln-2-markdown-injection-in-messag-001",
+      "title": "2. Markdown Injection in Message Signing",
+      "severity": "HIGH",
+      "grep": "renderSignMessage|sanitizeForDialog|sui_move_findings|snap_dialog",
+      "detect": "Raw message content shown in signing dialog",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_WALLET_SNAP_VULNERABILITIES.md",
+      "lines": [
+        220,
+        272
+      ],
+      "check": [
+        "VERIFY: Raw message content shown in signing dialog"
+      ],
+      "antipattern": "Raw message content shown in signing dialog",
+      "securePattern": "Sanitize message content and use copyable for addresses"
+    },
+    {
+      "id": "sui-move-sui-wallet-snap-vuln-3-forced-transaction-signing-v-002",
+      "title": "3. Forced Transaction Signing via RPC",
+      "severity": "HIGH",
+      "grep": "signTransaction|onRpcRequest|getPublicKey",
+      "detect": "dApp can call signTransaction immediately without prior context",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_WALLET_SNAP_VULNERABILITIES.md",
+      "lines": [
+        273,
+        360
+      ],
+      "check": [
+        "VERIFY: dApp can call signTransaction immediately without prior context"
+      ],
+      "antipattern": "dApp can call signTransaction immediately without prior context",
+      "securePattern": "Require confirmation for key extraction, rate limit sign requests"
+    },
+    {
+      "id": "sui-move-sui-wallet-snap-vuln-4-public-key-extraction-withou-003",
+      "title": "4. Public Key Extraction Without User Consent",
+      "severity": "MEDIUM",
+      "grep": "getPublicKey|getAccount",
+      "detect": "The `getPublicKey` and `getAccount` RPC methods return the user's public key and Sui address without displaying a...",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_WALLET_SNAP_VULNERABILITIES.md",
+      "lines": [
+        361,
+        373
+      ],
+      "check": [
+        "VERIFY: `getPublicKey` and `getAccount` RPC methods return the user's public key and Sui address without displaying a..."
+      ]
+    },
+    {
+      "id": "sui-move-sui-wallet-snap-vuln-5-user-confirmation-suppressio-004",
+      "title": "5. User Confirmation Suppression",
+      "severity": "MEDIUM",
+      "grep": "getPublicKey|getAccount",
+      "detect": "Account info returned without any user interaction",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_WALLET_SNAP_VULNERABILITIES.md",
+      "lines": [
+        374,
+        422
+      ],
+      "check": [
+        "VERIFY: Account info returned without any user interaction"
+      ],
+      "antipattern": "Account info returned without any user interaction",
+      "securePattern": "Show confirmation for account access with origin info"
+    },
+    {
+      "id": "sui-move-sui-wallet-snap-vuln-6-key-derivation-path-manipula-005",
+      "title": "6. Key Derivation Path Manipulation",
+      "severity": "MEDIUM",
+      "grep": "deriveKeyPair|sui_move_findings|keyFromSeed|deriveChild",
+      "detect": "Derivation path not constrained to Sui BIP44 coin type",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_WALLET_SNAP_VULNERABILITIES.md",
+      "lines": [
+        423,
+        470
+      ],
+      "check": [
+        "VERIFY: Derivation path not constrained to Sui BIP44 coin type"
+      ],
+      "antipattern": "Derivation path not constrained to Sui BIP44 coin type",
+      "securePattern": "Restrict to Sui BIP44 coin type only"
+    },
+    {
+      "id": "sui-move-sui-wallet-snap-vuln-7-development-origins-in-produ-006",
+      "title": "7. Development Origins in Production Builds",
+      "severity": "MEDIUM",
+      "grep": "sui_move_findings|ConsenSys|Environment|Development",
+      "detect": "Development origins included in production build",
+      "cat": [
+        "general"
+      ],
+      "ref": "DB/Sui-Move-specific/SUI_WALLET_SNAP_VULNERABILITIES.md",
+      "lines": [
+        471,
+        513
+      ],
+      "check": [
+        "VERIFY: Development origins included in production build"
+      ],
+      "antipattern": "Development origins included in production build",
+      "securePattern": "Environment-based origin configuration"
     },
     {
       "id": "tokens-erc20-token-vulnerab-1-transfer-transferfrom-vulner-000",
