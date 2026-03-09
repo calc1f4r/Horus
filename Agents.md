@@ -275,6 +275,8 @@ Post-triage:
 | `.github/agents/resources/orchestration-pipeline.md` | 7-phase pipeline with error handling and context budgets |
 | `.github/agents/resources/reasoning-skills.md` | Core reasoning framework for deep vulnerability analysis |
 | `.github/agents/resources/domain-decomposition.md` | Domain decomposition strategy for reasoning agent |
+| `.github/agents/resources/certora-sui-move-reference.md` | CVLM type system, manifest functions, ghosts, shadows, CLI reference for Sui Move |
+| `.github/agents/resources/certora-sui-move-templates.md` | Copy-paste CVLM spec patterns for Sui Move verification |
 
 ### All Agents
 
@@ -290,6 +292,7 @@ Post-triage:
 | `issue-writer` | `.github/agents/issue-writer-agent.md` | Polishes findings for submission |
 | `medusa-fuzzing` | `.github/agents/medusa-fuzzing-agent.md` | Generates Medusa fuzzing harnesses |
 | `certora-verification` | `.github/agents/certora-verification-agent.md` | Generates Certora CVL specs |
+| `certora-sui-move-verification` | `.github/agents/certora-sui-move-verification-agent.md` | Generates Certora CVLM specs for Sui Move contracts |
 | `sherlock-judging` | `.github/agents/sherlock-judge-agent.md` | Validates against Sherlock criteria |
 | `cantina-judge` | `.github/agents/cantina-judge-agent.md` | Validates against Cantina criteria |
 | `variant-template-writer` | `.github/agents/variant-template-writer.agent.md` | Creates DB entries from reports |
