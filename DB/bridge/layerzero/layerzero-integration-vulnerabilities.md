@@ -48,7 +48,7 @@ primitives:
   - OFTComposeMsgCodec
 
 # Impact Classification (Required)
-severity: high|medium|low
+severity: high
 impact: channel_dos|fund_loss|gas_griefing|message_stuck|token_theft|refund_loss
 exploitability: 0.80
 financial_impact: high

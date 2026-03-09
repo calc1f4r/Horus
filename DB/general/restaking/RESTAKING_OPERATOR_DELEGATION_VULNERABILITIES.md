@@ -25,7 +25,7 @@ primitives:
   - operator_registry
 
 # Impact Classification (Required)
-severity: high|medium
+severity: high
 impact: fund_loss|exchange_rate_manipulation|dos|censorship
 exploitability: 0.6
 financial_impact: high

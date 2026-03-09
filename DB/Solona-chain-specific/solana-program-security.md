@@ -30,7 +30,7 @@ primitives:
   - bump_seed
 
 # Impact Classification (Required)
-severity: critical|high|medium|low
+severity: critical
 impact: fund_theft|unauthorized_access|dos|state_corruption|account_takeover
 exploitability: 0.70
 financial_impact: high

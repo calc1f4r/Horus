@@ -1,7 +1,7 @@
 ---
 title: "Liquidity Management Vulnerabilities in Concentrated Liquidity AMMs"
 vulnerability_class: "Liquidity Management Vulnerabilities"
-severity: "HIGH to MEDIUM"
+severity: high
 chain: "Multi-chain"
 affected_protocols:
   - "Uniswap V3/V4"

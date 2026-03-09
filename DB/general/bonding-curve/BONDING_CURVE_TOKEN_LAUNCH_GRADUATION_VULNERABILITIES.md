@@ -27,7 +27,7 @@ primitives:
   - migration
 
 # Impact Classification (Required)
-severity: critical|high|medium
+severity: critical
 impact: fund_loss|manipulation|dos|unfair_launch
 exploitability: 0.80
 financial_impact: high

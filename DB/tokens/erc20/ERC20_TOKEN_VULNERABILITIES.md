@@ -29,7 +29,7 @@ primitives:
   - safeApprove
 
 # Impact Classification (Required)
-severity: critical|high|medium|low
+severity: critical
 impact: fund_loss|dos|manipulation|accounting_error|locked_funds
 exploitability: 0.80
 financial_impact: high

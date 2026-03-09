@@ -21,7 +21,7 @@ primitives:
   - access_control
 
 # Impact Classification (Required)
-severity: high_to_critical
+severity: critical
 impact: complete_governance_takeover|fund_loss|protocol_control
 exploitability: 0.70
 financial_impact: critical

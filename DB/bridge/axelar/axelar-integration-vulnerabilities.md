@@ -35,7 +35,7 @@ primitives:
   - commandId
 
 # Impact Classification (Required)
-severity: high|medium|low
+severity: high
 impact: fund_loss|token_stuck|unlimited_minting|state_corruption
 exploitability: 0.70
 financial_impact: high

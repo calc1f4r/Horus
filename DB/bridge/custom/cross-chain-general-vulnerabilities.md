@@ -29,7 +29,7 @@ primitives:
   - sequencer
 
 # Impact Classification (Required)
-severity: high|medium|low
+severity: high
 impact: fund_loss|double_spending|replay_attack|token_stuck
 exploitability: 0.75
 financial_impact: critical

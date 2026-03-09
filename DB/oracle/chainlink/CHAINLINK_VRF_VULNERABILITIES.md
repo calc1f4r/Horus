@@ -27,7 +27,7 @@ primitives:
   - randomWords
 
 # Impact Classification (Required)
-severity: high|medium|low
+severity: high
 impact: manipulation|fund_loss|dos|unfair_outcomes
 exploitability: 0.60
 financial_impact: high

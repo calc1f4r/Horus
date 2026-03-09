@@ -27,7 +27,7 @@ primitives:
   - liquidity_provision
 
 # Impact Classification (Required)
-severity: critical|high|medium|low
+severity: critical
 impact: fund_loss|theft_of_yield|dos|manipulation|price_manipulation
 exploitability: 0.75
 financial_impact: high

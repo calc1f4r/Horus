@@ -1,7 +1,7 @@
 ---
 title: "Uniswap V4 Hook Security and Token Compatibility Vulnerabilities"
 vulnerability_class: "Hook Security / Token Compatibility"
-severity: "HIGH to CRITICAL"
+severity: critical
 chain: "Multi-chain"
 affected_protocols:
   - "Uniswap V4"

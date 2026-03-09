@@ -1,3 +1,4 @@
+---
 # Core Classification
 protocol: "generic"
 chain: "ethereum, base, bsc, arbitrum"

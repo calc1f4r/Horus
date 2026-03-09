@@ -27,7 +27,7 @@ primitives:
   - subscription
 
 # Impact Classification (Required)
-severity: medium|low
+severity: medium
 impact: dos|fund_loss|functionality_failure
 exploitability: 0.65
 financial_impact: medium

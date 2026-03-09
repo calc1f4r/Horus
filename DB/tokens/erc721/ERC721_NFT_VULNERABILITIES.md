@@ -1,5 +1,3 @@
-# ERC721/NFT Security Vulnerabilities Database
-
 ---
 # Core Classification
 protocol: generic
@@ -25,10 +23,10 @@ primitives:
   - voting_power
 
 # Impact Classification
-severity: varies (low-critical)
+severity: high
 impact: fund_loss, locked_tokens, governance_manipulation
-exploitability: varies
-financial_impact: varies
+exploitability: 0.7
+financial_impact: high
 
 # Context Tags
 tags:
@@ -43,6 +41,8 @@ tags:
   - royalty
   - metadata
 ---
+
+# ERC721/NFT Security Vulnerabilities Database
 
 ## Overview
 

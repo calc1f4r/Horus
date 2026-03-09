@@ -6,7 +6,7 @@ category: Price Manipulation
 vulnerability_type: Spot Price Manipulation, Reserve Manipulation, Callback Exploitation, Timing Attacks
 attack_type: Sandwich Attack, Flash Loan, Front-Running, Price Oracle Manipulation
 primitives: Bonding Curve, AMM, Uniswap V2/V3/V4, DEX, Price Discovery
-severity: HIGH to CRITICAL
+severity: critical
 impact: Fund Theft, Price Distortion, LP Losses, Reserve Draining
 tags:
   - bonding-curve

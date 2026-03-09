@@ -29,7 +29,7 @@ primitives:
   - sender
 
 # Impact Classification (Required)
-severity: high|medium|low
+severity: high
 impact: fund_loss|dos|message_failure
 exploitability: 0.70
 financial_impact: high

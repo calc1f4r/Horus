@@ -32,7 +32,7 @@ primitives:
   - startedAt
 
 # Impact Classification (Required)
-severity: critical|high|medium|low
+severity: critical
 impact: incorrect_pricing|fund_loss|dos|manipulation|liquidation
 exploitability: 0.80
 financial_impact: high

@@ -23,7 +23,7 @@ primitives:
   - storage_layout
 
 # Impact Classification (Required)
-severity: medium_to_high
+severity: high
 impact: implementation_takeover
 exploitability: 0.7
 financial_impact: high

@@ -33,7 +33,7 @@ primitives:
   - ERC4494
 
 # Impact Classification (Required)
-severity: medium|high
+severity: high
 impact: signature_bypass|fund_loss|dos|reentrancy|address_mismatch|session_impersonation|token_theft
 exploitability: 0.75
 financial_impact: high

@@ -35,7 +35,7 @@ primitives:
   - IStargateRouter
 
 # Impact Classification (Required)
-severity: high|medium|low
+severity: high
 impact: fund_loss|token_stuck|dos|slippage_exploitation
 exploitability: 0.75
 financial_impact: high

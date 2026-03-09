@@ -151,7 +151,7 @@ def parse_md_file(filepath):
 
 def generate_pattern_id(category, filename, section_title, idx):
     """Generate a unique pattern ID."""
-    file_slug = re.sub(r"[^a-z0-9]+", "-", filename.lower()).strip("-")[:20]
+    file_slug = re.sub(r"[^a-z0-9]+", "-", filename.lower()).strip("-")[:40]
     title_slug = re.sub(r"[^a-z0-9]+", "-", section_title.lower()).strip("-")[:30]
     return f"{category}-{file_slug}-{title_slug}-{idx:03d}"
 
@@ -566,8 +566,9 @@ GENERAL_SUBCATEGORIES = {
             "fee-on-transfer-tokens", "token-compatibility",
             "precision", "rounding-precision-loss", "calculation",
             "integer-overflow", "business-logic",
+            "bonding-curve", "restaking",
         ],
-        "description": "DeFi-specific: flash loans, slippage, vaults, precision, calculations",
+        "description": "DeFi-specific: flash loans, slippage, vaults, precision, calculations, bonding curves, restaking",
     },
     "general-infrastructure": {
         "folders": [

@@ -23,7 +23,7 @@ primitives:
   - initialization
 
 # Impact Classification (Required)
-severity: medium_to_high
+severity: high
 impact: state_corruption
 exploitability: 0.5
 financial_impact: high

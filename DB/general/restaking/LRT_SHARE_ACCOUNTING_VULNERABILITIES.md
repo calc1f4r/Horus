@@ -25,7 +25,7 @@ primitives:
   - erc4626
 
 # Impact Classification (Required)
-severity: high|medium
+severity: high
 impact: fund_loss|inflation|dos|incorrect_pricing
 exploitability: 0.7
 financial_impact: high
