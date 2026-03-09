@@ -298,4 +298,5 @@ Post-triage:
 | `variant-template-writer` | `.github/agents/variant-template-writer.agent.md` | Creates DB entries from reports |
 | `defihacklabs-indexer` | `.github/agents/defihacklabs-indexer.agent.md` | Indexes DeFiHackLabs exploits |
 | `solodit-fetching` | `.github/agents/solodit-fetching-agent.md` | Fetches reports from Solodit API |
+| `db-quality-monitor` | `.github/agents/db-quality-monitor.agent.md` | Monitors full pipeline: 4-tier architecture integrity, manifest generation, hunt cards, script health, context delivery quality, and auto-fixes via sub-agents |
 

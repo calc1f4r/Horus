@@ -25,7 +25,7 @@ primitives:
   - invariant
 
 # Impact Classification (Required)
-severity: high|medium
+severity: high
 impact: fund_loss|value_leak|dos
 exploitability: 0.70
 financial_impact: medium

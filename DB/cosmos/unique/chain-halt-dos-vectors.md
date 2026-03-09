@@ -19,7 +19,7 @@ primitives:
   - linear_iteration
 
 # Impact Classification
-severity: high_to_critical
+severity: critical
 impact: chain_halt
 exploitability: 0.8
 financial_impact: critical

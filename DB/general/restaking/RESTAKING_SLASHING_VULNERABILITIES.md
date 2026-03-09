@@ -25,7 +25,7 @@ primitives:
   - native_vault
 
 # Impact Classification (Required)
-severity: high|medium
+severity: high
 impact: fund_loss|insolvency|dos|unfair_distribution
 exploitability: 0.5
 financial_impact: high

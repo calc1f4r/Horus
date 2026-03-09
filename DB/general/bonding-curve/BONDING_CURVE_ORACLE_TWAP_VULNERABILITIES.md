@@ -6,7 +6,7 @@ category: Oracle Manipulation
 vulnerability_type: Stale TWAP, TWAP Design Flaws, Oracle Denomination Errors, Collateral Depeg Arbitrage
 attack_type: TWAP Manipulation, Oracle Arbitrage, Stale Price Exploitation
 primitives: Bonding Curve, TWAP Oracle, Curve Metapool, Uniswap V2 Oracle, Chainlink
-severity: MEDIUM to HIGH
+severity: high
 impact: Price Manipulation, DoS, Stablecoin Depeg, Collateral Draining
 tags:
   - bonding-curve

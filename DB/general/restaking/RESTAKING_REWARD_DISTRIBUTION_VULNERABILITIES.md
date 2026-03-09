@@ -24,7 +24,7 @@ primitives:
   - staking_rewards
 
 # Impact Classification (Required)
-severity: high|medium
+severity: high
 impact: fund_loss|reward_theft|dos|locked_rewards
 exploitability: 0.6
 financial_impact: high

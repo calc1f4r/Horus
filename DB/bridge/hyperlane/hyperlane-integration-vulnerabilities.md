@@ -29,7 +29,7 @@ primitives:
   - payForGas
 
 # Impact Classification (Required)
-severity: high|medium|low
+severity: high
 impact: unlimited_minting|fund_loss|message_replay|state_corruption
 exploitability: 0.75
 financial_impact: critical

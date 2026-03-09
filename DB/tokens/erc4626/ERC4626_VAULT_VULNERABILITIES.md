@@ -1,27 +1,14 @@
-# ERC4626 Tokenized Vault Vulnerabilities - Comprehensive Database
-
-**A Complete Pattern-Matching Guide for ERC4626 Vault Security Audits**
-
 ---
-
-## Frontmatter
-
-```yaml
-# Core Classification (Required)
 protocol: generic
 chain: everychain
 category: vault
 vulnerability_type: erc4626_vault_integration
-
-# Attack Vector Details (Required)
-attack_type: economic_exploit|logical_error|data_manipulation
-affected_component: share_calculation|deposit_logic|withdrawal_logic|fee_handling|access_control
-
-# Vault-Specific Fields
-vault_standard: erc4626
-vault_attack_vector: inflation|first_depositor|rounding|slippage|reentrancy|fee_manipulation|compliance
-
-# Technical Primitives (Required)
+attack_type: economic_exploit
+affected_component: share_calculation
+severity: critical
+impact: fund_loss
+exploitability: 0.80
+financial_impact: high
 primitives:
   - convertToShares
   - convertToAssets
@@ -42,14 +29,6 @@ primitives:
   - exchange_rate
   - virtual_shares
   - decimal_offset
-
-# Impact Classification (Required)
-severity: critical|high|medium|low
-impact: fund_loss|share_manipulation|dos|incorrect_accounting|integration_failure
-exploitability: 0.80
-financial_impact: high
-
-# Context Tags
 tags:
   - defi
   - vault
@@ -59,11 +38,13 @@ tags:
   - erc4626
   - first_depositor_attack
   - inflation_attack
-
-# Version Info
 language: solidity
 version: all
-```
+---
+
+# ERC4626 Tokenized Vault Vulnerabilities - Comprehensive Database
+
+**A Complete Pattern-Matching Guide for ERC4626 Vault Security Audits**
 
 ---
 

@@ -33,7 +33,7 @@ primitives:
   - token_account_extensions
 
 # Impact Classification (Required)
-severity: critical|high|medium|low
+severity: critical
 impact: fund_theft|dos|accounting_errors|token_manipulation
 exploitability: 0.75
 financial_impact: high

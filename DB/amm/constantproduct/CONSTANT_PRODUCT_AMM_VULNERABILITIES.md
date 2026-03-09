@@ -33,7 +33,7 @@ primitives:
   - spot_price
 
 # Impact Classification (Required)
-severity: critical|high|medium|low
+severity: critical
 impact: fund_loss|price_manipulation|dos|unfair_exchange
 exploitability: 0.75
 financial_impact: high

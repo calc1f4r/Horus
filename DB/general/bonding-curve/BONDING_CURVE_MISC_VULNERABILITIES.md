@@ -29,7 +29,7 @@ primitives:
   - curve_metapool
 
 # Impact Classification (Required)
-severity: critical|high|medium
+severity: critical
 impact: fund_loss|manipulation|dos|value_leak
 exploitability: 0.70
 financial_impact: high

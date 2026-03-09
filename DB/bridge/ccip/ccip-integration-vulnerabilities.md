@@ -36,7 +36,7 @@ primitives:
   - i_router
 
 # Impact Classification (Required)
-severity: high|medium|low
+severity: high
 impact: fund_loss|message_replay|dos|token_stuck|fee_loss
 exploitability: 0.75
 financial_impact: high

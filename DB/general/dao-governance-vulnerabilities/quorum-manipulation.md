@@ -20,7 +20,7 @@ primitives:
   - supply_based_quorum
 
 # Impact Classification (Required)
-severity: medium_to_high
+severity: high
 impact: governance_bypass|proposal_manipulation
 exploitability: 0.65
 financial_impact: high

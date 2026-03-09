@@ -1,7 +1,7 @@
 ---
 title: "DoS, Arithmetic, and Initialization Vulnerabilities in Concentrated Liquidity AMMs"
 vulnerability_class: "DoS/Arithmetic/Initialization Vulnerabilities"
-severity: "HIGH to MEDIUM"
+severity: high
 chain: "Multi-chain"
 affected_protocols:
   - "Uniswap V3/V4"

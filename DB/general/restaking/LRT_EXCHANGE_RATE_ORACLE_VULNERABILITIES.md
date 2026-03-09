@@ -26,7 +26,7 @@ primitives:
   - upgradeable_proxy
 
 # Impact Classification (Required)
-severity: high|medium
+severity: high
 impact: fund_loss|arbitrage|oracle_manipulation|price_manipulation
 exploitability: 0.6
 financial_impact: high

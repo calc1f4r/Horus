@@ -30,7 +30,7 @@ primitives:
   - TransceiverMessage
 
 # Impact Classification (Required)
-severity: high|medium|low
+severity: high
 impact: fund_loss|double_spending|message_replay|governance_bypass
 exploitability: 0.70
 financial_impact: critical

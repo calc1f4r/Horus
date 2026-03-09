@@ -1,7 +1,7 @@
 ---
 title: "Price Oracle Manipulation in Concentrated Liquidity AMMs"
 vulnerability_class: "Price Oracle Vulnerabilities"
-severity: "HIGH to MEDIUM"
+severity: high
 chain: "Multi-chain"
 affected_protocols:
   - "Uniswap V3/V4"

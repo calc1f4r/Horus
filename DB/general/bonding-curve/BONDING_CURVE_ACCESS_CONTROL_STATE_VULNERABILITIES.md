@@ -26,7 +26,7 @@ primitives:
   - oracle_address
 
 # Impact Classification (Required)
-severity: critical|high|medium
+severity: critical
 impact: fund_loss|manipulation|dos|unauthorized_access
 exploitability: 0.75
 financial_impact: high

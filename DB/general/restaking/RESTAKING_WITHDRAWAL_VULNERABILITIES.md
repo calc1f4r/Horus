@@ -25,7 +25,7 @@ primitives:
   - completequeuedwithdrawal
 
 # Impact Classification (Required)
-severity: critical|high|medium
+severity: critical
 impact: fund_loss|permanent_lockup|dos|accounting_error
 exploitability: 0.7
 financial_impact: critical

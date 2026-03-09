@@ -26,7 +26,7 @@ primitives:
   - verifyBalanceUpdate
 
 # Impact Classification (Required)
-severity: critical|high|medium
+severity: critical
 impact: fund_loss|proof_forgery|dos|upgrade_breakage
 exploitability: 0.6
 financial_impact: critical
