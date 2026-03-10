@@ -295,6 +295,7 @@ Post-triage:
 | `certora-sui-move-verification` | `.github/agents/certora-sui-move-verification-agent.md` | Generates Certora CVLM specs for Sui Move contracts |
 | `sherlock-judging` | `.github/agents/sherlock-judge-agent.md` | Validates against Sherlock criteria |
 | `cantina-judge` | `.github/agents/cantina-judge-agent.md` | Validates against Cantina criteria |
+| `code4rena-judge` | `.github/agents/code4rena-judge-agent.md` | Validates against Code4rena criteria |
 | `variant-template-writer` | `.github/agents/variant-template-writer.agent.md` | Creates DB entries from reports |
 | `defihacklabs-indexer` | `.github/agents/defihacklabs-indexer.agent.md` | Indexes DeFiHackLabs exploits |
 | `solodit-fetching` | `.github/agents/solodit-fetching-agent.md` | Fetches reports from Solodit API |

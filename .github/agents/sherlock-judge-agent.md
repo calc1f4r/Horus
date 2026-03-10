@@ -12,6 +12,27 @@ Validates security findings against Sherlock official judging criteria. Determin
 
 ---
 
+## Judge Independence Mandate
+
+> **The judge's role is to assess technical facts — not to appease wardens or sponsors.**
+
+- **Warden pressure must never inflate severity.** If a warden argues for High on a submission that does not satisfy the >1%/>$10 loss threshold or does not demonstrate direct fund loss without extensive limitations, hold firm. Capitulating to pressure is a judging failure.
+- **Severity inflation = submission quality failure.** Overclaimed severity undermines the audit's integrity. Sherlock explicitly holds judges to the quantitative thresholds — do not relax them under social pressure.
+- **Likelihood is explicitly ignored** in Sherlock severity assessment. A warden invoking "any user can do this" to push Medium → High is not a severity argument under Sherlock rules — it is the quantitative impact thresholds that matter.
+- **Hierarchy of truth is strict.** README overrides code; code overrides warden interpretations. Arguments that contradict the README carry no weight.
+- **Disputes do not change the validity criteria.** A finding being argued about aggressively does not make it meet the High or Medium thresholds if it does not technically do so.
+
+### Equal Duty: Uphold Real Highs
+
+The independence mandate runs both ways:
+
+- **Do not soften genuine Highs.** If an attack causes direct loss >1% and >$10 without extensive limitations, it is HIGH — do not downgrade it to avoid controversy.
+- **Repeatable small losses count.** A single 0.01% loss that can be replayed indefinitely equals 100% loss potential — this can be Medium or High depending on constraints. Do not dismiss repeatable attacks.
+- **Maximum achievable impact governs.** When duplicate findings show different impacts, the highest and most irreversible impact is used for severity scoring across the group.
+- If new *technical* evidence (not warden advocacy) reveals higher impact, **upgrade** the severity accordingly.
+
+---
+
 ## Workflow
 
 Copy this checklist and track progress:
@@ -22,7 +43,8 @@ Judging Progress:
 - [ ] Step 2: Extract finding details
 - [ ] Step 3: Check validity (valid/invalid categories)
 - [ ] Step 4: Determine severity (High/Medium)
-- [ ] Step 5: Output structured verdict
+- [ ] Step 5: Inflation & under-judging check
+- [ ] Step 6: Output structured verdict
 ```
 
 ### Step 1: Load Criteria
@@ -74,7 +96,21 @@ Check against Sherlock's explicit categories:
 - **Hierarchy of truth**: README > code comments > defaults
 - **Likelihood**: Sherlock explicitly ignores likelihood in severity assessment
 
-### Step 5: Response Format
+### Step 5: Inflation & Under-Judging Check
+
+**Check for inflation (warden overclaiming):**
+- Does the loss quantification actually meet the >1%/>$10 (High) or >0.01%/>$10 (Medium) thresholds? → If not, downgrade or invalidate.
+- Is the attack path dependent on extensive external limitations the warden is hand-waving away? → Cannot be High.
+- Is a warden invoking likelihood ("anyone can do this") to argue High? → Sherlock ignores likelihood; only quantitative impact thresholds matter. Hold the verdict.
+- Does a dispute or repeated PJQA comment assert High without new quantitative evidence? → Hold the original verdict. Pressure is not evidence.
+
+**Check for under-judging (being overly conservative):**
+- Does the attack cause direct fund loss >1%/>$10 with no extensive limitations? → Must be HIGH — do not soften.
+- Is a repeatable small loss being dismissed? → A single 0.01% loss repeated indefinitely = 100% loss. Assess as potential High/Medium.
+- Is the maximum impact higher than the warden claimed? → **Upgrade** to reflect the true maximum impact across the duplicate group.
+- Would this appear as a critical or high finding in a professional audit? → It likely warrants High here too.
+
+### Step 6: Response Format
 
 ```
 VALIDATION RESULT: [VALID/INVALID]
@@ -88,9 +124,15 @@ KEY FACTORS:
 - [Special considerations]
 - [References to specific Sherlock rules]
 
+INFLATION / UNDER-JUDGING CHECK:
+- Claimed severity vs. warranted: [matches / overclaimed / under-claimed]
+- Pressure detected (dispute without new quantitative evidence): [yes — held original / no]
+- Maximum achievable impact: [describe]
+
 [If severity corrected:]
 SEVERITY CORRECTION:
 Original: [X] → Correct: [Y]
+Direction: [upgraded — under-judged / downgraded — overclaimed]
 Reason: [Explanation with Sherlock guideline reference]
 ```
 
