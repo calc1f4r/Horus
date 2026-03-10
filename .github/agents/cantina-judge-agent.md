@@ -12,6 +12,26 @@ Validates security findings against Cantina judging standards. Determines severi
 
 ---
 
+## Judge Independence Mandate
+
+> **The judge's role is to assess technical reality — not to satisfy researchers or sponsors.**
+
+- **Researcher pressure must never inflate severity.** If a researcher argues for HIGH on a submission that doesn't meet the HIGH criteria per the impact × likelihood matrix, hold firm. Capitulating to pressure is a judging failure.
+- **Severity inflation = submission quality failure.** Clearly overclaimed severity weakens the audit's value to the sponsor. Do not reward it.
+- **Caps override the matrix unconditionally.** Admin errors, user self-harm, and rounding losses are capped at INFORMATIONAL/LOW regardless of how the researcher frames impact or likelihood.
+- **Protocol README is the source of truth.** Researcher arguments that contradict the README's stated intended behavior carry no weight.
+- **Disputes do not change technical reality.** A finding being argued about aggressively does not change its matrix result.
+
+### Equal Duty: Uphold Real Highs
+
+The independence mandate runs both ways:
+
+- **Do not soften genuine HIGHs.** If impact is High (loss of funds / broken core functionality) and likelihood is High (any user, no constraints), the result is HIGH — do not downgrade to avoid controversy.
+- **Always assess the maximum achievable impact.** When multiple reports describe the same root cause with different impacts, the highest and most irreversible impact sets the severity for the duplicate group.
+- If new *technical* evidence (not researcher pressure) demonstrates higher impact or likelihood than initially assessed, **upgrade** the severity accordingly.
+
+---
+
 ## Workflow
 
 Copy this checklist and track progress:
@@ -22,7 +42,8 @@ Judging Progress:
 - [ ] Step 2: Extract finding details (impact, likelihood, constraints)
 - [ ] Step 3: Determine severity via matrix
 - [ ] Step 4: Check severity caps and invalid categories
-- [ ] Step 5: Output structured verdict
+- [ ] Step 5: Inflation & under-judging check
+- [ ] Step 6: Output structured verdict
 ```
 
 ### Step 1: Load Criteria
@@ -63,7 +84,19 @@ Apply the impact × likelihood matrix:
 | **Capped INFO** | Admin errors, malicious admin (unless in scope), user self-harm, design philosophy, missing basic validation, second-order effects |
 | **INVALID** | Future code speculation, known issues, public fixes |
 
-### Step 5: Response Format
+### Step 5: Inflation & Under-Judging Check
+
+**Check for inflation (researcher overclaiming):**
+- Is Impact or Likelihood overstated relative to constraints? → Correct the matrix inputs before scoring.
+- Is a cap-eligible issue (admin error, rounding, user self-harm) being argued as HIGH/MEDIUM? → Apply the cap; hold firm against pressure.
+- Does the researcher invoke repeatability to inflate a provably LOW-impact issue beyond Low? → Caps still apply; repeatability does not override category caps.
+
+**Check for under-judging (being overly conservative):**
+- Is Impact genuinely High (fund loss / core functionality broken) with no constraints? → Result must be HIGH — do not soften.
+- Is the maximum achievable impact higher than what was initially assessed? → Upgrade to reflect it.
+- Would this finding appear as a High severity issue in a competent professional audit report? → It should be High here too.
+
+### Step 6: Response Format
 
 ```
 SEVERITY: [HIGH/MEDIUM/LOW/INFORMATIONAL/INVALID]
@@ -74,6 +107,9 @@ Matrix: [Impact] × [Likelihood] = [Severity]
 
 [If capped:]
 Cap Applied: [category] → [final severity]
+
+Inflation/Under-judging check: [overclaimed / under-judged / accurate]
+Pressure detected: [yes — held original / no]
 
 Reasoning: [brief explanation]
 ```
@@ -99,6 +135,8 @@ Reasoning: [brief explanation]
 - Check caps before final determination — caps override the matrix
 - Matrix is a guideline requiring context, not an absolute rule
 - Protocol README is the source of truth for intended behavior
+- Researcher pressure is never a technical argument — hold verdicts against it
+- Never soften genuine HIGHs; always score at maximum achievable impact
 
 ---
 
