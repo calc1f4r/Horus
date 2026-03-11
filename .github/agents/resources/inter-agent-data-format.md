@@ -20,6 +20,7 @@ audit-output/
 │   └── ...                            ←   One file per contract
 ├── 01-context.md                      ← Phase 2: Compact global synthesis
 ├── 02-invariants.md                   ← Phase 3: Invariant extraction
+├── 02-invariants-reviewed.md          ← Phase 3a: Reviewed & hardened invariants
 ├── hunt-card-hits.json                ← Phase 4: Grep-prune results
 ├── hunt-card-shards.json              ← Phase 4: Partition plan
 ├── 03-findings-shard-*.md             ← Phase 4: Per-shard findings (temporary)
@@ -256,6 +257,76 @@ Produced by `invariant-writer`. Must use this category structure:
 ```
 
 Each invariant MUST have: ID, Property (concrete expression), Scope (files), Why (impact if broken), Testable (YES/NO).
+
+---
+
+## Phase 3a: Reviewed Invariant Spec (`02-invariants-reviewed.md`)
+
+Produced by `invariant-reviewer`. Uses the same category structure as Phase 3 with added review annotations:
+
+```markdown
+# Invariant Specifications (Reviewed)
+
+## Solvency Invariants
+### INV-S-001: Total deposits cover total borrows
+- **Property**: `totalDeposits >= totalBorrowed`
+- **Scope**: Pool.sol
+- **Why**: If violated, protocol is insolvent
+- **Testable**: YES — check after every deposit/withdraw/borrow/repay
+- **Review**: UNCHANGED — matches canonical lending solvency property
+
+### INV-S-002: Share price monotonicity
+- **Property**: `sharePrice(t) <= sharePrice(t+1)` in absence of realized losses
+- **Scope**: Vault.sol
+- **Why**: Share price decrease without loss event indicates value extraction
+- **Testable**: YES — ghost variable tracking sharePrice across calls
+- **Review**: TIGHTENED — original was `sharePrice >= 0` (tautological). Source: ERC4626 canonical properties.
+- **Bound Rationale**: Rounding tolerance: ±1 wei per operation due to integer division.
+
+### INV-S-010: Flash-loan-resistant solvency [ADDED]
+- **Property**: `solvencyRatio() >= MIN_RATIO` at END of every transaction
+- **Scope**: Pool.sol
+- **Why**: Flash loans can temporarily inflate collateral to borrow and default
+- **Testable**: YES — post-condition on every public function
+- **Review**: ADDED — not in original spec. Source: [canonical lending properties]
+- **Multi-step**: deposit(flash) → borrow(max) → repay(flash) → default
+```
+
+Every invariant MUST have the standard fields (ID, Property, Scope, Why, Testable) PLUS:
+- **Review**: Action tag — `UNCHANGED | TIGHTENED | LOOSENED | SPLIT | COMPOSED | ADDED | REMOVED | PARAMETERIZED`
+- **Bound Rationale** (if TIGHTENED/LOOSENED): Derivation of the correct bound
+- **Multi-step** (if COMPOSED/ADDED): The attack sequence it was designed to survive
+- **Source** (if ADDED): Research URL, EIP, audit report, or DB pattern reference
+
+Must include a Review Summary section at the end:
+
+```markdown
+## Review Summary
+
+### Statistics
+| Action | Count |
+|---|---|
+| UNCHANGED | N |
+| TIGHTENED | N |
+| ... | ... |
+
+### Canonical Coverage
+| Canonical Invariant | Status |
+|---|---|
+| Solvency | COVERED by INV-S-001 |
+| ... | ... |
+
+### Multi-Step Coverage
+| Attack Sequence | Invariants Covering |
+|---|---|
+| deposit→borrow→oracle_crash→liquidate | INV-S-001, INV-ORA-001 |
+| ... | ... |
+
+### Remaining Gaps
+| Gap | Risk | Recommendation |
+|---|---|---|
+| ... | ... | ... |
+```
 
 ---
 

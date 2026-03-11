@@ -19,7 +19,7 @@ Aggregates 815+ vulnerability patterns from real-world audits and on-chain explo
 
 The Vulnerability Database is a curated knowledge base purpose-built for AI-assisted smart contract auditing. Rather than storing flat lists of findings, it uses a **4-tier precision architecture** that lets agents load only the context they need — reducing token usage by 60–80% compared to naive full-file reads.
 
-The database ships with a **13-agent audit pipeline** that can take an unfamiliar codebase from zero to a triaged report with PoCs, fuzzing harnesses, and formal verification specs — all powered by the patterns stored here.
+The database ships with a **21-agent audit pipeline** that can take an unfamiliar codebase from zero to a triaged report with PoCs, fuzzing harnesses, and formal verification specs — all powered by the patterns stored here.
 
 ![Architecture diagram showing the full 4-tier search system and agent pipeline](./Architecture.png)
 
@@ -86,7 +86,7 @@ Tier 3    DB/**/*.md                                ← Vulnerability content.
 
 ## Agent Ecosystem
 
-The `.github/agents/` directory contains 13 specialized agents that form a complete audit pipeline.
+The `.github/agents/` directory contains 21 specialized agents that form a complete audit pipeline.
 
 ### Entry Point
 
@@ -113,25 +113,26 @@ Phase 7  Downstream           → medusa-fuzzing, certora-verification,
 | Agent | Role |
 |---|---|
 | `audit-orchestrator` | Entry point — orchestrates all 7 phases |
-| `audit-context-building` | Line-by-line codebase comprehension |
+| `audit-context-building` | Line-by-line codebase comprehension; spawns sub-agents |
+| `function-analyzer` | Per-contract ultra-granular function analysis (sub-agent) |
+| `system-synthesizer` | Synthesizes per-contract files into global context (sub-agent) |
 | `invariant-writer` | Extracts all system invariants |
+| `invariant-reviewer` | Reviews & hardens invariants for FV readiness |
 | `invariant-catcher` | Hunts DB patterns against target code (parallel shards) |
 | `protocol-reasoning-agent` | Deep reasoning-based vulnerability discovery |
 | `missing-validation-reasoning` | Input validation scanner |
 | `poc-writer` | Writes compilable Foundry/Hardhat exploit tests |
-| `issue-writer` | Polishes findings for competition submission |
+| `issue-writer` | Polishes findings into Sherlock-format submissions |
 | `medusa-fuzzing` | Generates Medusa fuzzing harnesses |
 | `certora-verification` | Generates Certora CVL formal specs |
+| `certora-sui-move-verification` | Generates Certora CVLM specs for Sui Move contracts |
+| `sui-prover-verification` | Generates Asymptotic Sui Prover specs for Sui Move |
 | `sherlock-judge` | Validates findings against Sherlock severity criteria |
 | `cantina-judge` | Validates findings against Cantina severity criteria |
+| `code4rena-judge` | Validates findings against Code4rena severity criteria |
 | `variant-template-writer` | Converts audit reports into DB entries |
-
-### DB Ingestion Agents
-
-| Agent | Role |
-|---|---|
-| `defihacklabs-indexer` | Indexes DeFiHackLabs exploit PoCs into DB entries |
 | `solodit-fetching` | Fetches raw findings from the Solodit/Cyfrin API |
+| `db-quality-monitor` | Monitors 4-tier architecture integrity, manifest health, and auto-fixes |
 
 ---
 
@@ -223,8 +224,8 @@ git clone -b reports/erc4626 --single-branch https://github.com/calc1f4r/Vulnera
 # 1. Fetch raw findings from Solodit
 python3 solodit_fetcher.py --keyword "<topic>" --output ./reports/<topic>_findings/
 
-# 2. Use variant-template-writer agent or defihacklabs-indexer agent
-#    to synthesize findings into DB entries following TEMPLATE.md
+# 2. Use variant-template-writer agent to synthesize findings into DB entries
+#    following TEMPLATE.md
 
 # 3. Regenerate all manifests and hunt cards
 python3 generate_manifests.py

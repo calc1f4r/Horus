@@ -2,6 +2,14 @@
 
 Complete reference for writing formal verification specs with the [Asymptotic Sui Prover](https://github.com/asymptotic-code/sui-prover). Specs are written in Move alongside (or in a separate package from) the target contract.
 
+> **Official Documentation** (authoritative source — consult when in doubt):
+> - [Asymptotic Home](https://info.asymptotic.tech/) — company hub
+> - [Sui Prover Overview](https://info.asymptotic.tech/sui-prover) — entry point & examples
+> - [Sui Prover Reference](https://info.asymptotic.tech/sui-prover-reference) — canonical spec API (`requires`, `ensures`, `asserts`, `old!`, ghost variables, loop invariants, attributes)
+> - [Sui Prover FAQ](https://info.asymptotic.tech/sui-prover-faq) — composition, abort specs, compile errors, `no_opaque`, `ignore_abort`, `focus`
+
+> **Note on `clone!` vs `old!`**: The official reference uses `old!(pool)` to capture pre-call state. This file uses `clone!(ref)` which is an equivalent alias. Both are valid; prefer `old!` when following the official docs.
+
 ---
 
 ## Installation

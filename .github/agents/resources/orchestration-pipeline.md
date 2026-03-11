@@ -30,6 +30,13 @@ User Input: @audit-orchestrator <path> [hint]
                │ invariantSpecs (INV-*)
                ▼
 ┌─────────────────────────────────────┐
+│ Phase 3a: INVARIANT REVIEW          │  Sub-agent: invariant-reviewer
+│ Canonical research, multi-step      │  Output: 02-invariants-reviewed.md
+│ stress test, bound calibration      │
+└──────────────┬──────────────────────┘
+               │ reviewedInvariantSpecs (INV-*)
+               ▼
+┌─────────────────────────────────────┐
 │ Phase 4: DB-POWERED HUNTING         │  Self + Sub-agent: invariant-catcher
 │ Hunt card grep-prune + batched scan │  Output: 03-findings-raw.md
 └──────────────┬──────────────────────┘
@@ -157,9 +164,49 @@ Every invariant must have: ID, Property, Scope, Why, Testable.
 Categories: Solvency, Access Control, State Machine, Arithmetic, Oracle, Cross-Contract.
 ```
 
-**Transition**: Read `audit-output/02-invariants.md`, pass invariant specs + manifest list to Phase 4.
+**Transition**: Read `audit-output/02-invariants.md`, pass to Phase 3a.
 
 **Error handling**: If sub-agent fails, extract invariant candidates from Phase 2 context directly and use those (they won't be as structured but are usable).
+
+---
+
+### Phase 3a: Invariant Review & Hardening
+
+| Attribute | Value |
+|-----------|-------|
+| **Agent** | `invariant-reviewer` (sub-agent) |
+| **Input** | Invariant specs from Phase 3 + context from Phase 2 + DB manifests |
+| **Output** | `audit-output/02-invariants-reviewed.md` |
+| **Estimated context** | Medium-Large — reads context + invariants + researches canonical properties via browser |
+
+**Sub-agent prompt template**:
+```
+You are the invariant-reviewer agent. Review and harden the invariant specifications.
+
+TARGET CODEBASE: <path>
+PROTOCOL TYPE: <detected types>
+MANIFEST LIST: <manifests>
+
+Read:
+- audit-output/01-context.md for architecture
+- audit-output/02-invariants.md for invariants to review
+- DB/index.json for vulnerability patterns that inform invariant strength
+
+Perform your full 5-phase workflow:
+1. Re-derive protocol understanding independently
+2. Research canonical invariants (use browser for Crytic/properties, Certora specs, EIPs, audit reports)
+3. Audit existing invariants (bound calibration, gap detection, completeness)
+4. Multi-step composition stress test (flash loans, sandwiches, governance attacks)
+5. Write reviewed invariant file
+
+Write to audit-output/02-invariants-reviewed.md.
+Every invariant must have a Review tag: UNCHANGED | TIGHTENED | LOOSENED | SPLIT | COMPOSED | ADDED | REMOVED | PARAMETERIZED.
+Include: Review Summary, Canonical Coverage table, Multi-Step Coverage table, Remaining Gaps.
+```
+
+**Transition**: Read `audit-output/02-invariants-reviewed.md`, pass reviewed invariant specs + manifest list to Phase 4. If `02-invariants-reviewed.md` does not exist (agent failed), fall back to `02-invariants.md`.
+
+**Error handling**: If sub-agent fails, retry once with reduced scope (solvency + access control categories only). If still fails, use `02-invariants.md` directly — downstream phases are unaffected.
 
 ---
 
@@ -206,7 +253,7 @@ CRITICAL CARDS (duplicated across all shards — ALWAYS CHECK):
 <paste all neverPrune cards>
 
 INVARIANT SPECS:
-Read audit-output/02-invariants.md
+Read audit-output/02-invariants-reviewed.md (fall back to 02-invariants.md if not available)
 
 These cards have been grep-matched — every card has ≥1 keyword hit.
 Your job:
@@ -249,7 +296,7 @@ MANIFEST LIST: <manifests>
 
 PIPELINE CONTEXT:
   - Read audit-output/01-context.md for architecture
-  - Read audit-output/02-invariants.md for invariants
+  - Read audit-output/02-invariants-reviewed.md for invariants (fall back to 02-invariants.md)
   - Read audit-output/03-findings-raw.md to avoid duplicates
 
 Perform your full 6-phase workflow (Seeds → Domains → Round 1-4 → Merge).
@@ -341,7 +388,7 @@ For each CRITICAL/HIGH finding:
 
 **Spawn sequence** (these can run in parallel via agent tool):
 
-1. **Medusa Fuzzing** — spawn `medusa-fuzzing` with invariant specs from `02-invariants.md`
+1. **Medusa Fuzzing** — spawn `medusa-fuzzing` with invariant specs from `02-invariants-reviewed.md` (fall back to `02-invariants.md`)
 2. **Certora Verification** — spawn `certora-verification` with invariant specs
 3. **Sherlock Judging** — spawn `sherlock-judging` with triaged findings from `05-findings-triaged.md`
 4. **Cantina Judging** — spawn `cantina-judge` with triaged findings

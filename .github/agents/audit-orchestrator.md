@@ -50,6 +50,7 @@ Audit Progress:
 - [ ] Phase 1: Reconnaissance & protocol detection
 - [ ] Phase 2: Deep context building (sub-agent)
 - [ ] Phase 3: Invariant extraction (sub-agent)
+- [ ] Phase 3a: Invariant review & hardening (sub-agent)
 - [ ] Phase 4: DB-powered vulnerability hunting (sub-agent + self)
 - [ ] Phase 4a: Reasoning-based vulnerability discovery (sub-agent)
 - [ ] Phase 5: Validation gap analysis (sub-agent)
@@ -217,6 +218,58 @@ If sub-agent fails, extract the "Invariant Candidates" section from `audit-outpu
 
 ---
 
+## Phase 3a: Invariant Review & Hardening
+
+**Agent**: Spawn `invariant-reviewer` sub-agent
+**Input**: Invariants from Phase 3 + context from Phase 2 + DB manifests
+**Output**: `audit-output/02-invariants-reviewed.md`
+
+The `invariant-reviewer` re-derives the protocol's safety properties independently, researches canonical invariants for the detected protocol type(s), stress-tests every invariant against multi-step attack sequences, and calibrates bounds for formal verification readiness.
+
+### Spawn Instructions
+
+```
+Review and harden the invariant specifications.
+
+TARGET CODEBASE: <path>
+PROTOCOL TYPE: <detected types>
+MANIFEST LIST: <manifests from Phase 1>
+
+Read:
+- audit-output/01-context.md for protocol architecture
+- audit-output/02-invariants.md for invariants to review
+- DB/index.json for manifest resolution
+
+Perform your full 5-phase workflow:
+1. Re-derive protocol understanding independently
+2. Research canonical invariants for this protocol type (use browser)
+3. Audit existing invariants (bound calibration, specificity, completeness)
+4. Multi-step composition stress test
+5. Write reviewed invariant file
+
+Write output to audit-output/02-invariants-reviewed.md.
+Every invariant must have a Review tag: UNCHANGED, TIGHTENED, LOOSENED, SPLIT, COMPOSED, ADDED, REMOVED, or PARAMETERIZED.
+Include: canonical coverage table, multi-step coverage table, remaining gaps.
+```
+
+### Verify Output
+
+After sub-agent returns, verify:
+1. `audit-output/02-invariants-reviewed.md` exists
+2. Contains Review Summary with action counts
+3. Contains Canonical Coverage and Multi-Step Coverage tables
+4. No invariant is left without a review annotation
+
+### Error Recovery
+
+If sub-agent fails, retry once with a reduced scope (solvency + access control categories only). If still fails, use the original `02-invariants.md` directly — downstream agents will still function.
+
+### Downstream Impact
+
+All subsequent phases that consume invariants (`invariant-catcher` in Phase 4, `protocol-reasoning-agent` in Phase 4a, `medusa-fuzzing` and `certora-verification` in Phase 7) should read `02-invariants-reviewed.md` instead of `02-invariants.md`. If the reviewed file does not exist, fall back to `02-invariants.md`.
+
+---
+
 ## Phase 4: DB-Powered Vulnerability Hunting (Parallel Fan-Out)
 
 **Agent**: Self (grep-prune + partition + merge) + N × `invariant-catcher` sub-agents
@@ -258,7 +311,7 @@ YOUR CARDS (<card-count> cards, categories: <categories>):
 CRITICAL CARDS (duplicated across all shards — ALWAYS CHECK THESE):
 <paste all neverPrune cards>
 
-Read audit-output/02-invariants.md for invariant specifications.
+Read audit-output/02-invariants-reviewed.md for invariant specifications (fall back to 02-invariants.md if not available).
 Follow the 2-pass workflow from resources/db-hunting-workflow.md.
 Write findings to audit-output/03-findings-shard-<shard-id>.md
 ```
@@ -308,7 +361,7 @@ Perform deep reasoning-based vulnerability discovery.
 TARGET CODEBASE: <path>
 PROTOCOL TYPE: <detected types>
 
-Read: audit-output/01-context.md, 02-invariants.md, 03-findings-raw.md
+Read: audit-output/01-context.md, 02-invariants-reviewed.md (fall back to 02-invariants.md), 03-findings-raw.md
 Reasoning seeds: audit-output/reasoning-seeds.md (pre-extracted from DB)
 
 Perform your full 6-phase workflow (A-F). Use reasoning-seeds.md instead
