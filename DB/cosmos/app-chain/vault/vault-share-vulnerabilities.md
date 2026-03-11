@@ -171,8 +171,6 @@ As the `exchangeRate` is updated using the `UNDERLYING_TOKEN.balanceOf(address(t
 **Example 2: [H-03] StakedCitadel depositors can be attacked by the first depositor with depr** [HIGH]
 > 📖 Reference: `reports/cosmos_cometbft_findings/h-03-stakedcitadel-depositors-can-be-attacked-by-the-first-depositor-with-depres.md`
 ```
-// Vulnerable pattern from BadgerDAO:
-_Submitted by hyh, also found by VAD37, cmichel, 0xDjango, berndartmueller, and danb_
 
 <https://github.com/code-423n4/2022-04-badger-citadel/blob/main/src/StakedCitadel.sol#L881-L892>
 
