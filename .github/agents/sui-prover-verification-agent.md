@@ -587,3 +587,14 @@ Load general-defi.json → pattern: "First Depositor Attack"
 - [Certora Sui Move Reference](resources/certora-sui-move-reference.md) — CVLM alternative approach (Certora-specific)
 - [Invariant Writer Output](resources/inter-agent-data-format.md) — Expected input format from invariant-writer agent
 - [Sui Prover GitHub](https://github.com/asymptotic-code/sui-prover) — Official repository
+
+### Official Asymptotic Documentation (fetch these when you need help)
+
+If the local reference files are insufficient or you encounter an edge case, consult the official Asymptotic docs directly:
+
+| Resource | URL | When to use |
+|----------|-----|-------------|
+| Asymptotic Home | https://info.asymptotic.tech/ | Starting point |
+| Sui Prover Overview | https://info.asymptotic.tech/sui-prover | Entry point, examples, links |
+| Sui Prover Reference | https://info.asymptotic.tech/sui-prover-reference | Canonical API: `requires`, `ensures`, `asserts`, `old!`, ghost variables, loop invariants, attributes (`#[spec]`, `#[spec(prove)]`, `#[spec_only]`, `#[ext]`) |
+| Sui Prover FAQ | https://info.asymptotic.tech/sui-prover-faq | Spec composition, abort specs, compile errors, `no_opaque`, `ignore_abort`, `focus`, cross-module specs, private field access |

@@ -25,7 +25,10 @@ vuln-database/
 │   │   ├── general-infrastructure.json
 │   │   ├── general-governance.json
 │   │   ├── unique.json
-│   │   └── keywords.json
+│   │   ├── keywords.json
+│   │   └── huntcards/               # Compressed detection cards (Tier 1.5)
+│   │       ├── all-huntcards.json   # ALL 451+ cards in one file
+│   │       └── *-huntcards.json     # Per-manifest cards
 │   ├── oracle/                      # Oracle vulnerabilities
 │   │   ├── chainlink/
 │   │   ├── pyth/
@@ -74,7 +77,7 @@ vuln-database/
 │   ├── Methodology.md
 │   ├── Skills.md
 │   └── resources/
-├── .github/agents/                  # AI agent skill definitions
+├── .github/agents/                  # 21 AI agent skill definitions
 │   └── resources/                   # Agent reference materials
 ├── TEMPLATE.md                      # Canonical entry structure
 ├── Example.md                       # Reference implementation
@@ -98,14 +101,17 @@ vuln-database/
 - `auditChecklist`: Quick security checks by category
 - `keywordIndex`: Points to `DB/manifests/keywords.json` for keyword lookup
 
-### 3-Tier Search Architecture
+### 4-Tier Search Architecture
 
 ```
-Tier 1: DB/index.json              ← Lean router. Start here.
+Tier 1:   DB/index.json                               ← Lean router. Start here.
    ↓
-Tier 2: DB/manifests/<name>.json   ← Pattern-level indexes with line ranges
+Tier 1.5: DB/manifests/huntcards/all-huntcards.json   ← 451+ compressed detection cards
+   ↓                                                     with grep patterns & micro-directives
+Tier 2:   DB/manifests/<name>.json                    ← Pattern-level indexes with line ranges
    ↓
-Tier 3: DB/**/*.md                 ← Vulnerability content. Read ONLY targeted line ranges.
+Tier 3:   DB/**/*.md                                  ← Vulnerability content.
+                                                          Read ONLY targeted line ranges.
 ```
 
 **Usage**:
@@ -117,6 +123,10 @@ DB/index.json → protocolContext.mappings.lending_protocol
 // By keyword
 DB/manifests/keywords.json → "getPriceUnsafe" → ["oracle"]
   → Load DB/manifests/oracle.json → find pattern → read targeted line ranges
+
+// Bulk audit (hunt cards)
+DB/manifests/huntcards/all-huntcards.json
+  → grep target code per card.grep → prune zero-hit cards → shard → spawn sub-agents
 ```
 
 For the full search guide, see `DB/SEARCH_GUIDE.md`.
