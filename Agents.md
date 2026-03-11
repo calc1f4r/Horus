@@ -277,6 +277,7 @@ Post-triage:
 | `.github/agents/resources/domain-decomposition.md` | Domain decomposition strategy for reasoning agent |
 | `.github/agents/resources/certora-sui-move-reference.md` | CVLM type system, manifest functions, ghosts, shadows, CLI reference for Sui Move |
 | `.github/agents/resources/certora-sui-move-templates.md` | Copy-paste CVLM spec patterns for Sui Move verification |
+| `.github/agents/resources/sui-prover-reference.md` | Sui Prover spec API, math types, ghost variables, quantifiers, CLI, debugging |
 
 ### All Agents
 
@@ -293,6 +294,7 @@ Post-triage:
 | `medusa-fuzzing` | `.github/agents/medusa-fuzzing-agent.md` | Generates Medusa fuzzing harnesses |
 | `certora-verification` | `.github/agents/certora-verification-agent.md` | Generates Certora CVL specs |
 | `certora-sui-move-verification` | `.github/agents/certora-sui-move-verification-agent.md` | Generates Certora CVLM specs for Sui Move contracts |
+| `sui-prover-verification` | `.github/agents/sui-prover-verification-agent.md` | Generates Asymptotic Sui Prover specs for Sui Move contracts |
 | `sherlock-judging` | `.github/agents/sherlock-judge-agent.md` | Validates against Sherlock criteria |
 | `cantina-judge` | `.github/agents/cantina-judge-agent.md` | Validates against Cantina criteria |
 | `code4rena-judge` | `.github/agents/code4rena-judge-agent.md` | Validates against Code4rena criteria |
