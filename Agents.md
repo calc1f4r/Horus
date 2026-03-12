@@ -210,7 +210,7 @@ Phase 4a: Reasoning Discovery  → Sub-agent: protocol-reasoning-agent
 Phase 5: Validation Gaps      → Sub-agent: missing-validation-reasoning
 Phase 6: Triage & PoC         → Self + Sub-agent: poc-writing
 Phase 7: Downstream Gen       → Sub-agents: medusa-fuzzing, certora-verification,
-                                 sherlock-judging, cantina-judge
+                                 halmos-verification, sherlock-judging, cantina-judge
 Final:   Report Assembly      → Produces audit-output/AUDIT-REPORT.md
 ```
 
@@ -240,12 +240,12 @@ Final:   Report Assembly      → Produces audit-output/AUDIT-REPORT.md
 │ reviewer         │
 └────────┬─────────┘
          │
-    ┌────┴────┐
-    ▼         ▼
-┌────────┐ ┌──────────┐
-│ medusa │ │ certora  │
-│ fuzzing│ │ verif.   │
-└────────┘ └──────────┘
+    ┌────┴─────────┐
+    ▼         ▼     ▼
+┌────────┐ ┌──────┐ ┌────────┐
+│ medusa │ │certora│ │ halmos │
+│ fuzzing│ │verif. │ │ verif. │
+└────────┘ └──────┘ └────────┘
 
 Post-triage:
   ├── poc-writing (per CRITICAL/HIGH finding)
@@ -269,6 +269,7 @@ Post-triage:
 | `issue-writer` | Polished submission | Individual findings |
 | `medusa-fuzzing` | `fuzzing/` harnesses | Invariant specs |
 | `certora-verification` | `certora/` specs | Invariant specs |
+| `halmos-verification` | `test/halmos/` symbolic tests | Invariant specs |
 | `sherlock-judging` | `06-sherlock-validation.md` | Triaged findings |
 | `cantina-judge` | `07-cantina-validation.md` | Triaged findings |
 
@@ -301,6 +302,7 @@ Post-triage:
 | `issue-writer` | `.github/agents/issue-writer-agent.md` | Polishes findings for submission |
 | `medusa-fuzzing` | `.github/agents/medusa-fuzzing-agent.md` | Generates Medusa fuzzing harnesses |
 | `certora-verification` | `.github/agents/certora-verification-agent.md` | Generates Certora CVL specs |
+| `halmos-verification` | `.github/agents/halmos-verification-agent.md` | Generates Halmos symbolic test suites for Solidity formal verification |
 | `certora-sui-move-verification` | `.github/agents/certora-sui-move-verification-agent.md` | Generates Certora CVLM specs for Sui Move contracts |
 | `sui-prover-verification` | `.github/agents/sui-prover-verification-agent.md` | Generates Asymptotic Sui Prover specs for Sui Move contracts |
 | `sherlock-judging` | `.github/agents/sherlock-judge-agent.md` | Validates against Sherlock criteria |
