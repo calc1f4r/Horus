@@ -272,6 +272,13 @@ Post-triage:
 | `halmos-verification` | `test/halmos/` symbolic tests | Invariant specs |
 | `sherlock-judging` | `06-sherlock-validation.md` | Triaged findings |
 | `cantina-judge` | `07-cantina-validation.md` | Triaged findings |
+| `multi-persona-orchestrator` | `persona-findings.md`, `personas/round-N/*.md`, `personas/shared-knowledge-round-N.md` | Context (01-context.md), invariants (02-invariants.md) |
+| `persona-bfs` (×1 per round) | `personas/round-N/bfs.md` | Scope, shared knowledge, target code |
+| `persona-dfs` (×1 per round) | `personas/round-N/dfs.md` | Scope, shared knowledge, target code |
+| `persona-working-backward` (×1 per round) | `personas/round-N/backward.md` | Scope, shared knowledge, target code |
+| `persona-state-machine` (×1 per round) | `personas/round-N/state-machine.md` | Scope, shared knowledge, target code |
+| `persona-mirror` (×1 per round) | `personas/round-N/mirror.md` | Scope, shared knowledge, target code |
+| `persona-reimplementer` (×1 per round) | `personas/round-N/reimpl.md` | Scope, shared knowledge, target code |
 
 ### New Resource Files
 
@@ -314,4 +321,11 @@ Post-triage:
 | `system-synthesizer` | `.github/agents/system-synthesizer.md` | Synthesizes per-contract context into global context document (spawned by audit-context-building) |
 | `invariant-indexer` | `.github/agents/invariant-indexer.md` | Indexes canonical invariants from production DeFi protocols into per-category reference files for invariant-writer |
 | `db-quality-monitor` | `.github/agents/db-quality-monitor.md` | Monitors full pipeline: 4-tier architecture integrity, manifest generation, hunt cards, script health, context delivery quality, and auto-fixes via sub-agents |
+| `multi-persona-orchestrator` | `.github/agents/multi-persona-orchestrator.md` | Orchestrates 6 parallel auditing personas (BFS, DFS, Working Backward, State Machine, Mirror, Re-Implementation) with iterative knowledge sharing and cross-verification |
+| `persona-bfs` | `.github/agents/persona-bfs.md` | BFS auditing persona — maps entry points then progressively deepens (spawned by multi-persona-orchestrator) |
+| `persona-dfs` | `.github/agents/persona-dfs.md` | DFS auditing persona — verifies leaf functions then works upward (spawned by multi-persona-orchestrator) |
+| `persona-working-backward` | `.github/agents/persona-working-backward.md` | Working Backward persona — traces from critical sinks to attacker-controllable sources (spawned by multi-persona-orchestrator) |
+| `persona-state-machine` | `.github/agents/persona-state-machine.md` | State Machine persona — maps all protocol states and transitions to find illegal paths to bad states (spawned by multi-persona-orchestrator) |
+| `persona-mirror` | `.github/agents/persona-mirror.md` | Mirror persona — analyzes paired/opposite functions for asymmetries (spawned by multi-persona-orchestrator) |
+| `persona-reimplementer` | `.github/agents/persona-reimplementer.md` | Re-Implementation persona — hypothetically re-implements functions then diffs (spawned by multi-persona-orchestrator) |
 
