@@ -313,4 +313,5 @@ Post-triage:
 | `function-analyzer` | `.github/agents/function-analyzer.md` | Per-contract ultra-granular function analysis (spawned by audit-context-building) |
 | `system-synthesizer` | `.github/agents/system-synthesizer.md` | Synthesizes per-contract context into global context document (spawned by audit-context-building) |
 | `db-quality-monitor` | `.github/agents/db-quality-monitor.agent.md` | Monitors full pipeline: 4-tier architecture integrity, manifest generation, hunt cards, script health, context delivery quality, and auto-fixes via sub-agents |
+| `protocol-invariants-indexer` | `.github/agents/protocol-invariants-indexer.md` | Indexes invariants from major DeFi protocol repos (sourced from shafu0x/awesome-smart-contracts and Recon-Fuzz/audits); writes per-protocol reference files under `protocol-invariants/` for use by the invariant-writer agent |
 

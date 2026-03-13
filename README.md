@@ -133,6 +133,7 @@ Phase 7  Downstream           → medusa-fuzzing, certora-verification,
 | `variant-template-writer` | Converts audit reports into DB entries |
 | `solodit-fetching` | Fetches raw findings from the Solodit/Cyfrin API |
 | `db-quality-monitor` | Monitors 4-tier architecture integrity, manifest health, and auto-fixes |
+| `protocol-invariants-indexer` | Indexes invariants from major DeFi protocols; writes per-protocol reference files for the invariant-writer agent |
 
 ---
 
