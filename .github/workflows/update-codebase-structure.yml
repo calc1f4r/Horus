@@ -1,0 +1,36 @@
+name: Update Codebase Structure
+
+on:
+  push:
+    branches:
+      - hunt-cards
+    paths:
+      - 'reports/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Regenerate report branches table
+        run: python3 scripts/update_codebase_structure.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CodebaseStructure.md
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "docs: auto-update report branches in CodebaseStructure.md"
+          git push
