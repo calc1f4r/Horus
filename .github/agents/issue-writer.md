@@ -8,9 +8,9 @@ tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 
 Converts validated vulnerability findings into polished, submission-ready write-ups using **Sherlock format by default**. Also supports Cantina engagements and standalone audit reports when explicitly requested.
 
-**Prerequisite**: A validated finding with root cause, affected code, and severity assessment. Typically produced by `invariant-catcher-agent`, `missing-validation-reasoning`, or `audit-orchestrator`.
+**Prerequisite**: A validated finding with root cause, affected code, and severity assessment. Typically produced by `invariant-catcher`, `missing-validation-reasoning`, or `audit-orchestrator`.
 
-**Do NOT use for** finding vulnerabilities (use `invariant-catcher-agent`), writing PoCs (use `poc-writing`), or building codebase context (use `audit-context-building`).
+**Do NOT use for** finding vulnerabilities (use `invariant-catcher`), writing PoCs (use `poc-writing`), or building codebase context (use `audit-context-building`).
 
 ---
 
@@ -36,12 +36,12 @@ Every finding MUST have these fields before writing. If any are missing, researc
 | Severity | YES | HIGH |
 | Root Cause | YES | "No freshness validation on Chainlink price data" |
 | Impact | YES | "Attacker can exploit stale prices for $X profit" |
-| Affected Code | YES | `src/Oracle.sol L42-L55` |
+| Affected Code | YES | `src/Oracle.ext L42-L55` (use actual file extension) |
 | Attack Scenario | YES | Step-by-step exploit path |
 | Confidence | YES | HIGH / MEDIUM / LOW |
 | GitHub Repo URL | OPTIONAL | `https://github.com/org/repo/blob/<commit>/` |
 | DB Pattern Ref | OPTIONAL | `oracle-staleness-001` |
-| PoC Reference | OPTIONAL | `audit-output/pocs/F-001-poc.t.sol` |
+| PoC Reference | OPTIONAL | `audit-output/pocs/F-001-poc.{ext}` |
 
 If the finding comes from the `audit-orchestrator` pipeline, read it from `audit-output/05-findings-triaged.md`.
 
@@ -63,9 +63,9 @@ Use the **Sherlock submission format** by default. This is the standard template
 
 **CRITICAL — follow these rules strictly:**
 
-1. **Existing codebase code** (contracts, libraries, interfaces that live in the repo):
-   - If the GitHub repo URL is known, use **GitHub permalink format**: `[file.sol#L42-L55](https://github.com/org/repo/blob/<commit>/src/file.sol#L42-L55)`
-   - If just a local path is known (no GitHub URL), use relative path + line numbers: `file.sol:L42-L55`
+1. **Existing codebase code** (contracts, modules, libraries, interfaces that live in the repo):
+   - If the GitHub repo URL is known, use **GitHub permalink format**: `[<file>#L42-L55](https://github.com/org/repo/blob/<commit>/src/<file>#L42-L55)`
+   - If just a local path is known (no GitHub URL), use relative path + line numbers: `<file>:L42-L55`
    - Always verify the line numbers by reading the file first — never guess
 
 2. **Agent-generated content** (PoCs, test files, recommended fixes):
@@ -76,8 +76,8 @@ Use the **Sherlock submission format** by default. This is the standard template
    - Never fabricate a GitHub URL for content that doesn't exist on-chain/in-repo
 
 3. **Code citation format in Root Cause section** (Sherlock style):
-   - With GitHub URL: `In [\`file.sol:42\`](https://github.com/org/repo/blob/<commit>/src/file.sol#L42), ...`
-   - Without GitHub URL: `In \`file.sol:42\`, ...`
+   - With GitHub URL: `In [\`<file>:42\`](https://github.com/org/repo/blob/<commit>/src/<file>#L42), ...`
+   - Without GitHub URL: `In \`<file>:42\`, ...`
 
 #### Sherlock Submission Template
 
@@ -90,7 +90,7 @@ Use the **Sherlock submission format** by default. This is the standard template
 
 ### Root Cause
 
-In [`file.sol:42`](https://github.com/org/repo/blob/<commit>/src/file.sol#L42), [description of what's missing or wrong].
+In [`<file>:42`](https://github.com/org/repo/blob/<commit>/src/<file>#L42), [description of what's missing or wrong].
 
 [Root cause statement formula: "This vulnerability exists because [MISSING VALIDATION / UNTRUSTED DATA] in [COMPONENT] allows [ATTACK VECTOR] leading to [IMPACT]."]
 
@@ -110,7 +110,7 @@ In [`file.sol:42`](https://github.com/org/repo/blob/<commit>/src/file.sol#L42), 
 
 ### Attack Path
 
-1. [Attacker] calls [function](https://github.com/org/repo/blob/<commit>/src/file.sol#L42) with [parameters]
+1. [Attacker] calls [function](https://github.com/org/repo/blob/<commit>/src/<file>#L42) with [parameters]
 2. This causes [state change] because [reason with code citation]
 3. [Attacker] then calls [function](link) which [exploits the state]
 4. Result: [concrete quantified impact]
@@ -135,12 +135,13 @@ function testExploit() public {
 
 [Recommended fix with inline code. Do NOT add GitHub links for mitigation code — it is a recommendation, not existing code.]
 
-```solidity
-function getPrice() external view returns (uint256) {
-    (, int256 price,, uint256 updatedAt,) = priceFeed.latestRoundData();
-    require(block.timestamp - updatedAt < STALENESS_THRESHOLD, "Stale");
-    require(price > 0, "Invalid");
-    return uint256(price);
+```
+// Example mitigation in the target codebase's language
+function getPrice() {
+    price = priceFeed.latestRoundData()
+    require(block.timestamp - price.updatedAt < STALENESS_THRESHOLD, "Stale")
+    require(price > 0, "Invalid")
+    return price
 }
 ```
 ```
@@ -195,7 +196,7 @@ Submission Pre-Flight:
 - [ ] Impact is quantified (not just "loss of funds" — specify how much, who, when)
 - [ ] Severity follows Sherlock criteria (no likelihood consideration — only impact + conditions)
 - [ ] Finding does NOT fall into Sherlock INVALID categories
-- [ ] PoC compiles (if included) or is honestly absent with reason
+- [ ] PoC compiles and runs with the project's test framework (if included) or is honestly absent with reason
 - [ ] Mitigation is concrete code (not just "add a check")
 - [ ] No hallucinated function names — every function verified to exist
 - [ ] No hallucinated file paths — every path verified
@@ -214,7 +215,7 @@ The default format is **Sherlock**. Use the alternatives below only when explici
 - Replace Sherlock severity with Cantina impact × likelihood matrix:
   - Impact: Critical (direct theft >$1M) / High (theft) / Medium (partial loss) / Low (info leak)
   - Likelihood: High (no preconditions) / Medium (some conditions) / Low (unlikely conditions)
-  - See [Cantina-criteria.md](resources/Cantina-criteria.md) for full matrix
+  - See [cantina-criteria.md](resources/cantina-criteria.md) for full matrix
 - PoC may be required for HIGH+ findings
 - Severity caps apply (some categories capped at MEDIUM regardless of impact)
 - Code citation rules remain the same (GitHub links for existing code, none for PoC/mitigation)
@@ -231,7 +232,7 @@ The default format is **Sherlock**. Use the alternatives below only when explici
 ## Quality Standards
 
 ### Language
-- Technical but clear — assume the reader is a Solidity developer, not a security expert
+- Technical but clear — assume the reader is a smart contract developer, not a security expert
 - Active voice: "The function lacks validation" not "Validation is not present"
 - Specific: "5% of deposited collateral" not "some funds"
 - No hedging: "This allows theft of..." not "This could potentially allow..."
@@ -255,7 +256,7 @@ The default format is **Sherlock**. Use the alternatives below only when explici
 ## Resources
 
 - **Sherlock criteria**: [sherlock-judging-criteria.md](resources/sherlock-judging-criteria.md)
-- **Cantina criteria**: [Cantina-criteria.md](resources/Cantina-criteria.md)
+- **Cantina criteria**: [cantina-criteria.md](resources/cantina-criteria.md)
 - **Root cause analysis**: [root-cause-analysis.md](resources/root-cause-analysis.md)
 - **Inter-agent data format**: [inter-agent-data-format.md](resources/inter-agent-data-format.md)
 

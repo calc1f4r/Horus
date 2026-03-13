@@ -101,7 +101,7 @@ Phase 1  Reconnaissance       → Protocol detection, scope, manifest resolution
 Phase 2  Context Building     → audit-context-building
 Phase 3  Invariant Extraction → invariant-writer
 Phase 4  DB-powered Hunting   → N × invariant-catcher (parallel shards)
-Phase 4a Reasoning Discovery  → protocol-reasoning-agent
+Phase 4a Reasoning Discovery  → protocol-reasoning
 Phase 5  Validation Gaps      → missing-validation-reasoning
 Phase 6  Triage & PoC         → poc-writing
 Phase 7  Downstream           → medusa-fuzzing, certora-verification,
@@ -119,15 +119,15 @@ Phase 7  Downstream           → medusa-fuzzing, certora-verification,
 | `invariant-writer` | Extracts all system invariants |
 | `invariant-reviewer` | Reviews & hardens invariants for FV readiness |
 | `invariant-catcher` | Hunts DB patterns against target code (parallel shards) |
-| `protocol-reasoning-agent` | Deep reasoning-based vulnerability discovery |
+| `protocol-reasoning` | Deep reasoning-based vulnerability discovery |
 | `missing-validation-reasoning` | Input validation scanner |
-| `poc-writer` | Writes compilable Foundry/Hardhat exploit tests |
+| `poc-writing` | Writes compilable Foundry/Hardhat exploit tests |
 | `issue-writer` | Polishes findings into Sherlock-format submissions |
 | `medusa-fuzzing` | Generates Medusa fuzzing harnesses |
 | `certora-verification` | Generates Certora CVL formal specs |
 | `certora-sui-move-verification` | Generates Certora CVLM specs for Sui Move contracts |
 | `sui-prover-verification` | Generates Asymptotic Sui Prover specs for Sui Move |
-| `sherlock-judge` | Validates findings against Sherlock severity criteria |
+| `sherlock-judging` | Validates findings against Sherlock severity criteria |
 | `cantina-judge` | Validates findings against Cantina severity criteria |
 | `code4rena-judge` | Validates findings against Code4rena severity criteria |
 | `variant-template-writer` | Converts audit reports into DB entries |

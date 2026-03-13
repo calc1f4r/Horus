@@ -122,7 +122,7 @@ Load manifest → filter patterns where severity includes "HIGH" or "CRITICAL"
 | `governance_dao` | DAOs, governance systems, voting contracts |
 | `cross_chain_bridge` | Bridges, LayerZero, Wormhole integrations |
 | `cosmos_appchain` | Cosmos SDK chains, IBC, app-chains |
-| `solana_program` | Solana programs, Anchor, SPL tokens |
+| `solana_program` | Solana programs, SPL tokens |
 | `perpetuals_derivatives` | Perpetual DEXes, options, derivatives |
 | `token_launch` | Token launches, meme coins, trading contracts |
 | `staking_liquid_staking` | Staking protocols, liquid staking |
@@ -206,7 +206,7 @@ Phase 2: Context Building     → Sub-agent: audit-context-building
 Phase 3: Invariant Extraction → Sub-agent: invariant-writer
 Phase 3a: Invariant Review    → Sub-agent: invariant-reviewer
 Phase 4: DB-powered Hunting   → Self (grep-prune + partition + merge) + N × Sub-agent: invariant-catcher (parallel shards)
-Phase 4a: Reasoning Discovery  → Sub-agent: protocol-reasoning-agent
+Phase 4a: Reasoning Discovery  → Sub-agent: protocol-reasoning
 Phase 5: Validation Gaps      → Sub-agent: missing-validation-reasoning
 Phase 6: Triage & PoC         → Self + Sub-agent: poc-writing
 Phase 7: Downstream Gen       → Sub-agents: medusa-fuzzing, certora-verification,
@@ -230,8 +230,8 @@ Final:   Report Assembly      → Produces audit-output/AUDIT-REPORT.md
 └────────┬─────────┘  │ shards)            │  └──────────────────────┘
          │                                     
          ▼                                     ┌──────────────────────┐
-┌──────────────────┐                           │ protocol-reasoning-  │
-│ invariant-writer │                           │ agent (spawns domain │
+┌──────────────────┐                           │ protocol-reasoning   │
+│ invariant-writer │                           │ (spawns domain       │
 └────────┬─────────┘                           │ sub-agents)          │
          │                                     └──────────────────────┘
          ▼                                     
@@ -263,9 +263,9 @@ Post-triage:
 | `invariant-writer` | `02-invariants.md` | Context |
 | `invariant-reviewer` | `02-invariants-reviewed.md` | Invariants, context, DB manifests |
 | `invariant-catcher` (×N shards) | `03-findings-shard-<id>.md` | Shard cards, invariants, target code |
-| `protocol-reasoning-agent` | `04a-reasoning-findings.md` | Context, invariants, raw findings, manifests |
+| `protocol-reasoning` | `04a-reasoning-findings.md` | Context, invariants, raw findings, manifests |
 | `missing-validation-reasoning` | `04-validation-findings.md` | Context |
-| `poc-writing` | `pocs/F-NNN-poc.t.sol` | Individual findings |
+| `poc-writing` | `pocs/F-NNN-poc.{ext}` | Individual findings |
 | `issue-writer` | Polished submission | Individual findings |
 | `medusa-fuzzing` | `fuzzing/` harnesses | Invariant specs |
 | `certora-verification` | `certora/` specs | Invariant specs |
@@ -293,24 +293,25 @@ Post-triage:
 |-------|------|---------|
 | `audit-orchestrator` | `.github/agents/audit-orchestrator.md` | **Entry point** — orchestrates full audit pipeline |
 | `audit-context-building` | `.github/agents/audit-context-building.md` | Line-by-line codebase analysis |
-| `invariant-writer` | `.github/agents/invariant-writer-agent.md` | Extracts all system invariants |
-| `invariant-reviewer` | `.github/agents/invariant-reviewer-agent.md` | Reviews & hardens invariants for multi-step coverage and FV readiness |
-| `invariant-catcher` | `.github/agents/invariant-catcher-agent.md` | Hunts for DB vulnerability patterns |
-| `protocol-reasoning-agent` | `.github/agents/protocol-reasoning-agent.md` | Deep reasoning-based vulnerability discovery |
-| `missing-validation-reasoning` | `.github/agents/missing-validation-reasoning-agent.md` | Input validation scanner |
-| `poc-writing` | `.github/agents/poc-writer-agent.md` | Writes Foundry/Hardhat exploit tests |
-| `issue-writer` | `.github/agents/issue-writer-agent.md` | Polishes findings for submission |
-| `medusa-fuzzing` | `.github/agents/medusa-fuzzing-agent.md` | Generates Medusa fuzzing harnesses |
-| `certora-verification` | `.github/agents/certora-verification-agent.md` | Generates Certora CVL specs |
-| `halmos-verification` | `.github/agents/halmos-verification-agent.md` | Generates Halmos symbolic test suites for Solidity formal verification |
-| `certora-sui-move-verification` | `.github/agents/certora-sui-move-verification-agent.md` | Generates Certora CVLM specs for Sui Move contracts |
-| `sui-prover-verification` | `.github/agents/sui-prover-verification-agent.md` | Generates Asymptotic Sui Prover specs for Sui Move contracts |
-| `sherlock-judging` | `.github/agents/sherlock-judge-agent.md` | Validates against Sherlock criteria |
-| `cantina-judge` | `.github/agents/cantina-judge-agent.md` | Validates against Cantina criteria |
-| `code4rena-judge` | `.github/agents/code4rena-judge-agent.md` | Validates against Code4rena criteria |
-| `variant-template-writer` | `.github/agents/variant-template-writer-agent.md` | Creates DB entries from reports |
-| `solodit-fetching` | `.github/agents/solodit-fetching-agent.md` | Fetches reports from Solodit API |
+| `invariant-writer` | `.github/agents/invariant-writer.md` | Extracts all system invariants |
+| `invariant-reviewer` | `.github/agents/invariant-reviewer.md` | Reviews & hardens invariants for multi-step coverage and FV readiness |
+| `invariant-catcher` | `.github/agents/invariant-catcher.md` | Hunts for DB vulnerability patterns |
+| `protocol-reasoning` | `.github/agents/protocol-reasoning.md` | Deep reasoning-based vulnerability discovery |
+| `missing-validation-reasoning` | `.github/agents/missing-validation-reasoning.md` | Input validation scanner |
+| `poc-writing` | `.github/agents/poc-writing.md` | Writes exploit tests using the target codebase's native test framework |
+| `issue-writer` | `.github/agents/issue-writer.md` | Polishes findings for submission |
+| `medusa-fuzzing` | `.github/agents/medusa-fuzzing.md` | Generates Medusa fuzzing harnesses |
+| `certora-verification` | `.github/agents/certora-verification.md` | Generates Certora CVL specs |
+| `halmos-verification` | `.github/agents/halmos-verification.md` | Generates Halmos symbolic test suites for Solidity formal verification |
+| `certora-sui-move-verification` | `.github/agents/certora-sui-move-verification.md` | Generates Certora CVLM specs for Sui Move contracts |
+| `sui-prover-verification` | `.github/agents/sui-prover-verification.md` | Generates Asymptotic Sui Prover specs for Sui Move contracts |
+| `sherlock-judging` | `.github/agents/sherlock-judging.md` | Validates against Sherlock criteria |
+| `cantina-judge` | `.github/agents/cantina-judge.md` | Validates against Cantina criteria |
+| `code4rena-judge` | `.github/agents/code4rena-judge.md` | Validates against Code4rena criteria |
+| `variant-template-writer` | `.github/agents/variant-template-writer.md` | Creates DB entries from reports |
+| `solodit-fetching` | `.github/agents/solodit-fetching.md` | Fetches reports from Solodit API |
 | `function-analyzer` | `.github/agents/function-analyzer.md` | Per-contract ultra-granular function analysis (spawned by audit-context-building) |
 | `system-synthesizer` | `.github/agents/system-synthesizer.md` | Synthesizes per-contract context into global context document (spawned by audit-context-building) |
-| `db-quality-monitor` | `.github/agents/db-quality-monitor.agent.md` | Monitors full pipeline: 4-tier architecture integrity, manifest generation, hunt cards, script health, context delivery quality, and auto-fixes via sub-agents |
+| `invariant-indexer` | `.github/agents/invariant-indexer.md` | Indexes canonical invariants from production DeFi protocols into per-category reference files for invariant-writer |
+| `db-quality-monitor` | `.github/agents/db-quality-monitor.md` | Monitors full pipeline: 4-tier architecture integrity, manifest generation, hunt cards, script health, context delivery quality, and auto-fixes via sub-agents |
 

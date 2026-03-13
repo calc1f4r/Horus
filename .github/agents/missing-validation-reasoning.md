@@ -37,16 +37,16 @@ For every constructor and `initialize` function, check:
 
 | Parameter | Validation needed |
 |-----------|------------------|
-| Address params | `!= address(0)` for critical infrastructure |
+| Address params | `!= null/zero address` for critical infrastructure |
 | Fee/rate params | Bounded (e.g., `fee <= MAX_FEE`) |
-| Token params | `!= address(0)`, is contract |
+| Token/contract params | `!= null/zero address`, is valid contract/program |
 | Time params | Not zero, not in the past |
 
 ### Phase 2: Invariant Identification
 
 Identify invariants across three categories:
 
-1. **Existence**: Critical addresses must be non-zero (`admin != address(0)`)
+1. **Existence**: Critical addresses/accounts must be non-null (`admin != null/zero`)
 2. **Freshness**: Oracle data must be recent (`updatedAt > now - threshold`)
 3. **Consistency**: Paired arrays must match (`a.length == b.length`)
 
@@ -56,7 +56,7 @@ For each invariant, reason about violations using adversarial thinking:
 
 ```
 ADVERSARY GOAL: What would an attacker achieve?
-  └── Brick the protocol (set admin to address(0))
+  └── Brick the protocol (set admin to null/zero address)
   └── Profit from bad data (stale price arbitrage)
   └── Crash the node (unbounded array loop)
 
@@ -70,9 +70,9 @@ ATTACK SURFACE: What can the attacker control?
 
 Apply five validation questions to every function input:
 
-1. **Is this address critical?** → Is `!= address(0)` verified? Contract check needed?
-2. **Is this data from an oracle?** → Are the 3 sacred checks present (`price > 0`, `updatedAt`, `roundId`)?
-3. **Are arrays involved?** → Is `a.length == b.length` checked? Loop bounded?
+1. **Is this address/account critical?** → Is `!= null/zero` verified? Contract/program existence check needed?
+2. **Is this data from an oracle?** → Are the core safety checks present (price > 0, freshness, round completeness)?
+3. **Are arrays/collections involved?** → Are lengths matched? Loops bounded?
 4. **Are numeric bounds enforced?** → Is there a MAX constant? Does zero break logic?
 5. **Is the state transition valid?** → Can it initialize twice? Claim same epoch twice?
 
@@ -88,25 +88,25 @@ Document each finding with:
 ## Quick Search Commands
 
 ```bash
-# Find setters missing zero checks
-grep -A 2 "function set" . -r --include=*.sol
+# Find setters missing zero/null checks (adapt extensions to target language)
+grep -rn "function set\|fn set\|pub fun set\|func set" <path>
 
-# Find constructor params
-grep -A 5 "constructor" . -r --include=*.sol
+# Find constructor/initializer params
+grep -rn "constructor\|initialize\|init\|fn new" <path>
 
-# Find unsafe oracle usage
-grep -n "latestRoundData" . -r --include=*.sol
+# Find oracle usage patterns
+grep -rn "latestRoundData\|getPrice\|get_price\|price_feed" <path>
 
-# Find batch functions without length checks
-grep -n "\[\]" . -r --include=*.sol | grep "function"
+# Find batch/array functions without length checks
+grep -rn "\[\]\|Vec<\|vector<" <path> | grep -i "function\|fn \|pub fun"
 ```
 
 ---
 
 ## Key Principles
 
-- **Severity matters**: Admin address set to `address(0)` = bricked proxy = HIGH severity, not LOW
-- **L2 oracles**: Sequencer uptime checks are mandatory on Arbitrum/Optimism — without them, users can't liquidate during downtime
+- **Severity matters**: Admin address set to null/zero = bricked protocol = HIGH severity, not LOW
+- **L2 oracles**: Sequencer uptime checks are mandatory on L2 chains with sequencers — without them, users can't liquidate during downtime
 - **Cross-reference with DB**: Always validate findings against `DB/general/missing-validations/`
 - **Immutability amplifies impact**: Constructor bugs are permanent — no second chance
 

@@ -1,5 +1,5 @@
 ---
-name: protocol-reasoning-agent
+name: protocol-reasoning
 description: 'Deep reasoning-based vulnerability discovery agent. Decomposes codebases into domains, spawns specialized sub-agents per domain, and uses DB vulnerability root causes as reasoning seeds (not keyword patterns). Iterates 4 rounds: standard → cross-domain → edge cases → completeness. Requires reachability proofs for every finding. Focuses exclusively on MEDIUM/HIGH/CRITICAL severity. Integrates into the audit pipeline as Phase 4a.'
 tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent','todo']
 ---
@@ -10,7 +10,7 @@ Deep reasoning vulnerability discovery engine. Unlike the `invariant-catcher` (p
 
 **Key difference from invariant-catcher**:
 - `invariant-catcher`: "Does this code match a known vulnerability pattern?" (keyword → template → match)
-- `protocol-reasoning-agent`: "Can this code reach a state that violates its assumptions?" (decompose → reason → prove)
+- `protocol-reasoning`: "Can this code reach a state that violates its assumptions?" (decompose → reason → prove)
 
 **Use as Phase 4a** in the audit pipeline, AFTER `invariant-catcher` (Phase 4) and BEFORE validation gap analysis (Phase 5).
 
@@ -35,7 +35,7 @@ Deep reasoning vulnerability discovery engine. Unlike the `invariant-catcher` (p
 ### Standalone
 
 ```
-@protocol-reasoning-agent <codebase-path> [protocol-type]
+@protocol-reasoning <codebase-path> [protocol-type]
 ```
 
 ### As Sub-Agent (Phase 4a in audit pipeline)
@@ -131,8 +131,8 @@ Read `audit-output/01-context.md` and adjust:
 ## Domain Map
 
 ### Domain: [Name]
-- **Files**: [contract1.sol, contract2.sol]
-- **Functions**: [list all public/external functions]
+- **Files**: [file1.ext, file2.ext]
+- **Functions**: [list all public/external/entry functions]
 - **Key State**: [critical state variables]
 - **Interfaces**:
   - → [Other Domain]: calls [function], reads [state]

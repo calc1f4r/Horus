@@ -58,7 +58,7 @@ python3 scripts/grep_prune.py <target_path> DB/manifests/huntcards/all-huntcards
 
 **Manual equivalent**:
 ```bash
-grep -rn "card.grep" <path> --include="*.sol" --include="*.rs" -l
+grep -rn "card.grep" <path> --include="*.sol" --include="*.rs" --include="*.go" --include="*.move" --include="*.cairo" --include="*.vy" -l
 ```
 
 Rules:

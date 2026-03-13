@@ -52,7 +52,7 @@ Before submitting:
 
 - **DB entries**: `CATEGORY_VULNERABILITIES.md` (e.g., `PYTH_ORACLE_VULNERABILITIES.md`)
 - **Reports**: `[severity]-[issue-number]-[description].md` (e.g., `m-01-missing-staleness-check.md`)
-- **Agent files**: lowercase with hyphens (e.g., `poc-writer-agent.md`)
+- **Agent files**: lowercase with hyphens, matching the `name:` field (e.g., `poc-writing.md`)
 
 ## Improving Agents
 

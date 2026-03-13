@@ -8,7 +8,7 @@ tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent','todo']
 
 Fetches vulnerability reports from the Solodit API by topic and stores them in `reports/<topic>/`. Produces the raw source data that `variant-template-writer` uses to create database entries.
 
-**Do NOT use for** analyzing reports (use `variant-template-writer`), indexing DeFiHackLabs exploits (use `defihacklabs-indexer`), or vulnerability hunting (use `invariant-catcher-agent`).
+**Do NOT use for** analyzing reports (use `variant-template-writer`), indexing DeFiHackLabs exploits (use `defihacklabs-indexer`), or vulnerability hunting (use `invariant-catcher`).
 
 ---
 

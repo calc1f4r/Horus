@@ -33,7 +33,7 @@ audit-output/
 ├── 07-cantina-validation.md           ← Phase 7: Cantina judging
 ├── AUDIT-REPORT.md                    ← Final assembled report
 ├── pocs/                              ← PoC exploit tests
-│   ├── F-001-poc.t.sol
+│   ├── F-001-poc.{ext}
 │   └── ...
 ├── fuzzing/                           ← Medusa harnesses
 │   ├── medusa.json
@@ -56,15 +56,15 @@ audit-output/
 - **Confidence**: HIGH | MEDIUM | LOW
 
 ## Codebase Summary
-- **Language**: Solidity | Rust | Go | Move
-- **Framework**: Foundry | Hardhat | Anchor | Cosmos SDK
+- **Language**: (detected from codebase — e.g., Solidity, Rust, Go, Move, Cairo, Vyper)
+- **Framework**: (detected from config files — e.g., Foundry, Hardhat, Anchor, Cosmos SDK, Scarb)
 - **Total files**: N
 - **Total LOC**: N (estimated)
 
 ## Files In Scope
 | File | LOC | Description |
 |------|-----|-------------|
-| src/Pool.sol | 450 | Main lending pool |
+| src/Pool.ext | 450 | Main lending pool |
 | ... | ... | ... |
 
 ## Resolved Manifests
@@ -225,35 +225,35 @@ Produced by `invariant-writer`. Must use this category structure:
 ## Solvency Invariants
 ### INV-S-001: Total deposits cover total borrows
 - **Property**: `totalDeposits >= totalBorrowed`
-- **Scope**: Pool.sol
+- **Scope**: Pool module/contract
 - **Why**: If violated, protocol is insolvent
 - **Testable**: YES — check after every deposit/withdraw/borrow/repay
 
 ## Access Control Invariants
 ### INV-AC-001: Only admin can pause
-- **Property**: `pause() reverts if msg.sender != admin`
-- **Scope**: Pool.sol
+- **Property**: `pause() reverts if caller != admin`
+- **Scope**: Pool module/contract
 - **Why**: Unauthorized pause = DoS
 
 ## State Machine Invariants
 ### INV-SM-001: Cannot borrow when paused
 - **Property**: `paused == true → borrow() reverts`
-- **Scope**: Pool.sol
+- **Scope**: Pool module/contract
 
 ## Arithmetic Invariants
 ### INV-A-001: Share price monotonically increases (absent losses)
 - **Property**: `sharePriceAfter >= sharePriceBefore` for deposits
-- **Scope**: Pool.sol, ShareMath.sol
+- **Scope**: Pool + ShareMath modules
 
 ## Oracle Invariants
 ### INV-O-001: Price feed freshness
-- **Property**: `block.timestamp - updatedAt < STALENESS_THRESHOLD`
-- **Scope**: OracleAdapter.sol
+- **Property**: `currentTime - updatedAt < STALENESS_THRESHOLD`
+- **Scope**: OracleAdapter module
 
 ## Cross-Contract Invariants
 ### INV-CC-001: Token balance matches accounting
 - **Property**: `token.balanceOf(pool) >= totalDeposits - totalBorrowed`
-- **Scope**: Pool.sol + ERC20 token
+- **Scope**: Pool + token modules
 ```
 
 Each invariant MUST have: ID, Property (concrete expression), Scope (files), Why (impact if broken), Testable (YES/NO).
@@ -270,14 +270,14 @@ Produced by `invariant-reviewer`. Uses the same category structure as Phase 3 wi
 ## Solvency Invariants
 ### INV-S-001: Total deposits cover total borrows
 - **Property**: `totalDeposits >= totalBorrowed`
-- **Scope**: Pool.sol
+- **Scope**: Pool module/contract
 - **Why**: If violated, protocol is insolvent
 - **Testable**: YES — check after every deposit/withdraw/borrow/repay
 - **Review**: UNCHANGED — matches canonical lending solvency property
 
 ### INV-S-002: Share price monotonicity
 - **Property**: `sharePrice(t) <= sharePrice(t+1)` in absence of realized losses
-- **Scope**: Vault.sol
+- **Scope**: Vault module/contract
 - **Why**: Share price decrease without loss event indicates value extraction
 - **Testable**: YES — ghost variable tracking sharePrice across calls
 - **Review**: TIGHTENED — original was `sharePrice >= 0` (tautological). Source: ERC4626 canonical properties.
@@ -285,7 +285,7 @@ Produced by `invariant-reviewer`. Uses the same category structure as Phase 3 wi
 
 ### INV-S-010: Flash-loan-resistant solvency [ADDED]
 - **Property**: `solvencyRatio() >= MIN_RATIO` at END of every transaction
-- **Scope**: Pool.sol
+- **Scope**: Pool module/contract
 - **Why**: Flash loans can temporarily inflate collateral to borrow and default
 - **Testable**: YES — post-condition on every public function
 - **Review**: ADDED — not in original spec. Source: [canonical lending properties]
@@ -332,7 +332,7 @@ Must include a Review Summary section at the end:
 
 ## Phase 4a: Reasoning Findings (`04a-reasoning-findings.md`)
 
-Produced by `protocol-reasoning-agent`. Extends the standard Finding Schema with reasoning-specific fields.
+Produced by `protocol-reasoning`. Extends the standard Finding Schema with reasoning-specific fields.
 
 ```markdown
 # Reasoning-Based Findings (Phase 4a)
@@ -347,7 +347,7 @@ Produced by `protocol-reasoning-agent`. Extends the standard Finding Schema with
 
 ## Domain Map
 ### Domain: [Name]
-- **Files**: [contract1.sol, contract2.sol]
+- **Files**: [file1.ext, file2.ext]
 - **Functions**: [function list]
 - **Key State**: [state variables]
 - **Interfaces**: [cross-domain connections]
@@ -400,31 +400,30 @@ Every finding across all phases MUST use this format:
 | **Confidence** | HIGH / MEDIUM / LOW |
 | **Root Cause** | [One sentence: "This vulnerability exists because..."] |
 | **Impact** | [Concrete impact: "$X stolen", "DoS for Y blocks", "Z% loss"] |
-| **Affected Code** | `src/Pool.sol` L123-L145 |
+| **Affected Code** | `src/Pool.ext` L123-L145 |
 | **DB Pattern Ref** | `oracle-staleness-001` from `DB/manifests/oracle.json` → `DB/oracle/pyth/PYTH_ORACLE_VULNERABILITIES.md` L93-L248 (or "Novel — no DB match") |
 | **Attack Scenario** | Step-by-step exploit path |
 
 #### Vulnerable Code
-```solidity
-// src/Pool.sol L123-L145
-function getPrice() external view returns (uint256) {
-    (, int256 price,,,) = priceFeed.latestRoundData();
-    return uint256(price); // ❌ No staleness check
-}
+```
+// src/Pool L123-L145 (use target language)
+function getPrice() returns price:
+    price = priceFeed.latestRoundData()
+    return price  // ❌ No staleness check
 ```
 
 #### Recommended Fix
-```solidity
-function getPrice() external view returns (uint256) {
-    (, int256 price,, uint256 updatedAt,) = priceFeed.latestRoundData();
-    require(block.timestamp - updatedAt < STALENESS_THRESHOLD, "Stale price");
-    require(price > 0, "Invalid price");
-    return uint256(price); // ✅ Validated
-}
+```
+// src/Pool L123-L145 (use target language)
+function getPrice() returns price:
+    (price, updatedAt) = priceFeed.latestRoundData()
+    require(currentTime - updatedAt < STALENESS_THRESHOLD, "Stale price")
+    require(price > 0, "Invalid price")
+    return price  // ✅ Validated
 ```
 
 #### PoC Reference
-See `audit-output/pocs/F-001-poc.t.sol` (if generated)
+See `audit-output/pocs/F-001-poc.{ext}` (if generated)
 ```
 
 ---

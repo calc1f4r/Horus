@@ -8,7 +8,7 @@ tools: [vscode, execute, read, agent, browser, edit, search, todo]
 
 Monitors, diagnoses, and **fixes** every layer of the Vulnerability Database and the full agent pipeline that depends on it. Validates that `generate_manifests.py` produces correct output, that manifests deliver accurate context to downstream agents, that hunt cards align with their parent patterns, and that the entire 4-tier search architecture is internally consistent. When issues are found, spawns sub-agents to auto-remediate: patching frontmatter, fixing entries, regenerating manifests, and resolving broken references.
 
-**Do NOT use for** creating new entries from scratch (use `Variant Template Writer` / `defihacklabs-indexer`), auditing codebases (use `audit-orchestrator`), or bulk report fetching (use `solodit-fetching`).
+**Do NOT use for** creating new entries from scratch (use `variant-template-writer` / `defihacklabs-indexer`), auditing codebases (use `audit-orchestrator`), or bulk report fetching (use `solodit-fetching`).
 
 ---
 
@@ -672,8 +672,8 @@ Switch to **diagnose-and-fix mode**. After each skill completes, immediately rem
 | Orphaned .md files not in manifests | ✅ YES | Regenerate manifests to pick them up, or fix CATEGORY_MAP | Self — terminal + edit |
 | Broken hunt card `ref` paths | ✅ YES | Regenerate manifests (hunt cards are auto-generated) | No — run `python3 generate_manifests.py` |
 | Missing Keywords section | ✅ YES | Spawn `Explore` sub-agent to read entry, then add keywords | Yes — `Explore` for context |
-| Stub entries (< 50 lines) | ⚠️ CONFIRM | Spawn `Variant Template Writer` to expand from reports | Yes — needs user confirmation |
-| Missing vulnerable/secure examples | ⚠️ CONFIRM | Spawn `Variant Template Writer` to enrich from reports | Yes — needs user confirmation |
+| Stub entries (< 50 lines) | ⚠️ CONFIRM | Spawn `variant-template-writer` to expand from reports | Yes — needs user confirmation |
+| Missing vulnerable/secure examples | ⚠️ CONFIRM | Spawn `variant-template-writer` to enrich from reports | Yes — needs user confirmation |
 | Broken internal links | ✅ YES | Update link targets or remove dead links | Self — edit file directly |
 | Duplicate patterns across manifests | ⚠️ CONFIRM | Present dedup plan, ask user before merging | No — report only unless confirmed |
 | Script bugs / import errors | 🔴 NO | Report with exact traceback — requires human fix | No — report only |
@@ -696,12 +696,12 @@ Pattern / Secure Implementation sections exist. Return a structured summary."
 
 Use this before patching frontmatter on entries you haven't read yet.
 
-#### Pattern 2: Variant Template Writer for Entry Enrichment
+#### Pattern 2: variant-template-writer for Entry Enrichment
 
 When an entry is a stub or missing required sections:
 
 ```
-Spawn sub-agent: Variant Template Writer
+Spawn sub-agent: variant-template-writer
 Prompt: "The entry at DB/<path>.md is missing [sections]. Check reports/<topic>/ for
 source reports that could be used to expand this entry. Enrich the entry following
 TEMPLATE.md structure. Preserve all existing content — only ADD missing sections."
@@ -806,7 +806,7 @@ Every reported issue gets one of:
 5. **Impact-aware** — always state which agents or pipeline phases are affected by each issue.
 6. **Fix-then-verify** — after every remediation action, re-run the relevant check to confirm the issue is resolved before moving on.
 7. **Preserve content** — never delete or overwrite existing vulnerability content. Fixes only ADD missing fields/sections or CORRECT metadata.
-8. **Delegate to specialists** — for entry enrichment, spawn `Variant Template Writer`. For context gathering, spawn `Explore`. For new entries from exploits, recommend `defihacklabs-indexer`. Don't try to write vulnerability content yourself.
+8. **Delegate to specialists** — for entry enrichment, spawn `variant-template-writer`. For context gathering, spawn `Explore`. For new entries from exploits, recommend `defihacklabs-indexer`. Don't try to write vulnerability content yourself.
 
 ---
 

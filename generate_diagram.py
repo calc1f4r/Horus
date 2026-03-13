@@ -192,7 +192,7 @@ phases = [
     ("Phase 2\nContext Building",    "#FFF3E0", "Deep line-by-line codebase analysis → produces 01-context.md",                          "🤖 audit-context-building"),
     ("Phase 3\nInvariant Extraction","#FFF3E0", "Extract all system invariants from context → produces 02-invariants.md",                "🤖 invariant-writer"),
     ("Phase 4\nDB-Powered Hunting",  "#FFECB3", "Grep-prune hunt cards → Partition shards → Parallel scan → 03-findings-raw.md",        "🤖 N × invariant-catcher  (→ see ⑤)"),
-    ("Phase 4a\nReasoning Discovery","#FFECB3", "Domain decomposition → Spawns domain sub-agents → 04a-reasoning-findings.md",          "🤖 protocol-reasoning-agent"),
+    ("Phase 4a\nReasoning Discovery","#FFECB3", "Domain decomposition → Spawns domain sub-agents → 04a-reasoning-findings.md",          "🤖 protocol-reasoning"),
     ("Phase 5\nValidation Gaps",     "#FFF3E0", "Specialized input validation scanning → 04-validation-findings.md",                    "🤖 missing-validation-reasoning"),
     ("Phase 6\nTriage & PoC",        "#FFCCBC", "Severity scoring + Exploit PoC writing → 05-findings-triaged.md",                      "🤖 poc-writing"),
     ("Phase 7\nDownstream Gen",      "#FFCCBC", "Fuzzing · Formal verification · Severity validation against contest criteria",         "🤖 medusa · certora · sherlock · cantina"),
@@ -337,7 +337,7 @@ _, t = mk_text(P+40, GY2+120, CW-80, 160,
     "• invariant-writer consumes context → 02-invariants.md\n"
     "• N × invariant-catcher shards + hunt cards → 03-findings-shard-<id>.md → merged → 03-findings-raw.md\n"
     "• missing-validation-reasoning → 04-validation-findings.md\n"
-    "• protocol-reasoning-agent → 04a-reasoning-findings.md\n"
+    "• protocol-reasoning → 04a-reasoning-findings.md\n"
     "• orchestrator triages → 05-findings-triaged.md\n"
     "• poc-writing + issue-writer + sherlock/cantina → AUDIT-REPORT.md",
     sz=11, color="#546E7A", align="left")

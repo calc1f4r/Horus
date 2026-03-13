@@ -30,6 +30,12 @@ Sui Prover specs are written in Move. They use `requires`, `ensures`, `asserts`,
 
 8. **No fabricated properties.** Specs must test genuine contract properties derived from the invariant specification. Do not invent tautological assertions or properties not supported by the codebase. If no meaningful property exists for a function, write only abort coverage (asserts).
 
+8a. **No phantom module interfaces.** Never create mock module interfaces, mock shared objects, or mock runtime behavior that diverges from the actual Sui runtime or the protocol's real module interactions. If an external module's behavior is needed and unavailable, **ASK the user** for the correct interface rather than fabricating one. A spec that proves a property against a phantom interface proves nothing about the real system.
+
+8b. **No impossible runtime conditions.** Never write `asserts` or `requires` that assume conditions the Sui runtime cannot produce (e.g., objects with invalid ownership, shared objects with impossible version states, non-existent type tags). If a property only fails under conditions the runtime prevents, the property holds in production.
+
+8c. **Reachability through public entry functions.** When writing specs for internal (non-`public`) helper functions, verify that the internal function IS reachable from a `public` or `public(package)` entry point under the spec's constraints. A spec proving a property about an internal function that no public function can reach with the constrained inputs is vacuous. Prefer writing specs against the public entry function and letting the prover trace through internals automatically.
+
 9. **Separate package when needed.** If adding specs alongside source code causes compilation errors (the prover modifies the compilation pipeline), put specs in a `spec/` subdirectory with its own `Move.toml` using `target` attributes to reference the original module.
 
 10. **One concern per spec module.** Separate specs into logical modules: solvency, access control, state transitions, arithmetic safety, etc. Do not create monolithic files.

@@ -36,6 +36,12 @@ Sui Move specs are written in Move (not CVL). The specification library is `cvlm
 
 11. **Never fabricate false properties.** Specs must test genuine contract properties. If no meaningful property exists for a function, a sanity rule is sufficient. Do not write tautological assertions.
 
+11a. **No phantom module interfaces.** Never create mock module interfaces, mock shared objects, or mock Sui runtime behavior that diverges from the actual chain implementation. If an external module's interface is unavailable, **ASK the user** rather than fabricating one. A rule that passes against a phantom interface proves nothing about the real system.
+
+11b. **No impossible runtime conditions in specs.** Never write `cvlm_assume_msg` constraints that assume conditions the Sui runtime cannot produce (e.g., objects with invalid ownership, shared objects with impossible version states). If a rule only catches violations under impossible conditions, it provides false confidence.
+
+11c. **Reachability through public entry functions.** When writing rules about internal helper functions, verify the internal function IS reachable from a `public` or `public(package)` entry point under the rule's `cvlm_assume_msg` constraints. A rule proving a property about an internal function unreachable from the public API is vacuous. Prefer targeting public entry functions with parametric rules via `target()` + `invoker()` and letting the prover trace through internals.
+
 12. **`#[test_only]` accessors for private fields.** When specs need to read private struct fields, add `#[test_only]` accessor functions to the target contract. Document which accessors are needed. Never bypass Move visibility rules.
 
 ---

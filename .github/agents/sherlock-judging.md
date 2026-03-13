@@ -8,7 +8,7 @@ tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent','todo']
 
 Validates security findings against Sherlock official judging criteria. Determines whether findings are valid, assigns correct severity (High/Medium/Invalid), and checks compliance with Sherlock contest standards.
 
-**Do NOT use for** Cantina validation (use `cantina-judge-agent`), writing PoCs (use `poc-writer-agent`), or general vulnerability discovery.
+**Do NOT use for** Cantina validation (use `cantina-judge`), writing PoCs (use `poc-writing`), or general vulnerability discovery.
 
 ---
 

@@ -4,7 +4,7 @@ This example demonstrates a complete micro-analysis following the Per-Function M
 
 ---
 
-## Target: `swap(address tokenIn, address tokenOut, uint256 amountIn, uint256 minAmountOut, uint256 deadline)` in Router.sol
+## Target: `swap(tokenIn, tokenOut, amountIn, minAmountOut, deadline)` in Router module
 
 **Purpose:**
 Enables users to swap one token for another through a liquidity pool. Core trading operation in a DEX that:

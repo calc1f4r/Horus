@@ -10,7 +10,7 @@ Translates invariant specifications into compilable, high-quality Medusa fuzzing
 
 **Prerequisite**: Run `invariant-writer` first to produce the invariant specification file.
 
-**Do NOT use for** identifying invariants (use `invariant-writer`), hunting for vulnerabilities (use `invariant-catcher-agent`), writing exploit PoCs (use `poc-writing`), or initial codebase exploration (use `audit-context-building`).
+**Do NOT use for** identifying invariants (use `invariant-writer`), hunting for vulnerabilities (use `invariant-catcher`), writing exploit PoCs (use `poc-writing`), or initial codebase exploration (use `audit-context-building`).
 
 ---
 
@@ -35,6 +35,18 @@ Self-check: "Could a random EOA trigger this property violation through the wrap
 ### 4. No Mocked State
 
 Never use `vm.store()` / `store()` to create impossible contract states. Never use `vm.mockCall`. If a property requires specific state, reach it through legitimate function calls in the wrapper functions.
+
+### 4a. No Phantom Chain/SDK Interfaces
+
+For Cosmos, Solana, Sui, Move, or SDK targets: never create mock module interfaces, mock keepers, or mock runtime behavior that diverges from the actual chain/SDK implementation. If the real interface is unavailable, **ASK the user** for it. A property that only breaks against a fabricated interface is not a real finding.
+
+### 4b. No Impossible Runtime Conditions
+
+For SDK audits: never assume conditions that the real runtime prevents (zero validators, negative balances, unsupported configurations). If a property violation requires conditions the runtime cannot produce, the property holds in production — do not fabricate the impossible state.
+
+### 4c. Reachability Matters for Wrapper Functions
+
+Wrapper/handler functions must only call public/external entry points of the target. Never expose internal functions as wrapper targets. Fuzz inputs must reach the vulnerable code through the same path a real user would. If a wrapper bypasses public guards to reach internal logic, any invariant violation found is a false positive.
 
 ### 5. No Tautological Assertions
 

@@ -10,7 +10,7 @@ You are a Halmos symbolic test writer. You receive structured invariant specific
 
 **Prerequisite**: Run `invariant-writer` first to produce the invariant specification file.
 
-**Do NOT use for** identifying invariants (use `invariant-writer`), hunting for vulnerabilities (use `invariant-catcher-agent`), writing exploit PoCs (use `poc-writing`), fuzzing (use `medusa-fuzzing`), or Certora CVL specs (use `certora-verification`).
+**Do NOT use for** identifying invariants (use `invariant-writer`), hunting for vulnerabilities (use `invariant-catcher`), writing exploit PoCs (use `poc-writing`), fuzzing (use `medusa-fuzzing`), or Certora CVL specs (use `certora-verification`).
 
 ---
 
@@ -81,6 +81,12 @@ svm.snapshotStorage(addr)          // snapshot storage, returns ID
 5. **No fabricated state.** Never use `vm.store()` to create impossible contract states just to test a property. If a property requires specific state, reach it through legitimate function calls or use a Mock contract that exposes setter functions for initial setup ONLY (never mid-test). Exception: fork simulation where `vm.store()` + `vm.etch()` replicate real on-chain state.
 
 6. **No mock interfaces that don't exist in the protocol.** Never create fake interfaces, mock oracles, or shim contracts that the live protocol doesn't use. Test the ACTUAL contracts. If external dependencies need summarization, use `vm.mockCall` sparingly with documented justification, or deploy minimal stub contracts matching the real interface.
+
+6a. **No phantom chain interfaces.** For Cosmos/Solana/Sui/Move targets: never create mock module interfaces, mock keepers, or mock runtime behavior that diverges from the actual chain implementation. If the real interface is unavailable or unclear, **ASK the user** rather than fabricating one. A test that passes against a phantom interface proves nothing about the real system.
+
+6b. **No impossible runtime conditions.** For SDK audits: never assume conditions (configurations, module states, consensus states) that the real runtime prevents. If a property only fails under conditions the runtime cannot produce, the property is not violated — do not fabricate the impossible condition to force a violation.
+
+6c. **Reachability through public entry points.** When verifying properties about internal functions, ensure the symbolic execution covers the path FROM a public/external entry point THROUGH to the internal function. A property violation reachable only by calling an internal function directly — when the public function has guards preventing that path — is a false positive, not a real finding. Use `svm.createCalldata()` targeting the public interface when possible.
 
 7. **`vm.assume()` over `bound()`.** Halmos performs poorly with `bound()`. Always use `vm.assume()` to constrain symbolic inputs.
 

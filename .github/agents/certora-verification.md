@@ -36,6 +36,12 @@ You are a Certora formal verification spec writer. You receive structured invari
 
 12. **Always use `builtin rule sanity`.** Include `use builtin rule sanity;` in every spec file to validate that each function has at least one non-reverting path.
 
+13. **No phantom chain/SDK interfaces.** For Cosmos, Solana, Sui, Move, or SDK targets: never create mock module interfaces, mock keeper summaries, or mock runtime behavior that diverges from the actual chain implementation. Certora summaries (ALWAYS, NONDET, etc.) must reflect real external contract behavior, not fabricated behavior. If the real interface is unavailable, **ASK the user**.
+
+14. **No impossible runtime conditions in specs.** Never write `require` statements in preserved blocks or rules that assume conditions the production runtime cannot produce (e.g., zero validators in Cosmos, negative bank balances, unsupported SDK configurations). A spec that only catches violations under impossible conditions provides false confidence.
+
+15. **Reachability through public entry points.** Parametric rules using `method f; calldataarg args; f(e, args);` automatically cover all public functions — which is correct. But when writing targeted rules about internal logic, verify that the internal code path IS reachable from a public function under the `require` constraints. A rule that proves a property about internal function `X` is vacuous if no public function can reach `X` with the constrained inputs.
+
 ---
 
 ## Workflow

@@ -8,7 +8,7 @@ tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 
 Validates security findings against Cantina judging standards. Determines severity via the impact × likelihood matrix, applies caps, and identifies invalid categories.
 
-**Do NOT use for** Sherlock validation (use `sherlock-judge-agent`), writing PoCs (use `poc-writer-agent`), or general vulnerability discovery.
+**Do NOT use for** Sherlock validation (use `sherlock-judging`), writing PoCs (use `poc-writing`), or general vulnerability discovery.
 
 ---
 
@@ -38,7 +38,7 @@ Copy this checklist and track progress:
 
 ```
 Judging Progress:
-- [ ] Step 1: Load criteria from Cantina-criteria.md
+- [ ] Step 1: Load criteria from cantina-criteria.md
 - [ ] Step 2: Extract finding details (impact, likelihood, constraints)
 - [ ] Step 3: Determine severity via matrix
 - [ ] Step 4: Check severity caps and invalid categories
@@ -48,7 +48,7 @@ Judging Progress:
 
 ### Step 1: Load Criteria
 
-Read [Cantina-criteria.md](resources/Cantina-criteria.md) for the complete judging standards including impact levels, likelihood levels, severity caps, PoC requirements, and duplication criteria.
+Read [cantina-criteria.md](resources/cantina-criteria.md) for the complete judging standards including impact levels, likelihood levels, severity caps, PoC requirements, and duplication criteria.
 
 ### Step 2: Analyze Finding
 
@@ -142,4 +142,4 @@ Reasoning: [brief explanation]
 
 ## Resources
 
-- **Judging standards**: [Cantina-criteria.md](resources/Cantina-criteria.md)
+- **Judging standards**: [cantina-criteria.md](resources/cantina-criteria.md)

@@ -1,5 +1,6 @@
 ---
-description: 'Hunts for vulnerability patterns in smart contract codebases using the Vulnerability Database (DB/). Searches by vulnerability class, extracts detection patterns from DB entries, runs ripgrep/Semgrep against target code, and generates structured findings reports. Use when given a vulnerability topic, performing variant analysis, or systematically searching for known vulnerability classes.'
+name: invariant-catcher
+description: 'Hunts for vulnerability patterns in smart contract codebases using the Vulnerability Database (DB/). Language-agnostic — works with any smart contract language. Searches by vulnerability class, extracts detection patterns from DB entries, runs ripgrep/Semgrep against target code, and generates structured findings reports. Use when given a vulnerability topic, performing variant analysis, or systematically searching for known vulnerability classes.'
 tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 ---
 
@@ -123,7 +124,7 @@ Use DB primitives to determine what to search for in code:
 | `exchange_rate` | Rate calculation functions |
 | `total_supply` | `totalSupply()` calls, especially in divisions |
 | `reward_accrual` | Reward update functions, `lastUpdated` |
-| `access_control` | `onlyOwner`, `require(msg.sender ==`, role checks |
+| `access_control` | Role checks, access modifiers, permission patterns |
 | `reentrancy` | External calls before state changes |
 | `flash_loan` | Same-block deposit/withdraw patterns |
 
@@ -162,6 +163,6 @@ Testing only with valid users → missing bypass when `userId = null` matches `r
 ## Resources
 
 - **Report templates**: [invariant-report-templates.md](resources/invariant-report-templates.md)
-- **Variant analysis methodology**: [Invariant-Methodology.md](resources/Invariant-Methodology.md)
+- **Variant analysis methodology**: [invariant-methodology.md](resources/invariant-methodology.md)
 - **CodeQL templates**: `resources/codeql/` (python, javascript, java, go, cpp)
 - **Semgrep templates**: `resources/semgrep/` (python, javascript, java, go, cpp)

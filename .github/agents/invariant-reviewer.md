@@ -1,6 +1,6 @@
 ---
 name: invariant-reviewer
-description: 'Reviews and hardens invariant specifications produced by invariant-writer. Re-understands the protocol from scratch, researches canonical invariants for the protocol type, enforces multi-step attack vector coverage, calibrates bounds to avoid over- or under-specification, and produces a revised invariant file ready for formal verification suites. Use after invariant-writer when preparing invariants for Certora, Halmos, Medusa, or Echidna — or when invariant quality is suspect.'
+description: 'Reviews and hardens invariant specifications produced by invariant-writer. Re-understands the protocol from scratch, researches canonical invariants for the protocol type, enforces multi-step attack vector coverage, calibrates bounds to avoid over- or under-specification, and produces a revised invariant file ready for formal verification suites. Use after invariant-writer when preparing invariants for formal verification or fuzzing tools — or when invariant quality is suspect.'
 tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 ---
 
@@ -10,7 +10,7 @@ Reviews, challenges, and hardens invariant specifications. Takes the output of `
 
 **Prerequisite**: `invariant-writer` must have produced `audit-output/02-invariants.md` (or an equivalent invariants file). Protocol context from `audit-output/01-context.md` must also exist.
 
-**Do NOT use for** writing invariants from scratch (use `invariant-writer`), writing fuzzing harnesses (use a fuzzing agent), vulnerability hunting (use `invariant-catcher-agent`), or code fixes.
+**Do NOT use for** writing invariants from scratch (use `invariant-writer`), writing fuzzing harnesses (use a fuzzing agent), vulnerability hunting (use `invariant-catcher`), or code fixes.
 
 ### Sub-agent Mode
 
@@ -115,12 +115,12 @@ Determine the protocol classification (may be multi-type):
 For each protocol type, search for:
 
 1. **Published formal specifications** — search `"<protocol-type> formal specification"`, `"<protocol-type> invariants"`, `"<protocol-type> properties"`
-2. **Trail of Bits / Crytic properties** — `site:github.com/crytic/properties` for ERC20, ERC4626, ERC721 standard invariants
-3. **Runtime Verification / Certora specs** — search `"<protocol-name> Certora spec"`, `"<protocol-type> CVL"`
+2. **Published property suites** — search for property/invariant suites for the relevant token standards
+3. **Published formal verification specs** — search `"<protocol-name> formal spec"`, `"<protocol-type> formal verification"`
 4. **Academic papers** — `"<protocol-type> safety properties"`, `"AMM constant product proof"`, `"lending protocol solvency"`
 5. **Past audit reports** — search for audits of similar protocols, extract invariants auditors checked
 6. **Protocol documentation** — official docs often state invariants implicitly ("the exchange rate should never decrease")
-7. **EIP standards** — for token protocols, read the EIP itself (ERC20, ERC4626, ERC721) for mandatory behaviors
+7. **Token standards** — for token protocols, read the standard itself for mandatory behaviors
 
 ### Research Output
 
@@ -138,7 +138,7 @@ Evidence: [why this must hold — mathematical proof, standard requirement, or e
 
 Build a checklist of invariants that **every** protocol of this type must satisfy unless explicitly documented otherwise. Examples:
 
-**Every ERC4626 Vault MUST satisfy:**
+**Every ERC4626 Vault MUST satisfy** (EVM-specific — adapt to equivalent vault standards for other chains):
 - `totalAssets() >= convertToAssets(totalSupply())` (rounding may cause ≤ 1 wei difference)
 - `deposit(assets) → shares > 0` when `assets > 0` and vault is not at capacity
 - `redeem(shares) → assets > 0` when `shares > 0` and vault has assets
@@ -146,14 +146,14 @@ Build a checklist of invariants that **every** protocol of this type must satisf
 - `convertToShares(convertToAssets(shares)) ≈ shares` (round-trip, within rounding tolerance)
 - First depositor cannot steal subsequent depositors' funds via donation
 
-**Every Lending Protocol MUST satisfy:**
+**Every Lending Protocol MUST satisfy** (universal across languages):
 - `totalDeposits >= totalBorrows` (solvency)
 - `userCollateralValue * LTV >= userBorrowValue` for every non-liquidatable position
 - Interest accrual does not decrease total deposits
 - Liquidation reduces protocol risk (liquidated position is healthier after)
 - Oracle price used for liquidation is fresh
 
-**Every AMM MUST satisfy:**
+**Every AMM MUST satisfy** (universal across languages):
 - `reserveA * reserveB >= k` after every swap (constant product, or equivalent)
 - Fees are extracted correctly: `amountOut = f(amountIn, reserves, fee)`
 - No token extraction beyond entitled amount
@@ -183,7 +183,7 @@ For each invariant with numeric bounds:
 | **Exact vs approximate** | Is `==` correct, or should it be `<=` / `>=` with tolerance? | Check rounding behavior in code |
 | **Rounding tolerance** | Does the invariant account for precision loss? | Add `± dust` where fixed-point math is used |
 | **Parameter sensitivity** | If a governance param changes, does the invariant still hold? | Parameterize bounds, don't hardcode |
-| **Edge values** | Does the invariant hold at 0, 1, MAX_UINT? | Test boundary conditions explicitly |
+| **Edge values** | Does the invariant hold at 0, 1, maximum representable value? | Test boundary conditions explicitly |
 
 **Too-Loose Detection:**
 ```
@@ -328,7 +328,7 @@ Every invariant gets a review annotation:
 ```markdown
 ### INV-S-001: Total deposits cover total borrows
 - **Property**: `totalDeposits >= totalBorrows`
-- **Scope**: Pool.sol
+- **Scope**: Pool module/contract
 - **Why**: If violated, protocol is insolvent
 - **Testable**: YES
 - **Review**: UNCHANGED — matches canonical lending solvency property
@@ -337,7 +337,7 @@ Every invariant gets a review annotation:
 ```markdown
 ### INV-S-002: Share price monotonicity
 - **Property**: `sharePrice(t) <= sharePrice(t+1)` in absence of realized losses
-- **Scope**: Vault.sol
+- **Scope**: Vault module/contract
 - **Why**: Share price decrease without loss event indicates value extraction
 - **Testable**: YES — ghost variable tracking sharePrice across calls
 - **Review**: TIGHTENED — original was `sharePrice >= 0` (tautological). Tightened to monotonicity per ERC4626 canonical properties.
@@ -347,7 +347,7 @@ Every invariant gets a review annotation:
 ```markdown
 ### INV-XCA-005: Flash-loan-resistant solvency [ADDED]
 - **Property**: `solvencyRatio() >= MIN_RATIO` holds at the END of every transaction, even if flash loans are used within
-- **Scope**: Pool.sol (deposit, borrow, repay, withdraw, liquidate)
+- **Scope**: Pool module (deposit, borrow, repay, withdraw, liquidate)
 - **Why**: Flash loans can temporarily inflate collateral to borrow and default
 - **Testable**: YES — check solvency as post-condition of every public function
 - **Review**: ADDED — not present in original spec. Canonical for lending protocols. Source: [Trail of Bits properties for lending]
@@ -480,10 +480,10 @@ Spawn subagents for:
 
 ## Resources
 
-- **Invariant writer**: [invariant-writer-agent.md](invariant-writer-agent.md) — produces the input this agent reviews
+- **Invariant writer**: [invariant-writer.md](invariant-writer.md) — produces the input this agent reviews
 - **Context builder**: [audit-context-building.md](audit-context-building.md) — protocol context
 - **Vulnerability database**: `DB/index.json` → manifests for known attack patterns
 - **Inter-agent format**: [inter-agent-data-format.md](resources/inter-agent-data-format.md) — output schema
-- **Invariant methodology**: [Invariant-Methodology.md](resources/Invariant-Methodology.md)
+- **Invariant methodology**: [invariant-methodology.md](resources/invariant-methodology.md)
 - **Crytic properties**: github.com/crytic/properties — standard token invariant reference
 - **Certora examples**: github.com/Certora — published CVL specs for reference bounds

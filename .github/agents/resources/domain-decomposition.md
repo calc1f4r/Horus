@@ -1,7 +1,7 @@
 # Domain Decomposition Strategy
 
-> **Purpose**: Defines how the `protocol-reasoning-agent` decomposes a codebase into domains, assigns sub-agents, manages iteration rounds, and handles cross-domain reasoning.
-> **Consumer**: `protocol-reasoning-agent`.
+> **Purpose**: Defines how the `protocol-reasoning` agent decomposes a codebase into domains, assigns sub-agents, manages iteration rounds, and handles cross-domain reasoning.
+> **Consumer**: `protocol-reasoning`.
 
 ---
 
@@ -134,8 +134,8 @@ You are analyzing the [DOMAIN_NAME] domain of a [PROTOCOL_TYPE] protocol.
 
 TARGET CODEBASE: <path>
 YOUR DOMAIN FILES:
-  - <file1.sol> (functions: f1, f2, f3)
-  - <file2.sol> (functions: f4, f5)
+  - <file1.ext> (functions: f1, f2, f3)
+  - <file2.ext> (functions: f4, f5)
 
 YOUR DOMAIN STATE:
   - <var1>: <type> (written by: f1, f3; read by: f2, f4, f5)

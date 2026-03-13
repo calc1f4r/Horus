@@ -58,12 +58,12 @@ severity_breakdown:
 ### Finding 1: [Title]
 
 **Severity**: HIGH
-**File**: `src/contracts/Vault.sol:L45-L52`
+**File**: `src/contracts/Vault.ext:L45-L52`
 **Pattern Match**: {DB pattern name}
 
 **Vulnerable Code**:
-\`\`\`solidity
-{code snippet}
+\`\`\`
+{code snippet — use target language}
 \`\`\`
 
 **Why Vulnerable**:

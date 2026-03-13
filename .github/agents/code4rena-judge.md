@@ -8,7 +8,7 @@ tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent', 'todo']
 
 Validates security findings against Code4rena official judging criteria. Determines whether findings are valid, assigns correct severity (High/Medium/QA/Invalid), applies severity caps, and checks submission quality.
 
-**Do NOT use for** Cantina validation (use `cantina-judge-agent`), Sherlock validation (use `sherlock-judge-agent`), writing PoCs (use `poc-writer-agent`), or general vulnerability discovery.
+**Do NOT use for** Cantina validation (use `cantina-judge`), Sherlock validation (use `sherlock-judging`), writing PoCs (use `poc-writing`), or general vulnerability discovery.
 
 ---
 
