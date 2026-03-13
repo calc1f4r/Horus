@@ -102,13 +102,20 @@ Can run standalone or as a phase within `audit-orchestrator`. When integrated:
 
 ## Workflow
 
+Copy this checklist and track progress. Mark items as you complete each phase:
+
 ```
-Phase 0: Setup & Reconnaissance
-Phase 1: Parallel Persona Execution (Round 1)
-Phase 2: Knowledge Sharing & Cross-Pollination
-Phase 3: Iterative Rounds (Round 2..N until convergence)
-Phase 4: Cross-Verification Vote
-Phase 5: Unified Findings Assembly
+Pipeline Progress:
+- [ ] Phase 0: Setup & Reconnaissance (scope doc written)
+- [ ] Phase 1: Round 1 — All 6 personas spawned and returned
+- [ ] Quality Gate 1: All 6 outputs non-empty, total findings > 0 or code confirmed trivial
+- [ ] Phase 2: Shared knowledge doc built, cross-pollination seeds extracted
+- [ ] Phase 3: Round 2..N — iterate until convergence score ≥ 0.8 or max rounds hit
+- [ ] Quality Gate 2: Every finding has code reference + root cause + severity estimate
+- [ ] Phase 4: Cross-verification — disputed/possible findings resolved
+- [ ] Quality Gate 3: Zero duplicate root causes, all findings have confidence score
+- [ ] Phase 5: Unified findings assembled, persona-findings.md written
+- [ ] Final Gate: Every CRITICAL/HIGH finding has attack scenario with specific parameters
 ```
 
 ---
@@ -202,12 +209,19 @@ Focus exclusively on YOUR methodology.
 Apply the Feynman technique relentlessly: for every line of code, ask WHY it exists,
 WHAT HAPPENS if deleted, and WHAT SPECIFIC ATTACK motivated it.
 
+CRITICAL DIRECTIVES:
+- Prioritize code that handles value flow (deposits, withdrawals, transfers, minting, burning).
+- Every finding MUST include: exact file:line, root cause, severity estimate, and attack scenario.
+- If you are uncertain about a finding, mark it as POSSIBLE and note what evidence would confirm it.
+- Include an "Open Questions for Other Personas" section with specific, answerable questions.
+- Track what percentage of in-scope code you examined. Report it in your output.
+
 OUTPUT: Write your complete analysis to:
   audit-output/personas/round-1/[persona-name].md
 
 Use your full output format as specified in your agent file.
-Include an "Open Questions for Other Personas" section — these questions will
-be shared with all other personas in the next round.
+SELF-VALIDATE before writing: re-read every finding and confirm the code reference
+is correct and the root cause is specific (not generic).
 ```
 
 | Sub-Agent | Agent Name | Output File |
@@ -227,6 +241,22 @@ After all 6 complete:
 1. Read all 6 output documents
 2. Count findings per persona
 3. Collect all "Open Questions for Other Personas" into a single list
+
+### Quality Gate 1: Round 1 Validation
+
+Before proceeding to Phase 2, validate:
+
+```
+QG-1 Checks:
+- [ ] All 6 persona outputs exist and are non-empty
+- [ ] Each persona followed its designated methodology (not generic scanning)
+- [ ] Total unique code locations referenced across all personas > 0
+- [ ] No persona output is a copy of another persona's output
+```
+
+**If any persona returned empty**: Retry that persona with a reduced scope (half the files, focusing on highest-value contracts). If still empty after retry, continue with 5 personas and redistribute that persona's focus areas via cross-pollination seeds.
+
+**If total findings across all personas = 0 AND codebase > 200 LoC**: This is suspicious. Verify the codebase path is correct and that source files (not just configs/tests) are in scope. If confirmed correct, proceed — Round 2 cross-pollination often reveals what Round 1 missed.
 
 ---
 
@@ -315,24 +345,55 @@ INSTRUCTIONS FOR THIS ROUND:
 5. Explore NEW areas suggested by cross-pollination seeds.
 6. Apply Feynman questioning to any code you haven't examined yet.
 7. Mark findings as NEW (this round) or CARRIED (from previous round, refined).
+8. SELF-VALIDATE: Before writing output, re-check every finding's code reference
+   and root cause. Remove or downgrade findings you can no longer support.
 
 OUTPUT: Write to audit-output/personas/round-[N]/[persona-name].md
+Include a "Code Coverage" line: X of Y in-scope files examined.
 ```
 
 #### Step 2: Collect & Evaluate Convergence
 
-After all 6 complete:
+After all 6 complete, compute a quantitative convergence score:
 
 ```
-CONVERGENCE CHECK:
-- Count NEW findings across all 6 personas this round
-- Count questions ANSWERED vs questions REMAINING
-- If NEW findings == 0 AND no open questions remain → CONVERGED
-- If NEW findings > 0 → Continue to next round
-- If max rounds reached → Force convergence, move to Phase 4
+CONVERGENCE SCORING (compute after each round):
+
+Inputs:
+  new_findings    = count of NEW findings across all 6 personas this round
+  carried_refined = count of CARRIED findings that were meaningfully refined
+  questions_open  = count of unanswered cross-persona questions
+  questions_total = total questions asked this round + carryover
+  code_coverage   = unique files referenced / total files in scope
+
+Formula:
+  novelty_rate    = new_findings / max(1, new_findings + carried_refined)
+  question_rate   = questions_open / max(1, questions_total)
+  convergence     = (1 - novelty_rate) * 0.5 + (1 - question_rate) * 0.3 + code_coverage * 0.2
+
+Decision:
+  convergence ≥ 0.8                        → CONVERGED — proceed to Phase 4
+  convergence < 0.8 AND round < max_rounds → continue to next round
+  round == max_rounds                      → FORCED convergence — proceed to Phase 4
+                                              Flag all POSSIBLE findings for manual review
 ```
 
-Build `audit-output/personas/shared-knowledge-round-[N].md` with updated cross-pollination.
+Log the convergence score in `audit-output/personas/shared-knowledge-round-[N].md`.
+
+### Quality Gate 2: Pre-Verification Validation
+
+Before moving to Phase 4, validate all findings:
+
+```
+QG-2 Checks:
+- [ ] Every finding has an exact code reference (file:line)
+- [ ] Every finding has a root cause (not just a symptom description)
+- [ ] Every finding has a severity estimate with justification
+- [ ] No two findings share the same root cause (pre-deduplicate)
+- [ ] CRITICAL/HIGH findings have concrete attack scenarios
+```
+
+Findings that fail QG-2 are downgraded to POSSIBLE regardless of persona agreement.
 
 ---
 
@@ -365,10 +426,27 @@ For each finding, calculate confidence based on multi-persona agreement:
 
 ### Step 3: Deduplication
 
-Multiple personas may find the same root cause through different paths:
-- Group findings by **affected code location**
-- Group by **root cause** (not symptom)
-- Merge duplicates, keeping the BEST explanation and ALL supporting evidence from different personas
+Multiple personas may find the same root cause through different paths. Apply this algorithm:
+
+```
+DEDUPLICATION ALGORITHM:
+
+1. GROUP by affected code location (file:line range, within 10 lines = same location)
+2. Within each group, CLUSTER by root cause:
+   - Same root cause, different symptoms → MERGE into one finding
+   - Same location, different root causes → KEEP as separate findings
+3. For each merged finding:
+   - Keep the CLEAREST root cause explanation (prioritize: DFS > Re-Impl > others for precision)
+   - Keep ALL supporting evidence from every persona that found it
+   - Use the HIGHEST severity estimate with justification
+   - Merge attack scenarios into the most complete version
+4. Assign canonical ID: F-NNN ordered by severity (CRITICAL first)
+```
+
+Common deduplication pitfalls:
+- **Same symptom, different root cause**: rounding error (Mirror) vs. precision loss chain (DFS) → keep BOTH
+- **Same root cause, different locations**: missing reentrancy guard in deposit AND withdraw → ONE finding, two affected locations
+- **Subset findings**: "oracle stale" (Working Backward) is a subset of "oracle manipulation enables liquidation" (State Machine) → keep the MORE COMPLETE finding
 
 ### Step 4: Cross-Verification Spawn
 
@@ -482,6 +560,23 @@ Create `audit-output/persona-findings.md`:
 cp -r audit-output/personas/ audit-output/personas-archive/
 ```
 
+### Final Quality Gate: Output Validation
+
+Before delivering `persona-findings.md`, validate:
+
+```
+FINAL GATE Checks:
+- [ ] Every CRITICAL/HIGH finding has a concrete attack scenario with specific parameters
+- [ ] Every finding's code reference is valid (file exists, line range contains relevant code)
+- [ ] No duplicate root causes remain after deduplication
+- [ ] Confidence scores are consistent with persona agreement levels
+- [ ] The Cross-Persona Agreement Matrix is complete (every finding × every persona)
+- [ ] Convergence log shows the progression across rounds
+- [ ] Summary severity counts match actual finding counts
+```
+
+If any check fails, fix before delivering. This is the feedback loop — validate, fix, re-validate.
+
 ---
 
 ## Feynman Technique Integration
@@ -535,7 +630,32 @@ Reference: [feynman-question-framework.md](resources/feynman-question-framework.
 | Previous round output (per persona) | ~8K tokens |
 | Target code (per persona) | Remaining budget |
 
-If codebase exceeds single-persona context limits:
-1. Split files across personas by domain affinity (BFS gets entry points, DFS gets libraries, etc.)
-2. Each persona gets FULL access to their primary files + summaries of others
-3. Cross-pollination documents bridge the gaps
+### Large Codebase Strategy
+
+If codebase exceeds single-persona context limits (total source > ~150K tokens):
+
+```
+STRATEGY: Domain-Affinity Partitioning
+
+1. PARTITION source files by functional domain:
+   - Core protocol logic (vaults, pools, markets)
+   - Token/accounting contracts
+   - Oracle/price feed integrations
+   - Access control / governance
+   - Periphery (routers, helpers, views)
+
+2. ASSIGN primary domains to personas by affinity:
+   - BFS: Gets ALL files (reads headers/signatures only in Layer 0)
+   - DFS: Gets math libraries + core logic (deepest dependencies)
+   - Working Backward: Gets value-transfer contracts + oracle integrations
+   - State Machine: Gets core logic + governance (state-heavy contracts)
+   - Mirror: Gets paired contracts (vault+token, deposit+withdraw modules)
+   - Re-Implementation: Gets highest-value contracts (by TVL flow)
+
+3. Each persona gets FULL text of their primary files + SIGNATURES ONLY of other files
+4. Cross-pollination documents bridge the context gaps
+5. In Round 2+, personas can REQUEST full text of specific non-primary files
+   based on cross-pollination seeds
+```
+
+Never skip a persona due to context limits — reduce scope per persona instead.
