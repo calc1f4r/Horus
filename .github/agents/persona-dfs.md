@@ -130,6 +130,49 @@ For entry-point-level functions:
 
 ---
 
+## False Positive Filters
+
+Common DFS false positives — check before reporting:
+
+| Pattern | Why It Looks Like a Bug | Why It's Usually Not | How to Confirm |
+|---------|------------------------|---------------------|----------------|
+| Leaf function allows input=0 | No zero check in library function | ALL callers validate input before calling | Check every caller's validation |
+| Unchecked return value from library | Library doesn't revert on failure | Return value is checked by the immediate caller above | Trace one level up |
+| Rounding direction "wrong" at leaf | Library rounds down | Protocol-level function wraps it with a round-up adjustment | Check the caller's arithmetic |
+| Theoretical overflow in intermediate | `a * b` could overflow in theory | Input domain is bounded by type or business logic (e.g., max supply) | Verify if any entry point can produce inputs large enough |
+| Custom fork differs from upstream | Code differs from OpenZeppelin/standard | Difference is intentional and documented | Check comments, commit history |
+
+## Self-Validation Checklist
+
+Before writing output:
+
+```
+Per-Finding Validation:
+- [ ] Code reference is exact (file:line)
+- [ ] Root cause is a specific CONTRACT VIOLATION (not "this could overflow")
+- [ ] REACHABILITY assessed: EXPLOITABLE / UNREACHABLE (QA) / CONDITIONALLY REACHABLE
+- [ ] If EXPLOITABLE: the entry point that triggers it is named with specific inputs
+- [ ] If CONDITIONALLY REACHABLE: the conditions are precise ("when totalSupply=0" not "in edge cases")
+```
+
+```
+Overall Validation:
+- [ ] Dependency tree is complete (all imports mapped)
+- [ ] Leaf function contracts use consistent notation (REQUIRES/GUARANTEES/ROUNDING/EDGES)
+- [ ] Assumption stack traces are bottom-up (not top-down)
+- [ ] Code coverage: report how many leaf functions have verified contracts vs. total
+```
+
+## Confidence Calibration
+
+| Confidence | Criteria |
+|------------|----------|
+| **HIGH** | Contract violation verified: caller sends input that violates callee's REQUIRES, AND the entry point that triggers this path is identified with specific inputs |
+| **MEDIUM** | Contract violation found but reachability unconfirmed — the violating input is theoretically possible but you haven't proven an entry point produces it |
+| **LOW** | Rounding/precision concern identified at leaf level — accumulation through call chain not yet traced |
+
+---
+
 ## Output Format
 
 Write your findings to the designated output path:
@@ -195,4 +238,15 @@ When reading documents from other personas:
 1. BFS persona's entry point map tells you **which callers matter most** — prioritize those paths
 2. Working Backward persona identifies **critical sinks** — verify the call chains feeding those sinks
 3. State Machine persona may flag **illegal state transitions** in libraries — cross-check against your leaf analysis
-4. Re-implementation persona may have a different mental model of what a function SHOULD do — compare against your documented contracts
+4. Mirror persona's asymmetry findings may indicate **one side of a pair violates a leaf contract** the other satisfies
+5. Re-implementation persona may have a different mental model of what a function SHOULD do — compare against your documented contracts
+
+**Questions to ANSWER** (other personas commonly ask DFS):
+- "Does function X actually enforce precondition Y?" → Check your leaf contracts
+- "What does function X return when input is 0?" → Check your boundary analysis
+- "Is the rounding in function X safe for use Y?" → Check your ROUNDING documentation
+
+**Questions to ASK** (DFS commonly needs from others):
+- BFS: "Which entry points call the function where I found this contract violation?"
+- Working Backward: "Does this leaf-level precision loss reach a value-transfer sink?"
+- State Machine: "Can the protocol reach a state where this leaf function receives violating inputs?"
