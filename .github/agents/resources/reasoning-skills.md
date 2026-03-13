@@ -1,7 +1,7 @@
 # Reasoning Skills for Vulnerability Discovery
 
-> **Purpose**: Core reasoning framework for the `protocol-reasoning-agent`. Defines the assumption layers, state reachability analysis, domain-specific reasoning guides, cross-function patterns, iteration protocol, and confidence calibration.
-> **Consumer**: `protocol-reasoning-agent` and its spawned domain sub-agents.
+> **Purpose**: Core reasoning framework for the `protocol-reasoning` agent. Defines the assumption layers, state reachability analysis, domain-specific reasoning guides, cross-function patterns, iteration protocol, and confidence calibration.
+> **Consumer**: `protocol-reasoning` and its spawned domain sub-agents.
 
 ---
 
@@ -188,10 +188,10 @@ Root cause seeds to reason about:
 
 Root cause seeds:
 - **Privilege escalation**: "Can a non-privileged actor reach a state that grants them privileges?"
-- **Missing authorization**: "Which functions modify critical state but don't check msg.sender?"
+- **Missing authorization**: "Which functions modify critical state but don't verify the caller's identity/permissions?"
 - **Role confusion**: "Are there multiple admin roles? Can one role's actions undermine another?"
 - **Initialization race**: "Can `initialize()` be called by anyone before the intended admin?"
-- **Delegatecall context**: "Does any delegatecall preserve the caller's context unexpectedly?"
+- **Delegatecall/proxy context**: "Does any delegated or proxied call preserve the caller's context unexpectedly?"
 
 ### Cross-Contract Interactions
 

@@ -1,6 +1,6 @@
 ---
 name: audit-orchestrator
-description: 'General-purpose smart contract audit orchestrator. Takes a codebase path and optional protocol hint, runs a 7-phase pipeline using specialized sub-agents, and produces a comprehensive audit report with findings, PoCs, fuzzing harnesses, formal verification specs, and dual Sherlock+Cantina severity validation. Supports Solidity/EVM, Cosmos SDK/Go, Solana/Rust, and any language. Use as the primary entry point for auditing an unfamiliar codebase.'
+description: 'General-purpose smart contract audit orchestrator. Takes a codebase path and optional protocol hint, runs a 7-phase pipeline using specialized sub-agents, and produces a comprehensive audit report with findings, PoCs, fuzzing harnesses, formal verification specs, and dual Sherlock+Cantina severity validation. Language-agnostic — works with any smart contract language and framework. Use as the primary entry point for auditing an unfamiliar codebase.'
 tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 ---
 
@@ -10,7 +10,7 @@ Master orchestrator for end-to-end smart contract security audits. Takes a codeb
 
 **This is the ENTRY POINT** for auditing an unfamiliar codebase. It spawns and coordinates all other agents.
 
-**Do NOT use for** DB entry creation (use `variant-template-writer`), individual PoC writing (use `poc-writing`), report fetching (use `solodit-fetching-agent`), or DB indexing (use `defihacklabs-indexer`).
+**Do NOT use for** DB entry creation (use `variant-template-writer`), individual PoC writing (use `poc-writing`), report fetching (use `solodit-fetching`), or DB indexing (use `defihacklabs-indexer`).
 
 ---
 
@@ -20,7 +20,7 @@ Master orchestrator for end-to-end smart contract security audits. Takes a codeb
 @audit-orchestrator <codebase-path> [protocol-hint]
 ```
 
-- `<codebase-path>`: Absolute or relative path to the target codebase root
+- `<codebase-path>`: Absolute or relative path to the target codebase 
 - `[protocol-hint]`: Optional. One of: `lending_protocol`, `dex_amm`, `vault_yield`, `governance_dao`, `cross_chain_bridge`, `cosmos_appchain`, `solana_program`, `perpetuals_derivatives`, `token_launch`, `staking_liquid_staking`, `nft_marketplace`
 
 If no hint is provided, protocol type is auto-detected.
@@ -76,18 +76,27 @@ mkdir -p audit-output/pocs audit-output/fuzzing audit-output/certora
 
 ### Step 2: Scan the Codebase
 
+Detect the language(s) and framework(s) used by the target codebase:
+
 ```bash
-# Count files by language
-find <path> -name "*.sol" | wc -l
-find <path> -name "*.rs" | wc -l
-find <path> -name "*.go" | wc -l
+# Detect languages present
+for ext in sol rs go move cairo vy ts js; do
+  count=$(find <path> -name "*.$ext" 2>/dev/null | wc -l)
+  [ "$count" -gt 0 ] && echo "$ext: $count files"
+done
 
-# Check framework
-ls <path>/{foundry.toml,hardhat.config.js,hardhat.config.ts,Anchor.toml,Cargo.toml,Move.toml,go.mod} 2>/dev/null
+# Detect framework by config files
+for cfg in foundry.toml hardhat.config.js hardhat.config.ts Anchor.toml Cargo.toml Move.toml go.mod Scarb.toml brownie-config.yaml ape-config.yaml; do
+  [ -f "<path>/$cfg" ] && echo "Framework config found: $cfg"
+done
 
-# List source files
-find <path> -name "*.sol" -not -path "*/test/*" -not -path "*/node_modules/*" -not -path "*/lib/*" | head -50
+# List source files (excluding tests, dependencies, build artifacts)
+find <path> -type f \( -name "*.sol" -o -name "*.rs" -o -name "*.go" -o -name "*.move" -o -name "*.cairo" -o -name "*.vy" \) \
+  -not -path "*/test/*" -not -path "*/tests/*" -not -path "*/node_modules/*" \
+  -not -path "*/lib/*" -not -path "*/target/*" -not -path "*/build/*" | head -50
 ```
+
+Record the detected language(s) and framework(s) — all subsequent phases adapt their commands accordingly.
 
 ### Step 3: Detect Protocol Type
 
@@ -97,9 +106,12 @@ Apply the detection rules from [protocol-detection.md](resources/protocol-detect
 2. **If no hint**: Run auto-detection using import/keyword analysis
 3. **Collect ALL matches** — codebases are often multi-type (e.g., lending + oracle + vault)
 
-For Solidity, scan imports:
+Scan for protocol-indicative keywords in source files (adapt file extensions to detected language):
 ```bash
-grep -r "import\|interface\|function" <path> --include="*.sol" | head -100
+# Scan imports, interfaces, and function signatures in source files
+grep -rn "import\|interface\|function\|module\|use\|pub fn\|entry fun" <path> \
+  --include="*.sol" --include="*.rs" --include="*.go" --include="*.move" \
+  --include="*.cairo" --include="*.vy" | head -100
 ```
 
 Match output against the detection tables in [protocol-detection.md](resources/protocol-detection.md).
@@ -266,7 +278,7 @@ If sub-agent fails, retry once with a reduced scope (solvency + access control c
 
 ### Downstream Impact
 
-All subsequent phases that consume invariants (`invariant-catcher` in Phase 4, `protocol-reasoning-agent` in Phase 4a, `medusa-fuzzing` and `certora-verification` in Phase 7) should read `02-invariants-reviewed.md` instead of `02-invariants.md`. If the reviewed file does not exist, fall back to `02-invariants.md`.
+All subsequent phases that consume invariants (`invariant-catcher` in Phase 4, `protocol-reasoning` in Phase 4a, `medusa-fuzzing` and `certora-verification` in Phase 7) should read `02-invariants-reviewed.md` instead of `02-invariants.md`. If the reviewed file does not exist, fall back to `02-invariants.md`.
 
 ---
 
@@ -348,7 +360,7 @@ Shard K fails → retry once. Still fails → log, continue (other shards unaffe
 
 ## Phase 4a: Reasoning-Based Vulnerability Discovery
 
-**Agent**: Spawn `protocol-reasoning-agent` sub-agent
+**Agent**: Spawn `protocol-reasoning` sub-agent
 **Output**: `audit-output/04a-reasoning-findings.md`
 
 This phase uses deep reasoning (not pattern matching) to discover vulnerabilities that Phase 4's keyword scan would miss — novel bugs, emergent cross-domain interactions, and assumption violations.
@@ -455,16 +467,18 @@ Apply Impact × Likelihood matrix:
 For each CRITICAL and HIGH confidence finding, spawn `poc-writing` sub-agent:
 
 ```
-Write a Foundry PoC for this vulnerability:
+Write a PoC for this vulnerability using the target codebase's native test framework.
 
 VULNERABILITY: <finding title>
 ROOT CAUSE: <root cause>
 AFFECTED CODE: <file + lines>
 ATTACK SCENARIO: <step-by-step>
 TARGET CODEBASE: <path>
+DETECTED LANGUAGE: <language>
+DETECTED FRAMEWORK: <framework>
 
 Follow your full workflow (understand → state setup → exploit → validate → pre-flight).
-Write the PoC to: audit-output/pocs/F-NNN-poc.t.sol
+Write the PoC to: audit-output/pocs/F-NNN-poc.<appropriate-extension>
 ```
 
 ### Step 6: Write Triaged Findings
@@ -576,8 +590,8 @@ Final Verification:
 - [ ] CRITICAL and HIGH findings have PoC references (or documented reason why not)
 - [ ] Sherlock + Cantina validation completed for all findings
 - [ ] Severity reconciliation applied where judges disagree
-- [ ] Fuzzing harnesses reference real contract names and functions
-- [ ] Certora specs are syntactically valid CVL
+- [ ] Fuzzing harnesses reference real contract/module names and functions
+- [ ] Formal verification specs are syntactically valid for their target tool
 - [ ] Executive summary statistics match actual finding count
 - [ ] No hallucinated file paths — every path verified via read_file or file listing
 - [ ] No hallucinated line numbers — every line range verified

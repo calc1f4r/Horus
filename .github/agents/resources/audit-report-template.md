@@ -75,7 +75,7 @@
 | **Confidence** | HIGH / MEDIUM |
 | **Impact** | [Concrete: "$X stolen", "total fund loss", etc.] |
 | **Likelihood** | [HIGH / MEDIUM / LOW] |
-| **Affected Code** | `file.sol` L123-L145 |
+| **Affected Code** | `file.ext` L123-L145 |
 | **DB Pattern** | `pattern-id` (or "Novel") |
 | **Sherlock** | HIGH |
 | **Cantina** | CRITICAL (Impact: High, Likelihood: High) |
@@ -90,21 +90,21 @@
 3. Attacker extracts value by calling `withdraw()`
 
 **Vulnerable Code**:
-```solidity
-// file.sol L123-L145
-function vulnerable() external {
+```
+// file L123-L145 (use target language)
+function vulnerable() {
     // ❌ VULNERABLE: missing check
 }
 ```
 
 **Recommended Fix**:
-```solidity
-function secure() external {
+```
+function secure() {
     // ✅ SECURE: added validation
 }
 ```
 
-**PoC**: See `audit-output/pocs/F-001-poc.t.sol`
+**PoC**: See `audit-output/pocs/F-001-poc.{ext}`
 
 ---
 
@@ -130,8 +130,8 @@ Summary of extracted invariants that can be used for ongoing testing:
 
 | ID | Category | Property | Scope | Testable |
 |----|----------|----------|-------|----------|
-| INV-S-001 | Solvency | totalDeposits >= totalBorrowed | Pool.sol | YES |
-| INV-AC-001 | Access Control | Only admin can pause | Pool.sol | YES |
+| INV-S-001 | Solvency | totalDeposits >= totalBorrowed | Pool module | YES |
+| INV-AC-001 | Access Control | Only admin can pause | Pool module | YES |
 | ... | ... | ... | ... | ... |
 
 Full specs: See `audit-output/02-invariants.md`
@@ -142,7 +142,7 @@ Full specs: See `audit-output/02-invariants.md`
 
 | Harness | Invariants Tested | Status |
 |---------|-------------------|--------|
-| `FuzzPool.sol` | INV-S-001, INV-A-001 | Generated |
+| `FuzzPool` | INV-S-001, INV-A-001 | Generated |
 | ... | ... | ... |
 
 Configuration: See `audit-output/fuzzing/medusa.json`

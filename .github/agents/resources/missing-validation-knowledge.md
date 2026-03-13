@@ -1,6 +1,6 @@
 # Missing Validation - Quick Knowledge Reference
 
-> **Purpose**: Fast lookup reference for the `missing-validation-reasoning-agent`. Contains condensed reasoning prompts, checklists, and vulnerability signatures.
+> **Purpose**: Fast lookup reference for the `missing-validation-reasoning` agent. Contains condensed reasoning prompts, checklists, and vulnerability signatures.
 
 ---
 
@@ -109,5 +109,5 @@ grep -n "uint256" . -r | grep "set"
 
 ## References
 
-- Use the [Missing Validation Agent](../missing-validation-reasoning-agent.md) for deep analysis.
+- Use the [Missing Validation Agent](../missing-validation-reasoning.md) for deep analysis.
 - Full DB Path: `DB/general/missing-validations/`

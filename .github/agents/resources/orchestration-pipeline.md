@@ -43,7 +43,7 @@ User Input: @audit-orchestrator <path> [hint]
                │ rawFindings (F-NNN)
                ▼
 ┌─────────────────────────────────────┐
-│ Phase 4a: REASONING DISCOVERY       │  Sub-agent: protocol-reasoning-agent
+│ Phase 4a: REASONING DISCOVERY       │  Sub-agent: protocol-reasoning
 │ Domain decomposition, 4-round deep  │  Output: 04a-reasoning-findings.md
 │ reasoning, reachability proofs      │  (spawns domain sub-agents internally)
 └──────────────┬──────────────────────┘
@@ -91,7 +91,7 @@ User Input: @audit-orchestrator <path> [hint]
 
 **Steps**:
 1. Create `audit-output/` directory
-2. Scan codebase: `find <path> -name "*.sol" -o -name "*.rs" -o -name "*.go" | head -50`
+2. Scan codebase: `find <path> -name "*.sol" -o -name "*.rs" -o -name "*.go" -o -name "*.move" -o -name "*.cairo" -o -name "*.vy" | head -50`
 3. Detect language/framework using [protocol-detection.md](protocol-detection.md) signals
 4. If user provided protocol hint → map directly to `protocolContext.mappings`
 5. If no hint → run auto-detection, collect all matches
@@ -225,7 +225,7 @@ Include: Review Summary, Canonical Coverage table, Multi-Step Coverage table, Re
    - Or all at once: `DB/manifests/huntcards/all-huntcards.json` (~100K tokens)
 2. For each card, run its `grep` pattern against the target codebase:
    ```bash
-   grep -rn "card.grep" <path> --include="*.sol" --include="*.rs" -l
+   grep -rn "card.grep" <path> --include="*.sol" --include="*.rs" --include="*.go" --include="*.move" --include="*.cairo" --include="*.vy" -l
    ```
 3. Cards with zero grep hits are **discarded** (pattern cannot apply to this codebase)
 4. Cards with `neverPrune: true` always survive
@@ -281,14 +281,14 @@ Write ALL findings to audit-output/03-findings-shard-<shard-id>.md
 
 | Attribute | Value |
 |-----------|-------|
-| **Agent** | `protocol-reasoning-agent` (sub-agent) |
+| **Agent** | `protocol-reasoning` (sub-agent) |
 | **Input** | Codebase path + context + invariants + Phase 4 findings + manifest list |
 | **Output** | `audit-output/04a-reasoning-findings.md` |
 | **Estimated context** | Large — sub-agent manages its own context, spawns domain sub-agents |
 
 **Sub-agent prompt template**:
 ```
-You are the protocol-reasoning-agent. Perform deep reasoning-based vulnerability discovery.
+You are the protocol-reasoning agent. Perform deep reasoning-based vulnerability discovery.
 
 TARGET CODEBASE: <path>
 PROTOCOL TYPE: <detected types>
@@ -371,7 +371,7 @@ For each CRITICAL/HIGH finding:
   Spawn poc-writer sub-agent with:
     - Finding details (root cause, affected code, attack scenario)
     - Target codebase path
-    - Output path: audit-output/pocs/F-NNN-poc.t.sol
+    - Output path: audit-output/pocs/F-NNN-poc.{ext} (extension matches target language)
 ```
 
 **Transition**: Pass triaged findings to Phase 7.

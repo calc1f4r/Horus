@@ -22,9 +22,9 @@ Run these checks first to determine the chain/language:
 
 ---
 
-## Protocol Type Detection (EVM/Solidity)
+## Protocol Type Detection
 
-Scan imports and interface usage to classify protocol type. Check in this order — a codebase may match multiple types (union all matches):
+Scan code patterns (imports, function names, keywords) to classify protocol type. These patterns are primarily Solidity/EVM examples — for other languages, look for equivalent concepts (e.g., `borrow`, `liquidate`, `swap` function names exist across all languages). Check in this order — a codebase may match multiple types (union all matches):
 
 ### Lending Protocol (`lending_protocol`)
 
@@ -177,19 +177,28 @@ The orchestrator should run this sequence:
 
 ```bash
 # Step 1: Detect language/framework
-find "$TARGET" -name "*.sol" -o -name "*.rs" -o -name "*.go" -o -name "*.vy" -o -name "*.move" | head -20
+find "$TARGET" -name "*.sol" -o -name "*.rs" -o -name "*.go" -o -name "*.vy" -o -name "*.move" -o -name "*.cairo" | head -20
 
 # Step 2: Check for framework files
-ls "$TARGET"/{foundry.toml,hardhat.config.js,hardhat.config.ts,Anchor.toml,Cargo.toml,Move.toml,go.mod} 2>/dev/null
+ls "$TARGET"/{foundry.toml,hardhat.config.js,hardhat.config.ts,Anchor.toml,Cargo.toml,Move.toml,go.mod,Scarb.toml} 2>/dev/null
 
-# Step 3: For Solidity — scan imports and keywords
+# Step 3: Scan for protocol-type keywords across all languages
+grep -rn "borrow\|repay\|liquidat\|swap\|deposit\|withdraw\|mint\|burn\|stake\|bridge\|relay" "$TARGET" --include="*.sol" --include="*.rs" --include="*.go" --include="*.move" --include="*.cairo" --include="*.vy" | head -100
+
+# Step 4: For Solidity — scan imports
 grep -r "import\|interface\|function" "$TARGET" --include="*.sol" | head -100
 
-# Step 4: For Go — scan imports
+# Step 5: For Go — scan imports
 grep -r "import\|func.*Keeper\|MsgServer" "$TARGET" --include="*.go" | head -50
 
-# Step 5: For Rust — scan attributes and imports
+# Step 6: For Rust — scan attributes and imports
 grep -r "#\[program\]\|use.*solana\|use.*cosmwasm" "$TARGET" --include="*.rs" | head -50
+
+# Step 7: For Move — scan module and function declarations
+grep -r "module\|public.*fun\|entry.*fun" "$TARGET" --include="*.move" | head -50
+
+# Step 8: For Cairo — scan module and function declarations
+grep -r "#\[contract\]\|fn\|#\[external\]" "$TARGET" --include="*.cairo" | head -50
 ```
 
 Parse the output against the tables above and collect all matches.

@@ -181,3 +181,91 @@ uint256 iterationsNeeded = targetBalance / minDeposit;
 require(iterationsNeeded < 1000, "Too many iterations for mainnet");
 for (uint i = 0; i < iterationsNeeded; i++) { target.deposit(minDeposit); }
 ```
+
+### "The Internal Bypasser"
+
+The agent calls an `internal` or `private` function directly to prove a bug, but the
+public functions that call it have guards preventing the vulnerable state from ever being reached.
+
+```solidity
+// BAD: Calling internal function directly — bypasses all public guards
+// The public function deposit() has `require(amount >= MIN_DEPOSIT)` which prevents
+// the zero-amount edge case this PoC exploits.
+target._internalCalculateShares(0);  // internal fn, never callable by attacker
+
+// FIX: Go through the public entry point. If the guard blocks the exploit, the bug
+// is NOT reachable and the PoC should not be written.
+vm.prank(attacker);
+target.deposit(0);  // This reverts with "amount below minimum" — bug is unreachable
+// → HALT: Report that the internal bug is guarded by the public interface.
+```
+
+```rust
+// BAD (Cosmos): Calling internal helper directly
+let result = _update_rewards(&mut deps.storage, &attacker_addr, amount);
+// The execute() handler that calls _update_rewards validates amount > 0 first
+
+// FIX: Go through the real message handler
+let msg = ExecuteMsg::ClaimRewards { amount: Uint128::zero() };
+let res = execute(deps.as_mut(), env, info, msg);
+// If this returns Err — the bug is unreachable through the public API.
+```
+
+### "The Impossible Environment"
+
+The agent fabricates SDK/chain conditions that cannot exist in production.
+
+```rust
+// BAD (Cosmos): Creating a mock querier that returns impossible chain state
+let mut deps = mock_dependencies();
+// Fabricating a validator set where total_power = 0 — impossible on a live chain
+deps.querier.update_staking("ustake", &[], &[]);
+// The chain's consensus module ALWAYS has at least one validator with non-zero power
+
+// FIX: Use realistic chain state or ask the user for the real environment
+let validators = &[Validator { address: "val1".into(), commission: Decimal::percent(5),
+    max_commission: Decimal::percent(20), max_change_rate: Decimal::percent(1) }];
+deps.querier.update_staking("ustake", validators, &[]);
+// If you need a condition the real chain can't produce, HALT and report it.
+```
+
+```typescript
+// BAD (SDK): Creating framework conditions that the SDK prevents
+const config = { maxValidators: 0 };  // SDK enforces minValidators >= 1
+// Any bug that depends on zero validators is not exploitable
+
+// FIX: Use conditions the SDK actually allows, or HALT
+```
+
+### "The Phantom Interface"
+
+Creating mock interfaces that don't match how the real chain/module works.
+
+```rust
+// BAD (Cosmos): Mock bank module that allows negative balances
+// The real bank module NEVER allows negative balances
+fn mock_bank_send(from: &Addr, to: &Addr, amount: i128) -> StdResult<Response> {
+    // This mock allows amount < 0, but the real chain doesn't
+    Ok(Response::new())
+}
+
+// FIX: Use cosmwasm_std::testing mocks which enforce real constraints,
+// or fork from a real chain state. If the real behavior is unknown, ASK the user.
+```
+
+### "The People Pleaser"
+
+The agent knows the bug is unreachable or the environment is fabricated, but writes
+the PoC anyway to avoid disappointing the reviewer.
+
+```
+// BAD: Agent internally recognizes the issue but proceeds anyway
+// "The internal function has the bug, but the public function guards against it...
+//  let me just call the internal function directly so the test passes."
+
+// FIX: HALT and be honest
+// "I could not produce a valid PoC because the vulnerable function `_calculateShares`
+//  is internal and the public entry point `deposit()` has a `require(amount >= MIN_DEPOSIT)`
+//  guard that prevents the zero-amount edge case from being reached. The vulnerability
+//  exists in the code but is not exploitable through the public API."
+```
