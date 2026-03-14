@@ -4,9 +4,10 @@ description: "State Machine auditing persona — maps all protocol states, trans
 context: fork
 agent: persona-state-machine
 user-invocable: false
+argument-hint: <codebase-path>
 ---
 
-Perform State Machine audit on the target codebase.
+Perform State Machine audit on the codebase at `$ARGUMENTS`.
 
 ## Strategy
 

@@ -4,9 +4,10 @@ description: "Mirror auditing persona — analyzes paired/opposite functions for
 context: fork
 agent: persona-mirror
 user-invocable: false
+argument-hint: <codebase-path>
 ---
 
-Perform Mirror audit on the target codebase.
+Perform Mirror audit on the codebase at `$ARGUMENTS`.
 
 ## Strategy
 

@@ -4,9 +4,10 @@ description: "DFS auditing persona — verifies leaf functions then works upward
 context: fork
 agent: persona-dfs
 user-invocable: false
+argument-hint: <codebase-path>
 ---
 
-Perform Depth-First Search audit on the target codebase.
+Perform Depth-First Search audit on the codebase at `$ARGUMENTS`.
 
 ## Strategy
 

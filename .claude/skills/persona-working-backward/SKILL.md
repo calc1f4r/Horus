@@ -4,9 +4,10 @@ description: "Working Backward auditing persona — traces from critical sinks t
 context: fork
 agent: persona-working-backward
 user-invocable: false
+argument-hint: <codebase-path>
 ---
 
-Perform Working Backward audit on the target codebase.
+Perform Working Backward audit on the codebase at `$ARGUMENTS`.
 
 ## Strategy
 

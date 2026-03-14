@@ -6,7 +6,7 @@ agent: invariant-catcher
 argument-hint: <codebase-path> [vulnerability-topic]
 ---
 
-Hunt for vulnerability patterns in the codebase at `$0` for topic `$1`.
+Hunt for vulnerability patterns in the codebase. Arguments: `$ARGUMENTS`.
 
 ## What this does
 

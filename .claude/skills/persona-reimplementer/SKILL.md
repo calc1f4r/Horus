@@ -4,9 +4,10 @@ description: "Re-Implementation auditing persona — hypothetically re-implement
 context: fork
 agent: persona-reimplementer
 user-invocable: false
+argument-hint: <codebase-path>
 ---
 
-Perform Re-Implementation audit on the target codebase.
+Perform Re-Implementation audit on the codebase at `$ARGUMENTS`.
 
 ## Strategy
 

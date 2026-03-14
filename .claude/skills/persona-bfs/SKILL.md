@@ -4,9 +4,10 @@ description: "BFS auditing persona — maps entry points then progressively deep
 context: fork
 agent: persona-bfs
 user-invocable: false
+argument-hint: <codebase-path>
 ---
 
-Perform Breadth-First Search audit on the target codebase.
+Perform Breadth-First Search audit on the codebase at `$ARGUMENTS`.
 
 ## Strategy
 

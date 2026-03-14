@@ -4,9 +4,10 @@ description: "Per-contract ultra-granular function analysis. Performs line-by-li
 context: fork
 agent: function-analyzer
 user-invocable: false
+argument-hint: <contract-file-path>
 ---
 
-Analyze every function in the contract file provided as input. For each non-trivial function, produce:
+Analyze every function in the contract at `$ARGUMENTS`. For each non-trivial function, produce:
 
 1. **Signature** — Full function signature with visibility and modifiers
 2. **Purpose** — One-line description of what the function does

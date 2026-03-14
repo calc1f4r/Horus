@@ -4,9 +4,10 @@ description: "Synthesizes per-contract analysis files into a global context docu
 context: fork
 agent: system-synthesizer
 user-invocable: false
+argument-hint: <audit-output-path>
 ---
 
-Read all per-contract context files from `audit-output/context/` and synthesize a compact `01-context.md` containing:
+Read all per-contract context files from `$ARGUMENTS` (defaults to `audit-output/context/`) and synthesize a compact `01-context.md` containing:
 
 1. **System architecture** — How contracts interact, inheritance hierarchy
 2. **Cross-contract data flows** — Token flows, callback patterns, delegate calls
