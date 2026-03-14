@@ -5,6 +5,13 @@ chain: "ethereum, arbitrum, bsc, base"
 category: "oracle"
 vulnerability_type: "price_manipulation, amm_oracle, curve_oracle, self_referencing_oracle, faulty_feed"
 
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: price_manipulation | price_feed | economic_exploit | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 # Attack Vector Details
 attack_type: "economic_exploit"
 affected_component: "price_feed, oracle_integration, collateral_valuation"
@@ -34,6 +41,31 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.85
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "TWAP"
+  - "sPMM"
+  - "sync"
+  - "sUSDE"
+  - "_update"
+  - "deposit"
+  - "UniProxy"
+  - "withdraw"
+  - "wooracle"
+  - "_transfer"
+  - "pair.sync"
+  - "MAX_DEVIATION"
+  - "getAssetPrice"
+  - "calculatePrice"
+  - "driveUpsUSDEPrice"
+path_keys:
+  - "curve_pool_based_oracle_manipulation_for_lending_liquidation"
+  - "self_referencing_oracle_spmm_manipulation"
+  - "concentrated_liquidity_vault_deposit_withdraw_cycling"
+  - "defective_token_transfer_hook_price_disruption"
+  - "broken_vault_mint_ratio"
+  - "faulty_chainlink_oracle_price_feed"
 
 # Context Tags
 tags:
@@ -69,14 +101,28 @@ version: ">=0.8.0"
 ---
 
 # Price Manipulation & Oracle Attack Patterns (2024-2025)
-
 ## Overview
 
 Price manipulation and oracle attacks remain a dominant exploit vector in 2024-2025, causing over **$38M** in losses. The attack surface has evolved from simple flash-loan-based AMM manipulation to more sophisticated patterns including Curve pool-based oracle manipulation for lending liquidation (UwULend $19.3M), self-referencing oracle exploitation in proactive market makers (WooFi $8M), concentrated liquidity vault deposit/withdraw cycling (Gamma $6.3M), defective token transfer hooks that disrupt AMM pricing (NGP $2M), broken vault mint ratios (MBUToken $2.16M), and faulty Chainlink price feed configurations for wrapped staked ETH (Moonwell $1M).
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_validation` |
+| Pattern Key | `price_manipulation | price_feed | economic_exploit | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, arbitrum, bsc, base |
+
+
 ## 1. Curve Pool-Based Oracle Manipulation for Lending Liquidation
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -138,6 +184,8 @@ while (uWETH.balanceOf(address(toBeLiquidatedHelper)) > 0) {
 
 ## 2. Self-Referencing Oracle (sPMM) Manipulation
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 Proactive market maker (PMM) DEXes like WooPPV2 use an internal oracle (WooracleV2) that updates its price state based on swaps executed through the same pool. This creates a circular dependency: the oracle price determines swap rates, and swap execution updates the oracle price. Large swaps can manipulate the oracle into extreme states, and subsequent swaps drain the pool at distorted rates.
@@ -180,6 +228,8 @@ IWooPPV2(WooPPV2).swap(address(USDCe), address(WOO), 926_342, 0, address(this), 
 ---
 
 ## 3. Concentrated Liquidity Vault Deposit/Withdraw Cycling
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -231,6 +281,8 @@ function calculatePrice() internal returns (uint160) {
 
 ## 4. Defective Token Transfer Hook Price Disruption
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 Custom ERC20 tokens that call `pair.sync()` inside their `_update()` or `_transfer()` function disrupt AMM pricing mechanics. When a swap sends tokens to the pair, the transfer triggers `sync()` which resets reserves to reflect the incoming tokens *before* the swap output is calculated. This causes the AMM to miscalculate the output amount, paying far more than warranted.
@@ -272,6 +324,8 @@ router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
 
 ## 5. Broken Vault Mint Ratio
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 Vaults or proxy contracts with misconfigured exchange rates or missing decimal normalization can mint vastly disproportionate token amounts for trivial deposits. This often occurs in ERC1967 proxy vaults where the implementation contract has an uninitialized or hardcoded exchange rate that doesn't account for token decimal differences.
@@ -303,6 +357,8 @@ IPancakeRouter(payable(router)).swapExactTokensForTokensSupportingFeeOnTransferT
 ---
 
 ## 6. Faulty Chainlink Oracle Price Feed
+
+> **pathShape**: `callback-reentrant`
 
 ### Root Cause
 

@@ -4,6 +4,13 @@ chain: ethereum
 category: integer_overflow
 vulnerability_type: arithmetic_overflow
 
+# Pattern Identity (Required)
+root_cause_family: arithmetic_invariant_break
+pattern_key: arithmetic_overflow | token_transfer | integer_overflow_underflow | fund_loss, token_minting
+
+# Interaction Scope
+interaction_scope: single_contract
+
 attack_type: integer_overflow_underflow
 affected_component: token_transfer, batch_transfer
 
@@ -18,6 +25,18 @@ severity: critical
 impact: fund_loss, token_minting
 exploitability: 0.95
 financial_impact: critical
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "_value"
+  - "require"
+  - "safeAdd"
+  - "safeMul"
+  - "batchTransfer"
+  - "transferProxy"
+path_keys:
+  - "bec_token"
+  - "smartmesh"
 
 tags:
   - integer_overflow
@@ -37,9 +56,32 @@ total_losses: "$140M+ confirmed"
 
 ## DeFiHackLabs Integer Overflow Exploit Patterns
 
+
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [BEC-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2018-04/BEC_exp.sol` |
+| [SMT-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2018-04/SMT_exp.sol` |
+
+---
+
 ### Overview
 
 Integer overflow vulnerabilities in pre-Solidity 0.8. tokens enabled the creation of tokens from nothing. This entry catalogs **2 landmark exploits** from 2018 that together demonstrate how unchecked arithmetic in ERC20 implementations can bypass balance checks and create billions in phantom tokens. These are historical but critical for auditing legacy contracts and understanding why SafeMath / Solidity >= 0.8 checks are essential.
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `arithmetic_invariant_break` |
+| Pattern Key | `arithmetic_overflow | token_transfer | integer_overflow_underflow | fund_loss, token_minting` |
+| Severity | CRITICAL |
+| Impact | fund_loss, token_minting |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum |
+
 
 ### Root Cause
 
@@ -54,6 +96,8 @@ If a `require()` check uses an expression that overflows, the check passes when 
 ### Vulnerable Pattern Examples
 
 #### Pattern 1: batchTransfer Overflow [CRITICAL]
+
+> **pathShape**: `atomic`
 
 **Example 1: BEC Token (Beauty Chain) — batchTransfer Creates Tokens ($900M market cap, 2018-04)** [CRITICAL]
 ```solidity
@@ -107,6 +151,8 @@ contract BECToken {
 ---
 
 #### Pattern 2: transferProxy Overflow [CRITICAL]
+
+> **pathShape**: `atomic`
 
 **Example 2: SmartMesh (SMT) — transferProxy Free Token Creation ($140M, 2018-04)** [CRITICAL]
 ```solidity
@@ -266,8 +312,7 @@ function safeMul(uint256 a, uint256 b) internal pure returns (uint256) {
 ### Detection Patterns
 
 ```bash
-# Solidity version < 0.8.0 (overflow-vulnerable)
-grep -rn "pragma solidity" --include="*.sol" | \
+# Solidity version < 0.8.0 (overflow-vulnerable)grep -rn "pragma solidity" --include="*.sol" | \
   grep -E "0\.[4-7]\."
 
 # batchTransfer / batch operations without SafeMath

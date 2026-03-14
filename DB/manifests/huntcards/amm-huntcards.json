@@ -2,10 +2,10 @@
   "meta": {
     "manifest": "amm",
     "description": "Compressed hunt cards for amm — one-line detection rules for bulk scanning",
-    "totalCards": 38,
-    "skipped": 29,
+    "totalCards": 40,
+    "skipped": 35,
     "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 38
+    "enriched": 40
   },
   "cards": [
     {
@@ -1003,11 +1003,11 @@
       "validWhen": "Pattern 1: slot0() or getReserves() used for pricing without TWAP"
     },
     {
-      "id": "amm-defihacklabs-amm-calculation-errors-defihacklabs-amm-calculation-e-000",
-      "title": "DeFiHackLabs AMM Calculation Errors Compendium",
-      "severity": "CRITICAL",
-      "grep": "balance_adjusted|DeFiHackLabs|getReserves|balance1_adj",
-      "detect": "Fee uses 10000 base but K-check still uses 1000 base",
+      "id": "amm-defihacklabs-amm-calculation-errors-root-cause-001",
+      "title": "Root Cause",
+      "severity": "UNKNOWN",
+      "grep": "UniswapV2|Mathematical|Right|Forks",
+      "detect": "UniswapV2's original swap function uses `1000` as both the fee denominator and the K-check base:",
       "cat": [
         "amm",
         "dex",
@@ -1016,21 +1016,58 @@
       ],
       "ref": "DB/amm/constantproduct/defihacklabs-amm-calculation-errors.md",
       "lines": [
-        38,
-        278
+        120,
+        147
       ],
-      "neverPrune": true,
       "check": [
-        "VERIFY: UniswapV2's swap function uses a K-invariant check with adjustment for 0.3% swap fees",
-        "PROVE: Yet another fork with the same 1000 vs 10000 mismatch",
-        "FALSIFY: If you don't need custom fees, use UniswapV2's original constants",
-        "IMPACT: Complete pool drainage: 99%+ of reserves extractable in single transaction"
+        "VERIFY: UniswapV2's original swap function uses 1000 as both the fee denominator and the K-check base"
       ],
-      "antipattern": "Yet another fork with the same 1000 vs 10000 mismatch",
-      "securePattern": "If you don't need custom fees, use UniswapV2's original constants",
-      "validWhen": "UniswapV2's swap function uses a K-invariant check with adjustment for 0.3% swap fees",
-      "invalidWhen": "If you don't need custom fees, use UniswapV2's original constants",
-      "impact": "Complete pool drainage: 99%+ of reserves extractable in single transaction"
+      "validWhen": "UniswapV2's original swap function uses 1000 as both the fee denominator and the K-check base"
+    },
+    {
+      "id": "amm-defihacklabs-amm-calculation-errors-path-variants-002",
+      "title": "Path Variants",
+      "severity": "UNKNOWN",
+      "grep": "testExploit|NimbusCall|takeFunds|fallback|atomic",
+      "detect": "Entry**: `UraniumPair.swap(0, drainAmount, attacker, \"\")` on BSC",
+      "cat": [
+        "amm",
+        "dex",
+        "liquidity",
+        "swap"
+      ],
+      "ref": "DB/amm/constantproduct/defihacklabs-amm-calculation-errors.md",
+      "lines": [
+        148,
+        237
+      ],
+      "check": [
+        "VERIFY: Entry: UraniumPair.swap(0, drainAmount, attacker, \"\") on BSC"
+      ],
+      "validWhen": "Entry: UraniumPair.swap(0, drainAmount, attacker, \"\") on BSC"
+    },
+    {
+      "id": "amm-defihacklabs-amm-calculation-errors-vulnerable-pattern-003",
+      "title": "Vulnerable Pattern",
+      "severity": "UNKNOWN",
+      "grep": "Instantiations|NowSwap|Vulnerable|Numerator",
+      "detect": "Fee uses 10000 base but K-check uses 1000 base",
+      "cat": [
+        "amm",
+        "dex",
+        "liquidity",
+        "swap"
+      ],
+      "ref": "DB/amm/constantproduct/defihacklabs-amm-calculation-errors.md",
+      "lines": [
+        238,
+        266
+      ],
+      "check": [
+        "VERIFY: Fee uses 10000 base but K-check uses 1000 base"
+      ],
+      "antipattern": "Fee uses 10000 base but K-check uses 1000 base",
+      "validWhen": "Fee uses 10000 base but K-check uses 1000 base"
     }
   ]
 }

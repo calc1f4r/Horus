@@ -5,6 +5,13 @@ chain: "ethereum, bsc, avalanche"
 category: "access_control"
 vulnerability_type: "missing_access_control"
 
+# Pattern Identity (Required)
+root_cause_family: missing_access_control
+pattern_key: missing_access_control | function_access | logical_error | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 # Attack Vector Details
 attack_type: "logical_error"
 affected_component: "function_access, token_operations, state_management"
@@ -24,6 +31,29 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.9
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "HPAY"
+  - "burn"
+  - "mint"
+  - "sync"
+  - "stake"
+  - "token"
+  - "amount"
+  - "deploy"
+  - "expiry"
+  - "public"
+  - "redeem"
+  - "address"
+  - "private"
+  - "setPool"
+  - "SafeMoon"
+path_keys:
+  - "unprotected_token_mint_burn"
+  - "unprotected_migration_function"
+  - "unprotected_configuration_setter"
+  - "missing_token_registry_validation"
 
 # Context Tags
 tags:
@@ -54,14 +84,28 @@ version: ">=0.8.0"
 ---
 
 # Access Control Failure Attack Patterns (2022-2023)
-
 ## Overview
 
 Access control failures are among the most straightforward yet devastating DeFi vulnerabilities. These occur when critical state-changing functions (mint, burn, migrate, configure) lack proper authorization checks — allowing anyone to call them. Between 2022-2023, access control failures caused over **$14.5M** in losses across 4+ major protocols. Attack patterns range from unprotected `mint()`/`burn()` on tokens (SafeMoon $8.9M) to missing `onlyOwner` on migration functions (TempleDAO $2.3M) to public configuration setters that allow reward token swaps (HPAY) and fake token interfaces bypassing bond redemption (OlympusDAO $292K).
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_access_control` |
+| Pattern Key | `missing_access_control | function_access | logical_error | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, bsc, avalanche |
+
+
 ## 1. Unprotected Token Mint / Burn
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -122,6 +166,8 @@ function doBurnHack(uint256 amount) public {
 
 ## 2. Unprotected Migration Function
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 When staking or vault contracts implement `migrateStake()` functions for protocol upgrades, these functions must be restricted to only accept calls from authorized sources and only migrate from legitimate old staking contracts. If `migrateStake(oldStaking, amount)` accepts an arbitrary `oldStaking` address without validation, an attacker passes their own dummy contract and receives credit for any amount of staked tokens.
@@ -157,6 +203,8 @@ function migrateWithdraw(address, uint256) public {}
 ---
 
 ## 3. Unprotected Configuration Setter
+
+> **pathShape**: `linear-multistep`
 
 ### Root Cause
 
@@ -202,6 +250,8 @@ BONUS.withdraw(30_000_000 * 1e18);
 ---
 
 ## 4. Missing Token Registry Validation
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 

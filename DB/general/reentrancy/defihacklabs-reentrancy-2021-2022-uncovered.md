@@ -3,6 +3,13 @@ protocol: Multi-Protocol
 chain: Ethereum, BSC, Avalanche
 category: reentrancy
 vulnerability_type: Advanced Reentrancy Patterns
+
+# Pattern Identity (Required)
+root_cause_family: callback_reentrancy
+pattern_key: Advanced Reentrancy Patterns |  |  | Share inflation, 3x lending, vault drain, double-credit deposits
+
+# Interaction Scope
+interaction_scope: cross_protocol
 attack_type:
   - ERC777 tokensToSend hook reentrancy
   - ERC777 tokensReceived hook reentrancy
@@ -30,6 +37,31 @@ severity: CRITICAL
 impact: Share inflation, 3x lending, vault drain, double-credit deposits
 exploitability: Medium to High
 financial_impact: "$2M+ aggregate"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "lend"
+  - "enter"
+  - "setUp"
+  - "attack"
+  - "buyJay"
+  - "deposit"
+  - "JAY_TOKEN"
+  - "flashLoan"
+  - "onFlashLoan"
+  - "totalAssets"
+  - "nonReentrant"
+  - "tokensToSend"
+  - "transferFrom"
+  - "extractProfit"
+  - "JAY_TOKEN.sell"
+path_keys:
+  - "erc777_tokenstosend_hook_reenter_staking"
+  - "erc777_tokensreceived_hook_reenter_lending"
+  - "erc3156_flash_loan_callback_deposit_during_own_loan"
+  - "fake_erc721_transferfrom_reenter_sell_during_buy"
+  - "erc721_onerc721received_reenter_liquidation_borrow"
+  - "fake_token_transferfrom_reenter_masterchef_deposit"
 tags:
   - defihacklabs
   - reentrancy
@@ -51,6 +83,20 @@ tags:
 
 # DeFiHackLabs Advanced Reentrancy Patterns (2021-2022)
 
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [BACON-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-03/Bacon_exp.sol` |
+| [DEFROST-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-12/Defrost_exp.sol` |
+| [JAY-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-12/JAY_exp.sol` |
+| [N00D-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/N00d_exp.sol` |
+| [OMNI-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-07/Omni_exp.sol` |
+| [PARALUNI-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-03/Paraluni_exp.sol` |
+
+---
+
+
 ## Overview
 
 This entry catalogs 6 reentrancy exploits from 2022 sourced from [DeFiHackLabs](https://github.com/SunWeb3Sec/DeFiHackLabs). Unlike classic reentrancy (ETH transfer → re-enter withdraw), these exploit **callback mechanisms in token standards** (ERC777, ERC721, ERC3156) and **untrusted external calls via fake tokens**.
@@ -64,6 +110,19 @@ This entry catalogs 6 reentrancy exploits from 2022 sourced from [DeFiHackLabs](
 6. **Fake Token `transferFrom`** — Custom ERC20 reenters deposit function (Paraluni)
 
 ---
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `callback_reentrancy` |
+| Pattern Key | `Advanced Reentrancy Patterns |  |  | Share inflation, 3x lending, vault drain, double-credit deposits` |
+| Severity | CRITICAL |
+| Impact | Share inflation, 3x lending, vault drain, double-credit deposits |
+| Interaction Scope | `cross_protocol` |
+| Chain(s) | Ethereum, BSC, Avalanche |
+
 
 ## Vulnerability Description
 
@@ -103,6 +162,8 @@ Advanced reentrancy exploits callback mechanisms that developers often overlook:
 ## Vulnerable Pattern Examples
 
 ### Pattern 1: ERC777 `tokensToSend` Hook → Reenter Staking
+
+> **pathShape**: `callback-reentrant`
 
 **Severity**: 🔴 CRITICAL | **Loss**: WETH | **Protocol**: N00d Token | **Chain**: Ethereum
 
@@ -152,6 +213,8 @@ contract N00dExploit {
 
 ### Pattern 2: ERC777 `tokensReceived` Hook → Reenter Lending
 
+> **pathShape**: `callback-reentrant`
+
 **Severity**: 🔴 CRITICAL | **Loss**: USDC | **Protocol**: Bacon Protocol | **Chain**: Ethereum
 
 Bacon's `lend()` function mints an ERC777-compatible bToken to the caller. The `tokensReceived` callback fires on mint, allowing the attacker to reenter `lend()` during the first mint — receiving 3x the expected bTokens.
@@ -200,6 +263,8 @@ contract BaconExploit {
 
 ### Pattern 3: ERC3156 Flash Loan Callback → Deposit During Own Loan
 
+> **pathShape**: `callback-reentrant`
+
 **Severity**: 🔴 CRITICAL | **Loss**: USDC | **Protocol**: Defrost Finance | **Chain**: Avalanche
 
 The Defrost vault offers ERC3156 flash loans. During the `onFlashLoan` callback, the vault's `totalAssets` is depleted (the loaned amount is out). The attacker calls `deposit()` during the callback — shares are minted at a deflated price because the vault appears to have fewer assets. After the flash loan returns, shares are redeemable at full value.
@@ -242,6 +307,8 @@ contract DefrostExploit {
 
 ### Pattern 4: Fake ERC721 `transferFrom` → Reenter Sell During Buy
 
+> **pathShape**: `callback-reentrant`
+
 **Severity**: 🟠 HIGH | **Loss**: ~15.32 ETH | **Protocol**: JAY Token | **Chain**: Ethereum
 
 JAY's `buyJay()` accepts ERC721 addresses and calls `transferFrom` on them. The attacker passes their own contract as an "ERC721", whose `transferFrom` reenters `JAY_TOKEN.sell()` to sell previously purchased tokens at a higher price — before the buy state is finalized.
@@ -272,6 +339,8 @@ contract JAYExploit {
 ---
 
 ### Pattern 5: ERC721 `onERC721Received` → Reenter Liquidation + Borrow
+
+> **pathShape**: `callback-reentrant`
 
 **Severity**: 🔴 CRITICAL | **Loss**: ETH | **Protocol**: Omni Protocol | **Chain**: Ethereum
 
@@ -320,6 +389,8 @@ contract OmniExploit {
 ---
 
 ### Pattern 6: Fake Token `transferFrom` → Reenter MasterChef Deposit
+
+> **pathShape**: `callback-reentrant`
 
 **Severity**: 🔴 CRITICAL | **Loss**: USDT + BUSD | **Protocol**: Paraluni | **Chain**: BSC
 

@@ -4,6 +4,13 @@ chain: everychain
 category: input_validation
 vulnerability_type: missing_input_validation
 
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_input_validation | external_functions | parameter_manipulation | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 attack_type: parameter_manipulation
 affected_component: external_functions
 
@@ -21,6 +28,30 @@ severity: critical
 impact: fund_loss
 exploitability: 0.85
 financial_impact: critical
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "burn"
+  - "swap"
+  - "token"
+  - "expiry"
+  - "redeem"
+  - "token_"
+  - "approve"
+  - "getPair"
+  - "getPool"
+  - "withdraw"
+  - "address(0"
+  - "balanceOf"
+  - "ecrecover"
+  - "pool.swap"
+  - "anySwapOut"
+path_keys:
+  - "anyswap"
+  - "olympusdao"
+  - "orbitchain"
+  - "socketgateway"
+  - "sushiswap_routeprocessor2"
 
 tags:
   - input_validation
@@ -42,9 +73,37 @@ total_losses: "$163.8M"
 
 ## Input Validation Vulnerabilities — DeFiHackLabs Patterns
 
+
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [ANYSWAP-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-01/Anyswap_exp.sol` |
+| [OLYMPUSDAO-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/OlympusDao_exp.sol` |
+| [ORBITCHAIN-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2024-01/OrbitChain_exp.sol` |
+| [PICKLE-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2020-11/Pickle_exp.sol` |
+| [SOCKETGATEWA-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2024-01/SocketGateway_exp.sol` |
+| [SUSHIROUTER-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2023-04/Sushi_Router_exp.sol` |
+| [TRANSITSWAP-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/TransitSwap_exp.sol` |
+
+---
+
 ### Overview
 
 Input validation vulnerabilities occur when smart contracts fail to properly validate function parameters, calldata, user-supplied addresses, or token contract references before processing them. Attackers exploit these gaps to forge signatures, impersonate tokens, inject arbitrary calldata, or bypass access controls — resulting in fund theft from protocols and their users.
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_validation` |
+| Pattern Key | `missing_input_validation | external_functions | parameter_manipulation | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | everychain |
+
 
 ### Vulnerability Description
 
@@ -86,6 +145,8 @@ The root causes fall into several distinct categories:
 ### Vulnerable Pattern Examples
 
 #### Category 1: Arbitrary Calldata Forwarding [CRITICAL]
+
+> **pathShape**: `atomic`
 
 **Example 1: SocketGateway — Route Calldata Injection (2024-01, ~$3.3M)** [CRITICAL]
 ```solidity
@@ -152,6 +213,8 @@ transitSwap.swap(token, attackCalldata, /* other params */);
 ---
 
 #### Category 2: Fake Token / Unvalidated Token Address [CRITICAL]
+
+> **pathShape**: `atomic`
 
 **Example 3: Anyswap (Multichain) — Fake Token Impersonation (2022-01, ~$1.4M)** [CRITICAL]
 ```solidity
@@ -253,6 +316,8 @@ bondTeller.redeem(address(fakeToken), ohmAmount);
 
 #### Category 3: Unvalidated Callback / Pool Address [HIGH]
 
+> **pathShape**: `callback-reentrant`
+
 **Example 5: SushiSwap RouteProcessor2 — Fake Pool Callback (2023-04, ~$3.3M)** [HIGH]
 ```solidity
 // ❌ VULNERABLE: processRoute accepts attacker's contract as pool address
@@ -299,6 +364,8 @@ contract FakePool {
 ---
 
 #### Category 4: Forged Signature / Insufficient Signer Validation [CRITICAL]
+
+> **pathShape**: `atomic`
 
 **Example 6: OrbitChain — Forged Bridge Withdrawal Signatures (2024-01, ~$81M)** [CRITICAL]
 ```solidity
@@ -439,8 +506,7 @@ function withdraw(bytes32 hash, uint8[] memory v, bytes32[] memory r, bytes32[] 
 ### Detection Patterns
 
 ```bash
-# Arbitrary external call with user data
-grep -rn "\.call(.*calldata\|\.call(.*data\|\.call(.*bytes" --include="*.sol"
+# Arbitrary external call with user datagrep -rn "\.call(.*calldata\|\.call(.*data\|\.call(.*bytes" --include="*.sol"
 
 # Missing msg.sender validation in callbacks
 grep -rn "uniswapV3SwapCallback\|pancakeV3SwapCallback" --include="*.sol" | grep -v "require.*msg.sender\|factory"

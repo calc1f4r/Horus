@@ -4,6 +4,13 @@ chain: ethereum
 category: compiler_bug
 vulnerability_type: vyper_reentrancy_lock_bug
 
+# Pattern Identity (Required)
+root_cause_family: callback_reentrancy
+pattern_key: vyper_reentrancy_lock_bug | vyper_compiler | reentrancy | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 attack_type: reentrancy
 affected_component: vyper_compiler
 
@@ -19,6 +26,16 @@ severity: critical
 impact: fund_loss
 exploitability: 0.6
 financial_impact: critical
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "attack"
+  - "receive"
+  - "withdraw"
+  - "add_liquidity"
+  - "remove_liquidity"
+path_keys:
+  - "curve_finance"
 
 tags:
   - compiler
@@ -41,6 +58,19 @@ total_losses: "$41.0M"
 ### Overview
 
 Compiler-level vulnerabilities occur when bugs in the compiler itself generate incorrect bytecode from correct source code. These are uniquely dangerous because auditors reviewing source code **cannot detect the vulnerability** — the source is correct; only the compiled output is wrong. The most devastating example is the Vyper compiler's `@nonreentrant` bug, which silently disabled reentrancy locks in Curve pools compiled with Vyper 0.2.15–0.3.0, enabling a $41M exploit.
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `callback_reentrancy` |
+| Pattern Key | `vyper_reentrancy_lock_bug | vyper_compiler | reentrancy | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum |
+
 
 ### Vulnerability Description
 
@@ -69,6 +99,8 @@ The Vyper compiler versions 0.2.15, 0.2.16, and 0.3.0 had a bug in the code gene
 ### Vulnerable Pattern Examples
 
 #### Category 1: Vyper @nonreentrant Lock Bypass [CRITICAL]
+
+> **pathShape**: `callback-reentrant`
 
 **Example 1: Curve Finance — Vyper Compiler Reentrancy Lock Bug (2023-07, ~$41M)** [CRITICAL]
 ```python

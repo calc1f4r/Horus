@@ -5,6 +5,13 @@ chain: "ethereum, bsc, fantom, arbitrum"
 category: "oracle_manipulation"
 vulnerability_type: "flash_loan_price_manipulation"
 
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: flash_loan_price_manipulation | price_oracle | economic_exploit | fund_loss
+
+# Interaction Scope
+interaction_scope: cross_protocol
+
 # Attack Vector Details
 attack_type: "economic_exploit"
 affected_component: "price_oracle, lending_market, stablecoin_mint_redeem"
@@ -25,6 +32,29 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.85
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "bond"
+  - "mint"
+  - "stake"
+  - "borrow"
+  - "donate"
+  - "plvGLP"
+  - "redeem"
+  - "deposit"
+  - "exchange"
+  - "getPrice"
+  - "overborrow"
+  - "getEGDPrice"
+  - "getReserves"
+  - "calculateAll"
+  - "addCollateral"
+path_keys:
+  - "amm_reserve_based_price_oracle_direct_lp_pool_manipulation"
+  - "curve_lp_virtual_price_oracle_manipulation"
+  - "solidly_lp_oracle_weak_signature_validation"
+  - "vault_share_price_inflation_via_donation"
 
 # Context Tags
 tags:
@@ -59,14 +89,28 @@ version: ">=0.6.0"
 ---
 
 # Flash Loan Oracle Manipulation Patterns (2022)
-
 ## Overview
 
 Flash loan-based oracle manipulation is the single most common DeFi attack vector in 2022, responsible for **$46.7M+** across at least 5 major exploits. The universal pattern: a protocol uses **real-time on-chain state** — AMM pool reserves, Curve LP virtual_price, vault share price, or Solidly LP pricing — as a price oracle for lending, minting, or collateral valuation. An attacker obtains a massive flash loan, distorts the on-chain state within the same transaction, interacts with the protocol at the manipulated price, then reverses the distortion and repays. Unlike 2021 patterns (direct reserve reads), 2022 saw increasingly sophisticated targets: Curve Tricrypto virtual_price, Plutus vault donation, Solidly LP oracle + weak cryptographic signatures, and multi-step mint/redeem arbitrage.
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_validation` |
+| Pattern Key | `flash_loan_price_manipulation | price_oracle | economic_exploit | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `cross_protocol` |
+| Chain(s) | ethereum, bsc, fantom, arbitrum |
+
+
 ## 1. AMM Reserve-Based Price Oracle — Direct LP Pool Manipulation
+
+> **pathShape**: `callback-reentrant`
 
 ### Root Cause
 
@@ -163,6 +207,8 @@ IElephantMoney(not_verified).redeem(balance_Trunk);
 
 ## 2. Curve LP / Virtual Price Oracle Manipulation
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 This vulnerability exists because lending protocols use Curve pool's **internal state** (virtual_price, LP token value) as a price oracle for collateral. By performing a massive swap or liquidity operation on the Curve pool via flash loan, the attacker distorts the pool's internal accounting. The oracle reads this distorted state and reports an inflated collateral value, enabling oversized borrows.
@@ -234,6 +280,8 @@ curveRegistry.exchange(
 ---
 
 ## 3. Solidly LP Oracle + Weak Signature Validation
+
+> **pathShape**: `linear-multistep`
 
 ### Root Cause
 
@@ -307,6 +355,8 @@ router.swapExactTokensForTokensSimple(
 ---
 
 ## 4. Vault Share Price Inflation via Donation
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 

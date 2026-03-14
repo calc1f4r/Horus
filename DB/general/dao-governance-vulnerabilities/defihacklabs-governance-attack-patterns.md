@@ -5,6 +5,13 @@ chain: "ethereum, bsc"
 category: "governance"
 vulnerability_type: "governance_manipulation"
 
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: governance_manipulation | governance_voting | logical_error | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 # Attack Vector Details
 attack_type: "logical_error"
 affected_component: "governance_voting, proposal_execution, proxy_initialization"
@@ -24,6 +31,30 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.5
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "sweep"
+  - "execute"
+  - "propose"
+  - "SafeSnap"
+  - "castVote"
+  - "Beanstalk"
+  - "Reality.io"
+  - "initialize"
+  - "XaveFinance"
+  - "getContract"
+  - "initializer"
+  - "BuildFinance"
+  - "Initializable"
+  - "emergencyCommit"
+  - "queueTransaction"
+path_keys:
+  - "flash_loan_governance_takeover"
+  - "low_quorum_governance_exploitation"
+  - "proxy_re_initialization_attack"
+  - "dao_module_oracle_self_answer_attack"
+  - "governance_treasury_drain_via_token_acquisition"
 
 # Context Tags
 tags:
@@ -55,14 +86,28 @@ version: ">=0.8.0"
 ---
 
 # Governance / DAO Manipulation Attack Patterns
-
 ## Overview
 
 Governance manipulation attacks exploit weaknesses in on-chain governance systems to pass malicious proposals that drain protocol treasuries or modify critical parameters. The three primary attack vectors are: (1) flash-loaned voting power to achieve instant majority, (2) low quorum requirements that allow small token holdings to pass proposals, and (3) proxy re-initialization to overwrite governance parameters (voting period, quorum, guardian address). These attacks caused over **$81M** in losses in 2022, with Beanstalk Farms being the single largest governance exploit at $77M.
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_validation` |
+| Pattern Key | `governance_manipulation | governance_voting | logical_error | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, bsc |
+
+
 ## 1. Flash Loan Governance Takeover
+
+> **pathShape**: `callback-reentrant`
 
 ### Root Cause
 
@@ -117,6 +162,8 @@ function sweep() external {
 
 ## 2. Low Quorum Governance Exploitation
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 When governance quorum requirements are set too low (or vote delegation concentrates power), an attacker with a relatively small token holding can pass proposals that modify critical protocol parameters. When combined with oracle manipulation, this enables a two-phase attack: first pass a proposal to add a worthless token as collateral, then manipulate its oracle price to borrow all protocol assets.
@@ -164,6 +211,8 @@ for (uint8 i; i < Delegators.length; i++) {
 ---
 
 ## 3. Proxy Re-Initialization Attack
+
+> **pathShape**: `linear-multistep`
 
 ### Root Cause
 
@@ -217,6 +266,8 @@ function isGovernanceAddress() external view returns (bool) { return true; }
 
 ## 4. DAO Module Oracle Self-Answer Attack
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 When a DAO uses Gnosis Safe Modules with Reality.io oracle for proposal validation, the security depends on the oracle bond economics. If the bond requirement is trivially low (1 wei) and anyone can submit answers, an attacker can propose malicious transactions and self-approve them by answering the Reality.io question themselves. After the challenge cooldown period (as low as 24 hours), the proposals execute unchallenged.
@@ -269,6 +320,8 @@ DAO_MODULE.executeProposalWithIndex("2", txIDs, ...);
 ---
 
 ## 5. Governance Treasury Drain via Token Acquisition
+
+> **pathShape**: `linear-multistep`
 
 ### Root Cause
 

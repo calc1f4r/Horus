@@ -2,10 +2,10 @@
   "meta": {
     "manifest": "unique",
     "description": "Compressed hunt cards for unique — one-line detection rules for bulk scanning",
-    "totalCards": 29,
-    "skipped": 50,
+    "totalCards": 46,
+    "skipped": 66,
     "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 28
+    "enriched": 41
   },
   "cards": [
     {
@@ -217,7 +217,7 @@
       "id": "unique-compiler-level-vulnerabilities-compiler-level-vulnerability-p-000",
       "title": "Compiler-Level Vulnerability Patterns",
       "severity": "CRITICAL",
-      "grep": "remove_liquidity|add_liquidity|receive",
+      "grep": "callback_reentrancy|remove_liquidity|single_contract|add_liquidity|receive",
       "detect": "The Vyper compiler versions 0.2.15, 0.2.16, and 0.3.0 had a bug in the code generation for the `@nonreentrant` decorator.",
       "cat": [
         "protocol-specific",
@@ -225,18 +225,18 @@
       ],
       "ref": "DB/unique/defihacklabs/compiler-level-vulnerabilities.md",
       "lines": [
-        39,
-        74
+        56,
+        106
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Vyper compiler versions 0.2.15, 0.2.16, and 0.3.0 had a bug in the code generation for the @nonreentrant decorator.",
+        "VERIFY: Pattern Key | vyper_reentrancy_lock_bug | vyper_compiler | reentrancy | fund_loss",
         "PROVE: Attacker calls remove_liquidity() on the Curve pool (compiled with vulnerable Vyper); Pool sends ETH to the attacker before updating state (standard ETH transfer)"
       ],
-      "validWhen": "The Vyper compiler versions 0.2.15, 0.2.16, and 0.3.0 had a bug in the code generation for the @nonreentrant decorator."
+      "validWhen": "Pattern Key | vyper_reentrancy_lock_bug | vyper_compiler | reentrancy | fund_loss"
     },
     {
-      "id": "unique-defihacklabs-novel-attack-patterns-2025--1-transient-storage-eip-1153-a-000",
+      "id": "unique-defihacklabs-novel-attack-patterns-2025--1-transient-storage-eip-1153-a-001",
       "title": "1. Transient Storage (EIP-1153) Authorization Bypass via CREATE2",
       "severity": "CRITICAL",
       "grep": "ImmutableCreate2Factory.safeCreate2|vault.uniswapV3SwapCallback|uint160(address(this|uniswapV3SwapCallback|vault.mint|tload(1",
@@ -247,8 +247,8 @@
       ],
       "ref": "DB/unique/defihacklabs/defihacklabs-novel-attack-patterns-2025-2026.md",
       "lines": [
-        81,
-        155
+        125,
+        201
       ],
       "neverPrune": true,
       "check": [
@@ -260,10 +260,10 @@
       "validWhen": "EIP-1153 introduced tstore/tload opcodes for transient storage that persists only within a single transaction."
     },
     {
-      "id": "unique-defihacklabs-novel-attack-patterns-2025--2-fee-on-transfer-token-overch-001",
+      "id": "unique-defihacklabs-novel-attack-patterns-2025--2-fee-on-transfer-token-overch-002",
       "title": "2. Fee-On-Transfer Token Overcharge + AMM Sync Drain",
       "severity": "HIGH",
-      "grep": "pair.skim(attacker|pair.sync|_transfer|sync|skim",
+      "grep": "pair.skim(attacker|pair.sync|_transfer|atomic|sync|skim",
       "detect": "When a token's `_transfer()` function applies fees based on a percentage list where `sum(shares) > 100%`, the sender is...",
       "cat": [
         "protocol-specific",
@@ -271,8 +271,8 @@
       ],
       "ref": "DB/unique/defihacklabs/defihacklabs-novel-attack-patterns-2025-2026.md",
       "lines": [
-        156,
-        217
+        202,
+        265
       ],
       "check": [
         "VERIFY: When a token's _transfer() function applies fees based on a percentage list where sum(shares) > 100%, the sender is debited more tokens than the...",
@@ -283,10 +283,10 @@
       "validWhen": "When a token's _transfer() function applies fees based on a percentage list where sum(shares) > 100%, the sender is debited more tokens than the recipient receives."
     },
     {
-      "id": "unique-defihacklabs-novel-attack-patterns-2025--3-staking-reward-farming-via-c-002",
+      "id": "unique-defihacklabs-novel-attack-patterns-2025--3-staking-reward-farming-via-c-003",
       "title": "3. Staking Reward Farming via CREATE2 Identity Rotation",
       "severity": "HIGH",
-      "grep": "claimReward|execute|earned|attack|stake",
+      "grep": "claimReward|execute|earned|attack|atomic|stake",
       "detect": "When a staking contract calculates rewards per-address without tracking total claimed amounts globally, an attacker can...",
       "cat": [
         "protocol-specific",
@@ -294,8 +294,8 @@
       ],
       "ref": "DB/unique/defihacklabs/defihacklabs-novel-attack-patterns-2025-2026.md",
       "lines": [
-        218,
-        287
+        266,
+        337
       ],
       "check": [
         "VERIFY: When a staking contract calculates rewards per-address without tracking total claimed amounts globally, an attacker can transfer staked tokens to...",
@@ -306,10 +306,10 @@
       "validWhen": "When a staking contract calculates rewards per-address without tracking total claimed amounts globally, an attacker can transfer staked tokens to freshly-deployed..."
     },
     {
-      "id": "unique-defihacklabs-novel-attack-patterns-2025--4-batch-array-refund-multiplic-003",
+      "id": "unique-defihacklabs-novel-attack-patterns-2025--4-batch-array-refund-multiplic-004",
       "title": "4. Batch Array Refund Multiplication",
       "severity": "HIGH",
-      "grep": "msg.value|buy",
+      "grep": "msg.value|atomic|buy",
       "detect": "When a sale/purchase function accepts arrays of recipients, rates, and refund flags, and processes refunds...",
       "cat": [
         "protocol-specific",
@@ -317,8 +317,8 @@
       ],
       "ref": "DB/unique/defihacklabs/defihacklabs-novel-attack-patterns-2025-2026.md",
       "lines": [
-        288,
-        353
+        338,
+        405
       ],
       "check": [
         "VERIFY: When a sale/purchase function accepts arrays of recipients, rates, and refund flags, and processes refunds per-iteration using msg.value (which is...",
@@ -329,7 +329,7 @@
       "validWhen": "When a sale/purchase function accepts arrays of recipients, rates, and refund flags, and processes refunds per-iteration using msg.value (which is constant across all..."
     },
     {
-      "id": "unique-defihacklabs-novel-attack-patterns-2025--5-bonding-curve-arithmetic-ove-004",
+      "id": "unique-defihacklabs-novel-attack-patterns-2025--5-bonding-curve-arithmetic-ove-005",
       "title": "5. Bonding Curve Arithmetic Overflow in Price Calculation",
       "severity": "CRITICAL",
       "grep": "type(uint256).max|sellTRU(amount|getPurchasePrice|solveForAmount|totalSupply|sellTRU",
@@ -340,8 +340,8 @@
       ],
       "ref": "DB/unique/defihacklabs/defihacklabs-novel-attack-patterns-2025-2026.md",
       "lines": [
-        354,
-        424
+        406,
+        478
       ],
       "neverPrune": true,
       "check": [
@@ -353,10 +353,10 @@
       "validWhen": "Bonding curve contracts calculate buy/sell prices using polynomial formulas."
     },
     {
-      "id": "unique-defihacklabs-novel-attack-patterns-2025--6-fee-unit-mismatch-between-sy-005",
+      "id": "unique-defihacklabs-novel-attack-patterns-2025--6-fee-unit-mismatch-between-sy-006",
       "title": "6. Fee Unit Mismatch Between Systems",
       "severity": "CRITICAL",
-      "grep": "addFee(tokenAmount|changePosition|feeAmount|addFee|fee",
+      "grep": "addFee(tokenAmount|changePosition|feeAmount|addFee|atomic|fee",
       "detect": "When one system computes a fee in **token units** (e.",
       "cat": [
         "protocol-specific",
@@ -364,8 +364,8 @@
       ],
       "ref": "DB/unique/defihacklabs/defihacklabs-novel-attack-patterns-2025-2026.md",
       "lines": [
-        425,
-        487
+        479,
+        543
       ],
       "neverPrune": true,
       "check": [
@@ -377,10 +377,10 @@
       "validWhen": "When one system computes a fee in token units (e.g., 500 USDC) and passes it to another system that interprets it as basis points or weight (e.g., 500 = 5%), the..."
     },
     {
-      "id": "unique-defihacklabs-novel-attack-patterns-2025--7-permissionless-aum-oracle-ma-006",
+      "id": "unique-defihacklabs-novel-attack-patterns-2025--7-permissionless-aum-oracle-ma-007",
       "title": "7. Permissionless AUM Oracle Manipulation",
       "severity": "CRITICAL",
-      "grep": "MachineShareOracle.getSharePrice|machine.updateTotalAum|updateTotalAum|getSharePrice|exchange",
+      "grep": "MachineShareOracle.getSharePrice|machine.updateTotalAum|updateTotalAum|getSharePrice|exchange|atomic",
       "detect": "When a protocol's `updateTotalAum()` function is permissionless (callable by anyone, not just keepers or admins), and...",
       "cat": [
         "protocol-specific",
@@ -388,8 +388,8 @@
       ],
       "ref": "DB/unique/defihacklabs/defihacklabs-novel-attack-patterns-2025-2026.md",
       "lines": [
-        488,
-        553
+        544,
+        611
       ],
       "neverPrune": true,
       "check": [
@@ -401,226 +401,501 @@
       "validWhen": "When a protocol's updateTotalAum() function is permissionless (callable by anyone, not just keepers or admins), and its return value feeds into an oracle used by other..."
     },
     {
-      "id": "unique-economic-arbitrage-design-flaws-economic-arbitrage-design-flaw-000",
-      "title": "Economic Arbitrage Design Flaws",
+      "id": "unique-economic-arbitrage-design-flaws-agent-quick-view-000",
+      "title": "Agent Quick View",
       "severity": "HIGH",
-      "grep": "VaultRouter.deposit|onMorphoFlashLoan|testExploit|swapData|deposit",
-      "detect": "Arbitrary Swap Routing via Vault Deposits**: Vault deposit functions accept user-controlled swap routing data (e.",
+      "grep": "missing_validation|single_contract",
+      "detect": "Agent Quick View",
       "cat": [
         "protocol-specific",
         "unique"
       ],
       "ref": "DB/unique/defihacklabs/economic-arbitrage-design-flaws.md",
       "lines": [
-        40,
-        321
+        79,
+        90
       ],
       "check": [
-        "VERIFY: Arbitrary Swap Routing via Vault Deposits: Vault deposit functions accept user-controlled swap routing data (e.",
-        "PROVE: *Thin Pool Vault Routing (UsualMoney pattern); Create a Uniswap V3 pool (USD0/sUSDS) with minimal liquidity (~10 sUSDS)",
-        "FALSIFY: Only allow routing through whitelisted pools",
-        "IMPACT: Controlled Price Impact: Attackers create pools with minimal liquidity specifically for exploitation"
+        "VERIFY: Pattern Key | economic_design_flaw | pricing_mechanism | economic_exploit | fund_loss"
       ],
-      "antipattern": "VaultRouter.deposit() accepts arbitrary swap routing data",
-      "securePattern": "Only allow routing through whitelisted pools",
-      "validWhen": "Arbitrary Swap Routing via Vault Deposits: Vault deposit functions accept user-controlled swap routing data (e.",
-      "invalidWhen": "Only allow routing through whitelisted pools",
-      "impact": "Controlled Price Impact: Attackers create pools with minimal liquidity specifically for exploitation"
+      "validWhen": "Pattern Key | economic_design_flaw | pricing_mechanism | economic_exploit | fund_loss"
     },
     {
-      "id": "unique-fee-mechanism-exploitation-fee-mechanism-exploitation-pat-000",
-      "title": "Fee Mechanism Exploitation Patterns",
-      "severity": "CRITICAL",
-      "grep": "safeTransferFrom|innerCallback|testExploit|_transfer|buyItem|sync",
-      "detect": "Zero Quantity Fee Bypass**: Functions that calculate `totalPrice = quantity * pricePerItem` without requiring `quantity > 0`.",
+      "id": "unique-economic-arbitrage-design-flaws-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "HIGH",
+      "grep": "VaultRouter.deposit|onMorphoFlashLoan|placeBuyOrder|testExploit|cancelOrder|flashLoan",
+      "detect": "VaultRouter.deposit() accepts arbitrary swap routing data",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/economic-arbitrage-design-flaws.md",
+      "lines": [
+        118,
+        289
+      ],
+      "check": [
+        "VERIFY: VaultRouter.deposit() forwards arbitrary swapData to the ParaSwap aggregator without restricting which pools can be used as routing targets.",
+        "PROVE: VaultRouter.deposit() accepts arbitrary swap routing data"
+      ],
+      "antipattern": "VaultRouter.deposit() accepts arbitrary swap routing data",
+      "validWhen": "VaultRouter.deposit() forwards arbitrary swapData to the ParaSwap aggregator without restricting which pools can be used as routing targets."
+    },
+    {
+      "id": "unique-economic-arbitrage-design-flaws-keywords-004",
+      "title": "Keywords",
+      "severity": "UNKNOWN",
+      "grep": "order_book_manipulation|flash_loan_arbitrage|thin_liquidity_pool|price_discrepancy",
+      "detect": "order_book_manipulation",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/economic-arbitrage-design-flaws.md",
+      "lines": [
+        412,
+        429
+      ],
+      "check": [
+        "VERIFY: order_book_manipulation"
+      ],
+      "validWhen": "order_book_manipulation"
+    },
+    {
+      "id": "unique-fee-mechanism-exploitation-agent-quick-view-000",
+      "title": "Agent Quick View",
+      "severity": "HIGH",
+      "grep": "arithmetic_invariant_break|single_contract",
+      "detect": "Agent Quick View",
       "cat": [
         "protocol-specific",
         "unique"
       ],
       "ref": "DB/unique/defihacklabs/fee-mechanism-exploitation.md",
       "lines": [
-        40,
-        262
+        82,
+        93
+      ],
+      "check": [
+        "VERIFY: Pattern Key | fee_calculation_exploitation | fee_controller | economic_exploit | fund_loss"
+      ],
+      "validWhen": "Pattern Key | fee_calculation_exploitation | fee_controller | economic_exploit | fund_loss"
+    },
+    {
+      "id": "unique-fee-mechanism-exploitation-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "CRITICAL",
+      "grep": "safeTransferFrom|innerCallback|testExploit|_transfer|buyItem|sync",
+      "detect": "buyItem allows quantity=0, resulting in zero payment",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/fee-mechanism-exploitation.md",
+      "lines": [
+        120,
+        235
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Zero Quantity Fee Bypass: Functions that calculate totalPrice = quantity * pricePerItem without requiring quantity > 0.",
-        "PROVE: *Zero Quantity Attack (TreasureDAO pattern); Attacker calls buyItem(tokenId, owner, quantity=0, pricePerItem, ...)",
-        "FALSIFY: Measure actual balance change, not transfer amount",
-        "IMPACT: Free Asset Acquisition: Zero-quantity bypass allows acquiring assets for $0"
+        "VERIFY: buyItem() calculates totalPrice = _quantity * _pricePerItem without requiring _quantity > 0.",
+        "PROVE: Token has broken fee mechanism creating phantom balance"
       ],
       "antipattern": "Token has broken fee mechanism creating phantom balance",
-      "securePattern": "Measure actual balance change, not transfer amount",
-      "validWhen": "Zero Quantity Fee Bypass: Functions that calculate totalPrice = quantity * pricePerItem without requiring quantity > 0.",
-      "invalidWhen": "Measure actual balance change, not transfer amount",
-      "impact": "Free Asset Acquisition: Zero-quantity bypass allows acquiring assets for $0"
+      "validWhen": "buyItem() calculates totalPrice = _quantity * _pricePerItem without requiring _quantity > 0."
     },
     {
-      "id": "unique-liquidity-migration-exploit-liquidity-migration-exploit-pa-000",
-      "title": "Liquidity Migration Exploit Patterns",
+      "id": "unique-fee-mechanism-exploitation-keywords-004",
+      "title": "Keywords",
+      "severity": "UNKNOWN",
+      "grep": "quantity_validation|fee_on_transfer|zero_quantity|fee_mechanism",
+      "detect": "Keywords",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/fee-mechanism-exploitation.md",
+      "lines": [
+        358,
+        375
+      ]
+    },
+    {
+      "id": "unique-liquidity-migration-exploit-agent-quick-view-000",
+      "title": "Agent Quick View",
       "severity": "CRITICAL",
-      "grep": "pair.token1|pair.token0|pair.burn|migrate|token1|token0",
-      "detect": "The root causes fall into three distinct patterns:",
+      "grep": "missing_validation|single_contract",
+      "detect": "Agent Quick View",
       "cat": [
         "protocol-specific",
         "unique"
       ],
       "ref": "DB/unique/defihacklabs/liquidity-migration-exploit.md",
       "lines": [
-        42,
-        345
+        88,
+        99
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: root causes fall into three distinct patterns",
-        "PROVE: *Fake Token Injection (Team Finance pattern); Call migrate(realPair, fakeToken0, fakeToken1) — pair is burned, real tokens go to migrator",
-        "FALSIFY: Use time-weighted average price instead of spot for migration",
-        "IMPACT: Token Stranding: Real tokens stranded in migrator contracts when fake tokens are used"
+        "VERIFY: Pattern Key | migration_parameter_exploitation | migrator_contract | parameter_manipulation | fund_loss"
       ],
-      "antipattern": "migrate() accepts arbitrary token0/token1 without validating against pair",
-      "securePattern": "Use time-weighted average price instead of spot for migration",
-      "validWhen": "The root causes fall into three distinct patterns",
-      "invalidWhen": "Use time-weighted average price instead of spot for migration",
-      "impact": "Token Stranding: Real tokens stranded in migrator contracts when fake tokens are used"
+      "validWhen": "Pattern Key | migration_parameter_exploitation | migrator_contract | parameter_manipulation | fund_loss"
     },
     {
-      "id": "unique-msgvalue-in-loop-msg-value-in-loop-vulnerabilit-000",
-      "title": "msg.value in Loop Vulnerability",
+      "id": "unique-liquidity-migration-exploit-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
       "severity": "CRITICAL",
-      "grep": "testExploit|msg.value|commitEth|multicall|exercise|batch",
-      "detect": "Solidity's `msg.value` is immutable for the duration of a transaction call.",
+      "grep": "pair.token1|pair.token0|pair.burn|migrate|token1|token0",
+      "detect": "migrate() accepts arbitrary token0/token1 without validating against pair",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/liquidity-migration-exploit.md",
+      "lines": [
+        126,
+        335
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: migrate() doesn't validate that token0/token1 match pair.token0()/pair.token1().",
+        "PROVE: migrate() accepts arbitrary token0/token1 without validating against pair"
+      ],
+      "antipattern": "migrate() accepts arbitrary token0/token1 without validating against pair",
+      "validWhen": "migrate() doesn't validate that token0/token1 match pair.token0()/pair.token1()."
+    },
+    {
+      "id": "unique-liquidity-migration-exploit-keywords-004",
+      "title": "Keywords",
+      "severity": "UNKNOWN",
+      "grep": "liquidity_migration|price_manipulation|migrate_function|biswap_migrator",
+      "detect": "Keywords",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/liquidity-migration-exploit.md",
+      "lines": [
+        447,
+        464
+      ]
+    },
+    {
+      "id": "unique-msgvalue-in-loop-agent-quick-view-000",
+      "title": "Agent Quick View",
+      "severity": "CRITICAL",
+      "grep": "missing_validation|single_contract",
+      "detect": "Agent Quick View",
       "cat": [
         "protocol-specific",
         "unique"
       ],
       "ref": "DB/unique/defihacklabs/msgvalue-in-loop.md",
       "lines": [
-        40,
-        315
+        81,
+        92
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Solidity's msg.value is immutable for the duration of a transaction call.",
-        "PROVE: *Opyn Protocol Pattern; Attacker calls exercise(vaultIds, amountsToExercise) with an array of 2+ vaults",
-        "FALSIFY: Only allow msg.value in first sub-call, or don't use delegatecall for payable",
-        "IMPACT: Payment Bypass: Attackers pay once but execute multiple paid operations"
+        "VERIFY: Pattern Key | msg_value_reuse_in_loop | batch_functions | economic_exploit | fund_loss"
       ],
-      "antipattern": "SushiMiso DutchAuction batch() forwards msg.value to each sub-call",
-      "securePattern": "Only allow msg.value in first sub-call, or don't use delegatecall for payable",
-      "validWhen": "Solidity's msg.value is immutable for the duration of a transaction call.",
-      "invalidWhen": "Only allow msg.value in first sub-call, or don't use delegatecall for payable",
-      "impact": "Payment Bypass: Attackers pay once but execute multiple paid operations"
+      "validWhen": "Pattern Key | msg_value_reuse_in_loop | batch_functions | economic_exploit | fund_loss"
     },
     {
-      "id": "unique-nft-specific-exploit-patterns-nft-specific-exploit-patterns-000",
-      "title": "NFT-Specific Exploit Patterns",
+      "id": "unique-msgvalue-in-loop-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
       "severity": "CRITICAL",
-      "grep": "fillSellOrder|testExploit|buyer",
-      "detect": "Missing Buyer Validation in fillSellOrder()**: The marketplace's `fillSellOrder()` function validates only the seller's...",
+      "grep": "testExploit|msg.value|delegatecall|commitEth|multicall|exercise",
+      "detect": "msg.value checked per vault in a loop",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/msgvalue-in-loop.md",
+      "lines": [
+        116,
+        280
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: exercise() iterates over multiple vaults and checks msg.value >= ethCost per iteration.",
+        "PROVE: SushiMiso DutchAuction batch() forwards msg.value to each sub-call"
+      ],
+      "antipattern": "SushiMiso DutchAuction batch() forwards msg.value to each sub-call",
+      "validWhen": "exercise() iterates over multiple vaults and checks msg.value >= ethCost per iteration."
+    },
+    {
+      "id": "unique-msgvalue-in-loop-keywords-004",
+      "title": "Keywords",
+      "severity": "UNKNOWN",
+      "grep": "batch_delegatecall|eth_payment_reuse|msg_value_loop|exercise_loop",
+      "detect": "Keywords",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/msgvalue-in-loop.md",
+      "lines": [
+        413,
+        433
+      ]
+    },
+    {
+      "id": "unique-nft-specific-exploit-patterns-agent-quick-view-000",
+      "title": "Agent Quick View",
+      "severity": "HIGH",
+      "grep": "missing_validation|single_contract",
+      "detect": "Agent Quick View",
       "cat": [
         "protocol-specific",
         "unique"
       ],
       "ref": "DB/unique/defihacklabs/nft-specific-exploit-patterns.md",
       "lines": [
-        41,
-        264
+        74,
+        85
       ],
-      "neverPrune": true,
       "check": [
-        "VERIFY: Missing Buyer Validation in fillSellOrder(): The marketplace's fillSellOrder() function validates only the seller's...",
-        "PROVE: *Forced Sale Attack (Quixotic pattern); Attacker monitors marketplace for valuable NFT listings",
-        "FALSIFY: Buyer must be msg.sender or provide a signature",
-        "IMPACT: Forced NFT Sales: Attacker fills any active listing without proper authorization"
+        "VERIFY: Pattern Key | marketplace_signature_bypass | nft_marketplace | parameter_manipulation | fund_loss"
       ],
-      "antipattern": "Only seller signature validated, buyer address is caller-controlled",
-      "securePattern": "Buyer must be msg.sender or provide a signature",
-      "validWhen": "Missing Buyer Validation in fillSellOrder(): The marketplace's fillSellOrder() function validates only the seller's...",
-      "invalidWhen": "Buyer must be msg.sender or provide a signature",
-      "impact": "Forced NFT Sales: Attacker fills any active listing without proper authorization"
+      "validWhen": "Pattern Key | marketplace_signature_bypass | nft_marketplace | parameter_manipulation | fund_loss"
     },
     {
-      "id": "unique-skim-balance-attack-skim-token-balance-attack-patt-000",
-      "title": "Skim Token Balance Attack Patterns",
+      "id": "unique-nft-specific-exploit-patterns-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "HIGH",
+      "grep": "fillSellOrder|testExploit|atomic|buyer",
+      "detect": "Only seller signature validated, buyer address is caller-controlled",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/nft-specific-exploit-patterns.md",
+      "lines": [
+        106,
+        223
+      ],
+      "check": [
+        "VERIFY: fillSellOrder() only validates the seller's signature.",
+        "PROVE: Only seller signature validated, buyer address is caller-controlled"
+      ],
+      "antipattern": "Only seller signature validated, buyer address is caller-controlled",
+      "validWhen": "fillSellOrder() only validates the seller's signature."
+    },
+    {
+      "id": "unique-nft-specific-exploit-patterns-keywords-004",
+      "title": "Keywords",
+      "severity": "UNKNOWN",
+      "grep": "listing_exploitation|seller_signature|buyer_validation|nft_marketplace",
+      "detect": "listing_exploitation",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/nft-specific-exploit-patterns.md",
+      "lines": [
+        350,
+        367
+      ],
+      "validWhen": "listing_exploitation"
+    },
+    {
+      "id": "unique-skim-balance-attack-agent-quick-view-000",
+      "title": "Agent Quick View",
       "severity": "MEDIUM",
-      "grep": "skim(address(pair|DPPFlashLoanCall|skim(attacker|address(pair|innerCallback|testExploit",
-      "detect": "The root causes fall into two distinct patterns:",
+      "grep": "stale_accounting|single_contract",
+      "detect": "Agent Quick View",
       "cat": [
         "protocol-specific",
         "unique"
       ],
       "ref": "DB/unique/defihacklabs/skim-balance-attack.md",
       "lines": [
-        43,
-        301
+        91,
+        102
       ],
       "check": [
-        "VERIFY: root causes fall into two distinct patterns",
-        "PROVE: *Skim Loop with Deflationary Token (GSS/ANCH pattern); Flash loan stablecoin (USDT/BUSD) from DODO",
-        "FALSIFY: Track actual received amounts, don't rely on skim()",
-        "IMPACT: Reserve Manipulation: Pair reserves diverge from actual token balances"
+        "VERIFY: Pattern Key | pair_skim_exploitation | uniswap_v2_pair | economic_exploit | fund_loss"
       ],
-      "antipattern": "Pair.skim() with fee-on-transfer token creates exploitable reserve gap",
-      "securePattern": "Track actual received amounts, don't rely on skim()",
-      "validWhen": "The root causes fall into two distinct patterns",
-      "invalidWhen": "Track actual received amounts, don't rely on skim()",
-      "impact": "Reserve Manipulation: Pair reserves diverge from actual token balances"
+      "validWhen": "Pattern Key | pair_skim_exploitation | uniswap_v2_pair | economic_exploit | fund_loss"
     },
     {
-      "id": "unique-stale-cached-state-exploits-stale-cached-state-exploit-pat-000",
-      "title": "Stale/Cached State Exploit Patterns",
-      "severity": "CRITICAL",
-      "grep": "updateExchangeRate|testExploit|sellAmount|_transfer|liquidate|borrow",
-      "detect": "Stale Global Variable Accumulation**: A storage variable updated during sells (`sellAmount`) is used in the sell logic...",
+      "id": "unique-skim-balance-attack-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "MEDIUM",
+      "grep": "DPPFlashLoanCall|address(pair|innerCallback|testExploit|skim(pair|sync",
+      "detect": "Pair.skim() with fee-on-transfer token creates exploitable reserve gap",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/skim-balance-attack.md",
+      "lines": [
+        132,
+        295
+      ],
+      "check": [
+        "VERIFY: GSS token has a transfer fee.",
+        "PROVE: Pair.skim() with fee-on-transfer token creates exploitable reserve gap"
+      ],
+      "antipattern": "Pair.skim() with fee-on-transfer token creates exploitable reserve gap",
+      "validWhen": "GSS token has a transfer fee."
+    },
+    {
+      "id": "unique-skim-balance-attack-defihacklabs-poc-references-003",
+      "title": "DeFiHackLabs PoC References",
+      "severity": "UNKNOWN",
+      "grep": "DeFiHackLabs|HackDao|References|Token",
+      "detect": "GSS** (2023-08, $24.8K): `DeFiHackLabs/src/test/2023-08/GSS_exp.sol`",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/skim-balance-attack.md",
+      "lines": [
+        400,
+        409
+      ],
+      "check": [
+        "VERIFY: GSS (2023-08, $24.8K): DeFiHackLabs/src/test/2023-08/GSS_exp.sol"
+      ],
+      "validWhen": "GSS (2023-08, $24.8K): DeFiHackLabs/src/test/2023-08/GSS_exp.sol"
+    },
+    {
+      "id": "unique-skim-balance-attack-keywords-004",
+      "title": "Keywords",
+      "severity": "UNKNOWN",
+      "grep": "balance_manipulation|reserve_discrepancy|deflationary_token|pair_manipulation",
+      "detect": "balance_manipulation",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/skim-balance-attack.md",
+      "lines": [
+        410,
+        430
+      ],
+      "validWhen": "balance_manipulation"
+    },
+    {
+      "id": "unique-stale-cached-state-exploits-agent-quick-view-000",
+      "title": "Agent Quick View",
+      "severity": "HIGH",
+      "grep": "missing_validation|single_contract",
+      "detect": "Agent Quick View",
       "cat": [
         "protocol-specific",
         "unique"
       ],
       "ref": "DB/unique/defihacklabs/stale-cached-state-exploits.md",
       "lines": [
-        41,
-        286
+        79,
+        90
       ],
-      "neverPrune": true,
       "check": [
-        "VERIFY: Stale Global Variable Accumulation: A storage variable updated during sells (sellAmount) is used in the sell logic...",
-        "PROVE: *Stale Variable Accumulation (CS Token pattern); Attacker makes 99 tiny buy transactions — each inflates the sellAmount global variable",
-        "FALSIFY: Track sell amounts per address instead of globally",
-        "IMPACT: State Accumulation Exploit: Global variables that accumulate across transactions create exploitation windows"
+        "VERIFY: Pattern Key | cached_state_exploitation | state_cache | state_manipulation | fund_loss"
       ],
-      "antipattern": "Global sellAmount variable is inflated by buys, reduces burn on sells",
-      "securePattern": "Track sell amounts per address instead of globally",
-      "validWhen": "Stale Global Variable Accumulation: A storage variable updated during sells (sellAmount) is used in the sell logic...",
-      "invalidWhen": "Track sell amounts per address instead of globally",
-      "impact": "State Accumulation Exploit: Global variables that accumulate across transactions create exploitation windows"
+      "validWhen": "Pattern Key | cached_state_exploitation | state_cache | state_manipulation | fund_loss"
     },
     {
-      "id": "unique-swap-metapool-attack-swap-metapool-attack-patterns-000",
-      "title": "Swap Metapool Attack Patterns",
-      "severity": "CRITICAL",
-      "grep": "executeOperation|virtual_price|testExploit|exchange",
-      "detect": "Virtual Price Dependency**: Metapools price their LP token component using the base pool's `virtual_price()`.",
+      "id": "unique-stale-cached-state-exploits-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "HIGH",
+      "grep": "updateExchangeRate|testExploit|sellAmount|_transfer|liquidate|borrow",
+      "detect": "Global sellAmount variable is inflated by buys, reduces burn on sells",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/stale-cached-state-exploits.md",
+      "lines": [
+        116,
+        253
+      ],
+      "check": [
+        "VERIFY: sellAmount global variable is accumulated by buy transactions without any cap, decay, or per-address tracking.",
+        "PROVE: Global sellAmount variable is inflated by buys, reduces burn on sells"
+      ],
+      "antipattern": "Global sellAmount variable is inflated by buys, reduces burn on sells",
+      "validWhen": "The sellAmount global variable is accumulated by buy transactions without any cap, decay, or per-address tracking."
+    },
+    {
+      "id": "unique-stale-cached-state-exploits-keywords-004",
+      "title": "Keywords",
+      "severity": "UNKNOWN",
+      "grep": "state_accumulation|self_liquidation|global_variable|outdated_price",
+      "detect": "Keywords",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/stale-cached-state-exploits.md",
+      "lines": [
+        379,
+        395
+      ]
+    },
+    {
+      "id": "unique-swap-metapool-attack-agent-quick-view-000",
+      "title": "Agent Quick View",
+      "severity": "HIGH",
+      "grep": "missing_validation|single_contract",
+      "detect": "Agent Quick View",
       "cat": [
         "protocol-specific",
         "unique"
       ],
       "ref": "DB/unique/defihacklabs/swap-metapool-attack.md",
       "lines": [
-        41,
-        232
+        77,
+        88
+      ],
+      "check": [
+        "VERIFY: Pattern Key | cross_pool_price_manipulation | curve_metapool | economic_exploit | fund_loss"
+      ],
+      "validWhen": "Pattern Key | cross_pool_price_manipulation | curve_metapool | economic_exploit | fund_loss"
+    },
+    {
+      "id": "unique-swap-metapool-attack-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "CRITICAL",
+      "grep": "executeOperation|testExploit|exchange|atomic",
+      "detect": "Metapool swap rate depends on base pool state",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/swap-metapool-attack.md",
+      "lines": [
+        111,
+        217
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Virtual Price Dependency: Metapools price their LP token component using the base pool's virtual_price().",
-        "PROVE: *Cross-Pool Arbitrage (Saddle pattern); Flash loan large amount of stablecoin (USDC)",
-        "FALSIFY: Verify metapool's virtual price against base pool before swap",
-        "IMPACT: Cross-Pool Arbitrage: Price discrepancies between interconnected pools allow risk-free extraction"
+        "VERIFY: Saddle's metapool swaps use a virtual price derived from its base pool LP token.",
+        "PROVE: Metapool swap rate depends on base pool state"
       ],
       "antipattern": "Metapool swap rate depends on base pool state",
-      "securePattern": "Verify metapool's virtual price against base pool before swap",
-      "validWhen": "Virtual Price Dependency: Metapools price their LP token component using the base pool's virtual_price().",
-      "invalidWhen": "Verify metapool's virtual price against base pool before swap",
-      "impact": "Cross-Pool Arbitrage: Price discrepancies between interconnected pools allow risk-free extraction"
+      "validWhen": "Saddle's metapool swaps use a virtual price derived from its base pool LP token."
+    },
+    {
+      "id": "unique-swap-metapool-attack-keywords-004",
+      "title": "Keywords",
+      "severity": "UNKNOWN",
+      "grep": "cross_pool_arbitrage|swap_manipulation|price_dependency|imbalanced_pool",
+      "detect": "cross_pool_arbitrage",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/swap-metapool-attack.md",
+      "lines": [
+        318,
+        333
+      ],
+      "validWhen": "cross_pool_arbitrage"
     },
     {
       "id": "unique-converttoshares-manipulation-dos-converttoshares-manipulation-b-000",

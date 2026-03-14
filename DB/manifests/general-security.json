@@ -3,7 +3,7 @@
     "category": "general-security",
     "description": "Access control, input validation, signatures, initialization",
     "fileCount": 15,
-    "totalPatterns": 93,
+    "totalPatterns": 105,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -435,12 +435,15 @@
     },
     {
       "file": "DB/general/access-control/defihacklabs-access-control-2021-2022-patterns.md",
-      "totalLines": 622,
+      "totalLines": 702,
       "frontmatter": {
         "protocol": "Multi-Protocol",
         "chain": "Ethereum, BSC, Fantom",
         "category": "access_control",
         "vulnerability_type": "Access Control Bypass Patterns",
+        "root_cause_family": "missing_access_control",
+        "pattern_key": "Access Control Bypass Patterns |  |  | Full protocol drain, governance takeover, token supply manipulation",
+        "interaction_scope": "single_contract",
         "source": "DeFiHackLabs",
         "total_exploits_analyzed": "9",
         "total_losses": "\"$3.3M+\"",
@@ -454,10 +457,11 @@
         {
           "id": "general-security-defihacklabs-access-control-2021-2022-pa-overview-000",
           "title": "Overview",
-          "lineStart": 53,
-          "lineEnd": 69,
-          "lineCount": 17,
+          "lineStart": 102,
+          "lineEnd": 131,
+          "lineCount": 30,
           "severity": [
+            "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
@@ -465,18 +469,33 @@
             "burn(address",
             "initialize",
             "mint",
+            "missing_access_control",
             "onlyOwner",
             "redeem",
+            "single_contract",
             "transferFrom"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 120,
+              "lineEnd": 131,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "missing_access_control",
+                "single_contract"
+              ]
+            }
+          ]
         },
         {
           "id": "general-security-defihacklabs-access-control-2021-2022-pa-vulnerability-description-001",
           "title": "Vulnerability Description",
-          "lineStart": 70,
-          "lineEnd": 99,
+          "lineStart": 132,
+          "lineEnd": 161,
           "lineCount": 30,
           "severity": [
             "LOW"
@@ -496,8 +515,8 @@
           "subsections": [
             {
               "title": "Root Cause Analysis",
-              "lineStart": 72,
-              "lineEnd": 81,
+              "lineStart": 134,
+              "lineEnd": 143,
               "severity": [
                 "LOW"
               ],
@@ -513,8 +532,8 @@
             },
             {
               "title": "Attack Scenario Taxonomy",
-              "lineStart": 82,
-              "lineEnd": 99,
+              "lineStart": 144,
+              "lineEnd": 161,
               "severity": [],
               "codeKeywords": [
                 "mint",
@@ -526,14 +545,15 @@
         {
           "id": "general-security-defihacklabs-access-control-2021-2022-pa-vulnerable-pattern-examples-002",
           "title": "Vulnerable Pattern Examples",
-          "lineStart": 100,
-          "lineEnd": 420,
-          "lineCount": 321,
+          "lineStart": 162,
+          "lineEnd": 500,
+          "lineCount": 339,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
+            "atomic",
             "initialize",
             "initialized",
             "mint",
@@ -545,12 +565,13 @@
           "subsections": [
             {
               "title": "Pattern 1: Missing Access Control on Owner Withdrawal",
-              "lineStart": 102,
-              "lineEnd": 129,
+              "lineStart": 164,
+              "lineEnd": 193,
               "severity": [
                 "CRITICAL"
               ],
               "codeKeywords": [
+                "atomic",
                 "onlyOwner",
                 "ownerWithdrawAllTo",
                 "testExploit"
@@ -558,37 +579,40 @@
             },
             {
               "title": "Pattern 2: Public burn(address) Enables LP Drain",
-              "lineStart": 130,
-              "lineEnd": 161,
+              "lineStart": 194,
+              "lineEnd": 227,
               "severity": [
                 "CRITICAL",
                 "LOW"
               ],
               "codeKeywords": [
+                "atomic",
                 "testExploit"
               ]
             },
             {
               "title": "Pattern 3: Public mint() Without Any Restriction",
-              "lineStart": 162,
-              "lineEnd": 187,
+              "lineStart": 228,
+              "lineEnd": 255,
               "severity": [
                 "HIGH"
               ],
               "codeKeywords": [
+                "atomic",
                 "mint",
                 "testExploit"
               ]
             },
             {
               "title": "Pattern 4: Unprotected Proxy Re-Initialization (Governance Takeover)",
-              "lineStart": 188,
-              "lineEnd": 237,
+              "lineStart": 256,
+              "lineEnd": 307,
               "severity": [
                 "CRITICAL",
                 "LOW"
               ],
               "codeKeywords": [
+                "atomic",
                 "initialize",
                 "initialized",
                 "testExploit"
@@ -596,13 +620,14 @@
             },
             {
               "title": "Pattern 5: Missing Approval Check in ERC-4626 Redeem",
-              "lineStart": 238,
-              "lineEnd": 265,
+              "lineStart": 308,
+              "lineEnd": 337,
               "severity": [
                 "CRITICAL",
                 "LOW"
               ],
               "codeKeywords": [
+                "atomic",
                 "msg.sender",
                 "owner",
                 "testExploit"
@@ -610,38 +635,41 @@
             },
             {
               "title": "Pattern 6: Public Function Drains User Approvals",
-              "lineStart": 266,
-              "lineEnd": 302,
+              "lineStart": 338,
+              "lineEnd": 376,
               "severity": [
                 "CRITICAL",
                 "LOW"
               ],
               "codeKeywords": [
                 "DPPFlashLoanCall",
+                "atomic",
                 "testExploit",
                 "user"
               ]
             },
             {
               "title": "Pattern 7: Router Swaps From Arbitrary Address",
-              "lineStart": 303,
-              "lineEnd": 345,
+              "lineStart": 377,
+              "lineEnd": 421,
               "severity": [
                 "CRITICAL"
               ],
               "codeKeywords": [
+                "atomic",
                 "testExploit"
               ]
             },
             {
               "title": "Pattern 8: Fake Factory Injection Inflates Swap Mining Rewards",
-              "lineStart": 346,
-              "lineEnd": 389,
+              "lineStart": 422,
+              "lineEnd": 467,
               "severity": [
                 "HIGH",
                 "LOW"
               ],
               "codeKeywords": [
+                "atomic",
                 "factories",
                 "getPair",
                 "getReserves",
@@ -650,8 +678,8 @@
             },
             {
               "title": "Pattern 9: Public NFT _burn() Allows Arbitrary Token Destruction",
-              "lineStart": 390,
-              "lineEnd": 420,
+              "lineStart": 468,
+              "lineEnd": 500,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -659,6 +687,7 @@
               "codeKeywords": [
                 "_burn",
                 "_numNFTPerAddress",
+                "atomic",
                 "testExploit"
               ]
             }
@@ -667,8 +696,8 @@
         {
           "id": "general-security-defihacklabs-access-control-2021-2022-pa-impact-analysis-003",
           "title": "Impact Analysis",
-          "lineStart": 421,
-          "lineEnd": 438,
+          "lineStart": 501,
+          "lineEnd": 518,
           "lineCount": 18,
           "severity": [],
           "codeKeywords": [],
@@ -678,8 +707,8 @@
         {
           "id": "general-security-defihacklabs-access-control-2021-2022-pa-secure-implementation-004",
           "title": "Secure Implementation",
-          "lineStart": 439,
-          "lineEnd": 545,
+          "lineStart": 519,
+          "lineEnd": 625,
           "lineCount": 107,
           "severity": [
             "LOW"
@@ -696,8 +725,8 @@
           "subsections": [
             {
               "title": "Fix 1: Proper Access Control Modifiers",
-              "lineStart": 441,
-              "lineEnd": 469,
+              "lineStart": 521,
+              "lineEnd": 549,
               "severity": [
                 "LOW"
               ],
@@ -709,8 +738,8 @@
             },
             {
               "title": "Fix 2: Proxy Initialization Guard",
-              "lineStart": 470,
-              "lineEnd": 493,
+              "lineStart": 550,
+              "lineEnd": 573,
               "severity": [],
               "codeKeywords": [
                 "initialize"
@@ -718,8 +747,8 @@
             },
             {
               "title": "Fix 3: ERC-4626 Redeem Authorization",
-              "lineStart": 494,
-              "lineEnd": 515,
+              "lineStart": 574,
+              "lineEnd": 595,
               "severity": [
                 "LOW"
               ],
@@ -729,8 +758,8 @@
             },
             {
               "title": "Fix 4: Validate Routing Parameters",
-              "lineStart": 516,
-              "lineEnd": 545,
+              "lineStart": 596,
+              "lineEnd": 625,
               "severity": [
                 "LOW"
               ],
@@ -743,8 +772,8 @@
         {
           "id": "general-security-defihacklabs-access-control-2021-2022-pa-detection-patterns-005",
           "title": "Detection Patterns",
-          "lineStart": 546,
-          "lineEnd": 590,
+          "lineStart": 626,
+          "lineEnd": 670,
           "lineCount": 45,
           "severity": [
             "LOW"
@@ -754,8 +783,8 @@
           "subsections": [
             {
               "title": "Static Analysis",
-              "lineStart": 548,
-              "lineEnd": 575,
+              "lineStart": 628,
+              "lineEnd": 655,
               "severity": [
                 "LOW"
               ],
@@ -763,8 +792,8 @@
             },
             {
               "title": "Invariant Checks",
-              "lineStart": 576,
-              "lineEnd": 590,
+              "lineStart": 656,
+              "lineEnd": 670,
               "severity": [
                 "LOW"
               ],
@@ -775,8 +804,8 @@
         {
           "id": "general-security-defihacklabs-access-control-2021-2022-pa-audit-checklist-006",
           "title": "Audit Checklist",
-          "lineStart": 591,
-          "lineEnd": 603,
+          "lineStart": 671,
+          "lineEnd": 683,
           "lineCount": 13,
           "severity": [
             "LOW"
@@ -797,8 +826,8 @@
         {
           "id": "general-security-defihacklabs-access-control-2021-2022-pa-real-world-examples-007",
           "title": "Real-World Examples",
-          "lineStart": 604,
-          "lineEnd": 619,
+          "lineStart": 684,
+          "lineEnd": 699,
           "lineCount": 16,
           "severity": [],
           "codeKeywords": [],
@@ -809,12 +838,15 @@
     },
     {
       "file": "DB/general/access-control/defihacklabs-access-control-2023-patterns.md",
-      "totalLines": 445,
+      "totalLines": 499,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, bsc, base\"",
         "category": "\"access_control\"",
         "vulnerability_type": "\"unprotected_mint_burn, unprotected_token_transfer, public_fee_function, swap_authorization\"",
+        "root_cause_family": "missing_access_control",
+        "pattern_key": "unprotected_mint_burn | token_contract | logical_error | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "\"logical_error\"",
         "affected_component": "\"token_contract, dex_pair, aggregator_router, bridge_gateway\"",
         "severity": "\"critical\"",
@@ -827,18 +859,49 @@
         "total_exploits_analyzed": "8",
         "total_losses": "\"$17M+\""
       },
-      "patternCount": 10,
+      "patternCount": 11,
       "patterns": [
         {
-          "id": "general-security-defihacklabs-access-control-2023-pattern-1-public-mint-public-burn-on-t-000",
-          "title": "1. Public Mint + Public Burn on Token Contract (SafeMoon $8.9M)",
-          "lineStart": 85,
-          "lineEnd": 152,
-          "lineCount": 68,
+          "id": "general-security-defihacklabs-access-control-2023-pattern-overview-000",
+          "title": "Overview",
+          "lineStart": 110,
+          "lineEnd": 128,
+          "lineCount": 19,
           "severity": [
             "CRITICAL"
           ],
           "codeKeywords": [
+            "missing_access_control",
+            "onlyOwner",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 117,
+              "lineEnd": 128,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "missing_access_control",
+                "single_contract"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-defihacklabs-access-control-2023-pattern-1-public-mint-public-burn-on-t-001",
+          "title": "1. Public Mint + Public Burn on Token Contract (SafeMoon $8.9M)",
+          "lineStart": 129,
+          "lineEnd": 198,
+          "lineCount": 70,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "atomic",
             "burn",
             "doBurnHack",
             "mint",
@@ -851,8 +914,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 91,
-              "lineEnd": 99,
+              "lineStart": 137,
+              "lineEnd": 145,
               "severity": [],
               "codeKeywords": [
                 "pair.sync"
@@ -860,8 +923,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 100,
-              "lineEnd": 152,
+              "lineStart": 146,
+              "lineEnd": 198,
               "severity": [
                 "CRITICAL",
                 "HIGH"
@@ -876,11 +939,11 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-access-control-2023-pattern-2-public-fee-transfer-function-001",
+          "id": "general-security-defihacklabs-access-control-2023-pattern-2-public-fee-transfer-function-002",
           "title": "2. Public Fee Transfer Function on DEX Pair (LeetSwap $630K)",
-          "lineStart": 153,
-          "lineEnd": 206,
-          "lineCount": 54,
+          "lineStart": 199,
+          "lineEnd": 254,
+          "lineCount": 56,
           "severity": [
             "HIGH",
             "LOW"
@@ -893,8 +956,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 159,
-              "lineEnd": 206,
+              "lineStart": 207,
+              "lineEnd": 254,
               "severity": [
                 "HIGH"
               ],
@@ -905,16 +968,17 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-access-control-2023-pattern-3-aggregator-arbitrary-sender--002",
+          "id": "general-security-defihacklabs-access-control-2023-pattern-3-aggregator-arbitrary-sender--003",
           "title": "3. Aggregator Arbitrary-Sender Swap (SwapX $1M)",
-          "lineStart": 207,
-          "lineEnd": 262,
-          "lineCount": 56,
+          "lineStart": 255,
+          "lineEnd": 312,
+          "lineCount": 58,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
+            "atomic",
             "from",
             "testExploit"
           ],
@@ -922,8 +986,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 213,
-              "lineEnd": 262,
+              "lineStart": 263,
+              "lineEnd": 312,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -935,25 +999,26 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-access-control-2023-pattern-4-token-lock-claim-with-migrat-003",
+          "id": "general-security-defihacklabs-access-control-2023-pattern-4-token-lock-claim-with-migrat-004",
           "title": "4. Token Lock/Claim with Migration Vulnerability (SHIDO $230K)",
-          "lineStart": 263,
-          "lineEnd": 306,
-          "lineCount": 44,
+          "lineStart": 313,
+          "lineEnd": 358,
+          "lineCount": 46,
           "severity": [
             "HIGH",
             "LOW"
           ],
           "codeKeywords": [
             "DPPFlashLoanCall",
-            "LockAndClaimToken"
+            "LockAndClaimToken",
+            "atomic"
           ],
           "rootCause": "SHIDO's token migration system allowed users to lock SHIDOINU tokens and claim SHIDO tokens. The lock contract didn't properly validate the exchange rate or the amount being claimed relative to what w",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 269,
-              "lineEnd": 306,
+              "lineStart": 321,
+              "lineEnd": 358,
               "severity": [
                 "HIGH"
               ],
@@ -965,22 +1030,24 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-access-control-2023-pattern-5-router-bot-authorization-fai-004",
+          "id": "general-security-defihacklabs-access-control-2023-pattern-5-router-bot-authorization-fai-005",
           "title": "5. Router/Bot Authorization Failures (Maestro $630K, UniBot $84K)",
-          "lineStart": 307,
-          "lineEnd": 340,
-          "lineCount": 34,
+          "lineStart": 359,
+          "lineEnd": 394,
+          "lineCount": 36,
           "severity": [
             "HIGH",
             "LOW"
           ],
-          "codeKeywords": [],
+          "codeKeywords": [
+            "atomic"
+          ],
           "rootCause": "Trading bot routers (MaestroRouter, UniBot) processed swap transactions on behalf of users but failed to properly verify that the calling address was authorized to execute specific operations. Attacke",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 313,
-              "lineEnd": 340,
+              "lineStart": 367,
+              "lineEnd": 394,
               "severity": [
                 "HIGH",
                 "LOW"
@@ -990,10 +1057,10 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-access-control-2023-pattern-secure-implementations-005",
+          "id": "general-security-defihacklabs-access-control-2023-pattern-secure-implementations-006",
           "title": "Secure Implementations",
-          "lineStart": 341,
-          "lineEnd": 385,
+          "lineStart": 395,
+          "lineEnd": 439,
           "lineCount": 45,
           "severity": [],
           "codeKeywords": [
@@ -1006,8 +1073,8 @@
           "subsections": [
             {
               "title": "Pattern 1: Access-Controlled Token Operations",
-              "lineStart": 343,
-              "lineEnd": 359,
+              "lineStart": 397,
+              "lineEnd": 413,
               "severity": [],
               "codeKeywords": [
                 "burn",
@@ -1016,8 +1083,8 @@
             },
             {
               "title": "Pattern 2: Sender-Verified Swaps",
-              "lineStart": 360,
-              "lineEnd": 374,
+              "lineStart": 414,
+              "lineEnd": 428,
               "severity": [],
               "codeKeywords": [
                 "swap"
@@ -1025,8 +1092,8 @@
             },
             {
               "title": "Pattern 3: Internal Fee Functions",
-              "lineStart": 375,
-              "lineEnd": 385,
+              "lineStart": 429,
+              "lineEnd": 439,
               "severity": [],
               "codeKeywords": [
                 "_transferFees"
@@ -1035,10 +1102,10 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-access-control-2023-pattern-impact-analysis-006",
+          "id": "general-security-defihacklabs-access-control-2023-pattern-impact-analysis-007",
           "title": "Impact Analysis",
-          "lineStart": 386,
-          "lineEnd": 397,
+          "lineStart": 440,
+          "lineEnd": 451,
           "lineCount": 12,
           "severity": [
             "CRITICAL",
@@ -1049,10 +1116,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-defihacklabs-access-control-2023-pattern-detection-patterns-007",
+          "id": "general-security-defihacklabs-access-control-2023-pattern-detection-patterns-008",
           "title": "Detection Patterns",
-          "lineStart": 398,
-          "lineEnd": 416,
+          "lineStart": 452,
+          "lineEnd": 470,
           "lineCount": 19,
           "severity": [],
           "codeKeywords": [],
@@ -1060,18 +1127,18 @@
           "subsections": [
             {
               "title": "Static Analysis",
-              "lineStart": 400,
-              "lineEnd": 416,
+              "lineStart": 454,
+              "lineEnd": 470,
               "severity": [],
               "codeKeywords": []
             }
           ]
         },
         {
-          "id": "general-security-defihacklabs-access-control-2023-pattern-audit-checklist-008",
+          "id": "general-security-defihacklabs-access-control-2023-pattern-audit-checklist-009",
           "title": "Audit Checklist",
-          "lineStart": 417,
-          "lineEnd": 428,
+          "lineStart": 471,
+          "lineEnd": 482,
           "lineCount": 12,
           "severity": [],
           "codeKeywords": [
@@ -1084,10 +1151,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-defihacklabs-access-control-2023-pattern-real-world-examples-009",
+          "id": "general-security-defihacklabs-access-control-2023-pattern-real-world-examples-010",
           "title": "Real-World Examples",
-          "lineStart": 429,
-          "lineEnd": 442,
+          "lineStart": 483,
+          "lineEnd": 496,
           "lineCount": 14,
           "severity": [],
           "codeKeywords": [],
@@ -1098,12 +1165,15 @@
     },
     {
       "file": "DB/general/access-control/defihacklabs-access-control-2024-2025.md",
-      "totalLines": 472,
+      "totalLines": 525,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, linea, zksync, base\"",
         "category": "\"access_control\"",
         "vulnerability_type": "\"missing_access_control, missing_modifier, public_mint, unvalidated_caller\"",
+        "root_cause_family": "missing_access_control",
+        "pattern_key": "missing_access_control | initialization | privilege_escalation | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "\"privilege_escalation\"",
         "affected_component": "\"initialization, execution, minting, pool_exit, module_core\"",
         "severity": "\"critical\"",
@@ -1113,19 +1183,50 @@
         "language": "\"solidity\"",
         "version": "\">=0.8.0\""
       },
-      "patternCount": 9,
+      "patternCount": 10,
       "patterns": [
         {
-          "id": "general-security-defihacklabs-access-control-2024-2025-1-missing-access-control-on-mo-000",
-          "title": "1. Missing Access Control on Module Initialization",
-          "lineStart": 69,
-          "lineEnd": 119,
-          "lineCount": 51,
+          "id": "general-security-defihacklabs-access-control-2024-2025-overview-000",
+          "title": "Overview",
+          "lineStart": 93,
+          "lineEnd": 111,
+          "lineCount": 19,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
+            "missing_access_control",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 100,
+              "lineEnd": 111,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "missing_access_control",
+                "single_contract"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-defihacklabs-access-control-2024-2025-1-missing-access-control-on-mo-001",
+          "title": "1. Missing Access Control on Module Initialization",
+          "lineStart": 112,
+          "lineEnd": 164,
+          "lineCount": 53,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "atomic",
             "initializeModuleCore",
             "initializer",
             "issueNewDs",
@@ -1136,8 +1237,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 75,
-              "lineEnd": 82,
+              "lineStart": 120,
+              "lineEnd": 127,
               "severity": [],
               "codeKeywords": [
                 "initializeModuleCore",
@@ -1146,8 +1247,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 83,
-              "lineEnd": 119,
+              "lineStart": 128,
+              "lineEnd": 164,
               "severity": [
                 "CRITICAL"
               ],
@@ -1156,16 +1257,17 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-access-control-2024-2025-2-missing-caller-restriction-o-001",
+          "id": "general-security-defihacklabs-access-control-2024-2025-2-missing-caller-restriction-o-002",
           "title": "2. Missing Caller Restriction on Core Execution Function",
-          "lineStart": 120,
-          "lineEnd": 173,
-          "lineCount": 54,
+          "lineStart": 165,
+          "lineEnd": 220,
+          "lineCount": 56,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
+            "atomic",
             "execute",
             "int128",
             "type(int128).max",
@@ -1175,8 +1277,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 126,
-              "lineEnd": 132,
+              "lineStart": 173,
+              "lineEnd": 179,
               "severity": [],
               "codeKeywords": [
                 "type(int128).max",
@@ -1185,8 +1287,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 133,
-              "lineEnd": 173,
+              "lineStart": 180,
+              "lineEnd": 220,
               "severity": [
                 "CRITICAL"
               ],
@@ -1197,11 +1299,11 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-access-control-2024-2025-3-public-mint-function-on-coll-002",
+          "id": "general-security-defihacklabs-access-control-2024-2025-3-public-mint-function-on-coll-003",
           "title": "3. Public Mint Function on Collateral Token",
-          "lineStart": 174,
-          "lineEnd": 225,
-          "lineCount": 52,
+          "lineStart": 221,
+          "lineEnd": 274,
+          "lineCount": 54,
           "severity": [
             "CRITICAL"
           ],
@@ -1214,8 +1316,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 180,
-              "lineEnd": 187,
+              "lineStart": 229,
+              "lineEnd": 236,
               "severity": [],
               "codeKeywords": [
                 "mint"
@@ -1223,8 +1325,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 188,
-              "lineEnd": 225,
+              "lineStart": 237,
+              "lineEnd": 274,
               "severity": [
                 "CRITICAL"
               ],
@@ -1235,23 +1337,25 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-access-control-2024-2025-4-unverified-contract-with-ext-003",
+          "id": "general-security-defihacklabs-access-control-2024-2025-4-unverified-contract-with-ext-004",
           "title": "4. Unverified Contract with External Transfer Proxy",
-          "lineStart": 226,
-          "lineEnd": 259,
-          "lineCount": 34,
+          "lineStart": 275,
+          "lineEnd": 310,
+          "lineCount": 36,
           "severity": [
             "CRITICAL",
             "HIGH",
             "LOW"
           ],
-          "codeKeywords": [],
+          "codeKeywords": [
+            "atomic"
+          ],
           "rootCause": "Unverified (non-open-source) contracts on blockchain explorers can hide malicious or vulnerable logic. When such contracts implement transfer proxy functionality without proper access control, any cal",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 232,
-              "lineEnd": 259,
+              "lineStart": 283,
+              "lineEnd": 310,
               "severity": [
                 "CRITICAL",
                 "HIGH",
@@ -1262,15 +1366,16 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-access-control-2024-2025-5-missing-msg-sender-validatio-004",
+          "id": "general-security-defihacklabs-access-control-2024-2025-5-missing-msg-sender-validatio-005",
           "title": "5. Missing msg.sender Validation in Pool Exit",
-          "lineStart": 260,
-          "lineEnd": 312,
-          "lineCount": 53,
+          "lineStart": 311,
+          "lineEnd": 365,
+          "lineCount": 55,
           "severity": [
             "CRITICAL"
           ],
           "codeKeywords": [
+            "atomic",
             "exitPool",
             "user"
           ],
@@ -1278,15 +1383,15 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 266,
-              "lineEnd": 271,
+              "lineStart": 319,
+              "lineEnd": 324,
               "severity": [],
               "codeKeywords": []
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 272,
-              "lineEnd": 312,
+              "lineStart": 325,
+              "lineEnd": 365,
               "severity": [
                 "CRITICAL"
               ],
@@ -1297,10 +1402,10 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-access-control-2024-2025-impact-analysis-005",
+          "id": "general-security-defihacklabs-access-control-2024-2025-impact-analysis-006",
           "title": "Impact Analysis",
-          "lineStart": 313,
-          "lineEnd": 339,
+          "lineStart": 366,
+          "lineEnd": 392,
           "lineCount": 27,
           "severity": [],
           "codeKeywords": [
@@ -1310,10 +1415,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-defihacklabs-access-control-2024-2025-secure-implementation-006",
+          "id": "general-security-defihacklabs-access-control-2024-2025-secure-implementation-007",
           "title": "Secure Implementation",
-          "lineStart": 340,
-          "lineEnd": 404,
+          "lineStart": 393,
+          "lineEnd": 457,
           "lineCount": 65,
           "severity": [],
           "codeKeywords": [
@@ -1327,10 +1432,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-defihacklabs-access-control-2024-2025-detection-patterns-007",
+          "id": "general-security-defihacklabs-access-control-2024-2025-detection-patterns-008",
           "title": "Detection Patterns",
-          "lineStart": 405,
-          "lineEnd": 428,
+          "lineStart": 458,
+          "lineEnd": 481,
           "lineCount": 24,
           "severity": [],
           "codeKeywords": [
@@ -1345,10 +1450,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-defihacklabs-access-control-2024-2025-real-world-examples-008",
+          "id": "general-security-defihacklabs-access-control-2024-2025-real-world-examples-009",
           "title": "Real-World Examples",
-          "lineStart": 429,
-          "lineEnd": 439,
+          "lineStart": 482,
+          "lineEnd": 492,
           "lineCount": 11,
           "severity": [],
           "codeKeywords": [],
@@ -1359,12 +1464,15 @@
     },
     {
       "file": "DB/general/access-control/defihacklabs-access-control-patterns.md",
-      "totalLines": 403,
+      "totalLines": 453,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, bsc, avalanche\"",
         "category": "\"access_control\"",
         "vulnerability_type": "\"missing_access_control\"",
+        "root_cause_family": "missing_access_control",
+        "pattern_key": "missing_access_control | function_access | logical_error | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "\"logical_error\"",
         "affected_component": "\"function_access, token_operations, state_management\"",
         "severity": "\"critical\"",
@@ -1374,19 +1482,53 @@
         "language": "\"solidity\"",
         "version": "\">=0.8.0\""
       },
-      "patternCount": 8,
+      "patternCount": 9,
       "patterns": [
         {
-          "id": "general-security-defihacklabs-access-control-patterns-1-unprotected-token-mint-burn-000",
-          "title": "1. Unprotected Token Mint / Burn",
-          "lineStart": 64,
-          "lineEnd": 122,
-          "lineCount": 59,
+          "id": "general-security-defihacklabs-access-control-patterns-overview-000",
+          "title": "Overview",
+          "lineStart": 87,
+          "lineEnd": 105,
+          "lineCount": 19,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
+            "burn",
+            "mint",
+            "missing_access_control",
+            "onlyOwner",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 94,
+              "lineEnd": 105,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "missing_access_control",
+                "single_contract"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-defihacklabs-access-control-patterns-1-unprotected-token-mint-burn-001",
+          "title": "1. Unprotected Token Mint / Burn",
+          "lineStart": 106,
+          "lineEnd": 166,
+          "lineCount": 61,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "atomic",
             "bridgeBurnAddress",
             "burn",
             "doBurnHack",
@@ -1400,8 +1542,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 70,
-              "lineEnd": 76,
+              "lineStart": 114,
+              "lineEnd": 120,
               "severity": [],
               "codeKeywords": [
                 "sync"
@@ -1409,8 +1551,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 77,
-              "lineEnd": 122,
+              "lineStart": 121,
+              "lineEnd": 166,
               "severity": [
                 "CRITICAL"
               ],
@@ -1425,16 +1567,17 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-access-control-patterns-2-unprotected-migration-functi-001",
+          "id": "general-security-defihacklabs-access-control-patterns-2-unprotected-migration-functi-002",
           "title": "2. Unprotected Migration Function",
-          "lineStart": 123,
-          "lineEnd": 158,
-          "lineCount": 36,
+          "lineStart": 167,
+          "lineEnd": 204,
+          "lineCount": 38,
           "severity": [
             "CRITICAL"
           ],
           "codeKeywords": [
             "amount",
+            "atomic",
             "migrateStake",
             "migrateWithdraw",
             "oldStaking"
@@ -1443,8 +1586,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 129,
-              "lineEnd": 158,
+              "lineStart": 175,
+              "lineEnd": 204,
               "severity": [
                 "CRITICAL"
               ],
@@ -1457,11 +1600,11 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-access-control-patterns-3-unprotected-configuration-se-002",
+          "id": "general-security-defihacklabs-access-control-patterns-3-unprotected-configuration-se-003",
           "title": "3. Unprotected Configuration Setter",
-          "lineStart": 159,
-          "lineEnd": 203,
-          "lineCount": 45,
+          "lineStart": 205,
+          "lineEnd": 251,
+          "lineCount": 47,
           "severity": [
             "HIGH",
             "LOW"
@@ -1477,8 +1620,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 165,
-              "lineEnd": 203,
+              "lineStart": 213,
+              "lineEnd": 251,
               "severity": [
                 "HIGH",
                 "LOW"
@@ -1492,15 +1635,16 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-access-control-patterns-4-missing-token-registry-valid-003",
+          "id": "general-security-defihacklabs-access-control-patterns-4-missing-token-registry-valid-004",
           "title": "4. Missing Token Registry Validation",
-          "lineStart": 204,
-          "lineEnd": 247,
-          "lineCount": 44,
+          "lineStart": 252,
+          "lineEnd": 297,
+          "lineCount": 46,
           "severity": [
             "HIGH"
           ],
           "codeKeywords": [
+            "atomic",
             "burn",
             "expiry",
             "redeem",
@@ -1511,8 +1655,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 210,
-              "lineEnd": 247,
+              "lineStart": 260,
+              "lineEnd": 297,
               "severity": [
                 "HIGH"
               ],
@@ -1526,10 +1670,10 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-access-control-patterns-impact-analysis-004",
+          "id": "general-security-defihacklabs-access-control-patterns-impact-analysis-005",
           "title": "Impact Analysis",
-          "lineStart": 248,
-          "lineEnd": 271,
+          "lineStart": 298,
+          "lineEnd": 321,
           "lineCount": 24,
           "severity": [],
           "codeKeywords": [
@@ -1539,10 +1683,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-defihacklabs-access-control-patterns-secure-implementation-005",
+          "id": "general-security-defihacklabs-access-control-patterns-secure-implementation-006",
           "title": "Secure Implementation",
-          "lineStart": 272,
-          "lineEnd": 332,
+          "lineStart": 322,
+          "lineEnd": 382,
           "lineCount": 61,
           "severity": [],
           "codeKeywords": [
@@ -1557,10 +1701,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-defihacklabs-access-control-patterns-detection-patterns-006",
+          "id": "general-security-defihacklabs-access-control-patterns-detection-patterns-007",
           "title": "Detection Patterns",
-          "lineStart": 333,
-          "lineEnd": 358,
+          "lineStart": 383,
+          "lineEnd": 408,
           "lineCount": 26,
           "severity": [],
           "codeKeywords": [
@@ -1579,10 +1723,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-defihacklabs-access-control-patterns-real-world-examples-007",
+          "id": "general-security-defihacklabs-access-control-patterns-real-world-examples-008",
           "title": "Real-World Examples",
-          "lineStart": 359,
-          "lineEnd": 372,
+          "lineStart": 409,
+          "lineEnd": 422,
           "lineCount": 14,
           "severity": [],
           "codeKeywords": [],
@@ -2000,12 +2144,15 @@
     },
     {
       "file": "DB/general/arbitrary-call/defihacklabs-arbitrary-call-2024-2025.md",
-      "totalLines": 510,
+      "totalLines": 563,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, arbitrum, bsc\"",
         "category": "\"arbitrary_call\"",
         "vulnerability_type": "\"unvalidated_external_call, input_validation_bypass, calldata_injection\"",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "unvalidated_external_call | swap_router | logical_error | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "\"logical_error\"",
         "affected_component": "\"swap_router, bridge_gateway, aggregator_proxy, diamond_facet, settlement\"",
         "severity": "\"critical\"",
@@ -2015,19 +2162,53 @@
         "language": "\"solidity\"",
         "version": "\">=0.8.0\""
       },
-      "patternCount": 9,
+      "patternCount": 10,
       "patterns": [
         {
-          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-1-unvalidated-callto-calldata--000",
+          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-overview-000",
+          "title": "Overview",
+          "lineStart": 100,
+          "lineEnd": 118,
+          "lineCount": 19,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "callData",
+            "callTo",
+            "missing_validation",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 107,
+              "lineEnd": 118,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "missing_validation",
+                "single_contract"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-1-unvalidated-callto-calldata--001",
           "title": "1. Unvalidated callTo/callData in Swap/Route Structs",
-          "lineStart": 76,
-          "lineEnd": 148,
-          "lineCount": 73,
+          "lineStart": 119,
+          "lineEnd": 193,
+          "lineCount": 75,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
+            "atomic",
             "call",
             "callData",
             "callTo",
@@ -2039,8 +2220,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 82,
-              "lineEnd": 90,
+              "lineStart": 127,
+              "lineEnd": 135,
               "severity": [
                 "LOW"
               ],
@@ -2051,8 +2232,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 91,
-              "lineEnd": 148,
+              "lineStart": 136,
+              "lineEnd": 193,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -2065,11 +2246,11 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-2-unrestricted-external-call-a-001",
+          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-2-unrestricted-external-call-a-002",
           "title": "2. Unrestricted External Call Actions (OPERATION_CALL)",
-          "lineStart": 149,
-          "lineEnd": 219,
-          "lineCount": 71,
+          "lineStart": 194,
+          "lineEnd": 266,
+          "lineCount": 73,
           "severity": [
             "CRITICAL",
             "LOW"
@@ -2082,8 +2263,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 155,
-              "lineEnd": 219,
+              "lineStart": 202,
+              "lineEnd": 266,
               "severity": [
                 "CRITICAL"
               ],
@@ -2092,23 +2273,24 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-3-bridge-signer-validation-byp-002",
+          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-3-bridge-signer-validation-byp-003",
           "title": "3. Bridge Signer Validation Bypass",
-          "lineStart": 220,
-          "lineEnd": 260,
-          "lineCount": 41,
+          "lineStart": 267,
+          "lineEnd": 309,
+          "lineCount": 43,
           "severity": [
             "CRITICAL"
           ],
           "codeKeywords": [
+            "atomic",
             "withdraw"
           ],
           "rootCause": "Cross-chain bridges use multi-signature validation on withdrawal requests — requiring N of M authorized validators to sign. When the signer verification is insufficient (e.g., using compromised keys, ",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 226,
-              "lineEnd": 260,
+              "lineStart": 275,
+              "lineEnd": 309,
               "severity": [
                 "CRITICAL"
               ],
@@ -2119,25 +2301,26 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-4-yul-integer-overflow-calldat-003",
+          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-4-yul-integer-overflow-calldat-004",
           "title": "4. Yul Integer Overflow Calldata Corruption",
-          "lineStart": 261,
-          "lineEnd": 314,
-          "lineCount": 54,
+          "lineStart": 310,
+          "lineEnd": 365,
+          "lineCount": 56,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
             "add",
+            "atomic",
             "interactionLength"
           ],
           "rootCause": "Contracts using Yul assembly for calldata manipulation are vulnerable to integer overflow, as Yul's `add()` opcode does NOT revert on overflow (unlike Solidity 0.8+). An attacker can craft a fake `int",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 267,
-              "lineEnd": 314,
+              "lineStart": 318,
+              "lineEnd": 365,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -2147,21 +2330,23 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-5-unverified-aggregator-proxy--004",
+          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-5-unverified-aggregator-proxy--005",
           "title": "5. Unverified Aggregator Proxy Forwarding",
-          "lineStart": 315,
-          "lineEnd": 347,
-          "lineCount": 33,
+          "lineStart": 366,
+          "lineEnd": 400,
+          "lineCount": 35,
           "severity": [
             "CRITICAL"
           ],
-          "codeKeywords": [],
+          "codeKeywords": [
+            "atomic"
+          ],
           "rootCause": "Trade aggregator proxies that accept raw calldata and forward it to external contracts create a universal call gadget. When the proxy holds user approvals (standard for aggregators), an attacker encod",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 321,
-              "lineEnd": 347,
+              "lineStart": 374,
+              "lineEnd": 400,
               "severity": [
                 "CRITICAL"
               ],
@@ -2170,10 +2355,10 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-impact-analysis-005",
+          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-impact-analysis-006",
           "title": "Impact Analysis",
-          "lineStart": 348,
-          "lineEnd": 377,
+          "lineStart": 401,
+          "lineEnd": 430,
           "lineCount": 30,
           "severity": [
             "LOW"
@@ -2183,10 +2368,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-secure-implementation-006",
+          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-secure-implementation-007",
           "title": "Secure Implementation",
-          "lineStart": 378,
-          "lineEnd": 440,
+          "lineStart": 431,
+          "lineEnd": 493,
           "lineCount": 63,
           "severity": [
             "LOW"
@@ -2200,10 +2385,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-detection-patterns-007",
+          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-detection-patterns-008",
           "title": "Detection Patterns",
-          "lineStart": 441,
-          "lineEnd": 465,
+          "lineStart": 494,
+          "lineEnd": 518,
           "lineCount": 25,
           "severity": [
             "LOW"
@@ -2225,10 +2410,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-real-world-examples-008",
+          "id": "general-security-defihacklabs-arbitrary-call-2024-2025-real-world-examples-009",
           "title": "Real-World Examples",
-          "lineStart": 466,
-          "lineEnd": 478,
+          "lineStart": 519,
+          "lineEnd": 531,
           "lineCount": 13,
           "severity": [
             "LOW"
@@ -2241,12 +2426,15 @@
     },
     {
       "file": "DB/general/arbitrary-call/defihacklabs-arbitrary-call-patterns.md",
-      "totalLines": 542,
+      "totalLines": 586,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, bsc\"",
         "category": "\"access_control\"",
         "vulnerability_type": "\"arbitrary_external_call\"",
+        "root_cause_family": "missing_access_control",
+        "pattern_key": "arbitrary_external_call | swap_router | data_manipulation | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "\"data_manipulation\"",
         "affected_component": "\"swap_router, cross_chain_proxy, callback_handler\"",
         "severity": "\"critical\"",
@@ -2256,18 +2444,50 @@
         "language": "\"solidity\"",
         "version": "\">=0.8.0\""
       },
-      "patternCount": 6,
+      "patternCount": 7,
       "patterns": [
         {
-          "id": "general-security-defihacklabs-arbitrary-call-patterns-1-unvalidated-router-address-c-000",
+          "id": "general-security-defihacklabs-arbitrary-call-patterns-overview-000",
+          "title": "Overview",
+          "lineStart": 89,
+          "lineEnd": 107,
+          "lineCount": 19,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "address",
+            "missing_access_control",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 96,
+              "lineEnd": 107,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "missing_access_control",
+                "single_contract"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-defihacklabs-arbitrary-call-patterns-1-unvalidated-router-address-c-001",
           "title": "1. Unvalidated Router Address + Calldata in Swap Functions",
-          "lineStart": 68,
-          "lineEnd": 234,
-          "lineCount": 167,
+          "lineStart": 108,
+          "lineEnd": 276,
+          "lineCount": 169,
           "severity": [
             "CRITICAL"
           ],
           "codeKeywords": [
+            "atomic",
             "balanceOf",
             "calldata",
             "msg.sender",
@@ -2281,15 +2501,15 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 74,
-              "lineEnd": 82,
+              "lineStart": 116,
+              "lineEnd": 124,
               "severity": [],
               "codeKeywords": []
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 83,
-              "lineEnd": 234,
+              "lineStart": 125,
+              "lineEnd": 276,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -2304,15 +2524,16 @@
           ]
         },
         {
-          "id": "general-security-defihacklabs-arbitrary-call-patterns-2-additional-arbitrary-call-pa-001",
+          "id": "general-security-defihacklabs-arbitrary-call-patterns-2-additional-arbitrary-call-pa-002",
           "title": "2. Additional Arbitrary Call Patterns (2022)",
-          "lineStart": 235,
-          "lineEnd": 360,
-          "lineCount": 126,
+          "lineStart": 277,
+          "lineEnd": 404,
+          "lineCount": 128,
           "severity": [
             "CRITICAL"
           ],
           "codeKeywords": [
+            "atomic",
             "balanceOf",
             "collateral",
             "mintToPayable"
@@ -2321,10 +2542,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-defihacklabs-arbitrary-call-patterns-impact-analysis-002",
+          "id": "general-security-defihacklabs-arbitrary-call-patterns-impact-analysis-003",
           "title": "Impact Analysis",
-          "lineStart": 361,
-          "lineEnd": 383,
+          "lineStart": 405,
+          "lineEnd": 427,
           "lineCount": 23,
           "severity": [],
           "codeKeywords": [
@@ -2334,10 +2555,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-defihacklabs-arbitrary-call-patterns-secure-implementation-003",
+          "id": "general-security-defihacklabs-arbitrary-call-patterns-secure-implementation-004",
           "title": "Secure Implementation",
-          "lineStart": 384,
-          "lineEnd": 460,
+          "lineStart": 428,
+          "lineEnd": 504,
           "lineCount": 77,
           "severity": [
             "LOW"
@@ -2352,10 +2573,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-defihacklabs-arbitrary-call-patterns-detection-patterns-004",
+          "id": "general-security-defihacklabs-arbitrary-call-patterns-detection-patterns-005",
           "title": "Detection Patterns",
-          "lineStart": 461,
-          "lineEnd": 487,
+          "lineStart": 505,
+          "lineEnd": 531,
           "lineCount": 27,
           "severity": [
             "LOW"
@@ -2376,10 +2597,10 @@
           "subsections": null
         },
         {
-          "id": "general-security-defihacklabs-arbitrary-call-patterns-real-world-examples-005",
+          "id": "general-security-defihacklabs-arbitrary-call-patterns-real-world-examples-006",
           "title": "Real-World Examples",
-          "lineStart": 488,
-          "lineEnd": 511,
+          "lineStart": 532,
+          "lineEnd": 555,
           "lineCount": 24,
           "severity": [],
           "codeKeywords": [],
@@ -2812,12 +3033,15 @@
     },
     {
       "file": "DB/general/missing-validations/defihacklabs-input-validation-patterns.md",
-      "totalLines": 550,
+      "totalLines": 616,
       "frontmatter": {
         "protocol": "generic",
         "chain": "everychain",
         "category": "input_validation",
         "vulnerability_type": "missing_input_validation",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "missing_input_validation | external_functions | parameter_manipulation | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "parameter_manipulation",
         "affected_component": "external_functions",
         "severity": "critical",
@@ -2828,27 +3052,39 @@
         "total_exploits_analyzed": "43",
         "total_losses": "\"$163.8M\""
       },
-      "patternCount": 1,
+      "patternCount": 5,
       "patterns": [
         {
-          "id": "general-security-defihacklabs-input-validation-patterns-input-validation-vulnerabiliti-000",
-          "title": "Input Validation Vulnerabilities — DeFiHackLabs Patterns",
-          "lineStart": 43,
-          "lineEnd": 441,
-          "lineCount": 399,
+          "id": "general-security-defihacklabs-input-validation-patterns-agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 96,
+          "lineEnd": 107,
+          "lineCount": 12,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "missing_validation",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-defihacklabs-input-validation-patterns-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 108,
+          "lineEnd": 144,
+          "lineCount": 37,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
-            "anySwapOutUnderlyingWithPermit",
-            "executeRoute",
             "msg.sender",
-            "performAction",
             "swapExtraData",
             "token",
             "token.burn",
-            "token.call(swapExtraData",
             "token.underlying",
             "transferFrom",
             "uniswapV3SwapCallback"
@@ -2856,9 +3092,9 @@
           "rootCause": "The root causes fall into several distinct categories:\n\n\n\n1. **Arbitrary Calldata Forwarding**: Functions that pass user-controlled calldata directly to external calls (e.g., `swapExtraData` forwarded",
           "subsections": [
             {
-              "title": "Vulnerability Description",
-              "lineStart": 49,
-              "lineEnd": 85,
+              "title": "Root Cause",
+              "lineStart": 110,
+              "lineEnd": 125,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -2867,31 +3103,133 @@
                 "msg.sender",
                 "swapExtraData",
                 "token",
-                "token.burn",
                 "token.underlying",
                 "transferFrom",
                 "uniswapV3SwapCallback"
               ]
             },
             {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 86,
-              "lineEnd": 342,
+              "title": "Attack Scenario",
+              "lineStart": 126,
+              "lineEnd": 144,
+              "severity": [],
+              "codeKeywords": [
+                "swapExtraData",
+                "token",
+                "token.burn",
+                "token.underlying"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-security-defihacklabs-input-validation-patterns-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 145,
+          "lineEnd": 409,
+          "lineCount": 265,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "anySwapOutUnderlyingWithPermit",
+            "atomic",
+            "burn",
+            "depositVault",
+            "executeRoute",
+            "performAction",
+            "swapExtraData",
+            "token.call(swapExtraData",
+            "transferFrom",
+            "underlying"
+          ],
+          "rootCause": "Route passes user-controlled swapExtraData as raw external call",
+          "subsections": [
+            {
+              "title": "Category 1: Arbitrary Calldata Forwarding [CRITICAL]",
+              "lineStart": 147,
+              "lineEnd": 214,
               "severity": [
                 "CRITICAL"
               ],
               "codeKeywords": [
-                "anySwapOutUnderlyingWithPermit",
-                "burn",
-                "depositVault",
+                "atomic",
                 "executeRoute",
                 "performAction",
                 "swapExtraData",
                 "token.call(swapExtraData",
                 "transferFrom"
               ]
+            },
+            {
+              "title": "Category 2: Fake Token / Unvalidated Token Address [CRITICAL]",
+              "lineStart": 215,
+              "lineEnd": 316,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "anySwapOutUnderlyingWithPermit",
+                "atomic",
+                "balanceOf",
+                "burn",
+                "depositVault",
+                "expiry",
+                "redeem",
+                "token"
+              ]
+            },
+            {
+              "title": "Category 3: Unvalidated Callback / Pool Address [HIGH]",
+              "lineStart": 317,
+              "lineEnd": 365,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "msg.sender",
+                "pool.swap",
+                "processRoute",
+                "swap",
+                "uniswapV3SwapCallback"
+              ]
+            },
+            {
+              "title": "Category 4: Forged Signature / Insufficient Signer Validation [CRITICAL]",
+              "lineStart": 366,
+              "lineEnd": 409,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "_validateSignatures",
+                "atomic",
+                "withdraw"
+              ]
             }
           ]
+        },
+        {
+          "id": "general-security-defihacklabs-input-validation-patterns-defihacklabs-poc-references-003",
+          "title": "DeFiHackLabs PoC References",
+          "lineStart": 559,
+          "lineEnd": 570,
+          "lineCount": 12,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-defihacklabs-input-validation-patterns-keywords-004",
+          "title": "Keywords",
+          "lineStart": 583,
+          "lineEnd": 610,
+          "lineCount": 28,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
@@ -2960,12 +3298,15 @@
     },
     {
       "file": "DB/general/initialization/defihacklabs-initialization-patterns.md",
-      "totalLines": 341,
+      "totalLines": 400,
       "frontmatter": {
         "protocol": "generic",
         "chain": "ethereum, bsc",
         "category": "initialization",
         "vulnerability_type": "unprotected_initialization",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "unprotected_initialization | proxy_initialization | initialization_hijack | fund_loss, total_control",
+        "interaction_scope": "single_contract",
         "attack_type": "initialization_hijack",
         "affected_component": "proxy_initialization, constructor",
         "severity": "critical",
@@ -2976,61 +3317,118 @@
         "total_exploits_analyzed": "4",
         "total_losses": "\"$500M+\""
       },
-      "patternCount": 1,
+      "patternCount": 4,
       "patterns": [
         {
-          "id": "general-security-defihacklabs-initialization-patterns-defihacklabs-unprotected-initi-000",
-          "title": "DeFiHackLabs Unprotected Initialization Compendium",
-          "lineStart": 36,
-          "lineEnd": 290,
-          "lineCount": 255,
+          "id": "general-security-defihacklabs-initialization-patterns-agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 84,
+          "lineEnd": 95,
+          "lineCount": 12,
           "severity": [
-            "CRITICAL",
-            "LOW",
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "missing_validation",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-defihacklabs-initialization-patterns-root-cause-categories-001",
+          "title": "Root Cause Categories",
+          "lineStart": 96,
+          "lineEnd": 103,
+          "lineCount": 8,
+          "severity": [
             "MEDIUM"
           ],
           "codeKeywords": [
+            "init",
+            "selfdestruct"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-security-defihacklabs-initialization-patterns-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 104,
+          "lineEnd": 281,
+          "lineCount": 178,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "atomic",
             "emergencyWithdraw",
             "flashLoan",
             "init",
-            "initialize",
             "initialized",
             "onlyOwner",
-            "selfdestruct",
             "setRewards"
           ],
           "rootCause": "init() has NO access control — anyone can re-set depositToken",
           "subsections": [
             {
-              "title": "Root Cause Categories",
-              "lineStart": 42,
-              "lineEnd": 49,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "init",
-                "selfdestruct"
-              ]
-            },
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 50,
-              "lineEnd": 221,
+              "title": "Category 1: Public init() — No Access Control [CRITICAL]",
+              "lineStart": 106,
+              "lineEnd": 183,
               "severity": [
                 "CRITICAL"
               ],
               "codeKeywords": [
-                "DPPFlashLoanCall",
+                "atomic",
                 "emergencyWithdraw",
-                "flashLoan",
                 "init",
                 "initialized",
                 "onlyOwner",
                 "setRewards"
               ]
+            },
+            {
+              "title": "Category 2: Re-Initialization During Flash Loan [CRITICAL]",
+              "lineStart": 184,
+              "lineEnd": 236,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall",
+                "flashLoan",
+                "init"
+              ]
+            },
+            {
+              "title": "Category 3: Uninitialized Library — selfdestruct [CRITICAL]",
+              "lineStart": 237,
+              "lineEnd": 281,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "atomic",
+                "delegatecall",
+                "initWallet",
+                "initialized",
+                "kill",
+                "selfdestruct"
+              ]
             }
           ]
+        },
+        {
+          "id": "general-security-defihacklabs-initialization-patterns-keywords-003",
+          "title": "Keywords",
+          "lineStart": 379,
+          "lineEnd": 395,
+          "lineCount": 17,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },

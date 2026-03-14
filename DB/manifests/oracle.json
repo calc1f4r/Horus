@@ -3,7 +3,7 @@
     "category": "oracle",
     "description": "Pattern-level index for oracle vulnerabilities",
     "fileCount": 12,
-    "totalPatterns": 84,
+    "totalPatterns": 90,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
   },
   "files": [
@@ -1061,12 +1061,15 @@
     },
     {
       "file": "DB/oracle/price-manipulation/defihacklabs-bsc-oracle-manipulation-2022.md",
-      "totalLines": 565,
+      "totalLines": 642,
       "frontmatter": {
         "protocol": "Multi-Protocol",
         "chain": "BSC, Fantom",
         "category": "oracle_price_manipulation",
         "vulnerability_type": "AMM-Based Oracle Price Manipulation",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "AMM-Based Oracle Price Manipulation |  |  | Protocol drain via manipulated prices, reward inflation, vault extraction",
+        "interaction_scope": "cross_protocol",
         "source": "DeFiHackLabs",
         "total_exploits_analyzed": "8",
         "total_losses": "\"$7M+\"",
@@ -1080,23 +1083,39 @@
         {
           "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-overview-000",
           "title": "Overview",
-          "lineStart": 58,
-          "lineEnd": 72,
-          "lineCount": 15,
+          "lineStart": 106,
+          "lineEnd": 133,
+          "lineCount": 28,
           "severity": [
+            "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
-            "getPrice"
+            "cross_protocol",
+            "getPrice",
+            "missing_validation"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 122,
+              "lineEnd": 133,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "cross_protocol",
+                "missing_validation"
+              ]
+            }
+          ]
         },
         {
           "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-vulnerability-description-001",
           "title": "Vulnerability Description",
-          "lineStart": 73,
-          "lineEnd": 110,
+          "lineStart": 134,
+          "lineEnd": 171,
           "lineCount": 38,
           "severity": [
             "LOW"
@@ -1110,8 +1129,8 @@
           "subsections": [
             {
               "title": "Root Cause Analysis",
-              "lineStart": 75,
-              "lineEnd": 84,
+              "lineStart": 136,
+              "lineEnd": 145,
               "severity": [
                 "LOW"
               ],
@@ -1123,8 +1142,8 @@
             },
             {
               "title": "Attack Flow Pattern",
-              "lineStart": 85,
-              "lineEnd": 110,
+              "lineStart": 146,
+              "lineEnd": 171,
               "severity": [
                 "LOW"
               ],
@@ -1135,9 +1154,9 @@
         {
           "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-vulnerable-pattern-examples-002",
           "title": "Vulnerable Pattern Examples",
-          "lineStart": 111,
-          "lineEnd": 388,
-          "lineCount": 278,
+          "lineStart": 172,
+          "lineEnd": 465,
+          "lineCount": 294,
           "severity": [
             "CRITICAL",
             "HIGH",
@@ -1145,6 +1164,7 @@
           ],
           "codeKeywords": [
             "DPPFlashLoanCall",
+            "atomic",
             "batchToken",
             "claim",
             "getPrice",
@@ -1161,13 +1181,14 @@
           "subsections": [
             {
               "title": "Pattern 1: Flash Swap Reserve Drain → Inflated Reward Claims",
-              "lineStart": 113,
-              "lineEnd": 143,
+              "lineStart": 174,
+              "lineEnd": 206,
               "severity": [
                 "CRITICAL",
                 "LOW"
               ],
               "codeKeywords": [
+                "atomic",
                 "getPrice",
                 "pancakeCall",
                 "testExploit"
@@ -1175,12 +1196,13 @@
             },
             {
               "title": "Pattern 2: Multi-function Reward Drain via Pair Price Manipulation",
-              "lineStart": 144,
-              "lineEnd": 173,
+              "lineStart": 207,
+              "lineEnd": 238,
               "severity": [
                 "HIGH"
               ],
               "codeKeywords": [
+                "atomic",
                 "claim",
                 "pancakeCall",
                 "withdrawReturnAmountByConsumer",
@@ -1190,26 +1212,28 @@
             },
             {
               "title": "Pattern 3: batchToken Mint Directly Into LP Pair",
-              "lineStart": 174,
-              "lineEnd": 209,
+              "lineStart": 239,
+              "lineEnd": 276,
               "severity": [
                 "CRITICAL"
               ],
               "codeKeywords": [
                 "DPPFlashLoanCall",
+                "atomic",
                 "batchToken",
                 "sync"
               ]
             },
             {
               "title": "Pattern 4: Public Token Function Skews LP Reserves",
-              "lineStart": 210,
-              "lineEnd": 242,
+              "lineStart": 277,
+              "lineEnd": 311,
               "severity": [
                 "HIGH",
                 "LOW"
               ],
               "codeKeywords": [
+                "atomic",
                 "swapAndLiquifyStepv1",
                 "swapTokensForOther",
                 "testExploit"
@@ -1217,13 +1241,14 @@
             },
             {
               "title": "Pattern 5: Broken transferFrom Drains LP Pair Reserves",
-              "lineStart": 243,
-              "lineEnd": 279,
+              "lineStart": 312,
+              "lineEnd": 350,
               "severity": [
                 "CRITICAL",
                 "LOW"
               ],
               "codeKeywords": [
+                "atomic",
                 "sync",
                 "testExploit",
                 "transferFrom"
@@ -1231,38 +1256,41 @@
             },
             {
               "title": "Pattern 6: Flash Loan Vault Share Inflation",
-              "lineStart": 280,
-              "lineEnd": 309,
+              "lineStart": 351,
+              "lineEnd": 382,
               "severity": [
                 "CRITICAL"
               ],
               "codeKeywords": [
+                "atomic",
                 "balanceOf(address(this",
                 "uniswapV2Call"
               ]
             },
             {
               "title": "Pattern 7: Spot Price Swap Proxy Arbitrage",
-              "lineStart": 310,
-              "lineEnd": 343,
+              "lineStart": 383,
+              "lineEnd": 418,
               "severity": [
                 "CRITICAL",
                 "LOW"
               ],
               "codeKeywords": [
-                "DPPFlashLoanCall"
+                "DPPFlashLoanCall",
+                "atomic"
               ]
             },
             {
               "title": "Pattern 8: balanceOf-Based Reward Recycling Across Contracts",
-              "lineStart": 344,
-              "lineEnd": 388,
+              "lineStart": 419,
+              "lineEnd": 465,
               "severity": [
                 "CRITICAL"
               ],
               "codeKeywords": [
                 "DPPFlashLoanCall",
                 "abuse",
+                "atomic",
                 "balanceOf(msg.sender"
               ]
             }
@@ -1271,8 +1299,8 @@
         {
           "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-impact-analysis-003",
           "title": "Impact Analysis",
-          "lineStart": 389,
-          "lineEnd": 405,
+          "lineStart": 466,
+          "lineEnd": 482,
           "lineCount": 17,
           "severity": [],
           "codeKeywords": [],
@@ -1282,8 +1310,8 @@
         {
           "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-secure-implementation-004",
           "title": "Secure Implementation",
-          "lineStart": 406,
-          "lineEnd": 489,
+          "lineStart": 483,
+          "lineEnd": 566,
           "lineCount": 84,
           "severity": [],
           "codeKeywords": [
@@ -1297,8 +1325,8 @@
           "subsections": [
             {
               "title": "Fix 1: Use TWAP or External Oracle (Not AMM Spot Price)",
-              "lineStart": 408,
-              "lineEnd": 434,
+              "lineStart": 485,
+              "lineEnd": 511,
               "severity": [],
               "codeKeywords": [
                 "getTokenPrice",
@@ -1307,8 +1335,8 @@
             },
             {
               "title": "Fix 2: Tracked Deposits Instead of balanceOf for Rewards",
-              "lineStart": 435,
-              "lineEnd": 464,
+              "lineStart": 512,
+              "lineEnd": 541,
               "severity": [],
               "codeKeywords": [
                 "claimReward",
@@ -1317,8 +1345,8 @@
             },
             {
               "title": "Fix 3: Flash Loan Guard for Vault Deposits",
-              "lineStart": 465,
-              "lineEnd": 489,
+              "lineStart": 542,
+              "lineEnd": 566,
               "severity": [],
               "codeKeywords": [
                 "deposit",
@@ -1330,8 +1358,8 @@
         {
           "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-detection-patterns-005",
           "title": "Detection Patterns",
-          "lineStart": 490,
-          "lineEnd": 534,
+          "lineStart": 567,
+          "lineEnd": 611,
           "lineCount": 45,
           "severity": [
             "LOW"
@@ -1341,15 +1369,15 @@
           "subsections": [
             {
               "title": "Static Analysis",
-              "lineStart": 492,
-              "lineEnd": 519,
+              "lineStart": 569,
+              "lineEnd": 596,
               "severity": [],
               "codeKeywords": []
             },
             {
               "title": "Invariant Checks",
-              "lineStart": 520,
-              "lineEnd": 534,
+              "lineStart": 597,
+              "lineEnd": 611,
               "severity": [
                 "LOW"
               ],
@@ -1360,8 +1388,8 @@
         {
           "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-audit-checklist-006",
           "title": "Audit Checklist",
-          "lineStart": 535,
-          "lineEnd": 547,
+          "lineStart": 612,
+          "lineEnd": 624,
           "lineCount": 13,
           "severity": [
             "CRITICAL"
@@ -1380,8 +1408,8 @@
         {
           "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-real-world-examples-007",
           "title": "Real-World Examples",
-          "lineStart": 548,
-          "lineEnd": 562,
+          "lineStart": 625,
+          "lineEnd": 639,
           "lineCount": 15,
           "severity": [],
           "codeKeywords": [],
@@ -1392,12 +1420,15 @@
     },
     {
       "file": "DB/oracle/price-manipulation/defihacklabs-flashloan-oracle-2022-patterns.md",
-      "totalLines": 549,
+      "totalLines": 599,
       "frontmatter": {
         "protocol": "\"lending, stablecoin, defi\"",
         "chain": "\"ethereum, bsc, fantom, arbitrum\"",
         "category": "\"oracle_manipulation\"",
         "vulnerability_type": "\"flash_loan_price_manipulation\"",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "flash_loan_price_manipulation | price_oracle | economic_exploit | fund_loss",
+        "interaction_scope": "cross_protocol",
         "attack_type": "\"economic_exploit\"",
         "affected_component": "\"price_oracle, lending_market, stablecoin_mint_redeem\"",
         "severity": "\"critical\"",
@@ -1407,14 +1438,43 @@
         "language": "\"solidity\"",
         "version": "\">=0.6.0\""
       },
-      "patternCount": 8,
+      "patternCount": 9,
       "patterns": [
         {
-          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-1-amm-reserve-based-price-orac-000",
+          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-overview-000",
+          "title": "Overview",
+          "lineStart": 92,
+          "lineEnd": 110,
+          "lineCount": 19,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "cross_protocol",
+            "missing_validation"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 99,
+              "lineEnd": 110,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "cross_protocol",
+                "missing_validation"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-1-amm-reserve-based-price-orac-001",
           "title": "1. AMM Reserve-Based Price Oracle — Direct LP Pool Manipulation",
-          "lineStart": 69,
-          "lineEnd": 163,
-          "lineCount": 95,
+          "lineStart": 111,
+          "lineEnd": 207,
+          "lineCount": 97,
           "severity": [
             "HIGH"
           ],
@@ -1432,8 +1492,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 75,
-              "lineEnd": 83,
+              "lineStart": 119,
+              "lineEnd": 127,
               "severity": [],
               "codeKeywords": [
                 "getPrice"
@@ -1441,8 +1501,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 84,
-              "lineEnd": 163,
+              "lineStart": 128,
+              "lineEnd": 207,
               "severity": [
                 "CRITICAL",
                 "HIGH"
@@ -1460,28 +1520,30 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-2-curve-lp-virtual-price-oracl-001",
+          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-2-curve-lp-virtual-price-oracl-002",
           "title": "2. Curve LP / Virtual Price Oracle Manipulation",
-          "lineStart": 164,
-          "lineEnd": 235,
-          "lineCount": 72,
+          "lineStart": 208,
+          "lineEnd": 281,
+          "lineCount": 74,
           "severity": [
             "CRITICAL"
           ],
-          "codeKeywords": [],
+          "codeKeywords": [
+            "atomic"
+          ],
           "rootCause": "This vulnerability exists because lending protocols use Curve pool's **internal state** (virtual_price, LP token value) as a price oracle for collateral. By performing a massive swap or liquidity oper",
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 170,
-              "lineEnd": 178,
+              "lineStart": 216,
+              "lineEnd": 224,
               "severity": [],
               "codeKeywords": []
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 179,
-              "lineEnd": 235,
+              "lineStart": 225,
+              "lineEnd": 281,
               "severity": [
                 "CRITICAL"
               ],
@@ -1490,11 +1552,11 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-3-solidly-lp-oracle-weak-signa-002",
+          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-3-solidly-lp-oracle-weak-signa-003",
           "title": "3. Solidly LP Oracle + Weak Signature Validation",
-          "lineStart": 236,
-          "lineEnd": 308,
-          "lineCount": 73,
+          "lineStart": 282,
+          "lineEnd": 356,
+          "lineCount": 75,
           "severity": [
             "CRITICAL"
           ],
@@ -1507,8 +1569,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 242,
-              "lineEnd": 308,
+              "lineStart": 290,
+              "lineEnd": 356,
               "severity": [
                 "CRITICAL"
               ],
@@ -1521,16 +1583,17 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-4-vault-share-price-inflation--003",
+          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-4-vault-share-price-inflation--004",
           "title": "4. Vault Share Price Inflation via Donation",
-          "lineStart": 309,
-          "lineEnd": 382,
-          "lineCount": 74,
+          "lineStart": 357,
+          "lineEnd": 432,
+          "lineCount": 76,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
+            "atomic",
             "donate",
             "mintAndStakeGlp",
             "mintAndStakeGlpETH",
@@ -1540,8 +1603,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 315,
-              "lineEnd": 382,
+              "lineStart": 365,
+              "lineEnd": 432,
               "severity": [
                 "CRITICAL"
               ],
@@ -1555,10 +1618,10 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-impact-analysis-004",
+          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-impact-analysis-005",
           "title": "Impact Analysis",
-          "lineStart": 383,
-          "lineEnd": 405,
+          "lineStart": 433,
+          "lineEnd": 455,
           "lineCount": 23,
           "severity": [
             "HIGH"
@@ -1568,10 +1631,10 @@
           "subsections": null
         },
         {
-          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-secure-implementation-005",
+          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-secure-implementation-006",
           "title": "Secure Implementation",
-          "lineStart": 406,
-          "lineEnd": 473,
+          "lineStart": 456,
+          "lineEnd": 523,
           "lineCount": 68,
           "severity": [],
           "codeKeywords": [
@@ -1583,10 +1646,10 @@
           "subsections": null
         },
         {
-          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-detection-patterns-006",
+          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-detection-patterns-007",
           "title": "Detection Patterns",
-          "lineStart": 474,
-          "lineEnd": 501,
+          "lineStart": 524,
+          "lineEnd": 551,
           "lineCount": 28,
           "severity": [],
           "codeKeywords": [
@@ -1601,10 +1664,10 @@
           "subsections": null
         },
         {
-          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-real-world-examples-007",
+          "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-real-world-examples-008",
           "title": "Real-World Examples",
-          "lineStart": 502,
-          "lineEnd": 517,
+          "lineStart": 552,
+          "lineEnd": 567,
           "lineCount": 16,
           "severity": [],
           "codeKeywords": [],
@@ -1615,12 +1678,15 @@
     },
     {
       "file": "DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md",
-      "totalLines": 517,
+      "totalLines": 571,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, arbitrum, polygon, avax, bsc\"",
         "category": "\"price_manipulation\"",
         "vulnerability_type": "\"tellor_oracle_manipulation, spot_price_oracle, reserve_ratio_manipulation, lp_price_manipulation, flash_loan_oracle\"",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "tellor_oracle_manipulation | tellor_oracle | flash_loan_price_manipulation | fund_loss",
+        "interaction_scope": "cross_protocol",
         "attack_type": "\"flash_loan_price_manipulation\"",
         "affected_component": "\"tellor_oracle, liquidity_bin, curve_pool, balancer_pool, DEX_pair, lending_oracle\"",
         "severity": "\"critical\"",
@@ -1633,14 +1699,44 @@
         "total_exploits_analyzed": "8",
         "total_losses": "\"$135M+\""
       },
-      "patternCount": 11,
+      "patternCount": 12,
       "patterns": [
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-1-low-cost-oracle-reporter-man-000",
+          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-overview-000",
+          "title": "Overview",
+          "lineStart": 114,
+          "lineEnd": 132,
+          "lineCount": 19,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "cross_protocol",
+            "missing_validation"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 121,
+              "lineEnd": 132,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "cross_protocol",
+                "missing_validation"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-1-low-cost-oracle-reporter-man-001",
           "title": "1. Low-Cost Oracle Reporter Manipulation (BonqDAO $88M)",
-          "lineStart": 91,
-          "lineEnd": 184,
-          "lineCount": 94,
+          "lineStart": 133,
+          "lineEnd": 228,
+          "lineCount": 96,
           "severity": [
             "CRITICAL",
             "HIGH",
@@ -1656,8 +1752,8 @@
           "subsections": [
             {
               "title": "Attack Scenario (Two Transactions)",
-              "lineStart": 97,
-              "lineEnd": 112,
+              "lineStart": 141,
+              "lineEnd": 156,
               "severity": [
                 "HIGH"
               ],
@@ -1665,8 +1761,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 113,
-              "lineEnd": 184,
+              "lineStart": 157,
+              "lineEnd": 228,
               "severity": [
                 "CRITICAL",
                 "HIGH",
@@ -1681,11 +1777,11 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-2-concentrated-liquidity-bin-m-001",
+          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-2-concentrated-liquidity-bin-m-002",
           "title": "2. Concentrated Liquidity Bin Manipulation (Jimbo $8M)",
-          "lineStart": 185,
-          "lineEnd": 256,
-          "lineCount": 72,
+          "lineStart": 229,
+          "lineEnd": 302,
+          "lineCount": 74,
           "severity": [
             "CRITICAL",
             "HIGH"
@@ -1699,8 +1795,8 @@
           "subsections": [
             {
               "title": "Root Cause",
-              "lineStart": 187,
-              "lineEnd": 194,
+              "lineStart": 233,
+              "lineEnd": 240,
               "severity": [
                 "HIGH"
               ],
@@ -1711,8 +1807,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 195,
-              "lineEnd": 256,
+              "lineStart": 241,
+              "lineEnd": 302,
               "severity": [
                 "CRITICAL"
               ],
@@ -1723,22 +1819,24 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-3-curve-lp-token-price-manipul-002",
+          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-3-curve-lp-token-price-manipul-003",
           "title": "3. Curve LP Token Price Manipulation (Zunami $2M)",
-          "lineStart": 257,
-          "lineEnd": 286,
-          "lineCount": 30,
+          "lineStart": 303,
+          "lineEnd": 334,
+          "lineCount": 32,
           "severity": [
             "HIGH",
             "LOW"
           ],
-          "codeKeywords": [],
+          "codeKeywords": [
+            "atomic"
+          ],
           "rootCause": "Zunami Protocol used Curve LP tokens (sETH/ETH, frxETH/ETH) whose price was derived from pool reserves. An attacker could flash loan massive amounts, add/remove liquidity to manipulate the LP token's ",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 263,
-              "lineEnd": 286,
+              "lineStart": 311,
+              "lineEnd": 334,
               "severity": [
                 "HIGH",
                 "LOW"
@@ -1748,22 +1846,24 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-4-vtoken-collateral-oracle-man-003",
+          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-4-vtoken-collateral-oracle-man-004",
           "title": "4. vToken Collateral Oracle Manipulation (0vix $2M)",
-          "lineStart": 287,
-          "lineEnd": 316,
-          "lineCount": 30,
+          "lineStart": 335,
+          "lineEnd": 366,
+          "lineCount": 32,
           "severity": [
             "HIGH",
             "LOW"
           ],
-          "codeKeywords": [],
+          "codeKeywords": [
+            "atomic"
+          ],
           "rootCause": "0vix Protocol (Compound V2 fork on Polygon) used vGHST as a collateral token. The oracle price for vGHST was derived from the underlying GHST token's Aave aGHST supply rate. By manipulating the aGHST ",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 293,
-              "lineEnd": 316,
+              "lineStart": 343,
+              "lineEnd": 366,
               "severity": [
                 "HIGH",
                 "LOW"
@@ -1773,23 +1873,24 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-5-flash-loan-spot-price-compou-004",
+          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-5-flash-loan-spot-price-compou-005",
           "title": "5. Flash Loan + Spot Price (CompounderFinance $27.2M, Gamma $6.3M, Allbridge $550K)",
-          "lineStart": 317,
-          "lineEnd": 352,
-          "lineCount": 36,
+          "lineStart": 367,
+          "lineEnd": 404,
+          "lineCount": 38,
           "severity": [
             "CRITICAL"
           ],
           "codeKeywords": [
+            "atomic",
             "getReserves"
           ],
           "rootCause": "Multiple protocols in 2023 continued to use DEX spot prices (pair reserves, `getReserves()`) as oracle prices. Flash loans made all these protocols trivially exploitable: inflate token price by swappi",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 323,
-              "lineEnd": 352,
+              "lineStart": 375,
+              "lineEnd": 404,
               "severity": [
                 "CRITICAL"
               ],
@@ -1798,22 +1899,24 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-6-lending-protocol-oracle-mani-005",
+          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-6-lending-protocol-oracle-mani-006",
           "title": "6. Lending Protocol Oracle Manipulation (RodeoFinance $888K)",
-          "lineStart": 353,
-          "lineEnd": 380,
-          "lineCount": 28,
+          "lineStart": 405,
+          "lineEnd": 434,
+          "lineCount": 30,
           "severity": [
             "HIGH",
             "LOW"
           ],
-          "codeKeywords": [],
+          "codeKeywords": [
+            "atomic"
+          ],
           "rootCause": "RodeoFinance on Arbitrum used a TWAP oracle for collateral pricing, but the TWAP window was too short (1 hour or less). An attacker could manipulate the price over multiple blocks to shift the TWAP, t",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 359,
-              "lineEnd": 380,
+              "lineStart": 413,
+              "lineEnd": 434,
               "severity": [
                 "HIGH",
                 "LOW"
@@ -1823,10 +1926,10 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-secure-implementations-006",
+          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-secure-implementations-007",
           "title": "Secure Implementations",
-          "lineStart": 381,
-          "lineEnd": 439,
+          "lineStart": 435,
+          "lineEnd": 493,
           "lineCount": 59,
           "severity": [
             "HIGH"
@@ -1839,8 +1942,8 @@
           "subsections": [
             {
               "title": "Pattern 1: Tellor with Dispute Window",
-              "lineStart": 383,
-              "lineEnd": 400,
+              "lineStart": 437,
+              "lineEnd": 454,
               "severity": [],
               "codeKeywords": [
                 "getPrice"
@@ -1848,8 +1951,8 @@
             },
             {
               "title": "Pattern 2: Multi-Source Oracle with Deviation Check",
-              "lineStart": 401,
-              "lineEnd": 418,
+              "lineStart": 455,
+              "lineEnd": 472,
               "severity": [
                 "HIGH"
               ],
@@ -1859,8 +1962,8 @@
             },
             {
               "title": "Pattern 3: Time-Weighted Liquidity Distribution",
-              "lineStart": 419,
-              "lineEnd": 439,
+              "lineStart": 473,
+              "lineEnd": 493,
               "severity": [],
               "codeKeywords": [
                 "shift"
@@ -1869,10 +1972,10 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-impact-analysis-007",
+          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-impact-analysis-008",
           "title": "Impact Analysis",
-          "lineStart": 440,
-          "lineEnd": 452,
+          "lineStart": 494,
+          "lineEnd": 506,
           "lineCount": 13,
           "severity": [
             "CRITICAL",
@@ -1884,10 +1987,10 @@
           "subsections": null
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-detection-patterns-008",
+          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-detection-patterns-009",
           "title": "Detection Patterns",
-          "lineStart": 453,
-          "lineEnd": 485,
+          "lineStart": 507,
+          "lineEnd": 539,
           "lineCount": 33,
           "severity": [],
           "codeKeywords": [],
@@ -1895,25 +1998,25 @@
           "subsections": [
             {
               "title": "Static Analysis",
-              "lineStart": 455,
-              "lineEnd": 469,
+              "lineStart": 509,
+              "lineEnd": 523,
               "severity": [],
               "codeKeywords": []
             },
             {
               "title": "Dynamic Testing",
-              "lineStart": 470,
-              "lineEnd": 485,
+              "lineStart": 524,
+              "lineEnd": 539,
               "severity": [],
               "codeKeywords": []
             }
           ]
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-audit-checklist-009",
+          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-audit-checklist-010",
           "title": "Audit Checklist",
-          "lineStart": 486,
-          "lineEnd": 499,
+          "lineStart": 540,
+          "lineEnd": 553,
           "lineCount": 14,
           "severity": [],
           "codeKeywords": [
@@ -1927,10 +2030,10 @@
           "subsections": null
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-real-world-examples-010",
+          "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-real-world-examples-011",
           "title": "Real-World Examples",
-          "lineStart": 500,
-          "lineEnd": 514,
+          "lineStart": 554,
+          "lineEnd": 568,
           "lineCount": 15,
           "severity": [
             "LOW"
@@ -1943,12 +2046,15 @@
     },
     {
       "file": "DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2024-2025.md",
-      "totalLines": 506,
+      "totalLines": 562,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, arbitrum, bsc, base\"",
         "category": "\"oracle\"",
         "vulnerability_type": "\"price_manipulation, amm_oracle, curve_oracle, self_referencing_oracle, faulty_feed\"",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "price_manipulation | price_feed | economic_exploit | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "\"economic_exploit\"",
         "affected_component": "\"price_feed, oracle_integration, collateral_valuation\"",
         "oracle_provider": "\"curve, custom_amm, wooracle, chainlink\"",
@@ -1960,19 +2066,49 @@
         "language": "\"solidity\"",
         "version": "\">=0.8.0\""
       },
-      "patternCount": 10,
+      "patternCount": 11,
       "patterns": [
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-1-curve-pool-based-oracle-mani-000",
+          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-overview-000",
+          "title": "Overview",
+          "lineStart": 104,
+          "lineEnd": 122,
+          "lineCount": 19,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "missing_validation",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 111,
+              "lineEnd": 122,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "missing_validation",
+                "single_contract"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-1-curve-pool-based-oracle-mani-001",
           "title": "1. Curve Pool-Based Oracle Manipulation for Lending Liquidation",
-          "lineStart": 79,
-          "lineEnd": 138,
-          "lineCount": 60,
+          "lineStart": 123,
+          "lineEnd": 184,
+          "lineCount": 62,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
+            "atomic",
             "driveDownsUSDEPrice",
             "driveUpsUSDEPrice"
           ],
@@ -1980,15 +2116,15 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 85,
-              "lineEnd": 93,
+              "lineStart": 131,
+              "lineEnd": 139,
               "severity": [],
               "codeKeywords": []
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 94,
-              "lineEnd": 138,
+              "lineStart": 140,
+              "lineEnd": 184,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -2001,21 +2137,23 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-2-self-referencing-oracle-spmm-001",
+          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-2-self-referencing-oracle-spmm-002",
           "title": "2. Self-Referencing Oracle (sPMM) Manipulation",
-          "lineStart": 139,
-          "lineEnd": 181,
-          "lineCount": 43,
+          "lineStart": 185,
+          "lineEnd": 229,
+          "lineCount": 45,
           "severity": [
             "CRITICAL"
           ],
-          "codeKeywords": [],
+          "codeKeywords": [
+            "atomic"
+          ],
           "rootCause": "Proactive market maker (PMM) DEXes like WooPPV2 use an internal oracle (WooracleV2) that updates its price state based on swaps executed through the same pool. This creates a circular dependency: the ",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 145,
-              "lineEnd": 181,
+              "lineStart": 193,
+              "lineEnd": 229,
               "severity": [
                 "CRITICAL"
               ],
@@ -2024,24 +2162,25 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-3-concentrated-liquidity-vault-002",
+          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-3-concentrated-liquidity-vault-003",
           "title": "3. Concentrated Liquidity Vault Deposit/Withdraw Cycling",
-          "lineStart": 182,
-          "lineEnd": 231,
-          "lineCount": 50,
+          "lineStart": 230,
+          "lineEnd": 281,
+          "lineCount": 52,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
+            "atomic",
             "calculatePrice"
           ],
           "rootCause": "Concentrated liquidity vaults (e.g., Gamma on Algebra/Uniswap V3) calculate LP share amounts based on the current spot price of the underlying pool. When an attacker manipulates the pool price, deposi",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 188,
-              "lineEnd": 231,
+              "lineStart": 238,
+              "lineEnd": 281,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -2053,17 +2192,18 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-4-defective-token-transfer-hoo-003",
+          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-4-defective-token-transfer-hoo-004",
           "title": "4. Defective Token Transfer Hook Price Disruption",
-          "lineStart": 232,
-          "lineEnd": 272,
-          "lineCount": 41,
+          "lineStart": 282,
+          "lineEnd": 324,
+          "lineCount": 43,
           "severity": [
             "CRITICAL"
           ],
           "codeKeywords": [
             "_transfer",
             "_update",
+            "atomic",
             "pair.sync",
             "sync"
           ],
@@ -2071,8 +2211,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 238,
-              "lineEnd": 272,
+              "lineStart": 290,
+              "lineEnd": 324,
               "severity": [
                 "CRITICAL"
               ],
@@ -2081,22 +2221,24 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-5-broken-vault-mint-ratio-004",
+          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-5-broken-vault-mint-ratio-005",
           "title": "5. Broken Vault Mint Ratio",
-          "lineStart": 273,
-          "lineEnd": 304,
-          "lineCount": 32,
+          "lineStart": 325,
+          "lineEnd": 358,
+          "lineCount": 34,
           "severity": [
             "CRITICAL",
             "HIGH"
           ],
-          "codeKeywords": [],
+          "codeKeywords": [
+            "atomic"
+          ],
           "rootCause": "Vaults or proxy contracts with misconfigured exchange rates or missing decimal normalization can mint vastly disproportionate token amounts for trivial deposits. This often occurs in ERC1967 proxy vau",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 279,
-              "lineEnd": 304,
+              "lineStart": 333,
+              "lineEnd": 358,
               "severity": [
                 "CRITICAL",
                 "HIGH"
@@ -2106,11 +2248,11 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-6-faulty-chainlink-oracle-pric-005",
+          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-6-faulty-chainlink-oracle-pric-006",
           "title": "6. Faulty Chainlink Oracle Price Feed",
-          "lineStart": 305,
-          "lineEnd": 350,
-          "lineCount": 46,
+          "lineStart": 359,
+          "lineEnd": 406,
+          "lineCount": 48,
           "severity": [
             "HIGH"
           ],
@@ -2119,8 +2261,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 311,
-              "lineEnd": 350,
+              "lineStart": 367,
+              "lineEnd": 406,
               "severity": [
                 "HIGH"
               ],
@@ -2129,10 +2271,10 @@
           ]
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-impact-analysis-006",
+          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-impact-analysis-007",
           "title": "Impact Analysis",
-          "lineStart": 351,
-          "lineEnd": 379,
+          "lineStart": 407,
+          "lineEnd": 435,
           "lineCount": 29,
           "severity": [
             "LOW",
@@ -2146,10 +2288,10 @@
           "subsections": null
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-secure-implementation-007",
+          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-secure-implementation-008",
           "title": "Secure Implementation",
-          "lineStart": 380,
-          "lineEnd": 438,
+          "lineStart": 436,
+          "lineEnd": 494,
           "lineCount": 59,
           "severity": [
             "HIGH"
@@ -2164,10 +2306,10 @@
           "subsections": null
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-detection-patterns-008",
+          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-detection-patterns-009",
           "title": "Detection Patterns",
-          "lineStart": 439,
-          "lineEnd": 463,
+          "lineStart": 495,
+          "lineEnd": 519,
           "lineCount": 25,
           "severity": [],
           "codeKeywords": [],
@@ -2175,10 +2317,10 @@
           "subsections": null
         },
         {
-          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-real-world-examples-009",
+          "id": "oracle-defihacklabs-oracle-manipulation-2024-20-real-world-examples-010",
           "title": "Real-World Examples",
-          "lineStart": 464,
-          "lineEnd": 475,
+          "lineStart": 520,
+          "lineEnd": 531,
           "lineCount": 12,
           "severity": [],
           "codeKeywords": [],
@@ -2189,12 +2331,15 @@
     },
     {
       "file": "DB/oracle/price-manipulation/defihacklabs-price-manipulation-patterns.md",
-      "totalLines": 457,
+      "totalLines": 527,
       "frontmatter": {
         "protocol": "generic",
         "chain": "ethereum, bsc",
         "category": "price_manipulation",
         "vulnerability_type": "oracle_price_manipulation",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "oracle_price_manipulation | price_oracle | flash_loan_price_manipulation | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "flash_loan_price_manipulation",
         "affected_component": "price_oracle",
         "severity": "critical",
@@ -2205,26 +2350,59 @@
         "total_exploits_analyzed": "9",
         "total_losses": "\"$300M+\""
       },
-      "patternCount": 1,
+      "patternCount": 4,
       "patterns": [
         {
-          "id": "oracle-defihacklabs-price-manipulation-patterns-defihacklabs-price-oracle-mani-000",
-          "title": "DeFiHackLabs Price & Oracle Manipulation Compendium",
-          "lineStart": 43,
-          "lineEnd": 399,
-          "lineCount": 357,
+          "id": "oracle-defihacklabs-price-manipulation-patterns-agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 98,
+          "lineEnd": 109,
+          "lineCount": 12,
           "severity": [
-            "CRITICAL",
-            "HIGH",
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "missing_validation",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "oracle-defihacklabs-price-manipulation-patterns-root-cause-categories-001",
+          "title": "Root Cause Categories",
+          "lineStart": 110,
+          "lineEnd": 120,
+          "lineCount": 11,
+          "severity": [
             "LOW"
           ],
           "codeKeywords": [
+            "balanceOf",
+            "pricePerShare"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "oracle-defihacklabs-price-manipulation-patterns-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 121,
+          "lineEnd": 404,
+          "lineCount": 284,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "IERC20.balanceOf(address(this",
             "Swap_Mono_For_USDC",
             "Swap_Mono_for_Mono_55_Times",
-            "balanceOf",
+            "atomic",
             "borrowAll",
             "borrowTokens",
-            "pricePerShare",
+            "removeLiquidity",
+            "staged",
             "swapExactTokenForToken",
             "totalAssets",
             "totalSupply",
@@ -2233,37 +2411,89 @@
           "rootCause": "swapExactTokenForToken allows tokenIn == tokenOut",
           "subsections": [
             {
-              "title": "Root Cause Categories",
-              "lineStart": 49,
-              "lineEnd": 59,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": [
-                "balanceOf",
-                "pricePerShare"
-              ]
-            },
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 60,
-              "lineEnd": 333,
+              "title": "Category 1: Self-Swap Price Inflation [CRITICAL]",
+              "lineStart": 123,
+              "lineEnd": 164,
               "severity": [
                 "CRITICAL",
                 "LOW"
               ],
               "codeKeywords": [
-                "IERC20.balanceOf(address(this",
                 "Swap_Mono_For_USDC",
                 "Swap_Mono_for_Mono_55_Times",
+                "atomic",
+                "swapExactTokenForToken"
+              ]
+            },
+            {
+              "title": "Category 2: Vault Donation / pricePerShare Inflation [CRITICAL]",
+              "lineStart": 165,
+              "lineEnd": 235,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "IERC20.balanceOf(address(this",
                 "borrowAll",
                 "borrowTokens",
                 "removeLiquidity",
-                "swapExactTokenForToken",
-                "totalAssets"
+                "staged",
+                "totalAssets",
+                "totalSupply",
+                "yUSD.pricePerShare"
+              ]
+            },
+            {
+              "title": "Category 3: Spot Price for Reward Minting [CRITICAL]",
+              "lineStart": 236,
+              "lineEnd": 290,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "BunnyMinter",
+                "atomic"
+              ]
+            },
+            {
+              "title": "Category 4: Index Pool Weight Manipulation [CRITICAL]",
+              "lineStart": 291,
+              "lineEnd": 330,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "atomic",
+                "extrapolatePoolValueFromToken",
+                "gulp"
+              ]
+            },
+            {
+              "title": "Category 5: Flash Loan + Curve Pool Manipulation [CRITICAL]",
+              "lineStart": 331,
+              "lineEnd": 404,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "atomic",
+                "theSwap"
               ]
             }
           ]
+        },
+        {
+          "id": "oracle-defihacklabs-price-manipulation-patterns-keywords-003",
+          "title": "Keywords",
+          "lineStart": 504,
+          "lineEnd": 522,
+          "lineCount": 19,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },

@@ -3,6 +3,13 @@ protocol: Multi-Protocol
 chain: BSC, Fantom
 category: oracle_price_manipulation
 vulnerability_type: AMM-Based Oracle Price Manipulation
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: AMM-Based Oracle Price Manipulation |  |  | Protocol drain via manipulated prices, reward inflation, vault extraction
+
+# Interaction Scope
+interaction_scope: cross_protocol
 attack_type:
   - Flash loan/swap pair reserve drain
   - Public token function pair manipulation
@@ -32,6 +39,31 @@ severity: CRITICAL
 impact: Protocol drain via manipulated prices, reward inflation, vault extraction
 exploitability: High
 financial_impact: "$7M+ aggregate"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "from"
+  - "sync"
+  - "abuse"
+  - "claim"
+  - "deposit"
+  - "getPrice"
+  - "withdraw"
+  - "balanceOf"
+  - "batchToken"
+  - "msg.sender"
+  - "claimReward"
+  - "getReserves"
+  - "pancakeCall"
+  - "testExploit"
+  - "transferFrom"
+path_keys:
+  - "flash_swap_reserve_drain_inflated_reward_claims"
+  - "multi_function_reward_drain_via_pair_price_manipulation"
+  - "batchtoken_mint_directly_into_lp_pair"
+  - "public_token_function_skews_lp_reserves"
+  - "broken_transferfrom_drains_lp_pair_reserves"
+  - "flash_loan_vault_share_inflation"
 tags:
   - defihacklabs
   - oracle-manipulation
@@ -55,6 +87,22 @@ tags:
 
 # DeFiHackLabs BSC Oracle & Price Manipulation Patterns (2022)
 
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [APC-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-12/APC_exp.sol` |
+| [ATK-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/ATK_exp.sol` |
+| [NEWFREEDAO-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-09/NewFreeDAO_exp.sol` |
+| [NOVO-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-05/Novo_exp.sol` |
+| [ONERING-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-03/OneRing_exp.sol` |
+| [SPACEGODZILL-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-07/SpaceGodzilla_exp.sol` |
+| [YYDS-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-09/Yyds_exp.sol` |
+| [ZOOMPROFINAN-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-09/ZoomproFinance_exp.sol` |
+
+---
+
+
 ## Overview
 
 This entry catalogs 8 AMM-based price manipulation exploits from 2022 sourced from [DeFiHackLabs](https://github.com/SunWeb3Sec/DeFiHackLabs). These represent the most common DeFi exploit pattern: using flash loans or public functions to manipulate AMM spot prices that protocols incorrectly rely on for pricing, rewards, or share calculations.
@@ -69,6 +117,19 @@ This entry catalogs 8 AMM-based price manipulation exploits from 2022 sourced fr
 7. **balanceOf-Based Reward Recycling** — Same tokens claim rewards across 50 contracts (NewFreeDAO)
 
 ---
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_validation` |
+| Pattern Key | `AMM-Based Oracle Price Manipulation |  |  | Protocol drain via manipulated prices, reward inflation, vault extraction` |
+| Severity | CRITICAL |
+| Impact | Protocol drain via manipulated prices, reward inflation, vault extraction |
+| Interaction Scope | `cross_protocol` |
+| Chain(s) | BSC, Fantom |
+
 
 ## Vulnerability Description
 
@@ -112,6 +173,8 @@ All 8 exploits share a common root cause: **protocols use AMM spot prices or on-
 
 ### Pattern 1: Flash Swap Reserve Drain → Inflated Reward Claims
 
+> **pathShape**: `atomic`
+
 **Severity**: 🔴 CRITICAL | **Loss**: ~$127K | **Protocol**: ATK (Journey of Awakening) | **Chain**: BSC
 
 The ATK protocol's reward contract uses `getPrice()` which reads the ATK/BUSDT pair reserves. Flash-swapping nearly all BUSDT from the pair temporarily makes ATK appear extremely valuable, allowing inflated reward claims.
@@ -143,6 +206,8 @@ function pancakeCall(address, uint256, uint256, bytes calldata) external {
 
 ### Pattern 2: Multi-function Reward Drain via Pair Price Manipulation
 
+> **pathShape**: `atomic`
+
 **Severity**: 🟠 HIGH | **Loss**: USDT profit | **Protocol**: YYDS | **Chain**: BSC
 
 Similar to ATK but exploits multiple reward claim functions (`claim`, `withdrawReturnAmountByReferral`, `withdrawReturnAmountByMerchant`, `withdrawReturnAmountByConsumer`) all dependent on the same manipulated pair price.
@@ -172,6 +237,8 @@ function pancakeCall(address, uint256, uint256, bytes calldata) external {
 ---
 
 ### Pattern 3: batchToken Mint Directly Into LP Pair
+
+> **pathShape**: `atomic`
 
 **Severity**: 🔴 CRITICAL | **Loss**: ~$3M | **Protocol**: ZoomproFinance | **Chain**: BSC
 
@@ -209,6 +276,8 @@ function DPPFlashLoanCall(address, uint256, uint256, bytes calldata) external {
 
 ### Pattern 4: Public Token Function Skews LP Reserves
 
+> **pathShape**: `atomic`
+
 **Severity**: 🟠 HIGH | **Loss**: ~$25K | **Protocol**: SpaceGodzilla | **Chain**: BSC
 
 The SpaceGodzilla token has publicly callable `swapTokensForOther()` and `swapAndLiquifyStepv1()` functions that perform swaps affecting the LP pair's reserves — enabling sandwich-style price manipulation.
@@ -241,6 +310,8 @@ function testExploit() public {
 ---
 
 ### Pattern 5: Broken transferFrom Drains LP Pair Reserves
+
+> **pathShape**: `atomic`
 
 **Severity**: 🔴 CRITICAL | **Loss**: ~17 WBNB | **Protocol**: NOVO | **Chain**: BSC
 
@@ -279,6 +350,8 @@ function testExploit() public {
 
 ### Pattern 6: Flash Loan Vault Share Inflation
 
+> **pathShape**: `atomic`
+
 **Severity**: 🔴 CRITICAL | **Loss**: ~$2M | **Protocol**: OneRing Finance | **Chain**: Fantom
 
 The OneRing vault calculates share prices from `balanceOf(address(this))`. A massive flash-loaned deposit inflates the share price, and withdrawing immediately after extracts more than deposited.
@@ -308,6 +381,8 @@ function uniswapV2Call(address, uint256 amount0, uint256, bytes calldata) extern
 ---
 
 ### Pattern 7: Spot Price Swap Proxy Arbitrage
+
+> **pathShape**: `atomic`
 
 **Severity**: 🔴 CRITICAL | **Loss**: ~$500K | **Protocol**: APC | **Chain**: BSC
 
@@ -342,6 +417,8 @@ function DPPFlashLoanCall(address, uint256, uint256, bytes calldata) external {
 ---
 
 ### Pattern 8: balanceOf-Based Reward Recycling Across Contracts
+
+> **pathShape**: `atomic`
 
 **Severity**: 🔴 CRITICAL | **Loss**: ~$1.25M (4,481 BNB) | **Protocol**: NewFreeDAO (NFD) | **Chain**: BSC
 

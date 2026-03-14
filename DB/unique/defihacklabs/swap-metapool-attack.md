@@ -4,6 +4,13 @@ chain: ethereum
 category: metapool_attack
 vulnerability_type: cross_pool_price_manipulation
 
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: cross_pool_price_manipulation | curve_metapool | economic_exploit | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 attack_type: economic_exploit
 affected_component: curve_metapool
 
@@ -19,6 +26,18 @@ severity: high
 impact: fund_loss
 exploitability: 0.7
 financial_impact: critical
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "swap"
+  - "exchange"
+  - "testExploit"
+  - "virtual_price"
+  - "getVirtualPrice"
+  - "executeOperation"
+path_keys:
+  - "nerve_bridge"
+  - "saddle_finance"
 
 tags:
   - metapool
@@ -40,9 +59,32 @@ total_losses: "$10.0M"
 
 ## Swap Metapool Attack Patterns
 
+
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [NERVEBRIDGE-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-12/NerveBridge_exp.sol` |
+| [SADDLE-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-04/Saddle_exp.sol` |
+
+---
+
 ### Overview
 
 Metapool attacks target Curve-style metapools — pools that combine a base pool LP token with another asset. These nested structures create price dependency chains: the metapool's internal pricing depends on the base pool's virtual price. By executing carefully orchestrated cross-pool swap sequences, attackers exploit imbalances between the metapool and its underlying base pool to extract value via arbitrage.
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_validation` |
+| Pattern Key | `cross_pool_price_manipulation | curve_metapool | economic_exploit | fund_loss` |
+| Severity | HIGH |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum |
+
 
 ### Vulnerability Description
 
@@ -69,6 +111,8 @@ Metapool attacks target Curve-style metapools — pools that combine a base pool
 ### Vulnerable Pattern Examples
 
 #### Category 1: Cross-Pool Swap Arbitrage [HIGH]
+
+> **pathShape**: `atomic`
 
 **Example 1: Saddle Finance — Cross-Pool Metapool Arbitrage (2022-04, ~$10M)** [CRITICAL]
 ```solidity
@@ -230,8 +274,7 @@ function getVirtualPrice() public view returns (uint256) {
 ### Detection Patterns
 
 ```bash
-# Metapool swap functions
-grep -rn "metapool\|MetaPool\|metaSwap" --include="*.sol"
+# Metapool swap functionsgrep -rn "metapool\|MetaPool\|metaSwap" --include="*.sol"
 
 # Virtual price usage
 grep -rn "getVirtualPrice\|virtual_price\|virtualPrice" --include="*.sol"

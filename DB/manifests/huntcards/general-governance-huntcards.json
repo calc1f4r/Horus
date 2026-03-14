@@ -2,14 +2,14 @@
   "meta": {
     "manifest": "general-governance",
     "description": "Compressed hunt cards for general-governance — one-line detection rules for bulk scanning",
-    "totalCards": 55,
-    "skipped": 42,
+    "totalCards": 57,
+    "skipped": 45,
     "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 55
+    "enriched": 57
   },
   "cards": [
     {
-      "id": "general-governance-defihacklabs-governance-attack-patterns-1-flash-loan-governance-takeov-000",
+      "id": "general-governance-defihacklabs-governance-attack-patterns-1-flash-loan-governance-takeov-001",
       "title": "1. Flash Loan Governance Takeover",
       "severity": "CRITICAL",
       "grep": "emergencyCommit|sweep",
@@ -23,8 +23,8 @@
       ],
       "ref": "DB/general/dao-governance-vulnerabilities/defihacklabs-governance-attack-patterns.md",
       "lines": [
-        65,
-        117
+        108,
+        162
       ],
       "neverPrune": true,
       "check": [
@@ -36,10 +36,10 @@
       "validWhen": "When governance voting power is determined by token balances at the time of vote (snapshot-less) or uses LP tokens that can be acquired via flash loans, an attacker..."
     },
     {
-      "id": "general-governance-defihacklabs-governance-attack-patterns-2-low-quorum-governance-exploi-001",
+      "id": "general-governance-defihacklabs-governance-attack-patterns-2-low-quorum-governance-exploi-002",
       "title": "2. Low Quorum Governance Exploitation",
       "severity": "CRITICAL",
-      "grep": "IGovernorAlpha|GovernorAlpha|ChainContract|block.timestamp",
+      "grep": "atomic|IGovernorAlpha|GovernorAlpha|ChainContract",
       "detect": "When governance quorum requirements are set too low (or vote delegation concentrates power), an attacker with a...",
       "cat": [
         "governance",
@@ -50,8 +50,8 @@
       ],
       "ref": "DB/general/dao-governance-vulnerabilities/defihacklabs-governance-attack-patterns.md",
       "lines": [
-        118,
-        165
+        163,
+        212
       ],
       "neverPrune": true,
       "check": [
@@ -62,7 +62,7 @@
       "validWhen": "When governance quorum requirements are set too low (or vote delegation concentrates power), an attacker with a relatively small token holding can pass proposals that..."
     },
     {
-      "id": "general-governance-defihacklabs-governance-attack-patterns-3-proxy-re-initialization-atta-002",
+      "id": "general-governance-defihacklabs-governance-attack-patterns-3-proxy-re-initialization-atta-003",
       "title": "3. Proxy Re-Initialization Attack",
       "severity": "CRITICAL",
       "grep": "isGovernanceAddress|getContract|initializer|initialize",
@@ -76,8 +76,8 @@
       ],
       "ref": "DB/general/dao-governance-vulnerabilities/defihacklabs-governance-attack-patterns.md",
       "lines": [
-        166,
-        217
+        213,
+        266
       ],
       "neverPrune": true,
       "check": [
@@ -88,10 +88,10 @@
       "validWhen": "When governance, staking, and delegate manager contracts are deployed behind proxies (UUPS or Transparent), the initialize() function must be called exactly once and..."
     },
     {
-      "id": "general-governance-defihacklabs-governance-attack-patterns-4-dao-module-oracle-self-answe-003",
+      "id": "general-governance-defihacklabs-governance-attack-patterns-4-dao-module-oracle-self-answe-004",
       "title": "4. DAO Module Oracle Self-Answer Attack",
       "severity": "CRITICAL",
-      "grep": "executeProposalWithIndex|encodeWithSignature|getTransactionHash|transferOwnership",
+      "grep": "atomic|executeProposalWithIndex|encodeWithSignature|getTransactionHash",
       "detect": "When a DAO uses Gnosis Safe Modules with Reality.",
       "cat": [
         "governance",
@@ -102,8 +102,8 @@
       ],
       "ref": "DB/general/dao-governance-vulnerabilities/defihacklabs-governance-attack-patterns.md",
       "lines": [
-        218,
-        270
+        267,
+        321
       ],
       "neverPrune": true,
       "check": [
@@ -114,7 +114,7 @@
       "validWhen": "When a DAO uses Gnosis Safe Modules with Reality.io oracle for proposal validation, the security depends on the oracle bond economics."
     },
     {
-      "id": "general-governance-defihacklabs-governance-attack-patterns-5-governance-treasury-drain-vi-004",
+      "id": "general-governance-defihacklabs-governance-attack-patterns-5-governance-treasury-drain-vi-005",
       "title": "5. Governance Treasury Drain via Token Acquisition",
       "severity": "CRITICAL",
       "grep": "encodeWithSignature|BuildGovernance|transferFrom|BuildFinance",
@@ -128,8 +128,8 @@
       ],
       "ref": "DB/general/dao-governance-vulnerabilities/defihacklabs-governance-attack-patterns.md",
       "lines": [
-        271,
-        319
+        322,
+        372
       ],
       "neverPrune": true,
       "check": [
@@ -1390,11 +1390,11 @@
       "validWhen": "Malicious contracts contain intentionally hidden functionality that allows the contract deployer (or privileged addresses) to"
     },
     {
-      "id": "general-governance-defihacklabs-mev-bot-2022-patterns-mev-bot-callback-arbitrary-cal-000",
-      "title": "MEV Bot Callback & Arbitrary Call Exploits (2022)",
+      "id": "general-governance-defihacklabs-mev-bot-2022-patterns-agent-quick-view-000",
+      "title": "Agent Quick View",
       "severity": "HIGH",
-      "grep": "receiveFlashLoan|DPPFlashLoanCall|_USDCToWETH|transferFrom|testExploit|getReserves",
-      "detect": "Flash Loan Callback Without Origin Validation**: MEV bots implement flash loan callback interfaces (Balancer...",
+      "grep": "missing_access_control|single_contract",
+      "detect": "Agent Quick View",
       "cat": [
         "governance",
         "dao",
@@ -1404,20 +1404,61 @@
       ],
       "ref": "DB/general/mev-bot/defihacklabs-mev-bot-2022-patterns.md",
       "lines": [
-        41,
-        333
+        88,
+        99
       ],
       "check": [
-        "VERIFY: Flash Loan Callback Without Origin Validation: MEV bots implement flash loan callback interfaces (Balancer...",
-        "PROVE: *Flash Loan Callback Exploitation (MEVa47b / MEVbot_0x28d9 pattern); Attacker triggers flash loan from Balancer/DODO with recipient = MEV bot",
-        "FALSIFY: Only process self-initiated flash loans",
-        "IMPACT: Fake Pair Impersonation: Attacker deploys a contract implementing getReserves() and swap() — MEV bots call these functions believing they're interacting with..."
+        "VERIFY: Pattern Key | mev_bot_callback_exploitation | mev_bot_contract | arbitrary_call | fund_loss"
+      ],
+      "validWhen": "Pattern Key | mev_bot_callback_exploitation | mev_bot_contract | arbitrary_call | fund_loss"
+    },
+    {
+      "id": "general-governance-defihacklabs-mev-bot-2022-patterns-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "HIGH",
+      "grep": "_USDCToWETH|transferFrom|testExploit|getReserves|userData|atomic",
+      "detect": "MEV Bot at 0x00000000000a47b1298f18cf67de547bbe0d723f",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/mev-bot/defihacklabs-mev-bot-2022-patterns.md",
+      "lines": [
+        127,
+        295
+      ],
+      "check": [
+        "VERIFY: MEV bot processes Balancer flash loan callbacks without verifying that the flash loan was self-initiated.",
+        "PROVE: MEV Bot at 0x00000000000a47b1298f18cf67de547bbe0d723f"
       ],
       "antipattern": "MEV Bot at 0x00000000000a47b1298f18cf67de547bbe0d723f",
-      "securePattern": "Only process self-initiated flash loans",
-      "validWhen": "Flash Loan Callback Without Origin Validation: MEV bots implement flash loan callback interfaces (Balancer...",
-      "invalidWhen": "Only process self-initiated flash loans",
-      "impact": "Fake Pair Impersonation: Attacker deploys a contract implementing getReserves() and swap() — MEV bots call these functions believing they're interacting with..."
+      "validWhen": "The MEV bot processes Balancer flash loan callbacks without verifying that the flash loan was self-initiated."
+    },
+    {
+      "id": "general-governance-defihacklabs-mev-bot-2022-patterns-keywords-004",
+      "title": "Keywords",
+      "severity": "UNKNOWN",
+      "grep": "arbitrary_call_execution|fake_pair_impersonation|approval_chain_attack|unverified_contract",
+      "detect": "arbitrary_call_execution",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/mev-bot/defihacklabs-mev-bot-2022-patterns.md",
+      "lines": [
+        436,
+        454
+      ],
+      "check": [
+        "VERIFY: arbitrary_call_execution"
+      ],
+      "validWhen": "arbitrary_call_execution"
     },
     {
       "id": "general-governance-mev-bot-vulnerabilities-vulnerability-categories-001",

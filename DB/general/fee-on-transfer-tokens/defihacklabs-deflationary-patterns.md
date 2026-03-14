@@ -4,6 +4,13 @@ chain: ethereum, bsc, avalanche
 category: fee_on_transfer
 vulnerability_type: deflationary_token_incompatibility
 
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: deflationary_token_incompatibility | farm_staking | repeated_deposit_drain | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 attack_type: repeated_deposit_drain
 affected_component: farm_staking, amm_pool, token_balance
 
@@ -18,6 +25,26 @@ severity: critical
 impact: fund_loss
 exploitability: 0.85
 financial_impact: high
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "bind"
+  - "gulp"
+  - "swap"
+  - "sync"
+  - "amount"
+  - "_amount"
+  - "deposit"
+  - "exploit"
+  - "withdraw"
+  - "_transfer"
+  - "balanceOf"
+  - "swapExactAmountIn"
+  - "transferFrom(amount"
+path_keys:
+  - "balancer_sta_token"
+  - "safedollar"
+  - "zabu_finance"
 
 tags:
   - deflationary
@@ -37,9 +64,33 @@ total_losses: "$5M+"
 
 ## DeFiHackLabs Deflationary Token Incompatibility Compendium
 
+
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [BALANCER-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2020-06/Balancer_exp.sol` |
+| [SAFEDOLLAR-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-06/SafeDollar_exp.sol` |
+| [ZABU-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-09/ZABU_exp.sol` |
+
+---
+
 ### Overview
 
 Deflationary (fee-on-transfer) tokens burn or tax a percentage on every transfer. When protocols assume `transferFrom(amount)` credits exactly `amount`, they create exploitable gaps between recorded balances and actual balances. This entry catalogs **3 real-world exploits** from 2019-2021 demonstrating how this mismatch enables complete fund drainage.
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_validation` |
+| Pattern Key | `deflationary_token_incompatibility | farm_staking | repeated_deposit_drain | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, bsc, avalanche |
+
 
 ### Root Cause Categories
 
@@ -51,6 +102,8 @@ Deflationary (fee-on-transfer) tokens burn or tax a percentage on every transfer
 ### Vulnerable Pattern Examples
 
 #### Category 1: Farm Drain Loop — Repeated Deposit/Withdraw [CRITICAL]
+
+> **pathShape**: `atomic`
 
 **Example 1: ZABU Finance — SPORE Deflationary Farm Drain ($3.2M, 2021-09)** [CRITICAL]
 ```solidity
@@ -135,6 +188,8 @@ for (uint256 i = 0; i < loopCount; i++) {
 ---
 
 #### Category 2: AMM Pool Balance Divergence [HIGH]
+
+> **pathShape**: `atomic`
 
 **Example 3: Balancer + STA Token — Pool Balance Drift + gulp() ($500K, 2020-06)** [HIGH]
 ```solidity
@@ -268,8 +323,7 @@ function swap(address tokenIn, uint256 amountIn, address tokenOut) external {
 ### Detection Patterns
 
 ```bash
-# Farm deposits that don't measure actual received
-grep -rn "function deposit\|function stake" --include="*.sol" | \
+# Farm deposits that don't measure actual receivedgrep -rn "function deposit\|function stake" --include="*.sol" | \
   xargs grep -A 5 "transferFrom" | \
   grep -L "balanceBefore\|balanceOf.*before\|actualReceived"
 

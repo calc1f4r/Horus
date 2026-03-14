@@ -3,7 +3,7 @@
     "category": "general-defi",
     "description": "DeFi-specific: flash loans, slippage, vaults, precision, calculations, bonding curves, restaking, perpetuals, lending rates, NFT marketplaces",
     "fileCount": 46,
-    "totalPatterns": 348,
+    "totalPatterns": 367,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -928,12 +928,15 @@
     },
     {
       "file": "DB/general/vault-inflation-attack/defihacklabs-vault-inflation-patterns.md",
-      "totalLines": 451,
+      "totalLines": 495,
       "frontmatter": {
         "protocol": "\"compound-v2-forks\"",
         "chain": "\"ethereum, optimism, bsc, arbitrum\"",
         "category": "\"economic\"",
         "vulnerability_type": "\"vault_inflation_attack\"",
+        "root_cause_family": "arithmetic_invariant_break",
+        "pattern_key": "vault_inflation_attack | exchange_rate_calculation | economic_exploit | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "\"economic_exploit\"",
         "affected_component": "\"exchange_rate_calculation, share_accounting\"",
         "severity": "\"critical\"",
@@ -943,19 +946,49 @@
         "language": "\"solidity\"",
         "version": "\">=0.8.0\""
       },
-      "patternCount": 6,
+      "patternCount": 7,
       "patterns": [
         {
-          "id": "general-defi-defihacklabs-vault-inflation-patterns-1-empty-market-exchange-rate-i-000",
+          "id": "general-defi-defihacklabs-vault-inflation-patterns-overview-000",
+          "title": "Overview",
+          "lineStart": 87,
+          "lineEnd": 105,
+          "lineCount": 19,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "arithmetic_invariant_break",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 94,
+              "lineEnd": 105,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "arithmetic_invariant_break",
+                "single_contract"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-defihacklabs-vault-inflation-patterns-1-empty-market-exchange-rate-i-001",
           "title": "1. Empty Market Exchange Rate Inflation",
-          "lineStart": 66,
-          "lineEnd": 174,
-          "lineCount": 109,
+          "lineStart": 106,
+          "lineEnd": 216,
+          "lineCount": 111,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
+            "atomic",
             "redeemUnderlying",
             "totalSupply",
             "transfer"
@@ -964,8 +997,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 72,
-              "lineEnd": 82,
+              "lineStart": 114,
+              "lineEnd": 124,
               "severity": [],
               "codeKeywords": [
                 "redeemUnderlying",
@@ -974,8 +1007,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 83,
-              "lineEnd": 174,
+              "lineStart": 125,
+              "lineEnd": 216,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -985,11 +1018,11 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-vault-inflation-patterns-2-share-price-inflation-via-do-001",
+          "id": "general-defi-defihacklabs-vault-inflation-patterns-2-share-price-inflation-via-do-002",
           "title": "2. Share Price Inflation via Donation",
-          "lineStart": 175,
-          "lineEnd": 287,
-          "lineCount": 113,
+          "lineStart": 217,
+          "lineEnd": 331,
+          "lineCount": 115,
           "severity": [
             "CRITICAL",
             "HIGH",
@@ -1005,8 +1038,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 181,
-              "lineEnd": 188,
+              "lineStart": 225,
+              "lineEnd": 232,
               "severity": [],
               "codeKeywords": [
                 "pseudoTotalPool",
@@ -1016,8 +1049,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 189,
-              "lineEnd": 287,
+              "lineStart": 233,
+              "lineEnd": 331,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -1027,10 +1060,10 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-vault-inflation-patterns-impact-analysis-002",
+          "id": "general-defi-defihacklabs-vault-inflation-patterns-impact-analysis-003",
           "title": "Impact Analysis",
-          "lineStart": 288,
-          "lineEnd": 309,
+          "lineStart": 332,
+          "lineEnd": 353,
           "lineCount": 22,
           "severity": [
             "LOW"
@@ -1045,10 +1078,10 @@
           "subsections": null
         },
         {
-          "id": "general-defi-defihacklabs-vault-inflation-patterns-secure-implementation-003",
+          "id": "general-defi-defihacklabs-vault-inflation-patterns-secure-implementation-004",
           "title": "Secure Implementation",
-          "lineStart": 310,
-          "lineEnd": 378,
+          "lineStart": 354,
+          "lineEnd": 422,
           "lineCount": 69,
           "severity": [],
           "codeKeywords": [
@@ -1062,10 +1095,10 @@
           "subsections": null
         },
         {
-          "id": "general-defi-defihacklabs-vault-inflation-patterns-detection-patterns-004",
+          "id": "general-defi-defihacklabs-vault-inflation-patterns-detection-patterns-005",
           "title": "Detection Patterns",
-          "lineStart": 379,
-          "lineEnd": 404,
+          "lineStart": 423,
+          "lineEnd": 448,
           "lineCount": 26,
           "severity": [
             "LOW"
@@ -1083,10 +1116,10 @@
           "subsections": null
         },
         {
-          "id": "general-defi-defihacklabs-vault-inflation-patterns-real-world-examples-005",
+          "id": "general-defi-defihacklabs-vault-inflation-patterns-real-world-examples-006",
           "title": "Real-World Examples",
-          "lineStart": 405,
-          "lineEnd": 422,
+          "lineStart": 449,
+          "lineEnd": 466,
           "lineCount": 18,
           "severity": [],
           "codeKeywords": [],
@@ -2619,12 +2652,15 @@
     },
     {
       "file": "DB/general/fee-on-transfer-tokens/defihacklabs-deflationary-patterns.md",
-      "totalLines": 322,
+      "totalLines": 376,
       "frontmatter": {
         "protocol": "generic",
         "chain": "ethereum, bsc, avalanche",
         "category": "fee_on_transfer",
         "vulnerability_type": "deflationary_token_incompatibility",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "deflationary_token_incompatibility | farm_staking | repeated_deposit_drain | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "repeated_deposit_drain",
         "affected_component": "farm_staking, amm_pool, token_balance",
         "severity": "critical",
@@ -2635,14 +2671,45 @@
         "total_exploits_analyzed": "3",
         "total_losses": "\"$5M+\""
       },
-      "patternCount": 1,
+      "patternCount": 4,
       "patterns": [
         {
-          "id": "general-defi-defihacklabs-deflationary-patterns-defihacklabs-deflationary-toke-000",
-          "title": "DeFiHackLabs Deflationary Token Incompatibility Compendium",
-          "lineStart": 38,
-          "lineEnd": 270,
-          "lineCount": 233,
+          "id": "general-defi-defihacklabs-deflationary-patterns-agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 83,
+          "lineEnd": 94,
+          "lineCount": 12,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "missing_validation",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-defihacklabs-deflationary-patterns-root-cause-categories-001",
+          "title": "Root Cause Categories",
+          "lineStart": 95,
+          "lineEnd": 101,
+          "lineCount": 7,
+          "severity": [],
+          "codeKeywords": [
+            "amount",
+            "balanceOf",
+            "gulp"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-defihacklabs-deflationary-patterns-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 102,
+          "lineEnd": 257,
+          "lineCount": 156,
           "severity": [
             "CRITICAL"
           ],
@@ -2650,31 +2717,18 @@
             "_amount",
             "_transfer",
             "amount",
-            "balanceOf",
+            "atomic",
             "deposit",
             "exploit",
-            "gulp",
             "swapExactAmountIn",
-            "transferFrom(amount",
             "withdraw"
           ],
           "rootCause": "Farm credits `amount` deposited, not actual tokens received",
           "subsections": [
             {
-              "title": "Root Cause Categories",
-              "lineStart": 44,
-              "lineEnd": 50,
-              "severity": [],
-              "codeKeywords": [
-                "amount",
-                "balanceOf",
-                "gulp"
-              ]
-            },
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 51,
-              "lineEnd": 202,
+              "title": "Category 1: Farm Drain Loop — Repeated Deposit/Withdraw [CRITICAL]",
+              "lineStart": 104,
+              "lineEnd": 189,
               "severity": [
                 "CRITICAL"
               ],
@@ -2682,13 +2736,38 @@
                 "_amount",
                 "_transfer",
                 "amount",
+                "atomic",
                 "deposit",
                 "exploit",
-                "swapExactAmountIn",
                 "withdraw"
+              ]
+            },
+            {
+              "title": "Category 2: AMM Pool Balance Divergence [HIGH]",
+              "lineStart": 190,
+              "lineEnd": 257,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "atomic",
+                "balanceOf",
+                "gulp",
+                "swapExactAmountIn"
               ]
             }
           ]
+        },
+        {
+          "id": "general-defi-defihacklabs-deflationary-patterns-keywords-003",
+          "title": "Keywords",
+          "lineStart": 355,
+          "lineEnd": 371,
+          "lineCount": 17,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
@@ -2885,12 +2964,15 @@
     },
     {
       "file": "DB/general/token-compatibility/defihacklabs-bsc-token-exploit-patterns-2022.md",
-      "totalLines": 703,
+      "totalLines": 773,
       "frontmatter": {
         "protocol": "generic",
         "chain": "bsc",
         "category": "token_compatibility",
         "vulnerability_type": "bsc_token_exploit_patterns",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "bsc_token_exploit_patterns | token_contract | economic_exploit | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "economic_exploit",
         "affected_component": "token_contract",
         "severity": "high",
@@ -2901,14 +2983,30 @@
         "total_exploits_analyzed": "9",
         "total_losses": "\"$200K+\""
       },
-      "patternCount": 1,
+      "patternCount": 5,
       "patterns": [
         {
-          "id": "general-defi-defihacklabs-bsc-token-exploit-patterns--bsc-token-exploit-patterns-202-000",
-          "title": "BSC Token Exploit Patterns (2022)",
-          "lineStart": 43,
-          "lineEnd": 606,
-          "lineCount": 564,
+          "id": "general-defi-defihacklabs-bsc-token-exploit-patterns--agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 98,
+          "lineEnd": 109,
+          "lineCount": 12,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "missing_validation",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-defihacklabs-bsc-token-exploit-patterns--vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 110,
+          "lineEnd": 150,
+          "lineCount": 41,
           "severity": [
             "HIGH",
             "LOW"
@@ -2921,66 +3019,187 @@
             "excludeFromReward",
             "getReserves",
             "includeInReward",
-            "onlyOwner",
             "reserve",
             "skim",
             "swapAndLiquifyStepv1",
             "sync",
-            "testExploit",
-            "token.swapAndLiquifyStepv1",
-            "transferOwnership"
+            "token.swapAndLiquifyStepv1"
           ],
           "rootCause": "1. **Reflection Token Accounting Desync**: SafeMoon-fork tokens track balances via dual accounting (`_rOwned` / `_tOwned`). The `excludeFromReward()` / `includeInReward()` mechanisms can be manipulate",
           "subsections": [
             {
-              "title": "Vulnerability Description",
-              "lineStart": 49,
-              "lineEnd": 89,
+              "title": "Root Cause",
+              "lineStart": 112,
+              "lineEnd": 123,
               "severity": [
                 "HIGH",
                 "LOW"
               ],
               "codeKeywords": [
-                "_isAddLiquidityV1",
                 "_rOwned",
                 "_tOwned",
                 "balanceOf",
                 "excludeFromReward",
                 "getReserves",
                 "includeInReward",
-                "reserve"
+                "reserve",
+                "skim"
               ]
             },
             {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 90,
-              "lineEnd": 481,
+              "title": "Attack Scenarios",
+              "lineStart": 124,
+              "lineEnd": 150,
+              "severity": [],
+              "codeKeywords": [
+                "_isAddLiquidityV1",
+                "_rOwned",
+                "_tOwned",
+                "balanceOf",
+                "includeInReward",
+                "token.swapAndLiquifyStepv1"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-defihacklabs-bsc-token-exploit-patterns--vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 151,
+          "lineEnd": 552,
+          "lineCount": 402,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "DPPFlashLoanCall",
+            "_rOwned",
+            "_tOwned",
+            "atomic",
+            "includeInReward",
+            "onlyOwner",
+            "testExploit",
+            "transferBBOX",
+            "transferOwnership"
+          ],
+          "rootCause": "transferOwnership() has no access control",
+          "subsections": [
+            {
+              "title": "Category 1: Reflection Token Accounting Exploitation [HIGH]",
+              "lineStart": 153,
+              "lineEnd": 219,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_rOwned",
+                "_tOwned",
+                "atomic",
+                "includeInReward",
+                "onlyOwner",
+                "testExploit",
+                "transferOwnership"
+              ]
+            },
+            {
+              "title": "Category 2: Sell Timelock Bypass via Intermediary Contract [MEDIUM]",
+              "lineStart": 220,
+              "lineEnd": 267,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall",
+                "atomic",
+                "testExploit",
+                "transferBBOX"
+              ]
+            },
+            {
+              "title": "Category 3: Publicly Callable swapAndLiquify [HIGH]",
+              "lineStart": 268,
+              "lineEnd": 316,
               "severity": [
                 "HIGH"
               ],
               "codeKeywords": [
                 "DPPFlashLoanCall",
-                "_rOwned",
-                "_tOwned",
-                "includeInReward",
-                "onlyOwner",
-                "testExploit",
-                "transferBBOX",
-                "transferOwnership"
+                "_isAddLiquidityV1",
+                "atomic",
+                "swapAndLiquifyStepv1"
+              ]
+            },
+            {
+              "title": "Category 4: `skim()` / `sync()` Fee-on-Transfer Amplification [HIGH]",
+              "lineStart": 317,
+              "lineEnd": 403,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "actualBalance",
+                "pancakeCall",
+                "skim",
+                "sync",
+                "uniswapV2Call"
+              ]
+            },
+            {
+              "title": "Category 5: Flash Loan Bond/Lending Price Manipulation [HIGH]",
+              "lineStart": 404,
+              "lineEnd": 552,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "atomic",
+                "borrow",
+                "deposit",
+                "getReserves",
+                "joeCall",
+                "mu_bond",
+                "mu_gold_bond",
+                "pancakeCall"
               ]
             }
           ]
+        },
+        {
+          "id": "general-defi-defihacklabs-bsc-token-exploit-patterns--defihacklabs-poc-references-003",
+          "title": "DeFiHackLabs PoC References",
+          "lineStart": 727,
+          "lineEnd": 740,
+          "lineCount": 14,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-defihacklabs-bsc-token-exploit-patterns--keywords-004",
+          "title": "Keywords",
+          "lineStart": 741,
+          "lineEnd": 766,
+          "lineCount": 26,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
     {
       "file": "DB/general/token-compatibility/defihacklabs-reflection-token-2023-2024-patterns.md",
-      "totalLines": 656,
+      "totalLines": 699,
       "frontmatter": {
         "protocol": "generic",
         "chain": "everychain",
         "category": "token_compatibility",
         "vulnerability_type": "reflection_token_exploit_patterns_2023_2024",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "reflection_token_exploit_patterns_2023_2024 | reflection_token_contract | economic_exploit | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "economic_exploit",
         "affected_component": "reflection_token_contract",
         "severity": "high",
@@ -2996,11 +3215,11 @@
         {
           "id": "general-defi-defihacklabs-reflection-token-2023-2024--reflection-tax-token-exploit-p-000",
           "title": "Reflection & Tax Token Exploit Patterns (2023-2024)",
-          "lineStart": 71,
-          "lineEnd": 105,
-          "lineCount": 35,
+          "lineStart": 101,
+          "lineEnd": 148,
+          "lineCount": 48,
           "severity": [
-            "LOW"
+            "HIGH"
           ],
           "codeKeywords": [
             "_transfer",
@@ -3013,18 +3232,30 @@
             "deliver",
             "getReserves",
             "mint",
+            "missing_validation",
             "rOwned",
             "rTotal",
             "reserve",
-            "reserve0",
-            "reserve1"
+            "reserve0"
           ],
           "rootCause": "All reflection token exploits share a fundamental architectural flaw: **the AMM pair's reserve tracking (`reserve0`, `reserve1`) does not account for dynamic balance changes caused by reflection rate ",
           "subsections": [
             {
+              "title": "Agent Quick View",
+              "lineStart": 108,
+              "lineEnd": 119,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "missing_validation",
+                "single_contract"
+              ]
+            },
+            {
               "title": "Vulnerability Description",
-              "lineStart": 77,
-              "lineEnd": 105,
+              "lineStart": 120,
+              "lineEnd": 148,
               "severity": [
                 "LOW"
               ],
@@ -3044,8 +3275,8 @@
         {
           "id": "general-defi-defihacklabs-reflection-token-2023-2024--variant-1-deliver-skim-pattern-001",
           "title": "Variant 1: deliver() + skim() Pattern (7/15 exploits)",
-          "lineStart": 106,
-          "lineEnd": 251,
+          "lineStart": 149,
+          "lineEnd": 294,
           "lineCount": 146,
           "severity": [
             "CRITICAL",
@@ -3060,8 +3291,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 108,
-              "lineEnd": 251,
+              "lineStart": 151,
+              "lineEnd": 294,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -3077,8 +3308,8 @@
         {
           "id": "general-defi-defihacklabs-reflection-token-2023-2024--variant-2-burn-sync-pattern-2--002",
           "title": "Variant 2: burn() + sync() Pattern (2/15 exploits)",
-          "lineStart": 252,
-          "lineEnd": 312,
+          "lineStart": 295,
+          "lineEnd": 355,
           "lineCount": 61,
           "severity": [
             "CRITICAL"
@@ -3091,8 +3322,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 254,
-              "lineEnd": 312,
+              "lineStart": 297,
+              "lineEnd": 355,
               "severity": [
                 "CRITICAL"
               ],
@@ -3106,8 +3337,8 @@
         {
           "id": "general-defi-defihacklabs-reflection-token-2023-2024--variant-3-self-transfer-balanc-003",
           "title": "Variant 3: Self-Transfer Balance Doubling (3/15 exploits)",
-          "lineStart": 313,
-          "lineEnd": 381,
+          "lineStart": 356,
+          "lineEnd": 424,
           "lineCount": 69,
           "severity": [
             "CRITICAL",
@@ -3121,8 +3352,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 315,
-              "lineEnd": 381,
+              "lineStart": 358,
+              "lineEnd": 424,
               "severity": [
                 "CRITICAL",
                 "HIGH"
@@ -3137,8 +3368,8 @@
         {
           "id": "general-defi-defihacklabs-reflection-token-2023-2024--variant-4-deflationary-pair-bu-004",
           "title": "Variant 4: Deflationary Pair Burn (2/15 exploits)",
-          "lineStart": 382,
-          "lineEnd": 445,
+          "lineStart": 425,
+          "lineEnd": 488,
           "lineCount": 64,
           "severity": [
             "HIGH"
@@ -3150,8 +3381,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 384,
-              "lineEnd": 445,
+              "lineStart": 427,
+              "lineEnd": 488,
               "severity": [
                 "HIGH"
               ],
@@ -3164,8 +3395,8 @@
         {
           "id": "general-defi-defihacklabs-reflection-token-2023-2024--variant-5-tax-reflection-to-pa-005",
           "title": "Variant 5: Tax Reflection to Pair (1/15 exploits)",
-          "lineStart": 446,
-          "lineEnd": 497,
+          "lineStart": 489,
+          "lineEnd": 540,
           "lineCount": 52,
           "severity": [
             "HIGH"
@@ -3177,8 +3408,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 448,
-              "lineEnd": 497,
+              "lineStart": 491,
+              "lineEnd": 540,
               "severity": [
                 "HIGH"
               ],
@@ -3191,8 +3422,8 @@
         {
           "id": "general-defi-defihacklabs-reflection-token-2023-2024--impact-analysis-006",
           "title": "Impact Analysis",
-          "lineStart": 498,
-          "lineEnd": 523,
+          "lineStart": 541,
+          "lineEnd": 566,
           "lineCount": 26,
           "severity": [],
           "codeKeywords": [
@@ -3205,22 +3436,22 @@
           "subsections": [
             {
               "title": "Financial Impact",
-              "lineStart": 500,
-              "lineEnd": 505,
+              "lineStart": 543,
+              "lineEnd": 548,
               "severity": [],
               "codeKeywords": []
             },
             {
               "title": "Impact by Pattern (15/15 exploits)",
-              "lineStart": 506,
-              "lineEnd": 514,
+              "lineStart": 549,
+              "lineEnd": 557,
               "severity": [],
               "codeKeywords": []
             },
             {
               "title": "Affected Scenarios (15/15 exploits)",
-              "lineStart": 515,
-              "lineEnd": 523,
+              "lineStart": 558,
+              "lineEnd": 566,
               "severity": [],
               "codeKeywords": [
                 "_transfer",
@@ -3234,8 +3465,8 @@
         {
           "id": "general-defi-defihacklabs-reflection-token-2023-2024--secure-implementation-007",
           "title": "Secure Implementation",
-          "lineStart": 524,
-          "lineEnd": 572,
+          "lineStart": 567,
+          "lineEnd": 615,
           "lineCount": 49,
           "severity": [],
           "codeKeywords": [
@@ -3247,15 +3478,15 @@
           "subsections": [
             {
               "title": "Fix 1: Exclude Pair from Reflections",
-              "lineStart": 526,
-              "lineEnd": 538,
+              "lineStart": 569,
+              "lineEnd": 581,
               "severity": [],
               "codeKeywords": []
             },
             {
               "title": "Fix 2: Restrict burn() and deliver()",
-              "lineStart": 539,
-              "lineEnd": 557,
+              "lineStart": 582,
+              "lineEnd": 600,
               "severity": [],
               "codeKeywords": [
                 "burn",
@@ -3264,8 +3495,8 @@
             },
             {
               "title": "Fix 3: Handle Self-Transfer Edge Case",
-              "lineStart": 558,
-              "lineEnd": 572,
+              "lineStart": 601,
+              "lineEnd": 615,
               "severity": [],
               "codeKeywords": [
                 "_transfer"
@@ -3276,8 +3507,8 @@
         {
           "id": "general-defi-defihacklabs-reflection-token-2023-2024--detection-patterns-008",
           "title": "Detection Patterns",
-          "lineStart": 573,
-          "lineEnd": 616,
+          "lineStart": 616,
+          "lineEnd": 659,
           "lineCount": 44,
           "severity": [
             "LOW"
@@ -3293,8 +3524,8 @@
           "subsections": [
             {
               "title": "Static Analysis",
-              "lineStart": 575,
-              "lineEnd": 598,
+              "lineStart": 618,
+              "lineEnd": 641,
               "severity": [],
               "codeKeywords": [
                 "_burn",
@@ -3306,8 +3537,8 @@
             },
             {
               "title": "Dynamic Analysis / Runtime Checks",
-              "lineStart": 599,
-              "lineEnd": 616,
+              "lineStart": 642,
+              "lineEnd": 659,
               "severity": [
                 "LOW"
               ],
@@ -3318,8 +3549,8 @@
         {
           "id": "general-defi-defihacklabs-reflection-token-2023-2024--audit-checklist-009",
           "title": "Audit Checklist",
-          "lineStart": 617,
-          "lineEnd": 631,
+          "lineStart": 660,
+          "lineEnd": 674,
           "lineCount": 15,
           "severity": [],
           "codeKeywords": [
@@ -3336,8 +3567,8 @@
         {
           "id": "general-defi-defihacklabs-reflection-token-2023-2024--real-world-examples-010",
           "title": "Real-World Examples",
-          "lineStart": 632,
-          "lineEnd": 653,
+          "lineStart": 675,
+          "lineEnd": 696,
           "lineCount": 22,
           "severity": [],
           "codeKeywords": [],
@@ -3963,12 +4194,15 @@
     },
     {
       "file": "DB/general/precision/defihacklabs-precision-share-manipulation-2024-2025.md",
-      "totalLines": 631,
+      "totalLines": 687,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, arbitrum, optimism, base\"",
         "category": "\"precision_loss\"",
         "vulnerability_type": "\"share_price_manipulation, exchange_rate_inflation, elastic_base_rounding\"",
+        "root_cause_family": "arithmetic_invariant_break",
+        "pattern_key": "share_price_manipulation | exchange_rate | economic_exploit | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "\"economic_exploit\"",
         "affected_component": "\"exchange_rate, share_accounting, scaling_factors, virtual_balance\"",
         "severity": "\"critical\"",
@@ -3978,18 +4212,48 @@
         "language": "\"solidity\"",
         "version": "\">=0.8.0\""
       },
-      "patternCount": 10,
+      "patternCount": 11,
       "patterns": [
         {
-          "id": "general-defi-defihacklabs-precision-share-manipulatio-1-empty-market-exchange-rate-i-000",
-          "title": "1. Empty Market Exchange Rate Inflation via Donation",
-          "lineStart": 84,
-          "lineEnd": 163,
-          "lineCount": 80,
+          "id": "general-defi-defihacklabs-precision-share-manipulatio-overview-000",
+          "title": "Overview",
+          "lineStart": 109,
+          "lineEnd": 127,
+          "lineCount": 19,
           "severity": [
             "CRITICAL"
           ],
           "codeKeywords": [
+            "arithmetic_invariant_break",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 116,
+              "lineEnd": 127,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "arithmetic_invariant_break",
+                "single_contract"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-defihacklabs-precision-share-manipulatio-1-empty-market-exchange-rate-i-001",
+          "title": "1. Empty Market Exchange Rate Inflation via Donation",
+          "lineStart": 128,
+          "lineEnd": 209,
+          "lineCount": 82,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "atomic",
             "exchangeRate",
             "totalCash",
             "totalSupply",
@@ -3999,8 +4263,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 90,
-              "lineEnd": 98,
+              "lineStart": 136,
+              "lineEnd": 144,
               "severity": [],
               "codeKeywords": [
                 "exchangeRate",
@@ -4009,8 +4273,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 99,
-              "lineEnd": 163,
+              "lineStart": 145,
+              "lineEnd": 209,
               "severity": [
                 "CRITICAL"
               ],
@@ -4019,16 +4283,17 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-precision-share-manipulatio-2-elastic-base-rebase-math-rou-001",
+          "id": "general-defi-defihacklabs-precision-share-manipulatio-2-elastic-base-rebase-math-rou-002",
           "title": "2. Elastic/Base Rebase Math Rounding Exploitation",
-          "lineStart": 164,
-          "lineEnd": 216,
-          "lineCount": 53,
+          "lineStart": 210,
+          "lineEnd": 264,
+          "lineCount": 55,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
+            "atomic",
             "base",
             "borrowPart",
             "elastic",
@@ -4044,8 +4309,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 170,
-              "lineEnd": 178,
+              "lineStart": 218,
+              "lineEnd": 226,
               "severity": [],
               "codeKeywords": [
                 "borrowPart",
@@ -4056,8 +4321,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 179,
-              "lineEnd": 216,
+              "lineStart": 227,
+              "lineEnd": 264,
               "severity": [
                 "CRITICAL"
               ],
@@ -4068,11 +4333,11 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-precision-share-manipulatio-3-liquidityindex-inflation-via-002",
+          "id": "general-defi-defihacklabs-precision-share-manipulatio-3-liquidityindex-inflation-via-003",
           "title": "3. LiquidityIndex Inflation via Recursive Flash Loans",
-          "lineStart": 217,
-          "lineEnd": 273,
-          "lineCount": 57,
+          "lineStart": 265,
+          "lineEnd": 323,
+          "lineCount": 59,
           "severity": [
             "CRITICAL",
             "LOW"
@@ -4086,8 +4351,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 223,
-              "lineEnd": 231,
+              "lineStart": 273,
+              "lineEnd": 281,
               "severity": [],
               "codeKeywords": [
                 "liquidityIndex",
@@ -4096,8 +4361,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 232,
-              "lineEnd": 273,
+              "lineStart": 282,
+              "lineEnd": 323,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -4109,11 +4374,11 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-precision-share-manipulatio-4-scaling-factor-precision-los-003",
+          "id": "general-defi-defihacklabs-precision-share-manipulatio-4-scaling-factor-precision-los-004",
           "title": "4. Scaling Factor Precision Loss in StableMath",
-          "lineStart": 274,
-          "lineEnd": 329,
-          "lineCount": 56,
+          "lineStart": 324,
+          "lineEnd": 381,
+          "lineCount": 58,
           "severity": [
             "CRITICAL"
           ],
@@ -4124,15 +4389,15 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 280,
-              "lineEnd": 286,
+              "lineStart": 332,
+              "lineEnd": 338,
               "severity": [],
               "codeKeywords": []
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 287,
-              "lineEnd": 329,
+              "lineStart": 339,
+              "lineEnd": 381,
               "severity": [
                 "CRITICAL"
               ],
@@ -4141,24 +4406,25 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-precision-share-manipulatio-5-share-price-inflation-via-di-004",
+          "id": "general-defi-defihacklabs-precision-share-manipulatio-5-share-price-inflation-via-di-005",
           "title": "5. Share Price Inflation via Direct Contract Donation",
-          "lineStart": 330,
-          "lineEnd": 412,
-          "lineCount": 83,
+          "lineStart": 382,
+          "lineEnd": 466,
+          "lineCount": 85,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
+            "atomic",
             "totalAssets"
           ],
           "rootCause": "When vault or lending protocols use `totalAssets() / totalShares()` for share pricing and rely on the contract's token balance for `totalAssets()`, an attacker can donate tokens directly to the underl",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 336,
-              "lineEnd": 412,
+              "lineStart": 390,
+              "lineEnd": 466,
               "severity": [
                 "CRITICAL"
               ],
@@ -4167,11 +4433,11 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-precision-share-manipulatio-6-virtual-balance-math-manipul-005",
+          "id": "general-defi-defihacklabs-precision-share-manipulatio-6-virtual-balance-math-manipul-006",
           "title": "6. Virtual Balance Math Manipulation",
-          "lineStart": 413,
-          "lineEnd": 454,
-          "lineCount": 42,
+          "lineStart": 467,
+          "lineEnd": 510,
+          "lineCount": 44,
           "severity": [
             "CRITICAL",
             "MEDIUM"
@@ -4184,8 +4450,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 419,
-              "lineEnd": 454,
+              "lineStart": 475,
+              "lineEnd": 510,
               "severity": [
                 "CRITICAL",
                 "MEDIUM"
@@ -4195,10 +4461,10 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-precision-share-manipulatio-impact-analysis-006",
+          "id": "general-defi-defihacklabs-precision-share-manipulatio-impact-analysis-007",
           "title": "Impact Analysis",
-          "lineStart": 455,
-          "lineEnd": 487,
+          "lineStart": 511,
+          "lineEnd": 543,
           "lineCount": 33,
           "severity": [
             "LOW"
@@ -4210,10 +4476,10 @@
           "subsections": null
         },
         {
-          "id": "general-defi-defihacklabs-precision-share-manipulatio-secure-implementation-007",
+          "id": "general-defi-defihacklabs-precision-share-manipulatio-secure-implementation-008",
           "title": "Secure Implementation",
-          "lineStart": 488,
-          "lineEnd": 557,
+          "lineStart": 544,
+          "lineEnd": 613,
           "lineCount": 70,
           "severity": [
             "LOW"
@@ -4228,10 +4494,10 @@
           "subsections": null
         },
         {
-          "id": "general-defi-defihacklabs-precision-share-manipulatio-detection-patterns-008",
+          "id": "general-defi-defihacklabs-precision-share-manipulatio-detection-patterns-009",
           "title": "Detection Patterns",
-          "lineStart": 558,
-          "lineEnd": 583,
+          "lineStart": 614,
+          "lineEnd": 639,
           "lineCount": 26,
           "severity": [],
           "codeKeywords": [
@@ -4245,10 +4511,10 @@
           "subsections": null
         },
         {
-          "id": "general-defi-defihacklabs-precision-share-manipulatio-real-world-examples-009",
+          "id": "general-defi-defihacklabs-precision-share-manipulatio-real-world-examples-010",
           "title": "Real-World Examples",
-          "lineStart": 584,
-          "lineEnd": 598,
+          "lineStart": 640,
+          "lineEnd": 654,
           "lineCount": 15,
           "severity": [],
           "codeKeywords": [],
@@ -4804,12 +5070,15 @@
     },
     {
       "file": "DB/general/calculation/defihacklabs-reward-calculation-2022-patterns.md",
-      "totalLines": 483,
+      "totalLines": 554,
       "frontmatter": {
         "protocol": "Multi-Protocol",
         "chain": "Ethereum, BSC",
         "category": "calculation",
         "vulnerability_type": "Reward and Fee Calculation Flaws",
+        "root_cause_family": "arithmetic_invariant_break",
+        "pattern_key": "Reward and Fee Calculation Flaws |  |  | Reward inflation, LP pair drain, airdrop multiplication",
+        "interaction_scope": "single_contract",
         "source": "DeFiHackLabs",
         "total_exploits_analyzed": "6",
         "total_losses": "\"$1.5M+\"",
@@ -4823,24 +5092,40 @@
         {
           "id": "general-defi-defihacklabs-reward-calculation-2022-pat-overview-000",
           "title": "Overview",
-          "lineStart": 55,
-          "lineEnd": 68,
-          "lineCount": 14,
+          "lineStart": 101,
+          "lineEnd": 127,
+          "lineCount": 27,
           "severity": [
+            "HIGH",
             "LOW"
           ],
           "codeKeywords": [
             "_spendAllowance",
-            "claimStakeLp"
+            "arithmetic_invariant_break",
+            "claimStakeLp",
+            "single_contract"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 116,
+              "lineEnd": 127,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "arithmetic_invariant_break",
+                "single_contract"
+              ]
+            }
+          ]
         },
         {
           "id": "general-defi-defihacklabs-reward-calculation-2022-pat-vulnerability-description-001",
           "title": "Vulnerability Description",
-          "lineStart": 69,
-          "lineEnd": 82,
+          "lineStart": 128,
+          "lineEnd": 141,
           "lineCount": 14,
           "severity": [
             "LOW"
@@ -4853,8 +5138,8 @@
           "subsections": [
             {
               "title": "Root Cause Analysis",
-              "lineStart": 71,
-              "lineEnd": 82,
+              "lineStart": 130,
+              "lineEnd": 141,
               "severity": [
                 "LOW"
               ],
@@ -4868,14 +5153,15 @@
         {
           "id": "general-defi-defihacklabs-reward-calculation-2022-pat-vulnerable-pattern-examples-002",
           "title": "Vulnerable Pattern Examples",
-          "lineStart": 83,
-          "lineEnd": 312,
-          "lineCount": 230,
+          "lineStart": 142,
+          "lineEnd": 383,
+          "lineCount": 242,
           "severity": [
             "HIGH"
           ],
           "codeKeywords": [
             "airDropReward",
+            "atomic",
             "claim",
             "claimStakeLp",
             "distributeAirdrop",
@@ -4887,8 +5173,8 @@
           "subsections": [
             {
               "title": "Pattern 1: Mass Contract Deployment Reward Farming",
-              "lineStart": 85,
-              "lineEnd": 134,
+              "lineStart": 144,
+              "lineEnd": 195,
               "severity": [
                 "HIGH"
               ],
@@ -4900,46 +5186,49 @@
             },
             {
               "title": "Pattern 2: Airdrop Recycling via LP Transfer",
-              "lineStart": 135,
-              "lineEnd": 171,
+              "lineStart": 196,
+              "lineEnd": 234,
               "severity": [
                 "HIGH"
               ],
               "codeKeywords": [
                 "airDropReward",
+                "atomic",
                 "distributeAirdrop",
                 "exploit"
               ]
             },
             {
               "title": "Pattern 3: Multiple Claim Without Cooldown",
-              "lineStart": 172,
-              "lineEnd": 205,
+              "lineStart": 235,
+              "lineEnd": 270,
               "severity": [
                 "HIGH"
               ],
               "codeKeywords": [
+                "atomic",
                 "claimStakeLp",
                 "testExploit"
               ]
             },
             {
               "title": "Pattern 4: Zero-Value Transfer Burns Tokens From LP Pair",
-              "lineStart": 206,
-              "lineEnd": 241,
+              "lineStart": 271,
+              "lineEnd": 308,
               "severity": [
                 "HIGH"
               ],
               "codeKeywords": [
                 "DPPFlashLoanCall",
                 "_transfer",
+                "atomic",
                 "testExploit"
               ]
             },
             {
               "title": "Pattern 5: Reflection Token Allowance Bypass",
-              "lineStart": 242,
-              "lineEnd": 276,
+              "lineStart": 309,
+              "lineEnd": 345,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -4948,14 +5237,15 @@
                 "_getReflectedAmount",
                 "_getStandardAmount",
                 "_spendAllowance",
+                "atomic",
                 "testExploit",
                 "transferFrom"
               ]
             },
             {
               "title": "Pattern 6: Skim Loop Fee Amplification Across Multiple Pairs",
-              "lineStart": 277,
-              "lineEnd": 312,
+              "lineStart": 346,
+              "lineEnd": 383,
               "severity": [
                 "CRITICAL"
               ],
@@ -4969,8 +5259,8 @@
         {
           "id": "general-defi-defihacklabs-reward-calculation-2022-pat-impact-analysis-003",
           "title": "Impact Analysis",
-          "lineStart": 313,
-          "lineEnd": 327,
+          "lineStart": 384,
+          "lineEnd": 398,
           "lineCount": 15,
           "severity": [
             "LOW"
@@ -4982,8 +5272,8 @@
         {
           "id": "general-defi-defihacklabs-reward-calculation-2022-pat-secure-implementation-004",
           "title": "Secure Implementation",
-          "lineStart": 328,
-          "lineEnd": 418,
+          "lineStart": 399,
+          "lineEnd": 489,
           "lineCount": 91,
           "severity": [],
           "codeKeywords": [
@@ -4996,8 +5286,8 @@
           "subsections": [
             {
               "title": "Fix 1: Per-Address Claim Tracking",
-              "lineStart": 330,
-              "lineEnd": 356,
+              "lineStart": 401,
+              "lineEnd": 427,
               "severity": [],
               "codeKeywords": [
                 "distributeAirdrop"
@@ -5005,8 +5295,8 @@
             },
             {
               "title": "Fix 2: Staking Claim with Deduction",
-              "lineStart": 357,
-              "lineEnd": 376,
+              "lineStart": 428,
+              "lineEnd": 447,
               "severity": [],
               "codeKeywords": [
                 "claimStakeLp"
@@ -5014,8 +5304,8 @@
             },
             {
               "title": "Fix 3: Safe Transfer Logic (No Pair Side Effects)",
-              "lineStart": 377,
-              "lineEnd": 401,
+              "lineStart": 448,
+              "lineEnd": 472,
               "severity": [],
               "codeKeywords": [
                 "_transfer"
@@ -5023,8 +5313,8 @@
             },
             {
               "title": "Fix 4: Correct Reflection Amount Conversion",
-              "lineStart": 402,
-              "lineEnd": 418,
+              "lineStart": 473,
+              "lineEnd": 489,
               "severity": [
                 "LOW"
               ],
@@ -5037,8 +5327,8 @@
         {
           "id": "general-defi-defihacklabs-reward-calculation-2022-pat-detection-patterns-005",
           "title": "Detection Patterns",
-          "lineStart": 419,
-          "lineEnd": 455,
+          "lineStart": 490,
+          "lineEnd": 526,
           "lineCount": 37,
           "severity": [
             "LOW"
@@ -5048,8 +5338,8 @@
           "subsections": [
             {
               "title": "Static Analysis",
-              "lineStart": 421,
-              "lineEnd": 442,
+              "lineStart": 492,
+              "lineEnd": 513,
               "severity": [
                 "LOW"
               ],
@@ -5057,8 +5347,8 @@
             },
             {
               "title": "Invariant Checks",
-              "lineStart": 443,
-              "lineEnd": 455,
+              "lineStart": 514,
+              "lineEnd": 526,
               "severity": [
                 "LOW"
               ],
@@ -5069,8 +5359,8 @@
         {
           "id": "general-defi-defihacklabs-reward-calculation-2022-pat-audit-checklist-006",
           "title": "Audit Checklist",
-          "lineStart": 456,
-          "lineEnd": 467,
+          "lineStart": 527,
+          "lineEnd": 538,
           "lineCount": 12,
           "severity": [
             "LOW"
@@ -5085,8 +5375,8 @@
         {
           "id": "general-defi-defihacklabs-reward-calculation-2022-pat-real-world-examples-007",
           "title": "Real-World Examples",
-          "lineStart": 468,
-          "lineEnd": 480,
+          "lineStart": 539,
+          "lineEnd": 551,
           "lineCount": 13,
           "severity": [],
           "codeKeywords": [],
@@ -5527,12 +5817,15 @@
     },
     {
       "file": "DB/general/integer-overflow/defihacklabs-overflow-patterns.md",
-      "totalLines": 319,
+      "totalLines": 364,
       "frontmatter": {
         "protocol": "generic",
         "chain": "ethereum",
         "category": "integer_overflow",
         "vulnerability_type": "arithmetic_overflow",
+        "root_cause_family": "arithmetic_invariant_break",
+        "pattern_key": "arithmetic_overflow | token_transfer | integer_overflow_underflow | fund_loss, token_minting",
+        "interaction_scope": "single_contract",
         "attack_type": "integer_overflow_underflow",
         "affected_component": "token_transfer, batch_transfer",
         "severity": "critical",
@@ -5543,61 +5836,112 @@
         "total_exploits_analyzed": "2",
         "total_losses": "\"$140M+ confirmed\""
       },
-      "patternCount": 1,
+      "patternCount": 5,
       "patterns": [
         {
-          "id": "general-defi-defihacklabs-overflow-patterns-defihacklabs-integer-overflow--000",
-          "title": "DeFiHackLabs Integer Overflow Exploit Patterns",
-          "lineStart": 38,
-          "lineEnd": 268,
-          "lineCount": 231,
+          "id": "general-defi-defihacklabs-overflow-patterns-agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 74,
+          "lineEnd": 85,
+          "lineCount": 12,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "arithmetic_invariant_break",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-defihacklabs-overflow-patterns-root-cause-001",
+          "title": "Root Cause",
+          "lineStart": 86,
+          "lineEnd": 95,
+          "lineCount": 10,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "require"
+          ],
+          "rootCause": "In Solidity < 0.8.0, arithmetic operations silently overflow/underflow:\n\n- `uint256(2) - uint256(3) = 2^256 - 1` (underflow → max value)\n\n- `uint256(2^255) * 2 = 0` (overflow → wraps to zero)\n\n\n\nIf a ",
+          "subsections": null
+        },
+        {
+          "id": "general-defi-defihacklabs-overflow-patterns-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 96,
+          "lineEnd": 206,
+          "lineCount": 111,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
             "_value",
+            "atomic",
             "batchTransfer",
-            "require",
             "transferProxy"
           ],
-          "rootCause": "In Solidity < 0.8.0, arithmetic operations silently overflow/underflow:\n\n- `uint256(2) - uint256(3) = 2^256 - 1` (underflow → max value)\n\n- `uint256(2^255) * 2 = 0` (overflow → wraps to zero)\n\n\n\nIf a ",
+          "rootCause": "batchTransfer has unchecked multiplication overflow",
           "subsections": [
             {
-              "title": "Root Cause",
-              "lineStart": 44,
-              "lineEnd": 53,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": [
-                "require"
-              ]
-            },
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 54,
-              "lineEnd": 160,
+              "title": "Pattern 1: batchTransfer Overflow [CRITICAL]",
+              "lineStart": 98,
+              "lineEnd": 152,
               "severity": [
                 "CRITICAL",
                 "LOW"
               ],
               "codeKeywords": [
                 "_value",
-                "batchTransfer",
-                "transferProxy"
+                "atomic",
+                "batchTransfer"
               ]
             },
             {
-              "title": "General Overflow Pattern",
-              "lineStart": 161,
-              "lineEnd": 184,
+              "title": "Pattern 2: transferProxy Overflow [CRITICAL]",
+              "lineStart": 153,
+              "lineEnd": 206,
               "severity": [
+                "CRITICAL",
                 "LOW"
               ],
-              "codeKeywords": []
+              "codeKeywords": [
+                "atomic",
+                "transferProxy"
+              ]
             }
           ]
+        },
+        {
+          "id": "general-defi-defihacklabs-overflow-patterns-general-overflow-pattern-003",
+          "title": "General Overflow Pattern",
+          "lineStart": 207,
+          "lineEnd": 230,
+          "lineCount": 24,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": "ANY of these patterns in Solidity < 0.8.0",
+          "subsections": null
+        },
+        {
+          "id": "general-defi-defihacklabs-overflow-patterns-keywords-004",
+          "title": "Keywords",
+          "lineStart": 344,
+          "lineEnd": 360,
+          "lineCount": 17,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
@@ -6384,12 +6728,15 @@
     },
     {
       "file": "DB/general/business-logic/defihacklabs-business-logic-2023-patterns.md",
-      "totalLines": 675,
+      "totalLines": 735,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, arbitrum, bsc, polygon\"",
         "category": "\"business_logic\"",
         "vulnerability_type": "\"donate_self_liquidation, duplicate_array_claim, emergency_withdraw_logic, liquidity_calculation_error, unprotected_burn_transfer, convertDust_manipulation\"",
+        "root_cause_family": "stale_accounting",
+        "pattern_key": "donate_self_liquidation | lending_protocol | logical_error | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "\"logical_error\"",
         "affected_component": "\"lending_protocol, referral_system, staking_pool, amm_liquidity, token_pair, yield_strategy\"",
         "severity": "\"critical\"",
@@ -6402,19 +6749,49 @@
         "total_exploits_analyzed": "9",
         "total_losses": "\"$268M+\""
       },
-      "patternCount": 13,
+      "patternCount": 14,
       "patterns": [
         {
-          "id": "general-defi-defihacklabs-business-logic-2023-pattern-1-donate-to-reserves-self-liqu-000",
+          "id": "general-defi-defihacklabs-business-logic-2023-pattern-overview-000",
+          "title": "Overview",
+          "lineStart": 119,
+          "lineEnd": 137,
+          "lineCount": 19,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "single_contract",
+            "stale_accounting"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 126,
+              "lineEnd": 137,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "single_contract",
+                "stale_accounting"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-defihacklabs-business-logic-2023-pattern-1-donate-to-reserves-self-liqu-001",
           "title": "1. Donate-to-Reserves Self-Liquidation (Euler $200M)",
-          "lineStart": 94,
-          "lineEnd": 169,
-          "lineCount": 76,
+          "lineStart": 138,
+          "lineEnd": 215,
+          "lineCount": 78,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
+            "atomic",
             "donateToReserves",
             "liquidate",
             "liquidator",
@@ -6425,8 +6802,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 100,
-              "lineEnd": 112,
+              "lineStart": 146,
+              "lineEnd": 158,
               "severity": [
                 "LOW"
               ],
@@ -6440,8 +6817,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 113,
-              "lineEnd": 169,
+              "lineStart": 159,
+              "lineEnd": 215,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -6454,11 +6831,11 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2023-pattern-2-tick-boundary-precision-erro-001",
+          "id": "general-defi-defihacklabs-business-logic-2023-pattern-2-tick-boundary-precision-erro-002",
           "title": "2. Tick Boundary Precision Error (KyberSwap $48M)",
-          "lineStart": 170,
-          "lineEnd": 249,
-          "lineCount": 80,
+          "lineStart": 216,
+          "lineEnd": 297,
+          "lineCount": 82,
           "severity": [
             "CRITICAL"
           ],
@@ -6471,8 +6848,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 176,
-              "lineEnd": 185,
+              "lineStart": 224,
+              "lineEnd": 233,
               "severity": [],
               "codeKeywords": [
                 "computeSwapStep",
@@ -6481,8 +6858,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 186,
-              "lineEnd": 249,
+              "lineStart": 234,
+              "lineEnd": 297,
               "severity": [
                 "CRITICAL"
               ],
@@ -6493,11 +6870,11 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2023-pattern-3-unprotected-burnfrom-transfe-002",
+          "id": "general-defi-defihacklabs-business-logic-2023-pattern-3-unprotected-burnfrom-transfe-003",
           "title": "3. Unprotected burnFrom + transferFrom (DEI $5.4M)",
-          "lineStart": 250,
-          "lineEnd": 292,
-          "lineCount": 43,
+          "lineStart": 298,
+          "lineEnd": 342,
+          "lineCount": 45,
           "severity": [
             "CRITICAL",
             "LOW"
@@ -6512,8 +6889,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 256,
-              "lineEnd": 292,
+              "lineStart": 306,
+              "lineEnd": 342,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -6525,17 +6902,18 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2023-pattern-4-duplicate-array-elements-in--003",
+          "id": "general-defi-defihacklabs-business-logic-2023-pattern-4-duplicate-array-elements-in--004",
           "title": "4. Duplicate Array Elements in Reward Claiming (Level $1M)",
-          "lineStart": 293,
-          "lineEnd": 352,
-          "lineCount": 60,
+          "lineStart": 343,
+          "lineEnd": 404,
+          "lineCount": 62,
           "severity": [
             "CRITICAL"
           ],
           "codeKeywords": [
             "DPPFlashLoanCall",
             "LevelReferralControllerV2.claimMultiple",
+            "atomic",
             "claimMultiple",
             "claimReward"
           ],
@@ -6543,8 +6921,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 299,
-              "lineEnd": 306,
+              "lineStart": 351,
+              "lineEnd": 358,
               "severity": [],
               "codeKeywords": [
                 "claimMultiple"
@@ -6552,8 +6930,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 307,
-              "lineEnd": 352,
+              "lineStart": 359,
+              "lineEnd": 404,
               "severity": [
                 "CRITICAL"
               ],
@@ -6565,11 +6943,11 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2023-pattern-5-emergency-withdraw-without-n-004",
+          "id": "general-defi-defihacklabs-business-logic-2023-pattern-5-emergency-withdraw-without-n-005",
           "title": "5. Emergency Withdraw Without NFT Unstake (BNO $505K)",
-          "lineStart": 353,
-          "lineEnd": 408,
-          "lineCount": 56,
+          "lineStart": 405,
+          "lineEnd": 462,
+          "lineCount": 58,
           "severity": [
             "HIGH"
           ],
@@ -6583,8 +6961,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 359,
-              "lineEnd": 408,
+              "lineStart": 413,
+              "lineEnd": 462,
               "severity": [
                 "HIGH"
               ],
@@ -6596,24 +6974,25 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2023-pattern-6-flash-loan-liquidity-manipul-005",
+          "id": "general-defi-defihacklabs-business-logic-2023-pattern-6-flash-loan-liquidity-manipul-006",
           "title": "6. Flash Loan Liquidity Manipulation (Palmswap $900K)",
-          "lineStart": 409,
-          "lineEnd": 458,
-          "lineCount": 50,
+          "lineStart": 463,
+          "lineEnd": 514,
+          "lineCount": 52,
           "severity": [
             "HIGH",
             "LOW"
           ],
           "codeKeywords": [
+            "atomic",
             "executeOperation"
           ],
           "rootCause": "Palmswap's liquidity event contract allowed users to purchase PLP tokens at a 1:1 ratio with USDP, but the withdrawal ratio was calculated based on the pool's current USDP reserves. By depositing a la",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 415,
-              "lineEnd": 458,
+              "lineStart": 471,
+              "lineEnd": 514,
               "severity": [
                 "HIGH"
               ],
@@ -6624,16 +7003,17 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2023-pattern-7-convertdusttoearned-price-ma-006",
+          "id": "general-defi-defihacklabs-business-logic-2023-pattern-7-convertdusttoearned-price-ma-007",
           "title": "7. convertDustToEarned Price Manipulation (BEARNDAO $769K)",
-          "lineStart": 459,
-          "lineEnd": 501,
-          "lineCount": 43,
+          "lineStart": 515,
+          "lineEnd": 559,
+          "lineCount": 45,
           "severity": [
             "HIGH",
             "LOW"
           ],
           "codeKeywords": [
+            "atomic",
             "convertDustToEarned",
             "pancakeCall"
           ],
@@ -6641,8 +7021,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 465,
-              "lineEnd": 501,
+              "lineStart": 523,
+              "lineEnd": 559,
               "severity": [
                 "HIGH",
                 "LOW"
@@ -6654,24 +7034,25 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2023-pattern-8-flash-loan-bad-debt-creation-007",
+          "id": "general-defi-defihacklabs-business-logic-2023-pattern-8-flash-loan-bad-debt-creation-008",
           "title": "8. Flash Loan Bad Debt Creation (Platypus $10.5M Total, 3 Exploits)",
-          "lineStart": 502,
-          "lineEnd": 534,
-          "lineCount": 33,
+          "lineStart": 560,
+          "lineEnd": 594,
+          "lineCount": 35,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
+            "atomic",
             "emergencyWithdraw"
           ],
           "rootCause": "Platypus Finance's lending system allowed users to borrow the protocol's stablecoin (USP) against staked LP tokens. The protocol did not properly account for flash-loan-inflated positions during the b",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 508,
-              "lineEnd": 534,
+              "lineStart": 568,
+              "lineEnd": 594,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -6681,10 +7062,10 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2023-pattern-secure-implementations-008",
+          "id": "general-defi-defihacklabs-business-logic-2023-pattern-secure-implementations-009",
           "title": "Secure Implementations",
-          "lineStart": 535,
-          "lineEnd": 590,
+          "lineStart": 595,
+          "lineEnd": 650,
           "lineCount": 56,
           "severity": [
             "CRITICAL"
@@ -6698,8 +7079,8 @@
           "subsections": [
             {
               "title": "Pattern 1: Donation with Solvency Check",
-              "lineStart": 537,
-              "lineEnd": 551,
+              "lineStart": 597,
+              "lineEnd": 611,
               "severity": [
                 "CRITICAL"
               ],
@@ -6709,8 +7090,8 @@
             },
             {
               "title": "Pattern 2: Deduplicated Batch Claims",
-              "lineStart": 552,
-              "lineEnd": 565,
+              "lineStart": 612,
+              "lineEnd": 625,
               "severity": [],
               "codeKeywords": [
                 "claimMultiple"
@@ -6718,8 +7099,8 @@
             },
             {
               "title": "Pattern 3: Synchronized Emergency Withdraw",
-              "lineStart": 566,
-              "lineEnd": 590,
+              "lineStart": 626,
+              "lineEnd": 650,
               "severity": [],
               "codeKeywords": [
                 "emergencyWithdraw"
@@ -6728,10 +7109,10 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2023-pattern-impact-analysis-009",
+          "id": "general-defi-defihacklabs-business-logic-2023-pattern-impact-analysis-010",
           "title": "Impact Analysis",
-          "lineStart": 591,
-          "lineEnd": 606,
+          "lineStart": 651,
+          "lineEnd": 666,
           "lineCount": 16,
           "severity": [
             "CRITICAL",
@@ -6742,10 +7123,10 @@
           "subsections": null
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2023-pattern-detection-patterns-010",
+          "id": "general-defi-defihacklabs-business-logic-2023-pattern-detection-patterns-011",
           "title": "Detection Patterns",
-          "lineStart": 607,
-          "lineEnd": 642,
+          "lineStart": 667,
+          "lineEnd": 702,
           "lineCount": 36,
           "severity": [],
           "codeKeywords": [],
@@ -6753,25 +7134,25 @@
           "subsections": [
             {
               "title": "Static Analysis",
-              "lineStart": 609,
-              "lineEnd": 623,
+              "lineStart": 669,
+              "lineEnd": 683,
               "severity": [],
               "codeKeywords": []
             },
             {
               "title": "Dynamic Testing",
-              "lineStart": 624,
-              "lineEnd": 642,
+              "lineStart": 684,
+              "lineEnd": 702,
               "severity": [],
               "codeKeywords": []
             }
           ]
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2023-pattern-audit-checklist-011",
+          "id": "general-defi-defihacklabs-business-logic-2023-pattern-audit-checklist-012",
           "title": "Audit Checklist",
-          "lineStart": 643,
-          "lineEnd": 656,
+          "lineStart": 703,
+          "lineEnd": 716,
           "lineCount": 14,
           "severity": [],
           "codeKeywords": [
@@ -6784,10 +7165,10 @@
           "subsections": null
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2023-pattern-real-world-examples-012",
+          "id": "general-defi-defihacklabs-business-logic-2023-pattern-real-world-examples-013",
           "title": "Real-World Examples",
-          "lineStart": 657,
-          "lineEnd": 672,
+          "lineStart": 717,
+          "lineEnd": 732,
           "lineCount": 16,
           "severity": [],
           "codeKeywords": [],
@@ -6798,12 +7179,15 @@
     },
     {
       "file": "DB/general/business-logic/defihacklabs-business-logic-2024-2025.md",
-      "totalLines": 387,
+      "totalLines": 434,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, arbitrum\"",
         "category": "\"business_logic\"",
         "vulnerability_type": "\"dangling_approval, repeated_withdrawal, uninitialized_proxy\"",
+        "root_cause_family": "stale_accounting",
+        "pattern_key": "dangling_approval | campaign_lifecycle | logical_error | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "\"logical_error\"",
         "affected_component": "\"campaign_lifecycle, tranche_state, proxy_initialization\"",
         "severity": "\"critical\"",
@@ -6813,14 +7197,44 @@
         "language": "\"solidity\"",
         "version": "\">=0.8.0\""
       },
-      "patternCount": 7,
+      "patternCount": 8,
       "patterns": [
         {
-          "id": "general-defi-defihacklabs-business-logic-2024-2025-1-dangling-approval-after-oper-000",
+          "id": "general-defi-defihacklabs-business-logic-2024-2025-overview-000",
+          "title": "Overview",
+          "lineStart": 90,
+          "lineEnd": 108,
+          "lineCount": 19,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "single_contract",
+            "stale_accounting"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 97,
+              "lineEnd": 108,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "single_contract",
+                "stale_accounting"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-defihacklabs-business-logic-2024-2025-1-dangling-approval-after-oper-001",
           "title": "1. Dangling Approval After Operation Cancellation",
-          "lineStart": 68,
-          "lineEnd": 124,
-          "lineCount": 57,
+          "lineStart": 109,
+          "lineEnd": 167,
+          "lineCount": 59,
           "severity": [
             "CRITICAL",
             "LOW"
@@ -6836,8 +7250,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 74,
-              "lineEnd": 82,
+              "lineStart": 117,
+              "lineEnd": 125,
               "severity": [],
               "codeKeywords": [
                 "cancelCampaign",
@@ -6846,8 +7260,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 83,
-              "lineEnd": 124,
+              "lineStart": 126,
+              "lineEnd": 167,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -6857,11 +7271,11 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2024-2025-2-repeated-withdrawal-without--001",
+          "id": "general-defi-defihacklabs-business-logic-2024-2025-2-repeated-withdrawal-without--002",
           "title": "2. Repeated Withdrawal Without State Invalidation",
-          "lineStart": 125,
-          "lineEnd": 174,
-          "lineCount": 50,
+          "lineStart": 168,
+          "lineEnd": 219,
+          "lineCount": 52,
           "severity": [
             "CRITICAL"
           ],
@@ -6874,8 +7288,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 131,
-              "lineEnd": 137,
+              "lineStart": 176,
+              "lineEnd": 182,
               "severity": [],
               "codeKeywords": [
                 "withdrawWithoutHedge(trancheID"
@@ -6883,8 +7297,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 138,
-              "lineEnd": 174,
+              "lineStart": 183,
+              "lineEnd": 219,
               "severity": [
                 "CRITICAL"
               ],
@@ -6896,11 +7310,11 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2024-2025-3-uninitialized-uups-proxy-tak-002",
+          "id": "general-defi-defihacklabs-business-logic-2024-2025-3-uninitialized-uups-proxy-tak-003",
           "title": "3. Uninitialized UUPS Proxy Takeover",
-          "lineStart": 175,
-          "lineEnd": 228,
-          "lineCount": 54,
+          "lineStart": 220,
+          "lineEnd": 275,
+          "lineCount": 56,
           "severity": [
             "CRITICAL"
           ],
@@ -6914,8 +7328,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 181,
-              "lineEnd": 188,
+              "lineStart": 228,
+              "lineEnd": 235,
               "severity": [],
               "codeKeywords": [
                 "initialize",
@@ -6924,8 +7338,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 189,
-              "lineEnd": 228,
+              "lineStart": 236,
+              "lineEnd": 275,
               "severity": [
                 "CRITICAL"
               ],
@@ -6937,10 +7351,10 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2024-2025-impact-analysis-003",
+          "id": "general-defi-defihacklabs-business-logic-2024-2025-impact-analysis-004",
           "title": "Impact Analysis",
-          "lineStart": 229,
-          "lineEnd": 252,
+          "lineStart": 276,
+          "lineEnd": 299,
           "lineCount": 24,
           "severity": [
             "LOW"
@@ -6950,10 +7364,10 @@
           "subsections": null
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2024-2025-secure-implementation-004",
+          "id": "general-defi-defihacklabs-business-logic-2024-2025-secure-implementation-005",
           "title": "Secure Implementation",
-          "lineStart": 253,
-          "lineEnd": 323,
+          "lineStart": 300,
+          "lineEnd": 370,
           "lineCount": 71,
           "severity": [
             "CRITICAL"
@@ -6968,10 +7382,10 @@
           "subsections": null
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2024-2025-detection-patterns-005",
+          "id": "general-defi-defihacklabs-business-logic-2024-2025-detection-patterns-006",
           "title": "Detection Patterns",
-          "lineStart": 324,
-          "lineEnd": 346,
+          "lineStart": 371,
+          "lineEnd": 393,
           "lineCount": 23,
           "severity": [
             "LOW"
@@ -6991,10 +7405,10 @@
           "subsections": null
         },
         {
-          "id": "general-defi-defihacklabs-business-logic-2024-2025-real-world-examples-006",
+          "id": "general-defi-defihacklabs-business-logic-2024-2025-real-world-examples-007",
           "title": "Real-World Examples",
-          "lineStart": 347,
-          "lineEnd": 355,
+          "lineStart": 394,
+          "lineEnd": 402,
           "lineCount": 9,
           "severity": [],
           "codeKeywords": [],
@@ -7005,12 +7419,15 @@
     },
     {
       "file": "DB/general/business-logic/defihacklabs-protocol-logic-flaws-2021-2022.md",
-      "totalLines": 704,
+      "totalLines": 785,
       "frontmatter": {
         "protocol": "Multi-Protocol",
         "chain": "Ethereum, BSC, Polygon, Fantom, Optimism",
         "category": "business_logic",
         "vulnerability_type": "Protocol Logic Flaws",
+        "root_cause_family": "stale_accounting",
+        "pattern_key": "Protocol Logic Flaws |  |  | Fund theft, permanent fund lock, full protocol drain",
+        "interaction_scope": "cross_protocol",
         "source": "DeFiHackLabs",
         "total_exploits_analyzed": "12",
         "total_losses": "\"$40M+\"",
@@ -7024,19 +7441,37 @@
         {
           "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-overview-000",
           "title": "Overview",
-          "lineStart": 55,
-          "lineEnd": 70,
-          "lineCount": 16,
-          "severity": [],
-          "codeKeywords": [],
+          "lineStart": 105,
+          "lineEnd": 133,
+          "lineCount": 29,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "cross_protocol",
+            "stale_accounting"
+          ],
           "rootCause": null,
-          "subsections": null
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 122,
+              "lineEnd": 133,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "cross_protocol",
+                "stale_accounting"
+              ]
+            }
+          ]
         },
         {
           "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-vulnerability-description-001",
           "title": "Vulnerability Description",
-          "lineStart": 71,
-          "lineEnd": 118,
+          "lineStart": 134,
+          "lineEnd": 181,
           "lineCount": 48,
           "severity": [
             "LOW",
@@ -7050,8 +7485,8 @@
           "subsections": [
             {
               "title": "Root Cause Analysis",
-              "lineStart": 73,
-              "lineEnd": 84,
+              "lineStart": 136,
+              "lineEnd": 147,
               "severity": [
                 "LOW",
                 "MEDIUM"
@@ -7063,8 +7498,8 @@
             },
             {
               "title": "Attack Scenarios",
-              "lineStart": 85,
-              "lineEnd": 118,
+              "lineStart": 148,
+              "lineEnd": 181,
               "severity": [],
               "codeKeywords": []
             }
@@ -7073,9 +7508,9 @@
         {
           "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-vulnerable-pattern-examples-002",
           "title": "Vulnerable Pattern Examples",
-          "lineStart": 119,
-          "lineEnd": 464,
-          "lineCount": 346,
+          "lineStart": 182,
+          "lineEnd": 545,
+          "lineCount": 364,
           "severity": [
             "CRITICAL"
           ],
@@ -7083,6 +7518,7 @@
             "XNFT.pledgeAndBorrow",
             "XToken",
             "_exploit",
+            "atomic",
             "dumpETH",
             "makePledge",
             "orderId",
@@ -7095,14 +7531,15 @@
           "subsections": [
             {
               "title": "Pattern 1: NFT Pledge Record Not Invalidated After Withdrawal",
-              "lineStart": 121,
-              "lineEnd": 166,
+              "lineStart": 184,
+              "lineEnd": 231,
               "severity": [
                 "CRITICAL"
               ],
               "codeKeywords": [
                 "XNFT.pledgeAndBorrow",
                 "XToken",
+                "atomic",
                 "dumpETH",
                 "makePledge",
                 "orderId",
@@ -7112,8 +7549,8 @@
             },
             {
               "title": "Pattern 2: Read-Only Reentrancy via Curve LP Pricing",
-              "lineStart": 167,
-              "lineEnd": 205,
+              "lineStart": 232,
+              "lineEnd": 272,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -7125,26 +7562,28 @@
             },
             {
               "title": "Pattern 3: Game Economics Abuse via Unrestricted Registration",
-              "lineStart": 206,
-              "lineEnd": 254,
+              "lineStart": 273,
+              "lineEnd": 323,
               "severity": [
                 "HIGH",
                 "LOW"
               ],
               "codeKeywords": [
+                "atomic",
                 "register",
                 "testExploit"
               ]
             },
             {
               "title": "Pattern 4: Decimal Miscalculation in Synthetic Minting",
-              "lineStart": 255,
-              "lineEnd": 282,
+              "lineStart": 324,
+              "lineEnd": 353,
               "severity": [
                 "CRITICAL"
               ],
               "codeKeywords": [
                 "_xftmOut",
+                "atomic",
                 "collect",
                 "pool.mint",
                 "testExploit"
@@ -7152,26 +7591,28 @@
             },
             {
               "title": "Pattern 5: Flash Loan Reward Price Manipulation",
-              "lineStart": 283,
-              "lineEnd": 318,
+              "lineStart": 354,
+              "lineEnd": 391,
               "severity": [
                 "CRITICAL"
               ],
               "codeKeywords": [
                 "BiswapCall",
+                "atomic",
                 "getReward"
               ]
             },
             {
               "title": "Pattern 6: Arbitrary External Call in Zap Contract",
-              "lineStart": 319,
-              "lineEnd": 359,
+              "lineStart": 392,
+              "lineEnd": 434,
               "severity": [
                 "HIGH",
                 "LOW"
               ],
               "codeKeywords": [
                 "approve",
+                "atomic",
                 "balanceOf",
                 "executeSwapAndDeposit",
                 "initiateDeposit",
@@ -7182,8 +7623,8 @@
             },
             {
               "title": "Pattern 7: Auction DoS via Reverting Fallback + Permanent Fund Lock",
-              "lineStart": 360,
-              "lineEnd": 401,
+              "lineStart": 435,
+              "lineEnd": 478,
               "severity": [
                 "CRITICAL"
               ],
@@ -7197,25 +7638,27 @@
             },
             {
               "title": "Pattern 8: Public Strategy Function Enables Sandwich Attack",
-              "lineStart": 402,
-              "lineEnd": 433,
+              "lineStart": 479,
+              "lineEnd": 512,
               "severity": [
                 "HIGH"
               ],
               "codeKeywords": [
                 "BvaultsStrategy.convertDustToEarned",
+                "atomic",
                 "testExploit"
               ]
             },
             {
               "title": "Pattern 9: Token Transfer Side-Effect Price Manipulation",
-              "lineStart": 434,
-              "lineEnd": 464,
+              "lineStart": 513,
+              "lineEnd": 545,
               "severity": [
                 "HIGH"
               ],
               "codeKeywords": [
                 "DPPFlashLoanCall",
+                "atomic",
                 "testExploit",
                 "transfer"
               ]
@@ -7225,8 +7668,8 @@
         {
           "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-impact-analysis-003",
           "title": "Impact Analysis",
-          "lineStart": 465,
-          "lineEnd": 485,
+          "lineStart": 546,
+          "lineEnd": 566,
           "lineCount": 21,
           "severity": [],
           "codeKeywords": [],
@@ -7236,8 +7679,8 @@
         {
           "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-secure-implementation-004",
           "title": "Secure Implementation",
-          "lineStart": 486,
-          "lineEnd": 621,
+          "lineStart": 567,
+          "lineEnd": 702,
           "lineCount": 136,
           "severity": [
             "LOW"
@@ -7255,8 +7698,8 @@
           "subsections": [
             {
               "title": "Fix 1: Invalidate State on Withdrawal (XCarnival Pattern)",
-              "lineStart": 488,
-              "lineEnd": 517,
+              "lineStart": 569,
+              "lineEnd": 598,
               "severity": [
                 "LOW"
               ],
@@ -7267,8 +7710,8 @@
             },
             {
               "title": "Fix 2: Use TWAP or Chainlink for Reward Pricing (Nmbplatform Pattern)",
-              "lineStart": 518,
-              "lineEnd": 545,
+              "lineStart": 599,
+              "lineEnd": 626,
               "severity": [],
               "codeKeywords": [
                 "getReward",
@@ -7277,8 +7720,8 @@
             },
             {
               "title": "Fix 3: Pull-Based Refunds (AkutarNFT Pattern)",
-              "lineStart": 546,
-              "lineEnd": 571,
+              "lineStart": 627,
+              "lineEnd": 652,
               "severity": [],
               "codeKeywords": [
                 "claimRefund",
@@ -7287,8 +7730,8 @@
             },
             {
               "title": "Fix 4: Restrict External Call Targets (Polynomial Pattern)",
-              "lineStart": 572,
-              "lineEnd": 600,
+              "lineStart": 653,
+              "lineEnd": 681,
               "severity": [
                 "LOW"
               ],
@@ -7298,8 +7741,8 @@
             },
             {
               "title": "Fix 5: Access Control for Strategy Functions (BDEX Pattern)",
-              "lineStart": 601,
-              "lineEnd": 621,
+              "lineStart": 682,
+              "lineEnd": 702,
               "severity": [],
               "codeKeywords": [
                 "convertDustToEarned"
@@ -7310,8 +7753,8 @@
         {
           "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-detection-patterns-005",
           "title": "Detection Patterns",
-          "lineStart": 622,
-          "lineEnd": 668,
+          "lineStart": 703,
+          "lineEnd": 749,
           "lineCount": 47,
           "severity": [],
           "codeKeywords": [],
@@ -7319,15 +7762,15 @@
           "subsections": [
             {
               "title": "Static Analysis",
-              "lineStart": 624,
-              "lineEnd": 651,
+              "lineStart": 705,
+              "lineEnd": 732,
               "severity": [],
               "codeKeywords": []
             },
             {
               "title": "Invariant Checks",
-              "lineStart": 652,
-              "lineEnd": 668,
+              "lineStart": 733,
+              "lineEnd": 749,
               "severity": [],
               "codeKeywords": []
             }
@@ -7336,8 +7779,8 @@
         {
           "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-audit-checklist-006",
           "title": "Audit Checklist",
-          "lineStart": 669,
-          "lineEnd": 683,
+          "lineStart": 750,
+          "lineEnd": 764,
           "lineCount": 15,
           "severity": [
             "MEDIUM"
@@ -7356,8 +7799,8 @@
         {
           "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-real-world-examples-007",
           "title": "Real-World Examples",
-          "lineStart": 684,
-          "lineEnd": 701,
+          "lineStart": 765,
+          "lineEnd": 782,
           "lineCount": 18,
           "severity": [],
           "codeKeywords": [],
@@ -7368,12 +7811,15 @@
     },
     {
       "file": "DB/general/business-logic/defihacklabs-share-accounting-patterns.md",
-      "totalLines": 456,
+      "totalLines": 525,
       "frontmatter": {
         "protocol": "generic",
         "chain": "ethereum, bsc",
         "category": "business_logic",
         "vulnerability_type": "share_fee_accounting_error",
+        "root_cause_family": "stale_accounting",
+        "pattern_key": "share_fee_accounting_error | share_accounting | accounting_manipulation | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "accounting_manipulation",
         "affected_component": "share_accounting, fee_distribution, balance_tracking",
         "severity": "critical",
@@ -7384,21 +7830,51 @@
         "total_exploits_analyzed": "6",
         "total_losses": "\"$35M+\""
       },
-      "patternCount": 1,
+      "patternCount": 4,
       "patterns": [
         {
-          "id": "general-defi-defihacklabs-share-accounting-patterns-defihacklabs-share-fee-account-000",
-          "title": "DeFiHackLabs Share & Fee Accounting Errors Compendium",
-          "lineStart": 40,
-          "lineEnd": 398,
-          "lineCount": 359,
+          "id": "general-defi-defihacklabs-share-accounting-patterns-agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 92,
+          "lineEnd": 103,
+          "lineCount": 12,
           "severity": [
-            "CRITICAL",
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "single_contract",
+            "stale_accounting"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-defihacklabs-share-accounting-patterns-root-cause-categories-001",
+          "title": "Root Cause Categories",
+          "lineStart": 104,
+          "lineEnd": 114,
+          "lineCount": 11,
+          "severity": [
             "LOW"
           ],
           "codeKeywords": [
+            "balanceOf"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-defihacklabs-share-accounting-patterns-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 115,
+          "lineEnd": 396,
+          "lineCount": 282,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
             "_transfer",
-            "balanceOf",
+            "atomic",
             "collectFees",
             "deposit",
             "emergencyBurn",
@@ -7409,45 +7885,117 @@
           "rootCause": "Sorbetto Fragola (concentrated liquidity optimizer)",
           "subsections": [
             {
-              "title": "Root Cause Categories",
-              "lineStart": 46,
-              "lineEnd": 56,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": [
-                "balanceOf"
-              ]
-            },
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 57,
-              "lineEnd": 326,
+              "title": "Category 1: Fee Not Reset on Transfer [CRITICAL]",
+              "lineStart": 117,
+              "lineEnd": 183,
               "severity": [
                 "CRITICAL"
               ],
               "codeKeywords": [
                 "_transfer",
+                "atomic",
                 "collectFees",
+                "exploit",
+                "userFeeDebt"
+              ]
+            },
+            {
+              "title": "Category 2: Emergency Withdraw Doesn't Burn Shares [HIGH]",
+              "lineStart": 184,
+              "lineEnd": 224,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "atomic",
                 "deposit",
                 "emergencyBurn",
-                "exploit",
-                "totalShares",
-                "userFeeDebt"
+                "totalShares"
+              ]
+            },
+            {
+              "title": "Category 3: Deposit/Withdraw Accounting Mismatch [CRITICAL]",
+              "lineStart": 225,
+              "lineEnd": 267,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "atomic",
+                "deposit",
+                "withdraw"
+              ]
+            },
+            {
+              "title": "Category 4: Donation-Inflated balanceOf() for Minting [HIGH]",
+              "lineStart": 268,
+              "lineEnd": 297,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "atomic",
+                "balanceOf(address(this",
+                "mintFor"
+              ]
+            },
+            {
+              "title": "Category 5: Stale Reward Accumulator [HIGH]",
+              "lineStart": 298,
+              "lineEnd": 339,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "accRewardsPerShare",
+                "atomic",
+                "claimRewards",
+                "deposit",
+                "pending"
+              ]
+            },
+            {
+              "title": "Category 6: Self-Transfer Balance Duplication [HIGH]",
+              "lineStart": 340,
+              "lineEnd": 396,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_internalTransferFrom",
+                "amount",
+                "atomic",
+                "from",
+                "transferFrom"
               ]
             }
           ]
+        },
+        {
+          "id": "general-defi-defihacklabs-share-accounting-patterns-keywords-003",
+          "title": "Keywords",
+          "lineStart": 504,
+          "lineEnd": 520,
+          "lineCount": 17,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
     {
       "file": "DB/general/business-logic/defihacklabs-solvency-business-logic-patterns.md",
-      "totalLines": 446,
+      "totalLines": 496,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, avalanche\"",
         "category": "\"logic\"",
         "vulnerability_type": "\"business_logic_error\"",
+        "root_cause_family": "stale_accounting",
+        "pattern_key": "business_logic_error | solvency_check | economic_exploit | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "\"economic_exploit\"",
         "affected_component": "\"solvency_check, swap_routing, balance_tracking\"",
         "severity": "\"critical\"",
@@ -7457,19 +8005,49 @@
         "language": "\"solidity\"",
         "version": "\">=0.8.0\""
       },
-      "patternCount": 8,
+      "patternCount": 9,
       "patterns": [
         {
-          "id": "general-defi-defihacklabs-solvency-business-logic-pat-1-missing-solvency-check-on-do-000",
+          "id": "general-defi-defihacklabs-solvency-business-logic-pat-overview-000",
+          "title": "Overview",
+          "lineStart": 86,
+          "lineEnd": 104,
+          "lineCount": 19,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "single_contract",
+            "stale_accounting"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 93,
+              "lineEnd": 104,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "single_contract",
+                "stale_accounting"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-defihacklabs-solvency-business-logic-pat-1-missing-solvency-check-on-do-001",
           "title": "1. Missing Solvency Check on Donation Functions",
-          "lineStart": 63,
-          "lineEnd": 127,
-          "lineCount": 65,
+          "lineStart": 105,
+          "lineEnd": 171,
+          "lineCount": 67,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
+            "atomic",
             "donateToReserves",
             "liquidate",
             "mint",
@@ -7479,8 +8057,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 69,
-              "lineEnd": 78,
+              "lineStart": 113,
+              "lineEnd": 122,
               "severity": [],
               "codeKeywords": [
                 "donateToReserves",
@@ -7490,8 +8068,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 79,
-              "lineEnd": 127,
+              "lineStart": 123,
+              "lineEnd": 171,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -7504,11 +8082,11 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-solvency-business-logic-pat-2-precision-loss-in-concentrat-001",
+          "id": "general-defi-defihacklabs-solvency-business-logic-pat-2-precision-loss-in-concentrat-002",
           "title": "2. Precision Loss in Concentrated Liquidity Tick Math",
-          "lineStart": 128,
-          "lineEnd": 190,
-          "lineCount": 63,
+          "lineStart": 172,
+          "lineEnd": 236,
+          "lineCount": 65,
           "severity": [
             "CRITICAL",
             "HIGH",
@@ -7521,8 +8099,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 134,
-              "lineEnd": 190,
+              "lineStart": 180,
+              "lineEnd": 236,
               "severity": [
                 "CRITICAL",
                 "HIGH"
@@ -7534,11 +8112,11 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-solvency-business-logic-pat-3-internal-vs-actual-balance-d-002",
+          "id": "general-defi-defihacklabs-solvency-business-logic-pat-3-internal-vs-actual-balance-d-003",
           "title": "3. Internal vs Actual Balance Divergence",
-          "lineStart": 191,
-          "lineEnd": 241,
-          "lineCount": 51,
+          "lineStart": 237,
+          "lineEnd": 289,
+          "lineCount": 53,
           "severity": [
             "HIGH",
             "LOW"
@@ -7555,8 +8133,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 197,
-              "lineEnd": 241,
+              "lineStart": 245,
+              "lineEnd": 289,
               "severity": [
                 "HIGH"
               ],
@@ -7565,15 +8143,16 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-solvency-business-logic-pat-4-unchecked-swap-router-callba-003",
+          "id": "general-defi-defihacklabs-solvency-business-logic-pat-4-unchecked-swap-router-callba-004",
           "title": "4. Unchecked Swap Router Callback Trust",
-          "lineStart": 242,
-          "lineEnd": 291,
-          "lineCount": 50,
+          "lineStart": 290,
+          "lineEnd": 341,
+          "lineCount": 52,
           "severity": [
             "CRITICAL"
           ],
           "codeKeywords": [
+            "atomic",
             "route",
             "swap",
             "uniswapV3SwapCallback"
@@ -7582,8 +8161,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 248,
-              "lineEnd": 291,
+              "lineStart": 298,
+              "lineEnd": 341,
               "severity": [
                 "CRITICAL"
               ],
@@ -7595,10 +8174,10 @@
           ]
         },
         {
-          "id": "general-defi-defihacklabs-solvency-business-logic-pat-impact-analysis-004",
+          "id": "general-defi-defihacklabs-solvency-business-logic-pat-impact-analysis-005",
           "title": "Impact Analysis",
-          "lineStart": 292,
-          "lineEnd": 314,
+          "lineStart": 342,
+          "lineEnd": 364,
           "lineCount": 23,
           "severity": [
             "CRITICAL",
@@ -7609,10 +8188,10 @@
           "subsections": null
         },
         {
-          "id": "general-defi-defihacklabs-solvency-business-logic-pat-secure-implementation-005",
+          "id": "general-defi-defihacklabs-solvency-business-logic-pat-secure-implementation-006",
           "title": "Secure Implementation",
-          "lineStart": 315,
-          "lineEnd": 376,
+          "lineStart": 365,
+          "lineEnd": 426,
           "lineCount": 62,
           "severity": [
             "CRITICAL"
@@ -7626,10 +8205,10 @@
           "subsections": null
         },
         {
-          "id": "general-defi-defihacklabs-solvency-business-logic-pat-detection-patterns-006",
+          "id": "general-defi-defihacklabs-solvency-business-logic-pat-detection-patterns-007",
           "title": "Detection Patterns",
-          "lineStart": 377,
-          "lineEnd": 401,
+          "lineStart": 427,
+          "lineEnd": 451,
           "lineCount": 25,
           "severity": [
             "LOW"
@@ -7642,10 +8221,10 @@
           "subsections": null
         },
         {
-          "id": "general-defi-defihacklabs-solvency-business-logic-pat-real-world-examples-007",
+          "id": "general-defi-defihacklabs-solvency-business-logic-pat-real-world-examples-008",
           "title": "Real-World Examples",
-          "lineStart": 402,
-          "lineEnd": 415,
+          "lineStart": 452,
+          "lineEnd": 465,
           "lineCount": 14,
           "severity": [],
           "codeKeywords": [],

@@ -3,6 +3,13 @@ protocol: Multi-Protocol
 chain: Ethereum, BSC
 category: calculation
 vulnerability_type: Reward and Fee Calculation Flaws
+
+# Pattern Identity (Required)
+root_cause_family: arithmetic_invariant_break
+pattern_key: Reward and Fee Calculation Flaws |  |  | Reward inflation, LP pair drain, airdrop multiplication
+
+# Interaction Scope
+interaction_scope: single_contract
 attack_type:
   - Mass contract deployment reward farming
   - Airdrop recycling via LP transfer
@@ -31,6 +38,31 @@ severity: HIGH
 impact: Reward inflation, LP pair drain, airdrop multiplication
 exploitability: Medium to High
 financial_impact: "$1.5M+ aggregate"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "skim"
+  - "claim"
+  - "exploit"
+  - "_transfer"
+  - "pancakeCall"
+  - "testExploit"
+  - "claimStakeLp"
+  - "transferFrom"
+  - "airDropReward"
+  - "_spendAllowance"
+  - "DPPFlashLoanCall"
+  - "distributeAirdrop"
+  - "updateUserBalance"
+  - "_getStandardAmount"
+  - "_getReflectedAmount"
+path_keys:
+  - "mass_contract_deployment_reward_farming"
+  - "airdrop_recycling_via_lp_transfer"
+  - "multiple_claim_without_cooldown"
+  - "zero_value_transfer_burns_tokens_from_lp_pair"
+  - "reflection_token_allowance_bypass"
+  - "skim_loop_fee_amplification_across_multiple_pairs"
 tags:
   - defihacklabs
   - reward-calculation
@@ -52,6 +84,20 @@ tags:
 
 # DeFiHackLabs Reward & Fee Calculation Flaw Patterns (2022)
 
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [DPC-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-09/DPC_exp.sol` |
+| [HEALTH-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/HEALTH_exp.sol` |
+| [RL-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/RL_exp.sol` |
+| [SNOOD-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-06/Snood_exp.sol` |
+| [VTF-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/VTF_exp.sol` |
+| [ZEED-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-04/Zeed_exp.sol` |
+
+---
+
+
 ## Overview
 
 This entry catalogs 6 reward and fee calculation exploits from 2022 sourced from [DeFiHackLabs](https://github.com/SunWeb3Sec/DeFiHackLabs). These represent bugs in token-level reward mechanisms, airdrop distribution, staking claims, and reflection/fee-on-transfer accounting.
@@ -65,6 +111,19 @@ This entry catalogs 6 reward and fee calculation exploits from 2022 sourced from
 6. **Skim Loop Fee Amplification** — Fee token excess amplified across 3 pairs (Zeed/YEED)
 
 ---
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `arithmetic_invariant_break` |
+| Pattern Key | `Reward and Fee Calculation Flaws |  |  | Reward inflation, LP pair drain, airdrop multiplication` |
+| Severity | HIGH |
+| Impact | Reward inflation, LP pair drain, airdrop multiplication |
+| Interaction Scope | `single_contract` |
+| Chain(s) | Ethereum, BSC |
+
 
 ## Vulnerability Description
 
@@ -83,6 +142,8 @@ Reward and fee calculation flaws arise from:
 ## Vulnerable Pattern Examples
 
 ### Pattern 1: Mass Contract Deployment Reward Farming
+
+> **pathShape**: `callback-reentrant`
 
 **Severity**: 🟠 HIGH | **Loss**: ~$50K | **Protocol**: VTF Token | **Chain**: BSC
 
@@ -134,6 +195,8 @@ function testExploit() public {
 
 ### Pattern 2: Airdrop Recycling via LP Transfer
 
+> **pathShape**: `atomic`
+
 **Severity**: 🟠 HIGH | **Loss**: RL tokens | **Protocol**: RL Token | **Chain**: BSC
 
 The `distributeAirdrop()` function distributes rewards based on LP token balance without tracking prior claims. By transferring LP to 100 pre-deployed contracts and calling `distributeAirdrop` from each, the same LP tokens claim rewards 100 times.
@@ -171,6 +234,8 @@ function exploit() internal {
 
 ### Pattern 3: Multiple Claim Without Cooldown
 
+> **pathShape**: `atomic`
+
 **Severity**: 🟠 HIGH | **Loss**: $103,755 | **Protocol**: DPC Token | **Chain**: BSC
 
 The `claimStakeLp()` function has no per-user cooldown or single-claim flag. After staking LP and waiting 24 hours, the attacker calls `claimStakeLp` 9 times consecutively in the same transaction, draining the staking rewards pool.
@@ -204,6 +269,8 @@ function testExploit() public {
 ---
 
 ### Pattern 4: Zero-Value Transfer Burns Tokens From LP Pair
+
+> **pathShape**: `atomic`
 
 **Severity**: 🟠 HIGH | **Loss**: ~16.64 BNB | **Protocol**: HEALTH Token | **Chain**: BSC
 
@@ -241,6 +308,8 @@ function DPPFlashLoanCall(address, uint256, uint256, bytes calldata) external {
 
 ### Pattern 5: Reflection Token Allowance Bypass
 
+> **pathShape**: `atomic`
+
 **Severity**: 🔴 CRITICAL | **Loss**: 104 ETH | **Protocol**: SNOOD Token | **Chain**: Ethereum
 
 SNOOD uses a reflection mechanism but its `_spendAllowance` function incorrectly uses `_getStandardAmount` instead of `_getReflectedAmount`. This allows calling `transferFrom` on the Uniswap pair without proper allowance verification, draining the pair's SNOOD tokens.
@@ -275,6 +344,8 @@ function testExploit() public {
 ---
 
 ### Pattern 6: Skim Loop Fee Amplification Across Multiple Pairs
+
+> **pathShape**: `iterative-loop`
 
 **Severity**: 🔴 CRITICAL | **Loss**: ~$1M | **Protocol**: Zeed Finance (YEED) | **Chain**: BSC
 

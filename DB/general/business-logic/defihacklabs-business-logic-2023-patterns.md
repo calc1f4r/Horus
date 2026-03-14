@@ -5,6 +5,13 @@ chain: "ethereum, arbitrum, bsc, polygon"
 category: "business_logic"
 vulnerability_type: "donate_self_liquidation, duplicate_array_claim, emergency_withdraw_logic, liquidity_calculation_error, unprotected_burn_transfer, convertDust_manipulation"
 
+# Pattern Identity (Required)
+root_cause_family: stale_accounting
+pattern_key: donate_self_liquidation | lending_protocol | logical_error | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 # Attack Vector Details
 attack_type: "logical_error"
 affected_component: "lending_protocol, referral_system, staking_pool, amm_liquidity, token_pair, yield_strategy"
@@ -29,6 +36,31 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.85
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "mint"
+  - "sqrtP"
+  - "_approve"
+  - "burnFrom"
+  - "violator"
+  - "liquidate"
+  - "liquidator"
+  - "unstakeNft"
+  - "claimReward"
+  - "pancakeCall"
+  - "testExploit"
+  - "transferFrom"
+  - "claimMultiple"
+  - "_flashCallback"
+  - "computeSwapStep"
+path_keys:
+  - "donate_to_reserves_self_liquidation_euler_200m"
+  - "tick_boundary_precision_error_kyberswap_48m"
+  - "unprotected_burnfrom_transferfrom_dei_5_4m"
+  - "duplicate_array_elements_in_reward_claiming_level_1m"
+  - "emergency_withdraw_without_nft_unstake_bno_505k"
+  - "flash_loan_liquidity_manipulation_palmswap_900k"
 
 # Context Tags
 tags:
@@ -84,14 +116,28 @@ total_losses: "$268M+"
 ---
 
 # Business Logic Attack Patterns (2023)
-
 ## Overview
 
 2023 saw increasingly sophisticated business logic exploits targeting fundamental protocol design flaws rather than simple coding errors. The year's biggest exploit — Euler Finance ($200M) — demonstrated a novel donate-to-reserves + self-liquidation attack that bypassed all solvency checks. KyberSwap ($48M) exploited a tick boundary precision error in concentrated liquidity calculations. Smaller but systemic patterns included duplicate array element abuse (Level $1M), unprotected burn/transfer functions (DEI $5.4M), emergency withdraw logic flaws (BNO $505K), and flash-loan-driven liquidity manipulation (Palmswap $900K, Platypus $10.5M total across 3 exploits). Combined 2023 business logic losses exceed **$268M**.
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `stale_accounting` |
+| Pattern Key | `donate_self_liquidation | lending_protocol | logical_error | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, arbitrum, bsc, polygon |
+
+
 ## 1. Donate-to-Reserves Self-Liquidation (Euler $200M)
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -168,6 +214,8 @@ contract Iliquidator {
 ---
 
 ## 2. Tick Boundary Precision Error (KyberSwap $48M)
+
+> **pathShape**: `callback-reentrant`
 
 ### Root Cause
 
@@ -249,6 +297,8 @@ function _flashCallback(uint256 due) internal returns (bool) {
 
 ## 3. Unprotected burnFrom + transferFrom (DEI $5.4M)
 
+> **pathShape**: `linear-multistep`
+
 ### Root Cause
 
 DEI stablecoin's `burnFrom()` function was callable by anyone with zero amount (`burnFrom(pair, 0)`), which inadvertently called `_approve()` with the caller's remaining allowance of 0. This set the pair's allowance for the attacker to 0 — but a separate bug in the approve mechanism allowed the attacker to then call `transferFrom()` to drain the pair's DEI balance. The combination of publicly accessible `burnFrom()` and flawed approval logic created a direct token drain.
@@ -291,6 +341,8 @@ function testExploit() public {
 ---
 
 ## 4. Duplicate Array Elements in Reward Claiming (Level $1M)
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -352,6 +404,8 @@ function DPPFlashLoanCall(...) external {
 
 ## 5. Emergency Withdraw Without NFT Unstake (BNO $505K)
 
+> **pathShape**: `iterative-loop`
+
 ### Root Cause
 
 BNO's staking pool had an `emergencyWithdraw()` function that reset a user's staked token balance but did not reclaim or lock the staked NFTs. After calling `emergencyWithdraw()`, the user could still call `unstakeNft()` to retrieve NFTs that should have been forfeited during the emergency exit. By repeating the cycle (stake NFTs → pledge tokens → emergency withdraw → unstake NFTs), the attacker extracted tokens each iteration.
@@ -408,6 +462,8 @@ function pancakeCall(...) external {
 
 ## 6. Flash Loan Liquidity Manipulation (Palmswap $900K)
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 Palmswap's liquidity event contract allowed users to purchase PLP tokens at a 1:1 ratio with USDP, but the withdrawal ratio was calculated based on the pool's current USDP reserves. By depositing a large amount of BUSDT into the vault (inflating the USDP supply), the attacker changed the withdrawal exchange rate from 1:1 to 1:1.9, extracting 90% more tokens than deposited.
@@ -458,6 +514,8 @@ function executeOperation(...) external returns (bool) {
 
 ## 7. convertDustToEarned Price Manipulation (BEARNDAO $769K)
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 BEARNDAO's Bvaults strategy had a public `convertDustToEarned()` function that swapped residual "dust" tokens to the earned token via a DEX. An attacker could front-run this call by first buying the earned token (ALPACA), then triggering `convertDustToEarned()` which would swap WBNB→ALPACA on the same DEX at an inflated price, and finally selling ALPACA back at profit.
@@ -500,6 +558,8 @@ function pancakeCall(...) external {
 ---
 
 ## 8. Flash Loan Bad Debt Creation (Platypus $10.5M Total, 3 Exploits)
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 

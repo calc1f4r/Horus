@@ -5,6 +5,13 @@ chain: "ethereum, arbitrum, polygon"
 category: "reentrancy"
 vulnerability_type: "read_only_reentrancy"
 
+# Pattern Identity (Required)
+root_cause_family: callback_reentrancy
+pattern_key: read_only_reentrancy | oracle_price_feed | economic_exploit | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 # Attack Vector Details
 attack_type: "economic_exploit"
 affected_component: "oracle_price_feed, collateral_valuation"
@@ -26,6 +33,27 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.6
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "receive"
+  - "exitPool"
+  - "fallback"
+  - "getPrice"
+  - "raw_call"
+  - "is_killed"
+  - "reenter_1"
+  - "getLPPrice"
+  - "nonReentrant"
+  - "virtual_price"
+  - "getLPTokenPrice"
+  - "remove_liquidity"
+  - "get_virtual_price"
+  - "handleDepeggedCurvePool"
+  - "WeightedBalancerLPOracle"
+path_keys:
+  - "curve_pool_read_only_reentrancy"
+  - "balancer_pool_read_only_reentrancy"
 
 # Context Tags
 tags:
@@ -58,14 +86,28 @@ version: ">=0.8.0"
 ---
 
 # Read-Only Reentrancy Attack Patterns
-
 ## Overview
 
 Read-only reentrancy is a class of vulnerability where an attacker reads stale on-chain state (e.g., Curve `get_virtual_price()` or Balancer LP token price) during a callback triggered by `remove_liquidity()` or `exitPool()`. Unlike traditional reentrancy that modifies state, read-only reentrancy exploits the fact that external protocols read price data from a pool whose internal balances haven't been updated yet. The attacker uses this temporarily inflated price to borrow, liquidate, or manipulate collateral valuations in lending protocols that rely on these LP token oracles. Between 2022-2023, this pattern caused **$8.9M+** in losses across 5+ protocols.
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `callback_reentrancy` |
+| Pattern Key | `read_only_reentrancy | oracle_price_feed | economic_exploit | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, arbitrum, polygon |
+
+
 ## 1. Curve Pool Read-Only Reentrancy
+
+> **pathShape**: `callback-reentrant`
 
 ### Root Cause
 
@@ -187,6 +229,8 @@ receive() external payable {
 ---
 
 ## 2. Balancer Pool Read-Only Reentrancy
+
+> **pathShape**: `cross-protocol`
 
 ### Root Cause
 

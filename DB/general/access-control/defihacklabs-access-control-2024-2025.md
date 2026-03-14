@@ -5,6 +5,13 @@ chain: "ethereum, linea, zksync, base"
 category: "access_control"
 vulnerability_type: "missing_access_control, missing_modifier, public_mint, unvalidated_caller"
 
+# Pattern Identity (Required)
+root_cause_family: missing_access_control
+pattern_key: missing_access_control | initialization | privilege_escalation | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 # Attack Vector Details
 attack_type: "privilege_escalation"
 affected_component: "initialization, execution, minting, pool_exit, module_core"
@@ -27,6 +34,30 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.90
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "burn"
+  - "init"
+  - "mint"
+  - "user"
+  - "int128"
+  - "public"
+  - "execute"
+  - "exitPool"
+  - "external"
+  - "onlyRole"
+  - "onlyAdmin"
+  - "onlyOwner"
+  - "initialize"
+  - "issueNewDs"
+  - "onlyMinter"
+path_keys:
+  - "missing_access_control_on_module_initialization"
+  - "missing_caller_restriction_on_core_execution_function"
+  - "public_mint_function_on_collateral_token"
+  - "unverified_contract_with_external_transfer_proxy"
+  - "missing_msg_sender_validation_in_pool_exit"
 
 # Context Tags
 tags:
@@ -59,14 +90,28 @@ version: ">=0.8.0"
 ---
 
 # Access Control & Missing Authorization Patterns (2024-2025)
-
 ## Overview
 
 Access control vulnerabilities remain the most common and easiest-to-exploit vulnerability class in DeFi. In 2024-2025, missing access control modifiers allowed attackers to: initialize core protocol modules to take ownership ($12M Cork), call privileged execution functions without restriction ($6.88M Velocore), mint unlimited collateral tokens ($4.9M Shezmu), exploit unverified proxy contracts ($2M), and exit pools on behalf of other users ($1.4M Bazaar). These exploits require zero sophisticated DeFi knowledge — just calling a public function. Combined losses exceed **$27M**.
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_access_control` |
+| Pattern Key | `missing_access_control | initialization | privilege_escalation | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, linea, zksync, base |
+
+
 ## 1. Missing Access Control on Module Initialization
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -118,6 +163,8 @@ CorkProtocol.redeemExpiredLv(moduleId, attacker, amount);
 ---
 
 ## 2. Missing Caller Restriction on Core Execution Function
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -173,6 +220,8 @@ Velocore.velocore__execute(
 
 ## 3. Public Mint Function on Collateral Token
 
+> **pathShape**: `linear-multistep`
+
 ### Root Cause
 
 When a protocol's collateral token contract exposes a `mint()` function without an `onlyOwner` or `onlyMinter` modifier, anyone can mint unlimited tokens. If the protocol uses that token as collateral or for borrowing, the attacker can mint → deposit as collateral → borrow real assets.
@@ -225,6 +274,8 @@ ShezmuVault.borrow(USDC, maxBorrowable);
 
 ## 4. Unverified Contract with External Transfer Proxy
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 Unverified (non-open-source) contracts on blockchain explorers can hide malicious or vulnerable logic. When such contracts implement transfer proxy functionality without proper access control, any caller can trigger transfers of tokens held by the contract. This is especially dangerous for contracts that hold user deposits or protocol reserves.
@@ -258,6 +309,8 @@ ITarget(target).transfer(
 ---
 
 ## 5. Missing msg.sender Validation in Pool Exit
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 

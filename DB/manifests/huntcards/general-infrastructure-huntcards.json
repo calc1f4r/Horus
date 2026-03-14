@@ -2,10 +2,10 @@
   "meta": {
     "manifest": "general-infrastructure",
     "description": "Compressed hunt cards for general-infrastructure — one-line detection rules for bulk scanning",
-    "totalCards": 44,
-    "skipped": 41,
+    "totalCards": 47,
+    "skipped": 45,
     "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 44
+    "enriched": 47
   },
   "cards": [
     {
@@ -205,7 +205,7 @@
       "validWhen": "State update AFTER external call"
     },
     {
-      "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-1-erc-677-ontokentransfer-reen-000",
+      "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-1-erc-677-ontokentransfer-reen-001",
       "title": "1. ERC-677 `onTokenTransfer` Reentrancy During Liquidation",
       "severity": "CRITICAL",
       "grep": "onTokenTransfer|liquidationCall|borrowTokens",
@@ -218,8 +218,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-callback-reentrancy-2022-patterns.md",
       "lines": [
-        70,
-        137
+        112,
+        181
       ],
       "neverPrune": true,
       "check": [
@@ -231,7 +231,7 @@
       "validWhen": "This vulnerability exists because Aave V2 forks deployed on chains using ERC-677 bridged tokens (like Gnosis Chain) inherit a callback mechanism not originally accounted..."
     },
     {
-      "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-2-flash-loan-callback-reentran-001",
+      "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-2-flash-loan-callback-reentran-002",
       "title": "2. Flash Loan Callback Reentrancy — Deposit-in-Callback",
       "severity": "CRITICAL",
       "grep": "flashCallback|viewDeposit|withdraw|deposit|flash",
@@ -244,8 +244,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-callback-reentrancy-2022-patterns.md",
       "lines": [
-        138,
-        194
+        182,
+        240
       ],
       "neverPrune": true,
       "check": [
@@ -256,7 +256,7 @@
       "validWhen": "This vulnerability exists because the flash loan function calls back to the borrower BEFORE verifying that the loan has been repaid."
     },
     {
-      "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-3-erc-1155-onerc1155received-r-002",
+      "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-3-erc-1155-onerc1155received-r-003",
       "title": "3. ERC-1155 `onERC1155Received` Reentrancy During NFT Mint",
       "severity": "CRITICAL",
       "grep": "depositAdditionalToFNFT|onERC1155Received",
@@ -269,8 +269,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-callback-reentrancy-2022-patterns.md",
       "lines": [
-        195,
-        250
+        241,
+        298
       ],
       "neverPrune": true,
       "check": [
@@ -281,7 +281,7 @@
       "validWhen": "This vulnerability exists because ERC-1155 token transfers trigger onERC1155Received() callbacks on the recipient."
     },
     {
-      "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-4-native-eth-avax-receive-reen-003",
+      "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-4-native-eth-avax-receive-reen-004",
       "title": "4. Native ETH/AVAX `receive()` Reentrancy — exitMarket/State Bypass",
       "severity": "CRITICAL",
       "grep": "exitMarket|fallback|receive|borrow",
@@ -294,8 +294,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-callback-reentrancy-2022-patterns.md",
       "lines": [
-        251,
-        345
+        299,
+        395
       ],
       "neverPrune": true,
       "check": [
@@ -306,7 +306,7 @@
       "validWhen": "This vulnerability exists because native token transfers (ETH, AVAX) trigger the recipient's receive() or fallback() function."
     },
     {
-      "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-1-curve-pool-read-only-reentra-000",
+      "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-1-curve-pool-read-only-reentra-001",
       "title": "1. Curve Pool Read-Only Reentrancy",
       "severity": "CRITICAL",
       "grep": "get_virtual_price|remove_liquidity|reenter_1|raw_call|fallback|receive",
@@ -319,8 +319,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-readonly-reentrancy-patterns.md",
       "lines": [
-        68,
-        188
+        108,
+        230
       ],
       "neverPrune": true,
       "check": [
@@ -332,7 +332,7 @@
       "validWhen": "Curve's remove_liquidity() function sends native ETH to the caller via raw_call() before updating the pool's internal balances."
     },
     {
-      "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-2-balancer-pool-read-only-reen-001",
+      "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-2-balancer-pool-read-only-reen-002",
       "title": "2. Balancer Pool Read-Only Reentrancy",
       "severity": "CRITICAL",
       "grep": "WeightedBalancerLPOracle|exitPool",
@@ -345,8 +345,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-readonly-reentrancy-patterns.md",
       "lines": [
-        189,
-        262
+        231,
+        306
       ],
       "neverPrune": true,
       "check": [
@@ -370,8 +370,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2021-2022-uncovered.md",
       "lines": [
-        103,
-        358
+        162,
+        429
       ],
       "neverPrune": true,
       "check": [
@@ -381,7 +381,7 @@
       "validWhen": "if (address(masterchef) != address(0) && msg.sender != address(masterchef)) {"
     },
     {
-      "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-1-read-only-reentrancy-via-cur-000",
+      "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-1-read-only-reentrancy-via-cur-001",
       "title": "1. Read-Only Reentrancy via Curve LP Withdrawal",
       "severity": "CRITICAL",
       "grep": "curvePool.remove_liquidity|get_virtual_price|remove_liquidity|call.value|fallback|receive",
@@ -394,8 +394,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md",
       "lines": [
-        93,
-        179
+        137,
+        225
       ],
       "neverPrune": true,
       "check": [
@@ -407,7 +407,7 @@
       "validWhen": "Curve pools use ETH transfers (via call.value()) during remove_liquidity()."
     },
     {
-      "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-2-read-only-reentrancy-via-cur-001",
+      "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-2-read-only-reentrancy-via-cur-002",
       "title": "2. Read-Only Reentrancy via Curve Callback (Conic $3.25M)",
       "severity": "CRITICAL",
       "grep": "handleDepeggedCurvePool|remove_liquidity",
@@ -420,8 +420,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md",
       "lines": [
-        180,
-        219
+        226,
+        267
       ],
       "neverPrune": true,
       "check": [
@@ -432,7 +432,7 @@
       "validWhen": "Conic Finance's ETH omnipool used Curve LP tokens as underlying."
     },
     {
-      "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-3-balancer-view-reentrancy-via-002",
+      "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-3-balancer-view-reentrancy-via-003",
       "title": "3. Balancer View Reentrancy via LP Price Oracle (Sentiment $1M)",
       "severity": "CRITICAL",
       "grep": "flashLoan|joinPool|getPrice|exitPool",
@@ -445,8 +445,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md",
       "lines": [
-        220,
-        265
+        268,
+        315
       ],
       "neverPrune": true,
       "check": [
@@ -457,7 +457,7 @@
       "validWhen": "Sentiment protocol used Balancer weighted LP tokens as collateral."
     },
     {
-      "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-4-fake-token-reentrancy-in-dex-003",
+      "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-4-fake-token-reentrancy-in-dex-004",
       "title": "4. Fake Token Reentrancy in DEX Swap (Orion $645K)",
       "severity": "CRITICAL",
       "grep": "swapThroughOrionPool|uniswapV2Call|transferFrom|deposit",
@@ -470,8 +470,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md",
       "lines": [
-        266,
-        320
+        316,
+        372
       ],
       "neverPrune": true,
       "check": [
@@ -482,7 +482,7 @@
       "validWhen": "Orion Protocol's swapThroughOrionPool() function allowed users to specify arbitrary token addresses in the swap path."
     },
     {
-      "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-5-native-token-receive-reentra-004",
+      "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-5-native-token-receive-reentra-005",
       "title": "5. Native Token Receive() Reentrancy (StarsArena $3M)",
       "severity": "CRITICAL",
       "grep": "call.value|testExploit|receive",
@@ -495,8 +495,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md",
       "lines": [
-        321,
-        369
+        373,
+        423
       ],
       "neverPrune": true,
       "check": [
@@ -507,7 +507,7 @@
       "validWhen": "StarsArena (a social token trading platform on Avalanche) sent AVAX via call.value() during share selling."
     },
     {
-      "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-6-curve-reentrancy-in-read-onl-005",
+      "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-6-curve-reentrancy-in-read-onl-006",
       "title": "6. Curve Reentrancy in Read-Only Oracle (Sturdy $800K)",
       "severity": "HIGH",
       "grep": "get_virtual_price|remove_liquidity",
@@ -520,8 +520,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md",
       "lines": [
-        370,
-        399
+        424,
+        455
       ],
       "check": [
         "VERIFY: Sturdy Finance (Aave V2 fork) used Curve stETH LP tokens as collateral, pricing them via Curve's get_virtual_price().",
@@ -531,7 +531,7 @@
       "validWhen": "Sturdy Finance (Aave V2 fork) used Curve stETH LP tokens as collateral, pricing them via Curve's get_virtual_price()."
     },
     {
-      "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-secure-implementations-006",
+      "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-secure-implementations-007",
       "title": "Secure Implementations",
       "severity": "MEDIUM",
       "grep": "swapThroughPool|sellShares|getPrice",
@@ -544,8 +544,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md",
       "lines": [
-        400,
-        450
+        456,
+        506
       ],
       "check": [
         "VERIFY: // SECURE: Check Curve's reentrancy lock before reading price",
@@ -556,7 +556,7 @@
       "invalidWhen": "Check Curve's reentrancy lock before reading price"
     },
     {
-      "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-1-fake-token-reward-harvesting-000",
+      "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-1-fake-token-reward-harvesting-001",
       "title": "1. Fake Token Reward Harvesting Callback Reentrancy",
       "severity": "CRITICAL",
       "grep": "rewardToken.claimRewards|batchHarvestMarketRewards|fakeSY.claimRewards|claimRewards",
@@ -569,8 +569,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2024-patterns.md",
       "lines": [
-        71,
-        135
+        110,
+        176
       ],
       "neverPrune": true,
       "check": [
@@ -582,10 +582,10 @@
       "validWhen": "When a protocol's batch reward harvesting function iterates over market pools and calls rewardToken.claimRewards() on each market's SY (Standardized Yield) token..."
     },
     {
-      "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-2-empty-market-phantom-collate-001",
+      "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-2-empty-market-phantom-collate-002",
       "title": "2. Empty Market Phantom Collateral Attack",
       "severity": "CRITICAL",
-      "grep": "PolterFinance|flashLoan|balanceOf|ISpookyV2",
+      "grep": "atomic|PolterFinance|flashLoan|balanceOf",
       "detect": "In lending protocols, when a market is empty (no existing deposits), the first depositor sets the initial exchange rate.",
       "cat": [
         "proxy",
@@ -595,8 +595,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2024-patterns.md",
       "lines": [
-        136,
-        188
+        177,
+        231
       ],
       "neverPrune": true,
       "check": [
@@ -608,7 +608,7 @@
       "validWhen": "In lending protocols, when a market is empty (no existing deposits), the first depositor sets the initial exchange rate."
     },
     {
-      "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-3-erc-3156-flash-loan-callback-002",
+      "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-3-erc-3156-flash-loan-callback-003",
       "title": "3. ERC-3156 Flash Loan Callback Re-deposit Loop",
       "severity": "HIGH",
       "grep": "onFlashLoan|ERC3156FlashBorrower|MinterestLending|lendRUSDY",
@@ -621,8 +621,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2024-patterns.md",
       "lines": [
-        189,
-        254
+        232,
+        299
       ],
       "check": [
         "VERIFY: ERC-3156 flash loans include an onFlashLoan() callback to the borrower.",
@@ -633,7 +633,7 @@
       "validWhen": "ERC-3156 flash loans include an onFlashLoan() callback to the borrower."
     },
     {
-      "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-4-strategy-callback-reentrancy-003",
+      "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-4-strategy-callback-reentrancy-004",
       "title": "4. Strategy Callback Reentrancy via Attacker-Controlled Hook",
       "severity": "HIGH",
       "grep": "mintHook|burnHook|burn",
@@ -646,8 +646,8 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-2024-patterns.md",
       "lines": [
-        255,
-        332
+        300,
+        379
       ],
       "check": [
         "VERIFY: DEX protocols with customizable strategies allow liquidity providers to register callback hooks (e.g., burnHook, mintHook) that execute when...",
@@ -658,10 +658,55 @@
       "validWhen": "DEX protocols with customizable strategies allow liquidity providers to register callback hooks (e.g., burnHook, mintHook) that execute when positions are modified."
     },
     {
-      "id": "general-infrastructure-defihacklabs-reentrancy-patterns-defihacklabs-reentrancy-patter-000",
-      "title": "DeFiHackLabs Reentrancy Pattern Compendium",
+      "id": "general-infrastructure-defihacklabs-reentrancy-patterns-agent-quick-view-000",
+      "title": "Agent Quick View",
       "severity": "CRITICAL",
-      "grep": "delegatedTransferERC20|tokensReceived|transferFrom|tokensToSend|depositFor|fallback",
+      "grep": "callback_reentrancy|multi_contract",
+      "detect": "Agent Quick View",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
+      "ref": "DB/general/reentrancy/defihacklabs-reentrancy-patterns.md",
+      "lines": [
+        98,
+        109
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Pattern Key | reentrancy_comprehensive | external_calls | reentrancy | fund_loss"
+      ],
+      "validWhen": "Pattern Key | reentrancy_comprehensive | external_calls | reentrancy | fund_loss"
+    },
+    {
+      "id": "general-infrastructure-defihacklabs-reentrancy-patterns-root-cause-categories-001",
+      "title": "Root Cause Categories",
+      "severity": "UNKNOWN",
+      "grep": "delegatedTransferERC20|tokensReceived|transferFrom|tokensToSend|fallback|receive",
+      "detect": "ERC-777 Token Hooks** — Tokens with `tokensReceived`/`tokensToSend` callbacks enable reentry during standard transfers...",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
+      "ref": "DB/general/reentrancy/defihacklabs-reentrancy-patterns.md",
+      "lines": [
+        110,
+        119
+      ],
+      "check": [
+        "VERIFY: ERC-777 Token Hooks — Tokens with tokensReceived/tokensToSend callbacks enable reentry during standard transfers..."
+      ],
+      "validWhen": "ERC-777 Token Hooks — Tokens with tokensReceived/tokensToSend callbacks enable reentry during standard transfers..."
+    },
+    {
+      "id": "general-infrastructure-defihacklabs-reentrancy-patterns-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "CRITICAL",
+      "grep": "tokensReceived|transferFrom|tokensToSend|depositFor|supply|borrow",
       "detect": "Lending protocol borrows ERC-777 token, triggering receiver hook",
       "cat": [
         "proxy",
@@ -671,21 +716,38 @@
       ],
       "ref": "DB/general/reentrancy/defihacklabs-reentrancy-patterns.md",
       "lines": [
-        43,
-        452
+        120,
+        436
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Lending protocol borrows ERC-777 token, triggering receiver hook",
-        "PROVE: deposit() calls delegatedTransferERC20() on user-supplied 'from' address",
-        "FALSIFY: OpenZeppelin ReentrancyGuard on all state-changing functions",
-        "IMPACT: Direct fund theft: Attacker drains pools by minting unbacked shares or borrowing against same collateral twice"
+        "VERIFY: Compound-fork borrow() transfers AMP (ERC-777) token before updating borrow state.",
+        "PROVE: deposit() calls delegatedTransferERC20() on user-supplied 'from' address"
       ],
       "antipattern": "deposit() calls delegatedTransferERC20() on user-supplied 'from' address",
-      "securePattern": "OpenZeppelin ReentrancyGuard on all state-changing functions",
-      "validWhen": "Lending protocol borrows ERC-777 token, triggering receiver hook",
-      "invalidWhen": "OpenZeppelin ReentrancyGuard on all state-changing functions",
-      "impact": "Direct fund theft: Attacker drains pools by minting unbacked shares or borrowing against same collateral twice"
+      "validWhen": "Compound-fork borrow() transfers AMP (ERC-777) token before updating borrow state."
+    },
+    {
+      "id": "general-infrastructure-defihacklabs-reentrancy-patterns-keywords-003",
+      "title": "Keywords",
+      "severity": "UNKNOWN",
+      "grep": "checks_effects_interactions|cross_contract_reentrancy|work_data_parameter|receive_fallback",
+      "detect": "delegatedTransferERC20",
+      "cat": [
+        "proxy",
+        "reentrancy",
+        "storage",
+        "upgradeable"
+      ],
+      "ref": "DB/general/reentrancy/defihacklabs-reentrancy-patterns.md",
+      "lines": [
+        573,
+        592
+      ],
+      "check": [
+        "VERIFY: delegatedTransferERC20"
+      ],
+      "validWhen": "delegatedTransferERC20"
     },
     {
       "id": "general-infrastructure-reentrancy-vulnerable-code-patterns-001",

@@ -4,6 +4,13 @@ chain: bsc
 category: skim_balance
 vulnerability_type: pair_skim_exploitation
 
+# Pattern Identity (Required)
+root_cause_family: stale_accounting
+pattern_key: pair_skim_exploitation | uniswap_v2_pair | economic_exploit | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 attack_type: economic_exploit
 affected_component: uniswap_v2_pair
 
@@ -21,6 +28,27 @@ severity: medium
 impact: fund_loss
 exploitability: 0.65
 financial_impact: medium
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "skim"
+  - "swap"
+  - "sync"
+  - "pair.sync"
+  - "skim(pair"
+  - "createPair"
+  - "testExploit"
+  - "address(pair"
+  - "innerCallback"
+  - "skim(attacker"
+  - "DPPFlashLoanCall"
+  - "skim(address(pair"
+  - "addLiquidityWithFeeToken"
+path_keys:
+  - "anch_token"
+  - "cfc_token"
+  - "gpt_token"
+  - "gss_token"
 
 tags:
   - skim
@@ -42,9 +70,35 @@ total_losses: "$41K+"
 
 ## Skim Token Balance Attack Patterns
 
+
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [ANCH-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-08/ANCH_exp.sol` |
+| [CFC-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2023-06/CFC_exp.sol` |
+| [GPT-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2023-05/GPT_exp.sol` |
+| [GSS-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2023-08/GSS_exp.sol` |
+| [HACKDAO-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-05/HackDao_exp.sol` |
+
+---
+
 ### Overview
 
 Skim balance attacks exploit the `skim()` function in Uniswap V2-style AMMs. The `skim()` function sends excess tokens (the difference between actual token balance and recorded reserves) to a specified address. When combined with deflationary or fee-on-transfer tokens, attackers create compounding reserve discrepancies through repeated `skim → pair` loops, then extract the accumulated surplus.
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `stale_accounting` |
+| Pattern Key | `pair_skim_exploitation | uniswap_v2_pair | economic_exploit | fund_loss` |
+| Severity | MEDIUM |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | bsc |
+
 
 ### Vulnerability Description
 
@@ -78,6 +132,8 @@ The root causes fall into two distinct patterns:
 ### Vulnerable Pattern Examples
 
 #### Category 1: Fee-on-Transfer Token — skim(pair) Loop [MEDIUM]
+
+> **pathShape**: `callback-reentrant`
 
 **Example 1: GSS Token — Flash Loan + Skim Loop (2023-08, ~$24.8K)** [MEDIUM]
 ```solidity
@@ -192,6 +248,8 @@ function DPPFlashLoanCall(address, uint256, uint256, bytes calldata) external {
 
 #### Category 2: Broken Fee Mechanism + Skim Extraction [HIGH]
 
+> **pathShape**: `callback-reentrant`
+
 **Example 4: GPT Token — Broken Fee + transfer→skim Loop (2023-05, ~$42K)** [HIGH]
 ```solidity
 // ❌ VULNERABLE: GPT token has a broken fee mechanism that creates phantom tokens
@@ -299,8 +357,7 @@ function createPair(address tokenA, address tokenB) external returns (address pa
 ### Detection Patterns
 
 ```bash
-# Direct skim() calls
-grep -rn "\.skim(" --include="*.sol"
+# Direct skim() callsgrep -rn "\.skim(" --include="*.sol"
 
 # skim() inside loops
 grep -B5 "\.skim(" --include="*.sol" | grep "for\s*("

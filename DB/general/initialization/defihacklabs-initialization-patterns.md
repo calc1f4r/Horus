@@ -4,6 +4,13 @@ chain: ethereum, bsc
 category: initialization
 vulnerability_type: unprotected_initialization
 
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: unprotected_initialization | proxy_initialization | initialization_hijack | fund_loss, total_control
+
+# Interaction Scope
+interaction_scope: single_contract
+
 attack_type: initialization_hijack
 affected_component: proxy_initialization, constructor
 
@@ -17,6 +24,28 @@ severity: critical
 impact: fund_loss, total_control
 exploitability: 0.85
 financial_impact: critical
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "init"
+  - "kill"
+  - "flashLoan"
+  - "onlyOwner"
+  - "initWallet"
+  - "initialize"
+  - "setRewards"
+  - "createVault"
+  - "initialized"
+  - "initializer"
+  - "delegatecall"
+  - "selfdestruct"
+  - "DPPFlashLoanCall"
+  - "emergencyWithdraw"
+path_keys:
+  - "88mph"
+  - "dao_maker"
+  - "dodo"
+  - "parity_multisig"
 
 tags:
   - initialization
@@ -35,9 +64,34 @@ total_losses: "$500M+"
 
 ## DeFiHackLabs Unprotected Initialization Compendium
 
+
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [88MPH-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-06/88mph_exp.sol` |
+| [DAOMAKER-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-09/DAOMaker_exp.sol` |
+| [DODO-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-03/DODO_exp.sol` |
+| [PARITY-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2017-11/Parity_exp.sol` |
+
+---
+
 ### Overview
 
 Unprotected initialization functions are the most devastating access control vulnerability in smart contracts. This entry catalogs **4 landmark exploits** spanning 2017-2021 totaling over **$500M in losses** (at time of exploit). The pattern: critical `init()` or `initialize()` functions lack access control, allowing anyone to claim ownership or re-initialize state.
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_validation` |
+| Pattern Key | `unprotected_initialization | proxy_initialization | initialization_hijack | fund_loss, total_control` |
+| Severity | CRITICAL |
+| Impact | fund_loss, total_control |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, bsc |
+
 
 ### Root Cause Categories
 
@@ -50,6 +104,8 @@ Unprotected initialization functions are the most devastating access control vul
 ### Vulnerable Pattern Examples
 
 #### Category 1: Public init() — No Access Control [CRITICAL]
+
+> **pathShape**: `atomic`
 
 **Example 1: DAO Maker — Unguarded init() Steals Deposits ($4M, 2021-09)** [CRITICAL]
 ```solidity
@@ -127,6 +183,8 @@ contract EightyEightMPH {
 
 #### Category 2: Re-Initialization During Flash Loan [CRITICAL]
 
+> **pathShape**: `callback-reentrant`
+
 **Example 3: DODO — init() Re-Callable During Flashloan ($700K, 2021-03)** [CRITICAL]
 ```solidity
 // ❌ VULNERABLE: DODO V2 pool init() can be called AGAIN during a flash loan
@@ -177,6 +235,8 @@ function DPPFlashLoanCall(address sender, uint256 amount, bytes calldata data) e
 ---
 
 #### Category 3: Uninitialized Library — selfdestruct [CRITICAL]
+
+> **pathShape**: `atomic`
 
 **Example 4: Parity Multisig — Library Kill (514K ETH / ~$157M, 2017-11)** [CRITICAL]
 ```solidity
@@ -288,8 +348,7 @@ contract WalletLibrary is Initializable {
 ### Detection Patterns
 
 ```bash
-# Unprotected init/initialize functions
-grep -rn "function init\|function initialize" --include="*.sol" | \
+# Unprotected init/initialize functionsgrep -rn "function init\|function initialize" --include="*.sol" | \
   xargs grep -L "initializer\|onlyOwner\|_initialized\|require.*!.*init"
 
 # selfdestruct in library contracts

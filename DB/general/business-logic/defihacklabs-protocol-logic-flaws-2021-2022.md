@@ -3,6 +3,13 @@ protocol: Multi-Protocol
 chain: Ethereum, BSC, Polygon, Fantom, Optimism
 category: business_logic
 vulnerability_type: Protocol Logic Flaws
+
+# Pattern Identity (Required)
+root_cause_family: stale_accounting
+pattern_key: Protocol Logic Flaws |  |  | Fund theft, permanent fund lock, full protocol drain
+
+# Interaction Scope
+interaction_scope: cross_protocol
 attack_type:
   - NFT pledge invalidation bypass
   - Game economics abuse
@@ -35,6 +42,31 @@ severity: CRITICAL
 impact: Fund theft, permanent fund lock, full protocol drain
 exploitability: Medium to High
 financial_impact: "$40M+ aggregate"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "bid"
+  - "XToken"
+  - "borrow"
+  - "approve"
+  - "collect"
+  - "deposit"
+  - "dumpETH"
+  - "harvest"
+  - "orderId"
+  - "require"
+  - "_exploit"
+  - "_xftmOut"
+  - "compound"
+  - "register"
+  - "selector"
+path_keys:
+  - "nft_pledge_record_not_invalidated_after_withdrawal"
+  - "read_only_reentrancy_via_curve_lp_pricing"
+  - "game_economics_abuse_via_unrestricted_registration"
+  - "decimal_miscalculation_in_synthetic_minting"
+  - "flash_loan_reward_price_manipulation"
+  - "arbitrary_external_call_in_zap_contract"
 tags:
   - defihacklabs
   - protocol-logic
@@ -52,6 +84,24 @@ tags:
 
 # DeFiHackLabs Protocol Logic Flaw Patterns (2021-2022)
 
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [AKUTARNFT-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-04/AkutarNFT_exp.sol` |
+| [BDEX-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-11/BDEX_exp.sol` |
+| [FANTASM-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-03/Fantasm_exp.sol` |
+| [MARKET-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/Market_exp.sol` |
+| [NMBPLATFORM-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-12/Nmbplatform_exp.sol` |
+| [POLYNOMIAL-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-11/Polynomial_exp.sol` |
+| [SEAMAN-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/SEAMAN_exp.sol` |
+| [SHEEPFARM-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-11/SheepFarm_exp.sol` |
+| [SHEEPFARM2-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-11/SheepFarm2_exp.sol` |
+| [XCARNIVAL-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-06/XCarnival_exp.sol` |
+
+---
+
+
 ## Overview
 
 This entry catalogs 12 protocol logic flaw exploits from 2021-2022 sourced from [DeFiHackLabs](https://github.com/SunWeb3Sec/DeFiHackLabs). These represent vulnerabilities where the core protocol logic — not just access control or math — was fundamentally flawed, enabling attackers to extract value through creative abuse of intended functionality.
@@ -67,6 +117,19 @@ This entry catalogs 12 protocol logic flaw exploits from 2021-2022 sourced from 
 8. **Public Strategy Function Sandwich** — Externally callable price-moving swap
 
 ---
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `stale_accounting` |
+| Pattern Key | `Protocol Logic Flaws |  |  | Fund theft, permanent fund lock, full protocol drain` |
+| Severity | CRITICAL |
+| Impact | Fund theft, permanent fund lock, full protocol drain |
+| Interaction Scope | `cross_protocol` |
+| Chain(s) | Ethereum, BSC, Polygon, Fantom, Optimism |
+
 
 ## Vulnerability Description
 
@@ -120,6 +183,8 @@ Protocol logic flaws arise when the contract's state machine allows transitions 
 
 ### Pattern 1: NFT Pledge Record Not Invalidated After Withdrawal
 
+> **pathShape**: `atomic`
+
 **Severity**: 🔴 CRITICAL | **Loss**: 3,087 ETH (~$3.87M) | **Protocol**: XCarnival | **Chain**: Ethereum
 
 The `XNFT.pledgeAndBorrow()` creates a pledge order, but `withdrawNFT()` does not invalidate the `orderId`. The same orderId can be reused to borrow from the `XToken` lending pool after the NFT has been withdrawn.
@@ -166,6 +231,8 @@ function testExploit() public {
 
 ### Pattern 2: Read-Only Reentrancy via Curve LP Pricing
 
+> **pathShape**: `callback-reentrant`
+
 **Severity**: 🔴 CRITICAL | **Loss**: ~$180K | **Protocol**: Market.xyz (MAI Finance) | **Chain**: Polygon
 
 During `remove_liquidity`, Curve sends native tokens via callback **before** updating internal pool state. If a lending market reads the Curve pool's virtual price during this callback, it sees a stale (inflated) value, allowing over-borrowing.
@@ -204,6 +271,8 @@ receive() external payable {
 ---
 
 ### Pattern 3: Game Economics Abuse via Unrestricted Registration
+
+> **pathShape**: `atomic`
 
 **Severity**: 🟠 HIGH | **Loss**: BNB (variable) | **Protocol**: SheepFarm | **Chain**: BSC
 
@@ -254,6 +323,8 @@ constructor() payable {
 
 ### Pattern 4: Decimal Miscalculation in Synthetic Minting
 
+> **pathShape**: `atomic`
+
 **Severity**: 🔴 CRITICAL | **Loss**: Variable (xFTM drained) | **Protocol**: Fantasm Finance | **Chain**: Fantom
 
 The `pool.mint()` function computes `_xftmOut` with a decimal error, producing significantly more synthetic xFTM tokens than the FSM collateral warrants. The attacker provides FSM, receives inflated xFTM, then calls `collect()` in the next block.
@@ -281,6 +352,8 @@ function testExploit() public {
 ---
 
 ### Pattern 5: Flash Loan Reward Price Manipulation
+
+> **pathShape**: `atomic`
 
 **Severity**: 🔴 CRITICAL | **Loss**: GNIMB + NIMB (significant) | **Protocol**: Nmbplatform (Nimbus) | **Chain**: BSC
 
@@ -317,6 +390,8 @@ function BiswapCall(address sender, uint256 baseAmount, uint256 quoteAmount, byt
 ---
 
 ### Pattern 6: Arbitrary External Call in Zap Contract
+
+> **pathShape**: `atomic`
 
 **Severity**: 🟠 HIGH | **Loss**: ~$1.4K | **Protocol**: Polynomial (Zap) | **Chain**: Optimism
 
@@ -358,6 +433,8 @@ function initiateDeposit(address, uint256) external {}
 ---
 
 ### Pattern 7: Auction DoS via Reverting Fallback + Permanent Fund Lock
+
+> **pathShape**: `callback-reentrant`
 
 **Severity**: 🔴 CRITICAL | **Loss**: >$34M locked permanently | **Protocol**: AkutarNFT | **Chain**: Ethereum
 
@@ -401,6 +478,8 @@ function testclaimProjectFunds() public {
 
 ### Pattern 8: Public Strategy Function Enables Sandwich Attack
 
+> **pathShape**: `atomic`
+
 **Severity**: 🟠 HIGH | **Loss**: ~BNB profit | **Protocol**: BDEX | **Chain**: BSC
 
 The `BvaultsStrategy.convertDustToEarned()` function — intended for internal/keeper use — is externally callable by anyone. It performs a swap that moves the BDEX/WBNB pair price, enabling a sandwich attack.
@@ -432,6 +511,8 @@ function testExploit() public {
 ---
 
 ### Pattern 9: Token Transfer Side-Effect Price Manipulation
+
+> **pathShape**: `atomic`
 
 **Severity**: 🟠 HIGH | **Loss**: USDT profit | **Protocol**: SEAMAN | **Chain**: BSC
 

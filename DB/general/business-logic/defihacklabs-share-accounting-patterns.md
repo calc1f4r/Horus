@@ -4,6 +4,13 @@ chain: ethereum, bsc
 category: business_logic
 vulnerability_type: share_fee_accounting_error
 
+# Pattern Identity (Required)
+root_cause_family: stale_accounting
+pattern_key: share_fee_accounting_error | share_accounting | accounting_manipulation | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 attack_type: accounting_manipulation
 affected_component: share_accounting, fee_distribution, balance_tracking
 
@@ -19,6 +26,30 @@ severity: critical
 impact: fund_loss
 exploitability: 0.8
 financial_impact: critical
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "from"
+  - "amount"
+  - "deposit"
+  - "exploit"
+  - "mintFor"
+  - "pending"
+  - "withdraw"
+  - "_transfer"
+  - "balanceOf"
+  - "collectFees"
+  - "totalShares"
+  - "userFeeDebt"
+  - "claimRewards"
+  - "transferFrom"
+  - "emergencyBurn"
+path_keys:
+  - "bearn_finance"
+  - "bzx_itoken"
+  - "cover_protocol"
+  - "eleven_finance"
+  - "pancakehunny"
 
 tags:
   - share_accounting
@@ -39,9 +70,36 @@ total_losses: "$35M+"
 
 ## DeFiHackLabs Share & Fee Accounting Errors Compendium
 
+
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [BEARN-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-05/bEarn_exp.sol` |
+| [BZX-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2020-09/bZx_exp.sol` |
+| [COVER-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2020-12/Cover_exp.sol` |
+| [ELEVEN-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-06/Eleven_exp.sol` |
+| [PANCAKEHUNNY-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-10/PancakeHunny_exp.sol` |
+| [POPSICLE-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-08/Popsicle_exp.sol` |
+
+---
+
 ### Overview
 
 Share and fee accounting errors occur when protocols incorrectly track ownership, rewards, or balances during transfers, withdrawals, or state transitions. This entry catalogs **6 real-world exploits** from 2020-2021 totaling **$35M+ in losses**. The core patterns: fee accumulators not reset on LP transfer, emergency withdraw bypassing share burns, deposit/withdraw accounting asymmetry, and self-transfer balance duplication.
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `stale_accounting` |
+| Pattern Key | `share_fee_accounting_error | share_accounting | accounting_manipulation | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, bsc |
+
 
 ### Root Cause Categories
 
@@ -57,6 +115,8 @@ Share and fee accounting errors occur when protocols incorrectly track ownership
 ### Vulnerable Pattern Examples
 
 #### Category 1: Fee Not Reset on Transfer [CRITICAL]
+
+> **pathShape**: `atomic`
 
 **Example 1: Popsicle Finance — Fee Replay Across Transfers ($20M, 2021-08)** [CRITICAL]
 ```solidity
@@ -123,6 +183,8 @@ contract PopsicleExploit {
 
 #### Category 2: Emergency Withdraw Doesn't Burn Shares [HIGH]
 
+> **pathShape**: `atomic`
+
 **Example 2: Eleven Finance — emergencyBurn Without Share Burn ($4.5M, 2021-06)** [HIGH]
 ```solidity
 // ❌ VULNERABLE: emergencyBurn() withdraws funds but doesn't burn user's vault shares
@@ -161,6 +223,8 @@ contract ElevenVault {
 ---
 
 #### Category 3: Deposit/Withdraw Accounting Mismatch [CRITICAL]
+
+> **pathShape**: `atomic`
 
 **Example 3: bEarn Finance — Cross-Strategy Balance Error ($11M, 2021-05)** [CRITICAL]
 ```solidity
@@ -203,6 +267,8 @@ contract bEarnVault {
 
 #### Category 4: Donation-Inflated balanceOf() for Minting [HIGH]
 
+> **pathShape**: `atomic`
+
 **Example 4: PancakeHunny — Inflated balanceOf() Mints Excess Tokens ($2.2M, 2021-10)** [HIGH]
 ```solidity
 // ❌ VULNERABLE: Mint calculation uses balanceOf(this) which can be inflated via donation
@@ -230,6 +296,8 @@ contract HunnyMinter {
 ---
 
 #### Category 5: Stale Reward Accumulator [HIGH]
+
+> **pathShape**: `atomic`
 
 **Example 5: Cover Protocol — Stale Rewards After Pool Transition ($4.4M, 2020-12)** [HIGH]
 ```solidity
@@ -270,6 +338,8 @@ contract CoverMining {
 ---
 
 #### Category 6: Self-Transfer Balance Duplication [HIGH]
+
+> **pathShape**: `atomic`
 
 **Example 6: bZx iToken — Self-Transfer Doubles Balance ($8M, 2020-09)** [HIGH]
 ```solidity
@@ -396,8 +466,7 @@ function _transfer(address from, address to, uint256 amount) internal {
 ### Detection Patterns
 
 ```bash
-# LP transfers that don't update fee/reward accounting
-grep -rn "function _transfer\|function transfer" --include="*.sol" | \
+# LP transfers that don't update fee/reward accountinggrep -rn "function _transfer\|function transfer" --include="*.sol" | \
   xargs grep -A 10 "super._transfer\|super.transfer" | \
   grep -L "feeDebt\|rewardDebt\|accumulat"
 

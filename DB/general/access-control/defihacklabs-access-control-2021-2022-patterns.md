@@ -3,6 +3,13 @@ protocol: Multi-Protocol
 chain: Ethereum, BSC, Fantom
 category: access_control
 vulnerability_type: Access Control Bypass Patterns
+
+# Pattern Identity (Required)
+root_cause_family: missing_access_control
+pattern_key: Access Control Bypass Patterns |  |  | Full protocol drain, governance takeover, token supply manipulation
+
+# Interaction Scope
+interaction_scope: single_contract
 attack_type:
   - Missing onlyOwner modifier
   - Public burn any address
@@ -33,6 +40,31 @@ severity: CRITICAL
 impact: Full protocol drain, governance takeover, token supply manipulation
 exploitability: High
 financial_impact: "$3.3M+ aggregate"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "burn"
+  - "from"
+  - "mint"
+  - "user"
+  - "_burn"
+  - "owner"
+  - "redeem"
+  - "getPair"
+  - "factories"
+  - "onlyAdmin"
+  - "onlyOwner"
+  - "initialize"
+  - "msg.sender"
+  - "getReserves"
+  - "initialized"
+path_keys:
+  - "missing_access_control_on_owner_withdrawal"
+  - "public_burn_address_enables_lp_drain"
+  - "public_mint_without_any_restriction"
+  - "unprotected_proxy_re_initialization_governance_takeover"
+  - "missing_approval_check_in_erc_4626_redeem"
+  - "public_function_drains_user_approvals"
 tags:
   - defihacklabs
   - access-control
@@ -50,6 +82,23 @@ tags:
 
 # DeFiHackLabs Access Control Bypass Patterns (2021-2022)
 
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [AUDIUS-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-07/Audius_exp.sol` |
+| [BABYSWAP-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/BabySwap_exp.sol` |
+| [FLIPPAZONE-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-05/FlippazOne_exp.sol` |
+| [GYMNET-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2023-07/GYMNET_exp.sol` |
+| [REAPERFARM-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-08/ReaperFarm_exp.sol` |
+| [SANDBOX-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-02/Sandbox_exp.sol` |
+| [SHADOWFI-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-09/Shadowfi_exp.sol` |
+| [UERII-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/Uerii_exp.sol` |
+| [ULME-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/ULME_exp.sol` |
+
+---
+
+
 ## Overview
 
 This entry catalogs 8 access control bypass exploits from 2021-2022 sourced from [DeFiHackLabs](https://github.com/SunWeb3Sec/DeFiHackLabs). These represent the most fundamental class of smart contract vulnerabilities — functions that should be restricted but aren't, allowing anyone to call privileged operations.
@@ -66,6 +115,19 @@ This entry catalogs 8 access control bypass exploits from 2021-2022 sourced from
 9. **Public NFT `_burn()`** — Anyone destroys any user's NFTs
 
 ---
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_access_control` |
+| Pattern Key | `Access Control Bypass Patterns |  |  | Full protocol drain, governance takeover, token supply manipulation` |
+| Severity | CRITICAL |
+| Impact | Full protocol drain, governance takeover, token supply manipulation |
+| Interaction Scope | `single_contract` |
+| Chain(s) | Ethereum, BSC, Fantom |
+
 
 ## Vulnerability Description
 
@@ -101,6 +163,8 @@ Access control vulnerabilities occur when:
 
 ### Pattern 1: Missing Access Control on Owner Withdrawal
 
+> **pathShape**: `atomic`
+
 **Severity**: 🔴 CRITICAL | **Loss**: All contract ETH | **Protocol**: FlippazOne | **Chain**: Ethereum
 
 The `ownerWithdrawAllTo()` function lacks any access control modifier. The function name implies owner-only access, but there's no `onlyOwner` check.
@@ -128,6 +192,8 @@ function testExploit() public {
 ---
 
 ### Pattern 2: Public burn(address) Enables LP Drain
+
+> **pathShape**: `atomic`
 
 **Severity**: 🔴 CRITICAL | **Loss**: ~$300K | **Protocol**: ShadowFi (SDF) | **Chain**: BSC
 
@@ -161,6 +227,8 @@ function testExploit() public {
 
 ### Pattern 3: Public mint() Without Any Restriction
 
+> **pathShape**: `atomic`
+
 **Severity**: 🟠 HIGH | **Loss**: ~$2.5K | **Protocol**: Uerii | **Chain**: Ethereum
 
 The UERII token's `mint()` function has zero access control — anyone can call it to mint tokens for free, then swap them on DEXes.
@@ -186,6 +254,8 @@ function testExploit() public {
 ---
 
 ### Pattern 4: Unprotected Proxy Re-Initialization (Governance Takeover)
+
+> **pathShape**: `atomic`
 
 **Severity**: 🔴 CRITICAL | **Loss**: 704 ETH (~$1.08M) | **Protocol**: Audius | **Chain**: Ethereum
 
@@ -237,6 +307,8 @@ function testExploit() public {
 
 ### Pattern 5: Missing Approval Check in ERC-4626 Redeem
 
+> **pathShape**: `atomic`
+
 **Severity**: 🔴 CRITICAL | **Loss**: ~$1.7M | **Protocol**: ReaperFarm | **Chain**: Fantom
 
 The `redeem(shares, receiver, owner)` function does not verify that `msg.sender` has spending allowance from `owner`. Anyone can redeem another user's vault shares to themselves.
@@ -264,6 +336,8 @@ function testExploit() public {
 ---
 
 ### Pattern 6: Public Function Drains User Approvals
+
+> **pathShape**: `atomic`
 
 **Severity**: 🔴 CRITICAL | **Loss**: ~$250K | **Protocol**: ULME | **Chain**: BSC
 
@@ -301,6 +375,8 @@ function DPPFlashLoanCall(address, uint256, uint256, bytes calldata) external {
 ---
 
 ### Pattern 7: Router Swaps From Arbitrary Address
+
+> **pathShape**: `atomic`
 
 **Severity**: 🔴 CRITICAL | **Loss**: Variable (18 victims drained) | **Protocol**: GYM Network | **Chain**: BSC
 
@@ -345,6 +421,8 @@ function testExploit() public {
 
 ### Pattern 8: Fake Factory Injection Inflates Swap Mining Rewards
 
+> **pathShape**: `atomic`
+
 **Severity**: 🟠 HIGH | **Loss**: BABY token rewards | **Protocol**: BabySwap | **Chain**: BSC
 
 The BabySwap router allows callers to supply custom `factories` arrays. The SwapMining contract calculates rewards based on the reserves reported by the factory's pair. An attacker deploys a fake factory returning extreme reserves (10^28:1), making tiny swaps appear astronomically large for reward computation.
@@ -388,6 +466,8 @@ function testExploit() public {
 ---
 
 ### Pattern 9: Public NFT _burn() Allows Arbitrary Token Destruction
+
+> **pathShape**: `atomic`
 
 **Severity**: 🔴 CRITICAL | **Loss**: NFT asset destruction | **Protocol**: The Sandbox Land | **Chain**: Ethereum
 

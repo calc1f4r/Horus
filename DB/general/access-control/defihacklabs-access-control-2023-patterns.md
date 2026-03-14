@@ -5,6 +5,13 @@ chain: "ethereum, bsc, base"
 category: "access_control"
 vulnerability_type: "unprotected_mint_burn, unprotected_token_transfer, public_fee_function, swap_authorization"
 
+# Pattern Identity (Required)
+root_cause_family: missing_access_control
+pattern_key: unprotected_mint_burn | token_contract | logical_error | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 # Attack Vector Details
 attack_type: "logical_error"
 affected_component: "token_contract, dex_pair, aggregator_router, bridge_gateway"
@@ -27,6 +34,31 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.90
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "burn"
+  - "from"
+  - "mint"
+  - "swap"
+  - "sync"
+  - "private"
+  - "internal"
+  - "onlyOwner"
+  - "pair.sync"
+  - "doBurnHack"
+  - "pancakeCall"
+  - "testExploit"
+  - "_transferFees"
+  - "DPPFlashLoanCall"
+  - "LockAndClaimToken"
+path_keys:
+  - "public_mint_public_burn_on_token_contract_safemoon_8_9m"
+  - "public_fee_transfer_function_on_dex_pair_leetswap_630k"
+  - "aggregator_arbitrary_sender_swap_swapx_1m"
+  - "token_lock_claim_with_migration_vulnerability_shido_230k"
+  - "router_bot_authorization_failures_maestro_630k_unibot_84k"
+  - "access_controlled_token_operations"
 
 # Context Tags
 tags:
@@ -75,14 +107,28 @@ total_losses: "$17M+"
 ---
 
 # Access Control Attack Patterns (2023)
-
 ## Overview
 
 2023 saw a proliferation of access control exploits targeting DeFi protocols at every layer — from token contracts (SafeMoon's public mint/burn: $8.9M) to DEX pair functions (LeetSwap's public fee transfer: $630K), to aggregator routers (SwapX's arbitrary-sender swap: $1M, Dexible's arbitrary transfer: $1.5M), to trading bots (MaestroRouter and UniBot router exploits). The common thread: critical functions exposed without sender verification, `onlyOwner` modifiers, or input validation. Total 2023 access control losses across the analyzed exploits exceed **$17M**.
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_access_control` |
+| Pattern Key | `unprotected_mint_burn | token_contract | logical_error | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, bsc, base |
+
+
 ## 1. Public Mint + Public Burn on Token Contract (SafeMoon $8.9M)
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -152,6 +198,8 @@ function pancakeCall(...) external {
 
 ## 2. Public Fee Transfer Function on DEX Pair (LeetSwap $630K)
 
+> **pathShape**: `linear-multistep`
+
 ### Root Cause
 
 LeetSwap's pair contract had a public `_transferFeesSupportingTaxTokens()` function that allowed anyone to transfer tokens out of the pair as "fees". Without access control, an attacker could drain the pair's token reserve, sync the pair to update reserves, and swap the remaining token at an inflated price.
@@ -205,6 +253,8 @@ function testExploit() external {
 ---
 
 ## 3. Aggregator Arbitrary-Sender Swap (SwapX $1M)
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -262,6 +312,8 @@ function testExploit() external {
 
 ## 4. Token Lock/Claim with Migration Vulnerability (SHIDO $230K)
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 SHIDO's token migration system allowed users to lock SHIDOINU tokens and claim SHIDO tokens. The lock contract didn't properly validate the exchange rate or the amount being claimed relative to what was locked, enabling disproportionate extraction.
@@ -305,6 +357,8 @@ FeeFreeRouter.addLiquidityETH{value: 0.01 ether}(
 ---
 
 ## 5. Router/Bot Authorization Failures (Maestro $630K, UniBot $84K)
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
