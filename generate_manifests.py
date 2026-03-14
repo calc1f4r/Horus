@@ -567,8 +567,10 @@ GENERAL_SUBCATEGORIES = {
             "precision", "rounding-precision-loss", "calculation",
             "integer-overflow", "business-logic",
             "bonding-curve", "restaking",
+            "perpetuals-derivatives", "lending-rate-model",
+            "nft-marketplace",
         ],
-        "description": "DeFi-specific: flash loans, slippage, vaults, precision, calculations, bonding curves, restaking",
+        "description": "DeFi-specific: flash loans, slippage, vaults, precision, calculations, bonding curves, restaking, perpetuals, lending rates, NFT marketplaces",
     },
     "general-infrastructure": {
         "folders": [
@@ -580,11 +582,12 @@ GENERAL_SUBCATEGORIES = {
     },
     "general-governance": {
         "folders": [
-            "dao-governance-vulnerabilities",
+            "dao-governance-vulnerabilities", "dao-governance",
+            "vetoken-governance",
             "stablecoin-vulnerabilities",
             "malicious", "mev-bot", "randomness",
         ],
-        "description": "Governance, stablecoins, malicious patterns, MEV, randomness",
+        "description": "Governance, stablecoins, veToken voting, DAO governance, malicious patterns, MEV, randomness",
     },
 }
 

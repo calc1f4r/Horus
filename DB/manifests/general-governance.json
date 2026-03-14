@@ -1,9 +1,9 @@
 {
   "meta": {
     "category": "general-governance",
-    "description": "Governance, stablecoins, malicious patterns, MEV, randomness",
-    "fileCount": 11,
-    "totalPatterns": 71,
+    "description": "Governance, stablecoins, veToken voting, DAO governance, malicious patterns, MEV, randomness",
+    "fileCount": 13,
+    "totalPatterns": 97,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -1437,6 +1437,1064 @@
           "codeKeywords": [],
           "rootCause": null,
           "subsections": null
+        }
+      ]
+    },
+    {
+      "file": "DB/general/dao-governance/DAO_GOVERNANCE_VULNERABILITIES.md",
+      "totalLines": 824,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "governance",
+        "vulnerability_type": "governance_manipulation",
+        "root_cause_family": "governance_mechanism_bypass",
+        "pattern_key": "governance_bypass | voting_proposal_timelock | manipulation_or_dos | unauthorized_execution_or_fund_theft",
+        "interaction_scope": "multi_contract",
+        "attack_type": "governance_exploit",
+        "affected_component": "governance_system",
+        "severity": "high",
+        "impact": "governance_takeover",
+        "exploitability": "0.75",
+        "financial_impact": "critical",
+        "language": "solidity",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 13,
+      "patterns": [
+        {
+          "id": "general-governance-dao-governance-vulnerabilities-vulnerability-title-000",
+          "title": "Vulnerability Title",
+          "lineStart": 143,
+          "lineEnd": 224,
+          "lineCount": 82,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "Governor.cancel",
+            "Governor.castVote",
+            "Governor.execute",
+            "Governor.propose",
+            "GovernorVotesQuorumFraction(4",
+            "Timelock.cancel",
+            "Timelock.setDelay",
+            "Timelock.setDelay(0",
+            "Timelock.setGovernor(newAddress",
+            "VoteEscrow.delegate",
+            "_writeCheckpoint",
+            "arbitrary_proposal_execution",
+            "cancel",
+            "castVote",
+            "checkpoint_storage_bug"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-dao-governance-vulnerabilities-section-1-flash-loan-snapshot--001",
+          "title": "Section 1: Flash Loan & Snapshot-Less Voting Power Manipulation",
+          "lineStart": 225,
+          "lineEnd": 287,
+          "lineCount": 63,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "Governor.castVote",
+            "castVote",
+            "countMemberVotes",
+            "getPastVotes(proposalSnapshot",
+            "getVotes(msg.sender",
+            "initializeDistributionRecord"
+          ],
+          "rootCause": "Governance contracts that use current token balance (instead of a historical snapshot at proposal creation) for voting power allow attackers to temporarily inflate their voting weight via flash loans,",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 231,
+              "lineEnd": 260,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "Governor.castVote",
+                "castVote",
+                "getPastVotes(proposalSnapshot",
+                "getVotes(msg.sender",
+                "initializeDistributionRecord"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 261,
+              "lineEnd": 287,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "countMemberVotes",
+                "initializeDistributionRecord"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-dao-governance-vulnerabilities-section-2-quorum-manipulation--002",
+          "title": "Section 2: Quorum Manipulation & Threshold Bypass",
+          "lineStart": 288,
+          "lineEnd": 351,
+          "lineCount": 64,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "Governor.propose",
+            "GovernorVotesQuorumFraction(4",
+            "VoteEscrow.withdraw",
+            "VotingToken.delegate",
+            "quorum"
+          ],
+          "rootCause": "Quorum thresholds calculated dynamically from current total supply (instead of frozen at proposal creation) can be manipulated by coordinated token burns, withdrawals, or delegation changes that reduc",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 294,
+              "lineEnd": 322,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "Governor.propose",
+                "GovernorVotesQuorumFraction(4",
+                "VoteEscrow.withdraw",
+                "VotingToken.delegate"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 323,
+              "lineEnd": 351,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "quorum"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-dao-governance-vulnerabilities-section-3-timelock-bypass-unau-003",
+          "title": "Section 3: Timelock Bypass & Unauthorized Execution",
+          "lineStart": 352,
+          "lineEnd": 418,
+          "lineCount": 67,
+          "severity": [
+            "CRITICAL",
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "Governor.cancel",
+            "Timelock.cancel(bytes32(0",
+            "Timelock.cancel(operationId",
+            "Timelock.setDelay",
+            "Timelock.setDelay(0",
+            "Timelock.setGovernor",
+            "Timelock.setGovernor(attacker",
+            "TimelockController.executeBatch",
+            "cancel",
+            "executeBatch",
+            "setGovernor"
+          ],
+          "rootCause": "Timelocks are meant to enforce a mandatory delay between proposal approval and execution. When the governor can directly modify the delay or governor address without going through the timelock itself,",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 358,
+              "lineEnd": 386,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "Governor.cancel",
+                "Timelock.cancel(bytes32(0",
+                "Timelock.cancel(operationId",
+                "Timelock.setDelay",
+                "Timelock.setDelay(0",
+                "Timelock.setGovernor",
+                "Timelock.setGovernor(attacker",
+                "TimelockController.executeBatch"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 387,
+              "lineEnd": 418,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "cancel",
+                "setGovernor"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-dao-governance-vulnerabilities-section-4-delegation-checkpoin-004",
+          "title": "Section 4: Delegation & Checkpoint Accounting Bugs",
+          "lineStart": 419,
+          "lineEnd": 481,
+          "lineCount": 63,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "VoteEscrow.delegate",
+            "VotingToken.delegate",
+            "VotingToken.withdraw",
+            "_writeCheckpoint",
+            "delegatedTokenIds",
+            "memory",
+            "oldCheckpoint",
+            "storage"
+          ],
+          "rootCause": "Vote delegation and checkpoint systems track historical voting power for governance snapshots. When checkpoints are written to `memory` instead of `storage` (same-block overwrites lost), or when deleg",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 425,
+              "lineEnd": 455,
+              "severity": [],
+              "codeKeywords": [
+                "VoteEscrow.delegate",
+                "VotingToken.delegate",
+                "VotingToken.withdraw",
+                "_writeCheckpoint",
+                "delegatedTokenIds",
+                "memory",
+                "oldCheckpoint",
+                "storage"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 456,
+              "lineEnd": 481,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "memory",
+                "storage"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-dao-governance-vulnerabilities-section-5-proposal-cancellatio-005",
+          "title": "Section 5: Proposal Cancellation & Execution Abuse",
+          "lineStart": 482,
+          "lineEnd": 535,
+          "lineCount": 54,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "AddPartyCardsAuthority.addPartyCards",
+            "ArbitraryCallsProposal",
+            "Defeated",
+            "Executed",
+            "Expired",
+            "Governor.cancel",
+            "Governor.execute",
+            "Succeeded",
+            "cancel",
+            "execute",
+            "queue"
+          ],
+          "rootCause": "Proposal lifecycle functions (`cancel`, `execute`, `queue`) with insufficient state validation allow: executing defeated/expired proposals, canceling succeeded proposals to block governance, or re-exe",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 488,
+              "lineEnd": 516,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "AddPartyCardsAuthority.addPartyCards",
+                "ArbitraryCallsProposal",
+                "Defeated",
+                "Executed",
+                "Expired",
+                "Governor.cancel",
+                "Governor.execute",
+                "Succeeded"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 517,
+              "lineEnd": 535,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "cancel"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-dao-governance-vulnerabilities-section-6-quadratic-voting-tal-006",
+          "title": "Section 6: Quadratic Voting & Tally Errors",
+          "lineStart": 536,
+          "lineEnd": 576,
+          "lineCount": 41,
+          "severity": [
+            "CRITICAL",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "Defeated",
+            "Governor.state(proposalId",
+            "StandardFunding._fundingVote",
+            "Succeeded",
+            "_fundingVote",
+            "state"
+          ],
+          "rootCause": "Quadratic voting systems that fail to properly square individual votes before summing them, or that don't enforce majority requirements (ties pass), produce outcomes that don't match the governance sp",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 542,
+              "lineEnd": 560,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "Defeated",
+                "Governor.state(proposalId",
+                "StandardFunding._fundingVote",
+                "Succeeded",
+                "state"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 561,
+              "lineEnd": 576,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_fundingVote"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-dao-governance-vulnerabilities-section-7-multisig-safe-module-007",
+          "title": "Section 7: Multisig & Safe Module Exploits",
+          "lineStart": 577,
+          "lineEnd": 618,
+          "lineCount": 42,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "Safe.checkNSignatures",
+            "Safe.enableModule",
+            "Safe.execTransactionFromModule",
+            "address(0",
+            "checkAfterExecution",
+            "ecrecover",
+            "enableNewModule",
+            "enabledModuleCount",
+            "isValidSigner(address(0"
+          ],
+          "rootCause": "Gnosis Safe modules and signer gate contracts assume module counts remain consistent and that hat owners are always valid addresses. When external modules bypass the module counter or address(0) is a ",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 583,
+              "lineEnd": 602,
+              "severity": [],
+              "codeKeywords": [
+                "Safe.checkNSignatures",
+                "Safe.enableModule",
+                "Safe.execTransactionFromModule",
+                "address(0",
+                "checkAfterExecution",
+                "ecrecover",
+                "enableNewModule",
+                "enabledModuleCount"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 603,
+              "lineEnd": 618,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "checkAfterExecution"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-dao-governance-vulnerabilities-section-8-governance-takeover--008",
+          "title": "Section 8: Governance Takeover via Deployment/Factory Bugs",
+          "lineStart": 619,
+          "lineEnd": 650,
+          "lineCount": 32,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "create_elections",
+            "elections_master",
+            "make_action",
+            "master.make_action"
+          ],
+          "rootCause": "When governance contracts accept operations from instances whose deployment origin isn't verified (i.e., anyone can deploy a governance contract with favorable parameters and have it recognized by the",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 625,
+              "lineEnd": 636,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "create_elections",
+                "elections_master",
+                "make_action",
+                "master.make_action"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 637,
+              "lineEnd": 650,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-governance-dao-governance-vulnerabilities-impact-analysis-009",
+          "title": "Impact Analysis",
+          "lineStart": 651,
+          "lineEnd": 674,
+          "lineCount": 24,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-dao-governance-vulnerabilities-secure-implementation-010",
+          "title": "Secure Implementation",
+          "lineStart": 675,
+          "lineEnd": 710,
+          "lineCount": 36,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "castVote",
+            "propose",
+            "setDelay",
+            "setGovernor"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-dao-governance-vulnerabilities-detection-patterns-011",
+          "title": "Detection Patterns",
+          "lineStart": 711,
+          "lineEnd": 770,
+          "lineCount": 60,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "memory",
+            "storage"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Contract / Call Graph Signals",
+              "lineStart": 713,
+              "lineEnd": 725,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "memory",
+                "storage"
+              ]
+            },
+            {
+              "title": "High-Signal Grep Seeds",
+              "lineStart": 726,
+              "lineEnd": 755,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-governance-dao-governance-vulnerabilities-real-world-examples-012",
+          "title": "Real-World Examples",
+          "lineStart": 771,
+          "lineEnd": 791,
+          "lineCount": 21,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Known Exploits & Audit Findings",
+              "lineStart": 773,
+              "lineEnd": 791,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/vetoken-governance/VETOKEN_VOTING_ESCROW_VULNERABILITIES.md",
+      "totalLines": 938,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "vetoken_governance",
+        "vulnerability_type": "voting_escrow_exploits",
+        "root_cause_family": "vetoken_accounting_and_governance",
+        "pattern_key": "missing_guard | voting_escrow | lock_vote_bribe_boost | fund_theft_governance_corruption",
+        "interaction_scope": "multi_contract",
+        "attack_type": "economic_exploit",
+        "affected_component": "voting_escrow_gauge_bribe_system",
+        "severity": "high",
+        "impact": "fund_theft_governance_corruption",
+        "exploitability": "0.75",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 13,
+      "patterns": [
+        {
+          "id": "general-governance-vetoken-voting-escrow-vulnerabilities-vulnerability-title-000",
+          "title": "Vulnerability Title",
+          "lineStart": 135,
+          "lineEnd": 201,
+          "lineCount": 67,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "BoostController.delegateBoost",
+            "Bribe.getRewardForOwner",
+            "GaugeController.vote",
+            "Voter.poke",
+            "Voter.vote",
+            "VotingEscrow.createLock",
+            "VotingEscrow.merge",
+            "VotingEscrow.split",
+            "multi_contract",
+            "strong"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-1-bribe-reward-theft-e-001",
+          "title": "Section 1: Bribe Reward Theft & Epoch Accounting Exploits",
+          "lineStart": 202,
+          "lineEnd": 302,
+          "lineCount": 101,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "Bribe.deposit",
+            "Bribe.withdraw",
+            "Voter.claimBribes",
+            "Voter.poke",
+            "claimBribes",
+            "deposit",
+            "getRewardForOwner",
+            "totalVoting",
+            "withdraw"
+          ],
+          "rootCause": "Bribe contracts distribute rewards based on voting checkpoints recorded per epoch. When the claim function does not verify that a tokenId actually voted during the epoch being claimed, or when deposit",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 208,
+              "lineEnd": 243,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "Bribe.deposit",
+                "Bribe.withdraw",
+                "Voter.claimBribes",
+                "Voter.poke",
+                "getRewardForOwner",
+                "totalVoting"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 244,
+              "lineEnd": 302,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "claimBribes",
+                "deposit",
+                "getRewardForOwner",
+                "withdraw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-2-voting-power-manipul-002",
+          "title": "Section 2: Voting Power Manipulation & Lock Accounting Bugs",
+          "lineStart": 303,
+          "lineEnd": 398,
+          "lineCount": 96,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "IVoter(voter).checkPeriodVoted",
+            "Voter.carryVoteForward",
+            "VotingEscrow.increase",
+            "VotingEscrow.increaseAndStake",
+            "VotingEscrow.split",
+            "_lockState.increaseLock",
+            "calculateAndUpdatePower",
+            "increase",
+            "merge",
+            "split",
+            "userLock.amount"
+          ],
+          "rootCause": "VotingEscrow contracts manage veNFT positions with lock amount and duration tracking. Bugs in `increase()`, `merge()`, `split()`, and lock extension functions can inflate voting power, create position",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 309,
+              "lineEnd": 354,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "IVoter(voter).checkPeriodVoted",
+                "Voter.carryVoteForward",
+                "VotingEscrow.increase",
+                "VotingEscrow.increaseAndStake",
+                "VotingEscrow.split",
+                "_lockState.increaseLock",
+                "calculateAndUpdatePower",
+                "userLock.amount"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 355,
+              "lineEnd": 398,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "increase",
+                "split"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-3-gauge-voting-emissio-003",
+          "title": "Section 3: Gauge Voting & Emission Distribution Exploits",
+          "lineStart": 399,
+          "lineEnd": 479,
+          "lineCount": 81,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "GaugeController.vote",
+            "Voter.distribute",
+            "Voter.updateFor",
+            "_updateFor",
+            "notifyRewardAmount",
+            "vote"
+          ],
+          "rootCause": "GaugeController contracts allow users to allocate voting weight across gauges to direct token emissions. Failures include: not tracking cumulative user weight across gauges (allowing over-allocation),",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 405,
+              "lineEnd": 437,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "GaugeController.vote",
+                "Voter.distribute",
+                "Voter.updateFor"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 438,
+              "lineEnd": 479,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_updateFor",
+                "notifyRewardAmount",
+                "vote"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-4-poke-function-exploi-004",
+          "title": "Section 4: Poke Function Exploits",
+          "lineStart": 480,
+          "lineEnd": 536,
+          "lineCount": 57,
+          "severity": [],
+          "codeKeywords": [
+            "FluxToken.accrueFlux",
+            "Voter.poke",
+            "_vote",
+            "onlyNewEpoch",
+            "poke",
+            "vote"
+          ],
+          "rootCause": "The `poke()` function updates a user's vote weights based on their current (potentially decayed) veNFT balance. When `poke()` lacks the same access control modifiers as `vote()` (e.g., `onlyNewEpoch`)",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 486,
+              "lineEnd": 517,
+              "severity": [],
+              "codeKeywords": [
+                "FluxToken.accrueFlux",
+                "Voter.poke",
+                "_vote",
+                "onlyNewEpoch"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 518,
+              "lineEnd": 536,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "poke"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-5-boost-mechanism-expl-005",
+          "title": "Section 5: Boost Mechanism Exploits",
+          "lineStart": 537,
+          "lineEnd": 594,
+          "lineCount": 58,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "BoostController.delegateBoost",
+            "BoostController.getBoostMultiplier",
+            "delegateBoost",
+            "getBoostMultiplier"
+          ],
+          "rootCause": "Boost controllers calculate reward multipliers based on veToken holdings. Bugs include: delegation only checking balance at delegation time (not ongoing), broken math that always returns maximum boost",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 543,
+              "lineEnd": 564,
+              "severity": [],
+              "codeKeywords": [
+                "BoostController.delegateBoost",
+                "BoostController.getBoostMultiplier"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 565,
+              "lineEnd": 594,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "delegateBoost",
+                "getBoostMultiplier"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-6-reward-emission-dist-006",
+          "title": "Section 6: Reward & Emission Distribution Bugs",
+          "lineStart": 595,
+          "lineEnd": 669,
+          "lineCount": 75,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "Gauge.notifyRewardAmount",
+            "Voter.distribute",
+            "distributeEx",
+            "stake",
+            "withdraw"
+          ],
+          "rootCause": "Minter → Voter → Gauge reward pipelines can fail when: distribution functions don't track per-gauge amounts already sent, epoch ordering between minter.updatePeriod() and distribute() is wrong, gauge.",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 601,
+              "lineEnd": 629,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "Gauge.notifyRewardAmount",
+                "Voter.distribute"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 630,
+              "lineEnd": 669,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "distributeEx",
+                "stake",
+                "withdraw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-7-checkpoint-voting-po-007",
+          "title": "Section 7: Checkpoint & Voting Power Decay Bugs",
+          "lineStart": 670,
+          "lineEnd": 713,
+          "lineCount": 44,
+          "severity": [
+            "HIGH",
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "Voter.vote",
+            "VotingEscrow._checkpoint",
+            "_checkpoint"
+          ],
+          "rootCause": "VotingEscrow uses checkpoint systems to record point-in-time voting power that decays linearly over lock duration. Bugs include: block slope rounding errors that prevent checkpoint block number update",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 676,
+              "lineEnd": 696,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "Voter.vote",
+                "VotingEscrow._checkpoint"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 697,
+              "lineEnd": 713,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_checkpoint"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-8-delegation-nft-opera-008",
+          "title": "Section 8: Delegation & NFT Operation Exploits",
+          "lineStart": 714,
+          "lineEnd": 757,
+          "lineCount": 44,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "VotingEscrow.delegate",
+            "VotingEscrow.depositManaged",
+            "_extendDuration"
+          ],
+          "rootCause": "veNFT-based systems allow delegation, merging, and managed deposits. When these operations don't properly interact with voting state or impose gas limits, they enable DoS attacks via delegate flooding",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 720,
+              "lineEnd": 738,
+              "severity": [],
+              "codeKeywords": [
+                "VotingEscrow.delegate",
+                "VotingEscrow.depositManaged"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 739,
+              "lineEnd": 757,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_extendDuration"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-vetoken-voting-escrow-vulnerabilities-impact-analysis-009",
+          "title": "Impact Analysis",
+          "lineStart": 758,
+          "lineEnd": 780,
+          "lineCount": 23,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-vetoken-voting-escrow-vulnerabilities-secure-implementation-010",
+          "title": "Secure Implementation",
+          "lineStart": 781,
+          "lineEnd": 826,
+          "lineCount": 46,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "claimBribes",
+            "vote",
+            "withdraw"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-vetoken-voting-escrow-vulnerabilities-detection-patterns-011",
+          "title": "Detection Patterns",
+          "lineStart": 827,
+          "lineEnd": 889,
+          "lineCount": 63,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Contract / Call Graph Signals",
+              "lineStart": 829,
+              "lineEnd": 839,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "High-Signal Grep Seeds",
+              "lineStart": 840,
+              "lineEnd": 861,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-governance-vetoken-voting-escrow-vulnerabilities-real-world-examples-012",
+          "title": "Real-World Examples",
+          "lineStart": 890,
+          "lineEnd": 905,
+          "lineCount": 16,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Known Exploits & Audit Findings",
+              "lineStart": 892,
+              "lineEnd": 905,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
         }
       ]
     },

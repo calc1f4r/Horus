@@ -2,10 +2,10 @@
   "meta": {
     "manifest": "general-governance",
     "description": "Compressed hunt cards for general-governance — one-line detection rules for bulk scanning",
-    "totalCards": 37,
-    "skipped": 34,
+    "totalCards": 55,
+    "skipped": 42,
     "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 37
+    "enriched": 55
   },
   "cards": [
     {
@@ -870,6 +870,474 @@
       ],
       "antipattern": "Self-delegation toggles community power",
       "validWhen": "Self-delegation toggles community power"
+    },
+    {
+      "id": "general-governance-dao-governance-vulnerabilities-vulnerability-title-000",
+      "title": "Vulnerability Title",
+      "severity": "HIGH",
+      "grep": "Timelock.setGovernor(newAddress|GovernorVotesQuorumFraction(4|arbitrary_proposal_execution|VoteEscrow.delegate|Timelock.setDelay(0|checkpoint_storage_bug",
+      "detect": "DAO Governance Vulnerabilities** — Voting power manipulation, timelock bypass, proposal execution abuse, delegation...",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/dao-governance/DAO_GOVERNANCE_VULNERABILITIES.md",
+      "lines": [
+        143,
+        224
+      ],
+      "check": [
+        "VERIFY: Signal 1: castVote uses current balance (getVotes(block.number)) instead of snapshot at proposal creation (getPastVotes(proposalSnapshot)); Signal 2:...",
+        "FALSIFY: Not this bug when: Governance uses getPastVotes(proposalSnapshot) from OZ Governor, which snapshots at proposal creation; Safe if: Timelock's setDelay and setGovernor..."
+      ],
+      "validWhen": "Signal 1: castVote uses current balance (getVotes(block.number)) instead of snapshot at proposal creation (getPastVotes(proposalSnapshot)); Signal 2: Quorum calculated...",
+      "invalidWhen": "Not this bug when: Governance uses getPastVotes(proposalSnapshot) from OZ Governor, which snapshots at proposal creation; Safe if: Timelock's setDelay and setGovernor..."
+    },
+    {
+      "id": "general-governance-dao-governance-vulnerabilities-section-1-flash-loan-snapshot--001",
+      "title": "Section 1: Flash Loan & Snapshot-Less Voting Power Manipulation",
+      "severity": "HIGH",
+      "grep": "getPastVotes(proposalSnapshot|initializeDistributionRecord|getVotes(msg.sender|Governor.castVote|countMemberVotes|castVote",
+      "detect": "Governance contracts that use current token balance (instead of a historical snapshot at proposal creation) for voting...",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/dao-governance/DAO_GOVERNANCE_VULNERABILITIES.md",
+      "lines": [
+        225,
+        287
+      ],
+      "check": [
+        "VERIFY: Governance contracts that use current token balance (instead of a historical snapshot at proposal creation) for voting power allow attackers to...",
+        "PROVE: *Path A: Flash Loan Voting; Attacker takes a flash loan of governance tokens (or borrows from pool)",
+        "ANTIPATTERN: No access control on re-initialization — unlimited voting power mint"
+      ],
+      "antipattern": "No access control on re-initialization — unlimited voting power mint",
+      "validWhen": "Governance contracts that use current token balance (instead of a historical snapshot at proposal creation) for voting power allow attackers to temporarily inflate their..."
+    },
+    {
+      "id": "general-governance-dao-governance-vulnerabilities-section-2-quorum-manipulation--002",
+      "title": "Section 2: Quorum Manipulation & Threshold Bypass",
+      "severity": "HIGH",
+      "grep": "GovernorVotesQuorumFraction(4|VotingToken.delegate|VoteEscrow.withdraw|Governor.propose|quorum",
+      "detect": "Quorum thresholds calculated dynamically from current total supply (instead of frozen at proposal creation) can be...",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/dao-governance/DAO_GOVERNANCE_VULNERABILITIES.md",
+      "lines": [
+        288,
+        351
+      ],
+      "check": [
+        "VERIFY: Quorum thresholds calculated dynamically from current total supply (instead of frozen at proposal creation) can be manipulated by coordinated token...",
+        "PROVE: *Path A: Quorum Lowered via Token Withdrawal; Attacker coordinates with group to lock tokens and create a proposal",
+        "ANTIPATTERN: `4` means 4%, NOT 1/4th (25%) — proposals pass at 6.25x lower threshold"
+      ],
+      "antipattern": "`4` means 4%, NOT 1/4th (25%) — proposals pass at 6.25x lower threshold",
+      "validWhen": "Quorum thresholds calculated dynamically from current total supply (instead of frozen at proposal creation) can be manipulated by coordinated token burns, withdrawals,..."
+    },
+    {
+      "id": "general-governance-dao-governance-vulnerabilities-section-3-timelock-bypass-unau-003",
+      "title": "Section 3: Timelock Bypass & Unauthorized Execution",
+      "severity": "CRITICAL",
+      "grep": "TimelockController.executeBatch|Timelock.setGovernor(attacker|Timelock.cancel(operationId|Timelock.cancel(bytes32(0|Timelock.setGovernor|Timelock.setDelay(0",
+      "detect": "Timelocks are meant to enforce a mandatory delay between proposal approval and execution.",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/dao-governance/DAO_GOVERNANCE_VULNERABILITIES.md",
+      "lines": [
+        352,
+        418
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Timelocks are meant to enforce a mandatory delay between proposal approval and execution.",
+        "PROVE: *Path A: Governor Sets Delay to Zero; Governor calls Timelock.setGovernor(attacker) — effective immediately (no timelock enforcement)",
+        "ANTIPATTERN: setGovernor effective immediately — no timelock enforcement"
+      ],
+      "antipattern": "setGovernor effective immediately — no timelock enforcement",
+      "validWhen": "Timelocks are meant to enforce a mandatory delay between proposal approval and execution."
+    },
+    {
+      "id": "general-governance-dao-governance-vulnerabilities-section-4-delegation-checkpoin-004",
+      "title": "Section 4: Delegation & Checkpoint Accounting Bugs",
+      "severity": "HIGH",
+      "grep": "VotingToken.withdraw|VotingToken.delegate|VoteEscrow.delegate|_writeCheckpoint|delegatedTokenIds|oldCheckpoint",
+      "detect": "Vote delegation and checkpoint systems track historical voting power for governance snapshots.",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/dao-governance/DAO_GOVERNANCE_VULNERABILITIES.md",
+      "lines": [
+        419,
+        481
+      ],
+      "check": [
+        "VERIFY: Vote delegation and checkpoint systems track historical voting power for governance snapshots.",
+        "PROVE: *Path A: _writeCheckpoint Memory vs Storage Bug; User delegates tokenA to userB, then delegates tokenA to userC in same block",
+        "ANTIPATTERN: No stake lockup during active voting — delegate→vote→withdraw→re-vote"
+      ],
+      "antipattern": "No stake lockup during active voting — delegate→vote→withdraw→re-vote",
+      "validWhen": "Vote delegation and checkpoint systems track historical voting power for governance snapshots."
+    },
+    {
+      "id": "general-governance-dao-governance-vulnerabilities-section-5-proposal-cancellatio-005",
+      "title": "Section 5: Proposal Cancellation & Execution Abuse",
+      "severity": "MEDIUM",
+      "grep": "AddPartyCardsAuthority.addPartyCards|ArbitraryCallsProposal|Governor.execute|Governor.cancel|Succeeded|Executed",
+      "detect": "Proposal lifecycle functions (`cancel`, `execute`, `queue`) with insufficient state validation allow: executing...",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/dao-governance/DAO_GOVERNANCE_VULNERABILITIES.md",
+      "lines": [
+        482,
+        535
+      ],
+      "check": [
+        "VERIFY: Proposal lifecycle functions (cancel, execute, queue) with insufficient state validation allow: executing defeated/expired proposals, canceling...",
+        "PROVE: *Path A: Execute Defeated/Expired Proposals; execute() accepts Succeeded, Defeated, and Expired states (too permissive)",
+        "ANTIPATTERN: Can cancel in all states except Executed — blocks governance"
+      ],
+      "antipattern": "Can cancel in all states except Executed — blocks governance",
+      "validWhen": "Proposal lifecycle functions (cancel, execute, queue) with insufficient state validation allow: executing defeated/expired proposals, canceling succeeded proposals to..."
+    },
+    {
+      "id": "general-governance-dao-governance-vulnerabilities-section-6-quadratic-voting-tal-006",
+      "title": "Section 6: Quadratic Voting & Tally Errors",
+      "severity": "CRITICAL",
+      "grep": "StandardFunding._fundingVote|Governor.state(proposalId|_fundingVote|Succeeded|Defeated",
+      "detect": "Quadratic voting systems that fail to properly square individual votes before summing them, or that don't enforce...",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/dao-governance/DAO_GOVERNANCE_VULNERABILITIES.md",
+      "lines": [
+        536,
+        576
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Quadratic voting systems that fail to properly square individual votes before summing them, or that don't enforce majority requirements (ties pass),...",
+        "PROVE: *Path A: Quadratic Sum Not Squared; Spec says: sum of squares of votes ≤ square of token holdings",
+        "ANTIPATTERN: votes not squared before summing — lower hijack threshold"
+      ],
+      "antipattern": "votes not squared before summing — lower hijack threshold",
+      "validWhen": "Quadratic voting systems that fail to properly square individual votes before summing them, or that don't enforce majority requirements (ties pass), produce outcomes..."
+    },
+    {
+      "id": "general-governance-dao-governance-vulnerabilities-section-7-multisig-safe-module-007",
+      "title": "Section 7: Multisig & Safe Module Exploits",
+      "severity": "HIGH",
+      "grep": "Safe.execTransactionFromModule|isValidSigner(address(0|Safe.checkNSignatures|Safe.enableModule|checkAfterExecution|enabledModuleCount",
+      "detect": "Gnosis Safe modules and signer gate contracts assume module counts remain consistent and that hat owners are always...",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/dao-governance/DAO_GOVERNANCE_VULNERABILITIES.md",
+      "lines": [
+        577,
+        618
+      ],
+      "check": [
+        "VERIFY: Gnosis Safe modules and signer gate contracts assume module counts remain consistent and that hat owners are always valid addresses.",
+        "PROVE: *Path A: Module Count Desync Bricks Safe; External module calls Safe.enableModule() directly (bypasses enableNewModule())",
+        "ANTIPATTERN: External module adds module → enabledModuleCount desync → safe bricked"
+      ],
+      "antipattern": "External module adds module → enabledModuleCount desync → safe bricked",
+      "validWhen": "Gnosis Safe modules and signer gate contracts assume module counts remain consistent and that hat owners are always valid addresses."
+    },
+    {
+      "id": "general-governance-dao-governance-vulnerabilities-section-8-governance-takeover--008",
+      "title": "Section 8: Governance Takeover via Deployment/Factory Bugs",
+      "severity": "HIGH",
+      "grep": "master.make_action|elections_master|create_elections|make_action",
+      "detect": "When governance contracts accept operations from instances whose deployment origin isn't verified (i.",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/dao-governance/DAO_GOVERNANCE_VULNERABILITIES.md",
+      "lines": [
+        619,
+        650
+      ],
+      "check": [
+        "VERIFY: When governance contracts accept operations from instances whose deployment origin isn't verified (i.e., anyone can deploy a governance contract with...",
+        "PROVE: *Path A: Unrestricted elections_master Deployment; make_action() validates sender by recalculating expected address from parameters",
+        "ANTIPATTERN: make_action() validates address but not deployment origin"
+      ],
+      "antipattern": "make_action() validates address but not deployment origin",
+      "validWhen": "When governance contracts accept operations from instances whose deployment origin isn't verified (i.e., anyone can deploy a governance contract with favorable..."
+    },
+    {
+      "id": "general-governance-vetoken-voting-escrow-vulnerabilities-vulnerability-title-000",
+      "title": "Vulnerability Title",
+      "severity": "HIGH",
+      "grep": "BoostController.delegateBoost|VotingEscrow.createLock|Bribe.getRewardForOwner|GaugeController.vote|VotingEscrow.split|VotingEscrow.merge",
+      "detect": "veToken / Voting Escrow Governance Vulnerabilities** — Comprehensive patterns across Solidly/ve(3,3)-style governance...",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/vetoken-governance/VETOKEN_VOTING_ESCROW_VULNERABILITIES.md",
+      "lines": [
+        135,
+        201
+      ],
+      "check": [
+        "VERIFY: Signal 1: Bribe.withdraw() does not decrement totalVoting while Bribe.deposit() does increment it; Signal 2: claimBribes/getRewardForOwner does not...",
+        "FALSIFY: Not this bug when: Protocol uses time-weighted voting with automatic decay in Bribe deposits; Safe if: Epoch guard modifier (onlyNewEpoch) is applied to all..."
+      ],
+      "validWhen": "Signal 1: Bribe.withdraw() does not decrement totalVoting while Bribe.deposit() does increment it; Signal 2: claimBribes/getRewardForOwner does not check if the tokenId...",
+      "invalidWhen": "Not this bug when: Protocol uses time-weighted voting with automatic decay in Bribe deposits; Safe if: Epoch guard modifier (onlyNewEpoch) is applied to all..."
+    },
+    {
+      "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-1-bribe-reward-theft-e-001",
+      "title": "Section 1: Bribe Reward Theft & Epoch Accounting Exploits",
+      "severity": "LOW",
+      "grep": "Voter.claimBribes|getRewardForOwner|Bribe.withdraw|Bribe.deposit|Voter.poke|totalVoting",
+      "detect": "Bribe contracts distribute rewards based on voting checkpoints recorded per epoch.",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/vetoken-governance/VETOKEN_VOTING_ESCROW_VULNERABILITIES.md",
+      "lines": [
+        202,
+        302
+      ],
+      "check": [
+        "VERIFY: Bribe contracts distribute rewards based on voting checkpoints recorded per epoch.",
+        "PROVE: *Path A: Claiming Bribes for Unvoted Epochs; Alice votes in epoch 1, Bob votes in epoch 1",
+        "ANTIPATTERN: deposit increments totalVoting, withdraw does not decrement it"
+      ],
+      "antipattern": "deposit increments totalVoting, withdraw does not decrement it",
+      "validWhen": "Bribe contracts distribute rewards based on voting checkpoints recorded per epoch."
+    },
+    {
+      "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-2-voting-power-manipul-002",
+      "title": "Section 2: Voting Power Manipulation & Lock Accounting Bugs",
+      "severity": "LOW",
+      "grep": "IVoter(voter).checkPeriodVoted|VotingEscrow.increaseAndStake|_lockState.increaseLock|Voter.carryVoteForward|VotingEscrow.increase|calculateAndUpdatePower",
+      "detect": "VotingEscrow contracts manage veNFT positions with lock amount and duration tracking.",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/vetoken-governance/VETOKEN_VOTING_ESCROW_VULNERABILITIES.md",
+      "lines": [
+        303,
+        398
+      ],
+      "check": [
+        "VERIFY: VotingEscrow contracts manage veNFT positions with lock amount and duration tracking.",
+        "PROVE: *Path A: Double Voting Power via Lock Increase; User creates a lock with a small initial amount (e.g., 1 wei)",
+        "ANTIPATTERN: amount is double-counted — added in increaseLock AND in calculateAndUpdatePower"
+      ],
+      "antipattern": "amount is double-counted — added in increaseLock AND in calculateAndUpdatePower",
+      "validWhen": "VotingEscrow contracts manage veNFT positions with lock amount and duration tracking."
+    },
+    {
+      "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-3-gauge-voting-emissio-003",
+      "title": "Section 3: Gauge Voting & Emission Distribution Exploits",
+      "severity": "LOW",
+      "grep": "GaugeController.vote|Voter.updateFor|notifyRewardAmount|Voter.distribute|_updateFor|vote",
+      "detect": "GaugeController contracts allow users to allocate voting weight across gauges to direct token emissions.",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/vetoken-governance/VETOKEN_VOTING_ESCROW_VULNERABILITIES.md",
+      "lines": [
+        399,
+        479
+      ],
+      "check": [
+        "VERIFY: GaugeController contracts allow users to allocate voting weight across gauges to direct token emissions.",
+        "PROVE: *Path A: Gauge Over-Voting (No Cumulative Weight Tracking); GaugeController.vote() allows setting weight per gauge but doesn't track total weight across all gauges",
+        "ANTIPATTERN: No check that total user weight across all gauges <= WEIGHT_PRECISION"
+      ],
+      "antipattern": "No check that total user weight across all gauges <= WEIGHT_PRECISION",
+      "validWhen": "GaugeController contracts allow users to allocate voting weight across gauges to direct token emissions."
+    },
+    {
+      "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-4-poke-function-exploi-004",
+      "title": "Section 4: Poke Function Exploits",
+      "severity": "UNKNOWN",
+      "grep": "FluxToken.accrueFlux|onlyNewEpoch|Voter.poke|_vote|vote|poke",
+      "detect": "The `poke()` function updates a user's vote weights based on their current (potentially decayed) veNFT balance.",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/vetoken-governance/VETOKEN_VOTING_ESCROW_VULNERABILITIES.md",
+      "lines": [
+        480,
+        536
+      ],
+      "check": [
+        "VERIFY: poke() function updates a user's vote weights based on their current (potentially decayed) veNFT balance.",
+        "PROVE: *Path A: Unlimited Flux Token Minting via Poke; vote() and reset() have onlyNewEpoch modifier — can only be called once per epoch",
+        "ANTIPATTERN: poke() lacks onlyNewEpoch modifier, can be called repeatedly"
+      ],
+      "antipattern": "poke() lacks onlyNewEpoch modifier, can be called repeatedly",
+      "validWhen": "The poke() function updates a user's vote weights based on their current (potentially decayed) veNFT balance."
+    },
+    {
+      "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-5-boost-mechanism-expl-005",
+      "title": "Section 5: Boost Mechanism Exploits",
+      "severity": "MEDIUM",
+      "grep": "BoostController.getBoostMultiplier|BoostController.delegateBoost|getBoostMultiplier|delegateBoost",
+      "detect": "Boost controllers calculate reward multipliers based on veToken holdings.",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/vetoken-governance/VETOKEN_VOTING_ESCROW_VULNERABILITIES.md",
+      "lines": [
+        537,
+        594
+      ],
+      "check": [
+        "VERIFY: Boost controllers calculate reward multipliers based on veToken holdings.",
+        "PROVE: *Path A: Unbacked Boost via Withdraw After Delegation; User has veTokens and calls delegateBoost(to, amount, duration)",
+        "ANTIPATTERN: Math simplifies to always returning MAX_BOOST for any nonzero amount"
+      ],
+      "antipattern": "Math simplifies to always returning MAX_BOOST for any nonzero amount",
+      "validWhen": "Boost controllers calculate reward multipliers based on veToken holdings."
+    },
+    {
+      "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-6-reward-emission-dist-006",
+      "title": "Section 6: Reward & Emission Distribution Bugs",
+      "severity": "HIGH",
+      "grep": "Gauge.notifyRewardAmount|Voter.distribute|distributeEx|withdraw|stake",
+      "detect": "Minter → Voter → Gauge reward pipelines can fail when: distribution functions don't track per-gauge amounts already...",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/vetoken-governance/VETOKEN_VOTING_ESCROW_VULNERABILITIES.md",
+      "lines": [
+        595,
+        669
+      ],
+      "check": [
+        "VERIFY: Minter → Voter → Gauge reward pipelines can fail when: distribution functions don't track per-gauge amounts already sent, epoch ordering between...",
+        "PROVE: *Path A: Repeated distributeEx Drains All Rewards; distributeEx() distributes rewards to gauges based on weight ratios",
+        "ANTIPATTERN: No tracking of already-distributed amounts per gauge per epoch"
+      ],
+      "antipattern": "No tracking of already-distributed amounts per gauge per epoch",
+      "validWhen": "Minter → Voter → Gauge reward pipelines can fail when: distribution functions don't track per-gauge amounts already sent, epoch ordering between minter.updatePeriod()..."
+    },
+    {
+      "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-7-checkpoint-voting-po-007",
+      "title": "Section 7: Checkpoint & Voting Power Decay Bugs",
+      "severity": "HIGH",
+      "grep": "VotingEscrow._checkpoint|Voter.vote|_checkpoint",
+      "detect": "VotingEscrow uses checkpoint systems to record point-in-time voting power that decays linearly over lock duration.",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/vetoken-governance/VETOKEN_VOTING_ESCROW_VULNERABILITIES.md",
+      "lines": [
+        670,
+        713
+      ],
+      "check": [
+        "VERIFY: VotingEscrow uses checkpoint systems to record point-in-time voting power that decays linearly over lock duration.",
+        "PROVE: *Path A: Checkpoint Block Number Never Updates; Block slope calculation: blockSlope = (MULTIPLIER * (block.number - lastPoint.blk)) / (block.timestamp - lastPoint.ts)",
+        "ANTIPATTERN: MULTIPLIER=2 is too small — blockSlope always rounds to zero"
+      ],
+      "antipattern": "MULTIPLIER=2 is too small — blockSlope always rounds to zero",
+      "validWhen": "VotingEscrow uses checkpoint systems to record point-in-time voting power that decays linearly over lock duration."
+    },
+    {
+      "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-8-delegation-nft-opera-008",
+      "title": "Section 8: Delegation & NFT Operation Exploits",
+      "severity": "MEDIUM",
+      "grep": "VotingEscrow.depositManaged|VotingEscrow.delegate|_extendDuration",
+      "detect": "veNFT-based systems allow delegation, merging, and managed deposits.",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/vetoken-governance/VETOKEN_VOTING_ESCROW_VULNERABILITIES.md",
+      "lines": [
+        714,
+        757
+      ],
+      "check": [
+        "VERIFY: veNFT-based systems allow delegation, merging, and managed deposits.",
+        "PROVE: *Path A: MAX_DELEGATES DoS; Attacker creates 1024 (MAX_DELEGATES) small veNFTs and delegates them all to a target",
+        "ANTIPATTERN: Extending expired position uses wrong dailyUnlockedAmounts key"
+      ],
+      "antipattern": "Extending expired position uses wrong dailyUnlockedAmounts key",
+      "validWhen": "veNFT-based systems allow delegation, merging, and managed deposits."
     },
     {
       "id": "general-governance-stablecoin-vulnerabilities-vulnerability-description-000",
