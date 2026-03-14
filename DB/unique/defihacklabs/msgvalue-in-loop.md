@@ -4,6 +4,13 @@ chain: ethereum
 category: msgvalue_loop
 vulnerability_type: msg_value_reuse_in_loop
 
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: msg_value_reuse_in_loop | batch_functions | economic_exploit | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 attack_type: economic_exploit
 affected_component: batch_functions
 
@@ -19,6 +26,23 @@ severity: critical
 impact: fund_loss
 exploitability: 0.9
 financial_impact: critical
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "for"
+  - "mint"
+  - "batch"
+  - "exercise"
+  - "commitEth"
+  - "msg.value"
+  - "multicall"
+  - "MINT_PRICE"
+  - "testExploit"
+  - "delegatecall"
+  - "batchPurchase"
+path_keys:
+  - "opyn_protocol"
+  - "sushimiso"
 
 tags:
   - msg_value
@@ -39,9 +63,32 @@ total_losses: "$371K + $3M saved"
 
 ## msg.value in Loop Vulnerability
 
+
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [OPYN-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2020-08/Opyn_exp.sol` |
+| [SUSHIMISO-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-09/Sushimiso_exp.sol` |
+
+---
+
 ### Overview
 
 When `msg.value` is used as a payment check inside a loop or across multiple function calls within a single transaction, the same ETH is counted multiple times. `msg.value` is a transaction-level constant — it does not decrease when ETH is spent inside the transaction. This allows attackers to multiply their purchasing power: sending ETH once but executing multiple paid operations.
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_validation` |
+| Pattern Key | `msg_value_reuse_in_loop | batch_functions | economic_exploit | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum |
+
 
 ### Vulnerability Description
 
@@ -69,6 +116,8 @@ This applies to:
 ### Vulnerable Pattern Examples
 
 #### Category 1: msg.value Reuse in Loop Iteration [CRITICAL]
+
+> **pathShape**: `atomic`
 
 **Example 1: Opyn Protocol — Exercise Multiple Vaults with Single Payment (2020-08, ~$371K)** [CRITICAL]
 ```solidity
@@ -127,6 +176,8 @@ function testExploit() public {
 ---
 
 #### Category 2: msg.value in Multicall / Batch [HIGH]
+
+> **pathShape**: `atomic`
 
 **Example 2: SushiMiso — Dutch Auction batch() ETH Commitment Multiplication (2021-09, ~$3M saved by whitehat)** [CRITICAL]
 ```solidity
@@ -203,6 +254,8 @@ vulnerableContract.multicall{value: MINT_PRICE}(calls);
 ---
 
 #### Category 3: msg.value in Payable Loop [HIGH]
+
+> **pathShape**: `atomic`
 
 **Example 3: Generic Batch Purchase Pattern** [HIGH]
 ```solidity
@@ -313,8 +366,7 @@ function multicall(bytes[] calldata data) external payable {
 ### Detection Patterns
 
 ```bash
-# msg.value inside loop body
-grep -B5 -A10 "for\s*(" --include="*.sol" | grep "msg.value"
+# msg.value inside loop bodygrep -B5 -A10 "for\s*(" --include="*.sol" | grep "msg.value"
 
 # msg.value in functions called from loops
 grep -rn "msg.value" --include="*.sol" | grep -v "//\|require.*==.*0"

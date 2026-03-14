@@ -4,6 +4,13 @@ chain: ethereum, bsc
 category: price_manipulation
 vulnerability_type: oracle_price_manipulation
 
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: oracle_price_manipulation | price_oracle | flash_loan_price_manipulation | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 attack_type: flash_loan_price_manipulation
 affected_component: price_oracle
 
@@ -20,6 +27,30 @@ severity: critical
 impact: fund_loss
 exploitability: 0.9
 financial_impact: critical
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "gulp"
+  - "swap"
+  - "theSwap"
+  - "balanceOf"
+  - "borrowAll"
+  - "BunnyMinter"
+  - "totalAssets"
+  - "totalSupply"
+  - "borrowTokens"
+  - "pricePerShare"
+  - "removeLiquidity"
+  - "Swap_Mono_For_USDC"
+  - "getCollateralValue"
+  - "yUSD.pricePerShare"
+  - "swapExactTokenForToken"
+path_keys:
+  - "cream_finance_2"
+  - "harvest_finance"
+  - "indexed_finance"
+  - "monox_finance"
+  - "pancakebunny"
 
 tags:
   - price_manipulation
@@ -42,9 +73,39 @@ total_losses: "$300M+"
 
 ## DeFiHackLabs Price & Oracle Manipulation Compendium
 
+
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [CREAM2-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-10/Cream_2_exp.sol` |
+| [HARVESTFINAN-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2020-10/HarvestFinance_exp.sol` |
+| [INDEXEDFINAN-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-10/IndexedFinance_exp.sol` |
+| [MONO-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-11/Mono_exp.sol` |
+| [PANCAKEBUNNY-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-05/PancakeBunny_exp.sol` |
+| [PLOUTOZ-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-11/Ploutoz_exp.sol` |
+| [SPARTAN-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-05/Spartan_exp.sol` |
+| [WAULTFINANCE-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-08/WaultFinance_exp.sol` |
+| [YEARNYDAI-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-02/Yearn_ydai_exp.sol` |
+
+---
+
 ### Overview
 
 Price manipulation is the highest-loss vulnerability class in DeFi. This entry catalogs **9 real-world price manipulation exploits** from 2020-2021 totaling over **$300M in losses**. The core pattern: protocols trust manipulable on-chain price sources (spot AMM ratios, vault pricePerShare, pool weights) for critical operations (lending collateral valuation, reward minting, share calculation).
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_validation` |
+| Pattern Key | `oracle_price_manipulation | price_oracle | flash_loan_price_manipulation | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, bsc |
+
 
 ### Root Cause Categories
 
@@ -60,6 +121,8 @@ Price manipulation is the highest-loss vulnerability class in DeFi. This entry c
 ### Vulnerable Pattern Examples
 
 #### Category 1: Self-Swap Price Inflation [CRITICAL]
+
+> **pathShape**: `atomic`
 
 **Example 1: MonoX Finance — Swap Token for Itself ($31M, 2021-11)** [CRITICAL]
 ```solidity
@@ -100,6 +163,8 @@ function Swap_Mono_For_USDC() internal {
 ---
 
 #### Category 2: Vault Donation / pricePerShare Inflation [CRITICAL]
+
+> **pathShape**: `staged`
 
 **Example 2: Cream Finance 2 — yUSD Donation Doubles Collateral ($130M, 2021-10)** [CRITICAL]
 ```solidity
@@ -170,6 +235,8 @@ SPT1_WBNB.removeLiquidity();
 
 #### Category 3: Spot Price for Reward Minting [CRITICAL]
 
+> **pathShape**: `atomic`
+
 **Example 4: PancakeBunny — AMM Spot Price Inflates BUNNY Minting (~$45M, 2021-05)** [CRITICAL]
 ```solidity
 // ❌ VULNERABLE: BunnyMinter uses WBNB/USDT AMM spot price to calculate
@@ -223,6 +290,8 @@ for (uint256 i = 0; i < 68; i++) {
 
 #### Category 4: Index Pool Weight Manipulation [CRITICAL]
 
+> **pathShape**: `atomic`
+
 **Example 6: Indexed Finance — gulp() + Weight Skew ($16M, 2021-10)** [CRITICAL]
 ```solidity
 // ❌ VULNERABLE: Index pool derives total value from single token's weight
@@ -260,6 +329,8 @@ indexPool.exitPool(defi5Balance, minAmountOut);
 ---
 
 #### Category 5: Flash Loan + Curve Pool Manipulation [CRITICAL]
+
+> **pathShape**: `atomic`
 
 **Example 7: Harvest Finance — Curve Sandwich ($33.8M, 2020-10)** [CRITICAL]
 ```solidity
@@ -397,8 +468,7 @@ function removeLiquidity(uint256 shares) external {
 ### Detection Patterns
 
 ```bash
-# Self-swap vulnerability (tokenIn == tokenOut not checked)
-grep -rn "function swap\|function exchange" --include="*.sol" | \
+# Self-swap vulnerability (tokenIn == tokenOut not checked)grep -rn "function swap\|function exchange" --include="*.sol" | \
   xargs grep -L "tokenIn.*!=.*tokenOut\|require.*different"
 
 # Spot price used for critical calculations

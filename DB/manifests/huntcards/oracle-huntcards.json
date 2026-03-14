@@ -2,10 +2,10 @@
   "meta": {
     "manifest": "oracle",
     "description": "Compressed hunt cards for oracle — one-line detection rules for bulk scanning",
-    "totalCards": 60,
-    "skipped": 24,
+    "totalCards": 63,
+    "skipped": 27,
     "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 60
+    "enriched": 63
   },
   "cards": [
     {
@@ -769,8 +769,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-bsc-oracle-manipulation-2022.md",
       "lines": [
-        111,
-        388
+        172,
+        465
       ],
       "neverPrune": true,
       "check": [
@@ -780,7 +780,7 @@
       "validWhen": "function uniswapV2Call(address, uint256 amount0, uint256, bytes calldata) external {"
     },
     {
-      "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-1-amm-reserve-based-price-orac-000",
+      "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-1-amm-reserve-based-price-orac-001",
       "title": "1. AMM Reserve-Based Price Oracle — Direct LP Pool Manipulation",
       "severity": "HIGH",
       "grep": "claimAllReward|calculateAll|getEGDPrice|getPrice|redeem|stake",
@@ -792,8 +792,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-flashloan-oracle-2022-patterns.md",
       "lines": [
-        69,
-        163
+        111,
+        207
       ],
       "check": [
         "VERIFY: price calculation function reads real-time AMM pool reserve balances to derive token prices.",
@@ -804,10 +804,10 @@
       "validWhen": "This vulnerability exists because the price calculation function reads real-time AMM pool reserve balances to derive token prices."
     },
     {
-      "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-2-curve-lp-virtual-price-oracl-001",
+      "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-2-curve-lp-virtual-price-oracl-002",
       "title": "2. Curve LP / Virtual Price Oracle Manipulation",
       "severity": "CRITICAL",
-      "grep": "InverseFinanceDola|YVCrv3CryptoFeed|virtual_price|enterMarkets",
+      "grep": "atomic|InverseFinanceDola|YVCrv3CryptoFeed|virtual_price",
       "detect": "This vulnerability exists because lending protocols use Curve pool's **internal state** (virtual_price, LP token value)...",
       "cat": [
         "oracle",
@@ -816,8 +816,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-flashloan-oracle-2022-patterns.md",
       "lines": [
-        164,
-        235
+        208,
+        281
       ],
       "neverPrune": true,
       "check": [
@@ -829,7 +829,7 @@
       "validWhen": "This vulnerability exists because lending protocols use Curve pool's internal state (virtual_price, LP token value) as a price oracle for collateral."
     },
     {
-      "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-3-solidly-lp-oracle-weak-signa-002",
+      "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-3-solidly-lp-oracle-weak-signa-003",
       "title": "3. Solidly LP Oracle + Weak Signature Validation",
       "severity": "CRITICAL",
       "grep": "addCollateral|deposit|borrow",
@@ -841,8 +841,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-flashloan-oracle-2022-patterns.md",
       "lines": [
-        236,
-        308
+        282,
+        356
       ],
       "neverPrune": true,
       "check": [
@@ -853,10 +853,10 @@
       "validWhen": "This vulnerability exists because the lending protocol uses a Solidly/Solidex LP token as collateral with an oracle that reads LP value from manipulable on-chain state,..."
     },
     {
-      "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-4-vault-share-price-inflation--003",
+      "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-4-vault-share-price-inflation--004",
       "title": "4. Vault Share Price Inflation via Donation",
       "severity": "CRITICAL",
-      "grep": "mintAndStakeGlpETH|mintAndStakeGlp|redeem|donate",
+      "grep": "mintAndStakeGlpETH|mintAndStakeGlp|redeem|donate|atomic",
       "detect": "This vulnerability exists because lending protocols accept vault tokens (plvGLP, yearn vault shares) as collateral and...",
       "cat": [
         "oracle",
@@ -865,8 +865,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-flashloan-oracle-2022-patterns.md",
       "lines": [
-        309,
-        382
+        357,
+        432
       ],
       "neverPrune": true,
       "check": [
@@ -877,7 +877,7 @@
       "validWhen": "This vulnerability exists because lending protocols accept vault tokens (plvGLP, yearn vault shares) as collateral and price them based on the vault's exchange rate..."
     },
     {
-      "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-1-low-cost-oracle-reporter-man-000",
+      "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-1-low-cost-oracle-reporter-man-001",
       "title": "1. Low-Cost Oracle Reporter Manipulation (BonqDAO $88M)",
       "severity": "CRITICAL",
       "grep": "tx2_liquidateMassiveAmountOfALBT|tx1_mintMassiveAmountOfBEUR|getCurrentValue|updatePrice",
@@ -889,8 +889,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md",
       "lines": [
-        91,
-        184
+        133,
+        228
       ],
       "neverPrune": true,
       "check": [
@@ -902,7 +902,7 @@
       "validWhen": "BonqDAO used TellorFlex oracle for wALBT token pricing."
     },
     {
-      "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-2-concentrated-liquidity-bin-m-001",
+      "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-2-concentrated-liquidity-bin-m-002",
       "title": "2. Concentrated Liquidity Bin Manipulation (Jimbo $8M)",
       "severity": "CRITICAL",
       "grep": "executeOperation|shift|reset",
@@ -914,8 +914,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md",
       "lines": [
-        185,
-        256
+        229,
+        302
       ],
       "neverPrune": true,
       "check": [
@@ -926,10 +926,10 @@
       "validWhen": "Jimbo Protocol used a custom liquidity distribution mechanism on Trader Joe V2.1 (Liquidity Book)."
     },
     {
-      "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-3-curve-lp-token-price-manipul-002",
+      "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-3-curve-lp-token-price-manipul-003",
       "title": "3. Curve LP Token Price Manipulation (Zunami $2M)",
       "severity": "HIGH",
-      "grep": "Manipulation|Vulnerable|Protocol|Examples",
+      "grep": "atomic|Manipulation|Vulnerable|Protocol",
       "detect": "Zunami Protocol used Curve LP tokens (sETH/ETH, frxETH/ETH) whose price was derived from pool reserves.",
       "cat": [
         "oracle",
@@ -938,8 +938,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md",
       "lines": [
-        257,
-        286
+        303,
+        334
       ],
       "check": [
         "VERIFY: Zunami Protocol used Curve LP tokens (sETH/ETH, frxETH/ETH) whose price was derived from pool reserves.",
@@ -949,10 +949,10 @@
       "validWhen": "Zunami Protocol used Curve LP tokens (sETH/ETH, frxETH/ETH) whose price was derived from pool reserves."
     },
     {
-      "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-4-vtoken-collateral-oracle-man-003",
+      "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-4-vtoken-collateral-oracle-man-004",
       "title": "4. vToken Collateral Oracle Manipulation (0vix $2M)",
       "severity": "HIGH",
-      "grep": "Manipulation|Vulnerable|Collateral|Chainlink",
+      "grep": "atomic|Manipulation|Vulnerable|Collateral",
       "detect": "0vix Protocol (Compound V2 fork on Polygon) used vGHST as a collateral token.",
       "cat": [
         "oracle",
@@ -961,8 +961,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md",
       "lines": [
-        287,
-        316
+        335,
+        366
       ],
       "check": [
         "VERIFY: 0vix Protocol (Compound V2 fork on Polygon) used vGHST as a collateral token.",
@@ -972,10 +972,10 @@
       "validWhen": "0vix Protocol (Compound V2 fork on Polygon) used vGHST as a collateral token."
     },
     {
-      "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-5-flash-loan-spot-price-compou-004",
+      "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-5-flash-loan-spot-price-compou-005",
       "title": "5. Flash Loan + Spot Price (CompounderFinance $27.2M, Gamma $6.3M, Allbridge $550K)",
       "severity": "CRITICAL",
-      "grep": "getReserves|CompounderFinance|spot_price|Manipulation",
+      "grep": "getReserves|atomic",
       "detect": "Multiple protocols in 2023 continued to use DEX spot prices (pair reserves, `getReserves()`) as oracle prices.",
       "cat": [
         "oracle",
@@ -984,8 +984,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md",
       "lines": [
-        317,
-        352
+        367,
+        404
       ],
       "neverPrune": true,
       "check": [
@@ -996,10 +996,10 @@
       "validWhen": "Multiple protocols in 2023 continued to use DEX spot prices (pair reserves, getReserves()) as oracle prices."
     },
     {
-      "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-6-lending-protocol-oracle-mani-005",
+      "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-6-lending-protocol-oracle-mani-006",
       "title": "6. Lending Protocol Oracle Manipulation (RodeoFinance $888K)",
       "severity": "HIGH",
-      "grep": "RodeoFinance|Manipulation|Insufficient|Vulnerable",
+      "grep": "atomic|RodeoFinance|Manipulation|Insufficient",
       "detect": "RodeoFinance on Arbitrum used a TWAP oracle for collateral pricing, but the TWAP window was too short (1 hour or less).",
       "cat": [
         "oracle",
@@ -1008,8 +1008,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md",
       "lines": [
-        353,
-        380
+        405,
+        434
       ],
       "check": [
         "VERIFY: RodeoFinance on Arbitrum used a TWAP oracle for collateral pricing, but the TWAP window was too short (1 hour or less).",
@@ -1019,7 +1019,7 @@
       "validWhen": "RodeoFinance on Arbitrum used a TWAP oracle for collateral pricing, but the TWAP window was too short (1 hour or less)."
     },
     {
-      "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-secure-implementations-006",
+      "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-secure-implementations-007",
       "title": "Secure Implementations",
       "severity": "HIGH",
       "grep": "getPrice|shift",
@@ -1031,8 +1031,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md",
       "lines": [
-        381,
-        439
+        435,
+        493
       ],
       "check": [
         "VERIFY: // SECURE: Read Tellor price with sufficient dispute window",
@@ -1043,10 +1043,10 @@
       "invalidWhen": "Read Tellor price with sufficient dispute window"
     },
     {
-      "id": "oracle-defihacklabs-oracle-manipulation-2024-20-1-curve-pool-based-oracle-mani-000",
+      "id": "oracle-defihacklabs-oracle-manipulation-2024-20-1-curve-pool-based-oracle-mani-001",
       "title": "1. Curve Pool-Based Oracle Manipulation for Lending Liquidation",
       "severity": "CRITICAL",
-      "grep": "driveDownsUSDEPrice|driveUpsUSDEPrice",
+      "grep": "driveDownsUSDEPrice|driveUpsUSDEPrice|atomic",
       "detect": "Lending protocols that derive collateral/debt asset prices from Curve pool spot prices are vulnerable to...",
       "cat": [
         "oracle",
@@ -1055,8 +1055,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2024-2025.md",
       "lines": [
-        79,
-        138
+        123,
+        184
       ],
       "neverPrune": true,
       "check": [
@@ -1068,10 +1068,10 @@
       "validWhen": "Lending protocols that derive collateral/debt asset prices from Curve pool spot prices are vulnerable to flash-loan-driven price manipulation."
     },
     {
-      "id": "oracle-defihacklabs-oracle-manipulation-2024-20-2-self-referencing-oracle-spmm-001",
+      "id": "oracle-defihacklabs-oracle-manipulation-2024-20-2-self-referencing-oracle-spmm-002",
       "title": "2. Self-Referencing Oracle (sPMM) Manipulation",
       "severity": "CRITICAL",
-      "grep": "woo_liquidity_amount|uni_flash_amount|IUniswapV3Flash|woo_amount_swap",
+      "grep": "atomic|woo_liquidity_amount|uni_flash_amount|IUniswapV3Flash",
       "detect": "Proactive market maker (PMM) DEXes like WooPPV2 use an internal oracle (WooracleV2) that updates its price state based...",
       "cat": [
         "oracle",
@@ -1080,8 +1080,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2024-2025.md",
       "lines": [
-        139,
-        181
+        185,
+        229
       ],
       "neverPrune": true,
       "check": [
@@ -1092,10 +1092,10 @@
       "validWhen": "Proactive market maker (PMM) DEXes like WooPPV2 use an internal oracle (WooracleV2) that updates its price state based on swaps executed through the same pool."
     },
     {
-      "id": "oracle-defihacklabs-oracle-manipulation-2024-20-3-concentrated-liquidity-vault-002",
+      "id": "oracle-defihacklabs-oracle-manipulation-2024-20-3-concentrated-liquidity-vault-003",
       "title": "3. Concentrated Liquidity Vault Deposit/Withdraw Cycling",
       "severity": "CRITICAL",
-      "grep": "calculatePrice|usdt_usdce_pool|globalState|algebra_pool",
+      "grep": "calculatePrice|atomic",
       "detect": "Concentrated liquidity vaults (e.",
       "cat": [
         "oracle",
@@ -1104,8 +1104,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2024-2025.md",
       "lines": [
-        182,
-        231
+        230,
+        281
       ],
       "neverPrune": true,
       "check": [
@@ -1116,10 +1116,10 @@
       "validWhen": "Concentrated liquidity vaults (e.g., Gamma on Algebra/Uniswap V3) calculate LP share amounts based on the current spot price of the underlying pool."
     },
     {
-      "id": "oracle-defihacklabs-oracle-manipulation-2024-20-4-defective-token-transfer-hoo-003",
+      "id": "oracle-defihacklabs-oracle-manipulation-2024-20-4-defective-token-transfer-hoo-004",
       "title": "4. Defective Token Transfer Hook Price Disruption",
       "severity": "CRITICAL",
-      "grep": "pair.sync|_transfer|_update|sync",
+      "grep": "pair.sync|_transfer|_update|atomic|sync",
       "detect": "Custom ERC20 tokens that call `pair.sync()` inside their `_update()` or `_transfer()` function disrupt AMM pricing mechanics.",
       "cat": [
         "oracle",
@@ -1128,8 +1128,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2024-2025.md",
       "lines": [
-        232,
-        272
+        282,
+        324
       ],
       "neverPrune": true,
       "check": [
@@ -1140,10 +1140,10 @@
       "validWhen": "Custom ERC20 tokens that call pair.sync() inside their _update() or _transfer() function disrupt AMM pricing mechanics."
     },
     {
-      "id": "oracle-defihacklabs-oracle-manipulation-2024-20-5-broken-vault-mint-ratio-004",
+      "id": "oracle-defihacklabs-oracle-manipulation-2024-20-5-broken-vault-mint-ratio-005",
       "title": "5. Broken Vault Mint Ratio",
       "severity": "CRITICAL",
-      "grep": "swapExactTokensForTokensSupportingFeeOnTransferTokens|IPancakeRouter|block.timestamp|PancakeSwap",
+      "grep": "atomic|swapExactTokensForTokensSupportingFeeOnTransferTokens|IPancakeRouter|block.timestamp",
       "detect": "Vaults or proxy contracts with misconfigured exchange rates or missing decimal normalization can mint vastly...",
       "cat": [
         "oracle",
@@ -1152,8 +1152,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2024-2025.md",
       "lines": [
-        273,
-        304
+        325,
+        358
       ],
       "neverPrune": true,
       "check": [
@@ -1164,7 +1164,7 @@
       "validWhen": "Vaults or proxy contracts with misconfigured exchange rates or missing decimal normalization can mint vastly disproportionate token amounts for trivial deposits."
     },
     {
-      "id": "oracle-defihacklabs-oracle-manipulation-2024-20-6-faulty-chainlink-oracle-pric-005",
+      "id": "oracle-defihacklabs-oracle-manipulation-2024-20-6-faulty-chainlink-oracle-pric-006",
       "title": "6. Faulty Chainlink Oracle Price Feed",
       "severity": "HIGH",
       "grep": "enterMarkets|Vulnerable|Chainlink|Attackers",
@@ -1176,8 +1176,8 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2024-2025.md",
       "lines": [
-        305,
-        350
+        359,
+        406
       ],
       "check": [
         "VERIFY: When Chainlink oracle feeds report incorrect prices for wrapped staked tokens (e.g., wrsETH vs wstETH), the price discrepancy between oracle-reported...",
@@ -1187,10 +1187,53 @@
       "validWhen": "When Chainlink oracle feeds report incorrect prices for wrapped staked tokens (e.g., wrsETH vs wstETH), the price discrepancy between oracle-reported value and actual..."
     },
     {
-      "id": "oracle-defihacklabs-price-manipulation-patterns-defihacklabs-price-oracle-mani-000",
-      "title": "DeFiHackLabs Price & Oracle Manipulation Compendium",
+      "id": "oracle-defihacklabs-price-manipulation-patterns-agent-quick-view-000",
+      "title": "Agent Quick View",
       "severity": "CRITICAL",
-      "grep": "Swap_Mono_for_Mono_55_Times|yUSD.pricePerShare|swapExactTokenForToken|Swap_Mono_For_USDC|pricePerShare|borrowTokens",
+      "grep": "missing_validation|single_contract",
+      "detect": "Agent Quick View",
+      "cat": [
+        "oracle",
+        "price-feed",
+        "data-freshness"
+      ],
+      "ref": "DB/oracle/price-manipulation/defihacklabs-price-manipulation-patterns.md",
+      "lines": [
+        98,
+        109
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Pattern Key | oracle_price_manipulation | price_oracle | flash_loan_price_manipulation | fund_loss"
+      ],
+      "validWhen": "Pattern Key | oracle_price_manipulation | price_oracle | flash_loan_price_manipulation | fund_loss"
+    },
+    {
+      "id": "oracle-defihacklabs-price-manipulation-patterns-root-cause-categories-001",
+      "title": "Root Cause Categories",
+      "severity": "LOW",
+      "grep": "pricePerShare|balanceOf",
+      "detect": "Self-Swap Price Inflation** — Protocol allows swapping token A for token A, inflating virtual price each swap",
+      "cat": [
+        "oracle",
+        "price-feed",
+        "data-freshness"
+      ],
+      "ref": "DB/oracle/price-manipulation/defihacklabs-price-manipulation-patterns.md",
+      "lines": [
+        110,
+        120
+      ],
+      "check": [
+        "VERIFY: Self-Swap Price Inflation — Protocol allows swapping token A for token A, inflating virtual price each swap"
+      ],
+      "validWhen": "Self-Swap Price Inflation — Protocol allows swapping token A for token A, inflating virtual price each swap"
+    },
+    {
+      "id": "oracle-defihacklabs-price-manipulation-patterns-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "CRITICAL",
+      "grep": "IERC20.balanceOf(address(this|Swap_Mono_for_Mono_55_Times|yUSD.pricePerShare|swapExactTokenForToken|Swap_Mono_For_USDC|removeLiquidity",
       "detect": "swapExactTokenForToken allows tokenIn == tokenOut",
       "cat": [
         "oracle",
@@ -1199,21 +1242,34 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-price-manipulation-patterns.md",
       "lines": [
-        43,
-        399
+        121,
+        404
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: swapExactTokenForToken allows tokenIn == tokenOut",
-        "PROVE: Cream uses yUSD vault's pricePerShare() to value crYUSD collateral",
-        "FALSIFY: Track reserves internally, don't use balanceOf for withdrawal calc",
-        "IMPACT: Protocol insolvency: Artificial collateral inflation allows borrowing far beyond real value"
+        "VERIFY: swapExactTokenForToken has no check that tokenIn != tokenOut.",
+        "PROVE: Cream uses yUSD vault's pricePerShare() to value crYUSD collateral"
       ],
       "antipattern": "Cream uses yUSD vault's pricePerShare() to value crYUSD collateral",
-      "securePattern": "Track reserves internally, don't use balanceOf for withdrawal calc",
-      "validWhen": "swapExactTokenForToken allows tokenIn == tokenOut",
-      "invalidWhen": "Track reserves internally, don't use balanceOf for withdrawal calc",
-      "impact": "Protocol insolvency: Artificial collateral inflation allows borrowing far beyond real value"
+      "validWhen": "swapExactTokenForToken has no check that tokenIn != tokenOut."
+    },
+    {
+      "id": "oracle-defihacklabs-price-manipulation-patterns-keywords-003",
+      "title": "Keywords",
+      "severity": "UNKNOWN",
+      "grep": "collateral_inflation|oracle_manipulation|price_manipulation|donation_attack",
+      "detect": "collateral_inflation",
+      "cat": [
+        "oracle",
+        "price-feed",
+        "data-freshness"
+      ],
+      "ref": "DB/oracle/price-manipulation/defihacklabs-price-manipulation-patterns.md",
+      "lines": [
+        504,
+        522
+      ],
+      "validWhen": "collateral_inflation"
     },
     {
       "id": "oracle-dex-amm-oracle-price-manipulation-attack-scenarios-002",

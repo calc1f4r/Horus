@@ -5,6 +5,13 @@ chain: "ethereum, arbitrum"
 category: "business_logic"
 vulnerability_type: "dangling_approval, repeated_withdrawal, uninitialized_proxy"
 
+# Pattern Identity (Required)
+root_cause_family: stale_accounting
+pattern_key: dangling_approval | campaign_lifecycle | logical_error | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 # Attack Vector Details
 attack_type: "logical_error"
 affected_component: "campaign_lifecycle, tranche_state, proxy_initialization"
@@ -26,6 +33,28 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.85
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "_burn"
+  - "cancel"
+  - "create"
+  - "redeem"
+  - "refund"
+  - "_burn(id"
+  - "withdraw"
+  - "approve(0"
+  - "withdrawn"
+  - "initialize"
+  - "transferFrom"
+  - "proxiableUUID"
+  - "cancelCampaign"
+  - "deposit_amount"
+  - "_burn(trancheID"
+path_keys:
+  - "dangling_approval_after_operation_cancellation"
+  - "repeated_withdrawal_without_state_invalidation"
+  - "uninitialized_uups_proxy_takeover"
 
 # Context Tags
 tags:
@@ -58,14 +87,28 @@ version: ">=0.8.0"
 ---
 
 # Business Logic & State Management Attack Patterns (2024-2025)
-
 ## Overview
 
 Business logic vulnerabilities exploit flaws in protocol state management — missing state invalidation, dangling approvals after operations, and uninitialized proxy contracts. These attacks are deceptively simple but devastatingly effective, causing over **$153M** in losses during 2024-2025. The three major patterns are: dangling ERC20 approvals after campaign cancellation (HedgeyFinance $48M), repeated withdrawals from non-invalidated tranches (HegicOptions $104M), and uninitialized UUPS proxies allowing ownership takeover (PikeFinance $1.4M).
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `stale_accounting` |
+| Pattern Key | `dangling_approval | campaign_lifecycle | logical_error | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, arbitrum |
+
+
 ## 1. Dangling Approval After Operation Cancellation
+
+> **pathShape**: `callback-reentrant`
 
 ### Root Cause
 
@@ -124,6 +167,8 @@ USDC.transferFrom(
 
 ## 2. Repeated Withdrawal Without State Invalidation
 
+> **pathShape**: `iterative-loop`
+
 ### Root Cause
 
 When a withdrawal or redemption function processes a tranche/position but fails to burn, delete, or otherwise invalidate the tranche ID after successful withdrawal, the same ID can be reused to withdraw again. This creates an infinite withdrawal loop where a tiny initial deposit enables draining the entire pool.
@@ -173,6 +218,8 @@ for (uint256 i = 0; i < 331; i++) {
 ---
 
 ## 3. Uninitialized UUPS Proxy Takeover
+
+> **pathShape**: `linear-multistep`
 
 ### Root Cause
 

@@ -3,7 +3,7 @@
     "category": "general-infrastructure",
     "description": "Smart contract infrastructure: proxies, reentrancy, storage, bridges",
     "fileCount": 14,
-    "totalPatterns": 85,
+    "totalPatterns": 92,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -1248,12 +1248,15 @@
     },
     {
       "file": "DB/general/reentrancy/defihacklabs-callback-reentrancy-2022-patterns.md",
-      "totalLines": 544,
+      "totalLines": 594,
       "frontmatter": {
         "protocol": "\"lending, defi, nft\"",
         "chain": "\"ethereum, gnosis, avalanche, polygon\"",
         "category": "\"reentrancy\"",
         "vulnerability_type": "\"callback_reentrancy\"",
+        "root_cause_family": "callback_reentrancy",
+        "pattern_key": "callback_reentrancy | lending_pool | reentrancy | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "\"reentrancy\"",
         "affected_component": "\"lending_pool, flash_loan, nft_mint, share_trading\"",
         "severity": "\"critical\"",
@@ -1263,14 +1266,46 @@
         "language": "\"solidity\"",
         "version": "\">=0.6.0\""
       },
-      "patternCount": 8,
+      "patternCount": 9,
       "patterns": [
         {
-          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-1-erc-677-ontokentransfer-reen-000",
+          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-overview-000",
+          "title": "Overview",
+          "lineStart": 93,
+          "lineEnd": 111,
+          "lineCount": 19,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "callback_reentrancy",
+            "onERC1155Received",
+            "onTokenTransfer",
+            "receive",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 100,
+              "lineEnd": 111,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "callback_reentrancy",
+                "single_contract"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-1-erc-677-ontokentransfer-reen-001",
           "title": "1. ERC-677 `onTokenTransfer` Reentrancy During Liquidation",
-          "lineStart": 70,
-          "lineEnd": 137,
-          "lineCount": 68,
+          "lineStart": 112,
+          "lineEnd": 181,
+          "lineCount": 70,
           "severity": [
             "CRITICAL",
             "LOW"
@@ -1284,8 +1319,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 76,
-              "lineEnd": 84,
+              "lineStart": 120,
+              "lineEnd": 128,
               "severity": [
                 "LOW"
               ],
@@ -1293,8 +1328,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 85,
-              "lineEnd": 137,
+              "lineStart": 129,
+              "lineEnd": 181,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -1307,11 +1342,11 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-2-flash-loan-callback-reentran-001",
+          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-2-flash-loan-callback-reentran-002",
           "title": "2. Flash Loan Callback Reentrancy — Deposit-in-Callback",
-          "lineStart": 138,
-          "lineEnd": 194,
-          "lineCount": 57,
+          "lineStart": 182,
+          "lineEnd": 240,
+          "lineCount": 59,
           "severity": [
             "CRITICAL"
           ],
@@ -1326,8 +1361,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 144,
-              "lineEnd": 194,
+              "lineStart": 190,
+              "lineEnd": 240,
               "severity": [
                 "CRITICAL"
               ],
@@ -1342,11 +1377,11 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-3-erc-1155-onerc1155received-r-002",
+          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-3-erc-1155-onerc1155received-r-003",
           "title": "3. ERC-1155 `onERC1155Received` Reentrancy During NFT Mint",
-          "lineStart": 195,
-          "lineEnd": 250,
-          "lineCount": 56,
+          "lineStart": 241,
+          "lineEnd": 298,
+          "lineCount": 58,
           "severity": [
             "CRITICAL"
           ],
@@ -1358,8 +1393,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 201,
-              "lineEnd": 250,
+              "lineStart": 249,
+              "lineEnd": 298,
               "severity": [
                 "CRITICAL"
               ],
@@ -1370,11 +1405,11 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-4-native-eth-avax-receive-reen-003",
+          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-4-native-eth-avax-receive-reen-004",
           "title": "4. Native ETH/AVAX `receive()` Reentrancy — exitMarket/State Bypass",
-          "lineStart": 251,
-          "lineEnd": 345,
-          "lineCount": 95,
+          "lineStart": 299,
+          "lineEnd": 395,
+          "lineCount": 97,
           "severity": [
             "CRITICAL"
           ],
@@ -1389,8 +1424,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 257,
-              "lineEnd": 345,
+              "lineStart": 307,
+              "lineEnd": 395,
               "severity": [
                 "CRITICAL"
               ],
@@ -1401,10 +1436,10 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-impact-analysis-004",
+          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-impact-analysis-005",
           "title": "Impact Analysis",
-          "lineStart": 346,
-          "lineEnd": 370,
+          "lineStart": 396,
+          "lineEnd": 420,
           "lineCount": 25,
           "severity": [],
           "codeKeywords": [],
@@ -1412,10 +1447,10 @@
           "subsections": null
         },
         {
-          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-secure-implementation-005",
+          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-secure-implementation-006",
           "title": "Secure Implementation",
-          "lineStart": 371,
-          "lineEnd": 466,
+          "lineStart": 421,
+          "lineEnd": 516,
           "lineCount": 96,
           "severity": [],
           "codeKeywords": [
@@ -1430,10 +1465,10 @@
           "subsections": null
         },
         {
-          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-detection-patterns-006",
+          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-detection-patterns-007",
           "title": "Detection Patterns",
-          "lineStart": 467,
-          "lineEnd": 494,
+          "lineStart": 517,
+          "lineEnd": 544,
           "lineCount": 28,
           "severity": [
             "LOW"
@@ -1448,10 +1483,10 @@
           "subsections": null
         },
         {
-          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-real-world-examples-007",
+          "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-real-world-examples-008",
           "title": "Real-World Examples",
-          "lineStart": 495,
-          "lineEnd": 510,
+          "lineStart": 545,
+          "lineEnd": 560,
           "lineCount": 16,
           "severity": [
             "LOW"
@@ -1464,12 +1499,15 @@
     },
     {
       "file": "DB/general/reentrancy/defihacklabs-readonly-reentrancy-patterns.md",
-      "totalLines": 436,
+      "totalLines": 480,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, arbitrum, polygon\"",
         "category": "\"reentrancy\"",
         "vulnerability_type": "\"read_only_reentrancy\"",
+        "root_cause_family": "callback_reentrancy",
+        "pattern_key": "read_only_reentrancy | oracle_price_feed | economic_exploit | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "\"economic_exploit\"",
         "affected_component": "\"oracle_price_feed, collateral_valuation\"",
         "severity": "\"critical\"",
@@ -1479,14 +1517,46 @@
         "language": "\"solidity\"",
         "version": "\">=0.8.0\""
       },
-      "patternCount": 6,
+      "patternCount": 7,
       "patterns": [
         {
-          "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-1-curve-pool-read-only-reentra-000",
+          "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-overview-000",
+          "title": "Overview",
+          "lineStart": 89,
+          "lineEnd": 107,
+          "lineCount": 19,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "callback_reentrancy",
+            "exitPool",
+            "get_virtual_price",
+            "remove_liquidity",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 96,
+              "lineEnd": 107,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "callback_reentrancy",
+                "single_contract"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-1-curve-pool-read-only-reentra-001",
           "title": "1. Curve Pool Read-Only Reentrancy",
-          "lineStart": 68,
-          "lineEnd": 188,
-          "lineCount": 121,
+          "lineStart": 108,
+          "lineEnd": 230,
+          "lineCount": 123,
           "severity": [
             "CRITICAL",
             "HIGH"
@@ -1503,8 +1573,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 74,
-              "lineEnd": 83,
+              "lineStart": 116,
+              "lineEnd": 125,
               "severity": [],
               "codeKeywords": [
                 "receive",
@@ -1513,8 +1583,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 84,
-              "lineEnd": 188,
+              "lineStart": 126,
+              "lineEnd": 230,
               "severity": [
                 "CRITICAL",
                 "HIGH"
@@ -1526,11 +1596,11 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-2-balancer-pool-read-only-reen-001",
+          "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-2-balancer-pool-read-only-reen-002",
           "title": "2. Balancer Pool Read-Only Reentrancy",
-          "lineStart": 189,
-          "lineEnd": 262,
-          "lineCount": 74,
+          "lineStart": 231,
+          "lineEnd": 306,
+          "lineCount": 76,
           "severity": [
             "CRITICAL"
           ],
@@ -1542,8 +1612,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 195,
-              "lineEnd": 262,
+              "lineStart": 239,
+              "lineEnd": 306,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -1553,10 +1623,10 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-impact-analysis-002",
+          "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-impact-analysis-003",
           "title": "Impact Analysis",
-          "lineStart": 263,
-          "lineEnd": 286,
+          "lineStart": 307,
+          "lineEnd": 330,
           "lineCount": 24,
           "severity": [],
           "codeKeywords": [
@@ -1567,10 +1637,10 @@
           "subsections": null
         },
         {
-          "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-secure-implementation-003",
+          "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-secure-implementation-004",
           "title": "Secure Implementation",
-          "lineStart": 287,
-          "lineEnd": 365,
+          "lineStart": 331,
+          "lineEnd": 409,
           "lineCount": 79,
           "severity": [
             "MEDIUM"
@@ -1585,10 +1655,10 @@
           "subsections": null
         },
         {
-          "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-detection-patterns-004",
+          "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-detection-patterns-005",
           "title": "Detection Patterns",
-          "lineStart": 366,
-          "lineEnd": 390,
+          "lineStart": 410,
+          "lineEnd": 434,
           "lineCount": 25,
           "severity": [
             "LOW"
@@ -1605,10 +1675,10 @@
           "subsections": null
         },
         {
-          "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-real-world-examples-005",
+          "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-real-world-examples-006",
           "title": "Real-World Examples",
-          "lineStart": 391,
-          "lineEnd": 406,
+          "lineStart": 435,
+          "lineEnd": 450,
           "lineCount": 16,
           "severity": [
             "LOW"
@@ -1627,12 +1697,15 @@
     },
     {
       "file": "DB/general/reentrancy/defihacklabs-reentrancy-2021-2022-uncovered.md",
-      "totalLines": 537,
+      "totalLines": 608,
       "frontmatter": {
         "protocol": "Multi-Protocol",
         "chain": "Ethereum, BSC, Avalanche",
         "category": "reentrancy",
         "vulnerability_type": "Advanced Reentrancy Patterns",
+        "root_cause_family": "callback_reentrancy",
+        "pattern_key": "Advanced Reentrancy Patterns |  |  | Share inflation, 3x lending, vault drain, double-credit deposits",
+        "interaction_scope": "cross_protocol",
         "source": "DeFiHackLabs",
         "total_exploits_analyzed": "6",
         "total_losses": "\"$2M+\"",
@@ -1646,11 +1719,15 @@
         {
           "id": "general-infrastructure-defihacklabs-reentrancy-2021-2022-uncove-overview-000",
           "title": "Overview",
-          "lineStart": 54,
-          "lineEnd": 67,
-          "lineCount": 14,
-          "severity": [],
+          "lineStart": 100,
+          "lineEnd": 126,
+          "lineCount": 27,
+          "severity": [
+            "CRITICAL"
+          ],
           "codeKeywords": [
+            "callback_reentrancy",
+            "cross_protocol",
             "onERC721Received",
             "onFlashLoan",
             "tokensReceived",
@@ -1658,13 +1735,26 @@
             "transferFrom"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 115,
+              "lineEnd": 126,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "callback_reentrancy",
+                "cross_protocol"
+              ]
+            }
+          ]
         },
         {
           "id": "general-infrastructure-defihacklabs-reentrancy-2021-2022-uncove-vulnerability-description-001",
           "title": "Vulnerability Description",
-          "lineStart": 68,
-          "lineEnd": 102,
+          "lineStart": 127,
+          "lineEnd": 161,
           "lineCount": 35,
           "severity": [],
           "codeKeywords": [
@@ -1679,8 +1769,8 @@
           "subsections": [
             {
               "title": "Root Cause Analysis",
-              "lineStart": 70,
-              "lineEnd": 81,
+              "lineStart": 129,
+              "lineEnd": 140,
               "severity": [],
               "codeKeywords": [
                 "onERC721Received",
@@ -1693,8 +1783,8 @@
             },
             {
               "title": "Reentrancy Vector Taxonomy",
-              "lineStart": 82,
-              "lineEnd": 102,
+              "lineStart": 141,
+              "lineEnd": 161,
               "severity": [],
               "codeKeywords": []
             }
@@ -1703,9 +1793,9 @@
         {
           "id": "general-infrastructure-defihacklabs-reentrancy-2021-2022-uncove-vulnerable-pattern-examples-002",
           "title": "Vulnerable Pattern Examples",
-          "lineStart": 103,
-          "lineEnd": 358,
-          "lineCount": 256,
+          "lineStart": 162,
+          "lineEnd": 429,
+          "lineCount": 268,
           "severity": [
             "CRITICAL"
           ],
@@ -1724,8 +1814,8 @@
           "subsections": [
             {
               "title": "Pattern 1: ERC777 `tokensToSend` Hook → Reenter Staking",
-              "lineStart": 105,
-              "lineEnd": 152,
+              "lineStart": 164,
+              "lineEnd": 213,
               "severity": [
                 "CRITICAL"
               ],
@@ -1738,8 +1828,8 @@
             },
             {
               "title": "Pattern 2: ERC777 `tokensReceived` Hook → Reenter Lending",
-              "lineStart": 153,
-              "lineEnd": 200,
+              "lineStart": 214,
+              "lineEnd": 263,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -1753,8 +1843,8 @@
             },
             {
               "title": "Pattern 3: ERC3156 Flash Loan Callback → Deposit During Own Loan",
-              "lineStart": 201,
-              "lineEnd": 242,
+              "lineStart": 264,
+              "lineEnd": 307,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -1769,8 +1859,8 @@
             },
             {
               "title": "Pattern 4: Fake ERC721 `transferFrom` → Reenter Sell During Buy",
-              "lineStart": 243,
-              "lineEnd": 273,
+              "lineStart": 308,
+              "lineEnd": 340,
               "severity": [
                 "HIGH"
               ],
@@ -1783,8 +1873,8 @@
             },
             {
               "title": "Pattern 5: ERC721 `onERC721Received` → Reenter Liquidation + Borrow",
-              "lineStart": 274,
-              "lineEnd": 321,
+              "lineStart": 341,
+              "lineEnd": 390,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -1797,8 +1887,8 @@
             },
             {
               "title": "Pattern 6: Fake Token `transferFrom` → Reenter MasterChef Deposit",
-              "lineStart": 322,
-              "lineEnd": 358,
+              "lineStart": 391,
+              "lineEnd": 429,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -1813,8 +1903,8 @@
         {
           "id": "general-infrastructure-defihacklabs-reentrancy-2021-2022-uncove-impact-analysis-003",
           "title": "Impact Analysis",
-          "lineStart": 359,
-          "lineEnd": 371,
+          "lineStart": 430,
+          "lineEnd": 442,
           "lineCount": 13,
           "severity": [],
           "codeKeywords": [
@@ -1830,8 +1920,8 @@
         {
           "id": "general-infrastructure-defihacklabs-reentrancy-2021-2022-uncove-secure-implementation-004",
           "title": "Secure Implementation",
-          "lineStart": 372,
-          "lineEnd": 473,
+          "lineStart": 443,
+          "lineEnd": 544,
           "lineCount": 102,
           "severity": [],
           "codeKeywords": [
@@ -1846,8 +1936,8 @@
           "subsections": [
             {
               "title": "Fix 1: Reentrancy Guard (OpenZeppelin `nonReentrant`)",
-              "lineStart": 374,
-              "lineEnd": 398,
+              "lineStart": 445,
+              "lineEnd": 469,
               "severity": [],
               "codeKeywords": [
                 "enter",
@@ -1856,8 +1946,8 @@
             },
             {
               "title": "Fix 2: CEI Pattern (Checks-Effects-Interactions)",
-              "lineStart": 399,
-              "lineEnd": 418,
+              "lineStart": 470,
+              "lineEnd": 489,
               "severity": [],
               "codeKeywords": [
                 "lend"
@@ -1865,8 +1955,8 @@
             },
             {
               "title": "Fix 3: Validate Token Contracts (Whitelist)",
-              "lineStart": 419,
-              "lineEnd": 444,
+              "lineStart": 490,
+              "lineEnd": 515,
               "severity": [],
               "codeKeywords": [
                 "depositByAddLiquidity"
@@ -1874,8 +1964,8 @@
             },
             {
               "title": "Fix 4: Flash Loan Guard for Vault Deposits",
-              "lineStart": 445,
-              "lineEnd": 473,
+              "lineStart": 516,
+              "lineEnd": 544,
               "severity": [],
               "codeKeywords": [
                 "deposit",
@@ -1887,8 +1977,8 @@
         {
           "id": "general-infrastructure-defihacklabs-reentrancy-2021-2022-uncove-detection-patterns-005",
           "title": "Detection Patterns",
-          "lineStart": 474,
-          "lineEnd": 510,
+          "lineStart": 545,
+          "lineEnd": 581,
           "lineCount": 37,
           "severity": [],
           "codeKeywords": [],
@@ -1896,15 +1986,15 @@
           "subsections": [
             {
               "title": "Static Analysis",
-              "lineStart": 476,
-              "lineEnd": 497,
+              "lineStart": 547,
+              "lineEnd": 568,
               "severity": [],
               "codeKeywords": []
             },
             {
               "title": "Invariant Checks",
-              "lineStart": 498,
-              "lineEnd": 510,
+              "lineStart": 569,
+              "lineEnd": 581,
               "severity": [],
               "codeKeywords": []
             }
@@ -1913,8 +2003,8 @@
         {
           "id": "general-infrastructure-defihacklabs-reentrancy-2021-2022-uncove-audit-checklist-006",
           "title": "Audit Checklist",
-          "lineStart": 511,
-          "lineEnd": 521,
+          "lineStart": 582,
+          "lineEnd": 592,
           "lineCount": 11,
           "severity": [
             "CRITICAL"
@@ -1930,8 +2020,8 @@
         {
           "id": "general-infrastructure-defihacklabs-reentrancy-2021-2022-uncove-real-world-examples-007",
           "title": "Real-World Examples",
-          "lineStart": 522,
-          "lineEnd": 534,
+          "lineStart": 593,
+          "lineEnd": 605,
           "lineCount": 13,
           "severity": [],
           "codeKeywords": [],
@@ -1942,12 +2032,15 @@
     },
     {
       "file": "DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md",
-      "totalLines": 528,
+      "totalLines": 584,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, arbitrum, avalanche, bsc\"",
         "category": "\"reentrancy\"",
         "vulnerability_type": "\"read_only_reentrancy, fake_token_reentrancy, native_transfer_reentrancy, balancer_view_reentrancy\"",
+        "root_cause_family": "callback_reentrancy",
+        "pattern_key": "read_only_reentrancy | curve_lp_oracle | reentrancy | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "\"reentrancy\"",
         "affected_component": "\"curve_lp_oracle, balancer_lp_oracle, social_token_trading, dex_swap, lending_liquidation\"",
         "severity": "\"critical\"",
@@ -1960,14 +2053,46 @@
         "total_exploits_analyzed": "9",
         "total_losses": "\"$16M+\""
       },
-      "patternCount": 11,
+      "patternCount": 12,
       "patterns": [
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-1-read-only-reentrancy-via-cur-000",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-overview-000",
+          "title": "Overview",
+          "lineStart": 118,
+          "lineEnd": 136,
+          "lineCount": 19,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "callback_reentrancy",
+            "receive",
+            "remove_liquidity",
+            "single_contract",
+            "transfer"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 125,
+              "lineEnd": 136,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "callback_reentrancy",
+                "single_contract"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-1-read-only-reentrancy-via-cur-001",
           "title": "1. Read-Only Reentrancy via Curve LP Withdrawal",
-          "lineStart": 93,
-          "lineEnd": 179,
-          "lineCount": 87,
+          "lineStart": 137,
+          "lineEnd": 225,
+          "lineCount": 89,
           "severity": [
             "CRITICAL"
           ],
@@ -1983,8 +2108,8 @@
           "subsections": [
             {
               "title": "Root Cause",
-              "lineStart": 95,
-              "lineEnd": 103,
+              "lineStart": 141,
+              "lineEnd": 149,
               "severity": [],
               "codeKeywords": [
                 "call.value",
@@ -1996,8 +2121,8 @@
             },
             {
               "title": "Attack Scenario (dForce)",
-              "lineStart": 104,
-              "lineEnd": 115,
+              "lineStart": 150,
+              "lineEnd": 161,
               "severity": [],
               "codeKeywords": [
                 "curvePool.remove_liquidity",
@@ -2006,8 +2131,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 116,
-              "lineEnd": 179,
+              "lineStart": 162,
+              "lineEnd": 225,
               "severity": [
                 "CRITICAL"
               ],
@@ -2016,11 +2141,11 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-2-read-only-reentrancy-via-cur-001",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-2-read-only-reentrancy-via-cur-002",
           "title": "2. Read-Only Reentrancy via Curve Callback (Conic $3.25M)",
-          "lineStart": 180,
-          "lineEnd": 219,
-          "lineCount": 40,
+          "lineStart": 226,
+          "lineEnd": 267,
+          "lineCount": 42,
           "severity": [
             "CRITICAL",
             "LOW",
@@ -2034,8 +2159,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 186,
-              "lineEnd": 219,
+              "lineStart": 234,
+              "lineEnd": 267,
               "severity": [
                 "CRITICAL",
                 "MEDIUM"
@@ -2045,11 +2170,11 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-3-balancer-view-reentrancy-via-002",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-3-balancer-view-reentrancy-via-003",
           "title": "3. Balancer View Reentrancy via LP Price Oracle (Sentiment $1M)",
-          "lineStart": 220,
-          "lineEnd": 265,
-          "lineCount": 46,
+          "lineStart": 268,
+          "lineEnd": 315,
+          "lineCount": 48,
           "severity": [
             "CRITICAL"
           ],
@@ -2063,8 +2188,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 226,
-              "lineEnd": 265,
+              "lineStart": 276,
+              "lineEnd": 315,
               "severity": [
                 "CRITICAL"
               ],
@@ -2073,11 +2198,11 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-4-fake-token-reentrancy-in-dex-003",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-4-fake-token-reentrancy-in-dex-004",
           "title": "4. Fake Token Reentrancy in DEX Swap (Orion $645K)",
-          "lineStart": 266,
-          "lineEnd": 320,
-          "lineCount": 55,
+          "lineStart": 316,
+          "lineEnd": 372,
+          "lineCount": 57,
           "severity": [
             "CRITICAL",
             "LOW"
@@ -2092,8 +2217,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 272,
-              "lineEnd": 320,
+              "lineStart": 324,
+              "lineEnd": 372,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -2105,11 +2230,11 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-5-native-token-receive-reentra-004",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-5-native-token-receive-reentra-005",
           "title": "5. Native Token Receive() Reentrancy (StarsArena $3M)",
-          "lineStart": 321,
-          "lineEnd": 369,
-          "lineCount": 49,
+          "lineStart": 373,
+          "lineEnd": 423,
+          "lineCount": 51,
           "severity": [
             "CRITICAL",
             "LOW"
@@ -2123,8 +2248,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 327,
-              "lineEnd": 369,
+              "lineStart": 381,
+              "lineEnd": 423,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -2136,11 +2261,11 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-6-curve-reentrancy-in-read-onl-005",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-6-curve-reentrancy-in-read-onl-006",
           "title": "6. Curve Reentrancy in Read-Only Oracle (Sturdy $800K)",
-          "lineStart": 370,
-          "lineEnd": 399,
-          "lineCount": 30,
+          "lineStart": 424,
+          "lineEnd": 455,
+          "lineCount": 32,
           "severity": [
             "HIGH",
             "LOW"
@@ -2153,8 +2278,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 376,
-              "lineEnd": 399,
+              "lineStart": 432,
+              "lineEnd": 455,
               "severity": [
                 "HIGH",
                 "LOW"
@@ -2164,10 +2289,10 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-secure-implementations-006",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-secure-implementations-007",
           "title": "Secure Implementations",
-          "lineStart": 400,
-          "lineEnd": 450,
+          "lineStart": 456,
+          "lineEnd": 506,
           "lineCount": 51,
           "severity": [
             "LOW",
@@ -2182,8 +2307,8 @@
           "subsections": [
             {
               "title": "Pattern 1: Reentrancy-Protected Price Oracle",
-              "lineStart": 402,
-              "lineEnd": 417,
+              "lineStart": 458,
+              "lineEnd": 473,
               "severity": [
                 "MEDIUM"
               ],
@@ -2193,8 +2318,8 @@
             },
             {
               "title": "Pattern 2: Whitelist-Only Swap Tokens",
-              "lineStart": 418,
-              "lineEnd": 430,
+              "lineStart": 474,
+              "lineEnd": 486,
               "severity": [
                 "LOW"
               ],
@@ -2204,8 +2329,8 @@
             },
             {
               "title": "Pattern 3: CEI Pattern for Native Token Transfers",
-              "lineStart": 431,
-              "lineEnd": 450,
+              "lineStart": 487,
+              "lineEnd": 506,
               "severity": [],
               "codeKeywords": [
                 "sellShares"
@@ -2214,10 +2339,10 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-impact-analysis-007",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-impact-analysis-008",
           "title": "Impact Analysis",
-          "lineStart": 451,
-          "lineEnd": 463,
+          "lineStart": 507,
+          "lineEnd": 519,
           "lineCount": 13,
           "severity": [
             "CRITICAL",
@@ -2228,10 +2353,10 @@
           "subsections": null
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-detection-patterns-008",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-detection-patterns-009",
           "title": "Detection Patterns",
-          "lineStart": 464,
-          "lineEnd": 497,
+          "lineStart": 520,
+          "lineEnd": 553,
           "lineCount": 34,
           "severity": [
             "LOW"
@@ -2241,8 +2366,8 @@
           "subsections": [
             {
               "title": "Static Analysis",
-              "lineStart": 466,
-              "lineEnd": 480,
+              "lineStart": 522,
+              "lineEnd": 536,
               "severity": [
                 "LOW"
               ],
@@ -2250,18 +2375,18 @@
             },
             {
               "title": "Dynamic Testing",
-              "lineStart": 481,
-              "lineEnd": 497,
+              "lineStart": 537,
+              "lineEnd": 553,
               "severity": [],
               "codeKeywords": []
             }
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-audit-checklist-009",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-audit-checklist-010",
           "title": "Audit Checklist",
-          "lineStart": 498,
-          "lineEnd": 509,
+          "lineStart": 554,
+          "lineEnd": 565,
           "lineCount": 12,
           "severity": [],
           "codeKeywords": [
@@ -2272,10 +2397,10 @@
           "subsections": null
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-real-world-examples-010",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-real-world-examples-011",
           "title": "Real-World Examples",
-          "lineStart": 510,
-          "lineEnd": 525,
+          "lineStart": 566,
+          "lineEnd": 581,
           "lineCount": 16,
           "severity": [],
           "codeKeywords": [],
@@ -2286,12 +2411,15 @@
     },
     {
       "file": "DB/general/reentrancy/defihacklabs-reentrancy-2024-patterns.md",
-      "totalLines": 499,
+      "totalLines": 546,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, arbitrum, fantom\"",
         "category": "\"reentrancy\"",
         "vulnerability_type": "\"cross_function_reentrancy, callback_reentrancy, flash_loan_reentrancy\"",
+        "root_cause_family": "callback_reentrancy",
+        "pattern_key": "cross_function_reentrancy | reward_harvest | reentrancy | fund_loss",
+        "interaction_scope": "cross_protocol",
         "attack_type": "\"reentrancy\"",
         "affected_component": "\"reward_harvest, collateral_accounting, flash_loan_callback, strategy_callback\"",
         "severity": "\"critical\"",
@@ -2301,14 +2429,43 @@
         "language": "\"solidity\"",
         "version": "\">=0.8.0\""
       },
-      "patternCount": 8,
+      "patternCount": 9,
       "patterns": [
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-1-fake-token-reward-harvesting-000",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-overview-000",
+          "title": "Overview",
+          "lineStart": 91,
+          "lineEnd": 109,
+          "lineCount": 19,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "callback_reentrancy",
+            "cross_protocol"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 98,
+              "lineEnd": 109,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "callback_reentrancy",
+                "cross_protocol"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-1-fake-token-reward-harvesting-001",
           "title": "1. Fake Token Reward Harvesting Callback Reentrancy",
-          "lineStart": 71,
-          "lineEnd": 135,
-          "lineCount": 65,
+          "lineStart": 110,
+          "lineEnd": 176,
+          "lineCount": 67,
           "severity": [
             "CRITICAL"
           ],
@@ -2322,8 +2479,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 77,
-              "lineEnd": 85,
+              "lineStart": 118,
+              "lineEnd": 126,
               "severity": [],
               "codeKeywords": [
                 "batchHarvestMarketRewards",
@@ -2333,8 +2490,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 86,
-              "lineEnd": 135,
+              "lineStart": 127,
+              "lineEnd": 176,
               "severity": [
                 "CRITICAL"
               ],
@@ -2346,29 +2503,31 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-2-empty-market-phantom-collate-001",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-2-empty-market-phantom-collate-002",
           "title": "2. Empty Market Phantom Collateral Attack",
-          "lineStart": 136,
-          "lineEnd": 188,
-          "lineCount": 53,
+          "lineStart": 177,
+          "lineEnd": 231,
+          "lineCount": 55,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
-          "codeKeywords": [],
+          "codeKeywords": [
+            "atomic"
+          ],
           "rootCause": "In lending protocols, when a market is empty (no existing deposits), the first depositor sets the initial exchange rate. If the protocol doesn't enforce minimum deposits or uses a flash-loan-compatibl",
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 142,
-              "lineEnd": 150,
+              "lineStart": 185,
+              "lineEnd": 193,
               "severity": [],
               "codeKeywords": []
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 151,
-              "lineEnd": 188,
+              "lineStart": 194,
+              "lineEnd": 231,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -2378,11 +2537,11 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-3-erc-3156-flash-loan-callback-002",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-3-erc-3156-flash-loan-callback-003",
           "title": "3. ERC-3156 Flash Loan Callback Re-deposit Loop",
-          "lineStart": 189,
-          "lineEnd": 254,
-          "lineCount": 66,
+          "lineStart": 232,
+          "lineEnd": 299,
+          "lineCount": 68,
           "severity": [
             "HIGH",
             "MEDIUM"
@@ -2394,8 +2553,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 195,
-              "lineEnd": 202,
+              "lineStart": 240,
+              "lineEnd": 247,
               "severity": [
                 "MEDIUM"
               ],
@@ -2405,8 +2564,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 203,
-              "lineEnd": 254,
+              "lineStart": 248,
+              "lineEnd": 299,
               "severity": [
                 "HIGH"
               ],
@@ -2417,11 +2576,11 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-4-strategy-callback-reentrancy-003",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-4-strategy-callback-reentrancy-004",
           "title": "4. Strategy Callback Reentrancy via Attacker-Controlled Hook",
-          "lineStart": 255,
-          "lineEnd": 332,
-          "lineCount": 78,
+          "lineStart": 300,
+          "lineEnd": 379,
+          "lineCount": 80,
           "severity": [
             "HIGH",
             "LOW"
@@ -2435,8 +2594,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 261,
-              "lineEnd": 268,
+              "lineStart": 308,
+              "lineEnd": 315,
               "severity": [],
               "codeKeywords": [
                 "burnHook"
@@ -2444,8 +2603,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 269,
-              "lineEnd": 332,
+              "lineStart": 316,
+              "lineEnd": 379,
               "severity": [
                 "HIGH",
                 "LOW"
@@ -2458,10 +2617,10 @@
           ]
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-impact-analysis-004",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-impact-analysis-005",
           "title": "Impact Analysis",
-          "lineStart": 333,
-          "lineEnd": 357,
+          "lineStart": 380,
+          "lineEnd": 404,
           "lineCount": 25,
           "severity": [],
           "codeKeywords": [
@@ -2471,10 +2630,10 @@
           "subsections": null
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-secure-implementation-005",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-secure-implementation-006",
           "title": "Secure Implementation",
-          "lineStart": 358,
-          "lineEnd": 432,
+          "lineStart": 405,
+          "lineEnd": 479,
           "lineCount": 75,
           "severity": [
             "LOW"
@@ -2489,10 +2648,10 @@
           "subsections": null
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-detection-patterns-006",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-detection-patterns-007",
           "title": "Detection Patterns",
-          "lineStart": 433,
-          "lineEnd": 456,
+          "lineStart": 480,
+          "lineEnd": 503,
           "lineCount": 24,
           "severity": [
             "LOW"
@@ -2504,10 +2663,10 @@
           "subsections": null
         },
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-real-world-examples-007",
+          "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-real-world-examples-008",
           "title": "Real-World Examples",
-          "lineStart": 457,
-          "lineEnd": 466,
+          "lineStart": 504,
+          "lineEnd": 513,
           "lineCount": 10,
           "severity": [],
           "codeKeywords": [],
@@ -2518,12 +2677,15 @@
     },
     {
       "file": "DB/general/reentrancy/defihacklabs-reentrancy-patterns.md",
-      "totalLines": 527,
+      "totalLines": 597,
       "frontmatter": {
         "protocol": "generic",
         "chain": "ethereum, bsc, fantom",
         "category": "reentrancy",
         "vulnerability_type": "reentrancy_comprehensive",
+        "root_cause_family": "callback_reentrancy",
+        "pattern_key": "reentrancy_comprehensive | external_calls | reentrancy | fund_loss",
+        "interaction_scope": "multi_contract",
         "attack_type": "reentrancy",
         "affected_component": "external_calls",
         "severity": "critical",
@@ -2534,67 +2696,150 @@
         "total_exploits_analyzed": "10",
         "total_losses": "\"$116M+\""
       },
-      "patternCount": 1,
+      "patternCount": 4,
       "patterns": [
         {
-          "id": "general-infrastructure-defihacklabs-reentrancy-patterns-defihacklabs-reentrancy-patter-000",
-          "title": "DeFiHackLabs Reentrancy Pattern Compendium",
-          "lineStart": 43,
-          "lineEnd": 452,
-          "lineCount": 410,
+          "id": "general-infrastructure-defihacklabs-reentrancy-patterns-agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 98,
+          "lineEnd": 109,
+          "lineCount": 12,
           "severity": [
             "CRITICAL"
           ],
           "codeKeywords": [
-            "borrow",
+            "callback_reentrancy",
+            "multi_contract"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-defihacklabs-reentrancy-patterns-root-cause-categories-001",
+          "title": "Root Cause Categories",
+          "lineStart": 110,
+          "lineEnd": 119,
+          "lineCount": 10,
+          "severity": [],
+          "codeKeywords": [
             "data",
             "delegatedTransferERC20",
-            "depositFor",
             "fallback",
             "receive",
             "sell",
-            "supply",
             "tokensReceived",
             "tokensToSend",
             "transfer",
             "transferFrom"
           ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-infrastructure-defihacklabs-reentrancy-patterns-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 120,
+          "lineEnd": 436,
+          "lineCount": 317,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "borrow",
+            "depositFor",
+            "supply",
+            "tokensReceived",
+            "tokensToSend",
+            "transferFrom"
+          ],
           "rootCause": "Lending protocol borrows ERC-777 token, triggering receiver hook",
           "subsections": [
             {
-              "title": "Root Cause Categories",
-              "lineStart": 49,
-              "lineEnd": 58,
-              "severity": [],
-              "codeKeywords": [
-                "data",
-                "delegatedTransferERC20",
-                "fallback",
-                "receive",
-                "sell",
-                "tokensReceived",
-                "tokensToSend",
-                "transfer"
-              ]
-            },
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 59,
-              "lineEnd": 365,
+              "title": "Category 1: ERC-777 Token Hooks [CRITICAL]",
+              "lineStart": 122,
+              "lineEnd": 214,
               "severity": [
                 "CRITICAL",
                 "LOW"
               ],
               "codeKeywords": [
                 "borrow",
-                "depositFor",
                 "supply",
                 "tokensReceived",
                 "tokensToSend",
                 "transferFrom"
               ]
+            },
+            {
+              "title": "Category 2: Fake/Malicious Token Callbacks [CRITICAL]",
+              "lineStart": 215,
+              "lineEnd": 321,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "depositFor",
+                "enter",
+                "exploit",
+                "safeTransferFrom",
+                "token",
+                "transfer",
+                "transferFrom"
+              ]
+            },
+            {
+              "title": "Category 3: Native ETH Transfer Reentrancy [HIGH]",
+              "lineStart": 322,
+              "lineEnd": 353,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "receive",
+                "sell"
+              ]
+            },
+            {
+              "title": "Category 4: User-Supplied Callback Target [HIGH]",
+              "lineStart": 354,
+              "lineEnd": 383,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "delegatedTransferERC20",
+                "deposit",
+                "from",
+                "owner"
+              ]
+            },
+            {
+              "title": "Category 5: Cross-Contract Reentrancy [CRITICAL]",
+              "lineStart": 384,
+              "lineEnd": 436,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "data",
+                "work"
+              ]
             }
           ]
+        },
+        {
+          "id": "general-infrastructure-defihacklabs-reentrancy-patterns-keywords-003",
+          "title": "Keywords",
+          "lineStart": 573,
+          "lineEnd": 592,
+          "lineCount": 20,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },

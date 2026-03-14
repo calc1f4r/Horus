@@ -5,6 +5,13 @@ chain: "ethereum, optimism, bsc, arbitrum"
 category: "economic"
 vulnerability_type: "vault_inflation_attack"
 
+# Pattern Identity (Required)
+root_cause_family: arithmetic_invariant_break
+pattern_key: vault_inflation_attack | exchange_rate_calculation | economic_exploit | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 # Attack Vector Details
 attack_type: "economic_exploit"
 affected_component: "exchange_rate_calculation, share_accounting"
@@ -24,6 +31,27 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.7
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "mint"
+  - "cToken"
+  - "donate"
+  - "ERC4626"
+  - "deposit"
+  - "500_WBTC"
+  - "transfer"
+  - "balanceOf"
+  - "totalShares"
+  - "totalSupply"
+  - "exchangeRate"
+  - "pseudoTotalPool"
+  - "_convertToAssets"
+  - "_convertToShares"
+  - "redeemUnderlying"
+path_keys:
+  - "empty_market_exchange_rate_inflation"
+  - "share_price_inflation_via_donation"
 
 # Context Tags
 tags:
@@ -56,14 +84,28 @@ version: ">=0.8.0"
 ---
 
 # CompoundV2 / ERC4626 Vault Inflation Attack Patterns
-
 ## Overview
 
 Vault inflation attacks exploit the share-to-asset exchange rate mechanism in CompoundV2 forks, ERC4626 vaults, and similar share-based lending protocols. An attacker manipulates an empty or near-empty market by donating assets directly to the vault contract, inflating the exchange rate so that subsequent share calculations suffer from integer rounding errors. This enables the attacker to borrow against vastly overvalued collateral or redeem donated assets with zero share burn, draining all protocol funds. Between 2022-2023, this attack pattern caused over **$19M** in losses across 6+ protocols.
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `arithmetic_invariant_break` |
+| Pattern Key | `vault_inflation_attack | exchange_rate_calculation | economic_exploit | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, optimism, bsc, arbitrum |
+
+
 ## 1. Empty Market Exchange Rate Inflation
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -173,6 +215,8 @@ cCLP_BTCB_BUSD.redeemUnderlying(redeemAmount - reserves - 1e9);
 ---
 
 ## 2. Share Price Inflation via Donation
+
+> **pathShape**: `iterative-loop`
 
 ### Root Cause
 

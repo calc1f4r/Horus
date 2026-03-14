@@ -5,6 +5,13 @@ chain: "ethereum, gnosis, avalanche, polygon"
 category: "reentrancy"
 vulnerability_type: "callback_reentrancy"
 
+# Pattern Identity (Required)
+root_cause_family: callback_reentrancy
+pattern_key: callback_reentrancy | lending_pool | reentrancy | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 # Attack Vector Details
 attack_type: "reentrancy"
 affected_component: "lending_pool, flash_loan, nft_mint, share_trading"
@@ -25,6 +32,29 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.8
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "FNFT"
+  - "mint"
+  - "_mint"
+  - "flash"
+  - "borrow"
+  - "address"
+  - "deposit"
+  - "receive"
+  - "fallback"
+  - "withdraw"
+  - "StarsArena"
+  - "exitMarket"
+  - "viewDeposit"
+  - "borrowTokens"
+  - "nonReentrant"
+path_keys:
+  - "erc_677_ontokentransfer_reentrancy_during_liquidation"
+  - "flash_loan_callback_reentrancy_deposit_in_callback"
+  - "erc_1155_onerc1155received_reentrancy_during_nft_mint"
+  - "native_eth_avax_receive_reentrancy_exitmarket_state_bypass"
 
 # Context Tags
 tags:
@@ -60,14 +90,28 @@ version: ">=0.6.0"
 ---
 
 # Callback Reentrancy Patterns — Token Standards & Native Transfers (2022-2023)
-
 ## Overview
 
 While classic ETH reentrancy via `receive()` is well-understood, 2022-2023 saw an explosion of **non-obvious callback reentrancy** vectors exploiting token standard callbacks (ERC-677 `onTokenTransfer`, ERC-1155 `onERC1155Received`), flash loan callback mechanisms, and native token transfers on non-Ethereum chains. These attacks caused **$94.5M+** in losses across 5+ major exploits. The common thread: protocol state is partially updated when a callback fires, and the attacker re-enters during the inconsistent state to borrow against not-yet-removed collateral, deposit flash-loaned tokens as liquidity, inflate FNFT values, or circumvent market exit checks.
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `callback_reentrancy` |
+| Pattern Key | `callback_reentrancy | lending_pool | reentrancy | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, gnosis, avalanche, polygon |
+
+
 ## 1. ERC-677 `onTokenTransfer` Reentrancy During Liquidation
+
+> **pathShape**: `callback-reentrant`
 
 ### Root Cause
 
@@ -137,6 +181,8 @@ function borrowTokens() internal boostLTVHack {
 
 ## 2. Flash Loan Callback Reentrancy — Deposit-in-Callback
 
+> **pathShape**: `callback-reentrant`
+
 ### Root Cause
 
 This vulnerability exists because the flash loan function calls back to the borrower BEFORE verifying that the loan has been repaid. The attacker uses the callback to `deposit()` the flash-loaned tokens as liquidity (receiving LP tokens), which the pool's balance check interprets as "loan repaid." After the flash loan completes, the attacker can withdraw the LP tokens to extract the underlying assets.
@@ -194,6 +240,8 @@ dfx.withdraw(receiption, block.timestamp + 60);
 
 ## 3. ERC-1155 `onERC1155Received` Reentrancy During NFT Mint
 
+> **pathShape**: `callback-reentrant`
+
 ### Root Cause
 
 This vulnerability exists because ERC-1155 token transfers trigger `onERC1155Received()` callbacks on the recipient. When a protocol mints ERC-1155 tokens (like Financial NFTs), the callback fires during the minting process BEFORE the mint's accounting state is finalized. The attacker uses this callback to call `depositAdditionalToFNFT()` which modifies the per-unit deposit value, inflating the value of all subsequently minted tokens.
@@ -249,6 +297,8 @@ revest.withdrawFNFT(fnftId + 1, 360_000 + 1);
 ---
 
 ## 4. Native ETH/AVAX `receive()` Reentrancy — exitMarket/State Bypass
+
+> **pathShape**: `callback-reentrant`
 
 ### Root Cause
 

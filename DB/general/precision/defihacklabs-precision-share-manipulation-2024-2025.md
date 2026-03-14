@@ -5,6 +5,13 @@ chain: "ethereum, arbitrum, optimism, base"
 category: "precision_loss"
 vulnerability_type: "share_price_manipulation, exchange_rate_inflation, elastic_base_rounding"
 
+# Pattern Identity (Required)
+root_cause_family: arithmetic_invariant_break
+pattern_key: share_price_manipulation | exchange_rate | economic_exploit | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 # Attack Vector Details
 attack_type: "economic_exploit"
 affected_component: "exchange_rate, share_accounting, scaling_factors, virtual_balance"
@@ -33,6 +40,31 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.8
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "base"
+  - "repay"
+  - "borrow"
+  - "mulDiv"
+  - "rayDiv"
+  - "toBase"
+  - "vb_sum"
+  - "elastic"
+  - "exploit"
+  - "mulDown"
+  - "vb_prod"
+  - "BentoBox"
+  - "DegenBox"
+  - "transfer"
+  - "batchSwap"
+path_keys:
+  - "empty_market_exchange_rate_inflation_via_donation"
+  - "elastic_base_rebase_math_rounding_exploitation"
+  - "liquidityindex_inflation_via_recursive_flash_loans"
+  - "scaling_factor_precision_loss_in_stablemath"
+  - "share_price_inflation_via_direct_contract_donation"
+  - "virtual_balance_math_manipulation"
 
 # Context Tags
 tags:
@@ -74,14 +106,28 @@ version: ">=0.8.0"
 ---
 
 # Precision Loss & Share Price Manipulation Attack Patterns (2024-2025)
-
 ## Overview
 
 Precision loss and share price manipulation attacks are the most financially devastating DeFi exploit category in 2024-2025, responsible for over **$215M** in combined losses. These attacks exploit rounding errors, exchange rate inflation, and scaling factor truncation across lending protocols, AMMs, and vaults. Attack patterns range from classic first-depositor/donation attacks on Compound forks (Sonne $20M), elastic/base rounding manipulation in Kashi lending (MIMSpell $6.5M), recursive flash loan index inflation on Aave forks (Radiant $4.5M), scaling factor precision loss in Balancer StableMath ($120M), to share price donation via direct contract transfers (ResupplyFi $9.6M).
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `arithmetic_invariant_break` |
+| Pattern Key | `share_price_manipulation | exchange_rate | economic_exploit | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, arbitrum, optimism, base |
+
+
 ## 1. Empty Market Exchange Rate Inflation via Donation
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -163,6 +209,8 @@ IFS(NFTLiquidationProxy).liquidateWithSingleRepay(
 
 ## 2. Elastic/Base Rebase Math Rounding Exploitation
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 Kashi-based lending protocols (BentoBox/DegenBox) track debt using an elastic/base rebase structure where `elastic` represents the actual token amount and `base` represents shares. The conversion functions `toElastic()` and `toBase()` use `mulDiv` that rounds in specific directions. When both `elastic` and `base` are driven to near-zero, repeated tiny borrow/repay cycles (1 wei) accumulate rounding errors that skew the ratio enormously, allowing the attacker to borrow the entire pool for negligible debt shares.
@@ -215,6 +263,8 @@ ICauldronV4(CauldronV4).borrow(address(this), fullBalance);
 ---
 
 ## 3. LiquidityIndex Inflation via Recursive Flash Loans
+
+> **pathShape**: `callback-reentrant`
 
 ### Root Cause
 
@@ -273,6 +323,8 @@ RadiantLendingPool.borrow(address(WETH), amountToBorrow, 2, 0, address(this));
 
 ## 4. Scaling Factor Precision Loss in StableMath
 
+> **pathShape**: `iterative-loop`
+
 ### Root Cause
 
 Balancer V2 ComposableStablePools use scaling factors to normalize token amounts with different decimals or wrapped token rates (e.g., wstETH, osETH). The `FixedPoint.mulDown(amount, scalingFactor)` operation truncates toward zero. When pool balances are drained to dust levels, this truncation error becomes a significant fraction of the total balance. Combining hundreds of micro-swaps via `batchSwap` in a single transaction, the attacker extracts the cumulative rounding profit.
@@ -328,6 +380,8 @@ IBalancerVault(balancer).manageUserBalance(withdrawOps);
 ---
 
 ## 5. Share Price Inflation via Direct Contract Donation
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -411,6 +465,8 @@ for (address token : [ETH, BTC, USDC, USDE, LINK, UNI, USDT, FRAX, DAI]) {
 ---
 
 ## 6. Virtual Balance Math Manipulation
+
+> **pathShape**: `iterative-loop`
 
 ### Root Cause
 

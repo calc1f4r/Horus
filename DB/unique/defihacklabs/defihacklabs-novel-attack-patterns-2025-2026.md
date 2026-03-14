@@ -5,6 +5,13 @@ chain: "ethereum, base, bsc, arbitrum"
 category: "novel_attack_vectors"
 vulnerability_type: "transient_storage_bypass, fee_overcharge, reward_farming, batch_refund, bonding_curve_overflow, fee_unit_mismatch, permissionless_oracle"
 
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: transient_storage_bypass | tstore_auth | logical_error, arithmetic_overflow, state_manipulation | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 # Attack Vector Details
 attack_type: "logical_error, arithmetic_overflow, state_manipulation"
 affected_component: "tstore_auth, transfer_fee, staking_rewards, sale_refund, bonding_curve, fee_manager, aum_oracle"
@@ -34,6 +41,31 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.75
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "buy"
+  - "fee"
+  - "mint"
+  - "skim"
+  - "sync"
+  - "THETA"
+  - "stake"
+  - "tload"
+  - "addFee"
+  - "amount"
+  - "attack"
+  - "buyTRU"
+  - "earned"
+  - "mulDiv"
+  - "tstore"
+path_keys:
+  - "transient_storage_eip_1153_authorization_bypass_via_create2"
+  - "fee_on_transfer_token_overcharge_amm_sync_drain"
+  - "staking_reward_farming_via_create2_identity_rotation"
+  - "batch_array_refund_multiplication"
+  - "bonding_curve_arithmetic_overflow_in_price_calculation"
+  - "fee_unit_mismatch_between_systems"
 
 # Context Tags
 tags:
@@ -71,14 +103,28 @@ version: ">=0.8.0"
 ---
 
 # Novel & Emerging Attack Patterns (2025-2026)
-
 ## Overview
 
 The 2025-2026 period introduces genuinely novel attack vectors that exploit new EVM features (transient storage EIP-1153), economic design flaws (bonding curve arithmetic, permissionless oracle updates), and classic patterns in new contexts (CREATE2 identity rotation, batch refund multiplication). These 7 exploits represent the bleeding edge of smart contract exploitation — many have no prior precedent. Combined losses exceed **$14M** with individual exploits ranging from 27 ETH to 8,540 ETH ($5.1M).
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_validation` |
+| Pattern Key | `transient_storage_bypass | tstore_auth | logical_error, arithmetic_overflow, state_manipulation | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, base, bsc, arbitrum |
+
+
 ## 1. Transient Storage (EIP-1153) Authorization Bypass via CREATE2
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -155,6 +201,8 @@ ImmutableCreate2Factory.safeCreate2(
 
 ## 2. Fee-On-Transfer Token Overcharge + AMM Sync Drain
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 When a token's `_transfer()` function applies fees based on a percentage list where `sum(shares) > 100%`, the sender is debited more tokens than the recipient receives. When this transfer involves an AMM pair, the pair's internal balance becomes desynced from its actual token balance. The attacker can then use `skim()` to extract excess tokens and `sync()` to lock the manipulated reserves, enabling profitable swaps.
@@ -216,6 +264,8 @@ router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
 ---
 
 ## 3. Staking Reward Farming via CREATE2 Identity Rotation
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -287,6 +337,8 @@ contract Attack2 {
 
 ## 4. Batch Array Refund Multiplication
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 When a sale/purchase function accepts arrays of recipients, rates, and refund flags, and processes refunds per-iteration using `msg.value` (which is constant across all iterations), the attacker can specify N entries all requesting refunds. Each iteration refunds `msg.value / rate`, but `msg.value` was paid only once. With N entries: total refund = N × (msg.value / rate), which exceeds msg.value when N > rate.
@@ -352,6 +404,8 @@ ISale(sale).buy{value: 1 ether}(recipients, rates, flags);
 ---
 
 ## 5. Bonding Curve Arithmetic Overflow in Price Calculation
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -424,6 +478,8 @@ while (address(POOL).balance >= 0.1 ether) {
 
 ## 6. Fee Unit Mismatch Between Systems
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 When one system computes a fee in **token units** (e.g., 500 USDC) and passes it to another system that **interprets it as basis points or weight** (e.g., 500 = 5%), the receiving system allocates massively inflated fee credits. The attacker opens a position that generates a large fee value, then claims the fee credit as if it were a proportional share.
@@ -486,6 +542,8 @@ opener.changePosition(0, -894_992_852_305, 0);
 ---
 
 ## 7. Permissionless AUM Oracle Manipulation
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 

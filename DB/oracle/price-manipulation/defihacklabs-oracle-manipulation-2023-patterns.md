@@ -5,6 +5,13 @@ chain: "ethereum, arbitrum, polygon, avax, bsc"
 category: "price_manipulation"
 vulnerability_type: "tellor_oracle_manipulation, spot_price_oracle, reserve_ratio_manipulation, lp_price_manipulation, flash_loan_oracle"
 
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: tellor_oracle_manipulation | tellor_oracle | flash_loan_price_manipulation | fund_loss
+
+# Interaction Scope
+interaction_scope: cross_protocol
+
 # Attack Vector Details
 attack_type: "flash_loan_price_manipulation"
 affected_component: "tellor_oracle, liquidity_bin, curve_pool, balancer_pool, DEX_pair, lending_oracle"
@@ -29,6 +36,29 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.90
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "reset"
+  - "shift"
+  - "getPrice"
+  - "rebalance"
+  - "spot_price"
+  - "getReserves"
+  - "updatePrice"
+  - "getDataBefore"
+  - "DISPUTE_WINDOW"
+  - "getCurrentValue"
+  - "executeOperation"
+  - "tx1_mintMassiveAmountOfBEUR"
+  - "tx2_liquidateMassiveAmountOfALBT"
+path_keys:
+  - "low_cost_oracle_reporter_manipulation_bonqdao_88m"
+  - "concentrated_liquidity_bin_manipulation_jimbo_8m"
+  - "curve_lp_token_price_manipulation_zunami_2m"
+  - "vtoken_collateral_oracle_manipulation_0vix_2m"
+  - "flash_loan_spot_price_compounderfinance_27_2m_gamma_6_3m_all"
+  - "lending_protocol_oracle_manipulation_rodeofinance_888k"
 
 # Context Tags
 tags:
@@ -81,14 +111,28 @@ total_losses: "$135M+"
 ---
 
 # Oracle & Price Manipulation Attack Patterns (2023)
-
 ## Overview
 
 2023 oracle manipulation exploits demonstrated the full spectrum of price attack vectors — from low-cost oracle reporter manipulation (BonqDAO $88M via Tellor for just 10 TRB stake) to sophisticated concentrated liquidity bin manipulation (Jimbo $8M), to classic flash-loan LP price inflation (Zunami $2M, 0vix $2M, Gamma $6.3M, Compounder $27.2M). The key insight: any protocol that uses on-chain spot prices, reserves, or cheaply-manipulable oracle feeds as the source of truth for collateral valuation or swap rates is exploitable. Total losses across the analyzed exploits exceed **$135M**.
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_validation` |
+| Pattern Key | `tellor_oracle_manipulation | tellor_oracle | flash_loan_price_manipulation | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `cross_protocol` |
+| Chain(s) | ethereum, arbitrum, polygon, avax, bsc |
+
+
 ## 1. Low-Cost Oracle Reporter Manipulation (BonqDAO $88M)
+
+> **pathShape**: `linear-multistep`
 
 ### Root Cause
 
@@ -184,6 +228,8 @@ function updatePrice(uint256 _tokenId, uint256 _price) public {
 
 ## 2. Concentrated Liquidity Bin Manipulation (Jimbo $8M)
 
+> **pathShape**: `linear-multistep`
+
 ### Root Cause
 
 Jimbo Protocol used a custom liquidity distribution mechanism on Trader Joe V2.1 (Liquidity Book). The protocol's `shift()` and `reset()` functions redistributed liquidity across bins based on current price. An attacker could:
@@ -256,6 +302,8 @@ function executeOperation(...) external returns (bool) {
 
 ## 3. Curve LP Token Price Manipulation (Zunami $2M)
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 Zunami Protocol used Curve LP tokens (sETH/ETH, frxETH/ETH) whose price was derived from pool reserves. An attacker could flash loan massive amounts, add/remove liquidity to manipulate the LP token's value, and exploit Zunami's oracle that relied on spot Curve pool state.
@@ -286,6 +334,8 @@ Zunami Protocol used Curve LP tokens (sETH/ETH, frxETH/ETH) whose price was deri
 
 ## 4. vToken Collateral Oracle Manipulation (0vix $2M)
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 0vix Protocol (Compound V2 fork on Polygon) used vGHST as a collateral token. The oracle price for vGHST was derived from the underlying GHST token's Aave aGHST supply rate. By manipulating the aGHST vault's exchange rate through flash loans, the attacker inflated vGHST's value, borrowed against it, then let the price return to normal.
@@ -315,6 +365,8 @@ Zunami Protocol used Curve LP tokens (sETH/ETH, frxETH/ETH) whose price was deri
 ---
 
 ## 5. Flash Loan + Spot Price (CompounderFinance $27.2M, Gamma $6.3M, Allbridge $550K)
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -351,6 +403,8 @@ Multiple protocols in 2023 continued to use DEX spot prices (pair reserves, `get
 ---
 
 ## 6. Lending Protocol Oracle Manipulation (RodeoFinance $888K)
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 

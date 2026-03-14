@@ -5,6 +5,13 @@ chain: "ethereum, avalanche"
 category: "logic"
 vulnerability_type: "business_logic_error"
 
+# Pattern Identity (Required)
+root_cause_family: stale_accounting
+pattern_key: business_logic_error | solvency_check | economic_exploit | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 # Attack Vector Details
 attack_type: "economic_exploit"
 affected_component: "solvency_check, swap_routing, balance_tracking"
@@ -24,6 +31,29 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.5
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "from"
+  - "mint"
+  - "swap"
+  - "kLast"
+  - "route"
+  - "violator"
+  - "KyberSwap"
+  - "balanceOf"
+  - "liquidate"
+  - "sqrtPrice"
+  - "ElasticSwap"
+  - "addLiquidity"
+  - "transferFrom"
+  - "_syncBalances"
+  - "_flashCallback"
+path_keys:
+  - "missing_solvency_check_on_donation_functions"
+  - "precision_loss_in_concentrated_liquidity_tick_math"
+  - "internal_vs_actual_balance_divergence"
+  - "unchecked_swap_router_callback_trust"
 
 # Context Tags
 tags:
@@ -53,14 +83,28 @@ version: ">=0.8.0"
 ---
 
 # Business Logic & Solvency Check Vulnerability Patterns (2022-2023)
-
 ## Overview
 
 Business logic vulnerabilities in DeFi arise when critical invariants (solvency, balance consistency, routing integrity) are not enforced at the protocol level. Unlike access control or reentrancy bugs, these exploit fundamental design flaws in the protocol's economic logic. The 2022-2023 period saw four major categories: (1) missing solvency checks on reserve donation functions (Euler $200M), (2) precision/tick manipulation in concentrated liquidity AMMs (KyberSwap $48M), (3) internal vs actual balance divergence in AMMs (ElasticSwap $845K), and (4) unchecked callback trust in swap routers (SushiSwap $3.3M). Combined losses: **$252M+**.
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `stale_accounting` |
+| Pattern Key | `business_logic_error | solvency_check | economic_exploit | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, avalanche |
+
+
 ## 1. Missing Solvency Check on Donation Functions
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -127,6 +171,8 @@ function liquidate(address _violator) external {
 
 ## 2. Precision Loss in Concentrated Liquidity Tick Math
 
+> **pathShape**: `linear-multistep`
+
 ### Root Cause
 
 KyberSwap's concentrated liquidity implementation had numeric precision errors in the tick-crossing calculation. When an attacker carefully positioned the pool price at a range boundary with zero liquidity, added a precisely crafted position, removed it, and then executed swaps that crossed this boundary, the swap math produced incorrect output amounts due to precision loss in the tick-to-sqrtPrice conversion. This effectively allowed the attacker to extract more tokens than the pool should have given.
@@ -190,6 +236,8 @@ function _flashCallback(uint256 due) internal returns (bool) {
 
 ## 3. Internal vs Actual Balance Divergence
 
+> **pathShape**: `linear-multistep`
+
 ### Root Cause
 
 ElasticSwap tracked internal balances (`baseTokenReserveQty`, `quoteTokenReserveQty`, `kLast`) separately from actual ERC20 token balances. When tokens were directly transferred to the exchange contract (not through `addLiquidity()`), a "decay" formed — the actual balance exceeded the internal tracking. Functions like `addLiquidity()`, `removeLiquidity()`, and `swap()` used these divergent values inconsistently, allowing the attacker to extract more value than deposited by manipulating the decay.
@@ -240,6 +288,8 @@ ELP.removeLiquidity(
 ---
 
 ## 4. Unchecked Swap Router Callback Trust
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 

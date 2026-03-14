@@ -3,18 +3,21 @@
     "category": "general-governance",
     "description": "Governance, stablecoins, veToken voting, DAO governance, malicious patterns, MEV, randomness",
     "fileCount": 13,
-    "totalPatterns": 97,
+    "totalPatterns": 102,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
     {
       "file": "DB/general/dao-governance-vulnerabilities/defihacklabs-governance-attack-patterns.md",
-      "totalLines": 487,
+      "totalLines": 540,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, bsc\"",
         "category": "\"governance\"",
         "vulnerability_type": "\"governance_manipulation\"",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "governance_manipulation | governance_voting | logical_error | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "\"logical_error\"",
         "affected_component": "\"governance_voting, proposal_execution, proxy_initialization\"",
         "severity": "\"critical\"",
@@ -24,14 +27,44 @@
         "language": "\"solidity\"",
         "version": "\">=0.8.0\""
       },
-      "patternCount": 9,
+      "patternCount": 10,
       "patterns": [
         {
-          "id": "general-governance-defihacklabs-governance-attack-patterns-1-flash-loan-governance-takeov-000",
+          "id": "general-governance-defihacklabs-governance-attack-patterns-overview-000",
+          "title": "Overview",
+          "lineStart": 89,
+          "lineEnd": 107,
+          "lineCount": 19,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "missing_validation",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 96,
+              "lineEnd": 107,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "missing_validation",
+                "single_contract"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-defihacklabs-governance-attack-patterns-1-flash-loan-governance-takeov-001",
           "title": "1. Flash Loan Governance Takeover",
-          "lineStart": 65,
-          "lineEnd": 117,
-          "lineCount": 53,
+          "lineStart": 108,
+          "lineEnd": 162,
+          "lineCount": 55,
           "severity": [
             "CRITICAL",
             "LOW"
@@ -44,8 +77,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 71,
-              "lineEnd": 81,
+              "lineStart": 116,
+              "lineEnd": 126,
               "severity": [],
               "codeKeywords": [
                 "emergencyCommit"
@@ -53,8 +86,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 82,
-              "lineEnd": 117,
+              "lineStart": 127,
+              "lineEnd": 162,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -66,22 +99,24 @@
           ]
         },
         {
-          "id": "general-governance-defihacklabs-governance-attack-patterns-2-low-quorum-governance-exploi-001",
+          "id": "general-governance-defihacklabs-governance-attack-patterns-2-low-quorum-governance-exploi-002",
           "title": "2. Low Quorum Governance Exploitation",
-          "lineStart": 118,
-          "lineEnd": 165,
-          "lineCount": 48,
+          "lineStart": 163,
+          "lineEnd": 212,
+          "lineCount": 50,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
-          "codeKeywords": [],
+          "codeKeywords": [
+            "atomic"
+          ],
           "rootCause": "When governance quorum requirements are set too low (or vote delegation concentrates power), an attacker with a relatively small token holding can pass proposals that modify critical protocol paramete",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 124,
-              "lineEnd": 165,
+              "lineStart": 171,
+              "lineEnd": 212,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -91,11 +126,11 @@
           ]
         },
         {
-          "id": "general-governance-defihacklabs-governance-attack-patterns-3-proxy-re-initialization-atta-002",
+          "id": "general-governance-defihacklabs-governance-attack-patterns-3-proxy-re-initialization-atta-003",
           "title": "3. Proxy Re-Initialization Attack",
-          "lineStart": 166,
-          "lineEnd": 217,
-          "lineCount": 52,
+          "lineStart": 213,
+          "lineEnd": 266,
+          "lineCount": 54,
           "severity": [
             "CRITICAL",
             "HIGH"
@@ -110,8 +145,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 172,
-              "lineEnd": 217,
+              "lineStart": 221,
+              "lineEnd": 266,
               "severity": [
                 "CRITICAL",
                 "HIGH"
@@ -124,22 +159,24 @@
           ]
         },
         {
-          "id": "general-governance-defihacklabs-governance-attack-patterns-4-dao-module-oracle-self-answe-003",
+          "id": "general-governance-defihacklabs-governance-attack-patterns-4-dao-module-oracle-self-answe-004",
           "title": "4. DAO Module Oracle Self-Answer Attack",
-          "lineStart": 218,
-          "lineEnd": 270,
-          "lineCount": 53,
+          "lineStart": 267,
+          "lineEnd": 321,
+          "lineCount": 55,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
-          "codeKeywords": [],
+          "codeKeywords": [
+            "atomic"
+          ],
           "rootCause": "When a DAO uses Gnosis Safe Modules with Reality.io oracle for proposal validation, the security depends on the oracle bond economics. If the bond requirement is trivially low (1 wei) and anyone can s",
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 224,
-              "lineEnd": 270,
+              "lineStart": 275,
+              "lineEnd": 321,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -149,11 +186,11 @@
           ]
         },
         {
-          "id": "general-governance-defihacklabs-governance-attack-patterns-5-governance-treasury-drain-vi-004",
+          "id": "general-governance-defihacklabs-governance-attack-patterns-5-governance-treasury-drain-vi-005",
           "title": "5. Governance Treasury Drain via Token Acquisition",
-          "lineStart": 271,
-          "lineEnd": 319,
-          "lineCount": 49,
+          "lineStart": 322,
+          "lineEnd": 372,
+          "lineCount": 51,
           "severity": [
             "CRITICAL"
           ],
@@ -162,8 +199,8 @@
           "subsections": [
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 277,
-              "lineEnd": 319,
+              "lineStart": 330,
+              "lineEnd": 372,
               "severity": [
                 "CRITICAL"
               ],
@@ -172,10 +209,10 @@
           ]
         },
         {
-          "id": "general-governance-defihacklabs-governance-attack-patterns-impact-analysis-005",
+          "id": "general-governance-defihacklabs-governance-attack-patterns-impact-analysis-006",
           "title": "Impact Analysis",
-          "lineStart": 320,
-          "lineEnd": 345,
+          "lineStart": 373,
+          "lineEnd": 398,
           "lineCount": 26,
           "severity": [
             "LOW"
@@ -188,10 +225,10 @@
           "subsections": null
         },
         {
-          "id": "general-governance-defihacklabs-governance-attack-patterns-secure-implementation-006",
+          "id": "general-governance-defihacklabs-governance-attack-patterns-secure-implementation-007",
           "title": "Secure Implementation",
-          "lineStart": 346,
-          "lineEnd": 413,
+          "lineStart": 399,
+          "lineEnd": 466,
           "lineCount": 68,
           "severity": [],
           "codeKeywords": [
@@ -204,10 +241,10 @@
           "subsections": null
         },
         {
-          "id": "general-governance-defihacklabs-governance-attack-patterns-detection-patterns-007",
+          "id": "general-governance-defihacklabs-governance-attack-patterns-detection-patterns-008",
           "title": "Detection Patterns",
-          "lineStart": 414,
-          "lineEnd": 440,
+          "lineStart": 467,
+          "lineEnd": 493,
           "lineCount": 27,
           "severity": [
             "LOW"
@@ -223,10 +260,10 @@
           "subsections": null
         },
         {
-          "id": "general-governance-defihacklabs-governance-attack-patterns-real-world-examples-008",
+          "id": "general-governance-defihacklabs-governance-attack-patterns-real-world-examples-009",
           "title": "Real-World Examples",
-          "lineStart": 441,
-          "lineEnd": 456,
+          "lineStart": 494,
+          "lineEnd": 509,
           "lineCount": 16,
           "severity": [
             "LOW"
@@ -3177,12 +3214,15 @@
     },
     {
       "file": "DB/general/mev-bot/defihacklabs-mev-bot-2022-patterns.md",
-      "totalLines": 401,
+      "totalLines": 459,
       "frontmatter": {
         "protocol": "generic",
         "chain": "ethereum",
         "category": "mev",
         "vulnerability_type": "mev_bot_callback_exploitation",
+        "root_cause_family": "missing_access_control",
+        "pattern_key": "mev_bot_callback_exploitation | mev_bot_contract | arbitrary_call | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "arbitrary_call",
         "affected_component": "mev_bot_contract",
         "severity": "high",
@@ -3193,35 +3233,47 @@
         "total_exploits_analyzed": "3",
         "total_losses": "\"$475K+\""
       },
-      "patternCount": 1,
+      "patternCount": 5,
       "patterns": [
         {
-          "id": "general-governance-defihacklabs-mev-bot-2022-patterns-mev-bot-callback-arbitrary-cal-000",
-          "title": "MEV Bot Callback & Arbitrary Call Exploits (2022)",
-          "lineStart": 41,
-          "lineEnd": 333,
-          "lineCount": 293,
+          "id": "general-governance-defihacklabs-mev-bot-2022-patterns-agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 88,
+          "lineEnd": 99,
+          "lineCount": 12,
           "severity": [
-            "HIGH",
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "missing_access_control",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-defihacklabs-mev-bot-2022-patterns-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 100,
+          "lineEnd": 126,
+          "lineCount": 27,
+          "severity": [
             "LOW"
           ],
           "codeKeywords": [
             "DPPFlashLoanCall",
-            "_USDCToWETH",
             "data",
             "getReserves",
             "receiveFlashLoan",
             "swap",
-            "testExploit",
-            "transferFrom",
-            "userData"
+            "transferFrom"
           ],
           "rootCause": "1. **Flash Loan Callback Without Origin Validation**: MEV bots implement flash loan callback interfaces (Balancer `receiveFlashLoan`, DODO `DPPFlashLoanCall`) to support their arbitrage strategies. Ho",
           "subsections": [
             {
-              "title": "Vulnerability Description",
-              "lineStart": 47,
-              "lineEnd": 73,
+              "title": "Root Cause",
+              "lineStart": 102,
+              "lineEnd": 109,
               "severity": [
                 "LOW"
               ],
@@ -3235,9 +3287,40 @@
               ]
             },
             {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 74,
-              "lineEnd": 236,
+              "title": "Attack Scenarios",
+              "lineStart": 110,
+              "lineEnd": 126,
+              "severity": [],
+              "codeKeywords": [
+                "data"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-governance-defihacklabs-mev-bot-2022-patterns-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 127,
+          "lineEnd": 295,
+          "lineCount": 169,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_USDCToWETH",
+            "atomic",
+            "getReserves",
+            "swap",
+            "testExploit",
+            "transferFrom",
+            "userData"
+          ],
+          "rootCause": "MEV Bot at 0x00000000000a47b1298f18cf67de547bbe0d723f",
+          "subsections": [
+            {
+              "title": "Category 1: Flash Loan Callback → Fake Pair Routing [HIGH]",
+              "lineStart": 129,
+              "lineEnd": 199,
               "severity": [
                 "HIGH"
               ],
@@ -3246,11 +3329,58 @@
                 "getReserves",
                 "swap",
                 "testExploit",
-                "transferFrom",
                 "userData"
+              ]
+            },
+            {
+              "title": "Category 2: Arbitrary Call Execution via Exposed Function [HIGH]",
+              "lineStart": 200,
+              "lineEnd": 245,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "atomic",
+                "testExploit",
+                "transferFrom"
+              ]
+            },
+            {
+              "title": "Category 3: DODO Flash Loan Callback Loop Drain [MEDIUM]",
+              "lineStart": 246,
+              "lineEnd": 295,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall",
+                "data",
+                "testExploit"
               ]
             }
           ]
+        },
+        {
+          "id": "general-governance-defihacklabs-mev-bot-2022-patterns-defihacklabs-poc-references-003",
+          "title": "DeFiHackLabs PoC References",
+          "lineStart": 428,
+          "lineEnd": 435,
+          "lineCount": 8,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-governance-defihacklabs-mev-bot-2022-patterns-keywords-004",
+          "title": "Keywords",
+          "lineStart": 436,
+          "lineEnd": 454,
+          "lineCount": 19,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },

@@ -3,7 +3,7 @@
     "category": "unique",
     "description": "Pattern-level index for unique vulnerabilities",
     "fileCount": 21,
-    "totalPatterns": 79,
+    "totalPatterns": 112,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
   },
   "files": [
@@ -972,12 +972,15 @@
     },
     {
       "file": "DB/unique/defihacklabs/compiler-level-vulnerabilities.md",
-      "totalLines": 299,
+      "totalLines": 331,
       "frontmatter": {
         "protocol": "curve",
         "chain": "ethereum",
         "category": "compiler_bug",
         "vulnerability_type": "vyper_reentrancy_lock_bug",
+        "root_cause_family": "callback_reentrancy",
+        "pattern_key": "vyper_reentrancy_lock_bug | vyper_compiler | reentrancy | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "reentrancy",
         "affected_component": "vyper_compiler",
         "severity": "critical",
@@ -993,23 +996,37 @@
         {
           "id": "unique-compiler-level-vulnerabilities-compiler-level-vulnerability-p-000",
           "title": "Compiler-Level Vulnerability Patterns",
-          "lineStart": 39,
-          "lineEnd": 74,
-          "lineCount": 36,
+          "lineStart": 56,
+          "lineEnd": 106,
+          "lineCount": 51,
           "severity": [
             "CRITICAL"
           ],
           "codeKeywords": [
             "add_liquidity",
+            "callback_reentrancy",
             "receive",
-            "remove_liquidity"
+            "remove_liquidity",
+            "single_contract"
           ],
           "rootCause": "The Vyper compiler versions 0.2.15, 0.2.16, and 0.3.0 had a bug in the code generation for the `@nonreentrant` decorator. The reentrancy lock used a storage slot that could be improperly handled acros",
           "subsections": [
             {
+              "title": "Agent Quick View",
+              "lineStart": 63,
+              "lineEnd": 74,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "callback_reentrancy",
+                "single_contract"
+              ]
+            },
+            {
               "title": "Vulnerability Description",
-              "lineStart": 45,
-              "lineEnd": 68,
+              "lineStart": 75,
+              "lineEnd": 98,
               "severity": [],
               "codeKeywords": [
                 "add_liquidity",
@@ -1019,8 +1036,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 69,
-              "lineEnd": 74,
+              "lineStart": 99,
+              "lineEnd": 106,
               "severity": [
                 "CRITICAL"
               ],
@@ -1032,12 +1049,15 @@
     },
     {
       "file": "DB/unique/defihacklabs/defihacklabs-novel-attack-patterns-2025-2026.md",
-      "totalLines": 747,
+      "totalLines": 805,
       "frontmatter": {
         "protocol": "\"generic\"",
         "chain": "\"ethereum, base, bsc, arbitrum\"",
         "category": "\"novel_attack_vectors\"",
         "vulnerability_type": "\"transient_storage_bypass, fee_overcharge, reward_farming, batch_refund, bonding_curve_overflow, fee_unit_mismatch, permissionless_oracle\"",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "transient_storage_bypass | tstore_auth | logical_error, arithmetic_overflow, state_manipulation | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "\"logical_error, arithmetic_overflow, state_manipulation\"",
         "affected_component": "\"tstore_auth, transfer_fee, staking_rewards, sale_refund, bonding_curve, fee_manager, aum_oracle\"",
         "severity": "\"critical\"",
@@ -1047,20 +1067,52 @@
         "language": "\"solidity\"",
         "version": "\">=0.8.0\""
       },
-      "patternCount": 11,
+      "patternCount": 12,
       "patterns": [
         {
-          "id": "unique-defihacklabs-novel-attack-patterns-2025--1-transient-storage-eip-1153-a-000",
+          "id": "unique-defihacklabs-novel-attack-patterns-2025--overview-000",
+          "title": "Overview",
+          "lineStart": 106,
+          "lineEnd": 124,
+          "lineCount": 19,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "missing_validation",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 113,
+              "lineEnd": 124,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "missing_validation",
+                "single_contract"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "unique-defihacklabs-novel-attack-patterns-2025--1-transient-storage-eip-1153-a-001",
           "title": "1. Transient Storage (EIP-1153) Authorization Bypass via CREATE2",
-          "lineStart": 81,
-          "lineEnd": 155,
-          "lineCount": 75,
+          "lineStart": 125,
+          "lineEnd": 201,
+          "lineCount": 77,
           "severity": [
             "CRITICAL"
           ],
           "codeKeywords": [
             "ImmutableCreate2Factory.safeCreate2",
             "amount",
+            "atomic",
             "expected",
             "mint",
             "tload",
@@ -1075,8 +1127,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 87,
-              "lineEnd": 97,
+              "lineStart": 133,
+              "lineEnd": 143,
               "severity": [],
               "codeKeywords": [
                 "ImmutableCreate2Factory.safeCreate2",
@@ -1089,8 +1141,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 98,
-              "lineEnd": 155,
+              "lineStart": 144,
+              "lineEnd": 201,
               "severity": [
                 "CRITICAL"
               ],
@@ -1104,16 +1156,17 @@
           ]
         },
         {
-          "id": "unique-defihacklabs-novel-attack-patterns-2025--2-fee-on-transfer-token-overch-001",
+          "id": "unique-defihacklabs-novel-attack-patterns-2025--2-fee-on-transfer-token-overch-002",
           "title": "2. Fee-On-Transfer Token Overcharge + AMM Sync Drain",
-          "lineStart": 156,
-          "lineEnd": 217,
-          "lineCount": 62,
+          "lineStart": 202,
+          "lineEnd": 265,
+          "lineCount": 64,
           "severity": [
             "HIGH"
           ],
           "codeKeywords": [
             "_transfer",
+            "atomic",
             "pair.skim(attacker",
             "pair.sync",
             "skim",
@@ -1123,8 +1176,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 162,
-              "lineEnd": 171,
+              "lineStart": 210,
+              "lineEnd": 219,
               "severity": [],
               "codeKeywords": [
                 "pair.skim(attacker",
@@ -1133,8 +1186,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 172,
-              "lineEnd": 217,
+              "lineStart": 220,
+              "lineEnd": 265,
               "severity": [
                 "HIGH"
               ],
@@ -1143,15 +1196,16 @@
           ]
         },
         {
-          "id": "unique-defihacklabs-novel-attack-patterns-2025--3-staking-reward-farming-via-c-002",
+          "id": "unique-defihacklabs-novel-attack-patterns-2025--3-staking-reward-farming-via-c-003",
           "title": "3. Staking Reward Farming via CREATE2 Identity Rotation",
-          "lineStart": 218,
-          "lineEnd": 287,
-          "lineCount": 70,
+          "lineStart": 266,
+          "lineEnd": 337,
+          "lineCount": 72,
           "severity": [
             "HIGH"
           ],
           "codeKeywords": [
+            "atomic",
             "attack",
             "claimReward",
             "earned",
@@ -1162,8 +1216,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 224,
-              "lineEnd": 232,
+              "lineStart": 274,
+              "lineEnd": 282,
               "severity": [],
               "codeKeywords": [
                 "claimReward"
@@ -1171,8 +1225,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 233,
-              "lineEnd": 287,
+              "lineStart": 283,
+              "lineEnd": 337,
               "severity": [
                 "HIGH"
               ],
@@ -1187,15 +1241,16 @@
           ]
         },
         {
-          "id": "unique-defihacklabs-novel-attack-patterns-2025--4-batch-array-refund-multiplic-003",
+          "id": "unique-defihacklabs-novel-attack-patterns-2025--4-batch-array-refund-multiplic-004",
           "title": "4. Batch Array Refund Multiplication",
-          "lineStart": 288,
-          "lineEnd": 353,
-          "lineCount": 66,
+          "lineStart": 338,
+          "lineEnd": 405,
+          "lineCount": 68,
           "severity": [
             "HIGH"
           ],
           "codeKeywords": [
+            "atomic",
             "buy",
             "msg.value"
           ],
@@ -1203,15 +1258,15 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 294,
-              "lineEnd": 301,
+              "lineStart": 346,
+              "lineEnd": 353,
               "severity": [],
               "codeKeywords": []
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 302,
-              "lineEnd": 353,
+              "lineStart": 354,
+              "lineEnd": 405,
               "severity": [
                 "HIGH"
               ],
@@ -1222,11 +1277,11 @@
           ]
         },
         {
-          "id": "unique-defihacklabs-novel-attack-patterns-2025--5-bonding-curve-arithmetic-ove-004",
+          "id": "unique-defihacklabs-novel-attack-patterns-2025--5-bonding-curve-arithmetic-ove-005",
           "title": "5. Bonding Curve Arithmetic Overflow in Price Calculation",
-          "lineStart": 354,
-          "lineEnd": 424,
-          "lineCount": 71,
+          "lineStart": 406,
+          "lineEnd": 478,
+          "lineCount": 73,
           "severity": [
             "CRITICAL",
             "HIGH",
@@ -1235,6 +1290,7 @@
           "codeKeywords": [
             "THETA",
             "amount",
+            "atomic",
             "buyTRU",
             "getPurchasePrice",
             "reserve",
@@ -1248,8 +1304,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 360,
-              "lineEnd": 367,
+              "lineStart": 414,
+              "lineEnd": 421,
               "severity": [
                 "HIGH"
               ],
@@ -1262,8 +1318,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 368,
-              "lineEnd": 424,
+              "lineStart": 422,
+              "lineEnd": 478,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -1280,17 +1336,18 @@
           ]
         },
         {
-          "id": "unique-defihacklabs-novel-attack-patterns-2025--6-fee-unit-mismatch-between-sy-005",
+          "id": "unique-defihacklabs-novel-attack-patterns-2025--6-fee-unit-mismatch-between-sy-006",
           "title": "6. Fee Unit Mismatch Between Systems",
-          "lineStart": 425,
-          "lineEnd": 487,
-          "lineCount": 63,
+          "lineStart": 479,
+          "lineEnd": 543,
+          "lineCount": 65,
           "severity": [
             "CRITICAL"
           ],
           "codeKeywords": [
             "addFee",
             "addFee(tokenAmount",
+            "atomic",
             "changePosition",
             "fee",
             "feeAmount"
@@ -1299,8 +1356,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 431,
-              "lineEnd": 439,
+              "lineStart": 487,
+              "lineEnd": 495,
               "severity": [],
               "codeKeywords": [
                 "addFee(tokenAmount",
@@ -1309,8 +1366,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 440,
-              "lineEnd": 487,
+              "lineStart": 496,
+              "lineEnd": 543,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -1325,16 +1382,17 @@
           ]
         },
         {
-          "id": "unique-defihacklabs-novel-attack-patterns-2025--7-permissionless-aum-oracle-ma-006",
+          "id": "unique-defihacklabs-novel-attack-patterns-2025--7-permissionless-aum-oracle-ma-007",
           "title": "7. Permissionless AUM Oracle Manipulation",
-          "lineStart": 488,
-          "lineEnd": 553,
-          "lineCount": 66,
+          "lineStart": 544,
+          "lineEnd": 611,
+          "lineCount": 68,
           "severity": [
             "CRITICAL"
           ],
           "codeKeywords": [
             "MachineShareOracle.getSharePrice",
+            "atomic",
             "exchange",
             "getSharePrice",
             "machine.updateTotalAum",
@@ -1344,8 +1402,8 @@
           "subsections": [
             {
               "title": "Attack Scenario",
-              "lineStart": 494,
-              "lineEnd": 501,
+              "lineStart": 552,
+              "lineEnd": 559,
               "severity": [],
               "codeKeywords": [
                 "MachineShareOracle.getSharePrice",
@@ -1354,8 +1412,8 @@
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 502,
-              "lineEnd": 553,
+              "lineStart": 560,
+              "lineEnd": 611,
               "severity": [
                 "CRITICAL"
               ],
@@ -1368,10 +1426,10 @@
           ]
         },
         {
-          "id": "unique-defihacklabs-novel-attack-patterns-2025--impact-analysis-007",
+          "id": "unique-defihacklabs-novel-attack-patterns-2025--impact-analysis-008",
           "title": "Impact Analysis",
-          "lineStart": 554,
-          "lineEnd": 584,
+          "lineStart": 612,
+          "lineEnd": 642,
           "lineCount": 31,
           "severity": [
             "LOW"
@@ -1384,10 +1442,10 @@
           "subsections": null
         },
         {
-          "id": "unique-defihacklabs-novel-attack-patterns-2025--secure-implementation-008",
+          "id": "unique-defihacklabs-novel-attack-patterns-2025--secure-implementation-009",
           "title": "Secure Implementation",
-          "lineStart": 585,
-          "lineEnd": 673,
+          "lineStart": 643,
+          "lineEnd": 731,
           "lineCount": 89,
           "severity": [],
           "codeKeywords": [
@@ -1402,10 +1460,10 @@
           "subsections": null
         },
         {
-          "id": "unique-defihacklabs-novel-attack-patterns-2025--detection-patterns-009",
+          "id": "unique-defihacklabs-novel-attack-patterns-2025--detection-patterns-010",
           "title": "Detection Patterns",
-          "lineStart": 674,
-          "lineEnd": 699,
+          "lineStart": 732,
+          "lineEnd": 757,
           "lineCount": 26,
           "severity": [
             "LOW"
@@ -1418,10 +1476,10 @@
           "subsections": null
         },
         {
-          "id": "unique-defihacklabs-novel-attack-patterns-2025--real-world-examples-010",
+          "id": "unique-defihacklabs-novel-attack-patterns-2025--real-world-examples-011",
           "title": "Real-World Examples",
-          "lineStart": 700,
-          "lineEnd": 712,
+          "lineStart": 758,
+          "lineEnd": 770,
           "lineCount": 13,
           "severity": [
             "LOW"
@@ -1436,12 +1494,15 @@
     },
     {
       "file": "DB/unique/defihacklabs/economic-arbitrage-design-flaws.md",
-      "totalLines": 386,
+      "totalLines": 434,
       "frontmatter": {
         "protocol": "generic",
         "chain": "everychain",
         "category": "arbitrage",
         "vulnerability_type": "economic_design_flaw",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "economic_design_flaw | pricing_mechanism | economic_exploit | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "economic_exploit",
         "affected_component": "pricing_mechanism",
         "severity": "high",
@@ -1452,31 +1513,42 @@
         "total_exploits_analyzed": "2",
         "total_losses": "\"$143K\""
       },
-      "patternCount": 1,
+      "patternCount": 5,
       "patterns": [
         {
-          "id": "unique-economic-arbitrage-design-flaws-economic-arbitrage-design-flaw-000",
-          "title": "Economic Arbitrage Design Flaws",
-          "lineStart": 40,
-          "lineEnd": 321,
-          "lineCount": 282,
+          "id": "unique-economic-arbitrage-design-flaws-agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 79,
+          "lineEnd": 90,
+          "lineCount": 12,
           "severity": [
-            "HIGH",
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "missing_validation",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-economic-arbitrage-design-flaws-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 91,
+          "lineEnd": 117,
+          "lineCount": 27,
+          "severity": [
             "LOW"
           ],
           "codeKeywords": [
-            "VaultRouter.deposit",
-            "deposit",
-            "onMorphoFlashLoan",
-            "swapData",
-            "testExploit"
+            "swapData"
           ],
           "rootCause": "1. **Arbitrary Swap Routing via Vault Deposits**: Vault deposit functions accept user-controlled swap routing data (e.g., ParaSwap `swapData`). The attacker creates a thin-liquidity Uniswap V3 pool, p",
           "subsections": [
             {
-              "title": "Vulnerability Description",
-              "lineStart": 46,
-              "lineEnd": 72,
+              "title": "Root Cause",
+              "lineStart": 93,
+              "lineEnd": 98,
               "severity": [
                 "LOW"
               ],
@@ -1485,36 +1557,108 @@
               ]
             },
             {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 73,
-              "lineEnd": 240,
+              "title": "Attack Scenario",
+              "lineStart": 99,
+              "lineEnd": 117,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "unique-economic-arbitrage-design-flaws-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 118,
+          "lineEnd": 289,
+          "lineCount": 172,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "VaultRouter.deposit",
+            "atomic",
+            "cancelOrder",
+            "deposit",
+            "flashLoan",
+            "onMorphoFlashLoan",
+            "placeBuyOrder",
+            "swapData",
+            "testExploit"
+          ],
+          "rootCause": "VaultRouter.deposit() accepts arbitrary swap routing data",
+          "subsections": [
+            {
+              "title": "Category 1: Arbitrary Vault Deposit Routing [HIGH]",
+              "lineStart": 120,
+              "lineEnd": 206,
               "severity": [
                 "HIGH",
                 "LOW"
               ],
               "codeKeywords": [
                 "VaultRouter.deposit",
-                "cancelOrder",
+                "atomic",
                 "deposit",
-                "flashLoan",
                 "onMorphoFlashLoan",
-                "placeBuyOrder",
                 "swapData",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Category 2: On-Chain Order Book Price Inflation [HIGH]",
+              "lineStart": 207,
+              "lineEnd": 289,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "atomic",
+                "cancelOrder",
+                "executeOperation",
+                "flashLoan",
+                "placeBuyOrder",
                 "testExploit"
               ]
             }
           ]
+        },
+        {
+          "id": "unique-economic-arbitrage-design-flaws-defihacklabs-poc-references-003",
+          "title": "DeFiHackLabs PoC References",
+          "lineStart": 405,
+          "lineEnd": 411,
+          "lineCount": 7,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-economic-arbitrage-design-flaws-keywords-004",
+          "title": "Keywords",
+          "lineStart": 412,
+          "lineEnd": 429,
+          "lineCount": 18,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
     {
       "file": "DB/unique/defihacklabs/fee-mechanism-exploitation.md",
-      "totalLines": 329,
+      "totalLines": 380,
       "frontmatter": {
         "protocol": "generic",
         "chain": "everychain",
         "category": "fee_mechanism",
         "vulnerability_type": "fee_calculation_exploitation",
+        "root_cause_family": "arithmetic_invariant_break",
+        "pattern_key": "fee_calculation_exploitation | fee_controller | economic_exploit | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "economic_exploit",
         "affected_component": "fee_controller",
         "severity": "high",
@@ -1525,35 +1669,43 @@
         "total_exploits_analyzed": "2",
         "total_losses": "\"$1.04M\""
       },
-      "patternCount": 1,
+      "patternCount": 5,
       "patterns": [
         {
-          "id": "unique-fee-mechanism-exploitation-fee-mechanism-exploitation-pat-000",
-          "title": "Fee Mechanism Exploitation Patterns",
-          "lineStart": 40,
-          "lineEnd": 262,
-          "lineCount": 223,
+          "id": "unique-fee-mechanism-exploitation-agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 82,
+          "lineEnd": 93,
+          "lineCount": 12,
           "severity": [
-            "CRITICAL",
-            "LOW"
+            "HIGH"
           ],
+          "codeKeywords": [
+            "arithmetic_invariant_break",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-fee-mechanism-exploitation-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 94,
+          "lineEnd": 119,
+          "lineCount": 26,
+          "severity": [],
           "codeKeywords": [
             "_transfer",
             "amount",
-            "buyItem",
-            "innerCallback",
-            "safeTransferFrom",
             "skim",
-            "swap",
-            "sync",
-            "testExploit"
+            "sync"
           ],
           "rootCause": "1. **Zero Quantity Fee Bypass**: Functions that calculate `totalPrice = quantity * pricePerItem` without requiring `quantity > 0`. When `quantity = 0`, the payment becomes zero, but the asset transfer",
           "subsections": [
             {
-              "title": "Vulnerability Description",
-              "lineStart": 46,
-              "lineEnd": 71,
+              "title": "Root Cause",
+              "lineStart": 96,
+              "lineEnd": 103,
               "severity": [],
               "codeKeywords": [
                 "_transfer",
@@ -1563,18 +1715,63 @@
               ]
             },
             {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 72,
-              "lineEnd": 183,
+              "title": "Attack Scenario",
+              "lineStart": 104,
+              "lineEnd": 119,
+              "severity": [],
+              "codeKeywords": [
+                "skim"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "unique-fee-mechanism-exploitation-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 120,
+          "lineEnd": 235,
+          "lineCount": 116,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_transfer",
+            "buyItem",
+            "innerCallback",
+            "safeTransferFrom",
+            "skim",
+            "swap",
+            "sync",
+            "testExploit"
+          ],
+          "rootCause": "buyItem allows quantity=0, resulting in zero payment",
+          "subsections": [
+            {
+              "title": "Category 1: Zero Quantity Fee Bypass [CRITICAL]",
+              "lineStart": 122,
+              "lineEnd": 180,
               "severity": [
                 "CRITICAL",
                 "LOW"
               ],
               "codeKeywords": [
-                "_transfer",
                 "buyItem",
-                "innerCallback",
                 "safeTransferFrom",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Category 2: Broken Token Fee + AMM Exploitation [HIGH]",
+              "lineStart": 181,
+              "lineEnd": 235,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_transfer",
+                "innerCallback",
                 "skim",
                 "swap",
                 "sync",
@@ -1582,17 +1779,42 @@
               ]
             }
           ]
+        },
+        {
+          "id": "unique-fee-mechanism-exploitation-defihacklabs-poc-references-003",
+          "title": "DeFiHackLabs PoC References",
+          "lineStart": 351,
+          "lineEnd": 357,
+          "lineCount": 7,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-fee-mechanism-exploitation-keywords-004",
+          "title": "Keywords",
+          "lineStart": 358,
+          "lineEnd": 375,
+          "lineCount": 18,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
     {
       "file": "DB/unique/defihacklabs/liquidity-migration-exploit.md",
-      "totalLines": 412,
+      "totalLines": 469,
       "frontmatter": {
         "protocol": "generic",
         "chain": "everychain",
         "category": "liquidity_migration",
         "vulnerability_type": "migration_parameter_exploitation",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "migration_parameter_exploitation | migrator_contract | parameter_manipulation | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "parameter_manipulation",
         "affected_component": "migrator_contract",
         "severity": "critical",
@@ -1603,34 +1825,46 @@
         "total_exploits_analyzed": "3",
         "total_losses": "\"$15.9M\""
       },
-      "patternCount": 1,
+      "patternCount": 5,
       "patterns": [
         {
-          "id": "unique-liquidity-migration-exploit-liquidity-migration-exploit-pa-000",
-          "title": "Liquidity Migration Exploit Patterns",
-          "lineStart": 42,
-          "lineEnd": 345,
-          "lineCount": 304,
+          "id": "unique-liquidity-migration-exploit-agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 88,
+          "lineEnd": 99,
+          "lineCount": 12,
           "severity": [
-            "CRITICAL",
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "missing_validation",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-liquidity-migration-exploit-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 100,
+          "lineEnd": 125,
+          "lineCount": 26,
+          "severity": [
             "LOW"
           ],
           "codeKeywords": [
             "burn",
             "migrate",
             "pair",
-            "pair.burn",
-            "pair.token0",
-            "pair.token1",
             "token0",
             "token1"
           ],
           "rootCause": "The root causes fall into three distinct patterns:\n\n\n\n1. **Token/Pair Parameter Mismatch**: Migration functions accept `token0` and `token1` parameters separately from the `pair` address. If the funct",
           "subsections": [
             {
-              "title": "Vulnerability Description",
-              "lineStart": 48,
-              "lineEnd": 73,
+              "title": "Root Cause",
+              "lineStart": 102,
+              "lineEnd": 111,
               "severity": [
                 "LOW"
               ],
@@ -1643,14 +1877,47 @@
               ]
             },
             {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 74,
-              "lineEnd": 277,
+              "title": "Attack Scenario",
+              "lineStart": 112,
+              "lineEnd": 125,
+              "severity": [],
+              "codeKeywords": [
+                "burn"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "unique-liquidity-migration-exploit-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 126,
+          "lineEnd": 335,
+          "lineCount": 210,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "atomic",
+            "migrate",
+            "pair.burn",
+            "pair.token0",
+            "pair.token1",
+            "token0",
+            "token1"
+          ],
+          "rootCause": "migrate() accepts arbitrary token0/token1 without validating against pair",
+          "subsections": [
+            {
+              "title": "Category 1: Token Parameter Mismatch — Fake Token Injection [CRITICAL]",
+              "lineStart": 128,
+              "lineEnd": 196,
               "severity": [
                 "CRITICAL",
                 "LOW"
               ],
               "codeKeywords": [
+                "atomic",
                 "migrate",
                 "pair.burn",
                 "pair.token0",
@@ -1658,19 +1925,76 @@
                 "token0",
                 "token1"
               ]
+            },
+            {
+              "title": "Category 2: Fake Pair Double-Migration [HIGH]",
+              "lineStart": 197,
+              "lineEnd": 277,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "V3Migrator.migrate",
+                "atomic",
+                "migrate",
+                "token0",
+                "token1"
+              ]
+            },
+            {
+              "title": "Category 3: Flash-Loan Price Manipulation During Migration [HIGH]",
+              "lineStart": 278,
+              "lineEnd": 335,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "DPPFlashLoanCall",
+                "LpMigration.migrate",
+                "migrate",
+                "pancakeV3FlashCallback",
+                "testExploit"
+              ]
             }
           ]
+        },
+        {
+          "id": "unique-liquidity-migration-exploit-defihacklabs-poc-references-003",
+          "title": "DeFiHackLabs PoC References",
+          "lineStart": 439,
+          "lineEnd": 446,
+          "lineCount": 8,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-liquidity-migration-exploit-keywords-004",
+          "title": "Keywords",
+          "lineStart": 447,
+          "lineEnd": 464,
+          "lineCount": 18,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
     {
       "file": "DB/unique/defihacklabs/msgvalue-in-loop.md",
-      "totalLines": 385,
+      "totalLines": 437,
       "frontmatter": {
         "protocol": "generic",
         "chain": "ethereum",
         "category": "msgvalue_loop",
         "vulnerability_type": "msg_value_reuse_in_loop",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "msg_value_reuse_in_loop | batch_functions | economic_exploit | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "economic_exploit",
         "affected_component": "batch_functions",
         "severity": "critical",
@@ -1681,33 +2005,43 @@
         "total_exploits_analyzed": "2",
         "total_losses": "\"$371K + $3M saved\""
       },
-      "patternCount": 1,
+      "patternCount": 5,
       "patterns": [
         {
-          "id": "unique-msgvalue-in-loop-msg-value-in-loop-vulnerabilit-000",
-          "title": "msg.value in Loop Vulnerability",
-          "lineStart": 40,
-          "lineEnd": 315,
-          "lineCount": 276,
+          "id": "unique-msgvalue-in-loop-agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 81,
+          "lineEnd": 92,
+          "lineCount": 12,
           "severity": [
-            "CRITICAL",
-            "LOW"
+            "CRITICAL"
           ],
           "codeKeywords": [
+            "missing_validation",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-msgvalue-in-loop-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 93,
+          "lineEnd": 115,
+          "lineCount": 23,
+          "severity": [],
+          "codeKeywords": [
             "batch",
-            "commitEth",
-            "exercise",
             "for",
             "msg.value",
-            "multicall",
-            "testExploit"
+            "multicall"
           ],
           "rootCause": "Solidity's `msg.value` is immutable for the duration of a transaction call. Unlike a local balance variable, it doesn't decrease when the contract transfers or uses ETH. Any function that validates pa",
           "subsections": [
             {
-              "title": "Vulnerability Description",
-              "lineStart": 46,
-              "lineEnd": 68,
+              "title": "Root Cause",
+              "lineStart": 95,
+              "lineEnd": 104,
               "severity": [],
               "codeKeywords": [
                 "batch",
@@ -1717,35 +2051,120 @@
               ]
             },
             {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 69,
-              "lineEnd": 227,
+              "title": "Attack Scenario",
+              "lineStart": 105,
+              "lineEnd": 115,
+              "severity": [],
+              "codeKeywords": [
+                "msg.value"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "unique-msgvalue-in-loop-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 116,
+          "lineEnd": 280,
+          "lineCount": 165,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "atomic",
+            "batch",
+            "commitEth",
+            "delegatecall",
+            "exercise",
+            "msg.value",
+            "multicall",
+            "testExploit"
+          ],
+          "rootCause": "msg.value checked per vault in a loop",
+          "subsections": [
+            {
+              "title": "Category 1: msg.value Reuse in Loop Iteration [CRITICAL]",
+              "lineStart": 118,
+              "lineEnd": 177,
               "severity": [
                 "CRITICAL"
               ],
               "codeKeywords": [
+                "atomic",
+                "exercise",
+                "msg.value",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Category 2: msg.value in Multicall / Batch [HIGH]",
+              "lineStart": 178,
+              "lineEnd": 255,
+              "severity": [
+                "CRITICAL",
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "atomic",
                 "batch",
                 "commitEth",
                 "delegatecall",
-                "exercise",
                 "mint",
                 "msg.value",
                 "multicall",
                 "testExploit"
               ]
+            },
+            {
+              "title": "Category 3: msg.value in Payable Loop [HIGH]",
+              "lineStart": 256,
+              "lineEnd": 280,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "atomic",
+                "batchPurchase"
+              ]
             }
           ]
+        },
+        {
+          "id": "unique-msgvalue-in-loop-defihacklabs-poc-references-003",
+          "title": "DeFiHackLabs PoC References",
+          "lineStart": 406,
+          "lineEnd": 412,
+          "lineCount": 7,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-msgvalue-in-loop-keywords-004",
+          "title": "Keywords",
+          "lineStart": 413,
+          "lineEnd": 433,
+          "lineCount": 21,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
     {
       "file": "DB/unique/defihacklabs/nft-specific-exploit-patterns.md",
-      "totalLines": 330,
+      "totalLines": 372,
       "frontmatter": {
         "protocol": "generic",
         "chain": "optimism",
         "category": "nft_specific",
         "vulnerability_type": "marketplace_signature_bypass",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "marketplace_signature_bypass | nft_marketplace | parameter_manipulation | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "parameter_manipulation",
         "affected_component": "nft_marketplace",
         "severity": "high",
@@ -1756,30 +2175,43 @@
         "total_exploits_analyzed": "1",
         "total_losses": "\"$100K\""
       },
-      "patternCount": 1,
+      "patternCount": 5,
       "patterns": [
         {
-          "id": "unique-nft-specific-exploit-patterns-nft-specific-exploit-patterns-000",
-          "title": "NFT-Specific Exploit Patterns",
-          "lineStart": 41,
-          "lineEnd": 264,
-          "lineCount": 224,
+          "id": "unique-nft-specific-exploit-patterns-agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 74,
+          "lineEnd": 85,
+          "lineCount": 12,
           "severity": [
-            "CRITICAL",
-            "HIGH",
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "missing_validation",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-nft-specific-exploit-patterns-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 86,
+          "lineEnd": 105,
+          "lineCount": 20,
+          "severity": [
             "LOW"
           ],
           "codeKeywords": [
             "buyer",
-            "fillSellOrder",
-            "testExploit"
+            "fillSellOrder"
           ],
           "rootCause": "1. **Missing Buyer Validation in fillSellOrder()**: The marketplace's `fillSellOrder()` function validates only the seller's EIP-712 signature but accepts any `buyer` address from the caller. Since th",
           "subsections": [
             {
-              "title": "Vulnerability Description",
-              "lineStart": 47,
-              "lineEnd": 66,
+              "title": "Root Cause",
+              "lineStart": 88,
+              "lineEnd": 93,
               "severity": [
                 "LOW"
               ],
@@ -1789,30 +2221,97 @@
               ]
             },
             {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 67,
-              "lineEnd": 180,
+              "title": "Attack Scenario",
+              "lineStart": 94,
+              "lineEnd": 105,
+              "severity": [],
+              "codeKeywords": [
+                "buyer"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "unique-nft-specific-exploit-patterns-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 106,
+          "lineEnd": 223,
+          "lineCount": 118,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "atomic",
+            "buyer",
+            "fillSellOrder",
+            "testExploit"
+          ],
+          "rootCause": "Only seller signature validated, buyer address is caller-controlled",
+          "subsections": [
+            {
+              "title": "Category 1: Missing Buyer Validation in Order Filling [HIGH]",
+              "lineStart": 108,
+              "lineEnd": 187,
               "severity": [
                 "HIGH"
               ],
               "codeKeywords": [
+                "atomic",
                 "buyer",
                 "fillSellOrder",
                 "testExploit"
               ]
+            },
+            {
+              "title": "Category 2: Generic Marketplace Listing Vulnerabilities [MEDIUM]",
+              "lineStart": 188,
+              "lineEnd": 223,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "atomic",
+                "fillSellOrder"
+              ]
             }
           ]
+        },
+        {
+          "id": "unique-nft-specific-exploit-patterns-defihacklabs-poc-references-003",
+          "title": "DeFiHackLabs PoC References",
+          "lineStart": 344,
+          "lineEnd": 349,
+          "lineCount": 6,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-nft-specific-exploit-patterns-keywords-004",
+          "title": "Keywords",
+          "lineStart": 350,
+          "lineEnd": 367,
+          "lineCount": 18,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
     {
       "file": "DB/unique/defihacklabs/skim-balance-attack.md",
-      "totalLines": 378,
+      "totalLines": 435,
       "frontmatter": {
         "protocol": "generic",
         "chain": "bsc",
         "category": "skim_balance",
         "vulnerability_type": "pair_skim_exploitation",
+        "root_cause_family": "stale_accounting",
+        "pattern_key": "pair_skim_exploitation | uniswap_v2_pair | economic_exploit | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "economic_exploit",
         "affected_component": "uniswap_v2_pair",
         "severity": "medium",
@@ -1823,48 +2322,91 @@
         "total_exploits_analyzed": "4",
         "total_losses": "\"$41K+\""
       },
-      "patternCount": 1,
+      "patternCount": 5,
       "patterns": [
         {
-          "id": "unique-skim-balance-attack-skim-token-balance-attack-patt-000",
-          "title": "Skim Token Balance Attack Patterns",
-          "lineStart": 43,
-          "lineEnd": 301,
-          "lineCount": 259,
+          "id": "unique-skim-balance-attack-agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 91,
+          "lineEnd": 102,
+          "lineCount": 12,
           "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "single_contract",
+            "stale_accounting"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-skim-balance-attack-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 103,
+          "lineEnd": 131,
+          "lineCount": 29,
+          "severity": [],
+          "codeKeywords": [
+            "pair.sync",
+            "skim",
+            "skim(address(pair",
+            "skim(attacker",
+            "sync"
+          ],
+          "rootCause": "The root causes fall into two distinct patterns:\n\n\n\n1. **Fee-on-Transfer Reserve Divergence**: When a fee-on-transfer token is sent to a pair, the pair receives less than the sent amount due to the tr",
+          "subsections": [
+            {
+              "title": "Root Cause",
+              "lineStart": 105,
+              "lineEnd": 112,
+              "severity": [],
+              "codeKeywords": [
+                "skim",
+                "skim(address(pair",
+                "sync"
+              ]
+            },
+            {
+              "title": "Attack Scenario",
+              "lineStart": 113,
+              "lineEnd": 131,
+              "severity": [],
+              "codeKeywords": [
+                "pair.sync",
+                "skim",
+                "skim(address(pair",
+                "skim(attacker"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "unique-skim-balance-attack-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 132,
+          "lineEnd": 295,
+          "lineCount": 164,
+          "severity": [
+            "LOW",
             "MEDIUM"
           ],
           "codeKeywords": [
             "DPPFlashLoanCall",
             "address(pair",
             "innerCallback",
-            "pair.sync",
             "skim",
-            "skim(address(pair",
-            "skim(attacker",
+            "skim(pair",
             "swap",
             "sync",
             "testExploit"
           ],
-          "rootCause": "The root causes fall into two distinct patterns:\n\n\n\n1. **Fee-on-Transfer Reserve Divergence**: When a fee-on-transfer token is sent to a pair, the pair receives less than the sent amount due to the tr",
+          "rootCause": "Pair.skim() with fee-on-transfer token creates exploitable reserve gap",
           "subsections": [
             {
-              "title": "Vulnerability Description",
-              "lineStart": 49,
-              "lineEnd": 77,
-              "severity": [],
-              "codeKeywords": [
-                "pair.sync",
-                "skim",
-                "skim(address(pair",
-                "skim(attacker",
-                "sync"
-              ]
-            },
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 78,
-              "lineEnd": 237,
+              "title": "Category 1: Fee-on-Transfer Token — skim(pair) Loop [MEDIUM]",
+              "lineStart": 134,
+              "lineEnd": 248,
               "severity": [
                 "LOW",
                 "MEDIUM"
@@ -1879,19 +2421,56 @@
                 "sync",
                 "testExploit"
               ]
+            },
+            {
+              "title": "Category 2: Broken Fee Mechanism + Skim Extraction [HIGH]",
+              "lineStart": 249,
+              "lineEnd": 295,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "innerCallback",
+                "testExploit"
+              ]
             }
           ]
+        },
+        {
+          "id": "unique-skim-balance-attack-defihacklabs-poc-references-003",
+          "title": "DeFiHackLabs PoC References",
+          "lineStart": 400,
+          "lineEnd": 409,
+          "lineCount": 10,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-skim-balance-attack-keywords-004",
+          "title": "Keywords",
+          "lineStart": 410,
+          "lineEnd": 430,
+          "lineCount": 21,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
     {
       "file": "DB/unique/defihacklabs/stale-cached-state-exploits.md",
-      "totalLines": 353,
+      "totalLines": 400,
       "frontmatter": {
         "protocol": "generic",
         "chain": "everychain",
         "category": "stale_state",
         "vulnerability_type": "cached_state_exploitation",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "cached_state_exploitation | state_cache | state_manipulation | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "state_manipulation",
         "affected_component": "state_cache",
         "severity": "high",
@@ -1902,33 +2481,43 @@
         "total_exploits_analyzed": "2",
         "total_losses": "\"$824K\""
       },
-      "patternCount": 1,
+      "patternCount": 5,
       "patterns": [
         {
-          "id": "unique-stale-cached-state-exploits-stale-cached-state-exploit-pat-000",
-          "title": "Stale/Cached State Exploit Patterns",
-          "lineStart": 41,
-          "lineEnd": 286,
-          "lineCount": 246,
+          "id": "unique-stale-cached-state-exploits-agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 79,
+          "lineEnd": 90,
+          "lineCount": 12,
           "severity": [
-            "CRITICAL",
-            "HIGH",
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "missing_validation",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-stale-cached-state-exploits-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 91,
+          "lineEnd": 115,
+          "lineCount": 25,
+          "severity": [
             "LOW"
           ],
           "codeKeywords": [
-            "_transfer",
-            "borrow",
-            "liquidate",
             "sellAmount",
-            "testExploit",
             "updateExchangeRate"
           ],
           "rootCause": "1. **Stale Global Variable Accumulation**: A storage variable updated during sells (`sellAmount`) is used in the sell logic to determine burn amounts. But it's also inflated by buy transactions. An at",
           "subsections": [
             {
-              "title": "Vulnerability Description",
-              "lineStart": 47,
-              "lineEnd": 71,
+              "title": "Root Cause",
+              "lineStart": 93,
+              "lineEnd": 98,
               "severity": [
                 "LOW"
               ],
@@ -1938,33 +2527,103 @@
               ]
             },
             {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 72,
-              "lineEnd": 205,
+              "title": "Attack Scenario",
+              "lineStart": 99,
+              "lineEnd": 115,
+              "severity": [],
+              "codeKeywords": [
+                "sellAmount",
+                "updateExchangeRate"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "unique-stale-cached-state-exploits-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 116,
+          "lineEnd": 253,
+          "lineCount": 138,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_transfer",
+            "atomic",
+            "borrow",
+            "liquidate",
+            "sellAmount",
+            "testExploit",
+            "updateExchangeRate"
+          ],
+          "rootCause": "Global sellAmount variable is inflated by buys, reduces burn on sells",
+          "subsections": [
+            {
+              "title": "Category 1: Stale Global Variable Accumulation [HIGH]",
+              "lineStart": 118,
+              "lineEnd": 182,
               "severity": [
                 "HIGH"
               ],
               "codeKeywords": [
                 "_transfer",
+                "atomic",
+                "sellAmount",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Category 2: On-Demand Exchange Rate Manipulation [HIGH]",
+              "lineStart": 183,
+              "lineEnd": 253,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "atomic",
                 "borrow",
                 "liquidate",
-                "sellAmount",
                 "testExploit",
                 "updateExchangeRate"
               ]
             }
           ]
+        },
+        {
+          "id": "unique-stale-cached-state-exploits-defihacklabs-poc-references-003",
+          "title": "DeFiHackLabs PoC References",
+          "lineStart": 372,
+          "lineEnd": 378,
+          "lineCount": 7,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-stale-cached-state-exploits-keywords-004",
+          "title": "Keywords",
+          "lineStart": 379,
+          "lineEnd": 395,
+          "lineCount": 17,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },
     {
       "file": "DB/unique/defihacklabs/swap-metapool-attack.md",
-      "totalLines": 295,
+      "totalLines": 338,
       "frontmatter": {
         "protocol": "curve_saddle",
         "chain": "ethereum",
         "category": "metapool_attack",
         "vulnerability_type": "cross_pool_price_manipulation",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "cross_pool_price_manipulation | curve_metapool | economic_exploit | fund_loss",
+        "interaction_scope": "single_contract",
         "attack_type": "economic_exploit",
         "affected_component": "curve_metapool",
         "severity": "high",
@@ -1975,46 +2634,85 @@
         "total_exploits_analyzed": "2",
         "total_losses": "\"$10.0M\""
       },
-      "patternCount": 1,
+      "patternCount": 5,
       "patterns": [
         {
-          "id": "unique-swap-metapool-attack-swap-metapool-attack-patterns-000",
-          "title": "Swap Metapool Attack Patterns",
-          "lineStart": 41,
-          "lineEnd": 232,
-          "lineCount": 192,
+          "id": "unique-swap-metapool-attack-agent-quick-view-000",
+          "title": "Agent Quick View",
+          "lineStart": 77,
+          "lineEnd": 88,
+          "lineCount": 12,
           "severity": [
-            "CRITICAL",
             "HIGH"
           ],
           "codeKeywords": [
-            "exchange",
-            "executeOperation",
-            "swap",
-            "testExploit",
+            "missing_validation",
+            "single_contract"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-swap-metapool-attack-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 89,
+          "lineEnd": 110,
+          "lineCount": 22,
+          "severity": [],
+          "codeKeywords": [
             "virtual_price"
           ],
           "rootCause": "1. **Virtual Price Dependency**: Metapools price their LP token component using the base pool's `virtual_price()`. Large swaps in either pool can create temporary price divergence between the metapool",
           "subsections": [
             {
-              "title": "Vulnerability Description",
-              "lineStart": 47,
-              "lineEnd": 68,
+              "title": "Root Cause",
+              "lineStart": 91,
+              "lineEnd": 98,
               "severity": [],
               "codeKeywords": [
                 "virtual_price"
               ]
             },
             {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 69,
-              "lineEnd": 173,
+              "title": "Attack Scenario",
+              "lineStart": 99,
+              "lineEnd": 110,
+              "severity": [],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "unique-swap-metapool-attack-vulnerable-pattern-examples-002",
+          "title": "Vulnerable Pattern Examples",
+          "lineStart": 111,
+          "lineEnd": 217,
+          "lineCount": 107,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "atomic",
+            "exchange",
+            "executeOperation",
+            "swap",
+            "testExploit"
+          ],
+          "rootCause": "Metapool swap rate depends on base pool state",
+          "subsections": [
+            {
+              "title": "Category 1: Cross-Pool Swap Arbitrage [HIGH]",
+              "lineStart": 113,
+              "lineEnd": 217,
               "severity": [
                 "CRITICAL",
                 "HIGH",
                 "LOW"
               ],
               "codeKeywords": [
+                "atomic",
                 "exchange",
                 "executeOperation",
                 "swap",
@@ -2022,6 +2720,28 @@
               ]
             }
           ]
+        },
+        {
+          "id": "unique-swap-metapool-attack-defihacklabs-poc-references-003",
+          "title": "DeFiHackLabs PoC References",
+          "lineStart": 311,
+          "lineEnd": 317,
+          "lineCount": 7,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "unique-swap-metapool-attack-keywords-004",
+          "title": "Keywords",
+          "lineStart": 318,
+          "lineEnd": 333,
+          "lineCount": 16,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     },

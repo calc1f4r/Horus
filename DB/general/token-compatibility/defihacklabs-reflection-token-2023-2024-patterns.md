@@ -4,6 +4,13 @@ chain: everychain
 category: token_compatibility
 vulnerability_type: reflection_token_exploit_patterns_2023_2024
 
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: reflection_token_exploit_patterns_2023_2024 | reflection_token_contract | economic_exploit | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 attack_type: economic_exploit
 affected_component: reflection_token_contract
 
@@ -21,6 +28,30 @@ severity: high
 impact: fund_loss
 exploitability: 0.8
 financial_impact: high
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "burn"
+  - "mint"
+  - "skim"
+  - "swap"
+  - "sync"
+  - "_burn"
+  - "rOwned"
+  - "rTotal"
+  - "tTotal"
+  - "balance"
+  - "deliver"
+  - "reserve"
+  - "reserve0"
+  - "reserve1"
+  - "_transfer"
+path_keys:
+  - "3913_token"
+  - "bevo"
+  - "bigfi"
+  - "bunn"
+  - "fdp"
 
 tags:
   - reflection_token
@@ -67,12 +98,24 @@ total_losses: "$10M+"
 | [SSS-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2024-03/SSS_exp.sol` |
 | [TGBS-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2024-03/TGBS_exp.sol` |
 | [MARS-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2024-04/MARS_exp.sol` |
-
 ## Reflection & Tax Token Exploit Patterns (2023-2024)
 
 ### Overview
 
 Reflection tokens (SafeMoon forks) and tax/deflationary tokens continued to be one of the most exploited token categories in 2023-2024, with 15+ exploits across BSC, Ethereum, and Blast chains. These tokens implement custom transfer mechanics where balances are computed dynamically via a `rate = rTotal / tTotal` formula, creating exploitable gaps between Uniswap/PancakeSwap pair tracked reserves and actual token balances. Attackers manipulate the reflection rate through `deliver()`, `burn()`, or self-transfer operations to inflate or deflate the pair's perceived token balance, then extract base tokens (WBNB/WETH) at favorable rates.
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_validation` |
+| Pattern Key | `reflection_token_exploit_patterns_2023_2024 | reflection_token_contract | economic_exploit | fund_loss` |
+| Severity | HIGH |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | everychain |
+
 
 ### Vulnerability Description
 

@@ -4,6 +4,13 @@ chain: everychain
 category: arbitrage
 vulnerability_type: economic_design_flaw
 
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: economic_design_flaw | pricing_mechanism | economic_exploit | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 attack_type: economic_exploit
 affected_component: pricing_mechanism
 
@@ -19,6 +26,21 @@ severity: high
 impact: fund_loss
 exploitability: 0.7
 financial_impact: high
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "deposit"
+  - "swapData"
+  - "flashLoan"
+  - "cancelOrder"
+  - "testExploit"
+  - "placeBuyOrder"
+  - "executeOperation"
+  - "onMorphoFlashLoan"
+  - "VaultRouter.deposit"
+path_keys:
+  - "evervaluecoin"
+  - "usualmoney"
 
 tags:
   - arbitrage
@@ -39,9 +61,32 @@ total_losses: "$143K"
 
 ## Economic Arbitrage Design Flaws
 
+
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [EVERVALUECOI-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2025-08/EverValueCoin_exp.sol` |
+| [USUALMONEY-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2025-05/UsualMoney_exp.sol` |
+
+---
+
 ### Overview
 
 Economic arbitrage design flaws occur when protocol mechanisms create predictable profit opportunities through controllable price discrepancies. Unlike simple oracle manipulation, these exploits target fundamental design weaknesses: vault deposit routes that can be directed through attacker-controlled thin-liquidity pools, or order book mechanisms where artificial orders can be placed to inflate prices before selling on external markets.
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_validation` |
+| Pattern Key | `economic_design_flaw | pricing_mechanism | economic_exploit | fund_loss` |
+| Severity | HIGH |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | everychain |
+
 
 ### Vulnerability Description
 
@@ -73,6 +118,8 @@ Economic arbitrage design flaws occur when protocol mechanisms create predictabl
 ### Vulnerable Pattern Examples
 
 #### Category 1: Arbitrary Vault Deposit Routing [HIGH]
+
+> **pathShape**: `atomic`
 
 **Example 1: UsualMoney — Thin Pool + ParaSwap Routing (2025-05, ~$43K)** [HIGH]
 ```solidity
@@ -158,6 +205,8 @@ function onMorphoFlashLoan(uint256 amount, bytes calldata) external {
 ---
 
 #### Category 2: On-Chain Order Book Price Inflation [HIGH]
+
+> **pathShape**: `atomic`
 
 **Example 2: EverValueCoin — Artificial Order Book Bid (2025-08, ~$100K)** [HIGH]
 ```solidity
@@ -319,8 +368,7 @@ function cancelOrder(uint256 orderId) external {
 ### Detection Patterns
 
 ```bash
-# Arbitrary swap data in vault/deposit functions
-grep -rn "swapData\|routeData\|swapCalldata" --include="*.sol" | grep "deposit\|vault"
+# Arbitrary swap data in vault/deposit functionsgrep -rn "swapData\|routeData\|swapCalldata" --include="*.sol" | grep "deposit\|vault"
 
 # ParaSwap/1inch integration points
 grep -rn "ParaSwap\|Augustus\|OneInchRouter\|0x.*Exchange" --include="*.sol"

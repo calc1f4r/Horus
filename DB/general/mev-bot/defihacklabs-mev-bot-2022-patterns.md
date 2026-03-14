@@ -4,6 +4,13 @@ chain: ethereum
 category: mev
 vulnerability_type: mev_bot_callback_exploitation
 
+# Pattern Identity (Required)
+root_cause_family: missing_access_control
+pattern_key: mev_bot_callback_exploitation | mev_bot_contract | arbitrary_call | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 attack_type: arbitrary_call
 affected_component: mev_bot_contract
 
@@ -18,6 +25,28 @@ severity: high
 impact: fund_loss
 exploitability: 0.8
 financial_impact: high
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "data"
+  - "swap"
+  - "MEV_BOT"
+  - "userData"
+  - "onlyOwner"
+  - "_USDCToWETH"
+  - "getReserves"
+  - "testExploit"
+  - "transferFrom"
+  - "DPPFlashLoanCall"
+  - "_executeSandwich"
+  - "_flashLoanActive"
+  - "attacker_address"
+  - "executeArbitrage"
+  - "receiveFlashLoan"
+path_keys:
+  - "mev_0ad8"
+  - "meva47b"
+  - "mevbot_0x28d9"
 
 tags:
   - mev_bot
@@ -40,9 +69,33 @@ total_losses: "$475K+"
 
 ## MEV Bot Callback & Arbitrary Call Exploits (2022)
 
+
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [MEV0AD8-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-11/MEV_0ad8_exp.sol` |
+| [MEVA47B-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-10/MEVa47b_exp.sol` |
+| [MEVBOT0X28D9-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-12/MEVbot_0x28d9_exp.sol` |
+
+---
+
 ### Overview
 
 MEV bots that operate on-chain accumulate significant token balances and approvals through sandwich attacks and arbitrage operations. In 2022, multiple MEV bots were drained by exploiting three distinct vulnerability classes: (1) flash loan callbacks that process attacker-controlled data without verifying the flash loan was self-initiated, (2) exposed functions that execute arbitrary calldata, and (3) fake LP pair impersonation where the attacker's contract mimics Uniswap pair interfaces. This entry documents 3 real exploits totaling ~$475K+ in losses, complementing the existing `mev-bot-vulnerabilities.md` entry which covers the 0xbad and BNB48 exploits.
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_access_control` |
+| Pattern Key | `mev_bot_callback_exploitation | mev_bot_contract | arbitrary_call | fund_loss` |
+| Severity | HIGH |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum |
+
 
 ### Vulnerability Description
 
@@ -74,6 +127,8 @@ MEV bots that operate on-chain accumulate significant token balances and approva
 ### Vulnerable Pattern Examples
 
 #### Category 1: Flash Loan Callback → Fake Pair Routing [HIGH]
+
+> **pathShape**: `callback-reentrant`
 
 **Example 1: MEVa47b — Balancer Flash Loan + Fake Pair Impersonation (2022-10, ~187.75 WETH)** [HIGH]
 ```solidity
@@ -144,6 +199,8 @@ contract ContractTest is Test {
 
 #### Category 2: Arbitrary Call Execution via Exposed Function [HIGH]
 
+> **pathShape**: `atomic`
+
 **Example 2: MEV_0ad8 — Exposed Function Selector Drains Victim Approvals (2022-11, ~$282K)** [HIGH]
 ```solidity
 // ❌ VULNERABLE: MEV Bot at 0x0AD8229D4bC84135786AE752B9A9D53392A8afd4
@@ -187,6 +244,8 @@ contract ContractTest is Test {
 ---
 
 #### Category 3: DODO Flash Loan Callback Loop Drain [MEDIUM]
+
+> **pathShape**: `callback-reentrant`
 
 **Example 3: MEVbot_0x28d9 — Repeated Flash Loan Callback Drain (2022-12, ~$1.3K)** [MEDIUM]
 ```solidity
@@ -331,8 +390,7 @@ contract SecureMEVBot {
 ### Detection Patterns
 
 ```bash
-# Flash loan callbacks without access control
-grep -rn "receiveFlashLoan\|DPPFlashLoanCall\|executeOperation\|pancakeCall" --include="*.sol" | grep -v "onlyOwner\|require.*msg.sender\|_flashLoanActive"
+# Flash loan callbacks without access controlgrep -rn "receiveFlashLoan\|DPPFlashLoanCall\|executeOperation\|pancakeCall" --include="*.sol" | grep -v "onlyOwner\|require.*msg.sender\|_flashLoanActive"
 
 # Exposed functions that accept arbitrary calldata
 grep -rn "function.*external.*bytes.*calldata\|\.call(data)" --include="*.sol" | grep -v "onlyOwner\|require"

@@ -5,6 +5,13 @@ chain: "ethereum, arbitrum, fantom"
 category: "reentrancy"
 vulnerability_type: "cross_function_reentrancy, callback_reentrancy, flash_loan_reentrancy"
 
+# Pattern Identity (Required)
+root_cause_family: callback_reentrancy
+pattern_key: cross_function_reentrancy | reward_harvest | reentrancy | fund_loss
+
+# Interaction Scope
+interaction_scope: cross_protocol
+
 # Attack Vector Details
 attack_type: "reentrancy"
 affected_component: "reward_harvest, collateral_accounting, flash_loan_callback, strategy_callback"
@@ -29,6 +36,26 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.80
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "burn"
+  - "deposit"
+  - "burnHook"
+  - "mintHook"
+  - "flashLoan"
+  - "reentrancy"
+  - "onFlashLoan"
+  - "claimRewards"
+  - "nonReentrant"
+  - "fakeSY.claimRewards"
+  - "rewardToken.claimRewards"
+  - "batchHarvestMarketRewards"
+path_keys:
+  - "fake_token_reward_harvesting_callback_reentrancy"
+  - "empty_market_phantom_collateral_attack"
+  - "erc_3156_flash_loan_callback_re_deposit_loop"
+  - "strategy_callback_reentrancy_via_attacker_controlled_hook"
 
 # Context Tags
 tags:
@@ -61,14 +88,28 @@ version: ">=0.8.0"
 ---
 
 # Reentrancy & Callback Exploitation Patterns (2024-2025)
-
 ## Overview
 
 Reentrancy in 2024 has evolved beyond classic ETH transfer reentrancy. Modern exploits abuse protocol-specific callback mechanisms — reward harvesting hooks, flash loan callbacks (ERC-3156), and strategy burn hooks. These attacks exploit cross-function reentrancy where the callback enters a different function than the one that initiated the external call, bypassing single-function reentrancy guards. Combined losses from the four major 2024 reentrancy exploits exceed **$35M**.
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `callback_reentrancy` |
+| Pattern Key | `cross_function_reentrancy | reward_harvest | reentrancy | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `cross_protocol` |
+| Chain(s) | ethereum, arbitrum, fantom |
+
+
 ## 1. Fake Token Reward Harvesting Callback Reentrancy
+
+> **pathShape**: `callback-reentrant`
 
 ### Root Cause
 
@@ -135,6 +176,8 @@ function batchHarvestMarketRewards(address[] memory markets) external {
 
 ## 2. Empty Market Phantom Collateral Attack
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 In lending protocols, when a market is empty (no existing deposits), the first depositor sets the initial exchange rate. If the protocol doesn't enforce minimum deposits or uses a flash-loan-compatible collateral token, an attacker can: (1) flash loan → deposit 1 token → become the sole depositor → borrow against manipulated collateral value → repay the original deposit → the borrowed amount remains as phantom debt backed by nothing.
@@ -187,6 +230,8 @@ PolterFinance.withdraw(SpookyLP_Market, 1e18);
 ---
 
 ## 3. ERC-3156 Flash Loan Callback Re-deposit Loop
+
+> **pathShape**: `callback-reentrant`
 
 ### Root Cause
 
@@ -253,6 +298,8 @@ function onFlashLoan(
 ---
 
 ## 4. Strategy Callback Reentrancy via Attacker-Controlled Hook
+
+> **pathShape**: `callback-reentrant`
 
 ### Root Cause
 

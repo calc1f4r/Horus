@@ -5,6 +5,13 @@ chain: "ethereum, arbitrum, avalanche, bsc"
 category: "reentrancy"
 vulnerability_type: "read_only_reentrancy, fake_token_reentrancy, native_transfer_reentrancy, balancer_view_reentrancy"
 
+# Pattern Identity (Required)
+root_cause_family: callback_reentrancy
+pattern_key: read_only_reentrancy | curve_lp_oracle | reentrancy | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 # Attack Vector Details
 attack_type: "reentrancy"
 affected_component: "curve_lp_oracle, balancer_lp_oracle, social_token_trading, dex_swap, lending_liquidation"
@@ -28,6 +35,31 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.85
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "deposit"
+  - "receive"
+  - "exitPool"
+  - "fallback"
+  - "getPrice"
+  - "joinPool"
+  - "transfer"
+  - "flashLoan"
+  - "call.value"
+  - "sellShares"
+  - "testExploit"
+  - "nonReentrant"
+  - "transferFrom"
+  - "uniswapV2Call"
+  - "virtual_price"
+path_keys:
+  - "read_only_reentrancy_via_curve_lp_withdrawal"
+  - "read_only_reentrancy_via_curve_callback_conic_3_25m"
+  - "balancer_view_reentrancy_via_lp_price_oracle_sentiment_1m"
+  - "fake_token_reentrancy_in_dex_swap_orion_645k"
+  - "native_token_receive_reentrancy_starsarena_3m"
+  - "curve_reentrancy_in_read_only_oracle_sturdy_800k"
 
 # Context Tags
 tags:
@@ -83,14 +115,28 @@ total_losses: "$16M+"
 ---
 
 # Reentrancy Attack Patterns (2023)
-
 ## Overview
 
 2023 reentrancy exploits matured beyond classic Checks-Effects-Interactions violations. The dominant pattern was **read-only reentrancy** — exploiting Curve/Balancer LP pool's ETH withdrawal callbacks to read stale LP token prices during `remove_liquidity()`, enabling liquidation at manipulated collateral values. This affected multiple protocols that used LP tokens as collateral (dForce $3.65M, Conic $3.25M, Sentiment $1M, Sturdy $800K). A second major pattern involved creating fake ERC20 tokens whose `transfer()` callbacks re-entered swap functions (Orion $645K). Native token (AVAX/BNB) `receive()` callbacks also enabled reentrancy in social token platforms (StarsArena $3M). Total 2023 reentrancy losses across the analyzed exploits exceed **$16M**.
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `callback_reentrancy` |
+| Pattern Key | `read_only_reentrancy | curve_lp_oracle | reentrancy | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, arbitrum, avalanche, bsc |
+
+
 ## 1. Read-Only Reentrancy via Curve LP Withdrawal
+
+> **pathShape**: `callback-reentrant`
 
 ### Root Cause
 
@@ -179,6 +225,8 @@ fallback() external payable {
 
 ## 2. Read-Only Reentrancy via Curve Callback (Conic $3.25M)
 
+> **pathShape**: `callback-reentrant`
+
 ### Root Cause
 
 Conic Finance's ETH omnipool used Curve LP tokens as underlying. When `handleDepeggedCurvePool()` was called, it triggered `remove_liquidity()` on the Curve pool, which during the ETH transfer callback allowed the attacker to deposit/withdraw at manipulated exchange rates. Same fundamental issue as dForce — Curve's ETH transfer during `remove_liquidity()` creates a window where reserves are stale.
@@ -218,6 +266,8 @@ ConicEthPool.withdraw(conicLpAmount, minUnderlyingReceived);
 ---
 
 ## 3. Balancer View Reentrancy via LP Price Oracle (Sentiment $1M)
+
+> **pathShape**: `callback-reentrant`
 
 ### Root Cause
 
@@ -264,6 +314,8 @@ AccountManager.borrow(account, address(WBTC), borrowAmount3);
 ---
 
 ## 4. Fake Token Reentrancy in DEX Swap (Orion $645K)
+
+> **pathShape**: `callback-reentrant`
 
 ### Root Cause
 
@@ -320,6 +372,8 @@ function uniswapV2Call(...) external {
 
 ## 5. Native Token Receive() Reentrancy (StarsArena $3M)
 
+> **pathShape**: `cross-protocol`
+
 ### Root Cause
 
 StarsArena (a social token trading platform on Avalanche) sent AVAX via `call.value()` during share selling. The receiving contract's `receive()` function could re-enter the contract to manipulate share pricing or state before the sell operation completed.
@@ -368,6 +422,8 @@ receive() external payable {
 ---
 
 ## 6. Curve Reentrancy in Read-Only Oracle (Sturdy $800K)
+
+> **pathShape**: `callback-reentrant`
 
 ### Root Cause
 

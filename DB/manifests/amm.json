@@ -3,7 +3,7 @@
     "category": "amm",
     "description": "Pattern-level index for amm vulnerabilities",
     "fileCount": 9,
-    "totalPatterns": 67,
+    "totalPatterns": 75,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
   },
   "files": [
@@ -2840,67 +2840,229 @@
     },
     {
       "file": "DB/amm/constantproduct/defihacklabs-amm-calculation-errors.md",
-      "totalLines": 341,
+      "totalLines": 359,
       "frontmatter": {
-        "protocol": "amm",
+        "protocol": "generic",
         "chain": "ethereum, bsc",
         "category": "amm_calculation",
         "vulnerability_type": "k_invariant_miscalculation",
-        "attack_type": "constant_product_bypass",
-        "affected_component": "swap_fee_calculation, k_check",
+        "root_cause_family": "arithmetic_invariant_break",
+        "pattern_key": "fee_base_k_check_mismatch | swap_function | constant_product_bypass | pool_drain",
+        "interaction_scope": "single_contract",
+        "attack_type": "arithmetic_exploit",
+        "affected_component": "swap_k_invariant_check",
+        "- \"UraniumSwap": "K\"",
+        "- \"Nimbus": "K\"",
         "severity": "critical",
         "impact": "fund_loss",
-        "exploitability": "0.9",
+        "exploitability": "0.95",
         "financial_impact": "critical",
-        "source": "DeFiHackLabs",
-        "total_exploits_analyzed": "3",
-        "total_losses": "\"$50M+\""
+        "language": "solidity",
+        "version": "\">=0.6.0\""
       },
-      "patternCount": 1,
+      "patternCount": 9,
       "patterns": [
         {
-          "id": "amm-defihacklabs-amm-calculation-errors-defihacklabs-amm-calculation-e-000",
-          "title": "DeFiHackLabs AMM Calculation Errors Compendium",
-          "lineStart": 38,
-          "lineEnd": 278,
-          "lineCount": 241,
+          "id": "amm-defihacklabs-amm-calculation-errors-overview-000",
+          "title": "Overview",
+          "lineStart": 78,
+          "lineEnd": 119,
+          "lineCount": 42,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
-            "exploit",
+            "FEE_DENOMINATOR",
+            "_kCheck",
+            "balance.mul(10000",
+            "mul(1000000",
+            "single_contract",
             "swap"
           ],
-          "rootCause": "Fee uses 10000 base but K-check still uses 1000 base",
+          "rootCause": null,
           "subsections": [
             {
-              "title": "Root Cause: The 1000 vs 10000 Bug",
-              "lineStart": 44,
-              "lineEnd": 60,
-              "severity": [],
-              "codeKeywords": []
-            },
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 61,
-              "lineEnd": 176,
+              "title": "Agent Quick View",
+              "lineStart": 82,
+              "lineEnd": 93,
               "severity": [
                 "CRITICAL"
               ],
               "codeKeywords": [
-                "exploit",
+                "single_contract",
                 "swap"
               ]
             },
             {
-              "title": "Mathematical Proof of Exploitability",
-              "lineStart": 177,
-              "lineEnd": 206,
+              "title": "Contract / Boundary Map",
+              "lineStart": 94,
+              "lineEnd": 103,
               "severity": [],
               "codeKeywords": []
+            },
+            {
+              "title": "Valid Bug Signals",
+              "lineStart": 104,
+              "lineEnd": 110,
+              "severity": [],
+              "codeKeywords": [
+                "balance.mul(10000",
+                "mul(1000000",
+                "swap"
+              ]
+            },
+            {
+              "title": "False Positive Guards",
+              "lineStart": 111,
+              "lineEnd": 119,
+              "severity": [],
+              "codeKeywords": [
+                "FEE_DENOMINATOR",
+                "_kCheck"
+              ]
             }
           ]
+        },
+        {
+          "id": "amm-defihacklabs-amm-calculation-errors-root-cause-001",
+          "title": "Root Cause",
+          "lineStart": 120,
+          "lineEnd": 147,
+          "lineCount": 28,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": "UniswapV2's original swap function uses `1000` as both the fee denominator and the K-check base:\n\n\n\n```solidity\n\n// UniswapV2 ORIGINAL (CORRECT):\n\nuint balance0Adjusted = balance0.mul(1000).sub(amount",
+          "subsections": null
+        },
+        {
+          "id": "amm-defihacklabs-amm-calculation-errors-path-variants-002",
+          "title": "Path Variants",
+          "lineStart": 148,
+          "lineEnd": 237,
+          "lineCount": 90,
+          "severity": [],
+          "codeKeywords": [
+            "NimbusCall",
+            "atomic",
+            "data",
+            "fallback",
+            "swap",
+            "takeFunds",
+            "testExploit"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Path A: Direct Swap Drain (Uranium — $50M, Apr 2021) `[atomic]`",
+              "lineStart": 150,
+              "lineEnd": 180,
+              "severity": [],
+              "codeKeywords": [
+                "atomic",
+                "swap",
+                "takeFunds"
+              ]
+            },
+            {
+              "title": "Path B: Flash Swap Drain (Nimbus — Sep 2021) `[atomic]`",
+              "lineStart": 181,
+              "lineEnd": 209,
+              "severity": [],
+              "codeKeywords": [
+                "NimbusCall",
+                "atomic",
+                "data",
+                "swap",
+                "testExploit"
+              ]
+            },
+            {
+              "title": "Path C: Flash Swap via Fallback (NowSwap — Sep 2021) `[atomic]`",
+              "lineStart": 210,
+              "lineEnd": 237,
+              "severity": [],
+              "codeKeywords": [
+                "atomic",
+                "fallback",
+                "testExploit"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "amm-defihacklabs-amm-calculation-errors-vulnerable-pattern-003",
+          "title": "Vulnerable Pattern",
+          "lineStart": 238,
+          "lineEnd": 266,
+          "lineCount": 29,
+          "severity": [],
+          "codeKeywords": [
+            "swap"
+          ],
+          "rootCause": "Fee uses 10000 base but K-check uses 1000 base",
+          "subsections": null
+        },
+        {
+          "id": "amm-defihacklabs-amm-calculation-errors-mathematical-proof-004",
+          "title": "Mathematical Proof",
+          "lineStart": 267,
+          "lineEnd": 278,
+          "lineCount": 12,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-defihacklabs-amm-calculation-errors-impact-analysis-005",
+          "title": "Impact Analysis",
+          "lineStart": 279,
+          "lineEnd": 292,
+          "lineCount": 14,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-defihacklabs-amm-calculation-errors-secure-implementation-006",
+          "title": "Secure Implementation",
+          "lineStart": 293,
+          "lineEnd": 316,
+          "lineCount": 24,
+          "severity": [],
+          "codeKeywords": [
+            "swap"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-defihacklabs-amm-calculation-errors-audit-checklist-007",
+          "title": "Audit Checklist",
+          "lineStart": 336,
+          "lineEnd": 344,
+          "lineCount": 9,
+          "severity": [],
+          "codeKeywords": [
+            "swap"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "amm-defihacklabs-amm-calculation-errors-real-world-examples-008",
+          "title": "Real-World Examples",
+          "lineStart": 345,
+          "lineEnd": 354,
+          "lineCount": 10,
+          "severity": [],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
         }
       ]
     }

@@ -5,6 +5,13 @@ chain: "ethereum, bsc"
 category: "access_control"
 vulnerability_type: "arbitrary_external_call"
 
+# Pattern Identity (Required)
+root_cause_family: missing_access_control
+pattern_key: arbitrary_external_call | swap_router | data_manipulation | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 # Attack Vector Details
 attack_type: "data_manipulation"
 affected_component: "swap_router, cross_chain_proxy, callback_handler"
@@ -24,6 +31,27 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.8
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "DDC"
+  - "call"
+  - "from"
+  - "swap"
+  - "zapIn"
+  - "Auctus"
+  - "Carrot"
+  - "Zapper"
+  - "router"
+  - "address"
+  - "BrahTOPG"
+  - "calldata"
+  - "transfer"
+  - "ACOWriter"
+  - "addRouter"
+path_keys:
+  - "unvalidated_router_address_calldata_in_swap_functions"
+  - "additional_arbitrary_call_patterns_2022"
 
 # Context Tags
 tags:
@@ -58,14 +86,28 @@ version: ">=0.8.0"
 ---
 
 # Arbitrary External Call / Router Exploitation Patterns (2022-2023)
-
 ## Overview
 
 Arbitrary external call vulnerabilities occur when DeFi contracts (swap routers, cross-chain proxies, aggregators) accept user-controlled `address` and `bytes calldata` parameters and perform low-level `.call()` to the specified address with the provided data. Since these router contracts hold broad ERC20 approvals from their users, an attacker can set the target address to a token contract and the calldata to `transferFrom(victim, attacker, amount)`, effectively stealing tokens from any user who approved the router. Between 2022-2023, this pattern caused **$26M+** in losses across 4+ protocols.
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_access_control` |
+| Pattern Key | `arbitrary_external_call | swap_router | data_manipulation | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, bsc |
+
+
 ## 1. Unvalidated Router Address + Calldata in Swap Functions
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -233,6 +275,8 @@ function swap(...) external returns (int256, int256) {
 ---
 
 ## 2. Additional Arbitrary Call Patterns (2022)
+
+> **pathShape**: `atomic`
 
 Beyond swap routers, the arbitrary call pattern manifests in options writers, zappers, multicall helpers, fee distributors, and token reward functions.
 

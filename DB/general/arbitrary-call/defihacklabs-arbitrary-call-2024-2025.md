@@ -5,6 +5,13 @@ chain: "ethereum, arbitrum, bsc"
 category: "arbitrary_call"
 vulnerability_type: "unvalidated_external_call, input_validation_bypass, calldata_injection"
 
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: unvalidated_external_call | swap_router | logical_error | fund_loss
+
+# Interaction Scope
+interaction_scope: single_contract
+
 # Attack Vector Details
 attack_type: "logical_error"
 affected_component: "swap_router, bridge_gateway, aggregator_proxy, diamond_facet, settlement"
@@ -30,6 +37,30 @@ severity: "critical"
 impact: "fund_loss"
 exploitability: 0.9
 financial_impact: "critical"
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "add"
+  - "call"
+  - "callTo"
+  - "permit"
+  - "approve"
+  - "safeAdd"
+  - "callData"
+  - "swapData"
+  - "withdraw"
+  - "routeData"
+  - "msg.sender"
+  - "settlement"
+  - "executeSwap"
+  - "getCallData"
+  - "interaction"
+path_keys:
+  - "unvalidated_callto_calldata_in_swap_route_structs"
+  - "unrestricted_external_call_actions_operation_call"
+  - "bridge_signer_validation_bypass"
+  - "yul_integer_overflow_calldata_corruption"
+  - "unverified_aggregator_proxy_forwarding"
 
 # Context Tags
 tags:
@@ -66,14 +97,28 @@ version: ">=0.8.0"
 ---
 
 # Arbitrary External Call & Input Validation Attack Patterns (2024-2025)
-
 ## Overview
 
 Arbitrary external call and input validation bypasses are the highest-impact single-category exploit in 2024-2025, causing over **$108M** in combined losses. The core vulnerability is consistent: contracts execute user-controlled external calls (target address + calldata) without validating that the destination and function selector are safe. Since users grant token approvals to these contracts (routers, bridges, aggregators), attackers weaponize those approvals via injected `transferFrom(victim, attacker, amount)` calls. Patterns include unvalidated `callTo`/`callData` in swap structs (LiFi $10M, SocketGateway $3.3M), unrestricted OPERATION_CALL actions (Seneca $6M, DoughFina $1.8M), compromised bridge signer validation (OrbitChain $81M), Yul integer overflow calldata corruption (1inch $4.5M), and unverified aggregator proxy forwarding (UnizenIO $2M).
 
 ---
 
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `missing_validation` |
+| Pattern Key | `unvalidated_external_call | swap_router | logical_error | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `single_contract` |
+| Chain(s) | ethereum, arbitrum, bsc |
+
+
 ## 1. Unvalidated callTo/callData in Swap/Route Structs
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -148,6 +193,8 @@ gateway.executeRoute(routeId, getRouteData(_usdc, targetUser));
 
 ## 2. Unrestricted External Call Actions (OPERATION_CALL)
 
+> **pathShape**: `callback-reentrant`
+
 ### Root Cause
 
 Multi-action contracts (like Kashi/Chamberss) implement an `OPERATION_CALL` action type that allows calling arbitrary external contracts. When there is no whitelist on target addresses or function selectors, any user can make the contract execute arbitrary calls — including `transferFrom()` calls targeting users who have approved the contract, or calls to manipulate other DeFi positions.
@@ -219,6 +266,8 @@ vulnContract.flashloanReq(false, debtTokens, debtAmounts, debtRateMode, collater
 
 ## 3. Bridge Signer Validation Bypass
 
+> **pathShape**: `atomic`
+
 ### Root Cause
 
 Cross-chain bridges use multi-signature validation on withdrawal requests — requiring N of M authorized validators to sign. When the signer verification is insufficient (e.g., using compromised keys, insufficient nonce protection, or weak signature validation), an attacker can forge withdrawal requests with crafted signatures and drain the bridge vault.
@@ -259,6 +308,8 @@ OrbitEthVault.withdraw(
 ---
 
 ## 4. Yul Integer Overflow Calldata Corruption
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 
@@ -313,6 +364,8 @@ bytes memory finalOrderInteraction = abi.encodePacked(
 ---
 
 ## 5. Unverified Aggregator Proxy Forwarding
+
+> **pathShape**: `atomic`
 
 ### Root Cause
 

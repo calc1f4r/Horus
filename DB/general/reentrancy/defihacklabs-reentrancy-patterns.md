@@ -4,6 +4,13 @@ chain: ethereum, bsc, fantom
 category: reentrancy
 vulnerability_type: reentrancy_comprehensive
 
+# Pattern Identity (Required)
+root_cause_family: callback_reentrancy
+pattern_key: reentrancy_comprehensive | external_calls | reentrancy | fund_loss
+
+# Interaction Scope
+interaction_scope: multi_contract
+
 attack_type: reentrancy
 affected_component: external_calls
 
@@ -19,6 +26,30 @@ severity: critical
 impact: fund_loss
 exploitability: 0.85
 financial_impact: critical
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - "data"
+  - "from"
+  - "sell"
+  - "work"
+  - "enter"
+  - "owner"
+  - "token"
+  - "borrow"
+  - "supply"
+  - "deposit"
+  - "exploit"
+  - "receive"
+  - "fallback"
+  - "transfer"
+  - "work(data"
+path_keys:
+  - "burgerswap"
+  - "cream_finance"
+  - "grim_finance"
+  - "lendf_me"
+  - "rari_capital"
 
 tags:
   - reentrancy
@@ -42,9 +73,39 @@ total_losses: "$116M+"
 
 ## DeFiHackLabs Reentrancy Pattern Compendium
 
+
+## References & Source Reports
+
+| Label | Source | Path / URL |
+|-------|--------|------------|
+| [BURGERSWAP-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-05/BurgerSwap_exp.sol` |
+| [CREAM-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-08/Cream_exp.sol` |
+| [GRIM-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-12/Grim_exp.sol` |
+| [LENDFME-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2020-04/LendfMe_exp.sol` |
+| [RARICAPITAL-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-05/RariCapital_exp.sol` |
+| [SPANKCHAIN-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2018-10/SpankChain_exp.sol` |
+| [VALUEDEFI-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-05/ValueDefi_exp.sol` |
+| [VISOR-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-12/Visor_exp.sol` |
+| [XSURGE-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2021-08/XSURGE_exp.sol` |
+
+---
+
 ### Overview
 
 Reentrancy remains the single most exploited vulnerability class in DeFi history. This entry catalogs **10 real-world reentrancy exploits** from 2018-2021 totaling over **$116M in losses**, organized by attack vector. Each exploit demonstrates a distinct reentrancy entry point that bypassed existing security assumptions.
+
+
+### Agent Quick View
+
+| Field | Value |
+|-------|-------|
+| Root Cause | `callback_reentrancy` |
+| Pattern Key | `reentrancy_comprehensive | external_calls | reentrancy | fund_loss` |
+| Severity | CRITICAL |
+| Impact | fund_loss |
+| Interaction Scope | `multi_contract` |
+| Chain(s) | ethereum, bsc, fantom |
+
 
 ### Root Cause Categories
 
@@ -59,6 +120,8 @@ Reentrancy remains the single most exploited vulnerability class in DeFi history
 ### Vulnerable Pattern Examples
 
 #### Category 1: ERC-777 Token Hooks [CRITICAL]
+
+> **pathShape**: `callback-reentrant`
 
 **Example 1: Cream Finance — ERC-777 tokensReceived Reentry ($18M, 2021-08)** [CRITICAL]
 ```solidity
@@ -150,6 +213,8 @@ function tokensToSend(
 ---
 
 #### Category 2: Fake/Malicious Token Callbacks [CRITICAL]
+
+> **pathShape**: `callback-reentrant`
 
 **Example 4: Grim Finance — depositFor with Arbitrary Token ($30M, 2021-12)** [CRITICAL]
 ```solidity
@@ -256,6 +321,8 @@ function transfer(address, uint256) public returns (bool) {
 
 #### Category 3: Native ETH Transfer Reentrancy [HIGH]
 
+> **pathShape**: `callback-reentrant`
+
 **Example 7: XSURGE — sell() Sends BNB Before State Update ($5M, 2021-08)** [CRITICAL]
 ```solidity
 // ❌ VULNERABLE: sell() sends BNB to caller via native transfer
@@ -286,6 +353,8 @@ receive() external payable {
 
 #### Category 4: User-Supplied Callback Target [HIGH]
 
+> **pathShape**: `callback-reentrant`
+
 **Example 8: Visor Finance — No-op delegatedTransferERC20 ($8.2M, 2021-12)** [CRITICAL]
 ```solidity
 // ❌ VULNERABLE: deposit() calls delegatedTransferERC20() on user-supplied 'from' address
@@ -313,6 +382,8 @@ function delegatedTransferERC20(address, address, uint256) external {}
 ---
 
 #### Category 5: Cross-Contract Reentrancy [CRITICAL]
+
+> **pathShape**: `callback-reentrant`
 
 **Example 9: Rari Capital — Malicious Token in work() Strategy (~$15M, 2021-05)** [CRITICAL]
 ```solidity
@@ -450,8 +521,7 @@ function borrow(uint256 amount) external nonReentrant {
 ### Detection Patterns
 
 ```bash
-# Functions accepting arbitrary address and calling external methods on it
-grep -rn "function.*address.*token.*external\|safeTransferFrom.*token\|\.call{" --include="*.sol" | \
+# Functions accepting arbitrary address and calling external methods on itgrep -rn "function.*address.*token.*external\|safeTransferFrom.*token\|\.call{" --include="*.sol" | \
   grep -v "nonReentrant"
 
 # ERC-777 vulnerable patterns — transfer before state update
