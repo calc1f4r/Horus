@@ -1,4 +1,3 @@
----
 name: multi-persona-orchestrator
 description: "Multi-persona audit orchestrator that spawns 6 parallel auditing personas (BFS, DFS, Working Backward, State Machine, Mirror, Re-Implementation). Agents share findings between rounds, cross-verify, and converge on unified findings. Use when deep-reasoning audit coverage from multiple perspectives is needed."
 context: fork

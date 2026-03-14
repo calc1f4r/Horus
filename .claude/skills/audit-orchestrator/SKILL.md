@@ -1,4 +1,3 @@
----
 name: audit-orchestrator
 description: "Run a full end-to-end smart contract security audit. Orchestrates 20+ sub-agents across 11 phases: reconnaissance, context building, invariant extraction, iterative discovery (DB hunting + reasoning + multi-persona + validation gaps), merge & triage, PoC generation, formal verification, judging, issue polishing, deep review, and report assembly. Use when auditing an unfamiliar codebase, running a contest-grade security review, or performing comprehensive vulnerability discovery."
 context: fork

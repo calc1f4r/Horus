@@ -1,4 +1,3 @@
----
 name: medusa-fuzzing
 description: "Convert invariant specifications into compilable Medusa-compatible Solidity test harnesses and medusa.json configuration. Produces property tests (property_ prefix), assertion tests, ghost variable tracking, actor proxies, and bounding utilities. Use when setting up a Medusa fuzzing campaign or converting invariant specs to harness code."
 context: fork

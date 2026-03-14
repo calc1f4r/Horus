@@ -1,4 +1,3 @@
----
 name: persona-mirror
 description: "Mirror auditing persona — analyzes paired/opposite functions for asymmetries (deposit/withdraw, mint/burn, stake/unstake, lock/unlock). Language-agnostic. Spawned by multi-persona-orchestrator."
 context: fork

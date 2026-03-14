@@ -1,4 +1,3 @@
----
 name: solodit-fetching
 description: "Fetch vulnerability reports from the Solodit/Cyfrin API for a given topic and store them in reports/<topic>/. Use when collecting raw audit findings for a new vulnerability topic, populating the reports/ directory, or preparing input for variant-template-writer."
 context: fork

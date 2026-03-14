@@ -1,4 +1,3 @@
----
 name: issue-writer
 description: "Polish a validated vulnerability finding into a submission-ready write-up in Sherlock format. Use after triage to convert raw findings into professional audit report entries or contest submissions."
 context: fork

@@ -1,4 +1,3 @@
----
 name: function-analyzer
 description: "Per-contract ultra-granular function analysis. Performs line-by-line micro-analysis of every non-trivial function in a single contract file. Pure context building — no vulnerability identification. Spawned by audit-context-building."
 context: fork

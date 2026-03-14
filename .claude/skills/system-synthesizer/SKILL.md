@@ -1,4 +1,3 @@
----
 name: system-synthesizer
 description: "Synthesizes per-contract analysis files into a global context document with system-wide invariants, cross-contract flows, trust boundaries, and actor models. Spawned by audit-context-building after all function-analyzers complete."
 context: fork

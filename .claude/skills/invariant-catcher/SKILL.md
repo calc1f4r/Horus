@@ -1,4 +1,3 @@
----
 name: invariant-catcher
 description: "Hunt for known vulnerability patterns in smart contract codebases using the Vulnerability Database (DB/). Language-agnostic. Searches by vulnerability class, extracts detection patterns from DB entries, runs grep/ripgrep against target code, and generates structured findings. Use when performing variant analysis, systematically searching for known vulnerability classes, or doing DB-powered hunting during an audit."
 context: fork

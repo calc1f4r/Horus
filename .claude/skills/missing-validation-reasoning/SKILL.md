@@ -1,4 +1,3 @@
----
 name: missing-validation-reasoning
 description: "Specialized reasoning-based auditor for input validation and hygiene vulnerabilities. Scans for zero-address checks, stale oracle data, array length mismatches, numeric bounds, arbitrary calldata forwarding, unvalidated token/callback addresses, and access control gaps. Use when reviewing constructors, initialize functions, admin setters, oracle integrations, or batch operations."
 context: fork

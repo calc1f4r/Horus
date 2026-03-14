@@ -1,4 +1,3 @@
----
 name: sherlock-judging
 description: "Validate a security finding against Sherlock audit platform standards. Determines severity (High/Medium/Invalid), checks validity, and assesses duplication. Use when validating findings for Sherlock contests, determining Sherlock severity, or checking if an issue meets Sherlock judging criteria."
 context: fork

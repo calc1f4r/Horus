@@ -1,4 +1,3 @@
----
 name: invariant-reviewer
 description: "Review and harden invariant specifications produced by invariant-writer. Re-understands the protocol, researches canonical invariants for the protocol type, enforces multi-step attack vector coverage, calibrates bounds, and produces a revised invariant file ready for formal verification. Use after invariant-writer or when invariant quality is suspect."
 context: fork

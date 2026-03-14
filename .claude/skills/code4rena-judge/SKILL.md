@@ -1,4 +1,3 @@
----
 name: code4rena-judge
 description: "Validate a security finding against Code4rena audit competition standards. Determines severity (High/Medium/QA/Invalid), checks in-scope validity, applies severity caps, and assesses submission quality. Use when validating findings for Code4rena contests, determining C4 severity, or checking if an issue meets C4 judging criteria."
 context: fork

@@ -1,4 +1,3 @@
----
 name: protocol-reasoning
 description: "Deep reasoning-based vulnerability discovery. Decomposes codebases into domains, spawns specialized sub-agents per domain, and uses DB vulnerability root causes as reasoning seeds. Iterates 4 rounds: standard → cross-domain → edge cases → completeness. Requires reachability proofs. Focuses on MEDIUM/HIGH/CRITICAL severity. Use for reasoning-first vulnerability discovery beyond pattern matching."
 context: fork

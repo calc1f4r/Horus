@@ -1,4 +1,3 @@
----
 name: certora-sui-move-verification
 description: "Convert invariant specifications into Certora Sui Prover Move specs using the CVLM library. Handles installation, Sui CLI setup, Move.toml configuration, and platform summaries. Produces Move-based specification modules. Use when setting up Certora formal verification for Sui Move contracts."
 context: fork

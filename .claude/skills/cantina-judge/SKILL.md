@@ -1,4 +1,3 @@
----
 name: cantina-judge
 description: "Validate a security finding against Cantina audit platform standards. Determines severity using impact × likelihood matrix, applies severity caps, and checks for invalid/duplicate categories. Use when validating findings for Cantina submission, determining Cantina severity, or checking if a finding would be capped or invalid."
 context: fork

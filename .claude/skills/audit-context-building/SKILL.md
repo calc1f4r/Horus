@@ -1,4 +1,3 @@
----
 name: audit-context-building
 description: "Build deep architectural context for a smart contract codebase before vulnerability hunting. Distributes per-contract analysis across sub-agents, then synthesizes a global context document. Use when preparing for a security audit, architecture review, threat modeling, or when bottom-up codebase comprehension is needed."
 context: fork

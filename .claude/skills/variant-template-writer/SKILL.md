@@ -1,4 +1,3 @@
----
 name: variant-template-writer
 description: "Analyze security audit reports from reports/<topic>/ to identify cross-report vulnerability patterns and create TEMPLATE.md-compliant database entries optimized for vector search. Synthesizes 5-10+ reports per pattern. Use when synthesizing audit findings into DB entries, performing variant analysis, or creating vulnerability templates."
 context: fork

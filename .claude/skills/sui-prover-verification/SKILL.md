@@ -1,4 +1,3 @@
----
 name: sui-prover-verification
 description: "Convert invariant specifications into Sui Prover formal verification specs for Sui Move contracts. Uses the Asymptotic Sui Prover via requires/ensures/asserts specification style. Produces Move specification modules with ghost variables, loop invariants, and Integer/Real math. Use when setting up Sui Prover for Sui Move verification."
 context: fork

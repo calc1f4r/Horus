@@ -1,4 +1,3 @@
----
 name: halmos-verification
 description: "Convert invariant specifications into compilable Halmos symbolic test suites (.t.sol) that run inside Foundry. Produces check_ prefix functions using halmos-cheatcodes (svm.createUint256, svm.createAddress) for exhaustive verification over all possible inputs. Use when setting up Halmos formal verification or converting invariant specs to symbolic tests."
 context: fork

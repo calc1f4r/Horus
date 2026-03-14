@@ -1,4 +1,3 @@
----
 name: invariant-indexer
 description: "Index canonical invariants from major DeFi protocol repositories, formal verification specs, fuzzing harnesses, and documented properties. Writes structured reference files into invariants/<category>/. Use when building protocol-level invariant reference libraries, studying how top protocols specify formal properties, or bootstrapping invariant suites."
 context: fork

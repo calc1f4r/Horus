@@ -1,4 +1,3 @@
----
 name: certora-verification
 description: "Convert invariant specifications into Certora CVL .spec and .conf files. Handles compilation, Python environment, and configuration issues proactively. Produces general specifications, handles admin conditions correctly, avoids vacuous rules, supports mutation testing via Gambit, and generates satisfy statements. Use when setting up Certora formal verification or converting invariant specs to CVL."
 context: fork

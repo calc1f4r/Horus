@@ -1,4 +1,3 @@
----
 name: persona-working-backward
 description: "Working Backward auditing persona — traces from critical sinks to attacker-controllable sources. Optimized for speedrun/bug-bounty style hunting. Language-agnostic. Spawned by multi-persona-orchestrator."
 context: fork

@@ -1,4 +1,3 @@
----
 name: persona-bfs
 description: "BFS auditing persona — maps entry points then progressively deepens. Language-agnostic. Applies Feynman questioning at every depth layer. Spawned by multi-persona-orchestrator."
 context: fork

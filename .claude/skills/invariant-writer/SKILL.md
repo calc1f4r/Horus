@@ -1,4 +1,3 @@
----
 name: invariant-writer
 description: "Extract and document all system invariants, properties, and constraints from a smart contract codebase. Uses dual-mode analysis: 'What Should Happen' (positive specification from specs/standards) and 'What Must Never Happen' (adversarial multi-call attack sequences). Produces language-agnostic invariants consumed by fuzzing and formal verification tools. Use when preparing invariant suites, writing property specifications, or before fuzzing campaigns."
 context: fork

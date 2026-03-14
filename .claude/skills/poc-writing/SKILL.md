@@ -1,4 +1,3 @@
----
 name: poc-writing
 description: "Write honest, minimal, compilable exploit tests that prove smart contract vulnerabilities. Adapts to the target codebase's language and test framework (Foundry, Hardhat, Anchor, etc.). Enforces reachability-first methodology. Use when a vulnerability needs a PoC to prove impact, validate an audit finding, or demonstrate to a protocol team."
 context: fork
