@@ -16,6 +16,18 @@ Extracts every invariant, property, and constraint from a codebase and writes th
 
 When spawned by `audit-orchestrator`, read context from `audit-output/01-context.md` and write output to `audit-output/02-invariants.md` using the format defined in [inter-agent-data-format.md](resources/inter-agent-data-format.md) (Phase 3: Invariant Spec section). Every invariant must have: ID, Property, Scope, Why, Testable.
 
+### Memory State Integration
+
+When spawned as part of the audit pipeline:
+1. **Read** `audit-output/memory-state.md` before starting — use INSIGHT entries from context building (architectural patterns, trust boundaries) and HYPOTHESIS entries (suspected vulnerability areas) to prioritize which invariants to extract first
+2. **Write** a memory entry after completing, appended to `audit-output/memory-state.md`:
+   - Entry ID: `MEM-3A-INVARIANT-WRITER`
+   - Summary: Total invariants extracted, categories covered, protocol-specific properties
+   - Key Insights: Which invariants were hardest to derive, areas with weak specification
+   - Hypotheses: Invariants that were difficult to express (may indicate design complexity exploitable by attackers)
+   - Dead Ends: Standard ERC invariants that are trivially satisfied
+   - Open Questions: Properties that need the invariant-reviewer's judgment on bounds/tightness
+
 ### Documentation Input
 
 If the user provides protocol documentation (whitepaper, spec, README, design doc), **read it before anything else**. Documentation is a higher-authority source than code for deriving invariants — the code may have bugs, but the spec is the intended truth. When docs and code conflict, write the invariant from the doc and flag the code deviation as a finding candidate.

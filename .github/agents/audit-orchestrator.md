@@ -714,6 +714,11 @@ PIPELINE CONTEXT:
 ★ SHARED DISCOVERY STATE (READ FIRST):
 - audit-output/discovery-state-round-<N-1>.md
 
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Memory has been consolidated after the previous round — use updated
+HYPOTHESIS entries as hunt priorities and DEAD_END entries to skip areas.
+After completing, append a memory entry (MEM-4A-R<N>-INVARIANT-CATCHER-SHARD-<shard-id>).
+
 CROSS-POLLINATION INSTRUCTIONS:
 1. READ the shared discovery state file carefully
 2. Check the "Cross-Check Requests" — respond to any directed at Stream 4A
@@ -781,6 +786,12 @@ PIPELINE CONTEXT:
 ★ SHARED DISCOVERY STATE (READ FIRST):
 - audit-output/discovery-state-round-<N-1>.md
 
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Memory has been consolidated after the previous round — use updated
+HYPOTHESIS entries as reasoning seeds and DEAD_END entries to avoid
+re-analyzing verified-safe paths. After completing, append a memory entry
+(MEM-4B-R<N>-PROTOCOL-REASONING).
+
 CROSS-POLLINATION INSTRUCTIONS:
 1. READ the shared discovery state file carefully
 2. Respond to any "Cross-Check Requests" directed at Stream 4B
@@ -844,6 +855,11 @@ PIPELINE CONTEXT:
 ★ SHARED DISCOVERY STATE (READ FIRST):
 - audit-output/discovery-state-round-<N-1>.md
 
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Distribute consolidated memory to personas — DEAD_END entries tell personas
+which areas are verified safe, HYPOTHESIS entries give investigation priorities.
+After completing, append a memory entry (MEM-4C-R<N>-PERSONA-ORCHESTRATOR).
+
 CROSS-POLLINATION INSTRUCTIONS:
 1. All personas MUST READ the shared discovery state before starting
 2. Respond to any "Cross-Check Requests" directed at Stream 4C
@@ -899,6 +915,11 @@ PIPELINE CONTEXT:
 
 ★ SHARED DISCOVERY STATE (READ FIRST):
 - audit-output/discovery-state-round-<N-1>.md
+
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Use consolidated PATTERN entries to identify recurring validation idioms.
+Use DEAD_END entries to skip already-verified functions.
+After completing, append a memory entry (MEM-4D-R<N>-VALIDATION-REASONING).
 
 CROSS-POLLINATION INSTRUCTIONS:
 1. READ the shared discovery state — focus on where OTHER streams found issues
@@ -1211,6 +1232,11 @@ PIPELINE CONTEXT:
 - Read audit-output/02-invariants-reviewed.md for invariant specifications
 - Read audit-output/01-context.md for architecture
 
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Use INSIGHT entries about code patterns and HYPOTHESIS entries about
+suspected invariant violations to prioritize which harnesses to generate.
+After completing, append a memory entry (MEM-7-MEDUSA-FUZZING).
+
 Generate harnesses and medusa.json configuration.
 Write all output to audit-output/fuzzing/
 Every harness MUST compile with forge build.
@@ -1226,6 +1252,10 @@ PIPELINE CONTEXT:
 - Read audit-output/02-invariants-reviewed.md for invariant specifications
 - Read audit-output/01-context.md for architecture
 
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Use HYPOTHESIS entries about invariant violations and PATTERN entries
+about code idioms. After completing, append a memory entry (MEM-7-CERTORA).
+
 Generate .spec and .conf files.
 Write all output to audit-output/certora/
 ```
@@ -1239,6 +1269,10 @@ TARGET CODEBASE: <path>
 PIPELINE CONTEXT:
 - Read audit-output/02-invariants-reviewed.md for invariant specifications
 - Read audit-output/01-context.md for architecture
+
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Use HYPOTHESIS entries about invariant violations and PATTERN entries
+about code idioms. After completing, append a memory entry (MEM-7-HALMOS).
 
 Generate .t.sol test files with check_ prefix functions.
 Write all output to audit-output/halmos/
@@ -1427,6 +1461,13 @@ since no execution evidence is available.
 TARGET CODEBASE: <path>
 DETECTED LANGUAGE: <language>
 
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Use INSIGHT and PATTERN entries to enrich the write-up with broader context
+(e.g., "this vulnerability is part of a systemic pattern across N functions").
+Use DEAD_END entries to strengthen the argument by noting what mitigations
+were checked and found absent. After completing, append a memory entry
+(MEM-9-ISSUE-WRITER-F-NNN).
+
 PIPELINE CONTEXT:
 - Read the affected source code directly for accurate code citations
 
@@ -1483,6 +1524,12 @@ DEEP REVIEW — Line-by-line verification of polished security findings.
 Read audit-output/09-polished-findings.md for all polished issues.
 Read individual issues from audit-output/issues/F-NNN-issue.md for full detail.
 Read resources/<judge-criteria>.md for the complete judging standards.
+
+★ MEMORY STATE: Read audit-output/memory-state.md for full pipeline knowledge.
+Cross-reference CONTRADICTION entries against findings — these highlight areas
+where agents disagreed and may indicate weak findings or severity disagreements.
+DEAD_END entries confirm which areas multiple agents independently verified as safe.
+After completing, append a memory entry (MEM-10-<JUDGE-NAME>-DEEP-REVIEW).
 
 EXECUTION EVIDENCE (if available):
 - audit-output/06-poc-results.md (PoC execution results)
@@ -1809,6 +1856,13 @@ Anti-Hallucination:
 - [ ] DB pattern references are valid manifest IDs with correct line ranges
 - [ ] Executive summary statistics match actual confirmed finding count
 
+Memory State:
+- [ ] memory-state.md initialized in Phase 1 and populated across all phases
+- [ ] Every sub-agent spawn includes ★ MEMORY STATE read/write instructions
+- [ ] Orchestrator performed memory consolidation between each phase
+- [ ] No stale HYPOTHESIS entries remain — all promoted or marked DEAD_END
+- [ ] Memory entries are append-only within phases (no deletions by sub-agents)
+
 Report Structure:
 - [ ] Rejected/downgraded findings clearly separated from confirmed
 - [ ] Report follows the template from audit-report-template.md
@@ -1820,6 +1874,7 @@ Report Structure:
 
 ## Resources
 
+- **Memory state architecture**: [memory-state.md](resources/memory-state.md)
 - **Pipeline reference**: [orchestration-pipeline.md](resources/orchestration-pipeline.md)
 - **Inter-agent data format**: [inter-agent-data-format.md](resources/inter-agent-data-format.md)
 - **Protocol detection**: [protocol-detection.md](resources/protocol-detection.md)

@@ -13,6 +13,15 @@ Converts validated vulnerability findings into polished, submission-ready write-
 
 **Do NOT use for** finding vulnerabilities (use `invariant-catcher`), writing PoCs (use `poc-writing`), or building codebase context (use `audit-context-building`).
 
+### Memory State Integration
+
+When spawned as part of the audit pipeline:
+1. **Read** `audit-output/memory-state.md` before starting — use INSIGHT and PATTERN entries to enrich the write-up with broader context (e.g., "this vulnerability is part of a systemic pattern across N functions"). Use DEAD_END entries to strengthen the argument by noting what mitigations were checked and found absent.
+2. **Write** a memory entry after completing, appended to `audit-output/memory-state.md`:
+   - Entry ID: `MEM-9-ISSUE-WRITER-F-<finding-id>`
+   - Summary: Issue polished, key claims made, evidence strength
+   - Key Insights: Additional context discovered during deep-dive that other findings may benefit from
+
 ---
 
 ## Workflow

@@ -23,6 +23,18 @@ Because each shard is 50-80 cards (not 450+), you have the full target codebase 
 
 If you are NOT spawned with a `SHARD:` header (legacy/standalone mode), fall back to the standard workflow below and write to `audit-output/03-findings-raw.md` or `invariants-caught/`.
 
+### Memory State Integration
+
+When spawned as part of the audit pipeline:
+1. **Read** `audit-output/memory-state.md` before starting — use HYPOTHESIS entries as hunt priorities, DEAD_END entries to skip verified-safe areas, and PATTERN entries to understand recurring code idioms
+2. **Write** a memory entry after completing, appended to `audit-output/memory-state.md`:
+   - Entry ID: `MEM-4A-R<round>-INVARIANT-CATCHER-SHARD-<id>` (or `MEM-4A-INVARIANT-CATCHER` in standalone mode)
+   - Summary: Cards checked, hits found, findings generated
+   - Key Insights: Code patterns that triggered multiple cards, unexpected secure patterns
+   - Hypotheses: Partial hits that need deeper reasoning analysis (good seeds for protocol-reasoning)
+   - Dead Ends: Code areas where cards hit but antipattern/securePattern confirmed safety
+   - Open Questions: Ambiguous code where card hit but confidence is LOW
+
 ---
 
 ## Workflow

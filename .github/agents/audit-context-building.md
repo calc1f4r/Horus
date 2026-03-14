@@ -28,6 +28,77 @@ Each layer writes to its own file — **no single agent accumulates the full ana
 
 When spawned by `audit-orchestrator`, this agent manages the full pipeline and ensures `audit-output/01-context.md` exists at completion with all required sections from [inter-agent-data-format.md](resources/inter-agent-data-format.md) (Phase 2: Context Output section).
 
+### Memory State Integration
+
+This agent manages memory context in both standalone and pipeline modes. Read the full memory architecture in [memory-state.md](resources/memory-state.md).
+
+#### Standalone Mode (invoked directly, no orchestrator)
+
+When invoked as a standalone agent (not spawned by `audit-orchestrator`), this agent **owns the memory lifecycle**:
+
+1. **Initialize** `audit-output/memory-state.md` at the start of Phase 0.5:
+   ```markdown
+   # Audit Memory State
+   > Cumulative knowledge from all agents across all phases. Read this BEFORE starting your work.
+   > Last updated: <timestamp> by audit-context-building (standalone)
+
+   ## Phase 0: Standalone Initialization
+   ### MEM-0-STANDALONE-INIT: Context building standalone run
+   - **Agent**: audit-context-building
+   - **Phase**: 0 — Initialization
+   - **Type**: INSIGHT
+
+   #### Summary
+   Standalone context building run. No prior pipeline state exists.
+   Target codebase: <path>. Protocol hint: <hint or "auto-detect">.
+   ```
+
+2. **Propagate memory between internal phases** — each sub-phase reads prior entries and writes its own:
+   - Phase 0.5 (self) → writes `MEM-0.5-ATTACKER-MINDSET` with attack goals, novel code areas, value stores
+   - Phase 1 (self) → reads Phase 0.5 entry, writes `MEM-1-ORIENTATION` with system map, actor model, function-state matrix
+   - Phase 2 (fan-out) → each function-analyzer reads the full memory state to prioritize analysis; writes per-contract memory entries
+   - Phase 3 (fan-in) → system-synthesizer reads ALL memory entries as additional context for synthesis
+
+3. **Consolidate** after Phase 2 completes (before spawning system-synthesizer):
+   - Read all `MEM-2-FUNC-ANALYZER-*` entries
+   - Identify CONTRADICTIONS (two analyzers disagree about a shared state variable's purpose)
+   - Promote HYPOTHESES that appear in 2+ analyzers
+   - Write `MEM-2-CONSOLIDATION` entry summarizing coverage gaps and cross-contract observations
+
+4. **Write final memory entry** `MEM-2-CONTEXT-BUILDING` after Phase 3 completes (same format as pipeline mode below)
+
+#### Pipeline Mode (spawned by audit-orchestrator)
+
+When spawned as part of the audit pipeline:
+1. **Read** `audit-output/memory-state.md` before starting — use Phase 1 INSIGHT entries about scope, protocol type, and initial hypotheses to guide context building priorities
+2. **Propagate** relevant orchestrator memory entries into sub-agent spawn prompts (function-analyzer, system-synthesizer)
+3. **Write** a memory entry after completing, appended to `audit-output/memory-state.md`:
+   - Entry ID: `MEM-2-CONTEXT-BUILDING`
+   - Summary: Key architectural patterns discovered, trust boundaries identified, novel code areas
+   - Key Insights: Protocol-specific idioms, unusual design patterns, surprising dependencies
+   - Hypotheses: Potential vulnerability areas based on architectural observations (not findings — just areas that deserve deeper analysis)
+   - Dead Ends: Code areas that are well-tested, standard implementations, or out of scope
+   - Open Questions: Ambiguities in the codebase that downstream agents should investigate
+
+#### Internal Memory Flow Diagram
+
+```
+Phase 0.5 (self)           Phase 1 (self)           Phase 2 (fan-out)             Phase 3 (fan-in)
+┌──────────────┐          ┌──────────────┐          ┌──────────────────────┐      ┌──────────────────┐
+│ MEM-0.5-     │─────────▶│ MEM-1-       │─────────▶│ MEM-2-FUNC-ANALYZER │──┐   │ MEM-2-CONTEXT-   │
+│ ATTACKER-    │          │ ORIENTATION  │          │  -Pool               │  │   │ BUILDING         │
+│ MINDSET      │          │              │          │ MEM-2-FUNC-ANALYZER │  │   │ (final)          │
+│              │          │              │          │  -Oracle             │  ├──▶│                  │
+│ Attack goals │          │ System map   │          │ MEM-2-FUNC-ANALYZER │  │   │ Global synthesis  │
+│ Novel code   │          │ Actor model  │          │  -ShareMath          │  │   │ + all sub-agent   │
+│ Value stores │          │ State matrix │          │  ...                 │  │   │ memory entries    │
+└──────────────┘          └──────────────┘          └──────────────────────┘  │   └──────────────────┘
+                                                    ┌──────────────────────┐  │
+                                                    │ MEM-2-CONSOLIDATION  │──┘
+                                                    │ (orchestrator self)  │
+                                                    └──────────────────────┘
+```
+
 ---
 
 ## Rationalizations (Do Not Skip)
@@ -136,6 +207,34 @@ Before reading code deeply, answer these 4 questions. They set PRIORITY for ever
 
 Functions and modules appearing in MULTIPLE answers get analyzed FIRST and with the DEEPEST scrutiny in Phase 2.
 
+#### Memory Write: Phase 0.5
+
+After writing `00-attacker-mindset.md`, append to `audit-output/memory-state.md`:
+
+```markdown
+### MEM-0.5-ATTACKER-MINDSET: Pre-analysis attack surface
+- **Agent**: audit-context-building (self)
+- **Phase**: 0.5 — Attacker Mindset
+- **Type**: INSIGHT
+
+#### Summary
+<Top 3 attack goals, count of novel code areas, key value stores identified>
+
+#### Key Insights
+- <Most dangerous attack goal and why>
+- <Most novel code area and what makes it unique>
+- <Largest value store and its outflow functions>
+
+#### Hypotheses
+- <Suspected weakest point based on surface scan>
+
+#### Dead Ends
+- <Known battle-tested forks identified (e.g., "Uses OpenZeppelin ERC20 unmodified")>
+
+#### Affected Code Summary
+- <Files identified as high priority with reasoning>
+```
+
 ---
 
 ### Phase 1: Initial Orientation (Self)
@@ -236,6 +335,40 @@ Recommended order for per-contract analysis (dependencies first, priority-weight
 4. ...
 ```
 
+#### Memory Write: Phase 1
+
+After writing `00-orientation.md`, append to `audit-output/memory-state.md`:
+
+```markdown
+### MEM-1-ORIENTATION: System architecture map
+- **Agent**: audit-context-building (self)
+- **Phase**: 1 — Orientation
+- **Type**: INSIGHT
+
+#### Summary
+<Contract count, total LOC, detected architecture pattern, actor count, key state variable count>
+
+#### Key Insights
+- <Most interconnected contract and its dependency count>
+- <Unusual actor model observations (e.g., "No admin role — fully permissionless")>
+- <Function pairs identified for mirror analysis>
+- <State machine complexity (number of states × transitions)>
+
+#### Hypotheses
+- <Suspected fragility points from function-state matrix (e.g., "Function X writes state Y but has no guard")>
+- <State machine gaps (e.g., "No transition from Active → Emergency exists")>
+
+#### Dead Ends
+- <Simple utility contracts that are straightforward>
+
+#### Open Questions
+- <Cross-contract interactions that need deeper analysis in Phase 2>
+
+#### Affected Code Summary
+- <All contracts mapped with LOC and analysis priority>
+```
+
+---
 ---
 
 ### Phase 2: Per-Contract Function Analysis (Fan-Out)
@@ -272,6 +405,19 @@ STATE MACHINE (relevant transitions):
 
 RELATED CONTRACTS (for cross-reference):
 <list contracts this one depends on or is depended upon by>
+
+★ MEMORY STATE:
+Read audit-output/memory-state.md before starting. Use prior entries to:
+- Prioritize functions flagged in MEM-0.5-ATTACKER-MINDSET attack goals
+- Skip or deprioritize code areas marked as standard/battle-tested in prior entries
+- Focus on areas marked as NOVEL or HIGH PRIORITY by earlier phases
+After completing your analysis, append a memory entry to audit-output/memory-state.md:
+  Entry ID: MEM-2-FUNC-ANALYZER-<ContractName>
+  Type: INSIGHT
+  Summary: Key patterns discovered in this contract, surprising behaviors, intent-vs-implementation gaps
+  Hypotheses: Suspected issues observed during context building (NOT findings — areas for later investigation)
+  Dead Ends: Functions/patterns verified as standard implementations (saves other analyzers time)
+  Open Questions: Cross-contract questions this contract raises about other contracts
 
 Analyze every non-trivial function following your full Per-Function Microstructure
 Checklist. This includes:
@@ -321,6 +467,48 @@ Phase 2 Progress:
 
 ---
 
+### Phase 2.5: Memory Consolidation (Self)
+
+**Agent**: Self (between Phase 2 fan-out and Phase 3 fan-in)
+
+After all function-analyzer sub-agents complete, **before** spawning the system-synthesizer:
+
+1. **Read** all `MEM-2-FUNC-ANALYZER-*` entries from `audit-output/memory-state.md`
+2. **Cross-reference** insights:
+   - Do multiple analyzers mention the same pattern? → Promote to high-confidence insight
+   - Do two analyzers contradict each other about shared state? → Write CONTRADICTION entry
+   - Are there unanswered OPEN QUESTIONS that another analyzer already answered? → Note the resolution
+3. **Assess coverage**: Which in-scope contracts have memory entries? Which don't? (analyzer may have failed)
+4. **Write consolidation entry**:
+
+```markdown
+### MEM-2-CONSOLIDATION: Cross-contract knowledge synthesis
+- **Agent**: audit-context-building (self)
+- **Phase**: 2 — Post-analysis consolidation
+- **Type**: INSIGHT
+
+#### Summary
+<N contracts analyzed, M memory entries received. Key cross-cutting patterns observed.>
+
+#### Key Insights
+- <Cross-contract patterns: e.g., "3 of 5 contracts use the same unchecked math pattern">
+- <Shared state coupling: e.g., "Pool.totalShares and Token.totalSupply track the same concept — inconsistency risk">
+
+#### Contradictions Detected
+- <Analyzer A says X about function F; Analyzer B says Y — needs synthesis resolution>
+
+#### Promoted Hypotheses (multi-analyzer agreement)
+- <Hypothesis H raised by analyzers [A, B] independently → HIGH PRIORITY for downstream>
+
+#### Coverage Gaps
+- <Contracts/functions with shallow or no analysis — priority targets for synthesis>
+
+#### Accumulated Dead Ends
+- <Aggregated safe-code areas from all analyzers — do NOT re-investigate>
+```
+
+---
+
 ### Phase 3: Global System Synthesis (Fan-In)
 
 **Agent**: Spawn one `system-synthesizer` sub-agent
@@ -340,6 +528,23 @@ PER-CONTRACT FILES:
 - audit-output/context/ContractA.md
 - audit-output/context/ContractB.md
 - ...
+
+★ MEMORY STATE:
+Read audit-output/memory-state.md before starting. It contains accumulated knowledge
+from Phase 0.5 (attacker mindset), Phase 1 (orientation), and all per-contract
+function-analyzer entries. Use this to:
+- Identify cross-contract patterns that multiple analyzers flagged independently
+- Resolve OPEN QUESTIONS where one analyzer's question is answered by another's insights
+- Surface CONTRADICTIONS between analyzers about shared state behavior
+- Prioritize fragility clusters where multiple analyzers raised HYPOTHESES
+After completing synthesis, append a memory entry to audit-output/memory-state.md:
+  Entry ID: MEM-2-SYSTEM-SYNTHESIZER
+  Type: INSIGHT
+  Summary: Key cross-contract discoveries, trust boundary surprises, invariant candidates
+  Key Insights: System-level patterns only visible in synthesis (not in individual contracts)
+  Hypotheses: System-level suspected fragilities (cross-contract state coupling, missing guards)
+  Dead Ends: Cross-contract interaction paths verified as safe
+  Open Questions: Ambiguities requiring invariant analysis or documentation clarification
 
 CODEBASE PATH: <path>
 

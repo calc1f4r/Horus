@@ -245,6 +245,7 @@ This file is created in Phase 1 and updated after EVERY phase. It is the single 
 3. **Parallel phases (4A-4D, 9) write to SEPARATE files** — orchestrator merges
 4. **Pipeline state is THE canonical record** — update it after every phase
 5. **Every finding gets a unique ID at birth** that persists through all phases
+6. **Every agent MUST read `memory-state.md` before starting** and **write a memory entry after completing** — see [memory-state.md](.claude/resources/memory-state.md)
 
 ---
 
@@ -380,11 +381,51 @@ Write `audit-output/00-scope.md` using the format from [inter-agent-data-format.
 
 Write `audit-output/pipeline-state.md` with the initial pipeline state (all phases NOT_STARTED, metadata filled in).
 
+Initialize the memory state file:
+
+```bash
+cat > audit-output/memory-state.md << 'EOF'
+# Audit Memory State
+
+> Cumulative knowledge from all agents across all phases.
+> Read this BEFORE starting your work.
+> Last updated: Phase 1 by audit-orchestrator
+
+EOF
+```
+
+### Step 8: Write Phase 1 Memory Entry
+
+Append to `audit-output/memory-state.md`:
+
+```markdown
+---
+## MEM-1-ORCHESTRATOR
+**Phase**: 1 — Reconnaissance | **Agent**: audit-orchestrator | **Timestamp**: <now>
+
+### Summary
+Protocol type: <detected types>. Manifests resolved: <list>. Files in scope: <count>.
+Language: <detected>. Framework: <detected>.
+
+### Key Insights
+- <protocol-specific observations from scope analysis>
+
+### Hypotheses
+- <initial vulnerability areas based on protocol type and manifest focus patterns>
+
+### Dead Ends
+- (none yet — Phase 1 only)
+
+### Open Questions
+- <ambiguities needing Phase 2 investigation>
+```
+
 ### Phase Gate
 
 Verify before proceeding:
 - [ ] `00-scope.md` exists with protocol types, manifest list, files in scope
 - [ ] `pipeline-state.md` exists with metadata
+- [ ] memory-state.md initialized with Phase 1 entry
 - [ ] At least 1 source file detected
 
 ---
@@ -423,6 +464,12 @@ Ensure audit-output/01-context.md contains these sections:
 - Function Analysis (references to per-contract files)
 - Cross-Function Flows, Trust Boundaries
 - Invariant Candidates, Assumption Register, Fragility Clusters
+
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Use Phase 1 INSIGHT entries (scope, protocol type, initial hypotheses) to
+guide your context building priorities. After completing, append a memory entry
+(MEM-2-CONTEXT-BUILDING) with: key architectural patterns, trust boundaries,
+novel code areas, and hypotheses about potential vulnerability zones.
 ```
 
 ### Verify Output & Update Pipeline State
@@ -437,6 +484,13 @@ Update `pipeline-state.md`: Phase 2 → COMPLETE.
 ### Error Recovery
 
 If sub-agent fails, retry once with reduced scope (top 5 files by apparent importance). If still fails, manually scan the top 3 entry-point files and produce minimal context.
+
+### Memory Consolidation (Post Phase 2)
+
+After `audit-context-building` returns, verify it wrote a memory entry. If not, write one on its behalf from `01-context.md`. Then consolidate:
+1. Check if Phase 2 insights CONTRADICT any Phase 1 hypotheses → mark as DEAD_END or update
+2. Promote any Phase 2 HYPOTHESIS entries that align with Phase 1 observations → boost confidence
+3. Record the consolidated state: `Last updated: Post-Phase 2 consolidation by orchestrator`
 
 ---
 
@@ -471,6 +525,11 @@ Write to audit-output/02-invariants.md with categories:
 - Cross-Contract Invariants (INV-CC-NNN)
 
 Every invariant MUST have: ID, Property (concrete expression), Scope (files), Why (impact if broken), Testable (YES/NO).
+
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Use INSIGHT entries from context building (architectural patterns, trust boundaries)
+and HYPOTHESIS entries (suspected vulnerability areas) to prioritize invariant extraction.
+After completing, append a memory entry (MEM-3A-INVARIANT-WRITER).
 ```
 
 **Error Recovery**: If fails, extract "Invariant Candidates" from `01-context.md` and format manually.
@@ -503,6 +562,10 @@ Perform your full 5-phase workflow:
 Write output to audit-output/02-invariants-reviewed.md.
 Every invariant must have a Review tag: UNCHANGED, TIGHTENED, LOOSENED, SPLIT, COMPOSED, ADDED, REMOVED, or PARAMETERIZED.
 Include: canonical coverage table, multi-step coverage table, remaining gaps.
+
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Use HYPOTHESIS entries from invariant-writer and INSIGHT entries from context building
+to focus review effort. After completing, append a memory entry (MEM-3B-INVARIANT-REVIEWER).
 ```
 
 ### Phase Gate
@@ -514,6 +577,13 @@ Verify before proceeding:
 **Error Recovery**: If reviewer fails, retry with reduced scope (solvency + access control only). If still fails, use `02-invariants.md` directly.
 
 Update `pipeline-state.md`: Phase 3 → COMPLETE.
+
+### Memory Consolidation (Post Phase 3)
+
+After invariant-reviewer returns:
+1. Detect CONTRADICTION entries: Do any invariant-reviewer findings conflict with context-building insights?
+2. Promote hypotheses: Which Phase 2 vulnerability hypotheses are supported by invariant gaps?
+3. Update memory state: `Last updated: Post-Phase 3 consolidation by orchestrator`
 
 ---
 
@@ -617,6 +687,11 @@ PIPELINE CONTEXT (read these files for shared state):
 Follow the 2-pass workflow from resources/db-hunting-workflow.md.
 Write findings to audit-output/03-findings-shard-<shard-id>-R1.md
 Use Finding Schema from resources/inter-agent-data-format.md.
+
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Use HYPOTHESIS entries as hunt priorities. Use DEAD_END entries to skip
+areas already verified safe. Use PATTERN entries for recurring code idioms.
+After completing, append a memory entry (MEM-4A-R1-INVARIANT-CATCHER-SHARD-<shard-id>).
 ```
 
 **Round 2+ prompt** — Same as Round 1 but with shared discovery state:
@@ -638,6 +713,11 @@ PIPELINE CONTEXT:
 
 ★ SHARED DISCOVERY STATE (READ FIRST):
 - audit-output/discovery-state-round-<N-1>.md
+
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Memory has been consolidated after the previous round — use updated
+HYPOTHESIS entries as hunt/reasoning priorities and DEAD_END entries to skip areas.
+After completing, append a memory entry (MEM-4A-R<N>-INVARIANT-CATCHER-SHARD-<shard-id>).
 
 CROSS-POLLINATION INSTRUCTIONS:
 1. READ the shared discovery state file carefully
@@ -679,6 +759,14 @@ of re-loading hunt cards. Only report MEDIUM+ with reachability proofs.
 
 Write to audit-output/04a-reasoning-findings-R1.md
 Use Finding Schema from resources/inter-agent-data-format.md.
+
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Use HYPOTHESIS entries as reasoning seeds alongside DB seeds.
+Use DEAD_END entries to avoid re-analyzing verified-safe paths.
+Use PATTERN entries to inform which code idioms the team uses consistently.
+After completing, append a memory entry (MEM-4B-R1-PROTOCOL-REASONING)
+with: reasoning paths explored, cross-domain interactions discovered,
+and hypotheses that need validation by other streams.
 ```
 
 **Round 2+ prompt**:
@@ -697,6 +785,11 @@ PIPELINE CONTEXT:
 
 ★ SHARED DISCOVERY STATE (READ FIRST):
 - audit-output/discovery-state-round-<N-1>.md
+
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Memory has been consolidated after the previous round — use updated
+HYPOTHESIS entries as hunt/reasoning priorities and DEAD_END entries to skip areas.
+After completing, append a memory entry (MEM-4B-R<N>-PROTOCOL-REASONING).
 
 CROSS-POLLINATION INSTRUCTIONS:
 1. READ the shared discovery state file carefully
@@ -736,6 +829,13 @@ Also write per-persona and per-round artifacts to audit-output/personas/R1/
 
 Use Finding Schema from resources/inter-agent-data-format.md.
 Every finding MUST have concrete code references and a reachability argument.
+
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Distribute relevant memory entries to each persona — e.g., DEAD_END entries
+tell personas which areas are already verified safe, HYPOTHESIS entries
+give them investigation priorities. After completing, append a memory entry
+(MEM-4C-R1-PERSONA-ORCHESTRATOR) summarizing: which personas found what,
+cross-persona agreements/disagreements, and areas that need deeper analysis.
 ```
 
 **Round 2+ prompt**:
@@ -753,6 +853,11 @@ PIPELINE CONTEXT:
 
 ★ SHARED DISCOVERY STATE (READ FIRST):
 - audit-output/discovery-state-round-<N-1>.md
+
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Memory has been consolidated after the previous round — use updated
+HYPOTHESIS entries as hunt/reasoning priorities and DEAD_END entries to skip areas.
+After completing, append a memory entry (MEM-4C-R<N>-PERSONA-ORCHESTRATOR).
 
 CROSS-POLLINATION INSTRUCTIONS:
 1. All personas MUST READ the shared discovery state before starting
@@ -787,6 +892,13 @@ PIPELINE CONTEXT (read these files for shared state):
 Perform your full 5-phase workflow.
 Write to audit-output/04d-validation-findings-R1.md
 Use Finding Schema from resources/inter-agent-data-format.md.
+
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Focus on PATTERN entries (recurring code idioms that may have validation gaps).
+Use DEAD_END entries to skip functions already verified for input validation.
+After completing, append a memory entry (MEM-4D-R1-VALIDATION-REASONING)
+with: validation patterns checked, systematic gaps discovered, and functions
+where validation was surprisingly robust (dead ends for other agents).
 ```
 
 **Round 2+ prompt**:
@@ -802,6 +914,11 @@ PIPELINE CONTEXT:
 
 ★ SHARED DISCOVERY STATE (READ FIRST):
 - audit-output/discovery-state-round-<N-1>.md
+
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Memory has been consolidated after the previous round — use updated
+HYPOTHESIS entries as hunt/reasoning priorities and DEAD_END entries to skip areas.
+After completing, append a memory entry (MEM-4D-R<N>-VALIDATION-REASONING).
 
 CROSS-POLLINATION INSTRUCTIONS:
 1. READ the shared discovery state — focus on where OTHER streams found issues
@@ -831,6 +948,15 @@ After each round completes, the orchestrator (self):
 
 This file is the **cross-pollination bus** — it's how streams communicate without direct messaging.
 
+### Memory Consolidation (Per Discovery Round)
+
+After writing the discovery state file for round N:
+1. Read ALL memory entries from round N agents
+2. Detect CONTRADICTIONS: findings that disagree across streams → mark as CONTRADICTION
+3. Promote HYPOTHESES: entries validated by multiple streams → upgrade to INSIGHT
+4. Aggregate DEAD_ENDS: areas confirmed safe by 2+ streams → consolidate into single entry
+5. Update memory state header: `Last updated: Post-Round <N> consolidation by orchestrator`
+
 ### Error Handling
 
 | Stream | Failure | Recovery |
@@ -852,6 +978,13 @@ Update `pipeline-state.md`: Phase 4-R{round} → COMPLETE (or PARTIAL with faile
 **Input**: ALL Phase 4 outputs from ALL rounds + final discovery state
 **Output**: `audit-output/05-findings-triaged.md`
 **Gate**: Phase 6 (or Phase 8 if `--static-only`) cannot start until triaged findings exist.
+
+### Step 0: Read Memory State for Triage Context
+
+Before merging findings, read `audit-output/memory-state.md` to understand:
+- Which HYPOTHESIS entries were promoted to INSIGHT (highest confidence findings)
+- Which areas are DEAD_END (reduce confidence for findings in those areas)
+- Which CONTRADICTION entries exist (flag for extra scrutiny during triage)
 
 ### Step 1: Merge All Findings
 
@@ -923,6 +1056,26 @@ Write `audit-output/05-findings-triaged.md` with:
 
 Update `pipeline-state.md`: Phase 5 → COMPLETE + Finding Tracker table.
 
+### Memory Write (Post Phase 5)
+
+Append to `memory-state.md`:
+
+```markdown
+---
+## MEM-5-ORCHESTRATOR
+**Phase**: 5 — Merge & Triage | **Agent**: audit-orchestrator | **Timestamp**: <now>
+
+### Summary
+Total findings after merge: <N>. After dedup: <N>. After falsification: <N>.
+Severity distribution: <CRITICAL: N, HIGH: N, MEDIUM: N>.
+
+### Key Insights
+- <cross-stream patterns, finding clusters, correlation analysis>
+
+### Dead Ends
+- <findings eliminated with reasons>
+```
+
 ---
 
 ## Phase 6: PoC Generation & EXECUTION
@@ -961,6 +1114,11 @@ PIPELINE CONTEXT:
 Follow your full workflow (reachability gate → understand → state setup → exploit → validate → pre-flight).
 Write the PoC to: audit-output/pocs/F-NNN-poc.<appropriate-extension>
 The PoC MUST be compilable and runnable without manual intervention.
+
+★ MEMORY STATE: Read audit-output/memory-state.md for accumulated pipeline knowledge.
+Use DEAD_END entries to understand which code areas are confirmed safe.
+Use INSIGHT entries about code patterns to set up realistic exploit conditions.
+After completing, append a memory entry (MEM-6-POC-WRITING-F-<NNN>).
 ```
 
 For MEDIUM findings, generate PoCs only if confidence is HIGH and the finding has cross-source validation.
@@ -1082,9 +1240,12 @@ PIPELINE CONTEXT:
 Generate harnesses and medusa.json configuration.
 Write all output to audit-output/fuzzing/
 Every harness MUST compile with forge build.
-```
 
-**Certora Verification** (Solidity only):
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Use INSIGHT entries about code patterns and HYPOTHESIS entries about
+suspected invariant violations to prioritize which harnesses to generate.
+After completing, append a memory entry (MEM-7-MEDUSA-FUZZING).
+``` (Solidity only):
 ```
 Generate Certora CVL specs for the target codebase.
 
@@ -1096,9 +1257,11 @@ PIPELINE CONTEXT:
 
 Generate .spec and .conf files.
 Write all output to audit-output/certora/
-```
 
-**Halmos Verification** (Solidity only):
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Use HYPOTHESIS entries about invariant violations and PATTERN entries
+about code idioms. After completing, append a memory entry (MEM-7-CERTORA).
+``` (Solidity only):
 ```
 Generate Halmos symbolic test suites for the target codebase.
 
@@ -1111,6 +1274,10 @@ PIPELINE CONTEXT:
 Generate .t.sol test files with check_ prefix functions.
 Write all output to audit-output/halmos/
 Every test MUST compile with forge build.
+
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Use HYPOTHESIS entries about invariant violations and PATTERN entries
+about code idioms. After completing, append a memory entry (MEM-7-HALMOS).
 ```
 
 ### Step 2: EXECUTE What Compiles
@@ -1219,6 +1386,11 @@ This is a SCREENING pass — focus on filtering out:
 - Duplicate root causes that have already been counted
 
 Write output to audit-output/08-pre-judge-<judge-name>.md
+
+★ MEMORY STATE: Read audit-output/memory-state.md for accumulated pipeline knowledge.
+Pay attention to CONTRADICTION entries — these highlight findings where agents
+disagreed, warranting extra scrutiny. DEAD_END entries identify code areas
+independently verified as safe by multiple agents — weigh against findings in those areas.
 ```
 
 ### Step 2: Merge Pre-Judge Results
@@ -1296,6 +1468,13 @@ PIPELINE CONTEXT:
 Write the polished issue to: audit-output/issues/F-NNN-issue.md
 Include PoC code inline if available.
 Include FV results as supplementary evidence if available.
+
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Use INSIGHT and PATTERN entries to enrich the write-up with broader context
+(e.g., "this vulnerability is part of a systemic pattern across N functions").
+Use DEAD_END entries to strengthen the argument by noting what mitigations
+were checked and found absent. After completing, append a memory entry
+(MEM-9-ISSUE-WRITER-F-NNN).
 ```
 
 ### Step 2: Concatenate Polished Issues
@@ -1381,6 +1560,12 @@ VERDICT per finding:
 - NEEDS-REVISION (issues) — Mostly valid but specific claims need correction
 
 Write output to audit-output/10-deep-review-<judge-name>.md
+
+★ MEMORY STATE: Read audit-output/memory-state.md for full pipeline knowledge.
+Cross-reference CONTRADICTION entries against findings — these highlight areas
+where agents disagreed and may indicate weak findings or severity disagreements.
+DEAD_END entries confirm which areas multiple agents independently verified as safe.
+After completing, append a memory entry (MEM-10-<JUDGE-NAME>-DEEP-REVIEW).
 ```
 
 ### Step 2: Merge Deep Review Results
@@ -1558,11 +1743,12 @@ Present `CONFIRMED-REPORT.md` to the user with a summary:
 6. **Configurable modes**: Respect `--static-only`, `--judge`, and `--discovery-rounds` flags
 7. **Iterative discovery**: Phase 4 runs in rounds with cross-pollination — streams help each other
 8. **Cross-pollination bus**: `discovery-state-round-N.md` files enable inter-stream communication
-9. **Complete pipeline**: Run all 11 phases even if early phases find nothing — later phases discover novel bugs
-10. **Graceful degradation**: Sub-agent failures don't stop the pipeline — recover and continue
-11. **Pipeline bus**: All agents communicate through `audit-output/` files — no side channels
-12. **Honest PoCs**: Never weaken assertions to make a PoC pass — an honest failure is valuable
-13. **Consensus-gated**: Severity = minimum of agreeing judges' ratings; tie-break with LOWER severity
+9. **Memory state**: Every agent reads `memory-state.md` before starting and writes a memory entry after completing — accumulated knowledge flows forward through the pipeline (see [memory-state.md](.claude/resources/memory-state.md))
+10. **Complete pipeline**: Run all 11 phases even if early phases find nothing — later phases discover novel bugs
+11. **Graceful degradation**: Sub-agent failures don't stop the pipeline — recover and continue
+12. **Pipeline bus**: All agents communicate through `audit-output/` files — no side channels
+13. **Honest PoCs**: Never weaken assertions to make a PoC pass — an honest failure is valuable
+14. **Consensus-gated**: Severity = minimum of agreeing judges' ratings; tie-break with LOWER severity
 
 ---
 
@@ -1573,6 +1759,11 @@ Present `CONFIRMED-REPORT.md` to the user with a summary:
     ┌────────────────────────────────────────────────────────────┐
     │                                                            │
     │  WRITES TO →                    ← READS FROM               │
+    │                                                            │
+    │  ★ MEMORY STATE (cross-cutting — all phases)               │
+    │    → memory-state.md ──────────→ ALL agents READ before    │
+    │    ← ALL agents WRITE after ───← starting their work       │
+    │    Orchestrator consolidates between phases                 │
     │                                                            │
     │  Phase 1 (self)                                            │
     │    → 00-scope.md ──────────────→ Phase 2, 4, 6, 11        │
@@ -1592,6 +1783,8 @@ Present `CONFIRMED-REPORT.md` to the user with a summary:
     │    → 04d-validation-findings-RN.md                         │
     │    → discovery-state-round-N.md → Phase 4 Round N+1       │
     │    ★ CROSS-POLLINATION: each round reads previous state    │
+    │    ★ MEMORY CONSOLIDATION: orchestrator synthesizes after   │
+    │      each round → feeds into next round's memory context   │
     │                                                            │
     │  Phase 5 (self — merge & triage)                           │
     │    → 05-findings-triaged.md ───→ Phase 6, 8               │
@@ -1664,6 +1857,13 @@ Anti-Hallucination:
 - [ ] DB pattern references are valid manifest IDs with correct line ranges
 - [ ] Executive summary statistics match actual confirmed finding count
 
+Memory State:
+- [ ] memory-state.md initialized in Phase 1 and populated across all phases
+- [ ] Every sub-agent spawn includes ★ MEMORY STATE read/write instructions
+- [ ] Orchestrator performed memory consolidation between each phase
+- [ ] No stale HYPOTHESIS entries remain — all promoted or marked DEAD_END
+- [ ] Memory entries are append-only within phases (no deletions by sub-agents)
+
 Report Structure:
 - [ ] Rejected/downgraded findings clearly separated from confirmed
 - [ ] Report follows the template from audit-report-template.md
@@ -1675,6 +1875,7 @@ Report Structure:
 
 ## Resources
 
+- **Memory state architecture**: [memory-state.md](.claude/resources/memory-state.md)
 - **Pipeline reference**: [orchestration-pipeline.md](resources/orchestration-pipeline.md)
 - **Inter-agent data format**: [inter-agent-data-format.md](resources/inter-agent-data-format.md)
 - **Protocol detection**: [protocol-detection.md](resources/protocol-detection.md)

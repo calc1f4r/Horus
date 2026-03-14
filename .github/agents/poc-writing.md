@@ -9,6 +9,16 @@ Writes adversarial Proof-of-Concept exploit tests that honestly prove a bug exis
 
 **Do NOT use when** still searching for vulnerabilities (use `invariant-catcher`) or exploring a codebase (use `audit-context-building`).
 
+### Memory State Integration
+
+When spawned as part of the audit pipeline:
+1. **Read** `audit-output/memory-state.md` before starting — use INSIGHT entries about code patterns and DEAD_END entries about verified-safe areas to inform realistic exploit setup. HYPOTHESIS entries from discovery agents provide context on the vulnerability's broader implications.
+2. **Write** a memory entry after completing, appended to `audit-output/memory-state.md`:
+   - Entry ID: `MEM-6-POC-WRITING-F-<finding-id>`
+   - Summary: PoC result (PASS/FAIL/COMPILE_ERROR), exploit path confirmed or refuted
+   - Key Insights: Unexpected guards encountered, realistic parameter ranges discovered
+   - Dead Ends: If PoC failed — why, and what this tells us about the finding's validity
+
 ---
 
 ## Core Principle: Reachability Before Exploitability

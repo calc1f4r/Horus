@@ -275,9 +275,11 @@ Post-triage:
 
 ### Data Pipeline Producers & Consumers
 
+> **Cross-cutting**: `memory-state.md` is read and written by ALL agents. Every agent reads it before starting and appends a memory entry after completing. The orchestrator consolidates between phases. See [memory-state.md](.github/agents/resources/memory-state.md).
+
 | Agent | Produces | Consumes |
 |-------|----------|----------|
-| `audit-orchestrator` | `00-scope.md`, `pipeline-state.md`, `hunt-card-shards.json`, `reasoning-seeds.md`, `discovery-state-round-*.md`, `03-findings-raw.md` (merged), `05-findings-triaged.md`, `08-pre-judge-results.md`, `10-deep-review.md`, `CONFIRMED-REPORT.md` | All outputs |
+| `audit-orchestrator` | `00-scope.md`, `pipeline-state.md`, `memory-state.md` (init + consolidation), `hunt-card-shards.json`, `reasoning-seeds.md`, `discovery-state-round-*.md`, `03-findings-raw.md` (merged), `05-findings-triaged.md`, `08-pre-judge-results.md`, `10-deep-review.md`, `CONFIRMED-REPORT.md` | All outputs |
 | `audit-context-building` | `01-context.md`, `context/*.md` | Scope |
 | `invariant-writer` | `02-invariants.md` | Context |
 | `invariant-reviewer` | `02-invariants-reviewed.md` | Invariants, context, DB manifests |
@@ -313,6 +315,7 @@ Post-triage:
 | `.github/agents/resources/certora-sui-move-reference.md` | CVLM type system, manifest functions, ghosts, shadows, CLI reference for Sui Move |
 | `.github/agents/resources/certora-sui-move-templates.md` | Copy-paste CVLM spec patterns for Sui Move verification |
 | `.github/agents/resources/sui-prover-reference.md` | Sui Prover spec API, math types, ghost variables, quantifiers, CLI, debugging |
+| `.github/agents/resources/memory-state.md` | Mem0-inspired cross-cutting memory bus architecture for inter-agent knowledge sharing |
 
 ### All Agents
 

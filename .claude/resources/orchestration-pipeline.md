@@ -146,21 +146,22 @@ All agents communicate through the **pipeline bus** — a shared file system und
 3. **Parallel phases write to SEPARATE files** — orchestrator merges
 4. **`pipeline-state.md` is the canonical record** — update after every phase
 5. **Every finding gets a unique stable ID at birth** that persists through all phases
+6. **`memory-state.md` is the cross-cutting knowledge bus** — every agent reads before starting and writes a memory entry after completing (see [memory-state.md](memory-state.md)). The orchestrator consolidates memory between phases.
 
 ### Data Contract: What Each Phase Produces and Consumes
 
 | Phase | Produces | Consumes |
 |-------|----------|----------|
-| 1 | `00-scope.md`, `pipeline-state.md` | Codebase path, DB/index.json |
-| 2 | `01-context.md`, `context/*.md` | `00-scope.md` |
-| 3 | `02-invariants-reviewed.md` | `01-context.md`, DB manifests |
-| 4 (per round) | `*-RN.md` outputs per stream, `discovery-state-round-N.md` | Hunt cards, invariants, context, previous round state |
-| 5 | `05-findings-triaged.md` | All Phase 4 outputs from all rounds |
-| 6 [CONDITIONAL] | `pocs/F-NNN-poc.*`, `06-poc-results.md` | `05-findings-triaged.md`, codebase |
-| 7 [CONDITIONAL] | `fuzzing/`, `certora/`, `halmos/`, `07-fv-results.md` | `02-invariants-reviewed.md`, codebase |
-| 8 | `08-pre-judge-results.md` | `05-findings-triaged.md`, execution evidence (if available) |
-| 9 | `issues/F-NNN-issue.md`, `09-polished-findings.md` | `08-pre-judge-results.md`, triaged findings, execution evidence |
-| 10 | `10-deep-review.md` | `09-polished-findings.md`, `issues/F-NNN-issue.md` |
+| 1 | `00-scope.md`, `pipeline-state.md`, `memory-state.md` (init) | Codebase path, DB/index.json |
+| 2 | `01-context.md`, `context/*.md` | `00-scope.md`, `memory-state.md` |
+| 3 | `02-invariants-reviewed.md` | `01-context.md`, DB manifests, `memory-state.md` |
+| 4 (per round) | `*-RN.md` outputs per stream, `discovery-state-round-N.md` | Hunt cards, invariants, context, previous round state, `memory-state.md` |
+| 5 | `05-findings-triaged.md` | All Phase 4 outputs from all rounds, `memory-state.md` |
+| 6 [CONDITIONAL] | `pocs/F-NNN-poc.*`, `06-poc-results.md` | `05-findings-triaged.md`, codebase, `memory-state.md` |
+| 7 [CONDITIONAL] | `fuzzing/`, `certora/`, `halmos/`, `07-fv-results.md` | `02-invariants-reviewed.md`, codebase, `memory-state.md` |
+| 8 | `08-pre-judge-results.md` | `05-findings-triaged.md`, execution evidence (if available), `memory-state.md` |
+| 9 | `issues/F-NNN-issue.md`, `09-polished-findings.md` | `08-pre-judge-results.md`, triaged findings, execution evidence, `memory-state.md` |
+| 10 | `10-deep-review.md` | `09-polished-findings.md`, `issues/F-NNN-issue.md`, `memory-state.md` |
 | 11 | `CONFIRMED-REPORT.md` | ALL outputs |
 
 ---

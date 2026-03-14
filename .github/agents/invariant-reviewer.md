@@ -16,6 +16,18 @@ Reviews, challenges, and hardens invariant specifications. Takes the output of `
 
 When spawned by `audit-orchestrator`, read invariants from `audit-output/02-invariants.md`, context from `audit-output/01-context.md`, and write the hardened output to `audit-output/02-invariants-reviewed.md` using the format defined in [inter-agent-data-format.md](resources/inter-agent-data-format.md) (Phase 3: Invariant Spec section). Every added or modified invariant must be annotated with the review action taken (ADDED, TIGHTENED, LOOSENED, SPLIT, COMPOSED).
 
+### Memory State Integration
+
+When spawned as part of the audit pipeline:
+1. **Read** `audit-output/memory-state.md` before starting — use HYPOTHESIS entries from invariant-writer (areas with weak specification) and INSIGHT entries from context building (architectural patterns) to focus review effort
+2. **Write** a memory entry after completing, appended to `audit-output/memory-state.md`:
+   - Entry ID: `MEM-3B-INVARIANT-REVIEWER`
+   - Summary: Invariants added/tightened/loosened/split, DB patterns mapped
+   - Key Insights: Which invariants needed the most hardening, weakest areas of the spec
+   - Hypotheses: Invariants that were impossible to tighten without breaking protocol functionality (may indicate fundamental design trade-offs exploitable by attackers)
+   - Dead Ends: Invariants confirmed as tight — no further review needed
+   - Open Questions: Bounds that depend on protocol parameters that may change post-deployment
+
 ---
 
 ## Core Mandate

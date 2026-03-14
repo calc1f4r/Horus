@@ -12,6 +12,8 @@ All pipeline artifacts go into `audit-output/` at the project root:
 ```
 audit-output/
 ├── pipeline-state.md                  ← Pipeline tracker (updated after every phase)
+├── memory-state.md                    ← Cross-cutting: Accumulated agent knowledge (Mem0-inspired)
+├── memory-state.json                  ← Cross-cutting: Structured memory entries (machine-readable)
 ├── 00-scope.md                        ← Phase 1: Reconnaissance
 ├── context/                           ← Phase 2: Per-contract context (sharded)
 │   ├── 00-orientation.md              ←   System map & contract inventory

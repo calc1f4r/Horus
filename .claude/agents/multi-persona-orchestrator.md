@@ -52,6 +52,87 @@ Can run standalone or as a phase within `audit-orchestrator`. When integrated:
 - **Consumes**: `audit-output/01-context.md`, `audit-output/02-invariants.md`
 - **Produces**: `audit-output/persona-findings.md`
 
+### Memory State Integration
+
+This agent manages memory context in both standalone and pipeline modes. Read the full memory architecture in [memory-state.md](.claude/resources/memory-state.md).
+
+#### Standalone Mode (invoked directly, no orchestrator)
+
+When invoked as a standalone agent (not spawned by `audit-orchestrator`), this agent **owns the memory lifecycle**:
+
+1. **Initialize** `audit-output/memory-state.md` at the start of Phase 0:
+   ```markdown
+   # Audit Memory State
+   > Cumulative knowledge from all agents across all phases. Read this BEFORE starting your work.
+   > Last updated: <timestamp> by multi-persona-orchestrator (standalone)
+
+   ## Phase 0: Standalone Initialization
+   ### MEM-0-STANDALONE-INIT: Multi-persona audit standalone run
+   - **Agent**: multi-persona-orchestrator
+   - **Phase**: 0 — Initialization
+   - **Type**: INSIGHT
+
+   #### Summary
+   Standalone multi-persona audit run. Target: <path>. Protocol: <hint or "auto-detect">.
+   Context source: <01-context.md if exists, otherwise self-built scope doc>.
+   ```
+
+2. **Propagate memory between rounds** — each round reads the accumulated memory and writes new entries:
+   - Phase 0 (self) → writes `MEM-0-SCOPE` with detected protocol type, files in scope, initial complexity assessment
+   - Phase 1 Round 1 (fan-out) → each persona reads memory, writes per-persona memory entry
+   - Phase 2 (self) → consolidates round 1 persona memory entries into cross-pollination seeds
+   - Phase 3 Round N (fan-out) → personas read consolidated memory + prior round entries
+   - Phase 4 (self) → writes cross-verification memory entry
+   - Phase 5 (self) → writes final synthesis memory entry
+
+3. **Per-round consolidation** — after each round completes:
+   - Read all 6 `MEM-4C-R<N>-PERSONA-<name>` entries
+   - Identify convergence signals: which areas do multiple personas agree are safe (DEAD_END)?
+   - Surface CONTRADICTIONS: two personas disagree → write CONTRADICTION entry → direct both to investigate in next round
+   - Promote multi-persona HYPOTHESES: same suspected issue from 2+ personas → HIGH PRIORITY
+   - Write `MEM-4C-R<N>-CONSOLIDATION` entry
+
+4. **Feed memory into cross-pollination** — the shared knowledge document (Phase 2/3) is ENRICHED by memory entries:
+   - Dead ends from memory → "Skip" directives for next round
+   - Hypotheses from memory → "Investigate" directives for specific personas
+   - Contradictions from memory → "Resolve" directives with both sides
+
+#### Pipeline Mode (spawned by audit-orchestrator)
+
+When spawned as part of the audit pipeline:
+1. **Read** `audit-output/memory-state.md` before starting — distribute relevant entries to each persona:
+   - DEAD_END entries → tell personas which areas are verified safe (skip or deprioritize)
+   - HYPOTHESIS entries → give personas investigation priorities
+   - PATTERN entries → inform personas about recurring code idioms
+   - CONTRADICTION entries → direct personas to investigate disagreements between prior agents
+2. **Propagate** pipeline memory entries into every persona spawn prompt (Round 1 AND Round N)
+3. **Write per-round memory entries** throughout execution (not just one final entry)
+4. **Write** a final memory entry after completing, appended to `audit-output/memory-state.md`:
+   - Entry ID: `MEM-4C-R<round>-PERSONA-ORCHESTRATOR`
+   - Summary: Which personas found what, total findings, cross-verification results
+   - Key Insights: Cross-persona agreements (high confidence), novel angles that only one persona found
+   - Hypotheses: Areas where personas disagreed — need external validation
+   - Dead Ends: Areas where all 6 personas independently found no issues
+   - Open Questions: Patterns one persona flagged that others couldn't verify
+
+#### Internal Memory Flow Diagram
+
+```
+Round 1                         Consolidation            Round 2                       Final
+┌──────────────┐               ┌──────────────┐         ┌──────────────┐           ┌──────────────┐
+│ 6× Persona   │               │ MEM-4C-R1-   │         │ 6× Persona   │           │ MEM-4C-FINAL │
+│ spawn        │──────────────▶│ CONSOLIDATION│────────▶│ spawn        │───...─────▶│ -ORCHESTRATOR│
+│              │               │              │         │              │           │              │
+│ Each writes: │               │ Contradicts? │         │ Each reads:  │           │ All findings │
+│ MEM-4C-R1-   │               │ Promotes?    │         │ - Consol.    │           │ Memory trail │
+│ PERSONA-BFS  │               │ Dead ends?   │         │ - Prior round│           │ Coverage map │
+│ PERSONA-DFS  │               │              │         │ - Pipeline   │           │              │
+│ ...          │               │ Feeds into:  │         │              │           │              │
+│              │               │ shared-know  │         │ Each writes: │           │              │
+│              │               │ -ledge doc   │         │ MEM-4C-R2-*  │           │              │
+└──────────────┘               └──────────────┘         └──────────────┘           └──────────────┘
+```
+
 ---
 
 ## Architecture
@@ -225,6 +306,23 @@ CRITICAL DIRECTIVES:
 - Include an "Open Questions for Other Personas" section with specific, answerable questions.
 - Track what percentage of in-scope code you examined. Report it in your output.
 
+★ MEMORY STATE:
+Read audit-output/memory-state.md before starting your analysis. Use accumulated
+knowledge to guide your work:
+- DEAD_END entries → skip these areas (already verified safe by prior agents/phases)
+- HYPOTHESIS entries → prioritize investigating these suspected issues
+- PATTERN entries → understand recurring code idioms before analyzing
+- INSIGHT entries → absorb architectural knowledge from context building phase
+After completing your analysis, append a memory entry to audit-output/memory-state.md:
+  Entry ID: MEM-4C-R1-PERSONA-<YOUR_PERSONA_NAME>
+  Type: INSIGHT
+  Summary: What your persona methodology uniquely revealed about this codebase
+  Key Insights: Patterns and behaviors only visible from your analytical angle
+  Hypotheses: Suspected issues for other personas to cross-verify
+  Dead Ends: Areas your methodology thoroughly covered and found safe
+  Open Questions: Specific questions directed at other personas by name
+  Affected Code: Files and line ranges you analyzed in depth
+
 OUTPUT: Write your complete analysis to:
   audit-output/personas/round-1/[persona-name].md
 
@@ -250,6 +348,40 @@ After all 6 complete:
 1. Read all 6 output documents
 2. Count findings per persona
 3. Collect all "Open Questions for Other Personas" into a single list
+4. **Read all `MEM-4C-R1-PERSONA-*` memory entries** and synthesize into consolidation entry
+
+#### Memory Consolidation: Post-Round 1
+
+After collecting Round 1 results, write a consolidation entry to `audit-output/memory-state.md`:
+
+```markdown
+### MEM-4C-R1-CONSOLIDATION: Round 1 cross-persona synthesis
+- **Agent**: multi-persona-orchestrator (self)
+- **Phase**: 4C — Round 1 consolidation
+- **Type**: INSIGHT
+
+#### Summary
+<6 personas completed. N total findings. M unique code locations. Key agreements and disagreements.>
+
+#### Cross-Persona Agreements (high confidence)
+- <Finding/observation confirmed by 2+ personas — elevated confidence>
+
+#### Contradictions
+- <Persona A says X; Persona B says Y about the same code — needs Round 2 resolution>
+
+#### Promoted Hypotheses
+- <Hypothesis raised by 2+ personas independently → HIGH PRIORITY for Round 2>
+
+#### Coverage Map
+- Code with deep coverage (3+ personas): <files>
+- Code with shallow coverage (1 persona): <files>
+- Code with ZERO coverage: <files> → priority targets for Round 2
+
+#### Accumulated Dead Ends
+- <Areas where multiple personas found nothing — safe to deprioritize>
+```
+
+Feed this consolidation into the shared knowledge document (Phase 2) and into Round 2 spawn prompts.
 
 ### Quality Gate 1: Round 1 Validation
 
@@ -314,6 +446,17 @@ Create `audit-output/personas/shared-knowledge-round-1.md`:
 - State Machine found illegal path through function W → Re-Implementation should diff W
 - Mirror found asymmetry in pair P → State Machine should check if asymmetric transition leads to bad state
 - Re-Implementation found missing guard G → DFS should check if G exists at leaf level
+
+## Memory State Enrichment
+(Extracted from MEM-4C-R1-CONSOLIDATION and per-persona memory entries)
+### Dead Ends (do NOT re-investigate in Round 2):
+- <aggregated from all persona memory entries — code areas verified safe by multiple personas>
+### High Priority Hypotheses (investigate in Round 2):
+- <hypotheses raised by 2+ personas independently>
+### Contradictions to Resolve:
+- <persona A and persona B disagree on X — both should investigate in Round 2>
+### Coverage Gaps to Fill:
+- <code areas with zero or single-persona coverage — distribute to appropriate personas>
 ```
 
 ---
@@ -357,6 +500,21 @@ INSTRUCTIONS FOR THIS ROUND:
 8. SELF-VALIDATE: Before writing output, re-check every finding's code reference
    and root cause. Remove or downgrade findings you can no longer support.
 
+★ MEMORY STATE:
+Read audit-output/memory-state.md — it now contains accumulated knowledge from ALL
+prior rounds plus consolidation entries. Pay special attention to:
+- MEM-4C-R[N-1]-CONSOLIDATION → contradictions you should resolve, coverage gaps to fill
+- MEM-4C-R[N-1]-PERSONA-<others> → other personas' insights that change your understanding
+- Promoted hypotheses → investigate these with HIGH PRIORITY
+After completing, append your memory entry:
+  Entry ID: MEM-4C-R[N]-PERSONA-<YOUR_PERSONA_NAME>
+  Type: INSIGHT
+  Summary: What changed from your previous round, new discoveries, resolved questions
+  Key Insights: Round-over-round delta (what you learned that you didn't know before)
+  Hypotheses: Refined or new suspected issues
+  Dead Ends: Additional safe areas verified (incremental to prior round)
+  Open Questions: Remaining unanswered questions for other personas
+
 OUTPUT: Write to audit-output/personas/round-[N]/[persona-name].md
 Include a "Code Coverage" line: X of Y in-scope files examined.
 ```
@@ -388,6 +546,39 @@ Decision:
 ```
 
 Log the convergence score in `audit-output/personas/shared-knowledge-round-[N].md`.
+
+#### Memory Consolidation: Post-Round N
+
+After computing convergence, write a round consolidation entry to `audit-output/memory-state.md`:
+
+```markdown
+### MEM-4C-R<N>-CONSOLIDATION: Round <N> cross-persona synthesis
+- **Agent**: multi-persona-orchestrator (self)
+- **Phase**: 4C — Round <N> consolidation
+- **Type**: INSIGHT
+
+#### Summary
+Round <N>: <new_findings> new, <carried_refined> refined. Convergence: <score>.
+<Key delta from previous round.>
+
+#### New Cross-Persona Agreements
+- <Finding/observation newly confirmed by 2+ personas this round>
+
+#### Resolved Contradictions
+- <Contradiction from prior round — now resolved: <resolution>>
+
+#### New Contradictions
+- <New disagreements surfaced this round>
+
+#### Coverage Delta
+- New code areas analyzed: <files>
+- Remaining gaps: <files>
+
+#### Accumulated Dead Ends (cumulative)
+- <All safe areas from all rounds — prevents future re-investigation>
+```
+
+Feed this into the next round's shared knowledge document or into Phase 4 cross-verification.
 
 ### Quality Gate 2: Pre-Verification Validation
 
