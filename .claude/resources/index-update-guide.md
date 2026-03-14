@@ -18,7 +18,7 @@ Manifests are **auto-generated** from the MD files. You do NOT manually edit `DB
 
 ## How to Update After Creating/Modifying an Entry
 
-### Step 1: Create or Edit the Vulnerability MD File
+### Step 1: Create, Edit, Or Migrate the Vulnerability MD File
 
 Place the file in the correct category folder:
 
@@ -33,7 +33,7 @@ Place the file in the correct category folder:
 | General | `DB/general/{vulnerability-class}/` |
 | Unique | `DB/unique/{category}/` |
 
-Follow [TEMPLATE.md](../../../TEMPLATE.md) for structure and [Example.md](../../../Example.md) for a complete reference.
+Follow [TEMPLATE.md](../../../TEMPLATE.md) for structure. When touching a legacy entry, migrate it using [entry-migration-guide.md](entry-migration-guide.md) instead of preserving the older layout. Treat `TEMPLATE.md` as authoritative if it conflicts with `Example.md`.
 
 ### Step 2: Regenerate Manifests
 
@@ -109,6 +109,8 @@ Each H2 section in your MD file becomes a searchable pattern with:
 3. **Use code blocks** with function/variable names — they become `codeKeywords`
 4. **Write root cause statements** near the top of each section — they become `rootCause`
 5. **Use H3 subheadings** for variants — they become searchable `subsections`
+6. **Populate `code_keywords` frontmatter** with grep-able identifiers — this improves manifest keywords and hunt cards
+7. **Front-load low-context triage sections** (`Agent Quick View`, `Valid Bug Signals`, `False Positive Guards`) so downstream agents do not need the full file
 
 ## Update Checklist
 
@@ -116,6 +118,9 @@ Each H2 section in your MD file becomes a searchable pattern with:
 Manifest Update:
 - [ ] MD file created/modified in correct DB/{category}/ folder
 - [ ] File follows TEMPLATE.md structure
+- [ ] Legacy entries touched during this change were migrated using entry-migration-guide.md
+- [ ] `root_cause_family`, `pattern_key`, and `code_keywords` are present
+- [ ] `Agent Quick View`, `Valid Bug Signals`, and `False Positive Guards` are present near the top of the file
 - [ ] H2 headings are descriptive vulnerability titles
 - [ ] Severity tags included in pattern sections
 - [ ] Code examples in fenced blocks with real function names

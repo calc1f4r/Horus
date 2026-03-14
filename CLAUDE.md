@@ -5,9 +5,9 @@ This repository is a **curated vulnerability database** for smart contract secur
 ## Quick Reference
 
 - **DB Router**: `DB/index.json` — START HERE for any vulnerability lookup
-- **Hunt Cards**: `DB/manifests/huntcards/all-huntcards.json` — all 451 detection patterns (~55K tokens)
+- **Hunt Cards**: `DB/manifests/huntcards/all-huntcards.json` — combined enriched hunt-card corpus; prefer per-manifest cards when context is tight
 - **Manifests**: `DB/manifests/*.json` — full pattern-level indexes with line ranges
-- **Template**: `TEMPLATE.md` — structure for new vulnerability entries
+- **Template**: `TEMPLATE.md` — structure for new and migrated vulnerability entries
 - **Example**: `Example.md` — reference implementation of an entry
 
 ## Architecture: 4-Tier Search
@@ -33,6 +33,7 @@ All agents live in `.claude/agents/`. The entry point for a full audit is `audit
 | `audit-context-building` | Deep line-by-line codebase analysis coordinator |
 | `multi-persona-orchestrator` | 6 parallel auditing personas with cross-verification |
 | `protocol-reasoning` | Deep reasoning-based vulnerability discovery |
+| `defihacklabs-indexer` | Attack-graph-aware indexing of DeFiHackLabs PoCs into DB entries and invariants |
 | `invariant-writer` / `invariant-reviewer` | Invariant extraction and hardening |
 | `invariant-catcher` | DB-powered vulnerability pattern hunting |
 | `poc-writing` | Exploit test generation |
@@ -94,7 +95,7 @@ python3 scripts/generate_entries.py
 
 ## Conventions
 
-- Vulnerability entries follow `TEMPLATE.md` structure
+- Vulnerability entries follow `TEMPLATE.md` structure, and touched legacy entries should be migrated to the current layout
 - Severity uses Impact × Likelihood matrix: CRITICAL, HIGH, MEDIUM, LOW
 - Every finding must have: concrete code references, root cause, attack scenario
 - DB patterns use unique IDs: `<manifest>-<category>-NNN` (e.g., `oracle-staleness-001`)

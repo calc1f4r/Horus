@@ -4,7 +4,7 @@
     "description": "Compressed hunt cards for amm — one-line detection rules for bulk scanning",
     "totalCards": 38,
     "skipped": 29,
-    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
     "enriched": 38
   },
   "cards": [
@@ -26,11 +26,14 @@
         436
       ],
       "check": [
-        "VERIFY: Migrating Uniswap V3's FullMath from pre-0.8 Solidity to 0.8+ without `unchecked` blocks breaks intentional overflow...",
-        "ANTIPATTERN: Wrong rounding direction enables invariant manipulation"
+        "VERIFY: Migrating Uniswap V3's FullMath from pre-0.8 Solidity to 0.8+ without unchecked blocks breaks intentional overflow...",
+        "PROVE: Wrong rounding direction enables invariant manipulation",
+        "FALSIFY: Validate counter addresses, or use per-position counters"
       ],
       "antipattern": "Wrong rounding direction enables invariant manipulation",
-      "securePattern": "Validate counter addresses, or use per-position counters"
+      "securePattern": "Validate counter addresses, or use per-position counters",
+      "validWhen": "Migrating Uniswap V3's FullMath from pre-0.8 Solidity to 0.8+ without unchecked blocks breaks intentional overflow...",
+      "invalidWhen": "Validate counter addresses, or use per-position counters"
     },
     {
       "id": "amm-fee-collection-distribution-vulnerable-pattern-examples-001",
@@ -50,10 +53,12 @@
         358
       ],
       "check": [
-        "VERIFY: Severity:** HIGH | **Sources:** Ammplify (Sherlock)",
-        "ANTIPATTERN: if (wrappedNativeBalance > 0) WRAPPED_NATIVE.safeTransfer(owner, wrappedNativeBalance);"
+        "VERIFY: if (wrappedNativeBalance > 0) WRAPPED_NATIVE.safeTransfer(owner, wrappedNativeBalance);",
+        "IMPACT: Complete failure of protocol fee collection, funds locked permanently."
       ],
-      "antipattern": "if (wrappedNativeBalance > 0) WRAPPED_NATIVE.safeTransfer(owner, wrappedNativeBalance);"
+      "antipattern": "if (wrappedNativeBalance > 0) WRAPPED_NATIVE.safeTransfer(owner, wrappedNativeBalance);",
+      "validWhen": "if (wrappedNativeBalance > 0) WRAPPED_NATIVE.safeTransfer(owner, wrappedNativeBalance);",
+      "impact": "Complete failure of protocol fee collection, funds locked permanently."
     },
     {
       "id": "amm-liquidity-management-vulnerabilities-vulnerable-pattern-examples-001",
@@ -74,10 +79,13 @@
       ],
       "check": [
         "VERIFY: Calculating theoretical liquidity amounts that exceed actual available liquidity causes transaction reverts and DoS.",
-        "ANTIPATTERN: Overestimating liquidity from multiple ranges"
+        "PROVE: Overestimating liquidity from multiple ranges",
+        "FALSIFY: Perform net liquidity decrement before iteration"
       ],
       "antipattern": "Overestimating liquidity from multiple ranges",
-      "securePattern": "Perform net liquidity decrement before iteration"
+      "securePattern": "Perform net liquidity decrement before iteration",
+      "validWhen": "Calculating theoretical liquidity amounts that exceed actual available liquidity causes transaction reverts and DoS.",
+      "invalidWhen": "Perform net liquidity decrement before iteration"
     },
     {
       "id": "amm-price-oracle-manipulation-vulnerable-pattern-examples-001",
@@ -97,11 +105,14 @@
         335
       ],
       "check": [
-        "VERIFY: Using `slot0.sqrtPriceX96` directly for swap calculations, liquidity allocations, or collateral valuations exposes...",
-        "ANTIPATTERN: Hardcoded 1e9 divisor ignores decimal differences"
+        "VERIFY: Using slot0.sqrtPriceX96 directly for swap calculations, liquidity allocations, or collateral valuations exposes...",
+        "PROVE: Hardcoded 1e9 divisor ignores decimal differences",
+        "FALSIFY: Round down for negative deltas (Uniswap OracleLibrary pattern)"
       ],
       "antipattern": "Hardcoded 1e9 divisor ignores decimal differences",
-      "securePattern": "Round down for negative deltas (Uniswap OracleLibrary pattern)"
+      "securePattern": "Round down for negative deltas (Uniswap OracleLibrary pattern)",
+      "validWhen": "Using slot0.sqrtPriceX96 directly for swap calculations, liquidity allocations, or collateral valuations exposes...",
+      "invalidWhen": "Round down for negative deltas (Uniswap OracleLibrary pattern)"
     },
     {
       "id": "amm-slippage-sandwich-frontrun-vulnerability-description-000",
@@ -121,10 +132,12 @@
         190
       ],
       "check": [
-        "VERIFY: **swap operations set amountOutMinimum to 0 or use ineffective slippage...",
+        "VERIFY: swap operations set amountOutMinimum to 0 or use ineffective slippage calculations when calling Uniswap V3/V4 functions, allowing 100%...",
+        "PROVE: *Scenario 1: Classic Sandwich Attack (Most Common - 43/43 reports); Alice submits a swap transaction with inadequate slippage protection (amountOutMinimum: 0)",
         "ANTIPATTERN: deadline set to max uint256 effectively disables protection"
       ],
-      "antipattern": "deadline set to max uint256 effectively disables protection"
+      "antipattern": "deadline set to max uint256 effectively disables protection",
+      "validWhen": "This vulnerability exists because swap operations set amountOutMinimum to 0 or use ineffective slippage calculations when calling Uniswap V3/V4 functions, allowing 100%..."
     },
     {
       "id": "amm-tick-range-position-vulnerabilities-vulnerable-pattern-examples-001",
@@ -144,10 +157,12 @@
         221
       ],
       "check": [
-        "VERIFY: Severity:** HIGH | **Source:** Superposition (Code4rena)",
-        "ANTIPATTERN: pub fn mint_position(&mut self, lower: i32, upper: i32) -> Result<U256, Error> {"
+        "VERIFY: pub fn mint_position(&mut self, lower: i32, upper: i32) -> Result<U256, Error> {",
+        "IMPACT: An attacker could open positions with arbitrary liquidity assigned to them."
       ],
-      "antipattern": "pub fn mint_position(&mut self, lower: i32, upper: i32) -> Result<U256, Error> {"
+      "antipattern": "pub fn mint_position(&mut self, lower: i32, upper: i32) -> Result<U256, Error> {",
+      "validWhen": "pub fn mint_position(&mut self, lower: i32, upper: i32) -> Result<U256, Error> {",
+      "impact": "An attacker could open positions with arbitrary liquidity assigned to them."
     },
     {
       "id": "amm-v4-hook-token-compatibility-vulnerable-pattern-examples-001",
@@ -168,11 +183,14 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Hooks with malicious implementations can call `unlockForRebalance()` to bypass global reentrancy protection and drain...",
-        "ANTIPATTERN: Balance check doesn't account for am-AMM bid during callback"
+        "VERIFY: Hooks with malicious implementations can call unlockForRebalance() to bypass global reentrancy protection and drain...",
+        "PROVE: Balance check doesn't account for am-AMM bid during callback",
+        "FALSIFY: Whitelist valid hooks or use per-pool reentrancy guards"
       ],
       "antipattern": "Balance check doesn't account for am-AMM bid during callback",
-      "securePattern": "Whitelist valid hooks or use per-pool reentrancy guards"
+      "securePattern": "Whitelist valid hooks or use per-pool reentrancy guards",
+      "validWhen": "Hooks with malicious implementations can call unlockForRebalance() to bypass global reentrancy protection and drain...",
+      "invalidWhen": "Whitelist valid hooks or use per-pool reentrancy guards"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-1-first-depositor-inflation-at-000",
@@ -192,11 +210,16 @@
         478
       ],
       "check": [
-        "VERIFY: LP tokens are calculated as:\n\n```\n\nliquidity = sqrt(amount0 * amount1)                    // First deposit\n\nliquidity =...",
-        "ANTIPATTERN: Unrestricted burn allows pool hijacking"
+        "VERIFY: liquidity = sqrt(amount0 * amount1) // First deposit",
+        "PROVE: Attacker creates pool and deposits minimal amount (1 wei of each token); Attacker receives 1 wei of LP tokens: sqrt(1 * 1) = 1",
+        "FALSIFY: Enforce minimum initial deposit",
+        "IMPACT: Complete loss of deposited funds for victims"
       ],
       "antipattern": "Unrestricted burn allows pool hijacking",
-      "securePattern": "Enforce minimum initial deposit"
+      "securePattern": "Enforce minimum initial deposit",
+      "validWhen": "liquidity = sqrt(amount0 * amount1) // First deposit",
+      "invalidWhen": "Enforce minimum initial deposit",
+      "impact": "Complete loss of deposited funds for victims"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-2-slippage-protection-vulnerab-001",
@@ -217,10 +240,15 @@
       ],
       "check": [
         "VERIFY: Functions that swap tokens or add/remove liquidity don't validate that the received amount meets user expectations.",
-        "ANTIPATTERN: Slippage parameter ignored in execution"
+        "PROVE: User submits swap: 100 ETH → USDC, expects ~$200,000; MEV bot sees pending transaction",
+        "FALSIFY: Compare against oracle price",
+        "IMPACT: Users receive significantly less tokens than expected"
       ],
       "antipattern": "Slippage parameter ignored in execution",
-      "securePattern": "Compare against oracle price"
+      "securePattern": "Compare against oracle price",
+      "validWhen": "Functions that swap tokens or add/remove liquidity don't validate that the received amount meets user expectations.",
+      "invalidWhen": "Compare against oracle price",
+      "impact": "Users receive significantly less tokens than expected"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-3-sandwich-mev-attacks-002",
@@ -241,10 +269,13 @@
       ],
       "check": [
         "VERIFY: Withdrawal swaps without protection",
-        "ANTIPATTERN: Users can set exploitable parameters"
+        "PROVE: Users can set exploitable parameters",
+        "FALSIFY: Use private transaction submission"
       ],
       "antipattern": "Users can set exploitable parameters",
-      "securePattern": "Use private transaction submission"
+      "securePattern": "Use private transaction submission",
+      "validWhen": "Withdrawal swaps without protection",
+      "invalidWhen": "Use private transaction submission"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-4-spot-price-manipulation-slot-003",
@@ -264,11 +295,14 @@
         731
       ],
       "check": [
-        "VERIFY: `slot0` returns the current tick and sqrtPriceX96 which reflect the most recent swap.",
-        "ANTIPATTERN: Using slot0 for price calculation"
+        "VERIFY: slot0 returns the current tick and sqrtPriceX96 which reflect the most recent swap.",
+        "PROVE: Using slot0 for price calculation",
+        "FALSIFY: Time-weighted average price"
       ],
       "antipattern": "Using slot0 for price calculation",
-      "securePattern": "Time-weighted average price"
+      "securePattern": "Time-weighted average price",
+      "validWhen": "slot0 returns the current tick and sqrtPriceX96 which reflect the most recent swap.",
+      "invalidWhen": "Time-weighted average price"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-5-deadline-vulnerabilities-004",
@@ -288,10 +322,13 @@
         783
       ],
       "check": [
-        "VERIFY: No deadline - transaction can execute anytime"
+        "VERIFY: No deadline - transaction can execute anytime",
+        "FALSIFY: User controls execution deadline"
       ],
       "antipattern": "No deadline - transaction can execute anytime",
-      "securePattern": "User controls execution deadline"
+      "securePattern": "User controls execution deadline",
+      "validWhen": "No deadline - transaction can execute anytime",
+      "invalidWhen": "User controls execution deadline"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-6-reserve-manipulation-attacks-005",
@@ -311,10 +348,13 @@
         821
       ],
       "check": [
-        "VERIFY: IL calculation uses manipulatable reserves"
+        "VERIFY: IL calculation uses manipulatable reserves",
+        "FALSIFY: Time-weighted reserves"
       ],
       "antipattern": "IL calculation uses manipulatable reserves",
-      "securePattern": "Time-weighted reserves"
+      "securePattern": "Time-weighted reserves",
+      "validWhen": "IL calculation uses manipulatable reserves",
+      "invalidWhen": "Time-weighted reserves"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-7-lp-token-calculation-issues-006",
@@ -334,10 +374,13 @@
         864
       ],
       "check": [
-        "VERIFY: Assumes 18 decimals for all tokens"
+        "VERIFY: Assumes 18 decimals for all tokens",
+        "FALSIFY: Fix: Handle Variable Decimals"
       ],
       "antipattern": "Assumes 18 decimals for all tokens",
-      "securePattern": "Normalize decimals"
+      "securePattern": "Normalize decimals",
+      "validWhen": "Assumes 18 decimals for all tokens",
+      "invalidWhen": "Fix: Handle Variable Decimals"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-8-callback-reentrancy-attacks-007",
@@ -358,11 +401,16 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: No access control on callback",
-        "ANTIPATTERN: Swap through untrusted token path"
+        "VERIFY: Uniswap V3 callbacks (uniswapV3MintCallback, uniswapV3SwapCallback) are called by the pool during operations.",
+        "PROVE: Swap through untrusted token path",
+        "FALSIFY: Only allow whitelisted tokens in path",
+        "IMPACT: Fund Drainage: Unrestricted callbacks allow draining approved tokens"
       ],
       "antipattern": "Swap through untrusted token path",
-      "securePattern": "Only allow whitelisted tokens in path"
+      "securePattern": "Only allow whitelisted tokens in path",
+      "validWhen": "Uniswap V3 callbacks (uniswapV3MintCallback, uniswapV3SwapCallback) are called by the pool during operations.",
+      "invalidWhen": "Only allow whitelisted tokens in path",
+      "impact": "Fund Drainage: Unrestricted callbacks allow draining approved tokens"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-9-factory-pool-creation-attack-008",
@@ -382,11 +430,16 @@
         1135
       ],
       "check": [
-        "VERIFY: Deterministic token address",
-        "ANTIPATTERN: Hardcoded hash doesn't match actual factory"
+        "VERIFY: When using CREATE opcode, new contract addresses are predictable.",
+        "PROVE: Hardcoded hash doesn't match actual factory",
+        "FALSIFY: Unpredictable address with user-controlled salt",
+        "IMPACT: Permanent DoS: Factory permanently blocked from creating pairs"
       ],
       "antipattern": "Hardcoded hash doesn't match actual factory",
-      "securePattern": "Unpredictable address with user-controlled salt"
+      "securePattern": "Unpredictable address with user-controlled salt",
+      "validWhen": "When using CREATE opcode, new contract addresses are predictable.",
+      "invalidWhen": "Unpredictable address with user-controlled salt",
+      "impact": "Permanent DoS: Factory permanently blocked from creating pairs"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-10-decimal-math-calculation-is-009",
@@ -407,10 +460,13 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Assumes both tokens have same decimals"
+        "VERIFY: Assumes both tokens have same decimals",
+        "FALSIFY: Normalize decimals before calculation"
       ],
       "antipattern": "Assumes both tokens have same decimals",
-      "securePattern": "Normalize decimals before calculation"
+      "securePattern": "Normalize decimals before calculation",
+      "validWhen": "Assumes both tokens have same decimals",
+      "invalidWhen": "Normalize decimals before calculation"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-11-liquidity-migration-protoco-010",
@@ -431,10 +487,13 @@
       ],
       "check": [
         "VERIFY: Uses raw balanceOf for calculations",
-        "ANTIPATTERN: Assumes protocol owns all pool reserves"
+        "PROVE: Assumes protocol owns all pool reserves",
+        "FALSIFY: Calculate based on actual LP ownership"
       ],
       "antipattern": "Assumes protocol owns all pool reserves",
-      "securePattern": "Calculate based on actual LP ownership"
+      "securePattern": "Calculate based on actual LP ownership",
+      "validWhen": "Uses raw balanceOf for calculations",
+      "invalidWhen": "Calculate based on actual LP ownership"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-12-flash-loan-based-graduation-011",
@@ -454,10 +513,13 @@
         1372
       ],
       "check": [
-        "VERIFY: Atomic unwrap allows flash loan closure"
+        "VERIFY: Atomic unwrap allows flash loan closure",
+        "FALSIFY: Enforce delay after graduation"
       ],
       "antipattern": "Atomic unwrap allows flash loan closure",
-      "securePattern": "Enforce delay after graduation"
+      "securePattern": "Enforce delay after graduation",
+      "validWhen": "Atomic unwrap allows flash loan closure",
+      "invalidWhen": "Enforce delay after graduation"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-13-detection-patterns-audit-ch-012",
@@ -478,12 +540,12 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Pattern 1: `slot0()` or `getReserves()` used for pricing without TWAP",
+        "VERIFY: Pattern 1: slot0() or getReserves() used for pricing without TWAP",
         "First depositor attack: Is MINIMUM_LIQUIDITY burned?",
         "Slippage: Is amountOutMin enforced and non-zero?",
-        "Deadline: Can users specify transaction expiry?",
-        "LOOK FOR: Pattern 2: Missing `amountOutMin` or set to 0"
-      ]
+        "LOOK FOR: Pattern 1: `slot0()` or `getReserves()` used for pricing without TWAP"
+      ],
+      "validWhen": "Pattern 1: slot0() or getReserves() used for pricing without TWAP"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-13-imbalanced-liquidity-additi-013",
@@ -503,11 +565,14 @@
         1485
       ],
       "check": [
-        "VERIFY: LP token calculation uses the minimum of two ratios:",
-        "ANTIPATTERN: No slippage checks on liquidity initialization"
+        "VERIFY: LP token calculation uses the minimum of two ratios",
+        "PROVE: No slippage checks on liquidity initialization",
+        "FALSIFY: Calculate optimal amounts first"
       ],
       "antipattern": "No slippage checks on liquidity initialization",
-      "securePattern": "Calculate optimal amounts first"
+      "securePattern": "Calculate optimal amounts first",
+      "validWhen": "LP token calculation uses the minimum of two ratios",
+      "invalidWhen": "Calculate optimal amounts first"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-14-rebasing-token-integration--014",
@@ -528,10 +593,13 @@
       ],
       "check": [
         "VERIFY: When depositing rebasing tokens, the initial balance equals the deposit amount.",
-        "ANTIPATTERN: Caching rebasing token shares"
+        "PROVE: Caching rebasing token shares",
+        "FALSIFY: Use wrapper token or track scaled balances"
       ],
       "antipattern": "Caching rebasing token shares",
-      "securePattern": "Use wrapper token or track scaled balances"
+      "securePattern": "Use wrapper token or track scaled balances",
+      "validWhen": "When depositing rebasing tokens, the initial balance equals the deposit amount.",
+      "invalidWhen": "Use wrapper token or track scaled balances"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-15-impermanent-loss-protection-015",
@@ -552,10 +620,13 @@
       ],
       "check": [
         "VERIFY: IL protection calculates losses by comparing initial deposit ratios to withdrawal ratios.",
-        "ANTIPATTERN: IL protection for ALL pairs"
+        "PROVE: IL protection for ALL pairs",
+        "FALSIFY: Whitelist tokens eligible for IL protection"
       ],
       "antipattern": "IL protection for ALL pairs",
-      "securePattern": "Whitelist tokens eligible for IL protection"
+      "securePattern": "Whitelist tokens eligible for IL protection",
+      "validWhen": "IL protection calculates losses by comparing initial deposit ratios to withdrawal ratios.",
+      "invalidWhen": "Whitelist tokens eligible for IL protection"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-16-protocol-invariant-breaking-016",
@@ -575,10 +646,13 @@
         1646
       ],
       "check": [
-        "VERIFY: Rounding errors accumulate to break invariant"
+        "VERIFY: Rounding errors accumulate to break invariant",
+        "FALSIFY: Add invariant check after operations"
       ],
       "antipattern": "Rounding errors accumulate to break invariant",
-      "securePattern": "Add invariant check after operations"
+      "securePattern": "Add invariant check after operations",
+      "validWhen": "Rounding errors accumulate to break invariant",
+      "invalidWhen": "Add invariant check after operations"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-17-dex-swap-slippage-accountin-017",
@@ -598,10 +672,13 @@
         1693
       ],
       "check": [
-        "VERIFY: Uses expected amount, not actual received"
+        "VERIFY: Uses expected amount, not actual received",
+        "FALSIFY: Track actual swap output"
       ],
       "antipattern": "Uses expected amount, not actual received",
-      "securePattern": "Track actual swap output"
+      "securePattern": "Track actual swap output",
+      "validWhen": "Uses expected amount, not actual received",
+      "invalidWhen": "Track actual swap output"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-18-leftover-token-accumulation-018",
@@ -621,10 +698,13 @@
         1741
       ],
       "check": [
-        "VERIFY: Doesn't consider existing balance before swap"
+        "VERIFY: Doesn't consider existing balance before swap",
+        "FALSIFY: Account for existing balances"
       ],
       "antipattern": "Doesn't consider existing balance before swap",
-      "securePattern": "Account for existing balances"
+      "securePattern": "Account for existing balances",
+      "validWhen": "Doesn't consider existing balance before swap",
+      "invalidWhen": "Account for existing balances"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-19-weth-eth-pool-asset-mismatc-019",
@@ -644,10 +724,13 @@
         1783
       ],
       "check": [
-        "VERIFY: Pool uses ETH but vault holds WETH"
+        "VERIFY: Pool uses ETH but vault holds WETH",
+        "FALSIFY: Handle WETH/ETH conversion"
       ],
       "antipattern": "Pool uses ETH but vault holds WETH",
-      "securePattern": "Handle WETH/ETH conversion"
+      "securePattern": "Handle WETH/ETH conversion",
+      "validWhen": "Pool uses ETH but vault holds WETH",
+      "invalidWhen": "Handle WETH/ETH conversion"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-20-single-sided-vs-proportiona-020",
@@ -667,10 +750,13 @@
         1829
       ],
       "check": [
-        "VERIFY: Uses single-sided exit during emergency"
+        "VERIFY: Uses single-sided exit during emergency",
+        "FALSIFY: Use proportional exit for emergencies"
       ],
       "antipattern": "Uses single-sided exit during emergency",
-      "securePattern": "Use proportional exit for emergencies"
+      "securePattern": "Use proportional exit for emergencies",
+      "validWhen": "Uses single-sided exit during emergency",
+      "invalidWhen": "Use proportional exit for emergencies"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-21-type-casting-integer-overfl-021",
@@ -691,11 +777,14 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: When casting from larger integer types to smaller ones without validation:",
-        "ANTIPATTERN: uint8 can only go up to 255"
+        "VERIFY: When casting from larger integer types to smaller ones without validation",
+        "PROVE: uint8 can only go up to 255",
+        "FALSIFY: Use try_from with error handling"
       ],
       "antipattern": "uint8 can only go up to 255",
-      "securePattern": "Use try_from with error handling"
+      "securePattern": "Use try_from with error handling",
+      "validWhen": "When casting from larger integer types to smaller ones without validation",
+      "invalidWhen": "Use try_from with error handling"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-22-spot-price-abuse-in-protoco-022",
@@ -716,11 +805,14 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Protocol contracts that:\n\n1. Calculate swap amounts using current DEX spot price\n\n2. Execute swaps without comparing to...",
-        "ANTIPATTERN: Uses spot price for swap amount calculation"
+        "VERIFY: Protocol contracts that",
+        "PROVE: Uses spot price for swap amount calculation",
+        "FALSIFY: Validate spot price against oracle"
       ],
       "antipattern": "Uses spot price for swap amount calculation",
-      "securePattern": "Validate spot price against oracle"
+      "securePattern": "Validate spot price against oracle",
+      "validWhen": "Protocol contracts that",
+      "invalidWhen": "Validate spot price against oracle"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-23-lp-token-burn-hijack-attack-023",
@@ -740,11 +832,14 @@
         2104
       ],
       "check": [
-        "VERIFY: Public `burn()` function without withdrawal logic",
-        "ANTIPATTERN: Unrestricted burn allows totalSupply manipulation"
+        "VERIFY: Public burn() function without withdrawal logic",
+        "PROVE: Unrestricted burn allows totalSupply manipulation",
+        "FALSIFY: Burn only through withdrawal with minimum enforced"
       ],
       "antipattern": "Unrestricted burn allows totalSupply manipulation",
-      "securePattern": "Burn only through withdrawal with minimum enforced"
+      "securePattern": "Burn only through withdrawal with minimum enforced",
+      "validWhen": "Public burn() function without withdrawal logic",
+      "invalidWhen": "Burn only through withdrawal with minimum enforced"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-24-constant-sum-amm-arbitrage-024",
@@ -764,11 +859,14 @@
         2174
       ],
       "check": [
-        "VERIFY: Constant sum invariant: `k = a + b`\n\n\n\nUnlike x*y=k (constant product), the price doesn't change with reserves.",
-        "ANTIPATTERN: Constant sum AMM with 1:1 rate"
+        "VERIFY: Constant sum invariant: k = a + b",
+        "PROVE: Constant sum AMM with 1:1 rate",
+        "FALSIFY: Use constant product or stableswap invariant"
       ],
       "antipattern": "Constant sum AMM with 1:1 rate",
-      "securePattern": "Use constant product or stableswap invariant"
+      "securePattern": "Use constant product or stableswap invariant",
+      "validWhen": "Constant sum invariant: k = a + b",
+      "invalidWhen": "Use constant product or stableswap invariant"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-25-state-accounting-discrepanc-025",
@@ -788,11 +886,14 @@
         2259
       ],
       "check": [
-        "VERIFY: State variables are updated incorrectly:\n\n- Subtraction from wrong counter (e.",
-        "ANTIPATTERN: Decreases ohmMinted instead of increasing ohmRemoved"
+        "VERIFY: State variables are updated incorrectly",
+        "PROVE: Decreases ohmMinted instead of increasing ohmRemoved",
+        "FALSIFY: Clear separation of minted vs removed tracking"
       ],
       "antipattern": "Decreases ohmMinted instead of increasing ohmRemoved",
-      "securePattern": "Clear separation of minted vs removed tracking"
+      "securePattern": "Clear separation of minted vs removed tracking",
+      "validWhen": "State variables are updated incorrectly",
+      "invalidWhen": "Clear separation of minted vs removed tracking"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-26-incorrect-liquidity-ownersh-026",
@@ -812,11 +913,14 @@
         2342
       ],
       "check": [
-        "VERIFY: Protocol calculates:\n\n```\n\nlpToRemove = (tokenToRemove * totalLpSupply) / totalReserve\n\n```\n\n\n\nBut if protocol only owns a fraction of the pool, `lpTo",
-        "ANTIPATTERN: Uses total pool reserves, not owned portion"
+        "VERIFY: lpToRemove = (tokenToRemove * totalLpSupply) / totalReserve",
+        "PROVE: Uses total pool reserves, not owned portion",
+        "FALSIFY: Base calculations on protocol's actual LP holdings"
       ],
       "antipattern": "Uses total pool reserves, not owned portion",
-      "securePattern": "Base calculations on protocol's actual LP holdings"
+      "securePattern": "Base calculations on protocol's actual LP holdings",
+      "validWhen": "lpToRemove = (tokenToRemove * totalLpSupply) / totalReserve",
+      "invalidWhen": "Base calculations on protocol's actual LP holdings"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-27-dividend-reward-gaming-027",
@@ -836,11 +940,14 @@
         2427
       ],
       "check": [
-        "VERIFY: Dividend calculation uses short-term fee averages:\n\n- Only last N trades (e.",
-        "ANTIPATTERN: normalAverageFee based on last 20 trades only"
+        "VERIFY: Dividend calculation uses short-term fee averages",
+        "PROVE: normalAverageFee based on last 20 trades only",
+        "FALSIFY: Use time-weighted volume, not individual trade count"
       ],
       "antipattern": "normalAverageFee based on last 20 trades only",
-      "securePattern": "Use time-weighted volume, not individual trade count"
+      "securePattern": "Use time-weighted volume, not individual trade count",
+      "validWhen": "Dividend calculation uses short-term fee averages",
+      "invalidWhen": "Use time-weighted volume, not individual trade count"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-28-missing-account-validation--028",
@@ -860,11 +967,14 @@
         2514
       ],
       "check": [
-        "VERIFY: Solana accounts are passed as parameters; the program must verify:",
-        "ANTIPATTERN: No validation on vault_reward_token_b_info"
+        "VERIFY: Solana accounts are passed as parameters; the program must verify",
+        "PROVE: No validation on vault_reward_token_b_info",
+        "FALSIFY: Validate all accounts against expected PDAs"
       ],
       "antipattern": "No validation on vault_reward_token_b_info",
-      "securePattern": "Validate all accounts against expected PDAs"
+      "securePattern": "Validate all accounts against expected PDAs",
+      "validWhen": "Solana accounts are passed as parameters; the program must verify",
+      "invalidWhen": "Validate all accounts against expected PDAs"
     },
     {
       "id": "amm-constant-product-amm-vulnerabilities-29-detection-patterns-audit-ch-029",
@@ -885,12 +995,12 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Pattern 1: `slot0()` or `getReserves()` used for pricing without TWAP",
+        "VERIFY: Pattern 1: slot0() or getReserves() used for pricing without TWAP",
         "First depositor attack: Is MINIMUM_LIQUIDITY burned?",
         "Slippage: Is amountOutMin enforced and non-zero?",
-        "Deadline: Can users specify transaction expiry?",
-        "LOOK FOR: Pattern 2: Missing `amountOutMin` or set to 0"
-      ]
+        "LOOK FOR: Pattern 1: `slot0()` or `getReserves()` used for pricing without TWAP"
+      ],
+      "validWhen": "Pattern 1: slot0() or getReserves() used for pricing without TWAP"
     },
     {
       "id": "amm-defihacklabs-amm-calculation-errors-defihacklabs-amm-calculation-e-000",
@@ -911,11 +1021,16 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Fee uses 10000 base but K-check still uses 1000 base",
-        "ANTIPATTERN: Yet another fork with the same 1000 vs 10000 mismatch"
+        "VERIFY: UniswapV2's swap function uses a K-invariant check with adjustment for 0.3% swap fees",
+        "PROVE: Yet another fork with the same 1000 vs 10000 mismatch",
+        "FALSIFY: If you don't need custom fees, use UniswapV2's original constants",
+        "IMPACT: Complete pool drainage: 99%+ of reserves extractable in single transaction"
       ],
       "antipattern": "Yet another fork with the same 1000 vs 10000 mismatch",
-      "securePattern": "If you don't need custom fees, use UniswapV2's original constants"
+      "securePattern": "If you don't need custom fees, use UniswapV2's original constants",
+      "validWhen": "UniswapV2's swap function uses a K-invariant check with adjustment for 0.3% swap fees",
+      "invalidWhen": "If you don't need custom fees, use UniswapV2's original constants",
+      "impact": "Complete pool drainage: 99%+ of reserves extractable in single transaction"
     }
   ]
 }

@@ -1,13 +1,13 @@
 ---
 name: solodit-fetching
-description: Fetches vulnerability reports from the Solodit/Cyfrin API for a given topic and stores them in reports/<topic>/. Use when collecting raw audit findings for a new vulnerability topic, populating the reports/ directory with source data, or preparing input for the variant-template-writer agent.
+description: Fetches vulnerability reports from the Solodit/Cyfrin API for a given topic and stores them in reports/<topic>_findings/. Preserve the raw source metadata needed for downstream fine-grained report indexing. Use when collecting raw audit findings for a new vulnerability topic, populating the reports/ directory with source data, or preparing input for the variant-template-writer agent.
 tools: [Agent, Bash, Edit, Glob, Grep, Read, WebSearch]
 maxTurns: 50
 ---
 
 # Solodit Fetcher
 
-Fetches vulnerability reports from the Solodit API by topic and stores them in `reports/<topic>/`. Produces the raw source data that `variant-template-writer` uses to create database entries.
+Fetches vulnerability reports from the Solodit API by topic and stores them in `reports/<topic>_findings/`. Produces the raw source data that `variant-template-writer` uses to create database entries.
 
 **Do NOT use for** analyzing reports (use `variant-template-writer`), indexing DeFiHackLabs exploits (use `defihacklabs-indexer`), or vulnerability hunting (use `invariant-catcher`).
 
@@ -22,8 +22,9 @@ Fetching Progress:
 - [ ] Step 1: Activate virtual environment
 - [ ] Step 2: Fetch reports for the primary topic
 - [ ] Step 3: Fetch reports for related protocols/keywords
-- [ ] Step 4: Deduplicate results
-- [ ] Step 5: Verify output in reports/<topic>/
+- [ ] Step 4: Preserve provenance and resolve filename collisions
+- [ ] Step 5: Deduplicate by source identifiers first, then content
+- [ ] Step 6: Verify raw output in reports/<topic>_findings/
 ```
 
 ### Step 1: Activate Environment
@@ -56,13 +57,33 @@ Many protocols use shared infrastructure. Search for protocols that integrate th
 python3 solodit_fetcher.py --keyword "<related_protocol>" --output ./reports/<topic>_findings
 ```
 
-### Step 4: Deduplicate
+### Step 4: Preserve Provenance
 
-Verify no vulnerability appears twice in the output directory. Check by title and content similarity.
+Ensure every fetched file preserves the metadata needed for downstream indexing:
 
-### Step 5: Verify Output
+- `source`, `solodit_id`, `source_link`, `contest_link`, `github_link`
+- `protocol`, `audit_firm`, `severity`
+- original title and finding content
 
-Confirm reports are stored in `reports/<topic>_findings/` with proper naming convention: `[severity]-[issue-number]-[description].md`.
+Do **not** hand-normalize weak fields like `category` or `vulnerability_type` to force them to match the folder topic. Folder placement is an acquisition hint, not a final classification.
+
+If multiple findings would land on the same filename, keep both raw reports by renaming the later file rather than overwriting provenance.
+
+### Step 5: Deduplicate
+
+Verify no vulnerability appears twice in the output directory.
+
+1. Check hard duplicates first: same `solodit_id`, same source URL, same GitHub issue, or same contest finding number
+2. Check soft duplicates second: normalized title + protocol + strongly overlapping body content
+3. If duplicate status is unclear, keep both raw files and let `variant-template-writer` resolve them during indexing
+
+### Step 6: Verify Output
+
+Confirm reports are stored in `reports/<topic>_findings/`.
+
+- Prefer the naming convention `[severity]-[issue-number]-[description].md` when the source provides that information
+- Do not treat the filename as authoritative classification data
+- Confirm the output preserves the metadata required by the [report indexing framework](../resources/report-indexing.md)
 
 ---
 
@@ -71,6 +92,9 @@ Confirm reports are stored in `reports/<topic>_findings/` with proper naming con
 - **Always** activate the virtual environment first: `source .venv/bin/activate`
 - **Always** use `python3` to run the script
 - **Never** apply quality filters (no `--quality` flag)
-- **Never** add duplicate findings — check before appending
+- **Never** hand-edit `category` or `vulnerability_type` to force-fit the topic
+- **Never** drop source IDs or URLs, even when other metadata is weak
+- **Never** add duplicate findings when the source identity is clear
 - **Always** search for related protocols that use the target feature
+- **If duplicate status is unclear, keep both raw files and resolve it later during report indexing**
 - For repository structure, see [CodebaseStructure.md](../../CodebaseStructure.md)

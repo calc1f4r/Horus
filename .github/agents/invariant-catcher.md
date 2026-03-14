@@ -14,7 +14,7 @@ Hunts for known vulnerability patterns in codebases by leveraging the Vulnerabil
 
 When spawned by `audit-orchestrator`, you receive a **shard** — a subset of hunt cards grouped by category:
 - **`SHARD:` header** in your prompt identifies your shard ID and position (e.g., `shard-2-defi, shard 2 of 3`)
-- **`YOUR CARDS:`** section contains 50-80 cards assigned to this shard (full card content with `check`/`antipattern`/`securePattern`)
+- **`YOUR CARDS:`** section contains 50-80 cards assigned to this shard (full card content with `check`/`antipattern`/`securePattern` plus triage context like `validWhen` / `invalidWhen` / `impact`)
 - **`CRITICAL CARDS:`** section contains `neverPrune` cards duplicated across all shards — ALWAYS check these regardless of your shard assignment
 - **Output**: Write findings to `audit-output/03-findings-shard-<shard-id>.md` (NOT to `03-findings-raw.md` — the orchestrator merges all shard files)
 
@@ -107,9 +107,9 @@ rg -n "pattern_from_db" /path/to/target/
 ```
 
 For each match, classify:
-- **True positive**: Code matches the vulnerable pattern AND has the required preconditions
-- **Likely positive**: Pattern matches but needs manual verification of context
-- **False positive**: Pattern matches syntactically but is not exploitable
+- **True positive**: Code matches the vulnerable pattern, satisfies `validWhen`, and lacks the `invalidWhen` guard
+- **Likely positive**: Pattern matches and `validWhen` is plausible, but exploitability still needs manual verification
+- **False positive**: Pattern matches syntactically, but `invalidWhen` / `securePattern` confirms safety or impact is unreachable
 
 **Tool selection:**
 

@@ -1318,15 +1318,15 @@ def main():
         # Write combined enriched all-huntcards.json
         combined = {
             "meta": {
-                "description": "ALL enriched hunt cards — compressed detection rules with micro-directives for direct verification",
+                "description": "ALL enriched hunt cards — compressed detection rules with verification and triage context for direct bug validation",
                 "totalCards": len(all_enriched_cards),
                 "enriched": total_enriched,
                 "manifests": list(sorted(manifests.keys())),
                 "usage": (
                     "Load this single file for all vulnerability detection cards. For each card: "
                     "grep target code for card.grep. On hit: execute card.check steps directly against "
-                    "grep hit locations. Only read full DB entry (card.ref + card.lines) for confirmed "
-                    "true/likely positives."
+                    "grep hit locations, use validWhen/invalidWhen/impact for rapid triage, and only read "
+                    "full DB entry (card.ref + card.lines) for confirmed true/likely positives."
                 ),
             },
             "cards": all_enriched_cards,
@@ -1347,7 +1347,7 @@ def main():
 
     # Add hunt card references to router
     router["huntcards"] = {
-        "description": "Enriched detection cards with grep patterns, micro-directives (check steps, antipattern, securePattern), and one-line detection rules. Load all-huntcards.json for ALL patterns. For each card: grep target code → on hit, execute card.check steps directly → only read .md for confirmed positives.",
+        "description": "Enriched detection cards with grep patterns, micro-directives (check steps, antipattern, securePattern), and triage context (validWhen, invalidWhen, impact). Load all-huntcards.json for ALL patterns. For each card: grep target code → on hit, execute card.check steps directly → use triage context to filter weak matches → only read .md for confirmed positives.",
         "allInOne": "DB/manifests/huntcards/all-huntcards.json",
         "totalCards": total_huntcards,
         "perManifest": huntcard_info,

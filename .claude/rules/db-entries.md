@@ -7,10 +7,12 @@ paths:
 
 When editing or creating vulnerability entries in `DB/`:
 
-- Follow the structure in `TEMPLATE.md` exactly — all required frontmatter fields must be present
-- Every entry needs: YAML frontmatter, description, root cause, detection pattern, vulnerable code, secure code, and real-world references
-- Use unique pattern IDs: `<manifest>-<category>-NNN` (e.g., `oracle-staleness-001`)
+- Follow the structure in `TEMPLATE.md` exactly — all required frontmatter fields and top-of-file low-context sections must be present
+- When touching a legacy entry, migrate it to the current template instead of preserving the older layout
+- Every entry needs: YAML frontmatter, `root_cause_family`, `pattern_key`, `code_keywords`, description, root cause, detection pattern, vulnerable code, secure code, and real-world references
+- Keep section titles and file names stable and specific so generated manifest pattern IDs remain meaningful
 - Severity uses Impact × Likelihood matrix: CRITICAL, HIGH, MEDIUM, LOW
 - Include concrete `grep`-able code keywords in frontmatter for hunt card generation
+- Split materially different exploit routes into explicit path variants instead of blending them into one attack story
 - After creating or modifying entries, regenerate manifests: `python3 generate_manifests.py`
 - Never read entire vulnerability files when searching — use `DB/index.json` → manifests → line ranges

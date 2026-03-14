@@ -13,7 +13,7 @@ The database uses a **4-tier search architecture** that progressively narrows fr
 Tier 1:   DB/index.json                          (Router — ~350 lines, ~12KB)
    ↓      Identifies which manifests/huntcards to load
 Tier 1.5: DB/manifests/huntcards/*-huntcards.json  (Hunt Cards — compressed detection rules)
-   ↓      ALL 451 patterns fit in ~55K tokens. Grep-based bulk scanning.
+   ↓      Grep-based bulk scanning. Combined corpus can be large after enrichment, so prefer per-manifest cards or bundles when context is tight.
 Tier 2:   DB/manifests/<name>.json                 (Manifest — 30-130KB each)
    ↓      Full pattern metadata with line ranges, keywords, root causes
 Tier 3:   DB/**/*.md                               (Vulnerability files — read only relevant lines)
@@ -21,7 +21,7 @@ Tier 3:   DB/**/*.md                               (Vulnerability files — read
 
 ### Tier 1.5: Hunt Cards (New)
 
-Hunt cards are **compressed detection rules** — one card per vulnerability pattern, each ~5 lines. They solve the context window problem: instead of loading 200KB+ manifests to decide which patterns are relevant, an agent loads all hunt cards (~55K tokens) and greps the target codebase to prune irrelevant patterns.
+Hunt cards are **compressed detection rules** — one card per vulnerability pattern, encoded as a compact JSON object with detection, verification, and triage fields. They solve the context window problem: instead of loading 200KB+ manifests to decide which patterns are relevant, an agent loads only the relevant hunt-card subset, greps the target codebase, and prunes irrelevant patterns before reading full entries.
 
 Each hunt card:
 ```json
@@ -31,6 +31,9 @@ Each hunt card:
   "severity": "CRITICAL",
   "grep": "redeemUnderlying|totalSupply|transfer",
   "detect": "When a CompoundV2-fork cToken market has extremely low totalSupply...",
+   "validWhen": "Exchange-rate math can be pushed into a manipulable near-zero-supply state.",
+   "invalidWhen": "Virtual liquidity, seed shares, or minimum-supply guards prevent near-zero exchange-rate inflation.",
+   "impact": "Attackers can mint or redeem against a distorted exchange rate and steal value from later users.",
   "cat": ["defi"],
   "neverPrune": true,
   "ref": "DB/general/vault-inflation-attack/defihacklabs-vault-inflation-patterns.md",
@@ -41,15 +44,18 @@ Each hunt card:
 **Key fields:**
 - `grep` — pipe-delimited regex for `grep -rn` or `rg` against target code
 - `detect` — one-line rule describing what makes code vulnerable
-- `check` — 1-5 ordered verification steps to execute directly against grep hit locations (no .md read needed)
+- `check` — ordered verification steps. Prefixes are meaningful: `VERIFY` = core bug condition, `PROVE` = evidence to capture, `FALSIFY` = guard that invalidates the finding, `IMPACT` = expected consequence
 - `antipattern` — one-line code shape indicating vulnerability (quick positive match)
 - `securePattern` — one-line code shape indicating safe code (quick false-positive elimination)
+- `validWhen` — compact reportability rule describing when the grep hit is a valid bug rather than a smell
+- `invalidWhen` — compact false-positive filter describing what mitigation or guard invalidates the bug report
+- `impact` — one-line impact summary for prioritization
 - `cat` — category tags for grouping (e.g., `defi`, `oracle`, `amm`, `bridge`)
 - `neverPrune` — if `true`, card survives grep-prune even with zero hits (CRITICAL patterns)
 - `ref` + `lines` — read full entry only for confirmed true/likely positives: `read_file(card.ref, startLine=card.lines[0], endLine=card.lines[1])`
 
 **Files:**
-- `DB/manifests/huntcards/all-huntcards.json` — ALL 451 cards in one file
+- `DB/manifests/huntcards/all-huntcards.json` — combined enriched hunt-card corpus; load only when context budget allows
 - `DB/manifests/huntcards/<manifest>-huntcards.json` — per-manifest cards
 
 ### Why This Matters
@@ -62,7 +68,7 @@ Each hunt card:
 
 | Scenario | Without Hunt Cards | With Hunt Cards |
 |----------|-------------------|----------------|
-| vault_yield audit (4 manifests) | ~384KB manifest JSON + 27K lines vuln content | ~20K tokens hunt cards → grep → read only hits |
+| vault_yield audit (4 manifests) | ~384KB manifest JSON + 27K lines vuln content | relevant hunt-card subset → grep → read only hits |
 
 ---
 
@@ -140,7 +146,7 @@ Each hunt card:
 2. Get manifest list
 3. Load hunt cards for those manifests:
    - Option A: Load per-manifest cards: DB/manifests/huntcards/<name>-huntcards.json
-   - Option B: Load ALL cards: DB/manifests/huntcards/all-huntcards.json (~100K tokens)
+   - Option B: Load DB/manifests/huntcards/all-huntcards.json only if your context budget is large enough; otherwise stick to per-manifest cards
 4. For each card, grep target codebase for card.grep pattern:
    grep -rn "card.grep" <target_path> --include="*.sol"
 5. Cards with `neverPrune: true` always survive (CRITICAL safety net)
@@ -174,10 +180,12 @@ Each hunt card:
 1. After grep-pruning, you have 80-120 surviving cards
 2. For each surviving card with `check` steps:
    a. Read TARGET CODE at grep hit locations
-   b. Execute each card.check step against the target code
-   c. Quick-match with card.antipattern (vulnerable code shape)
-   d. Quick-reject with card.securePattern (safe code shape)
-   e. Classify: true positive / likely positive / false positive
+   b. Use `card.validWhen` to confirm the hit is actually reportable
+   c. Execute each `card.check` step against the target code
+   d. Quick-match with `card.antipattern` (vulnerable code shape)
+   e. Quick-reject with `card.invalidWhen` or `card.securePattern` (safe code shape)
+   f. Use `card.impact` to prioritize which matches deserve Pass 2 first
+   g. Classify: true positive / likely positive / false positive
 3. ONLY for true/likely positives: read full .md entry via card.ref + card.lines
 4. This cuts .md reads from ~100 to ~10-20 (80-90% reduction)
 ```
@@ -323,7 +331,7 @@ The orchestrator manages context budget by loading manifests one at a time, extr
 Instead of loading manifests one at a time, use hunt cards for maximum coverage with minimal context:
 
 ```
-1. Load all hunt cards for resolved manifests (~100K tokens with micro-directives)
+1. Load the hunt cards for resolved manifests. Prefer per-manifest cards or protocol-specific subsets; use `all-huntcards.json` only when the context budget is large enough for the combined enriched corpus.
 2. Batch grep: for each card, search target code for card.grep:
    grep -rn "keyword1|keyword2" <path> --include="*.sol"
 3. Cards with `neverPrune: true` always survive (CRITICAL safety net)
@@ -342,11 +350,11 @@ This approach lets an agent hold ALL vulnerability detection patterns AND verifi
 | Action | Tokens | Notes |
 |--------|--------|-------|
 | Read index.json | ~3K | One-time routing |
-| Load all hunt cards (1 file) | ~100K | ALL 451 patterns with micro-directives |
+| Load all hunt cards (1 file) | Varies; can reach several hundred thousand after enrichment | Prefer per-manifest cards or pre-pruned shards |
 | Grep target code | 0 | Run in terminal |
 | Pass 1: micro-directive execution | 0 | Uses card.check against already-read target code |
 | Pass 2: read matched DB entries | ~5-15K | Only for confirmed hits (~10-20 patterns) |
-| **Total** | **~105-120K** | Leaves room for target codebase |
+| **Total** | **Varies with hunt-card subset size** | Keep full-corpus loads for large-context workflows |
 
 ---
 

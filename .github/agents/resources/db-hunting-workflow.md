@@ -24,11 +24,16 @@ Each card is a compressed detection rule (~200 tokens) with micro-directives:
   "grep": "totalSupply|convertToShares|totalAssets",
   "detect": "Share value inflatable when totalSupply approaches zero",
   "check": [
-    "VERIFY: deposit function handles totalSupply == 0 case",
-    "VERIFY: virtual shares/assets or dead shares used"
+    "VERIFY: share conversion remains safe when totalSupply approaches zero",
+    "PROVE: attacker can mint or donate into a near-empty vault before victim deposits",
+    "FALSIFY: virtual shares/assets, dead shares, or minimum-share guards prevent inflation",
+    "IMPACT: later depositors can receive 0 shares and lose assets"
   ],
   "antipattern": "convertToShares returns totalSupply == 0 ? shares : ...",
   "securePattern": "Virtual offset in share calculation OR dead shares in constructor",
+  "validWhen": "Share pricing becomes user-manipulable when supply is near zero or totalAssets can be donation-inflated.",
+  "invalidWhen": "Virtual offsets, dead shares, or explicit zero-share / minimum-liquidity guards block the attack path.",
+  "impact": "Victims can deposit assets and receive 0 or severely underpriced shares.",
   "cat": ["token", "erc4626"],
   "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
   "lines": [151, 393],
@@ -39,9 +44,12 @@ Each card is a compressed detection rule (~200 tokens) with micro-directives:
 | Field | Purpose |
 |-------|---------|
 | `grep` | Pipe-delimited keywords for initial pruning |
-| `check` | Ordered verification steps — execute against target code |
+| `check` | Ordered verification steps — `VERIFY`, `PROVE`, `FALSIFY`, and `IMPACT` directives executed against target code |
 | `antipattern` | Vulnerable code shape — if matched → likely positive |
 | `securePattern` | Safe code shape — if matched → false positive |
+| `validWhen` | Compact reportability rule — when a grep hit is a real bug |
+| `invalidWhen` | False-positive filter — what mitigation invalidates the finding |
+| `impact` | One-line consequence used to prioritize likely positives |
 | `neverPrune` | Card survives grep-prune even with zero hits |
 | `ref` + `lines` | Full DB entry for evidence lookup |
 
@@ -98,10 +106,12 @@ Each shard sub-agent runs a 2-pass analysis:
 
 For each card in the shard at grep hit locations:
 1. Read TARGET CODE at the grep hit location
-2. Execute each `check` step against the target code
-3. If `antipattern` matches → **likely positive** (fast path)
-4. If `securePattern` matches → **false positive** (prune immediately)
-5. If neither → **uncertain** (proceed to Pass 2)
+2. Use `validWhen` to decide whether the grep hit is actually reportable
+3. Execute each `check` step against the target code
+4. If `antipattern` matches → **likely positive** (fast path)
+5. If `invalidWhen` or `securePattern` matches → **false positive** (prune immediately)
+6. Use `impact` to rank which likely positives should be evidence-checked first
+7. If neither side is decisive → **uncertain** (proceed to Pass 2)
 
 ### Pass 2: Evidence Lookup (only for true/likely positives)
 

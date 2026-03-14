@@ -4,7 +4,7 @@
     "description": "Compressed hunt cards for general-security — one-line detection rules for bulk scanning",
     "totalCards": 38,
     "skipped": 55,
-    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
     "enriched": 38
   },
   "cards": [
@@ -27,7 +27,8 @@
       ],
       "check": [
         "VERIFY: Functions that should be restricted to admin/owner but are publicly callable."
-      ]
+      ],
+      "validWhen": "Functions that should be restricted to admin/owner but are publicly callable."
     },
     {
       "id": "general-security-access-control-vulnerabilities-vulnerable-code-patterns-002",
@@ -48,10 +49,11 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Real Exploit: SafeMoon (2023-03, $8.9M)**",
-        "ANTIPATTERN: Checks msg.sender instead of tx.origin or uses weak checks"
+        "VERIFY: Real Exploit: SafeMoon (2023-03, $8.9M)",
+        "PROVE: Checks msg.sender instead of tx.origin or uses weak checks"
       ],
-      "antipattern": "Checks msg.sender instead of tx.origin or uses weak checks"
+      "antipattern": "Checks msg.sender instead of tx.origin or uses weak checks",
+      "validWhen": "Real Exploit: SafeMoon (2023-03, $8.9M)"
     },
     {
       "id": "general-security-access-control-vulnerabilities-complete-exploit-list-by-year-003",
@@ -72,7 +74,8 @@
       ],
       "check": [
         "VERIFY: Complete Exploit List by Year"
-      ]
+      ],
+      "validWhen": "Complete Exploit List by Year"
     },
     {
       "id": "general-security-defihacklabs-access-control-2021-2022-pa-vulnerable-pattern-examples-002",
@@ -93,10 +96,10 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Severity**: 🔴 CRITICAL | **Loss**: All contract ETH | **Protocol**: FlippazOne | **Chain**: Ethereum",
-        "ANTIPATTERN: for (uint256 i = 0; i < victims.length; i++) {"
+        "VERIFY: for (uint256 i = 0; i < victims.length; i++) {"
       ],
-      "antipattern": "for (uint256 i = 0; i < victims.length; i++) {"
+      "antipattern": "for (uint256 i = 0; i < victims.length; i++) {",
+      "validWhen": "for (uint256 i = 0; i < victims.length; i++) {"
     },
     {
       "id": "general-security-defihacklabs-access-control-2023-pattern-1-public-mint-public-burn-on-t-000",
@@ -117,10 +120,12 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: SafeMoon's token contract had `mint()` and `burn()` functions that were callable by anyone — no `onlyOwner` or role check.",
+        "VERIFY: SafeMoon's token contract had mint() and burn() functions that were callable by anyone — no onlyOwner or role check.",
+        "PROVE: Flash loan WBNB; Swap WBNB → SafeMoon via PancakeSwap",
         "ANTIPATTERN: mint() and burn() have NO access control"
       ],
-      "antipattern": "mint() and burn() have NO access control"
+      "antipattern": "mint() and burn() have NO access control",
+      "validWhen": "SafeMoon's token contract had mint() and burn() functions that were callable by anyone — no onlyOwner or role check."
     },
     {
       "id": "general-security-defihacklabs-access-control-2023-pattern-2-public-fee-transfer-function-001",
@@ -140,10 +145,11 @@
         206
       ],
       "check": [
-        "VERIFY: LeetSwap's pair contract had a public `_transferFeesSupportingTaxTokens()` function that allowed anyone to transfer tokens out of the pair as \"fees\".",
-        "ANTIPATTERN: _transferFeesSupportingTaxTokens is PUBLIC"
+        "VERIFY: LeetSwap's pair contract had a public _transferFeesSupportingTaxTokens() function that allowed anyone to transfer tokens out of the pair as \"fees\".",
+        "PROVE: _transferFeesSupportingTaxTokens is PUBLIC"
       ],
-      "antipattern": "_transferFeesSupportingTaxTokens is PUBLIC"
+      "antipattern": "_transferFeesSupportingTaxTokens is PUBLIC",
+      "validWhen": "LeetSwap's pair contract had a public _transferFeesSupportingTaxTokens() function that allowed anyone to transfer tokens out of the pair as \"fees\"."
     },
     {
       "id": "general-security-defihacklabs-access-control-2023-pattern-3-aggregator-arbitrary-sender--002",
@@ -164,10 +170,11 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: SwapX aggregator's swap function accepted a `from` address parameter, allowing the caller to initiate swaps using...",
-        "ANTIPATTERN: Swap function uses caller-specified 'from' address"
+        "VERIFY: SwapX aggregator's swap function accepted a from address parameter, allowing the caller to initiate swaps using another user's pre-approved tokens.",
+        "PROVE: Swap function uses caller-specified 'from' address"
       ],
-      "antipattern": "Swap function uses caller-specified 'from' address"
+      "antipattern": "Swap function uses caller-specified 'from' address",
+      "validWhen": "SwapX aggregator's swap function accepted a from address parameter, allowing the caller to initiate swaps using another user's pre-approved tokens."
     },
     {
       "id": "general-security-defihacklabs-access-control-2023-pattern-4-token-lock-claim-with-migrat-003",
@@ -188,9 +195,10 @@
       ],
       "check": [
         "VERIFY: SHIDO's token migration system allowed users to lock SHIDOINU tokens and claim SHIDO tokens.",
-        "ANTIPATTERN: Lock contract mishandles migration rate"
+        "PROVE: Lock contract mishandles migration rate"
       ],
-      "antipattern": "Lock contract mishandles migration rate"
+      "antipattern": "Lock contract mishandles migration rate",
+      "validWhen": "SHIDO's token migration system allowed users to lock SHIDOINU tokens and claim SHIDO tokens."
     },
     {
       "id": "general-security-defihacklabs-access-control-2023-pattern-5-router-bot-authorization-fai-004",
@@ -210,10 +218,11 @@
         340
       ],
       "check": [
-        "VERIFY: Trading bot routers (MaestroRouter, UniBot) processed swap transactions on behalf of users but failed to properly...",
-        "ANTIPATTERN: Router processes swaps without verifying authorization"
+        "VERIFY: Trading bot routers (MaestroRouter, UniBot) processed swap transactions on behalf of users but failed to properly verify that the calling address was...",
+        "PROVE: Router processes swaps without verifying authorization"
       ],
-      "antipattern": "Router processes swaps without verifying authorization"
+      "antipattern": "Router processes swaps without verifying authorization",
+      "validWhen": "Trading bot routers (MaestroRouter, UniBot) processed swap transactions on behalf of users but failed to properly verify that the calling address was authorized to..."
     },
     {
       "id": "general-security-defihacklabs-access-control-2023-pattern-secure-implementations-005",
@@ -233,9 +242,12 @@
         385
       ],
       "check": [
-        "VERIFY: // ✅ SECURE: mint/burn restricted to authorized roles"
+        "VERIFY: // SECURE: mint/burn restricted to authorized roles",
+        "FALSIFY: Swap function verifies sender matches from-address"
       ],
-      "securePattern": "Swap function verifies sender matches from-address"
+      "securePattern": "Swap function verifies sender matches from-address",
+      "validWhen": "// SECURE: mint/burn restricted to authorized roles",
+      "invalidWhen": "Swap function verifies sender matches from-address"
     },
     {
       "id": "general-security-defihacklabs-access-control-2024-2025-1-missing-access-control-on-mo-000",
@@ -256,10 +268,12 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: When a protocol's core module initialization function (`initializeModuleCore()`) lacks an access control modifier (e.",
+        "VERIFY: When a protocol's core module initialization function (initializeModuleCore()) lacks an access control modifier (e.g., onlyOwner, onlyAdmin, or...",
+        "PROVE: Find initializeModuleCore() — verify it lacks access control; Call it with attacker-controlled addresses for admin, token, and config parameters",
         "ANTIPATTERN: initializeModuleCore() has no access control"
       ],
-      "antipattern": "initializeModuleCore() has no access control"
+      "antipattern": "initializeModuleCore() has no access control",
+      "validWhen": "When a protocol's core module initialization function (initializeModuleCore()) lacks an access control modifier (e.g., onlyOwner, onlyAdmin, or initializer), any..."
     },
     {
       "id": "general-security-defihacklabs-access-control-2024-2025-2-missing-caller-restriction-o-001",
@@ -280,10 +294,12 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: When a DEX or AMM exposes an `execute()` function that performs token swaps, liquidity operations, and balance...",
+        "VERIFY: When a DEX or AMM exposes an execute() function that performs token swaps, liquidity operations, and balance adjustments without validating that the...",
+        "PROVE: Find the core velocoreexecute() function — no caller restriction; Encode token operations with type(int128).max amounts (maximum withdrawal)",
         "ANTIPATTERN: velocore__execute() callable by anyone"
       ],
-      "antipattern": "velocore__execute() callable by anyone"
+      "antipattern": "velocore__execute() callable by anyone",
+      "validWhen": "When a DEX or AMM exposes an execute() function that performs token swaps, liquidity operations, and balance adjustments without validating that the caller is an..."
     },
     {
       "id": "general-security-defihacklabs-access-control-2024-2025-3-public-mint-function-on-coll-002",
@@ -304,10 +320,12 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: When a protocol's collateral token contract exposes a `mint()` function without an `onlyOwner` or `onlyMinter`...",
+        "VERIFY: When a protocol's collateral token contract exposes a mint() function without an onlyOwner or onlyMinter modifier, anyone can mint unlimited tokens.",
+        "PROVE: Identify the collateral token contract — find public mint() function; Mint a large amount of collateral tokens to attacker's address",
         "ANTIPATTERN: ShezmuUSD.mint() has no access control"
       ],
-      "antipattern": "ShezmuUSD.mint() has no access control"
+      "antipattern": "ShezmuUSD.mint() has no access control",
+      "validWhen": "When a protocol's collateral token contract exposes a mint() function without an onlyOwner or onlyMinter modifier, anyone can mint unlimited tokens."
     },
     {
       "id": "general-security-defihacklabs-access-control-2024-2025-4-unverified-contract-with-ext-003",
@@ -329,9 +347,10 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Unverified (non-open-source) contracts on blockchain explorers can hide malicious or vulnerable logic.",
-        "ANTIPATTERN: Unverified contract with externally callable transfer logic"
+        "PROVE: Unverified contract with externally callable transfer logic"
       ],
-      "antipattern": "Unverified contract with externally callable transfer logic"
+      "antipattern": "Unverified contract with externally callable transfer logic",
+      "validWhen": "Unverified (non-open-source) contracts on blockchain explorers can hide malicious or vulnerable logic."
     },
     {
       "id": "general-security-defihacklabs-access-control-2024-2025-5-missing-msg-sender-validatio-004",
@@ -352,10 +371,12 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: When a liquidity pool's `exitPool()` function accepts a `user` parameter to specify whose liquidity to withdraw but...",
+        "VERIFY: When a liquidity pool's exitPool() function accepts a user parameter to specify whose liquidity to withdraw but doesn't validate that msg.sender ==...",
+        "PROVE: Call exitPool(victim, maxAmount) — specify victim's address as the user; Protocol withdraws victim's liquidity and sends tokens to msg.sender (or to user parameter)",
         "ANTIPATTERN: exitPool() doesn't validate msg.sender == user"
       ],
-      "antipattern": "exitPool() doesn't validate msg.sender == user"
+      "antipattern": "exitPool() doesn't validate msg.sender == user",
+      "validWhen": "When a liquidity pool's exitPool() function accepts a user parameter to specify whose liquidity to withdraw but doesn't validate that msg.sender == user, any caller can..."
     },
     {
       "id": "general-security-defihacklabs-access-control-patterns-1-unprotected-token-mint-burn-000",
@@ -376,10 +397,12 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: When ERC20 token contracts expose `mint()` and `burn()` functions without access control modifiers (`onlyOwner`,...",
+        "VERIFY: When ERC20 token contracts expose mint() and burn() functions without access control modifiers (onlyOwner, onlyRole, or similar), any external caller...",
+        "PROVE: Call burn(pairAddress, pairBalance - dust) — burn nearly all tokens from LP pair; Call sync() on pair to update reserves (almost 0 tokens, same ETH/BNB)",
         "ANTIPATTERN: SafeMoon V2 token has unprotected mint/burn functions"
       ],
-      "antipattern": "SafeMoon V2 token has unprotected mint/burn functions"
+      "antipattern": "SafeMoon V2 token has unprotected mint/burn functions",
+      "validWhen": "When ERC20 token contracts expose mint() and burn() functions without access control modifiers (onlyOwner, onlyRole, or similar), any external caller can mint tokens to..."
     },
     {
       "id": "general-security-defihacklabs-access-control-patterns-2-unprotected-migration-functi-001",
@@ -400,10 +423,11 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: When staking or vault contracts implement `migrateStake()` functions for protocol upgrades, these functions must be...",
-        "ANTIPATTERN: migrateStake() has NO access control"
+        "VERIFY: When staking or vault contracts implement migrateStake() functions for protocol upgrades, these functions must be restricted to only accept calls...",
+        "PROVE: migrateStake() has NO access control"
       ],
-      "antipattern": "migrateStake() has NO access control"
+      "antipattern": "migrateStake() has NO access control",
+      "validWhen": "When staking or vault contracts implement migrateStake() functions for protocol upgrades, these functions must be restricted to only accept calls from authorized sources..."
     },
     {
       "id": "general-security-defihacklabs-access-control-patterns-3-unprotected-configuration-se-002",
@@ -423,10 +447,11 @@
         203
       ],
       "check": [
-        "VERIFY: When staking or reward contracts expose configuration functions like `setToken()`, `setRewardToken()`, or `setPool()`...",
-        "ANTIPATTERN: setToken() has NO access control"
+        "VERIFY: When staking or reward contracts expose configuration functions like setToken(), setRewardToken(), or setPool() without access control, an attacker...",
+        "PROVE: setToken() has NO access control"
       ],
-      "antipattern": "setToken() has NO access control"
+      "antipattern": "setToken() has NO access control",
+      "validWhen": "When staking or reward contracts expose configuration functions like setToken(), setRewardToken(), or setPool() without access control, an attacker can switch the..."
     },
     {
       "id": "general-security-defihacklabs-access-control-patterns-4-missing-token-registry-valid-003",
@@ -446,10 +471,11 @@
         247
       ],
       "check": [
-        "VERIFY: When bond teller or similar contracts accept a `token` parameter in `redeem()` without validating that it is a...",
-        "ANTIPATTERN: redeem() does not validate token_ is a registered bond token"
+        "VERIFY: When bond teller or similar contracts accept a token parameter in redeem() without validating that it is a legitimately issued bond token, an...",
+        "PROVE: redeem() does not validate token_ is a registered bond token"
       ],
-      "antipattern": "redeem() does not validate token_ is a registered bond token"
+      "antipattern": "redeem() does not validate token_ is a registered bond token",
+      "validWhen": "When bond teller or similar contracts accept a token parameter in redeem() without validating that it is a legitimately issued bond token, an attacker can deploy a fake..."
     },
     {
       "id": "general-security-arbitrary-external-call-vulnerabilities-vulnerability-categories-001",
@@ -469,8 +495,9 @@
         83
       ],
       "check": [
-        "VERIFY: Contract allows user to specify any target address for `.call()`."
-      ]
+        "VERIFY: Contract allows user to specify any target address for .call()."
+      ],
+      "validWhen": "Contract allows user to specify any target address for .call()."
     },
     {
       "id": "general-security-arbitrary-external-call-vulnerabilities-vulnerable-pattern-examples-002",
@@ -492,9 +519,10 @@
       "neverPrune": true,
       "check": [
         "VERIFY: User controls both 'router' and '_data' (calldata)",
-        "ANTIPATTERN: Route allows arbitrary external call via swapExtraData"
+        "PROVE: Route allows arbitrary external call via swapExtraData"
       ],
-      "antipattern": "Route allows arbitrary external call via swapExtraData"
+      "antipattern": "Route allows arbitrary external call via swapExtraData",
+      "validWhen": "User controls both 'router' and '_data' (calldata)"
     },
     {
       "id": "general-security-defihacklabs-arbitrary-call-2024-2025-1-unvalidated-callto-calldata--000",
@@ -515,10 +543,12 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Many DeFi protocols (routers, aggregators, bridges) accept user-supplied swap instructions containing a `callTo`...",
+        "VERIFY: Many DeFi protocols (routers, aggregators, bridges) accept user-supplied swap instructions containing a callTo (target address) and callData (raw...",
+        "PROVE: Identify a protocol with user approvals (router, aggregator, bridge gateway); Find a function that passes user-supplied callTo/callData to a low-level call",
         "ANTIPATTERN: Newly added route (ID 406) passes swapExtraData to low-level call"
       ],
-      "antipattern": "Newly added route (ID 406) passes swapExtraData to low-level call"
+      "antipattern": "Newly added route (ID 406) passes swapExtraData to low-level call",
+      "validWhen": "Many DeFi protocols (routers, aggregators, bridges) accept user-supplied swap instructions containing a callTo (target address) and callData (raw bytes) field."
     },
     {
       "id": "general-security-defihacklabs-arbitrary-call-2024-2025-2-unrestricted-external-call-a-001",
@@ -539,10 +569,11 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Multi-action contracts (like Kashi/Chamberss) implement an `OPERATION_CALL` action type that allows calling arbitrary...",
-        "ANTIPATTERN: Chamber.performOperations() has OPERATION_CALL (opcode 30)"
+        "VERIFY: Multi-action contracts (like Kashi/Chamberss) implement an OPERATION_CALL action type that allows calling arbitrary external contracts.",
+        "PROVE: Chamber.performOperations() has OPERATION_CALL (opcode 30)"
       ],
-      "antipattern": "Chamber.performOperations() has OPERATION_CALL (opcode 30)"
+      "antipattern": "Chamber.performOperations() has OPERATION_CALL (opcode 30)",
+      "validWhen": "Multi-action contracts (like Kashi/Chamberss) implement an OPERATION_CALL action type that allows calling arbitrary external contracts."
     },
     {
       "id": "general-security-defihacklabs-arbitrary-call-2024-2025-3-bridge-signer-validation-byp-002",
@@ -563,10 +594,11 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Cross-chain bridges use multi-signature validation on withdrawal requests — requiring N of M authorized validators to...",
-        "ANTIPATTERN: Bridge withdraw() accepts invalid/compromised validator signatures"
+        "VERIFY: Cross-chain bridges use multi-signature validation on withdrawal requests — requiring N of M authorized validators to sign.",
+        "PROVE: Bridge withdraw() accepts invalid/compromised validator signatures"
       ],
-      "antipattern": "Bridge withdraw() accepts invalid/compromised validator signatures"
+      "antipattern": "Bridge withdraw() accepts invalid/compromised validator signatures",
+      "validWhen": "Cross-chain bridges use multi-signature validation on withdrawal requests — requiring N of M authorized validators to sign."
     },
     {
       "id": "general-security-defihacklabs-arbitrary-call-2024-2025-4-yul-integer-overflow-calldat-003",
@@ -587,10 +619,11 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Contracts using Yul assembly for calldata manipulation are vulnerable to integer overflow, as Yul's `add()` opcode does...",
-        "ANTIPATTERN: Settlement._settleOrder() uses Yul add() for calldata offsets"
+        "VERIFY: Contracts using Yul assembly for calldata manipulation are vulnerable to integer overflow, as Yul's add() opcode does NOT revert on overflow (unlike...",
+        "PROVE: Settlement._settleOrder() uses Yul add() for calldata offsets"
       ],
-      "antipattern": "Settlement._settleOrder() uses Yul add() for calldata offsets"
+      "antipattern": "Settlement._settleOrder() uses Yul add() for calldata offsets",
+      "validWhen": "Contracts using Yul assembly for calldata manipulation are vulnerable to integer overflow, as Yul's add() opcode does NOT revert on overflow (unlike Solidity 0.8+)."
     },
     {
       "id": "general-security-defihacklabs-arbitrary-call-2024-2025-5-unverified-aggregator-proxy--004",
@@ -612,9 +645,10 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Trade aggregator proxies that accept raw calldata and forward it to external contracts create a universal call gadget.",
-        "ANTIPATTERN: Unverified aggregator proxy at 0xd3f64BAa732061F8B3626ee44bab354f854877AC"
+        "PROVE: Unverified aggregator proxy at 0xd3f64BAa732061F8B3626ee44bab354f854877AC"
       ],
-      "antipattern": "Unverified aggregator proxy at 0xd3f64BAa732061F8B3626ee44bab354f854877AC"
+      "antipattern": "Unverified aggregator proxy at 0xd3f64BAa732061F8B3626ee44bab354f854877AC",
+      "validWhen": "Trade aggregator proxies that accept raw calldata and forward it to external contracts create a universal call gadget."
     },
     {
       "id": "general-security-defihacklabs-arbitrary-call-patterns-1-unvalidated-router-address-c-000",
@@ -636,9 +670,11 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Swap aggregator and cross-chain proxy contracts often need to interact with multiple DEX routers.",
+        "PROVE: Enumerate all addresses that approved tokens to the vulnerable router contract; For each victim, check their approved token balance",
         "ANTIPATTERN: routerCallNative accepts ANY router address and ANY calldata"
       ],
-      "antipattern": "routerCallNative accepts ANY router address and ANY calldata"
+      "antipattern": "routerCallNative accepts ANY router address and ANY calldata",
+      "validWhen": "Swap aggregator and cross-chain proxy contracts often need to interact with multiple DEX routers."
     },
     {
       "id": "general-security-defihacklabs-arbitrary-call-patterns-2-additional-arbitrary-call-pa-001",
@@ -660,9 +696,10 @@
       "neverPrune": true,
       "check": [
         "VERIFY: write() accepts arbitrary callData and executes it",
-        "ANTIPATTERN: Zapper.zapIn() accepts ZapData with arbitrary swapTarget + callData"
+        "PROVE: Zapper.zapIn() accepts ZapData with arbitrary swapTarget + callData"
       ],
-      "antipattern": "Zapper.zapIn() accepts ZapData with arbitrary swapTarget + callData"
+      "antipattern": "Zapper.zapIn() accepts ZapData with arbitrary swapTarget + callData",
+      "validWhen": "write() accepts arbitrary callData and executes it"
     },
     {
       "id": "general-security-dex-aggregator-unvalidated-call-data-root-cause-analysis-001",
@@ -682,8 +719,9 @@
         115
       ],
       "check": [
-        "VERIFY: protocol calls a DEX aggregator as part of a liquidation or position-close flow, passing user-supplied `bytes..."
-      ]
+        "VERIFY: protocol calls a DEX aggregator as part of a liquidation or position-close flow, passing user-supplied bytes..."
+      ],
+      "validWhen": "The protocol calls a DEX aggregator as part of a liquidation or position-close flow, passing user-supplied bytes..."
     },
     {
       "id": "general-security-dex-aggregator-unvalidated-call-data-vulnerable-pattern-examples-003",
@@ -705,7 +743,8 @@
       "check": [
         "VERIFY: attacker controls dexTxnData — can encode swapExactTokensForETH"
       ],
-      "antipattern": "attacker controls dexTxnData — can encode swapExactTokensForETH"
+      "antipattern": "attacker controls dexTxnData — can encode swapExactTokensForETH",
+      "validWhen": "attacker controls dexTxnData — can encode swapExactTokensForETH"
     },
     {
       "id": "general-security-missing-validation-template-vulnerability-pattern-categori-001",
@@ -726,10 +765,15 @@
       ],
       "check": [
         "VERIFY: No zero address check",
-        "ANTIPATTERN: No length check, division by zero possible"
+        "PROVE: No length check, division by zero possible",
+        "FALSIFY: Full relationship validation",
+        "IMPACT: Silent failures, unexpected behavior, delegatecall to EOA"
       ],
       "antipattern": "No length check, division by zero possible",
-      "securePattern": "Full relationship validation"
+      "securePattern": "Full relationship validation",
+      "validWhen": "No zero address check",
+      "invalidWhen": "Full relationship validation",
+      "impact": "Silent failures, unexpected behavior, delegatecall to EOA"
     },
     {
       "id": "general-security-defihacklabs-input-validation-patterns-input-validation-vulnerabiliti-000",
@@ -750,11 +794,16 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: root causes fall into several distinct categories:",
-        "ANTIPATTERN: Bridge accepts signature arrays without verifying signers are authorized"
+        "VERIFY: root causes fall into several distinct categories",
+        "PROVE: *Arbitrary Calldata Attack (SocketGateway pattern); Attacker identifies a route that forwards swapExtraData as raw calldata to a token contract",
+        "FALSIFY: Verify callback caller is a legitimate pool from the factory",
+        "IMPACT: Fund Drainage: Approved tokens stolen via injected transferFrom calldata"
       ],
       "antipattern": "Bridge accepts signature arrays without verifying signers are authorized",
-      "securePattern": "Verify callback caller is a legitimate pool from the factory"
+      "securePattern": "Verify callback caller is a legitimate pool from the factory",
+      "validWhen": "The root causes fall into several distinct categories",
+      "invalidWhen": "Verify callback caller is a legitimate pool from the factory",
+      "impact": "Fund Drainage: Approved tokens stolen via injected transferFrom calldata"
     },
     {
       "id": "general-security-slippage-input-validation-vulnerabilitie-slippage-input-validation-vuln-000",
@@ -774,14 +823,18 @@
         675
       ],
       "check": [
-        "VERIFY: root causes fall into several distinct categories:",
+        "VERIFY: root causes fall into several distinct categories",
+        "PROVE: *Slippage Attack (Sandwich); Attacker monitors mempool for vulnerable swap transactions",
+        "FALSIFY: User-specified minimum output with reasonable bounds",
+        "IMPACT: Direct fund loss: Attackers extract value through sandwich attacks or parameter manipulation",
         "All swap functions specify meaningful minimum output amounts",
-        "Deadline is user-specified and validated (not block.timestamp)",
-        "External contract addresses are validated against whitelist",
-        "LOOK FOR: swapExactTokensForTokens(..., 0, ...)          # Zero slippage"
+        "Deadline is user-specified and validated (not block.timestamp)"
       ],
       "antipattern": "buyToken with user-controlled slippage parameter that can be set to 0",
-      "securePattern": "User-specified minimum output with reasonable bounds"
+      "securePattern": "User-specified minimum output with reasonable bounds",
+      "validWhen": "The root causes fall into several distinct categories",
+      "invalidWhen": "User-specified minimum output with reasonable bounds",
+      "impact": "Direct fund loss: Attackers extract value through sandwich attacks or parameter manipulation"
     },
     {
       "id": "general-security-defihacklabs-initialization-patterns-defihacklabs-unprotected-initi-000",
@@ -803,10 +856,15 @@
       "neverPrune": true,
       "check": [
         "VERIFY: init() has NO access control — anyone can re-set depositToken",
-        "ANTIPATTERN: Deploy creates a proxy but init() is never called in the same tx"
+        "PROVE: Deploy creates a proxy but init() is never called in the same tx",
+        "FALSIFY: Disable initialization on implementation/library contracts",
+        "IMPACT: Total contract takeover: Attacker becomes owner/admin with full control"
       ],
       "antipattern": "Deploy creates a proxy but init() is never called in the same tx",
-      "securePattern": "Disable initialization on implementation/library contracts"
+      "securePattern": "Disable initialization on implementation/library contracts",
+      "validWhen": "init() has NO access control — anyone can re-set depositToken",
+      "invalidWhen": "Disable initialization on implementation/library contracts",
+      "impact": "Total contract takeover: Attacker becomes owner/admin with full control"
     },
     {
       "id": "general-security-initialization-vulnerabilities-vulnerability-categories-001",
@@ -828,7 +886,8 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Proxy deployed without calling initializer, leaving critical state unset."
-      ]
+      ],
+      "validWhen": "Proxy deployed without calling initializer, leaving critical state unset."
     },
     {
       "id": "general-security-initialization-vulnerabilities-vulnerable-pattern-examples-002",
@@ -850,10 +909,13 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Proxy deployed without initialization",
-        "ANTIPATTERN: No validation on initialization parameters"
+        "PROVE: No validation on initialization parameters",
+        "FALSIFY: Initialize in constructor or same transaction"
       ],
       "antipattern": "No validation on initialization parameters",
-      "securePattern": "Initialize in constructor or same transaction"
+      "securePattern": "Initialize in constructor or same transaction",
+      "validWhen": "Proxy deployed without initialization",
+      "invalidWhen": "Initialize in constructor or same transaction"
     },
     {
       "id": "general-security-signature-verification-vulnerabilities-vulnerability-categories-001",
@@ -874,7 +936,8 @@
       ],
       "check": [
         "VERIFY: No verification or insufficient checking of signature parameters."
-      ]
+      ],
+      "validWhen": "No verification or insufficient checking of signature parameters."
     },
     {
       "id": "general-security-signature-verification-vulnerabilities-vulnerable-pattern-examples-002",
@@ -896,10 +959,13 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Invalid signature verification logic",
-        "ANTIPATTERN: ECDSA signature malleability not handled"
+        "PROVE: ECDSA signature malleability not handled",
+        "FALSIFY: EIP-712 with domain separator including chain ID"
       ],
       "antipattern": "ECDSA signature malleability not handled",
-      "securePattern": "EIP-712 with domain separator including chain ID"
+      "securePattern": "EIP-712 with domain separator including chain ID",
+      "validWhen": "Invalid signature verification logic",
+      "invalidWhen": "EIP-712 with domain separator including chain ID"
     }
   ]
 }

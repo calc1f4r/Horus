@@ -2,11 +2,13 @@
 """
 Micro-Directive Extractor
 =========================
-Enriches hunt cards with structured `check`, `antipattern`, and `securePattern`
-fields extracted from the referenced .md vulnerability entries.
+Enriches hunt cards with structured `check`, `antipattern`, `securePattern`,
+and compact triage context (`validWhen`, `invalidWhen`, `impact`) extracted
+from the referenced .md vulnerability entries.
 
 Agents can execute micro-directives directly against grep hit locations
-without reading the full .md file — cutting context usage by 60-80%.
+without reading the full .md file — cutting context usage by 60-80% while
+also getting enough reportability context to filter out weak matches earlier.
 
 Usage:
     python3 scripts/generate_micro_directives.py                  # Enrich all hunt cards
@@ -44,6 +46,85 @@ def _read_section(file_path: str, line_start: int, line_end: int) -> list[str]:
     return lines[max(0, line_start - 1):min(line_end, len(lines))]
 
 
+def _clean_text(text: str) -> str:
+    """Normalize markdown/prose into a compact plain-text sentence."""
+    cleaned = text.strip()
+    cleaned = re.sub(r"\[(.*?)\]\([^\)]*\)", r"\1", cleaned)
+    cleaned = cleaned.replace("❌", "").replace("✅", "").replace("📖", "")
+    cleaned = cleaned.replace("`", "")
+    cleaned = cleaned.replace("**", "")
+    cleaned = cleaned.replace("__", "")
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    return cleaned.strip(" -:|\"")
+
+
+def _shorten(text: str, max_len: int = 180) -> str:
+    """Collapse text to a readable single sentence capped at max_len."""
+    cleaned = _clean_text(text)
+    if not cleaned:
+        return ""
+    sentence_breaks = [". ", "! ", "? "]
+    for marker in sentence_breaks:
+        idx = cleaned.find(marker)
+        if 0 < idx < max_len:
+            return cleaned[: idx + 1].strip()
+    if len(cleaned) <= max_len:
+        return cleaned
+    truncated = cleaned[:max_len].rsplit(" ", 1)[0].strip()
+    return truncated + "..."
+
+
+def _is_informative_summary(text: str) -> bool:
+    """Return True only for summaries that help triage a bug report."""
+    cleaned = _clean_text(text)
+    lower = cleaned.lower()
+    if len(cleaned) < 20:
+        return False
+    bad_prefixes = (
+        "severity:",
+        "source:",
+        "sources:",
+        "reference:",
+        "references:",
+        "overview",
+        "summary",
+        "conclusion",
+        "technical impact",
+        "business impact",
+        "financial impact",
+    )
+    if lower.startswith(bad_prefixes):
+        return False
+    if lower in {
+        "vulnerability description",
+        "vulnerable pattern examples",
+        "attack scenario",
+        "attack scenarios",
+        "secure implementation",
+    }:
+        return False
+    if lower.endswith((" because", " due to", " as", " with", " where")):
+        return False
+    return True
+
+
+def _dedupe_keep_order(items: list[str]) -> list[str]:
+    """Deduplicate short directives while preserving order."""
+    result = []
+    seen = set()
+    for item in items:
+        if not item:
+            continue
+        key = item.strip().lower()
+        key = re.sub(r"^(verify|prove|falsify|impact|look for|antipattern):\s*", "", key)
+        key = re.sub(r"\s+", " ", key)
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(item.strip())
+    return result
+
+
 def _extract_checklist_items(section_lines: list[str]) -> list[str]:
     """Extract audit checklist items (- [ ] ...) from section lines."""
     items = []
@@ -53,6 +134,148 @@ def _extract_checklist_items(section_lines: list[str]) -> list[str]:
         if m:
             items.append(m.group(1).strip())
     return items
+
+
+def _extract_root_cause(section_lines: list[str]) -> str:
+    """Extract a concise root-cause sentence from a section."""
+    in_root_cause = False
+    for line in section_lines:
+        stripped = line.strip()
+        lower = _clean_text(stripped).lower()
+        if re.match(r"^#{1,6}\s+.*root cause", stripped, re.IGNORECASE):
+            in_root_cause = True
+            continue
+        if not in_root_cause and lower.startswith("root cause"):
+            parts = stripped.split(":", 1)
+            if len(parts) == 2:
+                candidate = _shorten(parts[1])
+                if _is_informative_summary(candidate):
+                    return candidate
+            in_root_cause = True
+            continue
+        if in_root_cause:
+            if stripped.startswith("#") or stripped.startswith("---"):
+                break
+            if not stripped or stripped.startswith(("```", ">")):
+                continue
+            candidate = _shorten(stripped)
+            if _is_informative_summary(candidate):
+                return candidate
+    return ""
+
+
+def _extract_attack_steps(section_lines: list[str]) -> list[str]:
+    """Extract short attack/precondition steps from attack scenario sections."""
+    steps = []
+    in_attack_section = False
+    for line in section_lines:
+        stripped = line.strip()
+        lower = _clean_text(stripped).lower()
+        if re.match(r"^#{1,6}\s+.*attack scenario", stripped, re.IGNORECASE):
+            in_attack_section = True
+            continue
+        if in_attack_section:
+            if stripped.startswith("#") or stripped.startswith("---"):
+                break
+            if stripped.startswith("```"):
+                continue
+            match = re.match(r"^(?:\d+[\.)]|[-*])\s*(.+)$", stripped)
+            if match:
+                candidate = _shorten(match.group(1), max_len=120)
+                if len(candidate) >= 12:
+                    steps.append(candidate)
+            elif steps and stripped.startswith(("  -", "    -")):
+                continue
+            if len(steps) >= 4:
+                break
+    return steps
+
+
+def _extract_guidance_signal(section_lines: list[str], heading_terms: tuple[str, ...]) -> str:
+    """Extract one concise bullet or sentence under a guidance heading.
+
+    Used for sections like "Valid Bug Signals" and "False Positive Guards"
+    that are optimized for low-context agent triage.
+    """
+    in_section = False
+    collected = []
+    heading_regex = "|".join(re.escape(term) for term in heading_terms)
+
+    for line in section_lines:
+        stripped = line.strip()
+        if re.match(rf"^#{{1,6}}\s+.*(?:{heading_regex})", stripped, re.IGNORECASE):
+            in_section = True
+            continue
+        if in_section:
+            if stripped.startswith("#") or stripped.startswith("---"):
+                break
+            if not stripped or stripped.startswith("```"):
+                continue
+            match = re.match(r"^(?:\d+[\.)]|[-*])\s*(.+)$", stripped)
+            candidate = match.group(1).strip() if match else stripped
+            candidate = _shorten(candidate, max_len=170)
+            if _is_informative_summary(candidate):
+                collected.append(candidate)
+            if len(collected) >= 2:
+                break
+
+    if not collected:
+        return ""
+    return _shorten("; ".join(collected), max_len=170)
+
+
+def _extract_impact_summary(section_lines: list[str]) -> str:
+    """Extract one concise impact line useful for triage prioritization."""
+    for line in section_lines:
+        stripped = line.strip()
+        cleaned = _clean_text(stripped)
+        lower = cleaned.lower()
+        if lower.startswith("impacts:") or lower.startswith("impact:"):
+            _, _, remainder = cleaned.partition(":")
+            candidate = _shorten(remainder or cleaned, max_len=160)
+            if _is_informative_summary(candidate):
+                return candidate
+
+    in_impact_section = False
+    for line in section_lines:
+        stripped = line.strip()
+        if re.match(r"^#{1,6}\s+.*(?:technical impact|business impact|financial impact)", stripped, re.IGNORECASE):
+            in_impact_section = True
+            continue
+        if in_impact_section:
+            if stripped.startswith("#") or stripped.startswith("---"):
+                break
+            if not stripped:
+                continue
+            if stripped.startswith("|"):
+                cols = [_clean_text(part) for part in stripped.strip("|").split("|")]
+                if len(cols) >= 3 and cols[0].lower() not in {"impact type", "impact category"}:
+                    candidate = _shorten(cols[2], max_len=160)
+                    if _is_informative_summary(candidate):
+                        return candidate
+            bullet = re.match(r"^(?:\d+[\.)]|[-*])\s*(.+)$", stripped)
+            if bullet:
+                candidate = _shorten(bullet.group(1), max_len=160)
+                if _is_informative_summary(candidate):
+                    return candidate
+    return ""
+
+
+def _extract_fix_signal(section_lines: list[str]) -> str:
+    """Extract the first secure/fix heading when no code comment is available."""
+    for line in section_lines:
+        stripped = line.strip()
+        if re.match(r"^#{1,6}\s+.*(?:secure pattern|secure implementation|fix)", stripped, re.IGNORECASE):
+            heading = re.sub(r"^#{1,6}\s*", "", stripped)
+            candidate = _shorten(heading, max_len=160)
+            if _is_informative_summary(candidate):
+                return candidate
+        cleaned = _clean_text(stripped)
+        if cleaned.lower().startswith("fix ") or cleaned.lower().startswith("fix:"):
+            candidate = _shorten(cleaned, max_len=160)
+            if _is_informative_summary(candidate):
+                return candidate
+    return ""
 
 
 def _extract_code_patterns(section_lines: list[str]) -> list[str]:
@@ -180,16 +403,61 @@ def _extract_vulnerable_code_shape(section_lines: list[str]) -> str:
     return ""
 
 
+def _build_valid_when(root_cause: str, attack_steps: list[str], antipattern: str) -> str:
+    """Build a compact reportability rule for the bug class."""
+    if _is_informative_summary(root_cause):
+        return _shorten(root_cause, max_len=170)
+    if attack_steps:
+        candidate = _shorten("; ".join(attack_steps[:2]), max_len=170)
+        if _is_informative_summary(candidate):
+            return candidate
+    if _is_informative_summary(antipattern):
+        return _shorten(antipattern, max_len=170)
+    return ""
+
+
+def _build_invalid_when(secure_pattern: str, fix_signal: str) -> str:
+    """Build a compact false-positive invalidator rule."""
+    if _is_informative_summary(secure_pattern):
+        return _shorten(secure_pattern, max_len=170)
+    if _is_informative_summary(fix_signal):
+        return _shorten(fix_signal, max_len=170)
+    return ""
+
+
+def _build_proof_hint(
+    attack_steps: list[str],
+    antipattern: str,
+    code_patterns: list[str],
+    valid_when: str,
+) -> str:
+    """Build a proof-oriented directive showing what evidence should exist."""
+    if attack_steps:
+        candidate = _shorten("; ".join(attack_steps[:2]), max_len=170)
+        if _is_informative_summary(candidate):
+            return candidate
+    if _is_informative_summary(antipattern) and _clean_text(antipattern).lower() != _clean_text(valid_when).lower():
+        return _shorten(antipattern, max_len=170)
+    if code_patterns:
+        candidate = _shorten(code_patterns[0], max_len=170)
+        if _is_informative_summary(candidate):
+            return candidate
+    return ""
+
+
 def _build_check_from_checklist_and_patterns(
     checklist: list[str],
     code_patterns: list[str],
     antipattern: str,
     root_cause: str,
+    proof_hint: str,
+    invalid_when: str,
+    impact: str,
 ) -> list[str]:
     """Build the `check` array from extracted components.
 
     Merges audit checklist items and code pattern descriptions into
-    1-5 actionable verification steps.
+    1-6 actionable verification steps.
     """
     checks = []
 
@@ -201,43 +469,36 @@ def _build_check_from_checklist_and_patterns(
         rc = re.sub(r"^This vulnerability exists because\s+", "", rc, flags=re.I)
         rc = re.sub(r"^The\s+", "", rc, flags=re.I)
         if len(rc) > 20:
-            checks.append(f"VERIFY: {rc[:150]}")
+            checks.append(f"VERIFY: {_shorten(rc, max_len=150)}")
+
+    if proof_hint:
+        checks.append(f"PROVE: {proof_hint}")
+
+    if invalid_when:
+        checks.append(f"FALSIFY: {invalid_when}")
+
+    if impact:
+        checks.append(f"IMPACT: {impact}")
 
     # Add checklist items (most actionable)
-    for item in checklist[:3]:
+    for item in checklist[:2]:
         item = item.strip()
         if item and len(item) > 10:
             # Already imperative from the checklist format
             checks.append(item)
 
     # Add code patterns (structural indicators)
-    for pattern in code_patterns[:2]:
+    for pattern in code_patterns[:1]:
         pattern = pattern.strip()
         if pattern and len(pattern) > 10:
             checks.append(f"LOOK FOR: {pattern}")
 
     # Add antipattern-based check if we have one and checks are sparse
-    if antipattern and len(checks) < 3:
+    if antipattern and len(checks) < 4:
         checks.append(f"ANTIPATTERN: {antipattern}")
 
-    # Deduplicate (fuzzy — avoid very similar checks)
-    if len(checks) > 1:
-        unique = [checks[0]]
-        for c in checks[1:]:
-            # Skip if >60% word overlap with any existing check
-            c_words = set(c.lower().split())
-            is_dup = False
-            for existing in unique:
-                e_words = set(existing.lower().split())
-                overlap = len(c_words & e_words) / max(len(c_words | e_words), 1)
-                if overlap > 0.6:
-                    is_dup = True
-                    break
-            if not is_dup:
-                unique.append(c)
-        checks = unique
-
-    return checks[:5]  # Max 5 checks
+    checks = _dedupe_keep_order(checks)
+    return checks[:6]  # Max 6 checks
 
 
 # ─── Main enrichment function ───
@@ -263,19 +524,38 @@ def enrich_card(card: dict) -> dict:
     # Extract components
     checklist = _extract_checklist_items(section_lines)
     code_patterns = _extract_code_patterns(section_lines)
+    root_cause = _extract_root_cause(section_lines) or card.get("detect", "")
+    attack_steps = _extract_attack_steps(section_lines)
+    explicit_valid_when = _extract_guidance_signal(
+        section_lines,
+        ("valid bug signals", "valid when", "reportable when"),
+    )
+    explicit_invalid_when = _extract_guidance_signal(
+        section_lines,
+        ("false positive guards", "invalid when", "not this bug when", "safe if"),
+    )
+    impact = _extract_impact_summary(section_lines)
     antipattern = _extract_antipattern(section_lines)
     secure_pattern = _extract_secure_pattern(section_lines)
+    fix_signal = _extract_fix_signal(section_lines)
 
     # If no explicit antipattern found, try to extract from code shape
     if not antipattern:
         antipattern = _extract_vulnerable_code_shape(section_lines)
 
-    # Get root cause from detect field (already in the card)
-    root_cause = card.get("detect", "")
+    valid_when = explicit_valid_when or _build_valid_when(root_cause, attack_steps, antipattern)
+    invalid_when = explicit_invalid_when or _build_invalid_when(secure_pattern, fix_signal)
+    proof_hint = _build_proof_hint(attack_steps, antipattern, code_patterns, valid_when)
 
     # Build check array
     checks = _build_check_from_checklist_and_patterns(
-        checklist, code_patterns, antipattern, root_cause
+        checklist,
+        code_patterns,
+        antipattern,
+        valid_when or root_cause,
+        proof_hint,
+        invalid_when,
+        impact,
     )
 
     # Only add fields if we actually extracted something useful
@@ -286,6 +566,12 @@ def enrich_card(card: dict) -> dict:
         enriched["antipattern"] = antipattern
     if secure_pattern:
         enriched["securePattern"] = secure_pattern
+    if valid_when:
+        enriched["validWhen"] = valid_when
+    if invalid_when:
+        enriched["invalidWhen"] = invalid_when
+    if impact:
+        enriched["impact"] = impact
 
     return enriched
 
@@ -297,7 +583,16 @@ def enrich_huntcard_file(input_path: Path, output_path: Path = None) -> dict:
 
     cards = data.get("cards", [])
     enriched_cards = []
-    stats = {"total": 0, "enriched": 0, "with_check": 0, "with_antipattern": 0, "with_secure": 0}
+    stats = {
+        "total": 0,
+        "enriched": 0,
+        "with_check": 0,
+        "with_antipattern": 0,
+        "with_secure": 0,
+        "with_valid": 0,
+        "with_invalid": 0,
+        "with_impact": 0,
+    }
 
     for card in cards:
         stats["total"] += 1
@@ -313,6 +608,15 @@ def enrich_huntcard_file(input_path: Path, output_path: Path = None) -> dict:
         if "securePattern" in enriched and enriched["securePattern"]:
             stats["with_secure"] += 1
             has_new = True
+        if "validWhen" in enriched and enriched["validWhen"]:
+            stats["with_valid"] += 1
+            has_new = True
+        if "invalidWhen" in enriched and enriched["invalidWhen"]:
+            stats["with_invalid"] += 1
+            has_new = True
+        if "impact" in enriched and enriched["impact"]:
+            stats["with_impact"] += 1
+            has_new = True
         if has_new:
             stats["enriched"] += 1
 
@@ -323,8 +627,8 @@ def enrich_huntcard_file(input_path: Path, output_path: Path = None) -> dict:
     data["meta"]["enriched"] = stats["enriched"]
     data["meta"]["usage"] = (
         "Load cards into context. For each card, grep target code for card.grep. "
-        "On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) "
-        "for confirmed true/likely positives."
+        "On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, "
+        "and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives."
     )
 
     if output_path:
@@ -365,11 +669,17 @@ def main():
         with_check = sum(1 for c in cards if c.get("check"))
         with_anti = sum(1 for c in cards if c.get("antipattern"))
         with_secure = sum(1 for c in cards if c.get("securePattern"))
+        with_valid = sum(1 for c in cards if c.get("validWhen"))
+        with_invalid = sum(1 for c in cards if c.get("invalidWhen"))
+        with_impact = sum(1 for c in cards if c.get("impact"))
         print(f"✅ Validation Results:")
         print(f"   Total cards:          {total}")
         print(f"   With check array:     {with_check} ({with_check/total*100:.0f}%)")
         print(f"   With antipattern:     {with_anti} ({with_anti/total*100:.0f}%)")
         print(f"   With securePattern:   {with_secure} ({with_secure/total*100:.0f}%)")
+        print(f"   With validWhen:       {with_valid} ({with_valid/total*100:.0f}%)")
+        print(f"   With invalidWhen:     {with_invalid} ({with_invalid/total*100:.0f}%)")
+        print(f"   With impact:          {with_impact} ({with_impact/total*100:.0f}%)")
         print(f"   File size:            {os.path.getsize(all_cards_path):,} bytes")
         # Token estimate (~4 chars per token)
         tokens = os.path.getsize(all_cards_path) // 4
@@ -396,6 +706,12 @@ def main():
                     print(f"    {i}. {step}")
             else:
                 print(f"  Check: (none extracted)")
+            if enriched.get("validWhen"):
+                print(f"  validWhen: {enriched['validWhen'][:140]}")
+            if enriched.get("invalidWhen"):
+                print(f"  invalidWhen: {enriched['invalidWhen'][:140]}")
+            if enriched.get("impact"):
+                print(f"  impact: {enriched['impact'][:140]}")
             if enriched.get("antipattern"):
                 print(f"  Antipattern: {enriched['antipattern'][:120]}")
             if enriched.get("securePattern"):
@@ -421,7 +737,16 @@ def main():
         return
 
     # Process all per-manifest hunt card files
-    total_stats = {"total": 0, "enriched": 0, "with_check": 0, "with_antipattern": 0, "with_secure": 0}
+    total_stats = {
+        "total": 0,
+        "enriched": 0,
+        "with_check": 0,
+        "with_antipattern": 0,
+        "with_secure": 0,
+        "with_valid": 0,
+        "with_invalid": 0,
+        "with_impact": 0,
+    }
     all_enriched_cards = []
 
     for hc_file in sorted(HUNTCARDS_DIR.glob("*-huntcards.json")):
@@ -457,8 +782,8 @@ def main():
                 "usage": (
                     "Load this single file for all vulnerability detection cards. For each card: "
                     "grep target code for card.grep. On hit: execute card.check steps directly against "
-                    "grep hit locations. Only read full DB entry (card.ref + card.lines) for confirmed "
-                    "true/likely positives."
+                    "grep hit locations, use validWhen/invalidWhen/impact for rapid triage, and only read "
+                    "full DB entry (card.ref + card.lines) for confirmed true/likely positives."
                 ),
             },
             "cards": all_enriched_cards,
@@ -479,6 +804,9 @@ def main():
     print(f"  With check array:     {t['with_check']} ({t['with_check']/max(t['total'],1)*100:.0f}%)")
     print(f"  With antipattern:     {t['with_antipattern']} ({t['with_antipattern']/max(t['total'],1)*100:.0f}%)")
     print(f"  With securePattern:   {t['with_secure']} ({t['with_secure']/max(t['total'],1)*100:.0f}%)")
+    print(f"  With validWhen:       {t['with_valid']} ({t['with_valid']/max(t['total'],1)*100:.0f}%)")
+    print(f"  With invalidWhen:     {t['with_invalid']} ({t['with_invalid']/max(t['total'],1)*100:.0f}%)")
+    print(f"  With impact:          {t['with_impact']} ({t['with_impact']/max(t['total'],1)*100:.0f}%)")
     if args.dry_run:
         print(f"\n  [DRY-RUN] No files were modified.")
 
