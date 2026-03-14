@@ -81,7 +81,7 @@ Each hunt card:
 ```
 1. Read DB/index.json → protocolContext.mappings.<protocol_type>
 2. Get manifest list + focusPatterns
-3. Load each manifest → search patterns matching focusPatterns
+3. Load each manifest → search patterns matching focusPatterns across title, `codeKeywords`, and `searchKeywords`
 4. Read only lineStart-lineEnd of matching patterns
 ```
 
@@ -103,7 +103,7 @@ Each hunt card:
 ```
 1. Load DB/manifests/keywords.json
 2. Find keyword → get manifest name(s)
-3. Load manifest → search patterns by codeKeywords
+3. Load manifest → search patterns by `codeKeywords` and `searchKeywords`
 4. Read matching line ranges
 ```
 
@@ -111,7 +111,7 @@ Each hunt card:
 ```
 → keywords.json: "getpriceunsafe" → ["oracle"]
 → Load DB/manifests/oracle.json
-→ Search patterns where codeKeywords contains "getPriceUnsafe"
+→ Search patterns where codeKeywords or searchKeywords contains "getPriceUnsafe"
 → Found in PYTH_ORACLE L183-245, severity: MEDIUM
 → read_file(DB/oracle/pyth/PYTH_ORACLE_VULNERABILITIES.md, 183, 245)
 ```
@@ -235,6 +235,7 @@ Each pattern in a manifest looks like:
   "lineCount": 156,
   "severity": ["MEDIUM"],
   "codeKeywords": ["checkUpkeep", "performData", "performUpkeep"],
+   "searchKeywords": ["automation mismatch", "perform upkeep", "check upkeep"],
   "rootCause": "checkUpkeep returns data encoded in one format, but performUpkeep expects...",
   "subsections": [
     {
@@ -251,7 +252,8 @@ Each pattern in a manifest looks like:
 **Key fields for agents:**
 - `lineStart` / `lineEnd` → Use with `read_file` for surgical access
 - `severity` → Filter for HIGH/CRITICAL when prioritizing
-- `codeKeywords` → Match against target codebase identifiers
+- `codeKeywords` → Match against target codebase identifiers for grep / code search
+- `searchKeywords` → Match human-readable focus terms and normalized frontmatter primitives
 - `rootCause` → Quick preview of the vulnerability without reading the file
 - `subsections` → Drill into specific sub-patterns for even more precision
 
@@ -263,7 +265,7 @@ Each pattern in a manifest looks like:
 - **Start with index.json** to route to the right manifest(s)
 - **Load only relevant manifests** — don't load all 11
 - **Use lineStart/lineEnd** to read only the exact section needed
-- **Search by codeKeywords** to match against code identifiers you find in target
+- **Search by codeKeywords/searchKeywords** to match both exact identifiers and normalized focus terms
 - **Check severity** to prioritize findings
 - **Use protocolContext** to quickly get the right manifests for a protocol type
 
