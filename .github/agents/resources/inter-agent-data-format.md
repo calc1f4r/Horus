@@ -11,6 +11,7 @@ All pipeline artifacts go into `audit-output/` at the project root:
 
 ```
 audit-output/
+├── pipeline-state.md                  ← Pipeline tracker (updated after every phase)
 ├── 00-scope.md                        ← Phase 1: Reconnaissance
 ├── context/                           ← Phase 2: Per-contract context (sharded)
 │   ├── 00-orientation.md              ←   System map & contract inventory
@@ -19,28 +20,57 @@ audit-output/
 │   ├── ShareMath.md                   ←   Per-contract function analysis
 │   └── ...                            ←   One file per contract
 ├── 01-context.md                      ← Phase 2: Compact global synthesis
-├── 02-invariants.md                   ← Phase 3: Invariant extraction
-├── 02-invariants-reviewed.md          ← Phase 3a: Reviewed & hardened invariants
-├── hunt-card-hits.json                ← Phase 4: Grep-prune results
-├── hunt-card-shards.json              ← Phase 4: Partition plan
-├── 03-findings-shard-*.md             ← Phase 4: Per-shard findings (temporary)
-├── 03-findings-raw.md                 ← Phase 4: Merged findings (final)
-├── 03-merge-log.md                    ← Phase 4: Shard merge deduplication log
-├── 04a-reasoning-findings.md          ← Phase 4a: Reasoning-based discovery
-├── 04-validation-findings.md          ← Phase 5: Validation gap analysis
-├── 05-findings-triaged.md             ← Phase 6: Triage & deduplication
-├── 06-sherlock-validation.md          ← Phase 7: Sherlock judging
-├── 07-cantina-validation.md           ← Phase 7: Cantina judging
-├── AUDIT-REPORT.md                    ← Final assembled report
-├── pocs/                              ← PoC exploit tests
-│   ├── F-001-poc.{ext}
+├── 02-invariants.md                   ← Phase 3: Invariant extraction (Step 3A)
+├── 02-invariants-reviewed.md          ← Phase 3: Reviewed & hardened invariants (Step 3B)
+├── hunt-card-hits.json                ← Phase 4: Grep-prune results (4A prep)
+├── hunt-card-shards.json              ← Phase 4: Partition plan (4A prep)
+├── reasoning-seeds.md                 ← Phase 4: Reasoning seeds extracted from manifests (4B prep)
+├── 03-findings-shard-*.md             ← Phase 4A: Per-shard findings (temporary)
+├── 03-findings-raw.md                 ← Phase 4A: Merged findings (final)
+├── 03-merge-log.md                    ← Phase 4A: Shard merge deduplication log
+├── 04a-reasoning-findings.md          ← Phase 4B: Reasoning-based discovery
+├── 04c-persona-findings.md            ← Phase 4C: Multi-persona audit findings
+├── personas/                          ← Phase 4C: Per-persona working files
+│   ├── round-1/                       ←   Round 1 individual persona findings
+│   │   ├── bfs.md
+│   │   ├── dfs.md
+│   │   ├── backward.md
+│   │   ├── state-machine.md
+│   │   ├── mirror.md
+│   │   └── reimpl.md
+│   ├── shared-knowledge-round-1.md    ←   Cross-pollinated knowledge per round
 │   └── ...
-├── fuzzing/                           ← Medusa harnesses
+├── 04d-validation-findings.md         ← Phase 4D: Validation gap analysis
+├── discovery-state-round-1.md         ← Phase 4: Cross-pollination state (round 1)
+├── discovery-state-round-2.md         ← Phase 4: Cross-pollination state (round 2)
+├── 05-findings-triaged.md             ← Phase 5: Merge, deduplicate & triage
+├── pocs/                              ← Phase 6: PoC exploit tests [CONDITIONAL]
+│   ├── F-001-poc.{ext}
+│   ├── F-001-poc.log                  ←   Execution log
+│   └── ...
+├── 06-poc-results.md                  ← Phase 6: PoC execution results [CONDITIONAL]
+├── fuzzing/                           ← Phase 7: Medusa harnesses [CONDITIONAL]
 │   ├── medusa.json
 │   └── ...
-└── certora/                           ← Certora specs
-    ├── spec.conf
-    └── ...
+├── certora/                           ← Phase 7: Certora specs [CONDITIONAL]
+│   ├── spec.conf
+│   └── ...
+├── halmos/                            ← Phase 7: Halmos symbolic tests [CONDITIONAL]
+│   └── ...
+├── 07-fv-results.md                   ← Phase 7: FV execution results [CONDITIONAL]
+├── 08-pre-judge-results.md            ← Phase 8: Pre-judging validity screen
+├── 08-pre-judge-sherlock.md           ← Phase 8: Per-judge pre-screen (if used)
+├── 08-pre-judge-cantina.md            ← Phase 8: Per-judge pre-screen (if used)
+├── 08-pre-judge-code4rena.md          ← Phase 8: Per-judge pre-screen (if used)
+├── issues/                            ← Phase 9: Polished issue write-ups (valid only)
+│   ├── F-001-issue.md
+│   └── ...
+├── 09-polished-findings.md            ← Phase 9: Index of polished issues
+├── 10-deep-review.md                  ← Phase 10: Deep review (line-by-line judge verification)
+├── 10-deep-review-sherlock.md         ← Phase 10: Per-judge deep review (if used)
+├── 10-deep-review-cantina.md          ← Phase 10: Per-judge deep review (if used)
+├── 10-deep-review-code4rena.md        ← Phase 10: Per-judge deep review (if used)
+└── CONFIRMED-REPORT.md               ← Phase 11: Final confirmed report
 ```
 
 ---
@@ -453,30 +483,276 @@ See `audit-output/pocs/F-001-poc.{ext}` (if generated)
 
 ---
 
-## Severity Validation Output (Phases 7)
-
-### Sherlock Validation (`06-sherlock-validation.md`)
+## Phase 8: Pre-Judge Results (`08-pre-judge-results.md`)
 
 ```markdown
-# Sherlock Severity Validation
+# Pre-Judge Results (Validity Screen)
 
-| Finding | Agent Severity | Sherlock Severity | Rationale |
-|---------|---------------|-------------------|-----------|
-| F-001 | HIGH | HIGH | Definite loss of funds > $10K |
-| F-002 | MEDIUM | INVALID | Requires admin action (trusted role) |
-| ... | ... | ... | ... |
+## Configuration
+- Judge Mode: <all | sherlock | cantina | code4rena>
+- Pipeline Mode: <full | static-only>
+- Consensus Threshold: <1/1 | 2/3>
+
+## Verdict Summary
+| Finding | <Judge 1> | <Judge 2> | <Judge 3> | Consensus | Proceed to Polish |
+|---------|-----------|-----------|-----------|-----------|-------------------|
+| F-001 | VALID (HIGH) | VALID (HIGH) | VALID (HIGH) | VALID | YES |
+| F-002 | VALID (MED) | VALID (MED) | — | VALID | YES |
+| F-003 | INVALID | VALID (LOW) | INVALID | INVALID | NO |
+
+## Findings Proceeding to Phase 9
+F-001, F-002, F-004, ...
+
+## Findings Rejected at Pre-Judge
+### F-003
+- Judge verdicts: INVALID / VALID(LOW) / INVALID
+- Rejection reason: Failed consensus — 1/3 valid, threshold 2/3
 ```
 
-### Cantina Validation (`07-cantina-validation.md`)
+### Per-Judge Pre-Screen (`08-pre-judge-<judge-name>.md`)
 
 ```markdown
-# Cantina Severity Validation
+# <Judge Name> Pre-Judge Screen
 
-| Finding | Agent Severity | Cantina Severity | Impact | Likelihood | Rationale |
-|---------|---------------|------------------|--------|------------|-----------|
-| F-001 | HIGH | HIGH | High | High | Direct fund theft possible |
-| F-002 | MEDIUM | LOW | Medium | Low | Requires specific market conditions |
-| ... | ... | ... | ... | ... | ... |
+| Finding | Valid? | Preliminary Severity | Rationale |
+|---------|--------|---------------------|-----------|
+| F-001 | VALID | HIGH | Definite loss of funds > $10K |
+| F-002 | VALID | MEDIUM | Moderate impact, realistic path |
+| F-003 | INVALID | — | Requires admin action (trusted role) |
+```
+
+---
+
+## Phase 9: Polished Findings (`09-polished-findings.md`)
+
+```markdown
+# Polished Findings
+
+## Summary
+| Finding | Severity | Execution Evidence | Status |
+|---------|----------|-------------------|--------|
+| F-001 | HIGH | PoC PASS + FV VIOLATED | Execution-verified |
+| F-002 | MEDIUM | N/A (static-only) | Static analysis only |
+
+## F-001: [Title]
+(Full submission-ready write-up from issue-writer)
+See audit-output/issues/F-001-issue.md for full detail.
+```
+
+---
+
+## Phase 10: Deep Review (`10-deep-review.md`)
+
+```markdown
+# Deep Review Results (Line-by-Line Verification)
+
+## Configuration
+- Judge Mode: <all | sherlock | cantina | code4rena>
+- Pipeline Mode: <full | static-only>
+- Consensus Threshold: <1/1 | 2/3>
+
+## Deep Review Summary
+| Finding | <Judge 1> | <Judge 2> | <Judge 3> | Final Verdict | Final Severity |
+|---------|-----------|-----------|-----------|---------------|----------------|
+| F-001 | CONFIRMED (HIGH) | CONFIRMED (HIGH) | CONFIRMED (HIGH) | CONFIRMED | HIGH |
+| F-002 | CONFIRMED (MED) | CONFIRMED-DOWNGRADED (LOW) | CONFIRMED (MED) | CONFIRMED | MEDIUM |
+| F-004 | REJECTED | REJECTED | — | REJECTED | — |
+
+## Confirmed Findings (passed both pre-judge and deep review)
+### F-001: [Title]
+- Pre-Judge: VALID (3/3)
+- Deep-Review: CONFIRMED (3/3)
+- Final Severity: HIGH
+- Execution Evidence: PoC PASS, FV VIOLATED (INV-S-001)
+
+## Rejected at Deep Review
+### F-004: [Title]
+- Pre-Judge: VALID (2/3)
+- Deep-Review: REJECTED (2/3)
+- Rejection Reason: Code reference at line 142 was hallucinated — function doesn't exist
+```
+
+### Per-Judge Deep Review (`10-deep-review-<judge-name>.md`)
+
+```markdown
+# <Judge Name> Deep Review
+
+| Finding | Code Refs | Claims | Severity | Attack Path | Root Cause | Verdict |
+|---------|-----------|--------|----------|-------------|-----------|---------|
+| F-001 | ✓ All verified | ✓ All substantiated | ✓ Justified | ✓ Executable | ✓ Correct | CONFIRMED (HIGH) |
+| F-004 | ✗ Line 142 not found | ✗ Claim unverifiable | — | ✗ Blocked by guard | — | REJECTED |
+```
+- **Code4rena**: 2 (High) — [full rationale]
+- **Consensus**: 3/3 VALID
+- **PoC Status**: PASS (see pocs/F-001-poc.sol)
+- **FV Status**: VIOLATED INV-S-001 (see halmos/)
+```
+
+---
+
+## Phase 4C: Persona Findings (`04c-persona-findings.md`)
+
+Produced by `multi-persona-orchestrator`. Aggregated findings from 6 independent auditing personas.
+
+```markdown
+# Multi-Persona Audit Findings
+
+## Persona Coverage Summary
+| Persona | Findings | Unique | Confirmed by Others |
+|---------|----------|--------|---------------------|
+| BFS | N | N | N |
+| DFS | N | N | N |
+| Working Backward | N | N | N |
+| State Machine | N | N | N |
+| Mirror | N | N | N |
+| Re-Implementation | N | N | N |
+
+## Cross-Verified Findings
+(Findings confirmed by 2+ personas — highest confidence)
+
+### F-4C-001: [Title]
+| Field | Value |
+|-------|-------|
+| **ID** | F-4C-001 |
+| **Severity** | HIGH |
+| **Confidence** | HIGH (confirmed by BFS + DFS + State Machine) |
+| **Root Cause** | ... |
+| **Impact** | ... |
+| **Discovered By** | BFS (Round 1), confirmed by DFS (Round 2), State Machine (Round 2) |
+
+## Single-Persona Findings
+(Findings from only 1 persona — lower confidence, needs triage verification)
+```
+
+---
+
+## Phase 6: PoC Results (`06-poc-results.md`)
+
+Produced by orchestrator after spawning `poc-writing` and executing the PoCs.
+
+```markdown
+# PoC Execution Results
+
+## Summary
+| Status | Count |
+|--------|-------|
+| PASS | N |
+| COMPILE_FAIL | N |
+| ASSERT_FAIL | N |
+| REVERT | N |
+| TIMEOUT | N |
+| SKIP | N |
+
+## Results
+| Finding | PoC File | Status | Attempts | Notes |
+|---------|----------|--------|----------|-------|
+| F-001 | pocs/F-001-poc.sol | PASS | 1 | Exploit confirmed, stole 100 ETH in test |
+| F-002 | pocs/F-002-poc.sol | COMPILE_FAIL | 2 | Import resolution failed after retry |
+| F-003 | — | SKIP | 0 | MEDIUM severity, no PoC generated |
+
+## Execution Logs
+### F-001 (PASS)
+```
+forge test --match-test test_F001_exploit -vvv
+[PASS] test_F001_exploit() (gas: 245891)
+Logs:
+  Attacker balance before: 0
+  Attacker balance after: 100000000000000000000
+```
+
+### F-002 (COMPILE_FAIL — Attempt 2)
+```
+forge build
+Error: ...
+```
+```
+
+---
+
+## Phase 7: FV Results (`07-fv-results.md`)
+
+Produced by orchestrator after spawning FV generators and executing the suites.
+
+```markdown
+# Formal Verification Execution Results
+
+## Tool Summary
+| Tool | Specs Generated | Compiled | Executed | Violations Found |
+|------|----------------|----------|----------|-----------------|
+| Medusa | N | Y/N | Y/N | N |
+| Certora | N | Y/N | Y/N | N |
+| Halmos | N | Y/N | Y/N | N |
+
+## Invariant → Finding Mapping
+| Invariant | Tool | Result | Maps to Finding |
+|-----------|------|--------|-----------------|
+| INV-S-001 | Halmos | VIOLATED | F-001 (existing) |
+| INV-A-003 | Medusa | VIOLATED | F-NEW-001 (new finding) |
+| INV-AC-001 | Certora | VERIFIED | — (property holds) |
+
+## New Findings from FV
+(Findings created from FV violations that don't match existing Phase 5 findings)
+
+### F-NEW-001: [Title from FV violation]
+(Standard Finding Schema)
+
+## Execution Logs
+### Medusa
+```
+medusa fuzz --config medusa.json
+...
+```
+
+### Halmos
+```
+halmos --function check_INV_S_001
+...
+```
+```
+
+---
+
+## Pipeline State (`pipeline-state.md`)
+
+Updated by orchestrator after every phase. Central tracking file.
+
+```markdown
+# Pipeline State
+
+## Metadata
+- **Target**: <codebase path>
+- **Protocol**: <detected types>
+- **Started**: <timestamp>
+- **Current Phase**: <N>
+
+## Configuration
+- **Mode**: full | static-only
+- **Judge Mode**: full (all 3) | single (<name>)
+- **Discovery Rounds**: <N>
+
+## Phase Status
+| Phase | Status | Started | Completed | Output File |
+|-------|--------|---------|-----------|-------------|
+| 1 | COMPLETED | T1 | T2 | 00-scope.md |
+| 2 | COMPLETED | T3 | T4 | 01-context.md |
+| 3 | COMPLETED | T5 | T6 | 02-invariants-reviewed.md |
+| 4-R1 | COMPLETED | T7 | T8 | (round 1 outputs) |
+| 4-R2 | COMPLETED | T9 | T10 | (round 2 outputs) |
+| 5 | COMPLETED | T11 | T12 | 05-findings-triaged.md |
+| 6 | COMPLETE/SKIPPED | T13 | T14 | 06-poc-results.md / — |
+| 7 | COMPLETE/SKIPPED | T15 | T16 | 07-fv-results.md / — |
+| 8 | COMPLETED | T17 | T18 | 08-pre-judge-results.md |
+| 9 | COMPLETED | T19 | T20 | 09-polished-findings.md |
+| 10 | COMPLETED | T21 | T22 | 10-deep-review.md |
+| 11 | IN_PROGRESS | T23 | — | — |
+
+## Finding Tracker
+| ID | Title | Source | Severity | PoC | FV | Pre-Judge | Polished | Deep-Review | Final Status |
+|----|-------|--------|----------|-----|-----|-----------|----------|-------------|--------------|
+| F-001 | Missing staleness check | 4A-R1 | HIGH | PASS | VIOLATED | VALID | ✓ | CONFIRMED | CONFIRMED |
+| F-002 | Reentrancy in withdraw | 4B-R2 | HIGH | PASS | — | VALID | ✓ | CONFIRMED | CONFIRMED |
+| F-003 | Zero-address admin | 4D-R1 | MEDIUM | SKIP | — | VALID | ✓ | NEEDS-REVISION | DEMOTED |
+| F-004 | False positive | 4C-R1 | LOW | — | — | INVALID | — | — | REJECTED |
 ```
 
 ---
@@ -485,34 +761,76 @@ See `audit-output/pocs/F-001-poc.{ext}` (if generated)
 
 ```
 Phase 1 (Scope) ──→ protocolTypes, manifestList, filesInScope
+                       │ + pipeline-state.md initialized (with Configuration)
                        │
 Phase 2 (Context) ←───┘ reads filesInScope
          │──→ architecture, functions, invariantCandidates, assumptions
          │
-Phase 3 (Invariants) ←── reads invariantCandidates
-         │──→ structured invariant specs (INV-*)
+Phase 3 (Invariants: 3A→3B) ←── reads invariantCandidates
+         │  3A: invariant-writer → 02-invariants.md
+         │  3B: invariant-reviewer → 02-invariants-reviewed.md
+         │──→ reviewed invariant specs (INV-*)
          │
-Phase 4 (Hunting) ←── reads manifestList + invariant specs
-         │  Self: grep-prune → partition into shards → spawn N sub-agents
-         │  N × invariant-catcher: per-shard findings → 03-findings-shard-*.md
-         │  Self: merge shards → deduplicate → 03-findings-raw.md
-         │──→ raw findings (F-NNN)
+         ╔══════════════════════════════════════════════════════════╗
+         ║  Phase 4 — ITERATIVE DISCOVERY (N rounds)              ║
+         ║                                                         ║
+         ║  Round 1:                                               ║
+         ║  ├──4A (DB Hunt) ──→ 03-findings-raw.md                ║
+         ║  ├──4B (Reasoning) ──→ 04a-reasoning-findings.md       ║
+         ║  ├──4C (Personas) ──→ 04c-persona-findings.md          ║
+         ║  └──4D (Validation) ──→ 04d-validation-findings.md     ║
+         ║       │                                                 ║
+         ║  Orchestrator writes discovery-state-round-1.md         ║
+         ║  (cumulative findings + cross-check requests +          ║
+         ║   unexplored areas + variant suggestions)               ║
+         ║       │                                                 ║
+         ║  Round 2+ (reads discovery-state-round-(N-1).md):       ║
+         ║  ├──4A ──→ 03-findings-raw-round-N.md                  ║
+         ║  ├──4B ──→ 04a-reasoning-round-N.md                    ║
+         ║  ├──4C ──→ 04c-persona-round-N.md                      ║
+         ║  └──4D ──→ 04d-validation-round-N.md                   ║
+         ║       │                                                 ║
+         ║  Orchestrator writes discovery-state-round-N.md         ║
+         ╚══════════════════════════════════════════════════════════╝
+                                     │
+Phase 5 (Merge & Triage) ←──────────┘ reads ALL rounds of Phase 4 outputs
+         │  Cross-source correlation → dedup → falsification → severity
+         │  Assign stable IDs: F-001, F-002, ...
+         │──→ 05-findings-triaged.md
          │
-Phase 4a (Reasoning) ←── reads context + invariants + raw findings + manifests
-         │──→ reasoning findings (F-4a-NNN) with reachability proofs
+         ┌─────────── if --static-only: SKIP Phases 6-7 ───────────┐
+         │                                                          │
+Phase 6 (PoC Gen + EXECUTION) [CONDITIONAL]                        │
+         │  Per CRIT/HIGH: poc-writing spawn → compile → RUN        │
+         │──→ pocs/F-NNN-poc.* + 06-poc-results.md                 │
+         │                                                          │
+Phase 7 (FV Gen + EXECUTION) [CONDITIONAL]                         │
+         │  Parallel: medusa + certora + halmos → compile → RUN     │
+         │──→ fuzzing/ + certora/ + halmos/ + 07-fv-results.md     │
+         └──────────────────────────────────────────────────────────┘
          │
-Phase 5 (Validation) ←── reads filesInScope + context
-         │──→ additional findings (F-NNN)
+         ╔══════════════════════════════════════════════════════════╗
+         ║  Phases 8-10 — JUDGING SELF-LOOP                       ║
+         ║                                                         ║
+         ║  Phase 8 (Pre-Judging) ←── reads 05-findings-triaged   ║
+         ║  │  Judge(s) screen all findings: VALID / INVALID       ║
+         ║  │  (--judge=X: single judge; default: all 3 parallel)  ║
+         ║  │──→ 08-pre-judge-results.md                           ║
+         ║  │                                                      ║
+         ║  Phase 9 (Issue Polishing) ←── reads VALID findings     ║
+         ║  │  issue-writer per finding (with execution evidence   ║
+         ║  │  if available, or static-only annotation)            ║
+         ║  │──→ issues/F-NNN-issue.md + 09-polished-findings.md  ║
+         ║  │                                                      ║
+         ║  Phase 10 (Deep Review) ←── reads polished findings     ║
+         ║  │  Same judge(s) do line-by-line deep review           ║
+         ║  │  CONFIRMED / NEEDS-REVISION / REJECTED               ║
+         ║  │  NEEDS-REVISION → loop back to Phase 9 (max 1 retry)║
+         ║  │──→ 10-deep-review.md                                 ║
+         ╚══════════════════════════════════════════════════════════╝
          │
-Phase 6 (Triage) ←── reads all findings (03 + 04a + 04)
-         │──→ deduplicated, scored findings + PoCs
-         │
-Phase 7 (Downstream) ←── reads invariant specs + triaged findings
-         ├──→ Medusa harnesses
-         ├──→ Certora specs
-         ├──→ Sherlock validation
-         └──→ Cantina validation
-         
-Final (Report) ←── reads ALL outputs
-         └──→ AUDIT-REPORT.md
+Phase 11 (Report) ←── reads ALL pipeline artifacts
+         │  Mode-aware: includes/omits execution evidence sections
+         │  Includes judging self-loop summary + discovery rounds record
+         └──→ CONFIRMED-REPORT.md
 ```

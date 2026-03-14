@@ -1,79 +1,167 @@
 # Orchestration Pipeline
 
-> **Purpose**: Master reference for the 7-phase audit pipeline. Defines phase transitions, data handoffs, sub-agent contracts, error handling, and context budgets.
+> **Purpose**: Master reference for the 11-phase configurable audit pipeline with iterative parallel discovery, optional PoC/FV execution, and a judging self-loop (pre-judge → polish → deep-review). Defines phase transitions, data handoffs, sub-agent contracts, error handling, and context budgets.
 > **Consumer**: `audit-orchestrator` agent.
+
+---
+
+## Configuration Options
+
+| Option | Values | Default | Effect |
+|--------|--------|---------|--------|
+| `--static-only` | flag | OFF | Skip Phases 6 (PoC) and 7 (FV) |
+| `--judge=X` | sherlock, cantina, code4rena | all 3 | Use single judge in self-loop |
+| `--discovery-rounds=N` | 1-5 | 2 | Number of iterative discovery rounds |
 
 ---
 
 ## Pipeline Overview
 
 ```
-User Input: @audit-orchestrator <path> [hint]
+User Input: @audit-orchestrator <path> [hint] [--static-only] [--judge=X] [--discovery-rounds=N]
     │
     ▼
+═══════════════════════════════════════════════════════
+ SEQUENTIAL FOUNDATION (Phases 1-3)
+═══════════════════════════════════════════════════════
+    │
 ┌─────────────────────────────────────┐
 │ Phase 1: RECONNAISSANCE             │  Self (no sub-agent)
-│ Protocol detection, scope, manifests│  Output: 00-scope.md
+│ Protocol detection, scope, manifests│  Output: 00-scope.md, pipeline-state.md
 └──────────────┬──────────────────────┘
-               │ protocolTypes, manifestList, filesInScope
+               │ protocolTypes, manifestList, filesInScope, config
                ▼
 ┌─────────────────────────────────────┐
 │ Phase 2: CONTEXT BUILDING           │  Sub-agent: audit-context-building
-│ Line-by-line codebase analysis      │  Output: 01-context.md
+│ Line-by-line codebase analysis      │  Output: 01-context.md + context/*.md
 └──────────────┬──────────────────────┘
                │ architecture, functions, invariantCandidates
                ▼
 ┌─────────────────────────────────────┐
-│ Phase 3: INVARIANT EXTRACTION       │  Sub-agent: invariant-writer
-│ Structured property specs           │  Output: 02-invariants.md
-└──────────────┬──────────────────────┘
-               │ invariantSpecs (INV-*)
-               ▼
-┌─────────────────────────────────────┐
-│ Phase 3a: INVARIANT REVIEW          │  Sub-agent: invariant-reviewer
-│ Canonical research, multi-step      │  Output: 02-invariants-reviewed.md
-│ stress test, bound calibration      │
+│ Phase 3: INVARIANT EXTRACTION +     │  Sub-agents: invariant-writer (sequential)
+│ REVIEW (sequential pair)            │  then invariant-reviewer
+│                                     │  Output: 02-invariants-reviewed.md
 └──────────────┬──────────────────────┘
                │ reviewedInvariantSpecs (INV-*)
                ▼
+═══════════════════════════════════════════════════════
+ ITERATIVE PARALLEL DISCOVERY (Phase 4 — N rounds)
+ Streams write → orchestrator merges → streams re-read
+═══════════════════════════════════════════════════════
+               │
+    ┌──── ROUND 1 (independent) ─────┐
+    │          │          │           │
+    ▼          ▼          ▼           ▼
+┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
+│ 4A: DB │ │ 4B:    │ │ 4C:    │ │ 4D:    │
+│ Hunt   │ │Reason  │ │Persona │ │Valid.  │
+└───┬────┘ └───┬────┘ └───┬────┘ └───┬────┘
+    └──────────┴──────────┴───────────┘
+               │ Round 1 findings
+               ▼
+    orchestrator → discovery-state-round-1.md
+               │
+    ┌──── ROUND 2+ (cross-pollination) ─┐
+    │  All streams read shared state     │
+    │  Cross-check, gap-fill, go deeper  │
+    └──────────┬─────────────────────────┘
+               │ ... repeat for N rounds ...
+               ▼
+═══════════════════════════════════════════════════════
+ TRIAGE (Phase 5)
+═══════════════════════════════════════════════════════
+               │
 ┌─────────────────────────────────────┐
-│ Phase 4: DB-POWERED HUNTING         │  Self + Sub-agent: invariant-catcher
-│ Hunt card grep-prune + batched scan │  Output: 03-findings-raw.md
+│ Phase 5: MERGE & TRIAGE            │  Self
+│ Cross-source correlation, dedup,    │  Output: 05-findings-triaged.md
+│ falsification, severity             │
 └──────────────┬──────────────────────┘
-               │ rawFindings (F-NNN)
+               │ triagedFindings (F-NNN) with stable IDs
+               ▼
+═══════════════════════════════════════════════════════
+ OPTIONAL DYNAMIC TESTING (Phases 6-7)
+ [SKIPPED if --static-only]
+═══════════════════════════════════════════════════════
+               │
+┌─────────────────────────────────────┐
+│ Phase 6: PoC GENERATION & EXECUTION│  Sub-agent: poc-writing × N
+│ [CONDITIONAL — skip if static-only] │  + Self (execution)
+│                                     │  Output: pocs/ + 06-poc-results.md
+└──────────────┬──────────────────────┘
+               │
+┌─────────────────────────────────────┐
+│ Phase 7: FV GENERATION & EXECUTION │  Sub-agents: medusa, certora, halmos
+│ [CONDITIONAL — skip if static-only] │  + Self (execution)
+│                                     │  Output: fuzzing/ + certora/ + halmos/
+│                                     │         + 07-fv-results.md
+└──────────────┬──────────────────────┘
+               │
+═══════════════════════════════════════════════════════
+ JUDGING SELF-LOOP (Phases 8-10)
+ Judge → Polish → Deep Review (same judges review twice)
+═══════════════════════════════════════════════════════
+               │
+┌─────────────────────────────────────┐
+│ Phase 8: PRE-JUDGING                │  Judge(s) per --judge flag
+│ Validity screen on raw findings     │  Output: 08-pre-judge-results.md
+└──────────────┬──────────────────────┘
+               │ only VALID findings proceed
                ▼
 ┌─────────────────────────────────────┐
-│ Phase 4a: REASONING DISCOVERY       │  Sub-agent: protocol-reasoning
-│ Domain decomposition, 4-round deep  │  Output: 04a-reasoning-findings.md
-│ reasoning, reachability proofs      │  (spawns domain sub-agents internally)
+│ Phase 9: ISSUE POLISHING            │  Sub-agent: issue-writer × N
+│ Submission-ready write-ups          │  Output: issues/ + 09-polished-findings.md
+│ (valid findings ONLY)               │
 └──────────────┬──────────────────────┘
-               │ reasoningFindings (F-4a-NNN)
+               │ polished issues
                ▼
 ┌─────────────────────────────────────┐
-│ Phase 5: VALIDATION GAP ANALYSIS    │  Sub-agent: missing-validation-reasoning
-│ Input validation, access control    │  Output: 04-validation-findings.md
+│ Phase 10: DEEP REVIEW               │  Same judge(s) as Phase 8
+│ Line-by-line verification           │  Output: 10-deep-review.md
+│ of polished issues                  │
 └──────────────┬──────────────────────┘
-               │ additionalFindings (F-NNN)
+               │ CONFIRMED findings only
                ▼
+═══════════════════════════════════════════════════════
+ REPORT (Phase 11)
+═══════════════════════════════════════════════════════
+               │
 ┌─────────────────────────────────────┐
-│ Phase 6: TRIAGE & PoC              │  Self + Sub-agent: poc-writer (per finding)
-│ Dedup, falsify, severity, PoCs     │  Output: 05-findings-triaged.md + pocs/
-└──────────────┬──────────────────────┘
-               │ triagedFindings + PoCs
-               ▼
-┌─────────────────────────────────────┐
-│ Phase 7: DOWNSTREAM GENERATION      │  Sub-agents: medusa-fuzzing,
-│ Fuzzing, formal verification,       │  certora-verification,
-│ Sherlock + Cantina judging          │  sherlock-judging, cantina-judge
-│                                     │  Output: 06/07-validation + fuzzing/ + certora/
-└──────────────┬──────────────────────┘
-               │ all artifacts
-               ▼
-┌─────────────────────────────────────┐
-│ FINAL: REPORT ASSEMBLY              │  Self (no sub-agent)
-│ Merge all outputs into report       │  Output: AUDIT-REPORT.md
+│ Phase 11: REPORT ASSEMBLY           │  Self
+│ Final report with judge verdicts,   │  Output: CONFIRMED-REPORT.md
+│ execution evidence (if available),  │
+│ cross-pollination record            │
 └─────────────────────────────────────┘
 ```
+
+---
+
+## Common Pipeline Bus
+
+All agents communicate through the **pipeline bus** — a shared file system under `audit-output/`. The orchestrator maintains `pipeline-state.md` which tracks every artifact's production status, consumption, and verification.
+
+### Pipeline Bus Rules
+
+1. **Every agent reads FROM and writes TO `audit-output/`** — no side channels
+2. **Phase N+1 may only start after Phase N outputs are verified** (phase gates)
+3. **Parallel phases write to SEPARATE files** — orchestrator merges
+4. **`pipeline-state.md` is the canonical record** — update after every phase
+5. **Every finding gets a unique stable ID at birth** that persists through all phases
+
+### Data Contract: What Each Phase Produces and Consumes
+
+| Phase | Produces | Consumes |
+|-------|----------|----------|
+| 1 | `00-scope.md`, `pipeline-state.md` | Codebase path, DB/index.json |
+| 2 | `01-context.md`, `context/*.md` | `00-scope.md` |
+| 3 | `02-invariants-reviewed.md` | `01-context.md`, DB manifests |
+| 4 (per round) | `*-RN.md` outputs per stream, `discovery-state-round-N.md` | Hunt cards, invariants, context, previous round state |
+| 5 | `05-findings-triaged.md` | All Phase 4 outputs from all rounds |
+| 6 [CONDITIONAL] | `pocs/F-NNN-poc.*`, `06-poc-results.md` | `05-findings-triaged.md`, codebase |
+| 7 [CONDITIONAL] | `fuzzing/`, `certora/`, `halmos/`, `07-fv-results.md` | `02-invariants-reviewed.md`, codebase |
+| 8 | `08-pre-judge-results.md` | `05-findings-triaged.md`, execution evidence (if available) |
+| 9 | `issues/F-NNN-issue.md`, `09-polished-findings.md` | `08-pre-judge-results.md`, triaged findings, execution evidence |
+| 10 | `10-deep-review.md` | `09-polished-findings.md`, `issues/F-NNN-issue.md` |
+| 11 | `CONFIRMED-REPORT.md` | ALL outputs |
 
 ---
 
@@ -85,22 +173,25 @@ User Input: @audit-orchestrator <path> [hint]
 |-----------|-------|
 | **Agent** | Self (orchestrator) |
 | **Input** | Codebase path + optional protocol hint |
-| **Output** | `audit-output/00-scope.md` |
+| **Output** | `audit-output/00-scope.md`, `audit-output/pipeline-state.md` |
 | **Sub-agents** | None |
 | **Estimated context** | ~500 lines (index.json + directory scan) |
 
 **Steps**:
-1. Create `audit-output/` directory
-2. Scan codebase: `find <path> -name "*.sol" -o -name "*.rs" -o -name "*.go" -o -name "*.move" -o -name "*.cairo" -o -name "*.vy" | head -50`
+1. Create `audit-output/` directory with subdirectories: `pocs`, `fuzzing`, `certora`, `halmos`, `issues`, `context`, `personas`
+2. Scan codebase for source files (all supported languages)
 3. Detect language/framework using [protocol-detection.md](protocol-detection.md) signals
 4. If user provided protocol hint → map directly to `protocolContext.mappings`
 5. If no hint → run auto-detection, collect all matches
 6. Read `DB/index.json` (~330 lines)
 7. Resolve manifest list from all matched protocol types (union + dedupe)
-8. Note corresponding hunt card files from `index.json` `huntcards.perManifest` — these are used in Phase 4
-9. Load `DB/manifests/keywords.json`, scan first 100 lines of target code for keyword hits to discover additional manifests
-10. For maximum depth: include all manifests from matched types + `general-security` + `unique` as baseline
-11. Write scope document to `audit-output/00-scope.md`
+8. Note corresponding hunt card files from `index.json` `huntcards.perManifest`
+9. Load `DB/manifests/keywords.json`, scan first 100 lines of target code for keyword hits
+10. Always include `general-security` + `unique` as baseline
+11. Write `audit-output/00-scope.md`
+12. Initialize `audit-output/pipeline-state.md` with metadata + all phases NOT_STARTED
+
+**Phase gate**: `00-scope.md` exists with protocol types, manifest list, files in scope. At least 1 source file detected.
 
 **Transition**: Pass `filesInScope`, `protocolTypes`, `manifestList` to Phase 2.
 
@@ -110,290 +201,203 @@ User Input: @audit-orchestrator <path> [hint]
 
 | Attribute | Value |
 |-----------|-------|
-| **Agent** | `audit-context-building` (sub-agent) |
-| **Input** | Scope document + codebase path |
-| **Output** | `audit-output/01-context.md` |
-| **Sub-agents** | May spawn its own sub-agents for dense functions |
+| **Agent** | `audit-context-building` (coordinator sub-agent) |
+| **Input** | `00-scope.md` + codebase path |
+| **Output** | `audit-output/01-context.md` + `audit-output/context/*.md` |
+| **Internal sub-agents** | `function-analyzer` ×N, `system-synthesizer` |
 | **Estimated context** | Large — sub-agent manages its own context |
 
-**Sub-agent prompt template**:
-```
-You are the audit-context-building agent. Analyze the following codebase for a security audit.
+**Phase gate**: `01-context.md` exists with Contract Inventory, Actor Model, Trust Boundaries, Invariant Candidates.
 
-TARGET CODEBASE: <path>
-FILES IN SCOPE: <file list from 00-scope.md>
-PROTOCOL TYPE: <detected types>
-
-Perform your full 3-phase workflow (orientation → micro-analysis → global understanding).
-
-Write your complete output to audit-output/01-context.md following the format in
-resources/inter-agent-data-format.md (Phase 2: Context Output section).
-
-Include: Contract inventory, actor model, state variable map, function analysis,
-cross-function flows, trust boundaries, invariant candidates, assumption register.
-```
-
-**Transition**: Read `audit-output/01-context.md`, extract `invariantCandidates` section for Phase 3.
-
-**Error handling**: If sub-agent times out or fails, retry once with a reduced scope (top 5 entry-point files only). If still fails, log the error and continue to Phase 3 with whatever partial output exists.
+**Error handling**: Retry with top 5 files on failure. Partial output is acceptable.
 
 ---
 
-### Phase 3: Invariant Extraction
+### Phase 3: Invariant Extraction + Review (Sequential Pair)
 
 | Attribute | Value |
 |-----------|-------|
-| **Agent** | `invariant-writer` (sub-agent) |
-| **Input** | Context output from Phase 2 |
-| **Output** | `audit-output/02-invariants.md` |
-| **Estimated context** | Medium — reads context, produces specs |
+| **Agents** | `invariant-writer` then `invariant-reviewer` (sequential) |
+| **Input** | `01-context.md` + DB manifests |
+| **Output** | `02-invariants.md` → `02-invariants-reviewed.md` |
 
-**Sub-agent prompt template**:
-```
-You are the invariant-writer agent. Extract all invariants from the audit context.
+**Step 3A**: Spawn `invariant-writer` → `02-invariants.md`
+**Step 3B**: Spawn `invariant-reviewer` with `02-invariants.md` as input → `02-invariants-reviewed.md`
 
-Read audit-output/01-context.md for the complete codebase analysis.
-TARGET CODEBASE: <path>
-
-Perform your full 4-phase workflow (ingest → extract → validate → write).
-
-Write output to audit-output/02-invariants.md following the format in
-resources/inter-agent-data-format.md (Phase 3: Invariant Spec section).
-
-Every invariant must have: ID, Property, Scope, Why, Testable.
-Categories: Solvency, Access Control, State Machine, Arithmetic, Oracle, Cross-Contract.
-```
-
-**Transition**: Read `audit-output/02-invariants.md`, pass to Phase 3a.
-
-**Error handling**: If sub-agent fails, extract invariant candidates from Phase 2 context directly and use those (they won't be as structured but are usable).
+**Phase gate**: `02-invariants-reviewed.md` exists with at least 5 invariants across 2+ categories. Fall back to `02-invariants.md` if reviewer fails.
 
 ---
 
-### Phase 3a: Invariant Review & Hardening
+### Phase 4: Iterative Parallel Discovery (N rounds)
 
-| Attribute | Value |
-|-----------|-------|
-| **Agent** | `invariant-reviewer` (sub-agent) |
-| **Input** | Invariant specs from Phase 3 + context from Phase 2 + DB manifests |
-| **Output** | `audit-output/02-invariants-reviewed.md` |
-| **Estimated context** | Medium-Large — reads context + invariants + researches canonical properties via browser |
+**This is the most compute-intensive phase.** Four independent discovery streams run **simultaneously** across multiple **rounds**. Between rounds, the orchestrator writes a shared discovery state file enabling cross-pollination.
 
-**Sub-agent prompt template**:
-```
-You are the invariant-reviewer agent. Review and harden the invariant specifications.
+| Stream | Agent(s) | Output per round | What It Finds |
+|--------|----------|------------------|---------------|
+| **4A** | Self (grep-prune) + N × `invariant-catcher` | `03-findings-shard-*-RN.md` | Known DB vulnerability patterns |
+| **4B** | `protocol-reasoning` | `04a-reasoning-findings-RN.md` | Novel bugs, cross-domain interactions |
+| **4C** | `multi-persona-orchestrator` (6 personas) | `04c-persona-findings-RN.md` | Multi-angle deep reasoning findings |
+| **4D** | `missing-validation-reasoning` | `04d-validation-findings-RN.md` | Input validation gaps |
 
-TARGET CODEBASE: <path>
-PROTOCOL TYPE: <detected types>
-MANIFEST LIST: <manifests>
+**Round loop**:
+1. Round 1: All 4 streams run independently
+2. Orchestrator merges → `discovery-state-round-1.md` (cross-pollination bus)
+3. Round 2+: All streams re-run reading shared state — cross-check, gap-fill, variants
+4. Repeat for `--discovery-rounds` iterations
 
-Read:
-- audit-output/01-context.md for architecture
-- audit-output/02-invariants.md for invariants to review
-- DB/index.json for vulnerability patterns that inform invariant strength
+**Cross-pollination state file** (`discovery-state-round-N.md`) contains:
+- Cumulative finding summary table
+- Cross-check requests (findings needing verification from other streams)
+- Unexplored areas (code areas with zero coverage)
+- Variant suggestions (root causes likely to have more instances)
 
-Perform your full 5-phase workflow:
-1. Re-derive protocol understanding independently
-2. Research canonical invariants (use browser for Crytic/properties, Certora specs, EIPs, audit reports)
-3. Audit existing invariants (bound calibration, gap detection, completeness)
-4. Multi-step composition stress test (flash loans, sandwiches, governance attacks)
-5. Write reviewed invariant file
+**Wait barrier**: ALL streams must complete per round before writing state and proceeding.
 
-Write to audit-output/02-invariants-reviewed.md.
-Every invariant must have a Review tag: UNCHANGED | TIGHTENED | LOOSENED | SPLIT | COMPOSED | ADDED | REMOVED | PARAMETERIZED.
-Include: Review Summary, Canonical Coverage table, Multi-Step Coverage table, Remaining Gaps.
-```
+**Error handling per stream**:
 
-**Transition**: Read `audit-output/02-invariants-reviewed.md`, pass reviewed invariant specs + manifest list to Phase 4. If `02-invariants-reviewed.md` does not exist (agent failed), fall back to `02-invariants.md`.
-
-**Error handling**: If sub-agent fails, retry once with reduced scope (solvency + access control categories only). If still fails, use `02-invariants.md` directly — downstream phases are unaffected.
+| Stream | Failure | Recovery |
+|--------|---------|----------|
+| 4A shard K | Retry shard K once | Continue with other shards |
+| 4A all shards | Fall back to single-agent DB hunt | |
+| 4B | Retry top 3 domains, 2 rounds | Skip if still fails |
+| 4C | Retry 3 personas, 1 round | Skip if still fails |
+| 4D | Skip | Other streams cover core vulns |
+| Any stream R2+ | Skip that stream for remaining rounds | Use its earlier round findings |
 
 ---
 
-### Phase 4: DB-Powered Hunting (Parallel Fan-Out)
+### Phase 5: Merge, Deduplicate & Triage
 
 | Attribute | Value |
 |-----------|-------|
-| **Agent** | Self (grep-prune + partition + merge) + **N × `invariant-catcher`** (parallel sub-agents) |
-| **Input** | Manifest list + invariant specs + codebase path |
-| **Output** | `audit-output/03-findings-raw.md` (merged) + `audit-output/hunt-card-shards.json` + `audit-output/03-merge-log.md` |
-| **Estimated context** | ~80-96K tokens per shard sub-agent (cards + full code + invariants + reasoning) |
+| **Agent** | Self |
+| **Input** | All Phase 4 outputs from ALL rounds + `discovery-state-round-*.md` |
+| **Output** | `05-findings-triaged.md` |
 
-**Hunt card grep-prune sequence** (self-driven):
-1. Load hunt cards for resolved manifests:
-   - Per-manifest: `DB/manifests/huntcards/<manifest>-huntcards.json`
-   - Or all at once: `DB/manifests/huntcards/all-huntcards.json` (~100K tokens)
-2. For each card, run its `grep` pattern against the target codebase:
-   ```bash
-   grep -rn "card.grep" <path> --include="*.sol" --include="*.rs" --include="*.go" --include="*.move" --include="*.cairo" --include="*.vy" -l
-   ```
-3. Cards with zero grep hits are **discarded** (pattern cannot apply to this codebase)
-4. Cards with `neverPrune: true` always survive
-5. This typically eliminates 60-80% of cards
-6. Write surviving cards + grep hit locations to `audit-output/hunt-card-hits.json`
+**Sequence**:
+1. **Merge** all findings from 4 streams
+2. **Cross-source correlation** — findings from 2+ streams get confidence boost
+3. **Deduplicate** by root cause (5 critical questions)
+4. **Falsification** protocol (5 checks per finding)
+5. **Severity assessment** (Impact × Likelihood matrix)
+6. **Assign stable IDs**: F-001, F-002, ... — these persist through ALL remaining phases
+7. **Write** `05-findings-triaged.md` with summary, correlation table, findings, excluded findings
 
-**Card partitioning** (self-driven):
-1. Separate `neverPrune` cards into a "critical set" (duplicated to every shard)
-2. Group remaining cards by `cat` tag
-3. Target shard size: 50-80 cards. Split large groups, merge small groups.
-4. Write partition plan to `audit-output/hunt-card-shards.json`
-
-**Sub-agent spawn** (parallel, one per shard):
-```
-You are the invariant-catcher agent. Hunt for vulnerability patterns in the target codebase.
-
-TARGET CODEBASE: <path>
-PROTOCOL TYPE: <detected types>
-
-SHARD: <shard-id> (shard <M> of <N>)
-YOUR CARDS (<card-count> cards, categories: <categories>):
-<paste shard cards with full content>
-
-CRITICAL CARDS (duplicated across all shards — ALWAYS CHECK):
-<paste all neverPrune cards>
-
-INVARIANT SPECS:
-Read audit-output/02-invariants-reviewed.md (fall back to 02-invariants.md if not available)
-
-These cards have been grep-matched — every card has ≥1 keyword hit.
-Your job:
-1. PASS 1: Execute card.check steps at grep hit locations (no .md reads)
-   - antipattern → quick positive; securePattern → quick negative
-2. PASS 2: For true/likely positives only, read full DB entry via card.ref + card.lines
-
-Write ALL findings to audit-output/03-findings-shard-<shard-id>.md
-```
-
-**Merge step** (self-driven, after all shards return):
-1. Read all `audit-output/03-findings-shard-*.md` files
-2. Deduplicate by root cause (same code line + same root cause → merge, keep higher confidence)
-3. Renumber findings sequentially: F-001, F-002, ...
-4. Write merged output to `audit-output/03-findings-raw.md`
-5. Write merge log to `audit-output/03-merge-log.md`
-
-**Transition**: Read raw findings, pass to Phase 4a alongside context.
-
-**Error handling**: If shard K fails, retry shard K once with same cards. If still fails, log and continue — other shard results are unaffected. If ALL shards fail, fall back to single-agent mode. Check `audit-output/03-findings-shard-*.md` for any partial results.
+**Phase gate**: `05-findings-triaged.md` exists.
 
 ---
 
-### Phase 4a: Reasoning-Based Discovery
+### Phase 6: PoC Generation & EXECUTION [CONDITIONAL]
 
 | Attribute | Value |
 |-----------|-------|
-| **Agent** | `protocol-reasoning` (sub-agent) |
-| **Input** | Codebase path + context + invariants + Phase 4 findings + manifest list |
-| **Output** | `audit-output/04a-reasoning-findings.md` |
-| **Estimated context** | Large — sub-agent manages its own context, spawns domain sub-agents |
+| **Condition** | **SKIPPED** if `--static-only` is set |
+| **Agent** | `poc-writing` × N (generation) + Self (execution) |
+| **Input** | `05-findings-triaged.md` + codebase |
+| **Output** | `audit-output/pocs/F-NNN-poc.*` + `audit-output/06-poc-results.md` |
 
-**Sub-agent prompt template**:
-```
-You are the protocol-reasoning agent. Perform deep reasoning-based vulnerability discovery.
+When skipped: Log `Phase 6: SKIPPED (--static-only mode)` to pipeline-state.md. Set all PoC statuses to N/A.
 
-TARGET CODEBASE: <path>
-PROTOCOL TYPE: <detected types>
-MANIFEST LIST: <manifests>
+**Critical difference from old pipeline**: PoCs are not just generated — they are **compiled and run**.
 
-PIPELINE CONTEXT:
-  - Read audit-output/01-context.md for architecture
-  - Read audit-output/02-invariants-reviewed.md for invariants (fall back to 02-invariants.md)
-  - Read audit-output/03-findings-raw.md to avoid duplicates
+**Sequence**:
+1. For each CRITICAL/HIGH finding → spawn `poc-writing` sub-agent
+2. For each generated PoC → **execute** using the target framework's test runner
+3. Record results: PASS / COMPILE_FAIL / ASSERT_FAIL / REVERT / TIMEOUT / SKIP
+4. **Retry policy**: For COMPILE_FAIL or ASSERT_FAIL, re-spawn `poc-writing` with error output (max 2 attempts total)
+5. Write `06-poc-results.md` with summary table + execution logs
 
-Perform your full 6-phase workflow (Seeds → Domains → Round 1-4 → Merge).
-Severity filter: MEDIUM, HIGH, CRITICAL only.
-Every finding requires a reachability proof.
-
-Write output to audit-output/04a-reasoning-findings.md following the format in
-resources/inter-agent-data-format.md (Phase 4a section).
-```
-
-**Transition**: Read reasoning findings, merge with Phase 4 raw findings, pass to Phase 5.
-
-**Error handling**: If sub-agent fails, retry once with reduced scope (top 3 domains, 2 rounds). If still fails, log and continue — Phase 4 findings remain valid.
+**Phase gate**: `06-poc-results.md` exists with results for every CRITICAL/HIGH finding.
 
 ---
 
-### Phase 5: Validation Gap Analysis
+### Phase 7: FV Generation & EXECUTION [CONDITIONAL]
 
 | Attribute | Value |
 |-----------|-------|
-| **Agent** | `missing-validation-reasoning` (sub-agent) |
-| **Input** | Codebase path + context from Phase 2 |
-| **Output** | `audit-output/04-validation-findings.md` |
-| **Estimated context** | Medium |
+| **Condition** | **SKIPPED** if `--static-only` is set |
+| **Agent** | `medusa-fuzzing` + `certora-verification` + `halmos-verification` (parallel generation) + Self (execution) |
+| **Input** | `02-invariants-reviewed.md` + codebase |
+| **Output** | `audit-output/fuzzing/`, `audit-output/certora/`, `audit-output/halmos/`, `audit-output/07-fv-results.md` |
 
-**Sub-agent prompt template**:
-```
-You are the missing-validation-reasoning agent. Scan for input validation vulnerabilities.
+When skipped: Log `Phase 7: SKIPPED (--static-only mode)` to pipeline-state.md. Set all FV statuses to N/A.
 
-TARGET CODEBASE: <path>
-CONTEXT: Read audit-output/01-context.md for architecture and function analysis.
+**Sequence**:
+1. Spawn all 3 FV generators in parallel
+2. For each generated suite → **compile** (forge build)
+3. For each compiled suite → **execute** (medusa fuzz / halmos / certoraRun)
+4. Map violations to existing findings or create NEW findings
+5. Write `07-fv-results.md` with results per tool + invariant violation → finding mapping
 
-Perform your full 5-phase workflow (constructor audit → invariants → attack surface → reasoning → documentation).
-
-Write findings to audit-output/04-validation-findings.md using the Finding Schema
-from resources/inter-agent-data-format.md.
-
-Focus: zero-address checks, stale oracle data, array length mismatches,
-numeric bounds, access control gaps, contract existence checks.
-```
-
-**Transition**: Merge validation findings with raw findings from Phase 4, pass all to Phase 6.
+**Phase gate**: `07-fv-results.md` exists.
 
 ---
 
-### Phase 6: Triage & PoC Generation
+### Phase 8: Pre-Judging (Validity Screen)
 
 | Attribute | Value |
 |-----------|-------|
-| **Agent** | Self (triage) + `poc-writer` (sub-agent, per HIGH/CRIT finding) |
-| **Input** | All raw findings from Phases 4+5 |
-| **Output** | `audit-output/05-findings-triaged.md` + `audit-output/pocs/` |
-| **Estimated context** | Variable — per-finding PoC spawns |
+| **Agent** | Judge(s) per `--judge` flag (single or all 3 in parallel) |
+| **Input** | `05-findings-triaged.md`, `06-poc-results.md` (if available), `07-fv-results.md` (if available) |
+| **Output** | `08-pre-judge-results.md` |
 
-**Triage sequence**:
-1. **Merge** all findings from `03-findings-raw.md`, `04a-reasoning-findings.md`, and `04-validation-findings.md`
-2. **Deduplicate** by root cause — group findings that share the same underlying issue
-3. **Falsification** — for each finding, apply the 5-check falsification protocol from [root-cause-analysis.md](root-cause-analysis.md):
-   - Is there a check I missed that prevents this?
-   - Does the execution order actually allow this?
-   - Are the preconditions realistic?
-   - Is there an external safeguard?
-   - Can the impact actually be realized?
-4. **Confidence scoring** — HIGH (include fully), MEDIUM (include with caveats), LOW (include as "potential"), SPECULATIVE (exclude)
-5. **Severity assessment** — Impact × Likelihood matrix
-6. **Exclude** findings that fail falsification (move to "Excluded Findings" section)
-7. **Number** surviving findings sequentially: F-001, F-002, ...
+First pass of the **judging self-loop**. Judge(s) assess raw triaged findings for validity before polishing.
 
-**PoC generation** (for CRITICAL and HIGH findings only):
-```
-For each CRITICAL/HIGH finding:
-  Spawn poc-writer sub-agent with:
-    - Finding details (root cause, affected code, attack scenario)
-    - Target codebase path
-    - Output path: audit-output/pocs/F-NNN-poc.{ext} (extension matches target language)
-```
+**Judge selection**:
+- `--judge=sherlock` → sherlock-judging only (consensus 1/1)
+- `--judge=cantina` → cantina-judge only (consensus 1/1)
+- `--judge=code4rena` → code4rena-judge only (consensus 1/1)
+- Default → all 3 judges in parallel (consensus 2/3)
 
-**Transition**: Pass triaged findings to Phase 7.
+**Rule**: Finding proceeds to Phase 9 only if it meets the consensus threshold for VALID.
+
+**Phase gate**: `08-pre-judge-results.md` exists with VALID/INVALID verdicts for every finding.
 
 ---
 
-### Phase 7: Downstream Generation
+### Phase 9: Issue Polishing (Valid Findings Only)
 
 | Attribute | Value |
 |-----------|-------|
-| **Agents** | `medusa-fuzzing`, `certora-verification`, `sherlock-judging`, `cantina-judge` |
-| **Input** | Invariant specs + triaged findings |
-| **Outputs** | `audit-output/fuzzing/`, `audit-output/certora/`, `06-sherlock-validation.md`, `07-cantina-validation.md` |
+| **Agent** | `issue-writer` × N |
+| **Input** | `08-pre-judge-results.md` (validated list), `05-findings-triaged.md`, execution evidence (if available) |
+| **Output** | `audit-output/issues/F-NNN-issue.md` + `audit-output/09-polished-findings.md` |
 
-**Spawn sequence** (these can run in parallel via agent tool):
+Only polish findings that passed Phase 8 pre-judging.
 
-1. **Medusa Fuzzing** — spawn `medusa-fuzzing` with invariant specs from `02-invariants-reviewed.md` (fall back to `02-invariants.md`)
-2. **Certora Verification** — spawn `certora-verification` with invariant specs
-3. **Sherlock Judging** — spawn `sherlock-judging` with triaged findings from `05-findings-triaged.md`
-4. **Cantina Judging** — spawn `cantina-judge` with triaged findings
+**Phase gate**: `09-polished-findings.md` exists.
 
-**Error handling**: If any downstream agent fails, note the failure in the report but don't block report assembly. Each downstream artifact is optional.
+---
+
+### Phase 10: Deep Review (Line-by-Line Judge Verification)
+
+| Attribute | Value |
+|-----------|-------|
+| **Agent** | Same judge(s) as Phase 8 (completes the self-loop) |
+| **Input** | `09-polished-findings.md`, `issues/F-NNN-issue.md` |
+| **Output** | `10-deep-review.md` |
+
+Second pass of the **judging self-loop**. Same judge(s) review polished issues line by line, verifying every code reference, claim, and severity assignment.
+
+**Verdicts per finding**: CONFIRMED / CONFIRMED-DOWNGRADED / REJECTED / NEEDS-REVISION
+
+**Confirmation criteria**:
+- **Full mode**: consensus threshold met in both rounds + execution evidence (PoC PASS or FV VIOLATED)
+- **Static-only mode**: consensus threshold met in both rounds (no execution evidence required)
+
+**Phase gate**: `10-deep-review.md` exists with final verdicts.
+
+---
+
+### Phase 11: Report Assembly
+
+| Attribute | Value |
+|-----------|-------|
+| **Agent** | Self |
+| **Input** | ALL pipeline artifacts |
+| **Output** | `CONFIRMED-REPORT.md` |
+
+Final report includes: configuration used, executive summary, confirmed findings with judge verdicts from both rounds, execution evidence (if full mode), invariant specifications, discovery cross-pollination record, pipeline execution record, rejected/downgraded findings, appendix.
 
 ---
 
@@ -404,13 +408,25 @@ For each CRITICAL/HIGH finding:
 | 1 | Can't detect protocol | Load ALL 11 manifests |
 | 2 | Context building timeout | Retry with top 5 files; use partial output |
 | 3 | Invariant extraction fails | Use invariant candidates from Phase 2 directly |
-| 4 | DB search finds no matches | Proceed — novel vulnerabilities possible |
-| 4 | Invariant-catcher fails | Use self-driven DB search results |
-| 4a | Reasoning agent timeout | Retry with top 3 domains + 2 rounds; skip if still fails |
-| 5 | Validation agent fails | Skip — Phase 4+4a findings still valid |
-| 6 | PoC generation fails | Document finding without PoC; add note |
-| 7 | Any downstream fails | Note in report; don't block assembly |
-| Final | Severity disagreement | Use LOWER rating (conservative) |
+| 3 | Invariant review fails | Use `02-invariants.md` directly |
+| 4 R1 | DB search finds no matches | Proceed — novel vulnerabilities possible |
+| 4 R1 | Shard K fails | Retry once; continue with other shards |
+| 4 R1 | Reasoning agent timeout | Retry top 3 domains + 2 rounds; skip if still fails |
+| 4 R1 | Multi-persona fails | Retry 3 personas + 1 round; skip if still fails |
+| 4 R1 | Validation agent fails | Skip — other streams cover core vulns |
+| 4 R2+ | Any stream fails | Skip that stream for remaining rounds; use earlier round findings |
+| 5 | Merge fails | Manual merge of available findings |
+| 6 | PoC compile/assert fail | Retry once with error context; record failure |
+| 6 | Skipped (static-only) | Normal — log SKIPPED |
+| 7 | FV generation fails | Note in report; don't block pipeline |
+| 7 | FV execution fails | Record error; FV artifacts still useful as specs |
+| 7 | Skipped (static-only) | Normal — log SKIPPED |
+| 8 | Judge fails | Retry once; if single-judge mode, try alternate judge as fallback |
+| 8 | 2+ judges fail (triple mode) | Use remaining judge + orchestrator self-assessment |
+| 9 | Issue writer fails | Use raw finding description instead |
+| 10 | Judge fails | Same recovery as Phase 8 |
+| 10 | NEEDS-REVISION verdict | Re-run issue-writer with feedback, re-judge (max 1 retry) |
+| 11 | Any missing artifact | Note gap in report; proceed with available data |
 
 ---
 
@@ -419,15 +435,20 @@ For each CRITICAL/HIGH finding:
 | Phase | Max Context Lines | Strategy |
 |-------|-------------------|----------|
 | 1 | 500 | Read index.json + targeted file listing |
-| 2 | Delegated | Sub-agent manages own context |
-| 3 | Delegated | Sub-agent manages own context |
-| 4 (self) | ~55K tokens | Load hunt cards, grep-prune, write surviving cards to hunt-card-hits.json |
-| 4 (sub) | ~30K per batch | Sub-agent reads DB entries in batches of 30-40 cards, checkpoints between batches |
-| 4a | Delegated | Sub-agent manages own context; spawns domain sub-agents |
-| 5 | Delegated | Sub-agent manages own context |
-| 6 | 1500 | Merge findings, deduplicate, triage |
+| 2 | Delegated | Coordinator manages sub-agent context |
+| 3 | Delegated | Sub-agents manage own context |
+| 4A (self) | ~55K tokens | Load hunt cards, grep-prune, partition |
+| 4A (subs) | ~30K per shard | Cards + code + invariants |
+| 4B | Delegated | Spawns domain sub-agents internally |
+| 4C | Delegated | Spawns 6 persona sub-agents internally |
+| 4D | Delegated | Sub-agent manages own context |
+| 5 | 2000 | Merge + deduplicate + triage |
+| 6 | Per-finding | One poc-writing spawn per finding |
 | 7 | Delegated | Sub-agents manage own context |
-| Final | 1000 | Assemble report from structured sections |
+| 8 | Per-finding | One issue-writer spawn per finding |
+| 9 | Delegated | Sub-agents manage own context |
+| 10 | 1500 | Read verdicts + PoC results + FV results |
+| 11 | 1000 | Assemble report from structured sections |
 
 ---
 
@@ -436,6 +457,6 @@ For each CRITICAL/HIGH finding:
 Stop the pipeline early if:
 
 1. **No source code found** at the provided path → Report error immediately
-2. **Codebase is trivially small** (<50 LOC) → Run abbreviated pipeline (skip Phase 3, 7)
+2. **Codebase is trivially small** (<50 LOC) → Run abbreviated pipeline (skip FV, persona)
 3. **Phase 2 reveals the code is a test file / mock** → Report and stop
-4. **All findings fail falsification** → Report "no vulnerabilities found" with methodology notes
+4. **All findings fail falsification AND confirmation** → Report "no vulnerabilities found" with full methodology notes
