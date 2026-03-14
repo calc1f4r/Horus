@@ -4,7 +4,7 @@
     "description": "Compressed hunt cards for sui-move — one-line detection rules for bulk scanning",
     "totalCards": 240,
     "skipped": 3,
-    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
     "enriched": 239
   },
   "cards": [
@@ -24,7 +24,8 @@
       ],
       "check": [
         "VERIFY: Downloaded Artifacts Summary"
-      ]
+      ],
+      "validWhen": "Downloaded Artifacts Summary"
     },
     {
       "id": "sui-move-artifact-index-protocol-coverage-002",
@@ -56,8 +57,9 @@
         67
       ],
       "check": [
-        "VERIFY: All artifacts are stored in:"
-      ]
+        "VERIFY: All artifacts are stored in"
+      ],
+      "validWhen": "All artifacts are stored in"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-move-access-control-and-author-000",
@@ -75,8 +77,9 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Move uses different access control paradigms per chain:"
-      ]
+        "VERIFY: Move uses different access control paradigms per chain"
+      ],
+      "validWhen": "Move uses different access control paradigms per chain"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-1-public-signer-capabi-001",
@@ -95,10 +98,14 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Public function returns signer for any distributor",
+        "PROVE: Protocol creates a resource account with SignerCapability stored; A public function returns the signer from the capability without authorization",
+        "FALSIFY: Make signer retrieval friend-only or internal",
         "ANTIPATTERN: Initialization uses signer-derived address, but access uses hardcoded"
       ],
       "antipattern": "Initialization uses signer-derived address, but access uses hardcoded",
-      "securePattern": "Make signer retrieval friend-only or internal"
+      "securePattern": "Make signer retrieval friend-only or internal",
+      "validWhen": "Public function returns signer for any distributor",
+      "invalidWhen": "Make signer retrieval friend-only or internal"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-2-missing-authorizatio-002",
@@ -117,10 +124,14 @@
       "neverPrune": true,
       "check": [
         "VERIFY: No access control on trading account retrieval",
+        "PROVE: Protocol exposes a function that performs a sensitive action (trading, payload marking, messaging); No check verifies the caller is authorized",
+        "FALSIFY: Move payload marking into treasury with access control",
         "ANTIPATTERN: No authorization check on cross-chain message sending"
       ],
       "antipattern": "No authorization check on cross-chain message sending",
-      "securePattern": "Move payload marking into treasury with access control"
+      "securePattern": "Move payload marking into treasury with access control",
+      "validWhen": "No access control on trading account retrieval",
+      "invalidWhen": "Move payload marking into treasury with access control"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-3-role-separation-viol-003",
@@ -138,10 +149,14 @@
       ],
       "check": [
         "VERIFY: OR logic lets listing admin do pool admin actions",
+        "PROVE: Protocol defines multiple admin roles with different permissions; Role checking logic uses OR instead of AND, or checks are incomplete",
+        "FALSIFY: Separate functions for separate roles",
         "ANTIPATTERN: Some functions check issuer role, others check transfer_agent"
       ],
       "antipattern": "Some functions check issuer role, others check transfer_agent",
-      "securePattern": "Separate functions for separate roles"
+      "securePattern": "Separate functions for separate roles",
+      "validWhen": "OR logic lets listing admin do pool admin actions",
+      "invalidWhen": "Separate functions for separate roles"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-4-missing-capability-r-004",
@@ -159,10 +174,13 @@
       ],
       "check": [
         "VERIFY: Caps can be generated but never revoked",
-        "ANTIPATTERN: Parameter update doesn't update last_used timestamp"
+        "PROVE: Parameter update doesn't update last_used timestamp",
+        "FALSIFY: Generate and revoke capabilities"
       ],
       "antipattern": "Parameter update doesn't update last_used timestamp",
-      "securePattern": "Generate and revoke capabilities"
+      "securePattern": "Generate and revoke capabilities",
+      "validWhen": "Caps can be generated but never revoked",
+      "invalidWhen": "Generate and revoke capabilities"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-5-missing-version-chec-005",
@@ -180,10 +198,14 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Admin functions don't check state version"
+        "VERIFY: Admin functions don't check state version",
+        "PROVE: Protocol upgrades package to a new version with security fixes; Admin functions or critical operations don't verify the state object version",
+        "FALSIFY: Version check on all entry points"
       ],
       "antipattern": "Admin functions don't check state version",
-      "securePattern": "Version check on all entry points"
+      "securePattern": "Version check on all entry points",
+      "validWhen": "Admin functions don't check state version",
+      "invalidWhen": "Version check on all entry points"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-6-unverified-object-po-006",
@@ -200,10 +222,13 @@
         461
       ],
       "check": [
-        "VERIFY: Doesn't verify correct SupplyPool instance"
+        "VERIFY: Doesn't verify correct SupplyPool instance",
+        "FALSIFY: Verify supply pool matches position's expected pool"
       ],
       "antipattern": "Doesn't verify correct SupplyPool instance",
-      "securePattern": "Verify supply pool matches position's expected pool"
+      "securePattern": "Verify supply pool matches position's expected pool",
+      "validWhen": "Doesn't verify correct SupplyPool instance",
+      "invalidWhen": "Verify supply pool matches position's expected pool"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-7-publicly-exposed-sig-007",
@@ -221,10 +246,14 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Any caller can get the signer for any distribution"
+        "VERIFY: Any caller can get the signer for any distribution",
+        "PROVE: A public function returns a signer created from a stored SignerCapability; Any external caller retrieves the signer for the resource account holding funds",
+        "FALSIFY: Restrict signer access to friend modules only"
       ],
       "antipattern": "Any caller can get the signer for any distribution",
-      "securePattern": "Restrict signer access to friend modules only"
+      "securePattern": "Restrict signer access to friend modules only",
+      "validWhen": "Any caller can get the signer for any distribution",
+      "invalidWhen": "Restrict signer access to friend modules only"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-8-excessive-admin-priv-008",
@@ -241,10 +270,14 @@
         541
       ],
       "check": [
-        "VERIFY: Listing admin gets full config modify power"
+        "VERIFY: Listing admin gets full config modify power",
+        "PROVE: Access control check uses OR to allow multiple admin roles; A lower-privilege role (listing admin) gains full configuration power intended for pool admin",
+        "FALSIFY: Separate paths for different admin scopes"
       ],
       "antipattern": "Listing admin gets full config modify power",
-      "securePattern": "Separate paths for different admin scopes"
+      "securePattern": "Separate paths for different admin scopes",
+      "validWhen": "Listing admin gets full config modify power",
+      "invalidWhen": "Separate paths for different admin scopes"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-9-inverted-assertion-l-009",
@@ -261,10 +294,14 @@
         576
       ],
       "check": [
-        "VERIFY: Assertion is backwards — only special wallets pass"
+        "VERIFY: Assertion is backwards — only special wallets pass",
+        "PROVE: Developer writes assert!(is_special_wallet(addr), E_WALLET_SPECIAL) intending to block special wallets; The assertion is inverted — it requires the wallet to BE special,...",
+        "FALSIFY: Negated check blocks special wallets"
       ],
       "antipattern": "Assertion is backwards — only special wallets pass",
-      "securePattern": "Negated check blocks special wallets"
+      "securePattern": "Negated check blocks special wallets",
+      "validWhen": "Assertion is backwards — only special wallets pass",
+      "invalidWhen": "Negated check blocks special wallets"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-10-signature-replay-in-010",
@@ -281,10 +318,14 @@
         630
       ],
       "check": [
-        "VERIFY: No nonce prevents replaying the same signature"
+        "VERIFY: No nonce prevents replaying the same signature",
+        "PROVE: Claim function uses signature-based authorization without nonce tracking; A valid signature can be retransmitted within the deadline window",
+        "FALSIFY: Include nonce in signature and track used nonces"
       ],
       "antipattern": "No nonce prevents replaying the same signature",
-      "securePattern": "Include nonce in signature and track used nonces"
+      "securePattern": "Include nonce in signature and track used nonces",
+      "validWhen": "No nonce prevents replaying the same signature",
+      "invalidWhen": "Include nonce in signature and track used nonces"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-11-cumulative-claim-ex-011",
@@ -302,10 +343,14 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Checks per-call, not cumulative"
+        "VERIFY: Checks per-call, not cumulative",
+        "PROVE: Claim function checks amount <= unlocked_tokens per call; Does NOT verify cumulative claims (amount + tokens_transferred <= unlocked_tokens)",
+        "FALSIFY: Check cumulative claims against total unlocked"
       ],
       "antipattern": "Checks per-call, not cumulative",
-      "securePattern": "Check cumulative claims against total unlocked"
+      "securePattern": "Check cumulative claims against total unlocked",
+      "validWhen": "Checks per-call, not cumulative",
+      "invalidWhen": "Check cumulative claims against total unlocked"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-12-permissionless-func-012",
@@ -322,10 +367,14 @@
         713
       ],
       "check": [
-        "VERIFY: No identity check before penalty period"
+        "VERIFY: No identity check before penalty period",
+        "PROVE: Access control is only enforced during a penalty period (e.g., after a deadline); Before the penalty period, any caller can invoke the restricted operation",
+        "FALSIFY: Always enforce driver identity"
       ],
       "antipattern": "No identity check before penalty period",
-      "securePattern": "Always enforce driver identity"
+      "securePattern": "Always enforce driver identity",
+      "validWhen": "No identity check before penalty period",
+      "invalidWhen": "Always enforce driver identity"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-13-missing-capability--013",
@@ -342,10 +391,14 @@
         752
       ],
       "check": [
-        "VERIFY: No check that cap belongs to this specific vault"
+        "VERIFY: No check that cap belongs to this specific vault",
+        "PROVE: Function accepts a capability object (VaultOwnerCap) and a target resource (Vault); It never validates that the capability belongs to the specific target resource",
+        "FALSIFY: Validate cap ownership against vault"
       ],
       "antipattern": "No check that cap belongs to this specific vault",
-      "securePattern": "Validate cap ownership against vault"
+      "securePattern": "Validate cap ownership against vault",
+      "validWhen": "No check that cap belongs to this specific vault",
+      "invalidWhen": "Validate cap ownership against vault"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-14-missing-approval-re-014",
@@ -363,10 +416,14 @@
       ],
       "check": [
         "VERIFY: Can add allowances but never remove them",
+        "PROVE: Protocol allows granting approval/deposit capabilities to addresses; No function exists to revoke granted capabilities",
+        "FALSIFY: Track and allow revocation of approvals",
         "ANTIPATTERN: Cap is created but never added to revocable list"
       ],
       "antipattern": "Cap is created but never added to revocable list",
-      "securePattern": "Track and allow revocation of approvals"
+      "securePattern": "Track and allow revocation of approvals",
+      "validWhen": "Can add allowances but never remove them",
+      "invalidWhen": "Track and allow revocation of approvals"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-15-front-running-paylo-015",
@@ -383,10 +440,14 @@
         851
       ],
       "check": [
-        "VERIFY: Anyone can call this to mark a payload as used"
+        "VERIFY: Anyone can call this to mark a payload as used",
+        "PROVE: A public validate_and_store_payload function marks payloads as consumed; Attacker monitors mempool for legitimate minting transactions",
+        "FALSIFY: Inline validation into the minting function"
       ],
       "antipattern": "Anyone can call this to mark a payload as used",
-      "securePattern": "Inline validation into the minting function"
+      "securePattern": "Inline validation into the minting function",
+      "validWhen": "Anyone can call this to mark a payload as used",
+      "invalidWhen": "Inline validation into the minting function"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-16-emergency-withdrawa-016",
@@ -403,10 +464,14 @@
         887
       ],
       "check": [
-        "VERIFY: Creator can bypass emergency restrictions via FA API"
+        "VERIFY: Creator can bypass emergency restrictions via FA API",
+        "PROVE: Protocol has emergency withdrawal pathway intended for crisis situations; A privileged actor (deployer creator, vault owner) can bypass normal restrictions",
+        "FALSIFY: Use a non-creator resource account as the store owner"
       ],
       "antipattern": "Creator can bypass emergency restrictions via FA API",
-      "securePattern": "Use a non-creator resource account as the store owner"
+      "securePattern": "Use a non-creator resource account as the store owner",
+      "validWhen": "Creator can bypass emergency restrictions via FA API",
+      "invalidWhen": "Use a non-creator resource account as the store owner"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-17-group-role-id-reuse-017",
@@ -423,10 +488,14 @@
         922
       ],
       "check": [
-        "VERIFY: Group IDs can be reused after removal"
+        "VERIFY: Group IDs can be reused after removal",
+        "PROVE: Admin removes a group, freeing up its numeric ID; A new group is created with the same ID as the removed one",
+        "FALSIFY: Use monotonically increasing IDs that are never reused"
       ],
       "antipattern": "Group IDs can be reused after removal",
-      "securePattern": "Use monotonically increasing IDs that are never reused"
+      "securePattern": "Use monotonically increasing IDs that are never reused",
+      "validWhen": "Group IDs can be reused after removal",
+      "invalidWhen": "Use monotonically increasing IDs that are never reused"
     },
     {
       "id": "sui-move-move-access-control-authorization-vulner-pattern-18-irrevocable-token-f-018",
@@ -444,13 +513,17 @@
       ],
       "check": [
         "VERIFY: No corresponding unfreeze function",
+        "PROVE: Admin can freeze token stores via coin::freeze_coin_store; No corresponding unfreeze function exists in the module",
+        "FALSIFY: Provide both freeze and unfreeze capabilities",
+        "IMPACT: Complete fund drainage through signer exposure (2/29 reports) — CRITICAL",
         "All public functions returning signers are friend-only or internal",
-        "Every state-modifying public function has authorization check",
-        "Role checks use AND for higher privilege, not OR",
-        "LOOK FOR: Pattern 1: `public fun` returning `signer` or exposing signer capability"
+        "Every state-modifying public function has authorization check"
       ],
       "antipattern": "No corresponding unfreeze function",
-      "securePattern": "Provide both freeze and unfreeze capabilities"
+      "securePattern": "Provide both freeze and unfreeze capabilities",
+      "validWhen": "No corresponding unfreeze function",
+      "invalidWhen": "Provide both freeze and unfreeze capabilities",
+      "impact": "Complete fund drainage through signer exposure (2/29 reports) — CRITICAL"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-move-arithmetic-and-precision--000",
@@ -468,7 +541,8 @@
       ],
       "check": [
         "VERIFY: Move uses unsigned integers (u8, u64, u128, u256) that abort on overflow/underflow rather than wrapping."
-      ]
+      ],
+      "validWhen": "Move uses unsigned integers (u8, u64, u128, u256) that abort on overflow/underflow rather than wrapping."
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-1-double-scaling-in-in-001",
@@ -487,10 +561,14 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Double upscaling in flashloan repayment validation",
+        "PROVE: Protocol applies scaling factor to balance amounts before computing invariant; Due to code error, scaling is applied twice to post-operation balances",
+        "FALSIFY: Apply metastable upscaling exactly once",
         "ANTIPATTERN: Overly strict assertion doesn't account for rounding"
       ],
       "antipattern": "Overly strict assertion doesn't account for rounding",
-      "securePattern": "Apply metastable upscaling exactly once"
+      "securePattern": "Apply metastable upscaling exactly once",
+      "validWhen": "Double upscaling in flashloan repayment validation",
+      "invalidWhen": "Apply metastable upscaling exactly once"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-2-division-before-mult-002",
@@ -507,10 +585,14 @@
         216
       ],
       "check": [
-        "VERIFY: Division before multiplication loses precision"
+        "VERIFY: Division before multiplication loses precision",
+        "PROVE: Protocol computes token amounts using division before multiplication; Integer truncation in division step loses significant precision",
+        "FALSIFY: Multiplication before division preserves precision"
       ],
       "antipattern": "Division before multiplication loses precision",
-      "securePattern": "Multiplication before division preserves precision"
+      "securePattern": "Multiplication before division preserves precision",
+      "validWhen": "Division before multiplication loses precision",
+      "invalidWhen": "Multiplication before division preserves precision"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-3-division-by-zero-in--003",
@@ -528,10 +610,14 @@
       ],
       "check": [
         "VERIFY: No guard against zero reserve in division",
+        "PROVE: Pool or staking contract uses share-based accounting; Total shares or reserve amount reaches zero through withdrawal/manipulation",
+        "FALSIFY: Check for zero before division",
         "ANTIPATTERN: Weight can be zero if node's stake is too low"
       ],
       "antipattern": "Weight can be zero if node's stake is too low",
-      "securePattern": "Check for zero before division"
+      "securePattern": "Check for zero before division",
+      "validWhen": "No guard against zero reserve in division",
+      "invalidWhen": "Check for zero before division"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-4-rounding-direction-e-004",
@@ -549,10 +635,14 @@
       ],
       "check": [
         "VERIFY: Rounding to 1 causes overpayment",
+        "PROVE: Share minting rounds down, so small deposits mint 0 shares; Share burning/redemption rounds up, so withdrawals extract more than proportional share",
+        "FALSIFY: Round DOWN on minting (fewer shares), round UP on burning (more tokens needed)",
         "ANTIPATTERN: Rounding up causes users to supply more than needed"
       ],
       "antipattern": "Rounding up causes users to supply more than needed",
-      "securePattern": "Round DOWN on minting (fewer shares), round UP on burning (more tokens needed)"
+      "securePattern": "Round DOWN on minting (fewer shares), round UP on burning (more tokens needed)",
+      "validWhen": "Rounding to 1 causes overpayment",
+      "invalidWhen": "Round DOWN on minting (fewer shares), round UP on burning (more tokens needed)"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-5-overflow-in-fee-rewa-005",
@@ -569,10 +659,14 @@
         392
       ],
       "check": [
-        "VERIFY: Overflow when token_amount * fee_bips exceeds u64::MAX"
+        "VERIFY: Overflow when token_amount * fee_bips exceeds u64::MAX",
+        "PROVE: Fee or reward calculation multiplies large token amounts by basis points; Intermediate multiplication exceeds u64 or u128 max",
+        "FALSIFY: Cast to u128 for intermediate calculation"
       ],
       "antipattern": "Overflow when token_amount * fee_bips exceeds u64::MAX",
-      "securePattern": "Cast to u128 for intermediate calculation"
+      "securePattern": "Cast to u128 for intermediate calculation",
+      "validWhen": "Overflow when token_amount * fee_bips exceeds u64::MAX",
+      "invalidWhen": "Cast to u128 for intermediate calculation"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-6-negative-value-misha-006",
@@ -591,10 +685,14 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Negative balance converted to large positive",
+        "PROVE: Protocol uses custom signed integer types (Move has no native signed ints); Negative intermediate values are cast to unsigned, becoming very large positive numbers",
+        "FALSIFY: Check sign before conversion",
         "ANTIPATTERN: Subtraction can underflow if lock_time > current time"
       ],
       "antipattern": "Subtraction can underflow if lock_time > current time",
-      "securePattern": "Check sign before conversion"
+      "securePattern": "Check sign before conversion",
+      "validWhen": "Negative balance converted to large positive",
+      "invalidWhen": "Check sign before conversion"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-7-faulty-constant-defi-007",
@@ -612,10 +710,13 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Missing final digit in MAX_U64 constant"
+        "VERIFY: Missing final digit in MAX_U64 constant",
+        "FALSIFY: Use compiler-checked maximum value"
       ],
       "antipattern": "Missing final digit in MAX_U64 constant",
-      "securePattern": "Use compiler-checked maximum value"
+      "securePattern": "Use compiler-checked maximum value",
+      "validWhen": "Missing final digit in MAX_U64 constant",
+      "invalidWhen": "Use compiler-checked maximum value"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-8-fee-accounting-denom-008",
@@ -633,10 +734,13 @@
       ],
       "check": [
         "VERIFY: Fallthrough when deep_quantity is zero",
-        "ANTIPATTERN: Returns 0 when fee_bips == MAX_FEE_BIPS"
+        "PROVE: Returns 0 when fee_bips == MAX_FEE_BIPS",
+        "FALSIFY: Handle all fee denomination cases explicitly"
       ],
       "antipattern": "Returns 0 when fee_bips == MAX_FEE_BIPS",
-      "securePattern": "Handle all fee denomination cases explicitly"
+      "securePattern": "Handle all fee denomination cases explicitly",
+      "validWhen": "Fallthrough when deep_quantity is zero",
+      "invalidWhen": "Handle all fee denomination cases explicitly"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-9-rounding-assertion-f-009",
@@ -654,10 +758,14 @@
       ],
       "check": [
         "VERIFY: Strict inequality doesn't account for rounding",
+        "PROVE: Protocol converts between token representations (cTokens ↔ underlying, shares ↔ tokens); Strict assertion checks equality between pre- and post-conversion values",
+        "FALSIFY: Use tolerance-based comparison or consistent scaling",
         "ANTIPATTERN: Two branches with different scaling yield different results"
       ],
       "antipattern": "Two branches with different scaling yield different results",
-      "securePattern": "Use tolerance-based comparison or consistent scaling"
+      "securePattern": "Use tolerance-based comparison or consistent scaling",
+      "validWhen": "Strict inequality doesn't account for rounding",
+      "invalidWhen": "Use tolerance-based comparison or consistent scaling"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-10-overestimation-from-010",
@@ -674,10 +782,14 @@
         673
       ],
       "check": [
-        "VERIFY: safe_mul_div_up rounds up, causing overestimation"
+        "VERIFY: safe_mul_div_up rounds up, causing overestimation",
+        "PROVE: Protocol uses mul_div_up (ceiling division) for deposit amount calculations; Rounding up causes users to supply more tokens than necessary to maintain pool ratio",
+        "FALSIFY: Round down for amounts taken from users"
       ],
       "antipattern": "safe_mul_div_up rounds up, causing overestimation",
-      "securePattern": "Round down for amounts taken from users"
+      "securePattern": "Round down for amounts taken from users",
+      "validWhen": "safe_mul_div_up rounds up, causing overestimation",
+      "invalidWhen": "Round down for amounts taken from users"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-11-fee-calculation-ove-011",
@@ -694,10 +806,14 @@
         718
       ],
       "check": [
-        "VERIFY: u64 multiplication overflows for large amounts"
+        "VERIFY: u64 multiplication overflows for large amounts",
+        "PROVE: Fee calculation uses (token_amount * fee_bips) / BIPS_PRECISION in u64; For large token amounts, the intermediate multiplication overflows u64",
+        "FALSIFY: Use u128 intermediate calculation"
       ],
       "antipattern": "u64 multiplication overflows for large amounts",
-      "securePattern": "Use u128 intermediate calculation"
+      "securePattern": "Use u128 intermediate calculation",
+      "validWhen": "u64 multiplication overflows for large amounts",
+      "invalidWhen": "Use u128 intermediate calculation"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-12-overpayment-from-mi-012",
@@ -714,10 +830,14 @@
         756
       ],
       "check": [
-        "VERIFY: Setting shares to 1 overpays at high exchange rates"
+        "VERIFY: Setting shares to 1 overpays at high exchange rates",
+        "PROVE: When unstaking, if computed share amount rounds to 0, protocol sets shares = 1; At high exchange rates, 1 share is worth more than the original unstake amount",
+        "FALSIFY: Abort on zero shares instead of rounding up"
       ],
       "antipattern": "Setting shares to 1 overpays at high exchange rates",
-      "securePattern": "Abort on zero shares instead of rounding up"
+      "securePattern": "Abort on zero shares instead of rounding up",
+      "validWhen": "Setting shares to 1 overpays at high exchange rates",
+      "invalidWhen": "Abort on zero shares instead of rounding up"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-13-subtraction-underfl-013",
@@ -735,10 +855,14 @@
       ],
       "check": [
         "VERIFY: Subtraction executes before guard check",
+        "PROVE: Code computes difference = time_a - time_b or balance_a - balance_b; Move aborts on unsigned underflow, but the subtraction is computed before the guard check",
+        "FALSIFY: Check before subtracting",
         "ANTIPATTERN: deny_list_size may exceed old_epoch_used_capacity"
       ],
       "antipattern": "deny_list_size may exceed old_epoch_used_capacity",
-      "securePattern": "Check before subtracting"
+      "securePattern": "Check before subtracting",
+      "validWhen": "Subtraction executes before guard check",
+      "invalidWhen": "Check before subtracting"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-14-mutable-local-copy--014",
@@ -756,10 +880,15 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: `mut left` is a local copy, not a mutable reference"
+        "VERIFY: mut left is a local copy, not a mutable reference",
+        "PROVE: Function destructures a struct with mut field, creating a mutable local copy; Update assigns to field = new_value instead of *field = new_value",
+        "FALSIFY: Dereference to update stored value",
+        "ANTIPATTERN: `mut left` is a local copy, not a mutable reference"
       ],
       "antipattern": "`mut left` is a local copy, not a mutable reference",
-      "securePattern": "Dereference to update stored value"
+      "securePattern": "Dereference to update stored value",
+      "validWhen": "mut left is a local copy, not a mutable reference",
+      "invalidWhen": "Dereference to update stored value"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-15-variable-shadowing--015",
@@ -776,10 +905,15 @@
         894
       ],
       "check": [
-        "VERIFY: `let value = 0` shadows the `_value` parameter"
+        "VERIFY: let value = 0 shadows the _value parameter",
+        "PROVE: A function declares let value = 0; which shadows an input parameter _value; All subsequent uses refer to the shadowed zero instead of the parameter",
+        "FALSIFY: Assign to existing variable instead of re-declaring",
+        "ANTIPATTERN: `let value = 0` shadows the `_value` parameter"
       ],
       "antipattern": "`let value = 0` shadows the `_value` parameter",
-      "securePattern": "Assign to existing variable instead of re-declaring"
+      "securePattern": "Assign to existing variable instead of re-declaring",
+      "validWhen": "let value = 0 shadows the _value parameter",
+      "invalidWhen": "Assign to existing variable instead of re-declaring"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-16-negative-to-unsigne-016",
@@ -796,11 +930,15 @@
         937
       ],
       "check": [
-        "VERIFY: Negative `base` produces inflated u64 from to_balance",
+        "VERIFY: Negative base produces inflated u64 from to_balance",
+        "PROVE: Protocol uses a signed fixed-point library (ifixed) with values stored as u256 with a sign bit; A negative value is passed to ifixed::to_balance() which tries to convert...",
+        "FALSIFY: Check sign before conversion",
         "ANTIPATTERN: Accumulated slippage can make balance_to_withdraw negative"
       ],
       "antipattern": "Accumulated slippage can make balance_to_withdraw negative",
-      "securePattern": "Check sign before conversion"
+      "securePattern": "Check sign before conversion",
+      "validWhen": "Negative base produces inflated u64 from to_balance",
+      "invalidWhen": "Check sign before conversion"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-17-division-by-zero-in-017",
@@ -818,10 +956,14 @@
       ],
       "check": [
         "VERIFY: weight can be 0 for low-stake nodes",
+        "PROVE: Protocol performs division by total supply, weight, or reserve that can be zero; Zero occurs when pool is empty, node has no stake, or all tokens are drained",
+        "FALSIFY: Guard against zero denominators",
         "ANTIPATTERN: reserve_a can be 0 if pool is fully drained"
       ],
       "antipattern": "reserve_a can be 0 if pool is fully drained",
-      "securePattern": "Guard against zero denominators"
+      "securePattern": "Guard against zero denominators",
+      "validWhen": "weight can be 0 for low-stake nodes",
+      "invalidWhen": "Guard against zero denominators"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-18-incorrect-round-up--018",
@@ -838,10 +980,14 @@
         1014
       ],
       "check": [
-        "VERIFY: a + b - 1 can overflow"
+        "VERIFY: a + b - 1 can overflow",
+        "PROVE: Protocol uses divide_and_round_up(a, b) = (a + b - 1) / b; When a is close to u128::MAX or u256::MAX, a + b - 1 overflows",
+        "FALSIFY: Avoid intermediate overflow"
       ],
       "antipattern": "a + b - 1 can overflow",
-      "securePattern": "Avoid intermediate overflow"
+      "securePattern": "Avoid intermediate overflow",
+      "validWhen": "a + b - 1 can overflow",
+      "invalidWhen": "Avoid intermediate overflow"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-19-overflow-in-signed--019",
@@ -858,10 +1004,14 @@
         1058
       ],
       "check": [
-        "VERIFY: Treats sign bit as overflow"
+        "VERIFY: Treats sign bit as overflow",
+        "PROVE: Signed fixed-point library uses GREATEST_BIT to detect sign/overflow; When one operand is negative, the raw product has the sign bit set",
+        "FALSIFY: Separate overflow check from sign handling"
       ],
       "antipattern": "Treats sign bit as overflow",
-      "securePattern": "Separate overflow check from sign handling"
+      "securePattern": "Separate overflow check from sign handling",
+      "validWhen": "Treats sign bit as overflow",
+      "invalidWhen": "Separate overflow check from sign handling"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-20-zero-mint-after-fix-020",
@@ -878,10 +1028,14 @@
         1097
       ],
       "check": [
-        "VERIFY: Non-zero fixed-point can become zero after conversion"
+        "VERIFY: Non-zero fixed-point can become zero after conversion",
+        "PROVE: Protocol checks lp_to_mint != 0 at fixed-point precision; Converts to balance via ifixed::to_balance(lp_to_mint, scaling)",
+        "FALSIFY: Check after conversion to actual balance"
       ],
       "antipattern": "Non-zero fixed-point can become zero after conversion",
-      "securePattern": "Check after conversion to actual balance"
+      "securePattern": "Check after conversion to actual balance",
+      "validWhen": "Non-zero fixed-point can become zero after conversion",
+      "invalidWhen": "Check after conversion to actual balance"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-21-faulty-constant-def-021",
@@ -898,10 +1052,14 @@
         1142
       ],
       "check": [
-        "VERIFY: 15 hex chars instead of 16"
+        "VERIFY: 15 hex chars instead of 16",
+        "PROVE: A constant for MAX_U64 or similar bit mask is defined with wrong number of digits; Bit manipulation operations (LSB, MSB, tick lookup) use incorrect mask",
+        "FALSIFY: Verified constant with proper digit count"
       ],
       "antipattern": "15 hex chars instead of 16",
-      "securePattern": "Verified constant with proper digit count"
+      "securePattern": "Verified constant with proper digit count",
+      "validWhen": "15 hex chars instead of 16",
+      "invalidWhen": "Verified constant with proper digit count"
     },
     {
       "id": "sui-move-move-arithmetic-precision-vulnerabilitie-pattern-22-excess-recall-withd-022",
@@ -919,13 +1077,17 @@
       ],
       "check": [
         "VERIFY: Rounding up can exceed available funds",
+        "PROVE: Protocol rounds recall/withdrawal amounts up to a minimum block size; After rounding, the requested amount exceeds available reserves",
+        "FALSIFY: Cap rounded amount to available reserves",
+        "IMPACT: Direct fund loss through incorrect calculations (8/29 reports)",
         "Verify scaling functions are applied exactly once per calculation path",
-        "Check all division operations have zero-denominator guards",
-        "Confirm multiplication happens before division in multi-step calculations",
-        "LOOK FOR: Pattern 1: `upscale` or `scale` called more than once on same variable"
+        "Check all division operations have zero-denominator guards"
       ],
       "antipattern": "Rounding up can exceed available funds",
-      "securePattern": "Cap rounded amount to available reserves"
+      "securePattern": "Cap rounded amount to available reserves",
+      "validWhen": "Rounding up can exceed available funds",
+      "invalidWhen": "Cap rounded amount to available reserves",
+      "impact": "Direct fund loss through incorrect calculations (8/29 reports)"
     },
     {
       "id": "sui-move-move-cross-chain-bridge-vulnerabilities-move-cross-chain-and-bridge-vu-000",
@@ -944,7 +1106,8 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Comprehensive patterns for cross-chain messaging, bridge validation, payload front-running, validator set integrity,..."
-      ]
+      ],
+      "validWhen": "Comprehensive patterns for cross-chain messaging, bridge validation, payload front-running, validator set integrity,..."
     },
     {
       "id": "sui-move-move-cross-chain-bridge-vulnerabilities-pattern-1-payload-front-runnin-001",
@@ -961,10 +1124,14 @@
         134
       ],
       "check": [
-        "VERIFY: Anyone can call validate_and_store_payload"
+        "VERIFY: Anyone can call validate_and_store_payload",
+        "PROVE: Legitimate user submits a valid payload + proof for token minting; validate_and_store_payload is a public function that marks payloads as used",
+        "FALSIFY: Combine validation and minting into single atomic operation"
       ],
       "antipattern": "Anyone can call validate_and_store_payload",
-      "securePattern": "Combine validation and minting into single atomic operation"
+      "securePattern": "Combine validation and minting into single atomic operation",
+      "validWhen": "Anyone can call validate_and_store_payload",
+      "invalidWhen": "Combine validation and minting into single atomic operation"
     },
     {
       "id": "sui-move-move-cross-chain-bridge-vulnerabilities-pattern-2-missing-validator-se-002",
@@ -983,10 +1150,12 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Multiple missing checks",
-        "ANTIPATTERN: Multiple missing checks"
+        "FALSIFY: Complete validator set validation"
       ],
       "antipattern": "Multiple missing checks",
-      "securePattern": "Complete validator set validation"
+      "securePattern": "Complete validator set validation",
+      "validWhen": "Multiple missing checks",
+      "invalidWhen": "Complete validator set validation"
     },
     {
       "id": "sui-move-move-cross-chain-bridge-vulnerabilities-pattern-3-cross-chain-message--003",
@@ -1005,10 +1174,14 @@
       "neverPrune": true,
       "check": [
         "VERIFY: No validation on incoming cross-chain message",
+        "PROVE: Protocol receives cross-chain messages via LayerZero/Wormhole integration; Incoming message content is not validated (no schema, no source verification)",
+        "FALSIFY: Validate incoming message schema and source",
         "ANTIPATTERN: Uses balance instead of message source for asset routing"
       ],
       "antipattern": "Uses balance instead of message source for asset routing",
-      "securePattern": "Validate incoming message schema and source"
+      "securePattern": "Validate incoming message schema and source",
+      "validWhen": "No validation on incoming cross-chain message",
+      "invalidWhen": "Validate incoming message schema and source"
     },
     {
       "id": "sui-move-move-cross-chain-bridge-vulnerabilities-pattern-4-unrestricted-cross-c-004",
@@ -1025,10 +1198,13 @@
         347
       ],
       "check": [
-        "VERIFY: Any user can send arbitrary cross-chain messages"
+        "VERIFY: Any user can send arbitrary cross-chain messages",
+        "FALSIFY: Capability-gated messaging"
       ],
       "antipattern": "Any user can send arbitrary cross-chain messages",
-      "securePattern": "Capability-gated messaging"
+      "securePattern": "Capability-gated messaging",
+      "validWhen": "Any user can send arbitrary cross-chain messages",
+      "invalidWhen": "Capability-gated messaging"
     },
     {
       "id": "sui-move-move-cross-chain-bridge-vulnerabilities-pattern-5-signature-replay-in--005",
@@ -1045,10 +1221,13 @@
         411
       ],
       "check": [
-        "VERIFY: Valid signatures can be retransmitted"
+        "VERIFY: Valid signatures can be retransmitted",
+        "FALSIFY: Track used signatures"
       ],
       "antipattern": "Valid signatures can be retransmitted",
-      "securePattern": "Track used signatures"
+      "securePattern": "Track used signatures",
+      "validWhen": "Valid signatures can be retransmitted",
+      "invalidWhen": "Track used signatures"
     },
     {
       "id": "sui-move-move-cross-chain-bridge-vulnerabilities-pattern-6-fund-loss-via-object-006",
@@ -1065,10 +1244,14 @@
         467
       ],
       "check": [
-        "VERIFY: Gas recipient may be an object ID, not an address"
+        "VERIFY: Gas recipient may be an object ID, not an address",
+        "PROVE: Bridge sends gas refund to a \"recipient\" address from cross-chain message; On Sui, object IDs and user addresses are both 32-byte values",
+        "FALSIFY: Validate recipient is a user address, not object ID"
       ],
       "antipattern": "Gas recipient may be an object ID, not an address",
-      "securePattern": "Validate recipient is a user address, not object ID"
+      "securePattern": "Validate recipient is a user address, not object ID",
+      "validWhen": "Gas recipient may be an object ID, not an address",
+      "invalidWhen": "Validate recipient is a user address, not object ID"
     },
     {
       "id": "sui-move-move-cross-chain-bridge-vulnerabilities-pattern-7-missing-version-chec-007",
@@ -1085,10 +1268,13 @@
         499
       ],
       "check": [
-        "VERIFY: No version gate on admin function"
+        "VERIFY: No version gate on admin function",
+        "FALSIFY: Version-gated admin function"
       ],
       "antipattern": "No version gate on admin function",
-      "securePattern": "Version-gated admin function"
+      "securePattern": "Version-gated admin function",
+      "validWhen": "No version gate on admin function",
+      "invalidWhen": "Version-gated admin function"
     },
     {
       "id": "sui-move-move-cross-chain-bridge-vulnerabilities-pattern-8-cross-chain-replay-f-008",
@@ -1106,10 +1292,13 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: No chain ID in message verification"
+        "VERIFY: No chain ID in message verification",
+        "FALSIFY: Validate destination chain ID"
       ],
       "antipattern": "No chain ID in message verification",
-      "securePattern": "Validate destination chain ID"
+      "securePattern": "Validate destination chain ID",
+      "validWhen": "No chain ID in message verification",
+      "invalidWhen": "Validate destination chain ID"
     },
     {
       "id": "sui-move-move-cross-chain-bridge-vulnerabilities-pattern-9-transceiver-id-overf-009",
@@ -1126,10 +1315,13 @@
         585
       ],
       "check": [
-        "VERIFY: No check that ID fits in bitmap"
+        "VERIFY: No check that ID fits in bitmap",
+        "FALSIFY: Validate transceiver ID fits in bitmap"
       ],
       "antipattern": "No check that ID fits in bitmap",
-      "securePattern": "Validate transceiver ID fits in bitmap"
+      "securePattern": "Validate transceiver ID fits in bitmap",
+      "validWhen": "No check that ID fits in bitmap",
+      "invalidWhen": "Validate transceiver ID fits in bitmap"
     },
     {
       "id": "sui-move-move-cross-chain-bridge-vulnerabilities-pattern-10-inconsistent-deadli-010",
@@ -1146,10 +1338,13 @@
         618
       ],
       "check": [
-        "VERIFY: Deadline comparison uses wrong time unit"
+        "VERIFY: Deadline comparison uses wrong time unit",
+        "FALSIFY: Normalize time units before comparison"
       ],
       "antipattern": "Deadline comparison uses wrong time unit",
-      "securePattern": "Normalize time units before comparison"
+      "securePattern": "Normalize time units before comparison",
+      "validWhen": "Deadline comparison uses wrong time unit",
+      "invalidWhen": "Normalize time units before comparison"
     },
     {
       "id": "sui-move-move-cross-chain-bridge-vulnerabilities-pattern-11-zero-value-burn-wit-011",
@@ -1166,10 +1361,13 @@
         661
       ],
       "check": [
-        "VERIFY: Zero-value burn emits valid cross-chain message"
+        "VERIFY: Zero-value burn emits valid cross-chain message",
+        "FALSIFY: Require minimum burn amount"
       ],
       "antipattern": "Zero-value burn emits valid cross-chain message",
-      "securePattern": "Require minimum burn amount"
+      "securePattern": "Require minimum burn amount",
+      "validWhen": "Zero-value burn emits valid cross-chain message",
+      "invalidWhen": "Require minimum burn amount"
     },
     {
       "id": "sui-move-move-cross-chain-bridge-vulnerabilities-pattern-12-deserialization-acc-012",
@@ -1187,13 +1385,17 @@
       ],
       "check": [
         "VERIFY: Public deserialization without authentication",
+        "PROVE: Pattern 1: public fun validate_and_store_payload separate from mint",
+        "FALSIFY: Deserialization is friend-only; execution requires proof",
+        "IMPACT: Permanent blocking of bridge minting via payload front-running (1/29 reports)",
         "Payload validation and minting are atomic (single function)",
-        "Validator set checks: no duplicates, key length, threshold ≤ total weight",
-        "All incoming cross-chain messages validated for schema and source",
-        "LOOK FOR: Pattern 1: `public fun validate_and_store_payload` separate from mint"
+        "Validator set checks: no duplicates, key length, threshold ≤ total weight"
       ],
       "antipattern": "Public deserialization without authentication",
-      "securePattern": "Deserialization is friend-only; execution requires proof"
+      "securePattern": "Deserialization is friend-only; execution requires proof",
+      "validWhen": "Public deserialization without authentication",
+      "invalidWhen": "Deserialization is friend-only; execution requires proof",
+      "impact": "Permanent blocking of bridge minting via payload front-running (1/29 reports)"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-move-defi-protocol-logic-vulne-000",
@@ -1211,7 +1413,8 @@
       ],
       "check": [
         "VERIFY: Comprehensive patterns for reward miscalculation, solvency failures, withdrawal logic bugs, claim exploits, liquidation..."
-      ]
+      ],
+      "validWhen": "Comprehensive patterns for reward miscalculation, solvency failures, withdrawal logic bugs, claim exploits, liquidation..."
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-1-incorrect-reward-ini-001",
@@ -1229,10 +1432,14 @@
       ],
       "check": [
         "VERIFY: New reward program starts all users at current time",
+        "PROVE: Protocol starts a new reward program at time T1; Users who staked before T1 have their reward start initialized to T1 (current time)",
+        "FALSIFY: Snapshot accumulated_per_share before restart",
         "ANTIPATTERN: Restart doesn't account for inactive period [t0, t1]"
       ],
       "antipattern": "Restart doesn't account for inactive period [t0, t1]",
-      "securePattern": "Snapshot accumulated_per_share before restart"
+      "securePattern": "Snapshot accumulated_per_share before restart",
+      "validWhen": "New reward program starts all users at current time",
+      "invalidWhen": "Snapshot accumulated_per_share before restart"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-2-missing-solvency-che-002",
@@ -1250,10 +1457,14 @@
       ],
       "check": [
         "VERIFY: No solvency check after withdrawal",
+        "PROVE: User has deposited collateral and borrowed against it; Withdrawal function does not check post-withdrawal collateral ratio",
+        "FALSIFY: Validate solvency after withdrawal",
         "ANTIPATTERN: Validator removed but staked funds not recovered"
       ],
       "antipattern": "Validator removed but staked funds not recovered",
-      "securePattern": "Validate solvency after withdrawal"
+      "securePattern": "Validate solvency after withdrawal",
+      "validWhen": "No solvency check after withdrawal",
+      "invalidWhen": "Validate solvency after withdrawal"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-3-flashloan-repayment--003",
@@ -1271,10 +1482,13 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: balances_after_flashloan applies upscaling twice"
+        "VERIFY: balances_after_flashloan applies upscaling twice",
+        "FALSIFY: Compare balances at same scaling level"
       ],
       "antipattern": "balances_after_flashloan applies upscaling twice",
-      "securePattern": "Compare balances at same scaling level"
+      "securePattern": "Compare balances at same scaling level",
+      "validWhen": "balances_after_flashloan applies upscaling twice",
+      "invalidWhen": "Compare balances at same scaling level"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-4-excessive-claims-via-004",
@@ -1292,10 +1506,13 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Each claim only checks current unlock, not cumulative"
+        "VERIFY: Each claim only checks current unlock, not cumulative",
+        "FALSIFY: Track cumulative claims"
       ],
       "antipattern": "Each claim only checks current unlock, not cumulative",
-      "securePattern": "Track cumulative claims"
+      "securePattern": "Track cumulative claims",
+      "validWhen": "Each claim only checks current unlock, not cumulative",
+      "invalidWhen": "Track cumulative claims"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-5-fee-accounting-misma-005",
@@ -1312,10 +1529,13 @@
         389
       ],
       "check": [
-        "VERIFY: Zero deep_quantity causes fee denomination switch"
+        "VERIFY: Zero deep_quantity causes fee denomination switch",
+        "FALSIFY: Deduct fees before share calculation"
       ],
       "antipattern": "Zero deep_quantity causes fee denomination switch",
-      "securePattern": "Deduct fees before share calculation"
+      "securePattern": "Deduct fees before share calculation",
+      "validWhen": "Zero deep_quantity causes fee denomination switch",
+      "invalidWhen": "Deduct fees before share calculation"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-6-forced-withdrawal-to-006",
@@ -1334,10 +1554,13 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Tolerance check skipped when base is zero",
-        "ANTIPATTERN: Signed-to-unsigned conversion flips negative to large positive"
+        "PROVE: Signed-to-unsigned conversion flips negative to large positive",
+        "FALSIFY: Always enforce tolerance, handle signed values correctly"
       ],
       "antipattern": "Signed-to-unsigned conversion flips negative to large positive",
-      "securePattern": "Always enforce tolerance, handle signed values correctly"
+      "securePattern": "Always enforce tolerance, handle signed values correctly",
+      "validWhen": "Tolerance check skipped when base is zero",
+      "invalidWhen": "Always enforce tolerance, handle signed values correctly"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-7-state-desynchronizat-007",
@@ -1355,10 +1578,13 @@
       ],
       "check": [
         "VERIFY: Obligations created without Bank module awareness",
-        "ANTIPATTERN: Future commission rate used for current distribution"
+        "PROVE: Future commission rate used for current distribution",
+        "FALSIFY: Use epoch-specific commission rate"
       ],
       "antipattern": "Future commission rate used for current distribution",
-      "securePattern": "Use epoch-specific commission rate"
+      "securePattern": "Use epoch-specific commission rate",
+      "validWhen": "Obligations created without Bank module awareness",
+      "invalidWhen": "Use epoch-specific commission rate"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-8-permissionless-front-008",
@@ -1375,10 +1601,13 @@
         561
       ],
       "check": [
-        "VERIFY: Anyone can fulfill before penalty period starts"
+        "VERIFY: Anyone can fulfill before penalty period starts",
+        "FALSIFY: Designated driver always has priority"
       ],
       "antipattern": "Anyone can fulfill before penalty period starts",
-      "securePattern": "Designated driver always has priority"
+      "securePattern": "Designated driver always has priority",
+      "validWhen": "Anyone can fulfill before penalty period starts",
+      "invalidWhen": "Designated driver always has priority"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-9-incorrect-withdrawal-009",
@@ -1395,10 +1624,13 @@
         624
       ],
       "check": [
-        "VERIFY: Assumes amount > minimum_pending_inactive threshold"
+        "VERIFY: Assumes amount > minimum_pending_inactive threshold",
+        "FALSIFY: Validate amount > 0, handle edge cases"
       ],
       "antipattern": "Assumes amount > minimum_pending_inactive threshold",
-      "securePattern": "Validate amount > 0, handle edge cases"
+      "securePattern": "Validate amount > 0, handle edge cases",
+      "validWhen": "Assumes amount > minimum_pending_inactive threshold",
+      "invalidWhen": "Validate amount > 0, handle edge cases"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-10-reward-accumulation-010",
@@ -1415,10 +1647,14 @@
         668
       ],
       "check": [
-        "VERIFY: Inactive time included in reward calculation"
+        "VERIFY: Inactive time included in reward calculation",
+        "PROVE: Reward distribution is paused or ended; When restarted, the system includes the inactive gap in reward calculations",
+        "FALSIFY: Reset last_update_time when restarting rewards"
       ],
       "antipattern": "Inactive time included in reward calculation",
-      "securePattern": "Reset last_update_time when restarting rewards"
+      "securePattern": "Reset last_update_time when restarting rewards",
+      "validWhen": "Inactive time included in reward calculation",
+      "invalidWhen": "Reset last_update_time when restarting rewards"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-11-tolerance-check-byp-011",
@@ -1436,10 +1672,14 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Force withdraw skips tolerance validation"
+        "VERIFY: Force withdraw skips tolerance validation",
+        "PROVE: User sets unrealistically high minimum expected balance, locking the withdrawal session; After a timeout, forced withdrawal path is triggered",
+        "FALSIFY: Enforce tolerance even in forced withdrawal"
       ],
       "antipattern": "Force withdraw skips tolerance validation",
-      "securePattern": "Enforce tolerance even in forced withdrawal"
+      "securePattern": "Enforce tolerance even in forced withdrawal",
+      "validWhen": "Force withdraw skips tolerance validation",
+      "invalidWhen": "Enforce tolerance even in forced withdrawal"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-12-lp-fee-manipulation-012",
@@ -1456,10 +1696,14 @@
         752
       ],
       "check": [
-        "VERIFY: Repeated splits cause rounding loss in provided_value_usd"
+        "VERIFY: Repeated splits cause rounding loss in provided_value_usd",
+        "PROVE: LP coin tracks provided_value_usd for fee calculation at withdrawal; Repeated split operations cause rounding errors that reduce provided_value_usd",
+        "FALSIFY: Use actual LP balance ratio at withdrawal time for fees"
       ],
       "antipattern": "Repeated splits cause rounding loss in provided_value_usd",
-      "securePattern": "Use actual LP balance ratio at withdrawal time for fees"
+      "securePattern": "Use actual LP balance ratio at withdrawal time for fees",
+      "validWhen": "Repeated splits cause rounding loss in provided_value_usd",
+      "invalidWhen": "Use actual LP balance ratio at withdrawal time for fees"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-13-boolean-logic-error-013",
@@ -1477,10 +1721,15 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: || makes the function always return true when end_time !"
+        "VERIFY: makes the function always return true when end_time !",
+        "PROVE: Time validation uses || (OR) where && (AND) is required; Condition always evaluates to true because one operand is trivially true",
+        "FALSIFY: Use AND to require both conditions",
+        "ANTIPATTERN: || makes the function always return true when end_time != 0"
       ],
       "antipattern": "|| makes the function always return true when end_time != 0",
-      "securePattern": "Use AND to require both conditions"
+      "securePattern": "Use AND to require both conditions",
+      "validWhen": "makes the function always return true when end_time !",
+      "invalidWhen": "Use AND to require both conditions"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-14-buffer-pool-drainag-014",
@@ -1497,10 +1746,15 @@
         831
       ],
       "check": [
-        "VERIFY: Burns `amount_needed` but mints `amount_needed - fee`"
+        "VERIFY: Burns amount_needed but mints amount_needed - fee",
+        "PROVE: Protocol mints derivative tokens for amount - fee but burns full amount; The burn > mint discrepancy drains the buffer/vault on each operation",
+        "FALSIFY: Symmetric mint and burn amounts",
+        "ANTIPATTERN: Burns `amount_needed` but mints `amount_needed - fee`"
       ],
       "antipattern": "Burns `amount_needed` but mints `amount_needed - fee`",
-      "securePattern": "Symmetric mint and burn amounts"
+      "securePattern": "Symmetric mint and burn amounts",
+      "validWhen": "Burns amount_needed but mints amount_needed - fee",
+      "invalidWhen": "Symmetric mint and burn amounts"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-15-validator-operator--015",
@@ -1517,10 +1771,14 @@
         871
       ],
       "check": [
-        "VERIFY: No stake migration when validator is removed"
+        "VERIFY: No stake migration when validator is removed",
+        "PROVE: Admin removes a validator from the protocol's pool set; Existing stakes on the removed validator have no migration path",
+        "FALSIFY: Migrate stakes before removal"
       ],
       "antipattern": "No stake migration when validator is removed",
-      "securePattern": "Migrate stakes before removal"
+      "securePattern": "Migrate stakes before removal",
+      "validWhen": "No stake migration when validator is removed",
+      "invalidWhen": "Migrate stakes before removal"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-16-price-boundary-chec-016",
@@ -1537,10 +1795,14 @@
         919
       ],
       "check": [
-        "VERIFY: >= allows price at exact boundary"
+        "VERIFY: >= allows price at exact boundary",
+        "PROVE: Swap validates sqrt_price_limit >= min_sqrt_price using >= instead of >; At the exact boundary, the swap can push the price to or beyond min/max tick",
+        "FALSIFY: Strict inequalities prevent boundary state"
       ],
       "antipattern": ">= allows price at exact boundary",
-      "securePattern": "Strict inequalities prevent boundary state"
+      "securePattern": "Strict inequalities prevent boundary state",
+      "validWhen": ">= allows price at exact boundary",
+      "invalidWhen": "Strict inequalities prevent boundary state"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-17-incorrect-commissio-017",
@@ -1557,10 +1819,14 @@
         959
       ],
       "check": [
-        "VERIFY: Applies new commission rate to current epoch rewards"
+        "VERIFY: Applies new commission rate to current epoch rewards",
+        "PROVE: During epoch transition, protocol applies pending (future) commission rate for current epoch; Operators receive rewards calculated at the wrong rate",
+        "FALSIFY: Calculate with old rate, then update"
       ],
       "antipattern": "Applies new commission rate to current epoch rewards",
-      "securePattern": "Calculate with old rate, then update"
+      "securePattern": "Calculate with old rate, then update",
+      "validWhen": "Applies new commission rate to current epoch rewards",
+      "invalidWhen": "Calculate with old rate, then update"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-18-stake-threshold-byp-018",
@@ -1577,10 +1843,14 @@
         1006
       ],
       "check": [
-        "VERIFY: update doesn't validate minimum threshold"
+        "VERIFY: update doesn't validate minimum threshold",
+        "PROVE: Active set requires minimum stake threshold to join; User stakes above threshold to enter the active set",
+        "FALSIFY: Enforce threshold on update"
       ],
       "antipattern": "update doesn't validate minimum threshold",
-      "securePattern": "Enforce threshold on update"
+      "securePattern": "Enforce threshold on update",
+      "validWhen": "update doesn't validate minimum threshold",
+      "invalidWhen": "Enforce threshold on update"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-19-uncapped-minting-dr-019",
@@ -1597,10 +1867,14 @@
         1048
       ],
       "check": [
-        "VERIFY: No cap or rate limit on minting"
+        "VERIFY: No cap or rate limit on minting",
+        "PROVE: Protocol allows unlimited minting of derivative tokens (xLPT, sthAPT); Attacker mints massive amount and stakes to capture disproportionate rewards",
+        "FALSIFY: Rate-limited minting per epoch"
       ],
       "antipattern": "No cap or rate limit on minting",
-      "securePattern": "Rate-limited minting per epoch"
+      "securePattern": "Rate-limited minting per epoch",
+      "validWhen": "No cap or rate limit on minting",
+      "invalidWhen": "Rate-limited minting per epoch"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-20-snapshot-integrity--020",
@@ -1617,10 +1891,14 @@
         1087
       ],
       "check": [
-        "VERIFY: No lock on token operations during snapshot"
+        "VERIFY: No lock on token operations during snapshot",
+        "PROVE: Protocol takes a snapshot of token balances for dividend distribution; During the snapshot process, users can merge (join) snapshotted tokens with non-snapshotted ones",
+        "FALSIFY: Block merges during active snapshots"
       ],
       "antipattern": "No lock on token operations during snapshot",
-      "securePattern": "Block merges during active snapshots"
+      "securePattern": "Block merges during active snapshots",
+      "validWhen": "No lock on token operations during snapshot",
+      "invalidWhen": "Block merges during active snapshots"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-21-frontrunning-pool-c-021",
@@ -1637,10 +1915,14 @@
         1130
       ],
       "check": [
-        "VERIFY: No limit on pools per address"
+        "VERIFY: No limit on pools per address",
+        "PROVE: Protocol selects random pools for matched fund distribution (e.g., melee crank); Attacker creates many pools with small amounts to increase selection probability",
+        "FALSIFY: Limit pools per address"
       ],
       "antipattern": "No limit on pools per address",
-      "securePattern": "Limit pools per address"
+      "securePattern": "Limit pools per address",
+      "validWhen": "No limit on pools per address",
+      "invalidWhen": "Limit pools per address"
     },
     {
       "id": "sui-move-move-defi-protocol-logic-vulnerabilities-pattern-22-cliff-timestamp-not-022",
@@ -1658,13 +1940,17 @@
       ],
       "check": [
         "VERIFY: Ignores cliff_timestamp in fully-unlocked calculation",
+        "PROVE: cancel_schedule_interval calculates fully_unlocked_timestamp from unlock + periods; Does not account for cliff_timestamp which may extend the actual lock period",
+        "FALSIFY: Include cliff in fully-unlocked calculation",
+        "IMPACT: Direct fund loss via flashloan bypass (1/29 reports) — CRITICAL",
         "Reward programs snapshot accumulated state before restart",
-        "All withdrawal paths check post-withdrawal solvency",
-        "Flashloan repayment compared at same scaling level",
-        "LOOK FOR: Pattern 1: Reward initialization with `timestamp::now_seconds()` in add_program"
+        "All withdrawal paths check post-withdrawal solvency"
       ],
       "antipattern": "Ignores cliff_timestamp in fully-unlocked calculation",
-      "securePattern": "Include cliff in fully-unlocked calculation"
+      "securePattern": "Include cliff in fully-unlocked calculation",
+      "validWhen": "Ignores cliff_timestamp in fully-unlocked calculation",
+      "invalidWhen": "Include cliff in fully-unlocked calculation",
+      "impact": "Direct fund loss via flashloan bypass (1/29 reports) — CRITICAL"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-move-denial-of-service-vulnera-000",
@@ -1683,7 +1969,8 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Comprehensive patterns for denial of service attacks in Move-based smart contracts, including unbounded storage growth,..."
-      ]
+      ],
+      "validWhen": "Comprehensive patterns for denial of service attacks in Move-based smart contracts, including unbounded storage growth,..."
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-1-unbounded-vector-gro-001",
@@ -1702,10 +1989,14 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Vector-backed rewards map grows unbounded",
+        "PROVE: Protocol stores per-user data in a vector (rewards, accounts, etc.); Attacker adds entries to the vector at negligible cost",
+        "FALSIFY: Bounded rewards with cleanup",
         "ANTIPATTERN: Zero-balance deposits/withdrawals still counted"
       ],
       "antipattern": "Zero-balance deposits/withdrawals still counted",
-      "securePattern": "Bounded rewards with cleanup"
+      "securePattern": "Bounded rewards with cleanup",
+      "validWhen": "Vector-backed rewards map grows unbounded",
+      "invalidWhen": "Bounded rewards with cleanup"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-2-front-running-resour-002",
@@ -1722,10 +2013,14 @@
         242
       ],
       "check": [
-        "VERIFY: Anyone can create a primary store at any address"
+        "VERIFY: Anyone can create a primary store at any address",
+        "PROVE: Protocol uses predictable address derivation (creator + seed) for resource accounts; Attacker observes creation transaction in mempool",
+        "FALSIFY: Use unpredictable seeds or handle existing accounts"
       ],
       "antipattern": "Anyone can create a primary store at any address",
-      "securePattern": "Use unpredictable seeds or handle existing accounts"
+      "securePattern": "Use unpredictable seeds or handle existing accounts",
+      "validWhen": "Anyone can create a primary store at any address",
+      "invalidWhen": "Use unpredictable seeds or handle existing accounts"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-3-event-object-limit-e-003",
@@ -1743,10 +2038,13 @@
       ],
       "check": [
         "VERIFY: Each order cancellation emits events",
-        "ANTIPATTERN: No length limit on public key stored in object"
+        "PROVE: No length limit on public key stored in object",
+        "FALSIFY: Validate public key length"
       ],
       "antipattern": "No length limit on public key stored in object",
-      "securePattern": "Validate public key length"
+      "securePattern": "Validate public key length",
+      "validWhen": "Each order cancellation emits events",
+      "invalidWhen": "Validate public key length"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-4-division-by-zero-in--004",
@@ -1764,10 +2062,13 @@
       ],
       "check": [
         "VERIFY: No guard against zero reserves",
-        "ANTIPATTERN: Share amount can be manipulated to zero"
+        "PROVE: Share amount can be manipulated to zero",
+        "FALSIFY: Guard all divisions against zero denominator"
       ],
       "antipattern": "Share amount can be manipulated to zero",
-      "securePattern": "Guard all divisions against zero denominator"
+      "securePattern": "Guard all divisions against zero denominator",
+      "validWhen": "No guard against zero reserves",
+      "invalidWhen": "Guard all divisions against zero denominator"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-5-hash-collision-dos-i-005",
@@ -1784,10 +2085,13 @@
         402
       ],
       "check": [
-        "VERIFY: User-controlled address keys can collide"
+        "VERIFY: User-controlled address keys can collide",
+        "FALSIFY: Use Table (BTreeMap-based) instead of SmartTable for user-keyed data"
       ],
       "antipattern": "User-controlled address keys can collide",
-      "securePattern": "Use Table (BTreeMap-based) instead of SmartTable for user-keyed data"
+      "securePattern": "Use Table (BTreeMap-based) instead of SmartTable for user-keyed data",
+      "validWhen": "User-controlled address keys can collide",
+      "invalidWhen": "Use Table (BTreeMap-based) instead of SmartTable for user-keyed data"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-6-overflow-abort-in-ar-006",
@@ -1804,10 +2108,13 @@
         460
       ],
       "check": [
-        "VERIFY: Large amount * fee_bips can overflow u64"
+        "VERIFY: Large amount * fee_bips can overflow u64",
+        "FALSIFY: Use u128 intermediate for overflow prevention"
       ],
       "antipattern": "Large amount * fee_bips can overflow u64",
-      "securePattern": "Use u128 intermediate for overflow prevention"
+      "securePattern": "Use u128 intermediate for overflow prevention",
+      "validWhen": "Large amount * fee_bips can overflow u64",
+      "invalidWhen": "Use u128 intermediate for overflow prevention"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-7-mint-rate-limit-exha-007",
@@ -1824,10 +2131,13 @@
         499
       ],
       "check": [
-        "VERIFY: Wrap/unwrap count toward epoch limit"
+        "VERIFY: Wrap/unwrap count toward epoch limit",
+        "FALSIFY: Per-user rate limiting or separate internal/external limits"
       ],
       "antipattern": "Wrap/unwrap count toward epoch limit",
-      "securePattern": "Per-user rate limiting or separate internal/external limits"
+      "securePattern": "Per-user rate limiting or separate internal/external limits",
+      "validWhen": "Wrap/unwrap count toward epoch limit",
+      "invalidWhen": "Per-user rate limiting or separate internal/external limits"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-8-missing-parameter-va-008",
@@ -1844,10 +2154,13 @@
         544
       ],
       "check": [
-        "VERIFY: Commission rate not bounded"
+        "VERIFY: Commission rate not bounded",
+        "FALSIFY: Validate all parameters at entry"
       ],
       "antipattern": "Commission rate not bounded",
-      "securePattern": "Validate all parameters at entry"
+      "securePattern": "Validate all parameters at entry",
+      "validWhen": "Commission rate not bounded",
+      "invalidWhen": "Validate all parameters at entry"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-9-unbounded-map-growth-009",
@@ -1864,10 +2177,13 @@
         591
       ],
       "check": [
-        "VERIFY: Unbounded map iterated during liquidation"
+        "VERIFY: Unbounded map iterated during liquidation",
+        "FALSIFY: Paginated reward iteration with max per-call limit"
       ],
       "antipattern": "Unbounded map iterated during liquidation",
-      "securePattern": "Paginated reward iteration with max per-call limit"
+      "securePattern": "Paginated reward iteration with max per-call limit",
+      "validWhen": "Unbounded map iterated during liquidation",
+      "invalidWhen": "Paginated reward iteration with max per-call limit"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-10-hash-collision-buck-010",
@@ -1884,10 +2200,13 @@
         630
       ],
       "check": [
-        "VERIFY: SmartTable with user-controlled keys"
+        "VERIFY: SmartTable with user-controlled keys",
+        "FALSIFY: Use split_load_threshold to limit bucket depth"
       ],
       "antipattern": "SmartTable with user-controlled keys",
-      "securePattern": "Use split_load_threshold to limit bucket depth"
+      "securePattern": "Use split_load_threshold to limit bucket depth",
+      "validWhen": "SmartTable with user-controlled keys",
+      "invalidWhen": "Use split_load_threshold to limit bucket depth"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-11-division-by-zero-on-011",
@@ -1904,10 +2223,13 @@
         664
       ],
       "check": [
-        "VERIFY: Division by total supply without zero-check"
+        "VERIFY: Division by total supply without zero-check",
+        "FALSIFY: Return 1:1 rate when supply is zero"
       ],
       "antipattern": "Division by total supply without zero-check",
-      "securePattern": "Return 1:1 rate when supply is zero"
+      "securePattern": "Return 1:1 rate when supply is zero",
+      "validWhen": "Division by total supply without zero-check",
+      "invalidWhen": "Return 1:1 rate when supply is zero"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-12-front-running-deplo-012",
@@ -1924,10 +2246,13 @@
         700
       ],
       "check": [
-        "VERIFY: Predictable seed allows front-running"
+        "VERIFY: Predictable seed allows front-running",
+        "FALSIFY: Include unpredictable component in seed"
       ],
       "antipattern": "Predictable seed allows front-running",
-      "securePattern": "Include unpredictable component in seed"
+      "securePattern": "Include unpredictable component in seed",
+      "validWhen": "Predictable seed allows front-running",
+      "invalidWhen": "Include unpredictable component in seed"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-13-epoch-transition-im-013",
@@ -1944,10 +2269,13 @@
         737
       ],
       "check": [
-        "VERIFY: Assertion fails on transient imbalance"
+        "VERIFY: Assertion fails on transient imbalance",
+        "FALSIFY: Allow transient imbalance, reconcile during transition"
       ],
       "antipattern": "Assertion fails on transient imbalance",
-      "securePattern": "Allow transient imbalance, reconcile during transition"
+      "securePattern": "Allow transient imbalance, reconcile during transition",
+      "validWhen": "Assertion fails on transient imbalance",
+      "invalidWhen": "Allow transient imbalance, reconcile during transition"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-14-unnecessary-asserti-014",
@@ -1964,10 +2292,13 @@
         772
       ],
       "check": [
-        "VERIFY: Ratio bound blocks normal operation"
+        "VERIFY: Ratio bound blocks normal operation",
+        "FALSIFY: Use ratio for validation, not hard abort"
       ],
       "antipattern": "Ratio bound blocks normal operation",
-      "securePattern": "Use ratio for validation, not hard abort"
+      "securePattern": "Use ratio for validation, not hard abort",
+      "validWhen": "Ratio bound blocks normal operation",
+      "invalidWhen": "Use ratio for validation, not hard abort"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-15-object-size-limit-e-015",
@@ -1984,10 +2315,13 @@
         815
       ],
       "check": [
-        "VERIFY: Unbounded vector inside shared object"
+        "VERIFY: Unbounded vector inside shared object",
+        "FALSIFY: Use dynamic fields or table for unbounded data"
       ],
       "antipattern": "Unbounded vector inside shared object",
-      "securePattern": "Use dynamic fields or table for unbounded data"
+      "securePattern": "Use dynamic fields or table for unbounded data",
+      "validWhen": "Unbounded vector inside shared object",
+      "invalidWhen": "Use dynamic fields or table for unbounded data"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-16-zero-value-deposit--016",
@@ -2004,10 +2338,13 @@
         855
       ],
       "check": [
-        "VERIFY: Zero-value deposit creates store, blocks withdrawals"
+        "VERIFY: Zero-value deposit creates store, blocks withdrawals",
+        "FALSIFY: Check specific asset balance, ignore unrelated stores"
       ],
       "antipattern": "Zero-value deposit creates store, blocks withdrawals",
-      "securePattern": "Check specific asset balance, ignore unrelated stores"
+      "securePattern": "Check specific asset balance, ignore unrelated stores",
+      "validWhen": "Zero-value deposit creates store, blocks withdrawals",
+      "invalidWhen": "Check specific asset balance, ignore unrelated stores"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-17-mint-limit-exhausti-017",
@@ -2024,10 +2361,13 @@
         890
       ],
       "check": [
-        "VERIFY: Mint limit only checks cumulative mints, ignoring burns"
+        "VERIFY: Mint limit only checks cumulative mints, ignoring burns",
+        "FALSIFY: Track net mints (mints minus burns) against limit"
       ],
       "antipattern": "Mint limit only checks cumulative mints, ignoring burns",
-      "securePattern": "Track net mints (mints minus burns) against limit"
+      "securePattern": "Track net mints (mints minus burns) against limit",
+      "validWhen": "Mint limit only checks cumulative mints, ignoring burns",
+      "invalidWhen": "Track net mints (mints minus burns) against limit"
     },
     {
       "id": "sui-move-move-denial-of-service-vulnerabilities-pattern-18-commission-rate-ove-018",
@@ -2045,13 +2385,17 @@
       ],
       "check": [
         "VERIFY: Commission rate not bounded at entry",
+        "PROVE: Pattern 1: while (i < vector::length(...)) in functions called by liquidate/withdraw",
+        "FALSIFY: Bound commission rate at the setter",
+        "IMPACT: Permanent liquidation blocking causing bad debt (Aave Aptos V3) — CRITICAL",
         "All vector iterations have bounded gas cost or pagination",
-        "Resource account seeds include unpredictable components",
-        "Event emission in loops bounded by constant or batch size",
-        "LOOK FOR: Pattern 1: `while (i < vector::length(...))` in functions called by liquidate/withdraw"
+        "Resource account seeds include unpredictable components"
       ],
       "antipattern": "Commission rate not bounded at entry",
-      "securePattern": "Bound commission rate at the setter"
+      "securePattern": "Bound commission rate at the setter",
+      "validWhen": "Commission rate not bounded at entry",
+      "invalidWhen": "Bound commission rate at the setter",
+      "impact": "Permanent liquidation blocking causing bad debt (Aave Aptos V3) — CRITICAL"
     },
     {
       "id": "sui-move-move-event-configuration-vulnerabilities-pattern-1-missing-events-for-c-001",
@@ -2069,10 +2413,13 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: No event on critical admin change"
+        "VERIFY: No event on critical admin change",
+        "FALSIFY: Emit event for every critical change"
       ],
       "antipattern": "No event on critical admin change",
-      "securePattern": "Emit event for every critical change"
+      "securePattern": "Emit event for every critical change",
+      "validWhen": "No event on critical admin change",
+      "invalidWhen": "Emit event for every critical change"
     },
     {
       "id": "sui-move-move-event-configuration-vulnerabilities-pattern-2-misleading-event-typ-002",
@@ -2089,10 +2436,13 @@
         162
       ],
       "check": [
-        "VERIFY: Event uses wrong type for a field"
+        "VERIFY: Event uses wrong type for a field",
+        "FALSIFY: Event uses proper types"
       ],
       "antipattern": "Event uses wrong type for a field",
-      "securePattern": "Event uses proper types"
+      "securePattern": "Event uses proper types",
+      "validWhen": "Event uses wrong type for a field",
+      "invalidWhen": "Event uses proper types"
     },
     {
       "id": "sui-move-move-event-configuration-vulnerabilities-pattern-3-event-emission-on-no-003",
@@ -2109,10 +2459,13 @@
         196
       ],
       "check": [
-        "VERIFY: Event emitted even when value unchanged"
+        "VERIFY: Event emitted even when value unchanged",
+        "FALSIFY: Only emit on actual state change"
       ],
       "antipattern": "Event emitted even when value unchanged",
-      "securePattern": "Only emit on actual state change"
+      "securePattern": "Only emit on actual state change",
+      "validWhen": "Event emitted even when value unchanged",
+      "invalidWhen": "Only emit on actual state change"
     },
     {
       "id": "sui-move-move-event-configuration-vulnerabilities-pattern-4-fee-annotation-misma-004",
@@ -2129,10 +2482,13 @@
         230
       ],
       "check": [
-        "VERIFY: Fee labeled as bps but calculated differently"
+        "VERIFY: Fee labeled as bps but calculated differently",
+        "FALSIFY: Fee precision matches annotation"
       ],
       "antipattern": "Fee labeled as bps but calculated differently",
-      "securePattern": "Fee precision matches annotation"
+      "securePattern": "Fee precision matches annotation",
+      "validWhen": "Fee labeled as bps but calculated differently",
+      "invalidWhen": "Fee precision matches annotation"
     },
     {
       "id": "sui-move-move-event-configuration-vulnerabilities-pattern-5-liquidation-bonus-co-005",
@@ -2149,10 +2505,13 @@
         274
       ],
       "check": [
-        "VERIFY: No upper bound on liquidation bonus"
+        "VERIFY: No upper bound on liquidation bonus",
+        "FALSIFY: Validate bonus + threshold don't exceed 100%"
       ],
       "antipattern": "No upper bound on liquidation bonus",
-      "securePattern": "Validate bonus + threshold don't exceed 100%"
+      "securePattern": "Validate bonus + threshold don't exceed 100%",
+      "validWhen": "No upper bound on liquidation bonus",
+      "invalidWhen": "Validate bonus + threshold don't exceed 100%"
     },
     {
       "id": "sui-move-move-event-configuration-vulnerabilities-pattern-6-cooldown-bypass-via--006",
@@ -2169,10 +2528,13 @@
         310
       ],
       "check": [
-        "VERIFY: Cooldown checked with >= instead of >"
+        "VERIFY: Cooldown checked with >= instead of >",
+        "FALSIFY: Strict inequality and minimum period"
       ],
       "antipattern": "Cooldown checked with >= instead of >",
-      "securePattern": "Strict inequality and minimum period"
+      "securePattern": "Strict inequality and minimum period",
+      "validWhen": "Cooldown checked with >= instead of >",
+      "invalidWhen": "Strict inequality and minimum period"
     },
     {
       "id": "sui-move-move-event-configuration-vulnerabilities-pattern-7-missing-approval-rev-007",
@@ -2189,10 +2551,13 @@
         350
       ],
       "check": [
-        "VERIFY: Approval set but no revoke function exists"
+        "VERIFY: Approval set but no revoke function exists",
+        "FALSIFY: Both approve and revoke available"
       ],
       "antipattern": "Approval set but no revoke function exists",
-      "securePattern": "Both approve and revoke available"
+      "securePattern": "Both approve and revoke available",
+      "validWhen": "Approval set but no revoke function exists",
+      "invalidWhen": "Both approve and revoke available"
     },
     {
       "id": "sui-move-move-event-configuration-vulnerabilities-pattern-8-dispatchable-token-s-008",
@@ -2209,10 +2574,13 @@
         392
       ],
       "check": [
-        "VERIFY: Custom functions defined but not registered as dispatch hooks"
+        "VERIFY: Custom functions defined but not registered as dispatch hooks",
+        "FALSIFY: Register dispatch hooks during initialization"
       ],
       "antipattern": "Custom functions defined but not registered as dispatch hooks",
-      "securePattern": "Register dispatch hooks during initialization"
+      "securePattern": "Register dispatch hooks during initialization",
+      "validWhen": "Custom functions defined but not registered as dispatch hooks",
+      "invalidWhen": "Register dispatch hooks during initialization"
     },
     {
       "id": "sui-move-move-event-configuration-vulnerabilities-pattern-9-version-check-missin-009",
@@ -2229,10 +2597,13 @@
         430
       ],
       "check": [
-        "VERIFY: No version check on shared object access"
+        "VERIFY: No version check on shared object access",
+        "FALSIFY: Version gate with migration"
       ],
       "antipattern": "No version check on shared object access",
-      "securePattern": "Version gate with migration"
+      "securePattern": "Version gate with migration",
+      "validWhen": "No version check on shared object access",
+      "invalidWhen": "Version gate with migration"
     },
     {
       "id": "sui-move-move-event-configuration-vulnerabilities-pattern-10-two-step-ownership--010",
@@ -2250,10 +2621,12 @@
       ],
       "check": [
         "VERIFY: Single-step ownership transfer",
-        "ANTIPATTERN: Single-step ownership transfer"
+        "FALSIFY: Two-step transfer with acceptance"
       ],
       "antipattern": "Single-step ownership transfer",
-      "securePattern": "Two-step transfer with acceptance"
+      "securePattern": "Two-step transfer with acceptance",
+      "validWhen": "Single-step ownership transfer",
+      "invalidWhen": "Two-step transfer with acceptance"
     },
     {
       "id": "sui-move-move-event-configuration-vulnerabilities-pattern-11-reentrancy-via-exte-011",
@@ -2270,10 +2643,13 @@
         510
       ],
       "check": [
-        "VERIFY: State updated after external callback"
+        "VERIFY: State updated after external callback",
+        "FALSIFY: Update state before external interaction"
       ],
       "antipattern": "State updated after external callback",
-      "securePattern": "Update state before external interaction"
+      "securePattern": "Update state before external interaction",
+      "validWhen": "State updated after external callback",
+      "invalidWhen": "Update state before external interaction"
     },
     {
       "id": "sui-move-move-event-configuration-vulnerabilities-pattern-12-hardcoded-batch-par-012",
@@ -2290,10 +2666,13 @@
         574
       ],
       "check": [
-        "VERIFY: Hardcoded event batch limit"
+        "VERIFY: Hardcoded event batch limit",
+        "FALSIFY: Include batch index and total for off-chain reconciliation"
       ],
       "antipattern": "Hardcoded event batch limit",
-      "securePattern": "Include batch index and total for off-chain reconciliation"
+      "securePattern": "Include batch index and total for off-chain reconciliation",
+      "validWhen": "Hardcoded event batch limit",
+      "invalidWhen": "Include batch index and total for off-chain reconciliation"
     },
     {
       "id": "sui-move-move-event-configuration-vulnerabilities-pattern-13-assertion-inconsist-013",
@@ -2310,10 +2689,13 @@
         615
       ],
       "check": [
-        "VERIFY: Setter allows 10000 but getter rejects it"
+        "VERIFY: Setter allows 10000 but getter rejects it",
+        "FALSIFY: Consistent bounds across setter and getter"
       ],
       "antipattern": "Setter allows 10000 but getter rejects it",
-      "securePattern": "Consistent bounds across setter and getter"
+      "securePattern": "Consistent bounds across setter and getter",
+      "validWhen": "Setter allows 10000 but getter rejects it",
+      "invalidWhen": "Consistent bounds across setter and getter"
     },
     {
       "id": "sui-move-move-event-configuration-vulnerabilities-pattern-14-inability-to-withdr-014",
@@ -2330,10 +2712,13 @@
         656
       ],
       "check": [
-        "VERIFY: Fees collected but no withdrawal path"
+        "VERIFY: Fees collected but no withdrawal path",
+        "FALSIFY: Fee withdrawal function for authorized parties"
       ],
       "antipattern": "Fees collected but no withdrawal path",
-      "securePattern": "Fee withdrawal function for authorized parties"
+      "securePattern": "Fee withdrawal function for authorized parties",
+      "validWhen": "Fees collected but no withdrawal path",
+      "invalidWhen": "Fee withdrawal function for authorized parties"
     },
     {
       "id": "sui-move-move-event-configuration-vulnerabilities-pattern-15-front-running-publi-015",
@@ -2351,13 +2736,17 @@
       ],
       "check": [
         "VERIFY: Public validation can be front-run",
+        "PROVE: Pattern 1: borrow_global_mut → mutation → no event::emit in same function",
+        "FALSIFY: Validation and initialization are atomic",
+        "IMPACT: Off-chain monitoring blind spots from missing events (3/29 reports) — MEDIUM",
         "All admin parameter changes emit events with old + new values",
-        "Event field types match semantic meaning (TypeName for coins, address for users)",
-        "Events only emitted on actual state changes (skip no-ops)",
-        "LOOK FOR: Pattern 1: `borrow_global_mut` → mutation → no `event::emit` in same function"
+        "Event field types match semantic meaning (TypeName for coins, address for users)"
       ],
       "antipattern": "Public validation can be front-run",
-      "securePattern": "Validation and initialization are atomic"
+      "securePattern": "Validation and initialization are atomic",
+      "validWhen": "Public validation can be front-run",
+      "invalidWhen": "Validation and initialization are atomic",
+      "impact": "Off-chain monitoring blind spots from missing events (3/29 reports) — MEDIUM"
     },
     {
       "id": "sui-move-move-merkle-verification-vulnerabilities-move-merkle-proof-verification-000",
@@ -2376,7 +2765,8 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Comprehensive patterns for Merkle proof replay, verification bypass, unchecked return values, and domain separation..."
-      ]
+      ],
+      "validWhen": "Comprehensive patterns for Merkle proof replay, verification bypass, unchecked return values, and domain separation..."
     },
     {
       "id": "sui-move-move-merkle-verification-vulnerabilities-pattern-1-merkle-proof-replay--001",
@@ -2394,10 +2784,14 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: leaf_index not part of the leaf hash"
+        "VERIFY: leaf_index not part of the leaf hash",
+        "PROVE: User has a valid Merkle proof for their allocation at leaf index N; Leaf hash = hash(address, amount) — index NOT included",
+        "FALSIFY: Include leaf_index in hash to prevent replay"
       ],
       "antipattern": "leaf_index not part of the leaf hash",
-      "securePattern": "Include leaf_index in hash to prevent replay"
+      "securePattern": "Include leaf_index in hash to prevent replay",
+      "validWhen": "leaf_index not part of the leaf hash",
+      "invalidWhen": "Include leaf_index in hash to prevent replay"
     },
     {
       "id": "sui-move-move-merkle-verification-vulnerabilities-pattern-2-flawed-merkle-proof--002",
@@ -2415,10 +2809,14 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Checks less-than instead of equal"
+        "VERIFY: Checks less-than instead of equal",
+        "PROVE: Custom compare_vectors returns 0 (less), 1 (equal), 2 (greater); Verification checks if computed hash < root (return value == 0)",
+        "FALSIFY: Check equality, not ordering"
       ],
       "antipattern": "Checks less-than instead of equal",
-      "securePattern": "Check equality, not ordering"
+      "securePattern": "Check equality, not ordering",
+      "validWhen": "Checks less-than instead of equal",
+      "invalidWhen": "Check equality, not ordering"
     },
     {
       "id": "sui-move-move-merkle-verification-vulnerabilities-pattern-3-unchecked-merkle-ver-003",
@@ -2437,10 +2835,13 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Verification result ignored",
-        "ANTIPATTERN: Verification result ignored"
+        "PROVE: Merkle verify() function is called with proof data; Return value (bool) is NOT asserted or checked",
+        "FALSIFY: Assert verification result"
       ],
       "antipattern": "Verification result ignored",
-      "securePattern": "Assert verification result"
+      "securePattern": "Assert verification result",
+      "validWhen": "Verification result ignored",
+      "invalidWhen": "Assert verification result"
     },
     {
       "id": "sui-move-move-merkle-verification-vulnerabilities-pattern-4-fee-bypass-at-maximu-004",
@@ -2457,10 +2858,13 @@
         311
       ],
       "check": [
-        "VERIFY: Edge case at maximum fee setting"
+        "VERIFY: Edge case at maximum fee setting",
+        "FALSIFY: MAX_FEE_BIPS returns full amount as fee"
       ],
       "antipattern": "Edge case at maximum fee setting",
-      "securePattern": "MAX_FEE_BIPS returns full amount as fee"
+      "securePattern": "MAX_FEE_BIPS returns full amount as fee",
+      "validWhen": "Edge case at maximum fee setting",
+      "invalidWhen": "MAX_FEE_BIPS returns full amount as fee"
     },
     {
       "id": "sui-move-move-merkle-verification-vulnerabilities-pattern-5-missing-domain-separ-005",
@@ -2478,10 +2882,13 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: No domain separation between leaf and internal nodes"
+        "VERIFY: No domain separation between leaf and internal nodes",
+        "FALSIFY: Prefix-based domain separation"
       ],
       "antipattern": "No domain separation between leaf and internal nodes",
-      "securePattern": "Prefix-based domain separation"
+      "securePattern": "Prefix-based domain separation",
+      "validWhen": "No domain separation between leaf and internal nodes",
+      "invalidWhen": "Prefix-based domain separation"
     },
     {
       "id": "sui-move-move-merkle-verification-vulnerabilities-pattern-6-resource-index-colli-006",
@@ -2498,10 +2905,13 @@
         412
       ],
       "check": [
-        "VERIFY: Claim index derived from predictable sequence"
+        "VERIFY: Claim index derived from predictable sequence",
+        "FALSIFY: Claim tracking by address, not index"
       ],
       "antipattern": "Claim index derived from predictable sequence",
-      "securePattern": "Claim tracking by address, not index"
+      "securePattern": "Claim tracking by address, not index",
+      "validWhen": "Claim index derived from predictable sequence",
+      "invalidWhen": "Claim tracking by address, not index"
     },
     {
       "id": "sui-move-move-merkle-verification-vulnerabilities-pattern-7-odd-length-proof-pad-007",
@@ -2518,10 +2928,13 @@
         457
       ],
       "check": [
-        "VERIFY: Odd node hashed with itself"
+        "VERIFY: Odd node hashed with itself",
+        "FALSIFY: Validate proof length matches tree depth"
       ],
       "antipattern": "Odd node hashed with itself",
-      "securePattern": "Validate proof length matches tree depth"
+      "securePattern": "Validate proof length matches tree depth",
+      "validWhen": "Odd node hashed with itself",
+      "invalidWhen": "Validate proof length matches tree depth"
     },
     {
       "id": "sui-move-move-merkle-verification-vulnerabilities-pattern-8-bitmap-claim-trackin-008",
@@ -2539,13 +2952,17 @@
       ],
       "check": [
         "VERIFY: No bounds check on bitmap index",
+        "PROVE: Pattern 1: hash(address, amount) without leaf_index in airdrop claims",
+        "FALSIFY: Validate index bounds against known total claims",
+        "IMPACT: Complete drainage of all airdrop/distribution funds (3/4 findings) — CRITICAL",
         "Leaf hash includes ALL claim parameters (index, address, amount, nonce)",
-        "Merkle verification checks hash EQUALITY (not less-than or greater-than)",
-        "`verify()` return value always wrapped in `assert!()`",
-        "LOOK FOR: Pattern 1: `hash(address, amount)` without leaf_index in airdrop claims"
+        "Merkle verification checks hash EQUALITY (not less-than or greater-than)"
       ],
       "antipattern": "No bounds check on bitmap index",
-      "securePattern": "Validate index bounds against known total claims"
+      "securePattern": "Validate index bounds against known total claims",
+      "validWhen": "No bounds check on bitmap index",
+      "invalidWhen": "Validate index bounds against known total claims",
+      "impact": "Complete drainage of all airdrop/distribution funds (3/4 findings) — CRITICAL"
     },
     {
       "id": "sui-move-move-oracle-pricing-vulnerabilities-move-oracle-and-pricing-vulner-000",
@@ -2564,7 +2981,8 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Comprehensive patterns for stale oracle prices, update skipping, SLTP clipping bugs, undervalued collateral, price..."
-      ]
+      ],
+      "validWhen": "Comprehensive patterns for stale oracle prices, update skipping, SLTP clipping bugs, undervalued collateral, price..."
     },
     {
       "id": "sui-move-move-oracle-pricing-vulnerabilities-pattern-1-missing-staleness-ch-001",
@@ -2581,10 +2999,14 @@
         124
       ],
       "check": [
-        "VERIFY: No staleness check on oracle price"
+        "VERIFY: No staleness check on oracle price",
+        "PROVE: Oracle price feed stops updating (oracle downtime, network congestion); Protocol continues using last known price for lending/liquidation decisions",
+        "FALSIFY: Enforce maximum price age"
       ],
       "antipattern": "No staleness check on oracle price",
-      "securePattern": "Enforce maximum price age"
+      "securePattern": "Enforce maximum price age",
+      "validWhen": "No staleness check on oracle price",
+      "invalidWhen": "Enforce maximum price age"
     },
     {
       "id": "sui-move-move-oracle-pricing-vulnerabilities-pattern-2-oracle-update-skippe-002",
@@ -2601,10 +3023,14 @@
         176
       ],
       "check": [
-        "VERIFY: Update skipped when tick doesn't change"
+        "VERIFY: Update skipped when tick doesn't change",
+        "PROVE: AMM/CLOB maintains on-chain oracle observations (TWAP); Oracle update triggered only when tick index changes",
+        "FALSIFY: Update oracle on every swap regardless of tick change"
       ],
       "antipattern": "Update skipped when tick doesn't change",
-      "securePattern": "Update oracle on every swap regardless of tick change"
+      "securePattern": "Update oracle on every swap regardless of tick change",
+      "validWhen": "Update skipped when tick doesn't change",
+      "invalidWhen": "Update oracle on every swap regardless of tick change"
     },
     {
       "id": "sui-move-move-oracle-pricing-vulnerabilities-pattern-3-sltp-size-clipping-v-003",
@@ -2621,10 +3047,14 @@
         237
       ],
       "check": [
-        "VERIFY: Negative base position becomes huge u64"
+        "VERIFY: Negative base position becomes huge u64",
+        "PROVE: User has a negative (short) base position: e.g., -1000 units; SLTP (Stop-Loss/Take-Profit) order needs to know position size for clipping",
+        "FALSIFY: Use absolute value for position size comparison"
       ],
       "antipattern": "Negative base position becomes huge u64",
-      "securePattern": "Use absolute value for position size comparison"
+      "securePattern": "Use absolute value for position size comparison",
+      "validWhen": "Negative base position becomes huge u64",
+      "invalidWhen": "Use absolute value for position size comparison"
     },
     {
       "id": "sui-move-move-oracle-pricing-vulnerabilities-pattern-4-undervalued-collater-004",
@@ -2641,10 +3071,14 @@
         295
       ],
       "check": [
-        "VERIFY: Simple price lookup doesn't account for LPT mechanics"
+        "VERIFY: Simple price lookup doesn't account for LPT mechanics",
+        "PROVE: Protocol accepts staked LP tokens (LPTs) as collateral; Oracle prices LPTs at face value, not considering underlying LP composition",
+        "FALSIFY: Calculate LPT value from underlying components"
       ],
       "antipattern": "Simple price lookup doesn't account for LPT mechanics",
-      "securePattern": "Calculate LPT value from underlying components"
+      "securePattern": "Calculate LPT value from underlying components",
+      "validWhen": "Simple price lookup doesn't account for LPT mechanics",
+      "invalidWhen": "Calculate LPT value from underlying components"
     },
     {
       "id": "sui-move-move-oracle-pricing-vulnerabilities-pattern-5-incorrect-price-boun-005",
@@ -2661,10 +3095,13 @@
         325
       ],
       "check": [
-        "VERIFY: >= and <= allow price to equal boundary"
+        "VERIFY: >= and <= allow price to equal boundary",
+        "FALSIFY: Strict inequalities at boundaries"
       ],
       "antipattern": ">= and <= allow price to equal boundary",
-      "securePattern": "Strict inequalities at boundaries"
+      "securePattern": "Strict inequalities at boundaries",
+      "validWhen": ">= and <= allow price to equal boundary",
+      "invalidWhen": "Strict inequalities at boundaries"
     },
     {
       "id": "sui-move-move-oracle-pricing-vulnerabilities-pattern-6-faulty-constant-defi-006",
@@ -2685,7 +3122,9 @@
         "VERIFY: Constant has wrong number of digits"
       ],
       "antipattern": "Constant has wrong number of digits",
-      "securePattern": "Correct constant"
+      "securePattern": "Correct constant",
+      "validWhen": "Constant has wrong number of digits",
+      "invalidWhen": "Correct constant"
     },
     {
       "id": "sui-move-move-oracle-pricing-vulnerabilities-pattern-7-unauthorized-price-f-007",
@@ -2702,10 +3141,13 @@
         402
       ],
       "check": [
-        "VERIFY: No specific authority verification"
+        "VERIFY: No specific authority verification",
+        "FALSIFY: Require specific authority type"
       ],
       "antipattern": "No specific authority verification",
-      "securePattern": "Require specific authority type"
+      "securePattern": "Require specific authority type",
+      "validWhen": "No specific authority verification",
+      "invalidWhen": "Require specific authority type"
     },
     {
       "id": "sui-move-move-oracle-pricing-vulnerabilities-pattern-8-fixed-point-arithmet-008",
@@ -2722,10 +3164,13 @@
         435
       ],
       "check": [
-        "VERIFY: from_u256balance conflates sign bit with overflow"
+        "VERIFY: from_u256balance conflates sign bit with overflow",
+        "FALSIFY: Separate sign handling from overflow detection"
       ],
       "antipattern": "from_u256balance conflates sign bit with overflow",
-      "securePattern": "Separate sign handling from overflow detection"
+      "securePattern": "Separate sign handling from overflow detection",
+      "validWhen": "from_u256balance conflates sign bit with overflow",
+      "invalidWhen": "Separate sign handling from overflow detection"
     },
     {
       "id": "sui-move-move-oracle-pricing-vulnerabilities-pattern-9-oracle-not-updated-w-009",
@@ -2742,10 +3187,13 @@
         474
       ],
       "check": [
-        "VERIFY: Oracle updated only on tick change"
+        "VERIFY: Oracle updated only on tick change",
+        "FALSIFY: Update oracle on every price change, not just tick change"
       ],
       "antipattern": "Oracle updated only on tick change",
-      "securePattern": "Update oracle on every price change, not just tick change"
+      "securePattern": "Update oracle on every price change, not just tick change",
+      "validWhen": "Oracle updated only on tick change",
+      "invalidWhen": "Update oracle on every price change, not just tick change"
     },
     {
       "id": "sui-move-move-oracle-pricing-vulnerabilities-pattern-10-undervalued-collate-010",
@@ -2762,10 +3210,13 @@
         513
       ],
       "check": [
-        "VERIFY: LP token priced using spot reserves"
+        "VERIFY: LP token priced using spot reserves",
+        "FALSIFY: Use fair LP pricing (Alpha Homora / Chainlink method)"
       ],
       "antipattern": "LP token priced using spot reserves",
-      "securePattern": "Use fair LP pricing (Alpha Homora / Chainlink method)"
+      "securePattern": "Use fair LP pricing (Alpha Homora / Chainlink method)",
+      "validWhen": "LP token priced using spot reserves",
+      "invalidWhen": "Use fair LP pricing (Alpha Homora / Chainlink method)"
     },
     {
       "id": "sui-move-move-oracle-pricing-vulnerabilities-pattern-11-duplicate-source-id-011",
@@ -2782,10 +3233,13 @@
         558
       ],
       "check": [
-        "VERIFY: No duplicate source ID check"
+        "VERIFY: No duplicate source ID check",
+        "FALSIFY: Enforce source ID uniqueness"
       ],
       "antipattern": "No duplicate source ID check",
-      "securePattern": "Enforce source ID uniqueness"
+      "securePattern": "Enforce source ID uniqueness",
+      "validWhen": "No duplicate source ID check",
+      "invalidWhen": "Enforce source ID uniqueness"
     },
     {
       "id": "sui-move-move-oracle-pricing-vulnerabilities-pattern-12-custom-price-exceed-012",
@@ -2802,10 +3256,13 @@
         592
       ],
       "check": [
-        "VERIFY: No cap on custom price"
+        "VERIFY: No cap on custom price",
+        "FALSIFY: Cap custom price relative to recent oracle range"
       ],
       "antipattern": "No cap on custom price",
-      "securePattern": "Cap custom price relative to recent oracle range"
+      "securePattern": "Cap custom price relative to recent oracle range",
+      "validWhen": "No cap on custom price",
+      "invalidWhen": "Cap custom price relative to recent oracle range"
     },
     {
       "id": "sui-move-move-oracle-pricing-vulnerabilities-pattern-13-confidence-before-t-013",
@@ -2823,13 +3280,17 @@
       ],
       "check": [
         "VERIFY: Confidence checked before staleness",
+        "PROVE: Pattern 1: latest_round_data() without timestamp age check",
+        "FALSIFY: Staleness check first, then confidence",
+        "IMPACT: Stale prices enabling bad debt accumulation (1/29 reports)",
         "All oracle price reads include maximum age validation",
-        "TWAP/oracle observations updated on every price-changing event (not just tick change)",
-        "Signed-to-unsigned conversions use absolute value correctly",
-        "LOOK FOR: Pattern 1: `latest_round_data()` without timestamp age check"
+        "TWAP/oracle observations updated on every price-changing event (not just tick change)"
       ],
       "antipattern": "Confidence checked before staleness",
-      "securePattern": "Staleness check first, then confidence"
+      "securePattern": "Staleness check first, then confidence",
+      "validWhen": "Confidence checked before staleness",
+      "invalidWhen": "Staleness check first, then confidence",
+      "impact": "Stale prices enabling bad debt accumulation (1/29 reports)"
     },
     {
       "id": "sui-move-move-state-management-vulnerabilities-move-state-management-data-int-000",
@@ -2847,7 +3308,8 @@
       ],
       "check": [
         "VERIFY: State management bugs in Move arise from the language's ownership and copy semantics."
-      ]
+      ],
+      "validWhen": "State management bugs in Move arise from the language's ownership and copy semantics."
     },
     {
       "id": "sui-move-move-state-management-vulnerabilities-pattern-1-local-copy-mutation--001",
@@ -2864,10 +3326,13 @@
         92
       ],
       "check": [
-        "VERIFY: Local copy modified but never written back"
+        "VERIFY: Local copy modified but never written back",
+        "FALSIFY: Mutate via borrow_global_mut"
       ],
       "antipattern": "Local copy modified but never written back",
-      "securePattern": "Mutate via borrow_global_mut"
+      "securePattern": "Mutate via borrow_global_mut",
+      "validWhen": "Local copy modified but never written back",
+      "invalidWhen": "Mutate via borrow_global_mut"
     },
     {
       "id": "sui-move-move-state-management-vulnerabilities-pattern-2-variable-shadowing-z-002",
@@ -2884,10 +3349,14 @@
         127
       ],
       "check": [
-        "VERIFY: `amount` shadowed by new binding"
+        "VERIFY: amount shadowed by new binding",
+        "FALSIFY: Unique variable names prevent shadowing",
+        "ANTIPATTERN: `amount` shadowed by new binding"
       ],
       "antipattern": "`amount` shadowed by new binding",
-      "securePattern": "Unique variable names prevent shadowing"
+      "securePattern": "Unique variable names prevent shadowing",
+      "validWhen": "amount shadowed by new binding",
+      "invalidWhen": "Unique variable names prevent shadowing"
     },
     {
       "id": "sui-move-move-state-management-vulnerabilities-pattern-3-investor-count-arith-003",
@@ -2904,10 +3373,13 @@
         164
       ],
       "check": [
-        "VERIFY: Counter decremented on partial withdrawal"
+        "VERIFY: Counter decremented on partial withdrawal",
+        "FALSIFY: Only decrement when user fully exits"
       ],
       "antipattern": "Counter decremented on partial withdrawal",
-      "securePattern": "Only decrement when user fully exits"
+      "securePattern": "Only decrement when user fully exits",
+      "validWhen": "Counter decremented on partial withdrawal",
+      "invalidWhen": "Only decrement when user fully exits"
     },
     {
       "id": "sui-move-move-state-management-vulnerabilities-pattern-4-wallet-balance-track-004",
@@ -2924,10 +3396,13 @@
         207
       ],
       "check": [
-        "VERIFY: Direct transfer bypasses registry"
+        "VERIFY: Direct transfer bypasses registry",
+        "FALSIFY: All transfers update registry atomically"
       ],
       "antipattern": "Direct transfer bypasses registry",
-      "securePattern": "All transfers update registry atomically"
+      "securePattern": "All transfers update registry atomically",
+      "validWhen": "Direct transfer bypasses registry",
+      "invalidWhen": "All transfers update registry atomically"
     },
     {
       "id": "sui-move-move-state-management-vulnerabilities-pattern-5-resource-attribute-c-005",
@@ -2944,10 +3419,13 @@
         246
       ],
       "check": [
-        "VERIFY: Group removal doesn't clean up member attributes"
+        "VERIFY: Group removal doesn't clean up member attributes",
+        "FALSIFY: Clean up all references when removing group"
       ],
       "antipattern": "Group removal doesn't clean up member attributes",
-      "securePattern": "Clean up all references when removing group"
+      "securePattern": "Clean up all references when removing group",
+      "validWhen": "Group removal doesn't clean up member attributes",
+      "invalidWhen": "Clean up all references when removing group"
     },
     {
       "id": "sui-move-move-state-management-vulnerabilities-pattern-6-group-id-reuse-after-006",
@@ -2964,10 +3442,13 @@
         296
       ],
       "check": [
-        "VERIFY: Group ID reused after deletion"
+        "VERIFY: Group ID reused after deletion",
+        "FALSIFY: Always increment, never reuse IDs"
       ],
       "antipattern": "Group ID reused after deletion",
-      "securePattern": "Always increment, never reuse IDs"
+      "securePattern": "Always increment, never reuse IDs",
+      "validWhen": "Group ID reused after deletion",
+      "invalidWhen": "Always increment, never reuse IDs"
     },
     {
       "id": "sui-move-move-state-management-vulnerabilities-pattern-7-storage-split-accoun-007",
@@ -2984,10 +3465,13 @@
         337
       ],
       "check": [
-        "VERIFY: Partial update of split accounting"
+        "VERIFY: Partial update of split accounting",
+        "FALSIFY: Double-entry bookkeeping"
       ],
       "antipattern": "Partial update of split accounting",
-      "securePattern": "Double-entry bookkeeping"
+      "securePattern": "Double-entry bookkeeping",
+      "validWhen": "Partial update of split accounting",
+      "invalidWhen": "Double-entry bookkeeping"
     },
     {
       "id": "sui-move-move-state-management-vulnerabilities-pattern-8-stale-share-rate-in--008",
@@ -3004,10 +3488,13 @@
         376
       ],
       "check": [
-        "VERIFY: Rate cached before modification"
+        "VERIFY: Rate cached before modification",
+        "FALSIFY: Refresh rate after each state-modifying step"
       ],
       "antipattern": "Rate cached before modification",
-      "securePattern": "Refresh rate after each state-modifying step"
+      "securePattern": "Refresh rate after each state-modifying step",
+      "validWhen": "Rate cached before modification",
+      "invalidWhen": "Refresh rate after each state-modifying step"
     },
     {
       "id": "sui-move-move-state-management-vulnerabilities-pattern-9-missing-default-grou-009",
@@ -3024,10 +3511,13 @@
         420
       ],
       "check": [
-        "VERIFY: No default group for new users"
+        "VERIFY: No default group for new users",
+        "FALSIFY: Assign to default group on creation"
       ],
       "antipattern": "No default group for new users",
-      "securePattern": "Assign to default group on creation"
+      "securePattern": "Assign to default group on creation",
+      "validWhen": "No default group for new users",
+      "invalidWhen": "Assign to default group on creation"
     },
     {
       "id": "sui-move-move-state-management-vulnerabilities-pattern-10-last-modifier-track-010",
@@ -3044,10 +3534,13 @@
         458
       ],
       "check": [
-        "VERIFY: Internal operations don't update last_modifier"
+        "VERIFY: Internal operations don't update last_modifier",
+        "FALSIFY: Track modification source distinctly"
       ],
       "antipattern": "Internal operations don't update last_modifier",
-      "securePattern": "Track modification source distinctly"
+      "securePattern": "Track modification source distinctly",
+      "validWhen": "Internal operations don't update last_modifier",
+      "invalidWhen": "Track modification source distinctly"
     },
     {
       "id": "sui-move-move-state-management-vulnerabilities-pattern-11-pause-state-allowin-011",
@@ -3064,10 +3557,13 @@
         503
       ],
       "check": [
-        "VERIFY: Pause check missing on claim function"
+        "VERIFY: Pause check missing on claim function",
+        "FALSIFY: Centralized pause check via helper"
       ],
       "antipattern": "Pause check missing on claim function",
-      "securePattern": "Centralized pause check via helper"
+      "securePattern": "Centralized pause check via helper",
+      "validWhen": "Pause check missing on claim function",
+      "invalidWhen": "Centralized pause check via helper"
     },
     {
       "id": "sui-move-move-state-management-vulnerabilities-pattern-12-token-metadata-swap-012",
@@ -3085,13 +3581,17 @@
       ],
       "check": [
         "VERIFY: Treasury caps assigned to wrong tokens",
+        "PROVE: Pattern 1: let x = *borrow_global<T>(@addr) followed by mutation of x (local copy)",
+        "FALSIFY: Explicitly typed capabilities prevent mix-up",
+        "IMPACT: Silent state mutations lost on function return (local copy bug) — HIGH",
         "All state mutations use `borrow_global_mut`, not copied values",
-        "No variable shadowing in state-modifying functions",
-        "Counter decrements only on full exit (not partial withdrawal)",
-        "LOOK FOR: Pattern 1: `let x = *borrow_global<T>(@addr)` followed by mutation of `x` (local copy)"
+        "No variable shadowing in state-modifying functions"
       ],
       "antipattern": "Treasury caps assigned to wrong tokens",
-      "securePattern": "Explicitly typed capabilities prevent mix-up"
+      "securePattern": "Explicitly typed capabilities prevent mix-up",
+      "validWhen": "Treasury caps assigned to wrong tokens",
+      "invalidWhen": "Explicitly typed capabilities prevent mix-up",
+      "impact": "Silent state mutations lost on function return (local copy bug) — HIGH"
     },
     {
       "id": "sui-move-move-token-supply-inflation-vulnerabilit-move-token-supply-and-inflatio-000",
@@ -3110,7 +3610,8 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Comprehensive patterns for inflation attacks, double minting, supply manipulation, permanent freeze, and mint limit..."
-      ]
+      ],
+      "validWhen": "Comprehensive patterns for inflation attacks, double minting, supply manipulation, permanent freeze, and mint limit..."
     },
     {
       "id": "sui-move-move-token-supply-inflation-vulnerabilit-pattern-1-first-depositor-infl-001",
@@ -3128,10 +3629,14 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: No minimum liquidity requirement"
+        "VERIFY: No minimum liquidity requirement",
+        "PROVE: Attacker is the first depositor into a pool/vault with zero liquidity; Attacker deposits minimal amount (1 wei), receives 1 share",
+        "FALSIFY: Minimum liquidity lock + minimum shares check"
       ],
       "antipattern": "No minimum liquidity requirement",
-      "securePattern": "Minimum liquidity lock + minimum shares check"
+      "securePattern": "Minimum liquidity lock + minimum shares check",
+      "validWhen": "No minimum liquidity requirement",
+      "invalidWhen": "Minimum liquidity lock + minimum shares check"
     },
     {
       "id": "sui-move-move-token-supply-inflation-vulnerabilit-pattern-2-double-minting-via-f-002",
@@ -3149,10 +3654,14 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: kAPT minted for full amount, but APT staked is net-of-fee"
+        "VERIFY: kAPT minted for full amount, but APT staked is net-of-fee",
+        "PROVE: User deposits amount tokens into staking/wrapping protocol; Protocol deducts fee internally (net backing = amount - fee)",
+        "FALSIFY: Deduct fees before share calculation"
       ],
       "antipattern": "kAPT minted for full amount, but APT staked is net-of-fee",
-      "securePattern": "Deduct fees before share calculation"
+      "securePattern": "Deduct fees before share calculation",
+      "validWhen": "kAPT minted for full amount, but APT staked is net-of-fee",
+      "invalidWhen": "Deduct fees before share calculation"
     },
     {
       "id": "sui-move-move-token-supply-inflation-vulnerabilit-pattern-3-uncapped-share-token-003",
@@ -3170,10 +3679,13 @@
       ],
       "check": [
         "VERIFY: No cap on xLPT minting rate",
-        "ANTIPATTERN: Admin can burn and reconcile without supply check"
+        "PROVE: Admin can burn and reconcile without supply check",
+        "FALSIFY: Cap minting and enforce supply invariants"
       ],
       "antipattern": "Admin can burn and reconcile without supply check",
-      "securePattern": "Cap minting and enforce supply invariants"
+      "securePattern": "Cap minting and enforce supply invariants",
+      "validWhen": "No cap on xLPT minting rate",
+      "invalidWhen": "Cap minting and enforce supply invariants"
     },
     {
       "id": "sui-move-move-token-supply-inflation-vulnerabilit-pattern-4-permanent-freeze-wit-004",
@@ -3190,10 +3702,13 @@
         329
       ],
       "check": [
-        "VERIFY: Freeze exists but no unfreeze"
+        "VERIFY: Freeze exists but no unfreeze",
+        "FALSIFY: Both freeze and unfreeze"
       ],
       "antipattern": "Freeze exists but no unfreeze",
-      "securePattern": "Both freeze and unfreeze"
+      "securePattern": "Both freeze and unfreeze",
+      "validWhen": "Freeze exists but no unfreeze",
+      "invalidWhen": "Both freeze and unfreeze"
     },
     {
       "id": "sui-move-move-token-supply-inflation-vulnerabilit-pattern-5-improper-mint-limit--005",
@@ -3211,10 +3726,13 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Incorrect variable reference on epoch boundary reset"
+        "VERIFY: Incorrect variable reference on epoch boundary reset",
+        "FALSIFY: Explicit limit reset with correct reference"
       ],
       "antipattern": "Incorrect variable reference on epoch boundary reset",
-      "securePattern": "Explicit limit reset with correct reference"
+      "securePattern": "Explicit limit reset with correct reference",
+      "validWhen": "Incorrect variable reference on epoch boundary reset",
+      "invalidWhen": "Explicit limit reset with correct reference"
     },
     {
       "id": "sui-move-move-token-supply-inflation-vulnerabilit-pattern-6-missing-activation-e-006",
@@ -3231,10 +3749,13 @@
         407
       ],
       "check": [
-        "VERIFY: No activation epoch validation on join"
+        "VERIFY: No activation epoch validation on join",
+        "FALSIFY: Validate matching epochs before join"
       ],
       "antipattern": "No activation epoch validation on join",
-      "securePattern": "Validate matching epochs before join"
+      "securePattern": "Validate matching epochs before join",
+      "validWhen": "No activation epoch validation on join",
+      "invalidWhen": "Validate matching epochs before join"
     },
     {
       "id": "sui-move-move-token-supply-inflation-vulnerabilit-pattern-7-unbacked-equity-shar-007",
@@ -3251,10 +3772,13 @@
         452
       ],
       "check": [
-        "VERIFY: Zero registry state allows unbacked share minting"
+        "VERIFY: Zero registry state allows unbacked share minting",
+        "FALSIFY: Prevent deposits when assets were redistributed"
       ],
       "antipattern": "Zero registry state allows unbacked share minting",
-      "securePattern": "Prevent deposits when assets were redistributed"
+      "securePattern": "Prevent deposits when assets were redistributed",
+      "validWhen": "Zero registry state allows unbacked share minting",
+      "invalidWhen": "Prevent deposits when assets were redistributed"
     },
     {
       "id": "sui-move-move-token-supply-inflation-vulnerabilit-pattern-8-debt-share-dilution--008",
@@ -3271,10 +3795,13 @@
         499
       ],
       "check": [
-        "VERIFY: Zero liability allows debt share manipulation"
+        "VERIFY: Zero liability allows debt share manipulation",
+        "FALSIFY: Reset debt shares when liability reaches zero"
       ],
       "antipattern": "Zero liability allows debt share manipulation",
-      "securePattern": "Reset debt shares when liability reaches zero"
+      "securePattern": "Reset debt shares when liability reaches zero",
+      "validWhen": "Zero liability allows debt share manipulation",
+      "invalidWhen": "Reset debt shares when liability reaches zero"
     },
     {
       "id": "sui-move-move-token-supply-inflation-vulnerabilit-pattern-9-inflation-attack-on--009",
@@ -3292,10 +3819,13 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: No minimum liquidity protection"
+        "VERIFY: No minimum liquidity protection",
+        "FALSIFY: Lock minimum liquidity on first deposit"
       ],
       "antipattern": "No minimum liquidity protection",
-      "securePattern": "Lock minimum liquidity on first deposit"
+      "securePattern": "Lock minimum liquidity on first deposit",
+      "validWhen": "No minimum liquidity protection",
+      "invalidWhen": "Lock minimum liquidity on first deposit"
     },
     {
       "id": "sui-move-move-token-supply-inflation-vulnerabilit-pattern-10-peg-inconsistency-f-010",
@@ -3312,10 +3842,13 @@
         590
       ],
       "check": [
-        "VERIFY: Burn amount can diverge from actual backing decrease"
+        "VERIFY: Burn amount can diverge from actual backing decrease",
+        "FALSIFY: Enforce peg invariant after each operation"
       ],
       "antipattern": "Burn amount can diverge from actual backing decrease",
-      "securePattern": "Enforce peg invariant after each operation"
+      "securePattern": "Enforce peg invariant after each operation",
+      "validWhen": "Burn amount can diverge from actual backing decrease",
+      "invalidWhen": "Enforce peg invariant after each operation"
     },
     {
       "id": "sui-move-move-token-supply-inflation-vulnerabilit-pattern-11-uncapped-derivative-011",
@@ -3332,10 +3865,13 @@
         625
       ],
       "check": [
-        "VERIFY: No cap on derivative token minting"
+        "VERIFY: No cap on derivative token minting",
+        "FALSIFY: Enforce supply cap on derivative token"
       ],
       "antipattern": "No cap on derivative token minting",
-      "securePattern": "Enforce supply cap on derivative token"
+      "securePattern": "Enforce supply cap on derivative token",
+      "validWhen": "No cap on derivative token minting",
+      "invalidWhen": "Enforce supply cap on derivative token"
     },
     {
       "id": "sui-move-move-token-supply-inflation-vulnerabilit-pattern-12-kapt-double-minting-012",
@@ -3353,13 +3889,17 @@
       ],
       "check": [
         "VERIFY: Mints based on gross amount, not net-of-fee",
+        "PROVE: Pattern 1: if (total_supply == 0) { shares = amount } without minimum liquidity lock",
+        "FALSIFY: Calculate net staked amount after provider fee",
+        "IMPACT: Exchange rate manipulation stealing all subsequent deposits (2/29 reports) — CRITICAL",
         "First deposit locks minimum liquidity (dead shares)",
-        "All minting uses net-of-fee amounts for share calculation",
-        "Total minted shares ≤ total backing invariant enforced",
-        "LOOK FOR: Pattern 1: `if (total_supply == 0) { shares = amount }` without minimum liquidity lock"
+        "All minting uses net-of-fee amounts for share calculation"
       ],
       "antipattern": "Mints based on gross amount, not net-of-fee",
-      "securePattern": "Calculate net staked amount after provider fee"
+      "securePattern": "Calculate net staked amount after provider fee",
+      "validWhen": "Mints based on gross amount, not net-of-fee",
+      "invalidWhen": "Calculate net staked amount after provider fee",
+      "impact": "Exchange rate manipulation stealing all subsequent deposits (2/29 reports) — CRITICAL"
     },
     {
       "id": "sui-move-sui-cross-chain-bridge-vulnerabilities-1-evm-state-persistence-despit-000",
@@ -3377,10 +3917,13 @@
       ],
       "check": [
         "VERIFY: EVM side commits state changes before confirming the Sui-side transaction succeeded.",
-        "ANTIPATTERN: func ProcessCrossChainTx(ctx sdk.Context, cctx *types.CrossChainTx) error {"
+        "PROVE: func ProcessCrossChainTx(ctx sdk.Context, cctx *types.CrossChainTx) error {",
+        "FALSIFY: Use two-phase commit or cache-and-commit pattern"
       ],
       "antipattern": "func ProcessCrossChainTx(ctx sdk.Context, cctx *types.CrossChainTx) error {",
-      "securePattern": "Use two-phase commit or cache-and-commit pattern"
+      "securePattern": "Use two-phase commit or cache-and-commit pattern",
+      "validWhen": "The EVM side commits state changes before confirming the Sui-side transaction succeeded.",
+      "invalidWhen": "Use two-phase commit or cache-and-commit pattern"
     },
     {
       "id": "sui-move-sui-cross-chain-bridge-vulnerabilities-2-outbound-nonce-manipulation--001",
@@ -3397,10 +3940,13 @@
         225
       ],
       "check": [
-        "VERIFY: Sequential nonce allows targeted blocking"
+        "VERIFY: Sequential nonce allows targeted blocking",
+        "FALSIFY: Use nonce gap handling or parallel nonce pools"
       ],
       "antipattern": "Sequential nonce allows targeted blocking",
-      "securePattern": "Use nonce gap handling or parallel nonce pools"
+      "securePattern": "Use nonce gap handling or parallel nonce pools",
+      "validWhen": "Sequential nonce allows targeted blocking",
+      "invalidWhen": "Use nonce gap handling or parallel nonce pools"
     },
     {
       "id": "sui-move-sui-cross-chain-bridge-vulnerabilities-3-sui-node-dos-blocks-intx-obs-002",
@@ -3417,10 +3963,13 @@
         280
       ],
       "check": [
-        "VERIFY: Single RPC endpoint, no failover"
+        "VERIFY: Single RPC endpoint, no failover",
+        "FALSIFY: Multiple RPC endpoints with failover"
       ],
       "antipattern": "Single RPC endpoint, no failover",
-      "securePattern": "Multiple RPC endpoints with failover"
+      "securePattern": "Multiple RPC endpoints with failover",
+      "validWhen": "Single RPC endpoint, no failover",
+      "invalidWhen": "Multiple RPC endpoints with failover"
     },
     {
       "id": "sui-move-sui-cross-chain-bridge-vulnerabilities-4-missing-receiver-module-vali-003",
@@ -3437,10 +3986,13 @@
         333
       ],
       "check": [
-        "VERIFY: Receiver not validated before creating outbound CCTX"
+        "VERIFY: Receiver not validated before creating outbound CCTX",
+        "FALSIFY: Validate Sui address format before processing"
       ],
       "antipattern": "Receiver not validated before creating outbound CCTX",
-      "securePattern": "Validate Sui address format before processing"
+      "securePattern": "Validate Sui address format before processing",
+      "validWhen": "Receiver not validated before creating outbound CCTX",
+      "invalidWhen": "Validate Sui address format before processing"
     },
     {
       "id": "sui-move-sui-cross-chain-bridge-vulnerabilities-5-improper-coin-type-validatio-004",
@@ -3457,10 +4009,13 @@
         371
       ],
       "check": [
-        "VERIFY: Partial string match allows coin type spoofing"
+        "VERIFY: Partial string match allows coin type spoofing",
+        "FALSIFY: Validate full coin type path against known registry"
       ],
       "antipattern": "Partial string match allows coin type spoofing",
-      "securePattern": "Validate full coin type path against known registry"
+      "securePattern": "Validate full coin type path against known registry",
+      "validWhen": "Partial string match allows coin type spoofing",
+      "invalidWhen": "Validate full coin type path against known registry"
     },
     {
       "id": "sui-move-sui-cross-chain-bridge-vulnerabilities-6-duplicate-cctx-re-signing-005",
@@ -3477,10 +4032,13 @@
         417
       ],
       "check": [
-        "VERIFY: No check for existing signature"
+        "VERIFY: No check for existing signature",
+        "FALSIFY: Check for existing signature before re-signing"
       ],
       "antipattern": "No check for existing signature",
-      "securePattern": "Check for existing signature before re-signing"
+      "securePattern": "Check for existing signature before re-signing",
+      "validWhen": "No check for existing signature",
+      "invalidWhen": "Check for existing signature before re-signing"
     },
     {
       "id": "sui-move-sui-cross-chain-bridge-vulnerabilities-7-tss-fund-drainage-via-gas-ma-006",
@@ -3497,10 +4055,13 @@
         464
       ],
       "check": [
-        "VERIFY: Gas coin amount not properly bounded"
+        "VERIFY: Gas coin amount not properly bounded",
+        "FALSIFY: Cap gas budget and validate against estimated cost"
       ],
       "antipattern": "Gas coin amount not properly bounded",
-      "securePattern": "Cap gas budget and validate against estimated cost"
+      "securePattern": "Cap gas budget and validate against estimated cost",
+      "validWhen": "Gas coin amount not properly bounded",
+      "invalidWhen": "Cap gas budget and validate against estimated cost"
     },
     {
       "id": "sui-move-sui-cross-chain-bridge-vulnerabilities-8-wrong-gas-price-for-outbound-007",
@@ -3517,10 +4078,13 @@
         506
       ],
       "check": [
-        "VERIFY: Uses EVM gas price model for Sui"
+        "VERIFY: Uses EVM gas price model for Sui",
+        "FALSIFY: Use Sui-specific gas price query"
       ],
       "antipattern": "Uses EVM gas price model for Sui",
-      "securePattern": "Use Sui-specific gas price query"
+      "securePattern": "Use Sui-specific gas price query",
+      "validWhen": "Uses EVM gas price model for Sui",
+      "invalidWhen": "Use Sui-specific gas price query"
     },
     {
       "id": "sui-move-sui-cross-chain-bridge-vulnerabilities-9-epoch-transition-failure-via-008",
@@ -3537,8 +4101,9 @@
         519
       ],
       "check": [
-        "VERIFY: Sui Bridge committee management uses `vec_map::insert` which aborts on duplicate keys."
-      ]
+        "VERIFY: Sui Bridge committee management uses vec_map::insert which aborts on duplicate keys."
+      ],
+      "validWhen": "The Sui Bridge committee management uses vec_map::insert which aborts on duplicate keys."
     },
     {
       "id": "sui-move-sui-cross-chain-bridge-vulnerabilities-10-blocklist-iterator-state-bu-009",
@@ -3556,7 +4121,8 @@
       ],
       "check": [
         "VERIFY: blocklist validation loop in Sui Bridge doesn't reset its iterator between list entries, causing incorrect..."
-      ]
+      ],
+      "validWhen": "The blocklist validation loop in Sui Bridge doesn't reset its iterator between list entries, causing incorrect..."
     },
     {
       "id": "sui-move-sui-cross-chain-bridge-vulnerabilities-11-cross-chain-flow-rate-direc-010",
@@ -3574,7 +4140,8 @@
       ],
       "check": [
         "VERIFY: Axelar's cross-chain gateway on Sui tracks inbound and outbound token flows for rate limiting."
-      ]
+      ],
+      "validWhen": "Axelar's cross-chain gateway on Sui tracks inbound and outbound token flows for rate limiting."
     },
     {
       "id": "sui-move-sui-cross-chain-bridge-vulnerabilities-12-wrong-integration-function--011",
@@ -3592,7 +4159,8 @@
       ],
       "check": [
         "VERIFY: When integrating cross-chain message handling with flow limiters, calling the wrong function (e."
-      ]
+      ],
+      "validWhen": "When integrating cross-chain message handling with flow limiters, calling the wrong function (e."
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-1-public-vs-public-package-vis-000",
@@ -3610,11 +4178,14 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Functions that modify protocol-critical state (cooldown periods, limits, prices) are declared `public` instead of...",
-        "ANTIPATTERN: Public function allows anyone to reset cooldown"
+        "VERIFY: Functions that modify protocol-critical state (cooldown periods, limits, prices) are declared public instead of public(package) or public(friend),...",
+        "PROVE: Public function allows anyone to reset cooldown",
+        "FALSIFY: Restrict to same package only"
       ],
       "antipattern": "Public function allows anyone to reset cooldown",
-      "securePattern": "Restrict to same package only"
+      "securePattern": "Restrict to same package only",
+      "validWhen": "Functions that modify protocol-critical state (cooldown periods, limits, prices) are declared public instead of public(package) or public(friend), allowing external...",
+      "invalidWhen": "Restrict to same package only"
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-2-missing-owner-authority-chec-001",
@@ -3631,10 +4202,13 @@
         247
       ],
       "check": [
-        "VERIFY: Anyone can withdraw from another user's farming position"
+        "VERIFY: Anyone can withdraw from another user's farming position",
+        "FALSIFY: Validate caller is position owner"
       ],
       "antipattern": "Anyone can withdraw from another user's farming position",
-      "securePattern": "Validate caller is position owner"
+      "securePattern": "Validate caller is position owner",
+      "validWhen": "Anyone can withdraw from another user's farming position",
+      "invalidWhen": "Validate caller is position owner"
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-3-missing-object-uid-id-valida-002",
@@ -3651,10 +4225,13 @@
         299
       ],
       "check": [
-        "VERIFY: BlueFin accepts any BankV2 — doesn't check it matches the vault"
+        "VERIFY: BlueFin accepts any BankV2 — doesn't check it matches the vault",
+        "FALSIFY: Validate all shared object identities"
       ],
       "antipattern": "BlueFin accepts any BankV2 — doesn't check it matches the vault",
-      "securePattern": "Validate all shared object identities"
+      "securePattern": "Validate all shared object identities",
+      "validWhen": "BlueFin accepts any BankV2 — doesn't check it matches the vault",
+      "invalidWhen": "Validate all shared object identities"
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-4-trade-proof-capability-bypas-003",
@@ -3671,10 +4248,13 @@
         342
       ],
       "check": [
-        "VERIFY: Alternative proof generation path bypasses trader authorization"
+        "VERIFY: Alternative proof generation path bypasses trader authorization",
+        "FALSIFY: Both paths should enforce the same authorization"
       ],
       "antipattern": "Alternative proof generation path bypasses trader authorization",
-      "securePattern": "Both paths should enforce the same authorization"
+      "securePattern": "Both paths should enforce the same authorization",
+      "validWhen": "Alternative proof generation path bypasses trader authorization",
+      "invalidWhen": "Both paths should enforce the same authorization"
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-5-flash-loan-receipt-manipulat-004",
@@ -3691,10 +4271,13 @@
         399
       ],
       "check": [
-        "VERIFY: Receipt doesn't bind to specific pool"
+        "VERIFY: Receipt doesn't bind to specific pool",
+        "FALSIFY: Receipt binds to specific pool"
       ],
       "antipattern": "Receipt doesn't bind to specific pool",
-      "securePattern": "Receipt binds to specific pool"
+      "securePattern": "Receipt binds to specific pool",
+      "validWhen": "Receipt doesn't bind to specific pool",
+      "invalidWhen": "Receipt binds to specific pool"
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-6-missing-zk-proof-verificatio-005",
@@ -3711,10 +4294,13 @@
         446
       ],
       "check": [
-        "VERIFY: ZK proof accepted without on-chain verification"
+        "VERIFY: ZK proof accepted without on-chain verification",
+        "FALSIFY: Verify ZK proof on-chain before applying state changes"
       ],
       "antipattern": "ZK proof accepted without on-chain verification",
-      "securePattern": "Verify ZK proof on-chain before applying state changes"
+      "securePattern": "Verify ZK proof on-chain before applying state changes",
+      "validWhen": "ZK proof accepted without on-chain verification",
+      "invalidWhen": "Verify ZK proof on-chain before applying state changes"
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-7-signature-length-format-vali-006",
@@ -3731,10 +4317,13 @@
         492
       ],
       "check": [
-        "VERIFY: No length validation on signature bytes"
+        "VERIFY: No length validation on signature bytes",
+        "FALSIFY: Validate signature and key lengths before verification"
       ],
       "antipattern": "No length validation on signature bytes",
-      "securePattern": "Validate signature and key lengths before verification"
+      "securePattern": "Validate signature and key lengths before verification",
+      "validWhen": "No length validation on signature bytes",
+      "invalidWhen": "Validate signature and key lengths before verification"
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-8-security-level-constraint-by-007",
@@ -3751,10 +4340,13 @@
         548
       ],
       "check": [
-        "VERIFY: Security level check can be bypassed via alternative code path"
+        "VERIFY: Security level check can be bypassed via alternative code path",
+        "FALSIFY: Enforce security level on ALL withdrawal paths"
       ],
       "antipattern": "Security level check can be bypassed via alternative code path",
-      "securePattern": "Enforce security level on ALL withdrawal paths"
+      "securePattern": "Enforce security level on ALL withdrawal paths",
+      "validWhen": "Security level check can be bypassed via alternative code path",
+      "invalidWhen": "Enforce security level on ALL withdrawal paths"
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-9-unsafe-role-removal-008",
@@ -3771,10 +4363,13 @@
         586
       ],
       "check": [
-        "VERIFY: Can remove any member, including the last admin"
+        "VERIFY: Can remove any member, including the last admin",
+        "FALSIFY: Prevent removing last admin and validate member exists"
       ],
       "antipattern": "Can remove any member, including the last admin",
-      "securePattern": "Prevent removing last admin and validate member exists"
+      "securePattern": "Prevent removing last admin and validate member exists",
+      "validWhen": "Can remove any member, including the last admin",
+      "invalidWhen": "Prevent removing last admin and validate member exists"
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-10-repeated-invocation-replay-009",
@@ -3791,10 +4386,13 @@
         636
       ],
       "check": [
-        "VERIFY: No tracking of whether user already claimed"
+        "VERIFY: No tracking of whether user already claimed",
+        "FALSIFY: Track claims and prevent replay"
       ],
       "antipattern": "No tracking of whether user already claimed",
-      "securePattern": "Track claims and prevent replay"
+      "securePattern": "Track claims and prevent replay",
+      "validWhen": "No tracking of whether user already claimed",
+      "invalidWhen": "Track claims and prevent replay"
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-11-inconsistent-assert-conditi-010",
@@ -3811,10 +4409,13 @@
         673
       ],
       "check": [
-        "VERIFY: Assert condition is inverted"
+        "VERIFY: Assert condition is inverted",
+        "FALSIFY: Correct comparison direction"
       ],
       "antipattern": "Assert condition is inverted",
-      "securePattern": "Correct comparison direction"
+      "securePattern": "Correct comparison direction",
+      "validWhen": "Assert condition is inverted",
+      "invalidWhen": "Correct comparison direction"
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-12-missing-range-bounds-valida-011",
@@ -3832,10 +4433,12 @@
       ],
       "check": [
         "VERIFY: TTL not checked against maximum",
-        "ANTIPATTERN: Tick index not validated against tick spacing"
+        "PROVE: Tick index not validated against tick spacing"
       ],
       "antipattern": "Tick index not validated against tick spacing",
-      "securePattern": "Validate all bounds"
+      "securePattern": "Validate all bounds",
+      "validWhen": "TTL not checked against maximum",
+      "invalidWhen": "Validate all bounds"
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-13-mint-limit-exhaustion-dos-012",
@@ -3852,10 +4455,13 @@
         770
       ],
       "check": [
-        "VERIFY: No minimum mint amount, attacker can exhaust limit with dust"
+        "VERIFY: No minimum mint amount, attacker can exhaust limit with dust",
+        "FALSIFY: Enforce minimum mint amount"
       ],
       "antipattern": "No minimum mint amount, attacker can exhaust limit with dust",
-      "securePattern": "Enforce minimum mint amount"
+      "securePattern": "Enforce minimum mint amount",
+      "validWhen": "No minimum mint amount, attacker can exhaust limit with dust",
+      "invalidWhen": "Enforce minimum mint amount"
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-14-excessive-gas-consumption-d-013",
@@ -3872,10 +4478,13 @@
         814
       ],
       "check": [
-        "VERIFY: Order matching loop can process unlimited orders"
+        "VERIFY: Order matching loop can process unlimited orders",
+        "FALSIFY: Limit matching iterations per transaction"
       ],
       "antipattern": "Order matching loop can process unlimited orders",
-      "securePattern": "Limit matching iterations per transaction"
+      "securePattern": "Limit matching iterations per transaction",
+      "validWhen": "Order matching loop can process unlimited orders",
+      "invalidWhen": "Limit matching iterations per transaction"
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-15-snapshot-integrity-bypass-014",
@@ -3892,10 +4501,13 @@
         861
       ],
       "check": [
-        "VERIFY: Single admin can override snapshot root"
+        "VERIFY: Single admin can override snapshot root",
+        "FALSIFY: Require multi-sig or time-locked update"
       ],
       "antipattern": "Single admin can override snapshot root",
-      "securePattern": "Require multi-sig or time-locked update"
+      "securePattern": "Require multi-sig or time-locked update",
+      "validWhen": "Single admin can override snapshot root",
+      "invalidWhen": "Require multi-sig or time-locked update"
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-16-missing-invariant-enforceme-015",
@@ -3912,10 +4524,13 @@
         906
       ],
       "check": [
-        "VERIFY: LP supply not validated after swap"
+        "VERIFY: LP supply not validated after swap",
+        "FALSIFY: Assert invariant after state mutation"
       ],
       "antipattern": "LP supply not validated after swap",
-      "securePattern": "Assert invariant after state mutation"
+      "securePattern": "Assert invariant after state mutation",
+      "validWhen": "LP supply not validated after swap",
+      "invalidWhen": "Assert invariant after state mutation"
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-17-blocklist-implementation-fl-016",
@@ -3933,7 +4548,8 @@
       ],
       "check": [
         "VERIFY: Bridge and compliance systems use blocklists to prevent sanctioned addresses from transacting."
-      ]
+      ],
+      "validWhen": "Bridge and compliance systems use blocklists to prevent sanctioned addresses from transacting."
     },
     {
       "id": "sui-move-sui-move-access-control-validation-vulne-18-price-manipulation-via-miss-017",
@@ -3950,10 +4566,13 @@
         958
       ],
       "check": [
-        "VERIFY: Pool NAV manipulated by direct coin transfer"
+        "VERIFY: Pool NAV manipulated by direct coin transfer",
+        "FALSIFY: Track \"virtual\" balance separately from actual balance"
       ],
       "antipattern": "Pool NAV manipulated by direct coin transfer",
-      "securePattern": "Track \"virtual\" balance separately from actual balance"
+      "securePattern": "Track \"virtual\" balance separately from actual balance",
+      "validWhen": "Pool NAV manipulated by direct coin transfer",
+      "invalidWhen": "Track \"virtual\" balance separately from actual balance"
     },
     {
       "id": "sui-move-sui-move-arithmetic-precision-vulnerabil-1-clmm-sqrt-price-overflow-000",
@@ -3970,14 +4589,18 @@
         252
       ],
       "check": [
-        "VERIFY: `get_delta_b` computes `liquidity * (sqrt_price_b - sqrt_price_a)` which can overflow when liquidity is large and the tick range approaches extreme va",
+        "VERIFY: get_delta_b computes liquidity * (sqrt_price_b - sqrt_price_a) which can overflow when liquidity is large and the tick range approaches extreme...",
+        "PROVE: Create or interact with a pool at extreme tick ranges (near MIN_TICK = -443636 or MAX_TICK = 443636); Provide large liquidity values",
+        "FALSIFY: Use u256 throughout and assert no truncation",
+        "IMPACT: Pool state corrupted with incorrect token delta computations",
         "Verify all intermediate CLMM math uses u256 to prevent overflow",
-        "Test delta calculations at MIN_TICK and MAX_TICK boundaries",
-        "Check checked_shlw implementation for correct overflow detection",
-        "LOOK FOR: get_delta_a / get_delta_b using u128 multiplication"
+        "Test delta calculations at MIN_TICK and MAX_TICK boundaries"
       ],
       "antipattern": "checked_shlw does not properly detect overflow",
-      "securePattern": "Use u256 throughout and assert no truncation"
+      "securePattern": "Use u256 throughout and assert no truncation",
+      "validWhen": "get_delta_b computes liquidity * (sqrt_price_b - sqrt_price_a) which can overflow when liquidity is large and the tick range approaches extreme values.",
+      "invalidWhen": "Use u256 throughout and assert no truncation",
+      "impact": "Pool state corrupted with incorrect token delta computations"
     },
     {
       "id": "sui-move-sui-move-arithmetic-precision-vulnerabil-3-bigvector-container-size-ove-002",
@@ -3994,10 +4617,13 @@
         292
       ],
       "check": [
-        "VERIFY: depth > 0 causes max_slice_size ^ (depth + 1) nodes"
+        "VERIFY: depth > 0 causes max_slice_size ^ (depth + 1) nodes",
+        "FALSIFY: Size parameters chosen to stay under 256KB at maximum depth"
       ],
       "antipattern": "depth > 0 causes max_slice_size ^ (depth + 1) nodes",
-      "securePattern": "Size parameters chosen to stay under 256KB at maximum depth"
+      "securePattern": "Size parameters chosen to stay under 256KB at maximum depth",
+      "validWhen": "depth > 0 causes max_slice_size ^ (depth + 1) nodes",
+      "invalidWhen": "Size parameters chosen to stay under 256KB at maximum depth"
     },
     {
       "id": "sui-move-sui-move-arithmetic-precision-vulnerabil-4-accumulator-volume-counter-o-003",
@@ -4014,10 +4640,13 @@
         334
       ],
       "check": [
-        "VERIFY: u64 volume accumulator overflows with high-volume pairs"
+        "VERIFY: u64 volume accumulator overflows with high-volume pairs",
+        "FALSIFY: Use u128 or u256 for volume accumulators"
       ],
       "antipattern": "u64 volume accumulator overflows with high-volume pairs",
-      "securePattern": "Use u128 or u256 for volume accumulators"
+      "securePattern": "Use u128 or u256 for volume accumulators",
+      "validWhen": "u64 volume accumulator overflows with high-volume pairs",
+      "invalidWhen": "Use u128 or u256 for volume accumulators"
     },
     {
       "id": "sui-move-sui-move-arithmetic-precision-vulnerabil-5-type-boundary-overflow-u64-u-004",
@@ -4035,10 +4664,13 @@
       ],
       "check": [
         "VERIFY: amount * PRECISION can exceed u64",
-        "ANTIPATTERN: Stress test may use voting_power near u64 max"
+        "PROVE: Stress test may use voting_power near u64 max",
+        "FALSIFY: Use u128 for intermediate calculations"
       ],
       "antipattern": "Stress test may use voting_power near u64 max",
-      "securePattern": "Use u128 for intermediate calculations"
+      "securePattern": "Use u128 for intermediate calculations",
+      "validWhen": "amount * PRECISION can exceed u64",
+      "invalidWhen": "Use u128 for intermediate calculations"
     },
     {
       "id": "sui-move-sui-move-arithmetic-precision-vulnerabil-6-rpc-node-crash-overflow-005",
@@ -4056,10 +4688,13 @@
       ],
       "check": [
         "VERIFY: (Rust, Sui fullnode): Unchecked subtraction in select_coins",
-        "ANTIPATTERN: fn select_coins(coins: &[CoinData], amount: u64) -> Vec<ObjectID> {"
+        "PROVE: fn select_coins(coins: &[CoinData], amount: u64) -> Vec<ObjectID> {",
+        "FALSIFY: Use saturating subtraction"
       ],
       "antipattern": "fn select_coins(coins: &[CoinData], amount: u64) -> Vec<ObjectID> {",
-      "securePattern": "Use saturating subtraction"
+      "securePattern": "Use saturating subtraction",
+      "validWhen": "(Rust, Sui fullnode): Unchecked subtraction in select_coins",
+      "invalidWhen": "Use saturating subtraction"
     },
     {
       "id": "sui-move-sui-move-arithmetic-precision-vulnerabil-7-faulty-constant-definitions-006",
@@ -4076,10 +4711,13 @@
         467
       ],
       "check": [
-        "VERIFY: Missing digit — value is 10x too small"
+        "VERIFY: Missing digit — value is 10x too small",
+        "FALSIFY: Use built-in constants or verify manually"
       ],
       "antipattern": "Missing digit — value is 10x too small",
-      "securePattern": "Use built-in constants or verify manually"
+      "securePattern": "Use built-in constants or verify manually",
+      "validWhen": "Missing digit — value is 10x too small",
+      "invalidWhen": "Use built-in constants or verify manually"
     },
     {
       "id": "sui-move-sui-move-arithmetic-precision-vulnerabil-8-precision-loss-in-token-redi-007",
@@ -4096,10 +4734,13 @@
         517
       ],
       "check": [
-        "VERIFY: Integer division truncates, losing dust"
+        "VERIFY: Integer division truncates, losing dust",
+        "FALSIFY: Track cumulative distribution and handle remainder"
       ],
       "antipattern": "Integer division truncates, losing dust",
-      "securePattern": "Track cumulative distribution and handle remainder"
+      "securePattern": "Track cumulative distribution and handle remainder",
+      "validWhen": "Integer division truncates, losing dust",
+      "invalidWhen": "Track cumulative distribution and handle remainder"
     },
     {
       "id": "sui-move-sui-move-arithmetic-precision-vulnerabil-9-reward-calculation-rounding--008",
@@ -4116,10 +4757,13 @@
         567
       ],
       "check": [
-        "VERIFY: Accumulated rounding dust is silently lost each epoch"
+        "VERIFY: Accumulated rounding dust is silently lost each epoch",
+        "FALSIFY: Use scaled accumulator pattern"
       ],
       "antipattern": "Accumulated rounding dust is silently lost each epoch",
-      "securePattern": "Use scaled accumulator pattern"
+      "securePattern": "Use scaled accumulator pattern",
+      "validWhen": "Accumulated rounding dust is silently lost each epoch",
+      "invalidWhen": "Use scaled accumulator pattern"
     },
     {
       "id": "sui-move-sui-move-arithmetic-precision-vulnerabil-10-share-price-inflation-first-009",
@@ -4137,10 +4781,13 @@
       ],
       "check": [
         "VERIFY: No minimum deposit, shares round to zero",
-        "ANTIPATTERN: Persistent rounding errors inflate share price over time"
+        "PROVE: Persistent rounding errors inflate share price over time",
+        "FALSIFY: Virtual offset prevents the first-depositor inflation attack"
       ],
       "antipattern": "Persistent rounding errors inflate share price over time",
-      "securePattern": "Virtual offset prevents the first-depositor inflation attack"
+      "securePattern": "Virtual offset prevents the first-depositor inflation attack",
+      "validWhen": "No minimum deposit, shares round to zero",
+      "invalidWhen": "Virtual offset prevents the first-depositor inflation attack"
     },
     {
       "id": "sui-move-sui-move-arithmetic-precision-vulnerabil-11-share-to-asset-rounding-dir-010",
@@ -4157,10 +4804,13 @@
         680
       ],
       "check": [
-        "VERIFY: Rounds DOWN when calculating SUI needed for shares"
+        "VERIFY: Rounds DOWN when calculating SUI needed for shares",
+        "FALSIFY: Round up when user is paying (deposit), round down when user is receiving"
       ],
       "antipattern": "Rounds DOWN when calculating SUI needed for shares",
-      "securePattern": "Round up when user is paying (deposit), round down when user is receiving"
+      "securePattern": "Round up when user is paying (deposit), round down when user is receiving",
+      "validWhen": "Rounds DOWN when calculating SUI needed for shares",
+      "invalidWhen": "Round up when user is paying (deposit), round down when user is receiving"
     },
     {
       "id": "sui-move-sui-move-arithmetic-precision-vulnerabil-12-incorrect-price-scaling-con-011",
@@ -4177,10 +4827,13 @@
         716
       ],
       "check": [
-        "VERIFY: Price feed uses 8 decimals but pool expects 18 decimals"
+        "VERIFY: Price feed uses 8 decimals but pool expects 18 decimals",
+        "FALSIFY: Explicit decimal conversion"
       ],
       "antipattern": "Price feed uses 8 decimals but pool expects 18 decimals",
-      "securePattern": "Explicit decimal conversion"
+      "securePattern": "Explicit decimal conversion",
+      "validWhen": "Price feed uses 8 decimals but pool expects 18 decimals",
+      "invalidWhen": "Explicit decimal conversion"
     },
     {
       "id": "sui-move-sui-move-arithmetic-precision-vulnerabil-13-incorrect-quantity-calculat-012",
@@ -4198,10 +4851,13 @@
       ],
       "check": [
         "VERIFY: Uses wrong quantity field in fill calculation",
-        "ANTIPATTERN: quantity not updated correctly after partial fill"
+        "PROVE: quantity not updated correctly after partial fill",
+        "FALSIFY: Track unfilled quantity independently"
       ],
       "antipattern": "quantity not updated correctly after partial fill",
-      "securePattern": "Track unfilled quantity independently"
+      "securePattern": "Track unfilled quantity independently",
+      "validWhen": "Uses wrong quantity field in fill calculation",
+      "invalidWhen": "Track unfilled quantity independently"
     },
     {
       "id": "sui-move-sui-move-arithmetic-precision-vulnerabil-14-reward-period-miscalculatio-013",
@@ -4218,10 +4874,13 @@
         808
       ],
       "check": [
-        "VERIFY: Inclusive vs exclusive boundary error"
+        "VERIFY: Inclusive vs exclusive boundary error",
+        "FALSIFY: Clamp to reward period boundaries"
       ],
       "antipattern": "Inclusive vs exclusive boundary error",
-      "securePattern": "Clamp to reward period boundaries"
+      "securePattern": "Clamp to reward period boundaries",
+      "validWhen": "Inclusive vs exclusive boundary error",
+      "invalidWhen": "Clamp to reward period boundaries"
     },
     {
       "id": "sui-move-sui-move-arithmetic-precision-vulnerabil-15-improper-integer-type-conve-014",
@@ -4238,10 +4897,13 @@
         844
       ],
       "check": [
-        "VERIFY: Intermediate u128 result truncated to u64"
+        "VERIFY: Intermediate u128 result truncated to u64",
+        "FALSIFY: Assert before truncation"
       ],
       "antipattern": "Intermediate u128 result truncated to u64",
-      "securePattern": "Assert before truncation"
+      "securePattern": "Assert before truncation",
+      "validWhen": "Intermediate u128 result truncated to u64",
+      "invalidWhen": "Assert before truncation"
     },
     {
       "id": "sui-move-sui-move-defi-logic-vulnerabilities-1-improper-stake-accounting-up-000",
@@ -4259,10 +4921,13 @@
       ],
       "check": [
         "VERIFY: stake update function uses the wrong multiplier or doesn't account for compounding effects.",
-        "ANTIPATTERN: Uses absolute multiplier instead of relative"
+        "PROVE: Uses absolute multiplier instead of relative",
+        "FALSIFY: Use relative accumulator pattern"
       ],
       "antipattern": "Uses absolute multiplier instead of relative",
-      "securePattern": "Use relative accumulator pattern"
+      "securePattern": "Use relative accumulator pattern",
+      "validWhen": "The stake update function uses the wrong multiplier or doesn't account for compounding effects.",
+      "invalidWhen": "Use relative accumulator pattern"
     },
     {
       "id": "sui-move-sui-move-defi-logic-vulnerabilities-2-tank-stability-pool-value-up-001",
@@ -4279,10 +4944,13 @@
         213
       ],
       "check": [
-        "VERIFY: Updates tank total with deposited amount instead of net change"
+        "VERIFY: Updates tank total with deposited amount instead of net change",
+        "FALSIFY: Track stablecoin deposits and collateral rewards separately"
       ],
       "antipattern": "Updates tank total with deposited amount instead of net change",
-      "securePattern": "Track stablecoin deposits and collateral rewards separately"
+      "securePattern": "Track stablecoin deposits and collateral rewards separately",
+      "validWhen": "Updates tank total with deposited amount instead of net change",
+      "invalidWhen": "Track stablecoin deposits and collateral rewards separately"
     },
     {
       "id": "sui-move-sui-move-defi-logic-vulnerabilities-3-surplus-claim-logic-failure-002",
@@ -4299,10 +4967,13 @@
         257
       ],
       "check": [
-        "VERIFY: When total_deposit = 0, surplus cannot be distributed"
+        "VERIFY: When total_deposit = 0, surplus cannot be distributed",
+        "FALSIFY: Handle zero total_deposit case for surplus distribution"
       ],
       "antipattern": "When total_deposit = 0, surplus cannot be distributed",
-      "securePattern": "Handle zero total_deposit case for surplus distribution"
+      "securePattern": "Handle zero total_deposit case for surplus distribution",
+      "validWhen": "When total_deposit = 0, surplus cannot be distributed",
+      "invalidWhen": "Handle zero total_deposit case for surplus distribution"
     },
     {
       "id": "sui-move-sui-move-defi-logic-vulnerabilities-4-incorrect-flow-rate-tracking-003",
@@ -4319,10 +4990,13 @@
         297
       ],
       "check": [
-        "VERIFY: Inbound flow tracked as outbound (or vice versa)"
+        "VERIFY: Inbound flow tracked as outbound (or vice versa)",
+        "FALSIFY: Track correct flow direction"
       ],
       "antipattern": "Inbound flow tracked as outbound (or vice versa)",
-      "securePattern": "Track correct flow direction"
+      "securePattern": "Track correct flow direction",
+      "validWhen": "Inbound flow tracked as outbound (or vice versa)",
+      "invalidWhen": "Track correct flow direction"
     },
     {
       "id": "sui-move-sui-move-defi-logic-vulnerabilities-5-wrong-function-call-in-integ-004",
@@ -4339,10 +5013,13 @@
         338
       ],
       "check": [
-        "VERIFY: Calls wrong flow tracking function"
+        "VERIFY: Calls wrong flow tracking function",
+        "FALSIFY: Correct function call matching the operation semantics"
       ],
       "antipattern": "Calls wrong flow tracking function",
-      "securePattern": "Correct function call matching the operation semantics"
+      "securePattern": "Correct function call matching the operation semantics",
+      "validWhen": "Calls wrong flow tracking function",
+      "invalidWhen": "Correct function call matching the operation semantics"
     },
     {
       "id": "sui-move-sui-move-defi-logic-vulnerabilities-6-reward-accumulation-during-i-005",
@@ -4359,10 +5036,13 @@
         389
       ],
       "check": [
-        "VERIFY: Reward calculation doesn't exclude inactive periods"
+        "VERIFY: Reward calculation doesn't exclude inactive periods",
+        "FALSIFY: Track active epochs explicitly"
       ],
       "antipattern": "Reward calculation doesn't exclude inactive periods",
-      "securePattern": "Track active epochs explicitly"
+      "securePattern": "Track active epochs explicitly",
+      "validWhen": "Reward calculation doesn't exclude inactive periods",
+      "invalidWhen": "Track active epochs explicitly"
     },
     {
       "id": "sui-move-sui-move-defi-logic-vulnerabilities-7-reward-period-boundary-error-006",
@@ -4380,7 +5060,8 @@
       ],
       "check": [
         "VERIFY: Off-by-one errors in reward period boundary calculations cause rewards to either overcount (distributing beyond the..."
-      ]
+      ],
+      "validWhen": "Off-by-one errors in reward period boundary calculations cause rewards to either overcount (distributing beyond the..."
     },
     {
       "id": "sui-move-sui-move-defi-logic-vulnerabilities-8-liquid-staking-pending-coin--007",
@@ -4397,10 +5078,13 @@
         442
       ],
       "check": [
-        "VERIFY: Includes pending (not-yet-staked) SUI in total calculation"
+        "VERIFY: Includes pending (not-yet-staked) SUI in total calculation",
+        "FALSIFY: Only count actively staked SUI in exchange rate"
       ],
       "antipattern": "Includes pending (not-yet-staked) SUI in total calculation",
-      "securePattern": "Only count actively staked SUI in exchange rate"
+      "securePattern": "Only count actively staked SUI in exchange rate",
+      "validWhen": "Includes pending (not-yet-staked) SUI in total calculation",
+      "invalidWhen": "Only count actively staked SUI in exchange rate"
     },
     {
       "id": "sui-move-sui-move-defi-logic-vulnerabilities-9-liquid-staking-restake-routi-008",
@@ -4417,10 +5101,13 @@
         495
       ],
       "check": [
-        "VERIFY: Restake moves SUI but doesn't update validator distribution record"
+        "VERIFY: Restake moves SUI but doesn't update validator distribution record",
+        "FALSIFY: Update all tracking state on restake"
       ],
       "antipattern": "Restake moves SUI but doesn't update validator distribution record",
-      "securePattern": "Update all tracking state on restake"
+      "securePattern": "Update all tracking state on restake",
+      "validWhen": "Restake moves SUI but doesn't update validator distribution record",
+      "invalidWhen": "Update all tracking state on restake"
     },
     {
       "id": "sui-move-sui-move-defi-logic-vulnerabilities-10-liquid-staking-share-roundi-009",
@@ -4438,7 +5125,8 @@
       ],
       "check": [
         "VERIFY: When converting between SUI and staking shares (voSUI/stSUI), the rounding direction must always favor the protocol."
-      ]
+      ],
+      "validWhen": "When converting between SUI and staking shares (voSUI/stSUI), the rounding direction must always favor the protocol."
     },
     {
       "id": "sui-move-sui-move-defi-logic-vulnerabilities-11-order-book-base-quote-quant-010",
@@ -4455,10 +5143,13 @@
         546
       ],
       "check": [
-        "VERIFY: Uses fill quantity where order quantity is expected"
+        "VERIFY: Uses fill quantity where order quantity is expected",
+        "FALSIFY: Correctly compute base and quote quantities"
       ],
       "antipattern": "Uses fill quantity where order quantity is expected",
-      "securePattern": "Correctly compute base and quote quantities"
+      "securePattern": "Correctly compute base and quote quantities",
+      "validWhen": "Uses fill quantity where order quantity is expected",
+      "invalidWhen": "Correctly compute base and quote quantities"
     },
     {
       "id": "sui-move-sui-move-defi-logic-vulnerabilities-12-order-book-partial-fill-tra-011",
@@ -4476,7 +5167,8 @@
       ],
       "check": [
         "VERIFY: Order books that allow partial fills must correctly track the unfilled quantity."
-      ]
+      ],
+      "validWhen": "Order books that allow partial fills must correctly track the unfilled quantity."
     },
     {
       "id": "sui-move-sui-move-defi-logic-vulnerabilities-13-share-price-manipulation-vi-012",
@@ -4495,7 +5187,8 @@
       "check": [
         "VERIFY: Pool's Net Asset Value is directly manipulable"
       ],
-      "antipattern": "Pool's Net Asset Value is directly manipulable"
+      "antipattern": "Pool's Net Asset Value is directly manipulable",
+      "validWhen": "Pool's Net Asset Value is directly manipulable"
     },
     {
       "id": "sui-move-sui-move-defi-logic-vulnerabilities-14-share-price-inflation-via-r-013",
@@ -4512,10 +5205,13 @@
         631
       ],
       "check": [
-        "VERIFY: Every withdrawal leaves dust, inflating share price"
+        "VERIFY: Every withdrawal leaves dust, inflating share price",
+        "FALSIFY: Use virtual offset pattern to minimize rounding impact"
       ],
       "antipattern": "Every withdrawal leaves dust, inflating share price",
-      "securePattern": "Use virtual offset pattern to minimize rounding impact"
+      "securePattern": "Use virtual offset pattern to minimize rounding impact",
+      "validWhen": "Every withdrawal leaves dust, inflating share price",
+      "invalidWhen": "Use virtual offset pattern to minimize rounding impact"
     },
     {
       "id": "sui-move-sui-move-defi-logic-vulnerabilities-15-exchange-rate-manipulation--014",
@@ -4533,11 +5229,11 @@
       ],
       "check": [
         "VERIFY: When a liquid staking or vault protocol has very low TVL, the exchange rate is sensitive to small deposits or...",
+        "PROVE: Exchange rate calculation: total_sui / total_shares (or similar)",
         "Check first-depositor protection (virtual offset or minimum initial deposit)",
-        "Verify rounding direction favors protocol on all operations",
-        "Test exchange rate manipulation at very low TVL (< 100 tokens)",
-        "LOOK FOR: Exchange rate calculation: total_sui / total_shares (or similar)"
-      ]
+        "Verify rounding direction favors protocol on all operations"
+      ],
+      "validWhen": "When a liquid staking or vault protocol has very low TVL, the exchange rate is sensitive to small deposits or..."
     },
     {
       "id": "sui-move-sui-move-object-model-vulnerabilities-1-uid-leak-object-identity-byp-000",
@@ -4555,14 +5251,18 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: verifier does not validate structures without a `key` capability.",
+        "VERIFY: verifier does not validate structures without a key capability.",
+        "PROVE: Publish a module with struct Bar without key ability — verifier skips UID leak checks; Upgrade the module, adding key ability to Bar",
+        "FALSIFY: Verifier should reject adding key ability to existing structs during upgrade",
+        "IMPACT: UID reuse allows creating objects that collide with existing Sui objects",
         "Verify all structs with UID field have `key` ability from initial publication",
-        "Check upgrade compatibility — no ability additions that bypass verifier",
-        "Ensure all shared object parameters have UID/ID validation",
-        "LOOK FOR: Structs without `key` ability that contain UID"
+        "Check upgrade compatibility — no ability additions that bypass verifier"
       ],
       "antipattern": "V0 - struct without key, verifier doesn't check UID packing",
-      "securePattern": "Verifier should reject adding key ability to existing structs during upgrade"
+      "securePattern": "Verifier should reject adding key ability to existing structs during upgrade",
+      "validWhen": "The verifier does not validate structures without a key capability.",
+      "invalidWhen": "Verifier should reject adding key ability to existing structs during upgrade",
+      "impact": "UID reuse allows creating objects that collide with existing Sui objects"
     },
     {
       "id": "sui-move-sui-move-object-model-vulnerabilities-2-dynamic-field-hash-collision-001",
@@ -4580,12 +5280,15 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: `hash_type_and_key` function concatenates `parent`, `k_bytes`, and `k_tag_bytes` without inserting length delimiters.",
-        "LOOK FOR: Hash computations concatenating variable-length fields without separators",
-        "LOOK FOR: Custom hash_type_and_key implementations"
+        "VERIFY: hash_type_and_key function concatenates parent, k_bytes, and k_tag_bytes without inserting length delimiters.",
+        "PROVE: Attacker crafts two different dynamic field type+key combinations that produce the same hash; Operations like add and exists_ resolve to the wrong field",
+        "FALSIFY: Length-prefix each component to prevent cross-boundary collisions",
+        "LOOK FOR: Hash computations concatenating variable-length fields without separators"
       ],
       "antipattern": "No length delimiters between components",
-      "securePattern": "Length-prefix each component to prevent cross-boundary collisions"
+      "securePattern": "Length-prefix each component to prevent cross-boundary collisions",
+      "validWhen": "The hash_type_and_key function concatenates parent, k_bytes, and k_tag_bytes without inserting length delimiters.",
+      "invalidWhen": "Length-prefix each component to prevent cross-boundary collisions"
     },
     {
       "id": "sui-move-sui-move-object-model-vulnerabilities-3-package-digest-collision-002",
@@ -4602,10 +5305,13 @@
         359
       ],
       "check": [
-        "VERIFY: Sorting and concatenating without item boundaries"
+        "VERIFY: Sorting and concatenating without item boundaries",
+        "FALSIFY: Hash each module individually, then hash the concatenation of hashes"
       ],
       "antipattern": "Sorting and concatenating without item boundaries",
-      "securePattern": "Hash each module individually, then hash the concatenation of hashes"
+      "securePattern": "Hash each module individually, then hash the concatenation of hashes",
+      "validWhen": "Sorting and concatenating without item boundaries",
+      "invalidWhen": "Hash each module individually, then hash the concatenation of hashes"
     },
     {
       "id": "sui-move-sui-move-object-model-vulnerabilities-4-object-size-limit-dos-003",
@@ -4622,10 +5328,13 @@
         428
       ],
       "check": [
-        "VERIFY: max_slice_size too large, leaf objects will exceed 256KB"
+        "VERIFY: max_slice_size too large, leaf objects will exceed 256KB",
+        "FALSIFY: Use max_slice_size < 2000 to stay well under 256KB limit"
       ],
       "antipattern": "max_slice_size too large, leaf objects will exceed 256KB",
-      "securePattern": "Use max_slice_size < 2000 to stay well under 256KB limit"
+      "securePattern": "Use max_slice_size < 2000 to stay well under 256KB limit",
+      "validWhen": "max_slice_size too large, leaf objects will exceed 256KB",
+      "invalidWhen": "Use max_slice_size < 2000 to stay well under 256KB limit"
     },
     {
       "id": "sui-move-sui-move-object-model-vulnerabilities-5-kiosk-extension-fund-locking-004",
@@ -4642,10 +5351,13 @@
         464
       ],
       "check": [
-        "VERIFY: Disabling extensions locks user funds"
+        "VERIFY: Disabling extensions locks user funds",
+        "FALSIFY: Allow extension termination to recover funds even when disabled"
       ],
       "antipattern": "Disabling extensions locks user funds",
-      "securePattern": "Allow extension termination to recover funds even when disabled"
+      "securePattern": "Allow extension termination to recover funds even when disabled",
+      "validWhen": "Disabling extensions locks user funds",
+      "invalidWhen": "Allow extension termination to recover funds even when disabled"
     },
     {
       "id": "sui-move-sui-move-object-model-vulnerabilities-6-missing-uid-validation-in-de-005",
@@ -4663,9 +5375,9 @@
       ],
       "check": [
         "VERIFY: Sui DeFi protocols often accept shared objects (banks, pools, oracles) as function parameters without verifying their...",
-        "LOOK FOR: Functions accepting &mut Bank or &Pool without asserting object::id()",
-        "LOOK FOR: Shared objects passed as parameters without cross-referencing stored IDs"
-      ]
+        "PROVE: Functions accepting &mut Bank or &Pool without asserting object::id()"
+      ],
+      "validWhen": "Sui DeFi protocols often accept shared objects (banks, pools, oracles) as function parameters without verifying their..."
     },
     {
       "id": "sui-move-sui-move-object-model-vulnerabilities-7-committee-epoch-management-b-006",
@@ -4684,10 +5396,13 @@
       "neverPrune": true,
       "check": [
         "VERIFY: member_idx not reset between iterations",
-        "ANTIPATTERN: vec_map::insert fails on duplicate bridge_pubkey_bytes"
+        "PROVE: vec_map::insert fails on duplicate bridge_pubkey_bytes",
+        "FALSIFY: Check for existing pubkey before registration"
       ],
       "antipattern": "vec_map::insert fails on duplicate bridge_pubkey_bytes",
-      "securePattern": "Check for existing pubkey before registration"
+      "securePattern": "Check for existing pubkey before registration",
+      "validWhen": "member_idx not reset between iterations",
+      "invalidWhen": "Check for existing pubkey before registration"
     },
     {
       "id": "sui-move-sui-move-object-model-vulnerabilities-8-visibility-ability-misuse-vi-007",
@@ -4705,10 +5420,11 @@
       ],
       "check": [
         "VERIFY: Public function allows arbitrary epoch manipulation",
-        "LOOK FOR: `public fun` on state-mutation functions that should be `public(friend)` or `public(package)`",
-        "LOOK FOR: Package upgrades adding abilities (key, store) to existing structs"
+        "PROVE: public fun on state-mutation functions that should be public(friend) or public(package)",
+        "LOOK FOR: `public fun` on state-mutation functions that should be `public(friend)` or `public(package)`"
       ],
-      "antipattern": "Public function allows arbitrary epoch manipulation"
+      "antipattern": "Public function allows arbitrary epoch manipulation",
+      "validWhen": "Public function allows arbitrary epoch manipulation"
     },
     {
       "id": "sui-move-sui-move-object-model-vulnerabilities-9-name-service-validation-fail-008",
@@ -4726,9 +5442,10 @@
       ],
       "check": [
         "VERIFY: ttl not validated against MAX_TTL",
-        "ANTIPATTERN: Returns empty string for normal domains, unvalidated for reverse domains"
+        "PROVE: Returns empty string for normal domains, unvalidated for reverse domains"
       ],
-      "antipattern": "Returns empty string for normal domains, unvalidated for reverse domains"
+      "antipattern": "Returns empty string for normal domains, unvalidated for reverse domains",
+      "validWhen": "ttl not validated against MAX_TTL"
     },
     {
       "id": "sui-move-sui-move-object-model-vulnerabilities-10-dynamic-field-access-limit--009",
@@ -4747,9 +5464,9 @@
       "check": [
         "VERIFY: Sui enforces a strict limit of 1,000 dynamic field accesses per transaction.",
         "Check for unbounded loops accessing dynamic fields",
-        "Verify that batch operations have pagination or limits",
-        "Ensure push-based distribution is replaced with pull-based claims"
-      ]
+        "Verify that batch operations have pagination or limits"
+      ],
+      "validWhen": "Sui enforces a strict limit of 1,000 dynamic field accesses per transaction."
     },
     {
       "id": "sui-move-sui-wallet-snap-vulnerabilities-1-markdown-control-character-i-000",
@@ -4767,10 +5484,12 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: `renderSignTransaction` function interpolates raw transaction data into dialog text without escaping Markdown...",
+        "VERIFY: renderSignTransaction function interpolates raw transaction data into dialog text without escaping Markdown characters or filtering control...",
+        "PROVE: Malicious dApp constructs a transaction with crafted metadata/comments containing Markdown; When user is prompted to sign, the dialog renders attacker-controlled...",
         "ANTIPATTERN: Raw transaction data rendered in Markdown dialog"
       ],
-      "antipattern": "Raw transaction data rendered in Markdown dialog"
+      "antipattern": "Raw transaction data rendered in Markdown dialog",
+      "validWhen": "The renderSignTransaction function interpolates raw transaction data into dialog text without escaping Markdown characters or filtering control characters."
     },
     {
       "id": "sui-move-sui-wallet-snap-vulnerabilities-2-markdown-injection-in-messag-001",
@@ -4787,10 +5506,13 @@
         272
       ],
       "check": [
-        "VERIFY: Raw message content shown in signing dialog"
+        "VERIFY: Raw message content shown in signing dialog",
+        "FALSIFY: Sanitize message content and use copyable for addresses"
       ],
       "antipattern": "Raw message content shown in signing dialog",
-      "securePattern": "Sanitize message content and use copyable for addresses"
+      "securePattern": "Sanitize message content and use copyable for addresses",
+      "validWhen": "Raw message content shown in signing dialog",
+      "invalidWhen": "Sanitize message content and use copyable for addresses"
     },
     {
       "id": "sui-move-sui-wallet-snap-vulnerabilities-3-forced-transaction-signing-v-002",
@@ -4807,10 +5529,13 @@
         360
       ],
       "check": [
-        "VERIFY: dApp can call signTransaction immediately without prior context"
+        "VERIFY: dApp can call signTransaction immediately without prior context",
+        "FALSIFY: Require confirmation for key extraction, rate limit sign requests"
       ],
       "antipattern": "dApp can call signTransaction immediately without prior context",
-      "securePattern": "Require confirmation for key extraction, rate limit sign requests"
+      "securePattern": "Require confirmation for key extraction, rate limit sign requests",
+      "validWhen": "dApp can call signTransaction immediately without prior context",
+      "invalidWhen": "Require confirmation for key extraction, rate limit sign requests"
     },
     {
       "id": "sui-move-sui-wallet-snap-vulnerabilities-4-public-key-extraction-withou-003",
@@ -4827,8 +5552,9 @@
         373
       ],
       "check": [
-        "VERIFY: `getPublicKey` and `getAccount` RPC methods return the user's public key and Sui address without displaying a..."
-      ]
+        "VERIFY: getPublicKey and getAccount RPC methods return the user's public key and Sui address without displaying a..."
+      ],
+      "validWhen": "The getPublicKey and getAccount RPC methods return the user's public key and Sui address without displaying a..."
     },
     {
       "id": "sui-move-sui-wallet-snap-vulnerabilities-5-user-confirmation-suppressio-004",
@@ -4845,10 +5571,13 @@
         422
       ],
       "check": [
-        "VERIFY: Account info returned without any user interaction"
+        "VERIFY: Account info returned without any user interaction",
+        "FALSIFY: Show confirmation for account access with origin info"
       ],
       "antipattern": "Account info returned without any user interaction",
-      "securePattern": "Show confirmation for account access with origin info"
+      "securePattern": "Show confirmation for account access with origin info",
+      "validWhen": "Account info returned without any user interaction",
+      "invalidWhen": "Show confirmation for account access with origin info"
     },
     {
       "id": "sui-move-sui-wallet-snap-vulnerabilities-6-key-derivation-path-manipula-005",
@@ -4865,10 +5594,13 @@
         470
       ],
       "check": [
-        "VERIFY: Derivation path not constrained to Sui BIP44 coin type"
+        "VERIFY: Derivation path not constrained to Sui BIP44 coin type",
+        "FALSIFY: Restrict to Sui BIP44 coin type only"
       ],
       "antipattern": "Derivation path not constrained to Sui BIP44 coin type",
-      "securePattern": "Restrict to Sui BIP44 coin type only"
+      "securePattern": "Restrict to Sui BIP44 coin type only",
+      "validWhen": "Derivation path not constrained to Sui BIP44 coin type",
+      "invalidWhen": "Restrict to Sui BIP44 coin type only"
     },
     {
       "id": "sui-move-sui-wallet-snap-vulnerabilities-7-development-origins-in-produ-006",
@@ -4885,10 +5617,13 @@
         513
       ],
       "check": [
-        "VERIFY: Development origins included in production build"
+        "VERIFY: Development origins included in production build",
+        "FALSIFY: Environment-based origin configuration"
       ],
       "antipattern": "Development origins included in production build",
-      "securePattern": "Environment-based origin configuration"
+      "securePattern": "Environment-based origin configuration",
+      "validWhen": "Development origins included in production build",
+      "invalidWhen": "Environment-based origin configuration"
     }
   ]
 }

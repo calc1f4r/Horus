@@ -4,7 +4,7 @@
     "description": "Compressed hunt cards for account-abstraction — one-line detection rules for bulk scanning",
     "totalCards": 4,
     "skipped": 0,
-    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
     "enriched": 4
   },
   "cards": [
@@ -28,10 +28,12 @@
         260
       ],
       "check": [
-        "VERIFY: ERC-7579 module management has multiple independent failure modes:",
+        "VERIFY: ERC-7579 module management has multiple independent failure modes",
+        "PROVE: *Scenario A — Registry bypass via compromised module [MOD-1]; Attacker submits a malicious module that passes ERC-7484 attestation checks at install time.",
         "ANTIPATTERN: Fallback handler can be called directly by anyone via the fallback function"
       ],
-      "antipattern": "Fallback handler can be called directly by anyone via the fallback function"
+      "antipattern": "Fallback handler can be called directly by anyone via the fallback function",
+      "validWhen": "ERC-7579 module management has multiple independent failure modes"
     },
     {
       "id": "account-abstraction-aa-paymaster-gas-accounting-vulnerabilit-aa-paymaster-gas-accounting-pr-000",
@@ -53,10 +55,12 @@
         238
       ],
       "check": [
-        "VERIFY: Gas accounting in ERC-4337 is a multi-phase process (validation → execution → postOp) with several hand-off points...",
+        "VERIFY: Gas accounting in ERC-4337 is a multi-phase process (validation → execution → postOp) with several hand-off points where gas values can be measured...",
+        "PROVE: *Scenario A — Inverted prefund multiplier [GAS-1] (OpenZeppelin EIP-4337 audit, HIGH); An op WITHOUT a paymaster submits verificationGasLimit = G.",
         "ANTIPATTERN: preGas reused from before-validation for before-postOp measurement"
       ],
-      "antipattern": "preGas reused from before-validation for before-postOp measurement"
+      "antipattern": "preGas reused from before-validation for before-postOp measurement",
+      "validWhen": "Gas accounting in ERC-4337 is a multi-phase process (validation → execution → postOp) with several hand-off points where gas values can be measured incorrectly"
     },
     {
       "id": "account-abstraction-aa-session-key-permission-abuse-session-key-abuse-spend-limit--000",
@@ -79,10 +83,12 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Session key security depends on correct enforcement of four invariants:",
+        "VERIFY: Session key security depends on correct enforcement of four invariants",
+        "PROVE: *Scenario A — Session key drains entire wallet [SK-1] (Shieldify, CRITICAL); Alice's smart wallet has a CredibleAccountModule with a session key SK authorized for...",
         "ANTIPATTERN: permissionId decoded from userOp.signature which is NOT signed by EntryPoint"
       ],
-      "antipattern": "permissionId decoded from userOp.signature which is NOT signed by EntryPoint"
+      "antipattern": "permissionId decoded from userOp.signature which is NOT signed by EntryPoint",
+      "validWhen": "Session key security depends on correct enforcement of four invariants"
     },
     {
       "id": "account-abstraction-aa-signature-replay-attacks-aa-signature-replay-missing-bi-000",
@@ -104,10 +110,12 @@
         248
       ],
       "check": [
-        "VERIFY: **inner EIP-712 hashes computed by the smart account omit one or more domain-binding...",
+        "VERIFY: inner EIP-712 hashes computed by the smart account omit one or more domain-binding fields (entryPoint address, nonce, chainId,...",
+        "PROVE: *Scenario A — EntryPoint upgrade replay [REPLAY-1]; User signs a userOp against EntryPoint v0.6.",
         "ANTIPATTERN: Co-signer signs only (target, value, calldata) without nonce or chainId"
       ],
-      "antipattern": "Co-signer signs only (target, value, calldata) without nonce or chainId"
+      "antipattern": "Co-signer signs only (target, value, calldata) without nonce or chainId",
+      "validWhen": "This vulnerability exists because inner EIP-712 hashes computed by the smart account omit one or more domain-binding fields (entryPoint address, nonce, chainId,..."
     }
   ]
 }

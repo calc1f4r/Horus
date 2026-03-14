@@ -4,10 +4,10 @@ This document gives agent models (like you) practical guidance for making safe, 
 
 ## Scope & Goals
 
-- Primary domain: Creation of Vulnerability database entries for smart contract security and blockchain appchains. 
+- Primary domain: Creation and migration of Vulnerability database entries for smart contract security and blockchain appchains. 
 - Core guarantees:
   - Making sure every vulnerability entry is well-structured, semantically rich, and optimized for vector search.
-  - Ensuring consistency with existing entries and adherence to the provided template.
+  - Ensuring consistency with existing entries, migrating touched legacy entries forward, and adhering to the provided template.
 
 ---
 
@@ -18,14 +18,14 @@ The database uses a **tiered architecture** for precision. Never read entire vul
 ```
 Tier 1:   DB/index.json                          ← Router (~350 lines). Start here.
    ↓  
-Tier 1.5: DB/manifests/huntcards/*-huntcards.json ← Compressed detection cards (~55K tokens for ALL 451 patterns)
+Tier 1.5: DB/manifests/huntcards/*-huntcards.json ← Compressed detection cards with triage context
    ↓  
-Tier 2:   DB/manifests/<name>.json                ← Full pattern-level index with line ranges (11 manifests)
+Tier 2:   DB/manifests/<name>.json                ← Full pattern-level indexes with line ranges
    ↓  
 Tier 3:   DB/**/*.md                              ← Vulnerability content. Read ONLY targeted line ranges.
 ```
 
-**Hunt Cards (Tier 1.5)**: Enriched detection cards with `grep` patterns, one-line detection rules, **micro-directives** (`check` steps, `antipattern`, `securePattern`), category tags, and `neverPrune` flags for CRITICAL patterns. Load `DB/manifests/huntcards/all-huntcards.json` to fit ALL patterns in context. For each card: grep target code → on hit, execute `card.check` steps directly against the target code. Only read full .md entry (`card.ref` + `card.lines`) for confirmed true/likely positives.
+**Hunt Cards (Tier 1.5)**: Enriched detection cards with `grep` patterns, one-line detection rules, **micro-directives** (`check` steps, `antipattern`, `securePattern`), triage context (`validWhen`, `invalidWhen`, `impact`), category tags, and `neverPrune` flags for CRITICAL patterns. Load `DB/manifests/huntcards/all-huntcards.json` only when the context budget allows it; otherwise prefer per-manifest hunt cards or protocol bundles/shards. For each card: grep target code → on hit, execute `card.check` steps directly against the target code, use `validWhen` / `invalidWhen` to separate valid bugs from code smells, and only read full .md entry (`card.ref` + `card.lines`) for confirmed true/likely positives.
 
 For the full search guide, see `DB/SEARCH_GUIDE.md`.
 
@@ -37,17 +37,17 @@ For the full search guide, see `DB/SEARCH_GUIDE.md`.
 
 Read `DB/index.json` (~330 lines). It contains:
 - **`protocolContext`** — maps protocol types to relevant manifests + focus patterns
-- **`manifests`** — lists all 11 manifest files with descriptions and pattern counts
+- **`manifests`** — lists the available manifest files with descriptions and pattern counts
 - **`auditChecklist`** — quick security checks by category
 - **`keywordIndex`** — points to `DB/manifests/keywords.json` for keyword search
 
 ### Step 2: Load Hunt Cards (Preferred) or Manifests
 
 **For bulk scanning (audits)**: Load hunt cards instead of full manifests:
-- `DB/manifests/huntcards/all-huntcards.json` — ALL 451 patterns (~55K tokens)
+- `DB/manifests/huntcards/all-huntcards.json` — combined enriched hunt cards for the full corpus; use only when your context budget allows it
 - `DB/manifests/huntcards/<manifest>-huntcards.json` — per-manifest cards
 
-Each card has a `grep` field for searching target code and `ref` + `lines` for reading the full DB entry on hit.
+Each card has a `grep` field for searching target code, triage fields (`validWhen`, `invalidWhen`, `impact`) for fast reportability decisions, and `ref` + `lines` for reading the full DB entry on hit.
 
 **For browsing/targeted lookup**: Load 1-3 relevant manifests:
 
@@ -178,11 +178,11 @@ python3 generate_manifests.py
 | File | Purpose |
 |------|---------|
 | `DB/index.json` | **START HERE** — Lean router to manifests + hunt cards |
-| `DB/manifests/huntcards/all-huntcards.json` | **ALL hunt cards** — 451 compressed detection cards (~55K tokens) |
+| `DB/manifests/huntcards/all-huntcards.json` | **Combined hunt cards** — full enriched corpus; prefer per-manifest cards or bundles when context is tight |
 | `DB/manifests/huntcards/<name>-huntcards.json` | Per-manifest hunt cards |
 | `DB/manifests/*.json` | Full pattern-level indexes with line ranges |
 | `DB/SEARCH_GUIDE.md` | Detailed search guide for agents |
-| `TEMPLATE.md` | Structure for new vulnerability entries |
+| `TEMPLATE.md` | Structure for new and migrated vulnerability entries |
 | `Example.md` | Reference implementation of an entry |
 | `generate_manifests.py` | Re-generates manifests after DB changes |
 
@@ -339,6 +339,7 @@ Post-triage:
 | `cantina-judge` | `.github/agents/cantina-judge.md` | Validates against Cantina criteria |
 | `code4rena-judge` | `.github/agents/code4rena-judge.md` | Validates against Code4rena criteria |
 | `variant-template-writer` | `.github/agents/variant-template-writer.md` | Creates DB entries from reports |
+| `defihacklabs-indexer` | `.github/agents/defihacklabs-indexer.md` | Indexes DeFiHackLabs exploit PoCs into attack-graph-aware DB entries and invariants |
 | `solodit-fetching` | `.github/agents/solodit-fetching.md` | Fetches reports from Solodit API |
 | `function-analyzer` | `.github/agents/function-analyzer.md` | Per-contract ultra-granular function analysis (spawned by audit-context-building) |
 | `system-synthesizer` | `.github/agents/system-synthesizer.md` | Synthesizes per-contract context into global context document (spawned by audit-context-building) |

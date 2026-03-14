@@ -1,12 +1,12 @@
 ---
 name: variant-template-writer
-description: Analyzes security audit reports from reports/<topic>/ folders to identify cross-report vulnerability patterns and creates TEMPLATE.md-compliant database entries optimized for vector search. Synthesizes 5-10+ reports per pattern with verified severity consensus and evidence-backed examples. Use when synthesizing audit findings into database entries, performing variant analysis across auditors, or creating comprehensive vulnerability templates.
+description: Analyzes security audit reports from reports/<topic>_findings/ folders to build a fine-grained, duplicate-aware report index, identify cross-report vulnerability patterns, and create or migrate TEMPLATE.md-compliant database entries optimized for vector search. Synthesizes 5-10+ reports per pattern with verified severity consensus and evidence-backed examples. Use when synthesizing audit findings into database entries, performing variant analysis across auditors, or creating comprehensive vulnerability templates.
 tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent','todo']
 ---
 
 # Variant Template Writer
 
-Synthesizes multiple security audit reports into comprehensive, search-optimized vulnerability database entries. Requires minimum 5 reports per pattern for cross-validation and approx 40 patterns per topic for robust coverage.
+Synthesizes multiple security audit reports from `reports/<topic>_findings/` into comprehensive, search-optimized vulnerability database entries. Also migrates existing legacy `DB/**/*.md` entries forward to the current template when an overlap already exists. Requires minimum 5 reports per pattern for cross-validation and approx 40 patterns per topic for robust coverage.
 
 **Do NOT use for** analyzing DeFiHackLabs exploits (use `defihacklabs-indexer`), initial codebase exploration (use `audit-context-building`), or writing fix recommendations (use `issue-writer`).
 
@@ -18,71 +18,92 @@ Copy this checklist and track progress:
 
 ```
 Analysis Progress:
-- [ ] Phase 1: Scan and categorize all reports in reports/<topic>/
-- [ ] Phase 2: Deep-read reports by category (5-10 per batch)
-- [ ] Phase 3: Build cross-report comparison matrix
-- [ ] Phase 4: Synthesize patterns with frequency + severity consensus
-- [ ] Phase 5: Write TEMPLATE.md-compliant entry
-- [ ] Phase 6: Verification gate — all references exist, no hallucinations
-- [ ] Phase 7: Regenerate manifests
+- [ ] Phase 1: Build canonical report index for reports/<topic>_findings/
+- [ ] Phase 2: Deduplicate and form fine-grained buckets
+- [ ] Phase 3: Deep-read unique reports by bucket (5-10 per batch)
+- [ ] Phase 4: Build cross-report comparison matrix
+- [ ] Phase 5: Synthesize patterns with frequency + severity consensus
+- [ ] Phase 6: Create or migrate TEMPLATE.md-compliant entry
+- [ ] Phase 7: Verification gate — duplicates collapsed, references verified, no hallucinations
+- [ ] Phase 8: Regenerate manifests
 ```
 
-### Phase 1: Scan and Categorize
+### Phase 1: Build Canonical Report Index
 
-1. List all reports in `reports/<topic>/`
-2. Read titles and severity ratings (quick skim)
-3. Create buckets by root cause keyword
-4. Prioritize HIGH/CRITICAL reports first
-5. If 15+ reports, chunk into groups of 5-10 for focused analysis
+1. List every file in `reports/<topic>_findings/`
+2. Build a canonical record for each file using the [report indexing framework](resources/report-indexing.md)
+3. Treat folder name, title, and frontmatter classification as hints only; derive classification from the body and source metadata
+4. Classify each file as `finding`, `fix-review`, `duplicate-summary`, `analysis/meta`, or `noise`
+5. Prioritize HIGH/CRITICAL `finding` reports first, and keep all non-finding files in a side list so they do not inflate evidence counts
 
-Output a categorization table:
+Output an index table:
 
-| Category | Count | Severity Range | Example Reports |
-|----------|-------|---------------|-----------------|
-| {pattern} | {n} | {LOW-HIGH} | file1.md, file2.md |
+| Report | Type | Severity | Root Cause Family | Component | Trigger / Sink | Notes |
+|--------|------|----------|-------------------|-----------|----------------|-------|
+| file1.md | finding | HIGH | {family} | {component} | {trigger -> sink} | {dedupe/context note} |
 
-### Phase 2: Deep Read by Category
+### Phase 2: Deduplicate And Form Fine-Grained Buckets
 
-For each report in a category, extract:
+1. Collapse hard duplicates using source identifiers and exact source links
+2. Review soft duplicates using normalized title + protocol + root cause + code-shape overlap
+3. Bucket only unique `finding` reports by `patternKey`: `missing control | affected component | trigger primitive | sink / invariant break`
+4. Split broad topic folders into separate buckets whenever the component, trigger, or sink differs, even if the reports share surface terms like `ERC4626` or `missing validation`
+5. If a bucket contains 15+ unique findings, chunk it into groups of 5-10 for focused analysis
+
+Output a bucket table:
+
+| Pattern Key | Unique Findings | Duplicates | Severity Range | Example Reports |
+|-------------|-----------------|------------|----------------|-----------------|
+| {patternKey} | {n} | {d} | {LOW-HIGH} | file1.md, file2.md |
+
+### Phase 3: Deep Read By Bucket
+
+For each unique `finding` in a bucket, extract:
 
 | Field | What to extract |
 |-------|----------------|
 | Vulnerable code | Exact code snippets |
 | Root cause | Fundamental issue (use [root cause analysis](resources/root-cause-analysis.md)) |
-| Attack vector | How to exploit |
+| Missing control | Exact missing guard / validation |
+| Affected component | Contract, module, function family |
+| Trigger primitive | Attacker action or enabling condition |
+| Preconditions | Internal / external preconditions |
+| Sink / invariant break | What concretely goes wrong |
 | Impact | Consequences |
 | Severity | Rating from auditor |
 | Protocol | Which project |
 | Auditor | Who found it |
 
-### Phase 3: Cross-Report Comparison Matrix
+### Phase 4: Cross-Report Comparison Matrix
 
 Build a matrix to surface consensus and outliers:
 
-| Report | Pattern | Severity | Unique Aspects |
-|--------|---------|----------|----------------|
-| {report1} | {pattern} | {sev} | {what's different} |
-| {report2} | {pattern} | {sev} | {what's different} |
+| Report | Pattern Key | Severity | Duplicate Status | Unique Aspects |
+|--------|-------------|----------|------------------|----------------|
+| {report1} | {patternKey} | {sev} | unique | {what's different} |
+| {report2} | {patternKey} | {sev} | soft duplicate | {what's different} |
 
 Identify:
-- **Consensus**: Common pattern across 3+ auditors
-- **Severity range**: Using LOWEST rating when reports disagree (see [severity rules](resources/vector-search-optimization.md))
-- **Variants**: Different manifestations of the same root cause
-- **Outliers**: Unique findings that don't fit established patterns
+- **Consensus**: Common pattern across 3+ unique findings
+- **Severity range**: Using LOWEST rating across unique supporting findings (see [severity rules](resources/vector-search-optimization.md))
+- **Variants**: Different manifestations of the same root cause family after fine-grained bucketing
+- **Outliers**: Files that look related by keyword but are actually different patterns, duplicates, or non-findings
 
-### Phase 4: Pattern Synthesis
+### Phase 5: Pattern Synthesis
 
 For each pattern, document:
 
 ```
 Pattern: {name}
-Frequency: {X}/{Y} reports
-Severity consensus: {rating} (lowest across auditors)
+Pattern key: {missing control} | {component} | {trigger} | {sink}
+Unique evidence: {X} findings from {A} auditor(s) across {P} protocol(s)
+Duplicate/supporting files: {D}
+Severity consensus: {rating} (lowest across unique supporting findings)
 Root cause statement: "This vulnerability exists because [MISSING] in [COMPONENT] allows [VECTOR] leading to [IMPACT]"
 
 Variants:
-1. {Variant A} ({n} reports) — {code shape}
-2. {Variant B} ({n} reports) — {code shape}
+1. {Variant A} ({n} unique findings) — {code shape}
+2. {Variant B} ({n} unique findings) — {code shape}
 
 Impact across reports:
 - Technical: {common impacts with frequency}
@@ -90,43 +111,61 @@ Impact across reports:
 - Scenarios: {affected use cases with frequency}
 ```
 
-Apply the [pattern abstraction ladder](resources/pattern-abstraction-ladder.md) to document at multiple levels.
+Apply the [pattern abstraction ladder](resources/pattern-abstraction-ladder.md) only after the fine-grained grouping is correct. Use the [report indexing framework](resources/report-indexing.md) to avoid merging unrelated reports that merely share a topical keyword.
 
-### Phase 5: Write Database Entry
+### Phase 6: Create Or Migrate Database Entry
 
-Create TEMPLATE.md-compliant entry. See [TEMPLATE.md](../../TEMPLATE.md) for structure and [Example.md](../../Example.md) for a complete reference.
+Before writing a new file, search `DB/**/*.md` for an existing entry with the same root cause family, component, and sink. If a legacy entry already covers the pattern, migrate it in-place using the [entry migration guide](resources/entry-migration-guide.md) instead of creating a duplicate. See [TEMPLATE.md](../../TEMPLATE.md) for structure. Treat `TEMPLATE.md` as authoritative if it conflicts with [Example.md](../../Example.md).
 
 Key requirements:
-1. **YAML frontmatter** with all required fields
-2. **References table** linking every example back to its source report file path
-3. **5+ vulnerable pattern examples** — each from a REAL report, labeled with severity
-4. **2-3 secure implementations** with explanations
-5. **Impact analysis** with frequency data: "Unfair liquidations (3/12 reports)"
-6. **Detection patterns** derived from actual vulnerable code
-7. **10+ keywords** for vector search (see [optimization guide](resources/vector-search-optimization.md))
+1. **YAML frontmatter** with all required fields, including `root_cause_family`, `pattern_key`, and `code_keywords`
+2. **References table** linking every example back to its source report file path and preserving source identifiers when available
+3. **Agent Quick View** near the top with root cause statement, pattern key, validation strength, primary component, typical sink, and high-signal keywords
+4. **Valid Bug Signals** and **False Positive Guards** so low-context agents can triage and falsify quickly
+5. **Attack Scenario / Path Variants** split into `Path A / B / C` when there are materially different exploit routes
+6. **5+ vulnerable pattern examples** — each from a REAL unique finding, labeled with severity
+7. **2-3 secure implementations** with explanations
+8. **Impact analysis** with frequency data: `Unfair liquidations (3/12 unique findings)`
+9. **Detection patterns** derived from actual vulnerable code, plus grep-able `code_keywords`
+10. **10+ keywords** for vector search (see [optimization guide](resources/vector-search-optimization.md))
+
+Migration rules:
+1. **Prefer in-place migration** when a legacy DB entry already covers the pattern
+2. **Preserve evidence-rich legacy content** and reorganize it under the new template instead of deleting it
+3. **Do not create a second DB file** for the same `pattern_key` unless the category boundary is intentional and clearly documented
+4. **Use the migration guide** for touched legacy entries even if the original request was only to add examples or frontmatter
 
 Map categories using the [taxonomy](resources/vulnerability-taxonomy.md).
 
-### Phase 6: Verification Gate
+### Phase 7: Verification Gate
 
 **Every entry must pass ALL checks before finalization.**
 
 ```
 Verification Gate:
-- [ ] Minimum 5 reports analyzed for this pattern
+- [ ] Canonical index built for EVERY file in the source folder
+- [ ] Minimum 5 unique findings analyzed for this pattern
+- [ ] Only `finding` reports count toward evidence totals
+- [ ] Hard duplicates collapsed; soft duplicates reviewed explicitly
 - [ ] ALL file paths in references table verified to exist in reports/
 - [ ] Every code example extracted from an actual report (none synthetic)
 - [ ] Severity ratings match source reports exactly
 - [ ] No hallucinated protocol names or findings
+- [ ] Existing overlapping DB entries were searched before deciding to create a new file
+- [ ] Any touched legacy entry was migrated using the [entry migration guide](resources/entry-migration-guide.md)
+- [ ] The first ~150 lines contain enough context for a low-window agent to triage the pattern
+- [ ] `Valid Bug Signals` and `False Positive Guards` are evidence-backed, not generic filler
+- [ ] Distinct exploit routes are split into explicit path variants when the root cause can be reached multiple ways
 - [ ] Code examples are syntactically correct
-- [ ] Pattern frequency documented: "Common (8/12)" vs "Rare (1/12)"
+- [ ] Pattern frequency documented with unique-finding counts: `Common (8/12 unique findings)` vs `Rare (1/12 unique findings)`
+- [ ] Shared surface terms did not cause unrelated components or sinks to be merged
 - [ ] Root cause statement passes falsification protocol
 - [ ] Secure implementations actually fix the documented root cause
 - [ ] Keywords cover 10+ terms across all categories
 - [ ] Cross-links to related vulnerability entries documented
 ```
 
-### Phase 7: Regenerate Manifests
+### Phase 8: Regenerate Manifests
 
 After creating the entry, regenerate the search manifests:
 
@@ -146,7 +185,7 @@ Every claim in the database entry must trace to a specific report:
 
 | Claim type | Required evidence |
 |------------|------------------|
-| Vulnerability pattern exists | 3+ reports showing same code shape |
+| Vulnerability pattern exists | 3+ unique findings showing the same `patternKey` / code shape |
 | Severity rating | Exact auditor + protocol + rating cited |
 | Code example | File path to source report |
 | Impact statement | Reports that support this impact + frequency |
@@ -168,13 +207,14 @@ Label each pattern's validation strength in the entry.
 3. **NEVER assume severity** — use actual ratings from audit reports only
 4. **NEVER create synthetic examples without labeling** — mark as "Illustrative (synthetic)" if unavoidable
 5. **NEVER single-source an entry** — one report is insufficient for a pattern
-6. **Count, don't estimate** — "8/12 reports" not "most reports"
+6. **NEVER use raw file count as evidence count** — dedupe first, then count
+7. **NEVER let folder topic or weak frontmatter override the body evidence** — classify from the report content
 
-If uncertain, write: "Insufficient data — only {n} report(s) confirm this pattern" rather than extrapolating.
+If uncertain, write: "Insufficient data — only {n} unique finding(s) confirm this pattern" or "Context only — related report does not cleanly support this pattern" rather than extrapolating.
 
 ### Falsification Protocol
 
-Before finalizing, apply [falsification checks](resources/root-cause-analysis.md#falsification-protocol) to each pattern. Actively search for reports where the pattern was present but NOT flagged — this may indicate the pattern requires specific preconditions you haven't documented.
+Before finalizing, apply [falsification checks](resources/root-cause-analysis.md) to each pattern. Actively search for reports where the pattern was present but NOT flagged — this may indicate the pattern requires specific preconditions you haven't documented.
 
 ---
 
@@ -192,15 +232,15 @@ Before finalizing, systematically expand coverage:
 ## Output
 
 Each analysis produces:
-1. **Database entry** → `DB/general/<vulnerability_class>/<pattern-name>.md` (or appropriate folder)
+1. **Database entry** → new file OR migrated existing file under `DB/**`
 2. **Manifest regeneration** → Run `python3 generate_manifests.py` to update all manifests
 
 ---
 
 ## Critical Rules
 
-**MUST**: Analyze 5+ reports per pattern. Verify all file paths exist. Label every example with source + severity. Document pattern frequency. Use the lowest severity when reports disagree. Apply falsification protocol. Run `python3 generate_manifests.py` after creating entries.
+**MUST**: Analyze 5+ reports per pattern. Verify all file paths exist. Label every example with source + severity. Document pattern frequency. Use the lowest severity when reports disagree. Apply falsification protocol. Migrate touched legacy entries to the current template. Run `python3 generate_manifests.py` after creating or migrating entries.
 
-**NEVER**: Overstate severity. Hallucinate references. Create unlabeled synthetic examples. Base entries on single reports. Use vague descriptions. Skip frequency documentation. Assume severity.
+**NEVER**: Overstate severity. Hallucinate references. Create unlabeled synthetic examples. Base entries on single reports. Use vague descriptions. Skip frequency documentation. Assume severity. Create a duplicate DB entry when an existing file can be migrated.
 
 Thorough cross-validated analysis beats fast, incomplete entries. This database drives future vulnerability discovery — accuracy is paramount.

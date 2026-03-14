@@ -438,7 +438,7 @@ Final report includes: configuration used, executive summary, confirmed findings
 | 1 | 500 | Read index.json + targeted file listing |
 | 2 | Delegated | Coordinator manages sub-agent context |
 | 3 | Delegated | Sub-agents manage own context |
-| 4A (self) | ~55K tokens | Load hunt cards, grep-prune, partition |
+| 4A (self) | Variable | Load only required hunt-card subsets, grep-prune, partition |
 | 4A (subs) | ~30K per shard | Cards + code + invariants |
 | 4B | Delegated | Spawns domain sub-agents internally |
 | 4C | Delegated | Spawns 6 persona sub-agents internally |

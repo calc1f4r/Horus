@@ -4,7 +4,7 @@
     "description": "Compressed hunt cards for bridge — one-line detection rules for bulk scanning",
     "totalCards": 64,
     "skipped": 18,
-    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
     "enriched": 64
   },
   "cards": [
@@ -26,11 +26,15 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: `execute()` function in `AxelarExecutable` calls `_execute()` which is overridden by the child contract.",
+        "VERIFY: execute() function in AxelarExecutable calls _execute() which is overridden by the child contract.",
+        "PROVE: Attacker identifies a receiver that doesn't validate via the gateway; Attacker calls execute() with forged commandId, sourceChain, sourceAddress, payload",
+        "FALSIFY: AxelarExecutable handles validation automatically",
         "ANTIPATTERN: No gateway validation — anyone can call execute"
       ],
       "antipattern": "No gateway validation — anyone can call execute",
-      "securePattern": "AxelarExecutable handles validation automatically"
+      "securePattern": "AxelarExecutable handles validation automatically",
+      "validWhen": "The execute() function in AxelarExecutable calls _execute() which is overridden by the child contract.",
+      "invalidWhen": "AxelarExecutable handles validation automatically"
     },
     {
       "id": "bridge-axelar-integration-vulnerabilities-2-source-chain-address-spoofin-001",
@@ -49,10 +53,13 @@
         289
       ],
       "check": [
-        "VERIFY: Accepts from any source chain/address"
+        "VERIFY: Accepts from any source chain/address",
+        "FALSIFY: Allowlist with proper string handling"
       ],
       "antipattern": "Accepts from any source chain/address",
-      "securePattern": "Allowlist with proper string handling"
+      "securePattern": "Allowlist with proper string handling",
+      "validWhen": "Accepts from any source chain/address",
+      "invalidWhen": "Allowlist with proper string handling"
     },
     {
       "id": "bridge-axelar-integration-vulnerabilities-3-token-burn-but-call-fails-002",
@@ -71,10 +78,13 @@
         358
       ],
       "check": [
-        "VERIFY: Revert after token burn on source = fund loss"
+        "VERIFY: Revert after token burn on source = fund loss",
+        "FALSIFY: Handle all failures gracefully"
       ],
       "antipattern": "Revert after token burn on source = fund loss",
-      "securePattern": "Handle all failures gracefully"
+      "securePattern": "Handle all failures gracefully",
+      "validWhen": "Revert after token burn on source = fund loss",
+      "invalidWhen": "Handle all failures gracefully"
     },
     {
       "id": "bridge-axelar-integration-vulnerabilities-4-express-execution-front-runn-003",
@@ -93,10 +103,13 @@
         411
       ],
       "check": [
-        "VERIFY: No check if express already processed"
+        "VERIFY: No check if express already processed",
+        "FALSIFY: ExpressExecutable handles express vs standard coordination"
       ],
       "antipattern": "No check if express already processed",
-      "securePattern": "ExpressExecutable handles express vs standard coordination"
+      "securePattern": "ExpressExecutable handles express vs standard coordination",
+      "validWhen": "No check if express already processed",
+      "invalidWhen": "ExpressExecutable handles express vs standard coordination"
     },
     {
       "id": "bridge-axelar-integration-vulnerabilities-5-its-token-manager-misconfigu-004",
@@ -116,10 +129,13 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Lock-Unlock TokenManager on non-origin chains"
+        "VERIFY: Lock-Unlock TokenManager on non-origin chains",
+        "FALSIFY: Mint-Burn on remote chains + flow limits"
       ],
       "antipattern": "Lock-Unlock TokenManager on non-origin chains",
-      "securePattern": "Mint-Burn on remote chains + flow limits"
+      "securePattern": "Mint-Burn on remote chains + flow limits",
+      "validWhen": "Lock-Unlock TokenManager on non-origin chains",
+      "invalidWhen": "Mint-Burn on remote chains + flow limits"
     },
     {
       "id": "bridge-axelar-integration-vulnerabilities-6-gas-service-payment-issues-005",
@@ -139,10 +155,13 @@
       ],
       "check": [
         "VERIFY: Message sent without gas payment — stuck forever",
-        "ANTIPATTERN: Hardcoded gas doesn't account for destination chain costs"
+        "PROVE: Hardcoded gas doesn't account for destination chain costs",
+        "FALSIFY: Estimate gas based on destination and payload"
       ],
       "antipattern": "Hardcoded gas doesn't account for destination chain costs",
-      "securePattern": "Estimate gas based on destination and payload"
+      "securePattern": "Estimate gas based on destination and payload",
+      "validWhen": "Message sent without gas payment — stuck forever",
+      "invalidWhen": "Estimate gas based on destination and payload"
     },
     {
       "id": "bridge-axelar-integration-vulnerabilities-7-string-based-chain-matching-006",
@@ -161,10 +180,13 @@
         601
       ],
       "check": [
-        "VERIFY: Different representations of same chain"
+        "VERIFY: Different representations of same chain",
+        "FALSIFY: Store and compare using Axelar's exact chain IDs"
       ],
       "antipattern": "Different representations of same chain",
-      "securePattern": "Store and compare using Axelar's exact chain IDs"
+      "securePattern": "Store and compare using Axelar's exact chain IDs",
+      "validWhen": "Different representations of same chain",
+      "invalidWhen": "Store and compare using Axelar's exact chain IDs"
     },
     {
       "id": "bridge-axelar-integration-vulnerabilities-8-executable-contract-reentran-007",
@@ -184,10 +206,12 @@
       ],
       "check": [
         "VERIFY: Reentrancy in _executeWithToken",
-        "ANTIPATTERN: Reentrancy in _executeWithToken"
+        "FALSIFY: Checks-Effects-Interactions + ReentrancyGuard"
       ],
       "antipattern": "Reentrancy in _executeWithToken",
-      "securePattern": "Checks-Effects-Interactions + ReentrancyGuard"
+      "securePattern": "Checks-Effects-Interactions + ReentrancyGuard",
+      "validWhen": "Reentrancy in _executeWithToken",
+      "invalidWhen": "Checks-Effects-Interactions + ReentrancyGuard"
     },
     {
       "id": "bridge-axelar-integration-vulnerabilities-9-governance-proposal-replay-008",
@@ -206,10 +230,13 @@
         715
       ],
       "check": [
-        "VERIFY: No tracking of executed governance commands"
+        "VERIFY: No tracking of executed governance commands",
+        "FALSIFY: Track all executed governance commands"
       ],
       "antipattern": "No tracking of executed governance commands",
-      "securePattern": "Track all executed governance commands"
+      "securePattern": "Track all executed governance commands",
+      "validWhen": "No tracking of executed governance commands",
+      "invalidWhen": "Track all executed governance commands"
     },
     {
       "id": "bridge-axelar-integration-vulnerabilities-10-command-id-collision-009",
@@ -228,10 +255,13 @@
         771
       ],
       "check": [
-        "VERIFY: Same commandId space for different message types"
+        "VERIFY: Same commandId space for different message types",
+        "FALSIFY: Separate tracking per message type"
       ],
       "antipattern": "Same commandId space for different message types",
-      "securePattern": "Separate tracking per message type"
+      "securePattern": "Separate tracking per message type",
+      "validWhen": "Same commandId space for different message types",
+      "invalidWhen": "Separate tracking per message type"
     },
     {
       "id": "bridge-ccip-integration-vulnerabilities-1-router-message-validation-000",
@@ -251,11 +281,15 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Contracts implementing `IAny2EVMMessageReceiver` expose `ccipReceive()` as a public/external function but omit the...",
+        "VERIFY: Contracts implementing IAny2EVMMessageReceiver expose ccipReceive() as a public/external function but omit the critical msg.sender == getRouter()...",
+        "PROVE: Attacker identifies a CCIP receiver without router validation; Attacker calls ccipReceive() directly with forged Client.Any2EVMMessage",
+        "FALSIFY: CCIPReceiver enforces msg.sender == i_router",
         "ANTIPATTERN: Router address can be changed to attacker-controlled contract"
       ],
       "antipattern": "Router address can be changed to attacker-controlled contract",
-      "securePattern": "CCIPReceiver enforces msg.sender == i_router"
+      "securePattern": "CCIPReceiver enforces msg.sender == i_router",
+      "validWhen": "Contracts implementing IAny2EVMMessageReceiver expose ccipReceive() as a public/external function but omit the critical msg.sender == getRouter() check, or fail to...",
+      "invalidWhen": "CCIPReceiver enforces msg.sender == i_router"
     },
     {
       "id": "bridge-ccip-integration-vulnerabilities-2-fee-estimation-errors-001",
@@ -274,10 +308,13 @@
         311
       ],
       "check": [
-        "VERIFY: Hardcoded fee doesn't track actual CCIP costs"
+        "VERIFY: Hardcoded fee doesn't track actual CCIP costs",
+        "FALSIFY: Quote fee and validate payment"
       ],
       "antipattern": "Hardcoded fee doesn't track actual CCIP costs",
-      "securePattern": "Quote fee and validate payment"
+      "securePattern": "Quote fee and validate payment",
+      "validWhen": "Hardcoded fee doesn't track actual CCIP costs",
+      "invalidWhen": "Quote fee and validate payment"
     },
     {
       "id": "bridge-ccip-integration-vulnerabilities-3-token-pool-configuration-002",
@@ -296,10 +333,13 @@
         394
       ],
       "check": [
-        "VERIFY: No tracking of locked vs released amounts"
+        "VERIFY: No tracking of locked vs released amounts",
+        "FALSIFY: Rate-limited pool with supply tracking"
       ],
       "antipattern": "No tracking of locked vs released amounts",
-      "securePattern": "Rate-limited pool with supply tracking"
+      "securePattern": "Rate-limited pool with supply tracking",
+      "validWhen": "No tracking of locked vs released amounts",
+      "invalidWhen": "Rate-limited pool with supply tracking"
     },
     {
       "id": "bridge-ccip-integration-vulnerabilities-4-extra-args-gas-limit-misconf-003",
@@ -319,10 +359,13 @@
       ],
       "check": [
         "VERIFY: Empty extraArgs defaults to 200k gas",
-        "ANTIPATTERN: Using V1 when V2 is needed (missing strict sequencing control)"
+        "PROVE: Using V1 when V2 is needed (missing strict sequencing control)",
+        "FALSIFY: Right gas limit with V2 extra args"
       ],
       "antipattern": "Using V1 when V2 is needed (missing strict sequencing control)",
-      "securePattern": "Right gas limit with V2 extra args"
+      "securePattern": "Right gas limit with V2 extra args",
+      "validWhen": "Empty extraArgs defaults to 200k gas",
+      "invalidWhen": "Right gas limit with V2 extra args"
     },
     {
       "id": "bridge-ccip-integration-vulnerabilities-5-lane-allowlist-bypass-004",
@@ -342,10 +385,13 @@
       ],
       "check": [
         "VERIFY: Accepts messages from ANY chain",
-        "ANTIPATTERN: Accepts from any sender on allowed chain"
+        "PROVE: Accepts from any sender on allowed chain",
+        "FALSIFY: Validate both chain and sender"
       ],
       "antipattern": "Accepts from any sender on allowed chain",
-      "securePattern": "Validate both chain and sender"
+      "securePattern": "Validate both chain and sender",
+      "validWhen": "Accepts messages from ANY chain",
+      "invalidWhen": "Validate both chain and sender"
     },
     {
       "id": "bridge-ccip-integration-vulnerabilities-6-manual-execution-replay-005",
@@ -364,10 +410,13 @@
         598
       ],
       "check": [
-        "VERIFY: Same message can be manually executed multiple times"
+        "VERIFY: Same message can be manually executed multiple times",
+        "FALSIFY: Idempotent message processing"
       ],
       "antipattern": "Same message can be manually executed multiple times",
-      "securePattern": "Idempotent message processing"
+      "securePattern": "Idempotent message processing",
+      "validWhen": "Same message can be manually executed multiple times",
+      "invalidWhen": "Idempotent message processing"
     },
     {
       "id": "bridge-ccip-integration-vulnerabilities-7-sender-receiver-validation-006",
@@ -387,10 +436,13 @@
       ],
       "check": [
         "VERIFY: Incorrect sender decoding",
-        "ANTIPATTERN: Sending tokens + data to receiver that can't handle both"
+        "PROVE: Sending tokens + data to receiver that can't handle both",
+        "FALSIFY: Validate sender format and content"
       ],
       "antipattern": "Sending tokens + data to receiver that can't handle both",
-      "securePattern": "Validate sender format and content"
+      "securePattern": "Validate sender format and content",
+      "validWhen": "Incorrect sender decoding",
+      "invalidWhen": "Validate sender format and content"
     },
     {
       "id": "bridge-ccip-integration-vulnerabilities-8-rate-limiter-griefing-007",
@@ -409,10 +461,13 @@
         725
       ],
       "check": [
-        "VERIFY: Global rate limit shared by all users"
+        "VERIFY: Global rate limit shared by all users",
+        "FALSIFY: Tiered rate limiting"
       ],
       "antipattern": "Global rate limit shared by all users",
-      "securePattern": "Tiered rate limiting"
+      "securePattern": "Tiered rate limiting",
+      "validWhen": "Global rate limit shared by all users",
+      "invalidWhen": "Tiered rate limiting"
     },
     {
       "id": "bridge-ccip-integration-vulnerabilities-9-off-ramp-processing-failures-008",
@@ -431,10 +486,13 @@
         799
       ],
       "check": [
-        "VERIFY: Revert causes tokens to be stuck in receiver contract"
+        "VERIFY: Revert causes tokens to be stuck in receiver contract",
+        "FALSIFY: Never revert, store failed messages for recovery"
       ],
       "antipattern": "Revert causes tokens to be stuck in receiver contract",
-      "securePattern": "Never revert, store failed messages for recovery"
+      "securePattern": "Never revert, store failed messages for recovery",
+      "validWhen": "Revert causes tokens to be stuck in receiver contract",
+      "invalidWhen": "Never revert, store failed messages for recovery"
     },
     {
       "id": "bridge-ccip-integration-vulnerabilities-10-token-amount-validation-009",
@@ -453,10 +511,13 @@
         847
       ],
       "check": [
-        "ANTIPATTERN: Trusts message.data instead of actual tokenAmounts"
+        "VERIFY: Trusts message.data instead of actual tokenAmounts",
+        "FALSIFY: Validate against actual received tokens"
       ],
       "antipattern": "Trusts message.data instead of actual tokenAmounts",
-      "securePattern": "Validate against actual received tokens"
+      "securePattern": "Validate against actual received tokens",
+      "validWhen": "Trusts message.data instead of actual tokenAmounts",
+      "invalidWhen": "Validate against actual received tokens"
     },
     {
       "id": "bridge-ccip-integration-vulnerabilities-11-message-size-limit-violatio-010",
@@ -475,10 +536,13 @@
         909
       ],
       "check": [
-        "VERIFY: No size check on dynamically built payload"
+        "VERIFY: No size check on dynamically built payload",
+        "FALSIFY: Check size before sending"
       ],
       "antipattern": "No size check on dynamically built payload",
-      "securePattern": "Check size before sending"
+      "securePattern": "Check size before sending",
+      "validWhen": "No size check on dynamically built payload",
+      "invalidWhen": "Check size before sending"
     },
     {
       "id": "bridge-ccip-integration-vulnerabilities-12-self-service-token-registra-011",
@@ -499,10 +563,13 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Lock-release pool on BOTH chains means no burn/mint",
-        "ANTIPATTERN: No flow limit means entire supply can migrate to one chain"
+        "PROVE: No flow limit means entire supply can migrate to one chain",
+        "FALSIFY: Correct pool type per chain"
       ],
       "antipattern": "No flow limit means entire supply can migrate to one chain",
-      "securePattern": "Correct pool type per chain"
+      "securePattern": "Correct pool type per chain",
+      "validWhen": "Lock-release pool on BOTH chains means no burn/mint",
+      "invalidWhen": "Correct pool type per chain"
     },
     {
       "id": "bridge-cross-chain-general-vulnerabilities-1-cross-chain-replay-attacks-000",
@@ -522,11 +589,16 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Bridge messages or signatures don't include sufficient context (chain ID, contract address, nonce) to prevent replay...",
-        "ANTIPATTERN: No contract address in replay protection"
+        "VERIFY: Bridge messages or signatures don't include sufficient context (chain ID, contract address, nonce) to prevent replay across different chains or...",
+        "PROVE: *Scenario 1: Cross-Chain Signature Replay; User signs message to bridge tokens on Chain A",
+        "FALSIFY: Full EIP-712 domain separation",
+        "IMPACT: Double Minting: Tokens minted multiple times for single deposit"
       ],
       "antipattern": "No contract address in replay protection",
-      "securePattern": "Full EIP-712 domain separation"
+      "securePattern": "Full EIP-712 domain separation",
+      "validWhen": "Bridge messages or signatures don't include sufficient context (chain ID, contract address, nonce) to prevent replay across different chains or contract instances.",
+      "invalidWhen": "Full EIP-712 domain separation",
+      "impact": "Double Minting: Tokens minted multiple times for single deposit"
     },
     {
       "id": "bridge-cross-chain-general-vulnerabilities-2-signature-validation-issues-001",
@@ -545,10 +617,13 @@
         389
       ],
       "check": [
-        "VERIFY: No signature length validation"
+        "VERIFY: No signature length validation",
+        "FALSIFY: Proper signature validation"
       ],
       "antipattern": "No signature length validation",
-      "securePattern": "Proper signature validation"
+      "securePattern": "Proper signature validation",
+      "validWhen": "No signature length validation",
+      "invalidWhen": "Proper signature validation"
     },
     {
       "id": "bridge-cross-chain-general-vulnerabilities-3-token-bridging-issues-002",
@@ -567,10 +642,13 @@
         501
       ],
       "check": [
-        "VERIFY: Doesn't account for transfer fees"
+        "VERIFY: Doesn't account for transfer fees",
+        "FALSIFY: Handle fee-on-transfer tokens"
       ],
       "antipattern": "Doesn't account for transfer fees",
-      "securePattern": "Handle fee-on-transfer tokens"
+      "securePattern": "Handle fee-on-transfer tokens",
+      "validWhen": "Doesn't account for transfer fees",
+      "invalidWhen": "Handle fee-on-transfer tokens"
     },
     {
       "id": "bridge-cross-chain-general-vulnerabilities-4-sequencer-l2-specific-issues-003",
@@ -589,10 +667,13 @@
         584
       ],
       "check": [
-        "VERIFY: Blocked when sequencer down"
+        "VERIFY: Blocked when sequencer down",
+        "FALSIFY: Account for sequencer downtime"
       ],
       "antipattern": "Blocked when sequencer down",
-      "securePattern": "Account for sequencer downtime"
+      "securePattern": "Account for sequencer downtime",
+      "validWhen": "Blocked when sequencer down",
+      "invalidWhen": "Account for sequencer downtime"
     },
     {
       "id": "bridge-cross-chain-general-vulnerabilities-5-access-control-vulnerabiliti-004",
@@ -611,10 +692,13 @@
         658
       ],
       "check": [
-        "VERIFY: Approval persists after bridging"
+        "VERIFY: Approval persists after bridging",
+        "FALSIFY: Clear approvals and use salt"
       ],
       "antipattern": "Approval persists after bridging",
-      "securePattern": "Clear approvals and use salt"
+      "securePattern": "Clear approvals and use salt",
+      "validWhen": "Approval persists after bridging",
+      "invalidWhen": "Clear approvals and use salt"
     },
     {
       "id": "bridge-cross-chain-general-vulnerabilities-6-slippage-mev-issues-005",
@@ -633,10 +717,13 @@
         741
       ],
       "check": [
-        "ANTIPATTERN: Price can change during bridge delay"
+        "VERIFY: Price can change during bridge delay",
+        "FALSIFY: Slippage protection and deadlines"
       ],
       "antipattern": "Price can change during bridge delay",
-      "securePattern": "Slippage protection and deadlines"
+      "securePattern": "Slippage protection and deadlines",
+      "validWhen": "Price can change during bridge delay",
+      "invalidWhen": "Slippage protection and deadlines"
     },
     {
       "id": "bridge-cross-chain-general-vulnerabilities-7-message-ordering-timing-006",
@@ -656,10 +743,12 @@
       ],
       "check": [
         "VERIFY: Assumes message order",
-        "ANTIPATTERN: Assumes message order"
+        "FALSIFY: State machine handles any order"
       ],
       "antipattern": "Assumes message order",
-      "securePattern": "State machine handles any order"
+      "securePattern": "State machine handles any order",
+      "validWhen": "Assumes message order",
+      "invalidWhen": "State machine handles any order"
     },
     {
       "id": "bridge-defihacklabs-bridge-2022-patterns-1-zero-hash-trusted-root-messa-000",
@@ -679,10 +768,12 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: During a routine upgrade, the Nomad Replica contract was initialized with a trusted root of `0x00` (zero hash).",
+        "VERIFY: During a routine upgrade, the Nomad Replica contract was initialized with a trusted root of 0x00 (zero hash).",
+        "PROVE: Find a legitimate past bridge transaction (e.g., WBTC transfer from Moonbeam → Ethereum); Copy the raw message bytes from the transaction calldata",
         "ANTIPATTERN: Replica initialized with trusted root = 0x00"
       ],
-      "antipattern": "Replica initialized with trusted root = 0x00"
+      "antipattern": "Replica initialized with trusted root = 0x00",
+      "validWhen": "During a routine upgrade, the Nomad Replica contract was initialized with a trusted root of 0x00 (zero hash)."
     },
     {
       "id": "bridge-defihacklabs-bridge-2022-patterns-2-native-token-deposit-fakery--001",
@@ -702,10 +793,11 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Qubit's QBridge mapped the ETH `resourceID` to `address(0)` in the deposit handler, and `address(0)` was whitelisted in `contractWhitelist`.",
-        "ANTIPATTERN: address(0) whitelisted + no msg.value validation for native deposits"
+        "VERIFY: Qubit's QBridge mapped the ETH resourceID to address(0) in the deposit handler, and address(0) was whitelisted in contractWhitelist.",
+        "PROVE: address(0) whitelisted + no msg.value validation for native deposits"
       ],
-      "antipattern": "address(0) whitelisted + no msg.value validation for native deposits"
+      "antipattern": "address(0) whitelisted + no msg.value validation for native deposits",
+      "validWhen": "Qubit's QBridge mapped the ETH resourceID to address(0) in the deposit handler, and address(0) was whitelisted in contractWhitelist."
     },
     {
       "id": "bridge-defihacklabs-bridge-2022-patterns-3-native-token-wrapping-bypass-002",
@@ -725,10 +817,11 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Bridge deposit handlers that support both native tokens (ETH/BNB) and ERC20 tokens must correctly enforce that...",
-        "ANTIPATTERN: Chainbridge fork deposit handler doesn't enforce msg.value"
+        "VERIFY: Bridge deposit handlers that support both native tokens (ETH/BNB) and ERC20 tokens must correctly enforce that msg.value matches the deposited amount...",
+        "PROVE: Chainbridge fork deposit handler doesn't enforce msg.value"
       ],
-      "antipattern": "Chainbridge fork deposit handler doesn't enforce msg.value"
+      "antipattern": "Chainbridge fork deposit handler doesn't enforce msg.value",
+      "validWhen": "Bridge deposit handlers that support both native tokens (ETH/BNB) and ERC20 tokens must correctly enforce that msg.value matches the deposited amount for native token..."
     },
     {
       "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-vulnerability-description-001",
@@ -747,8 +840,10 @@
         104
       ],
       "check": [
-        "VERIFY: Bridge and cross-chain vulnerabilities differ from standard DeFi exploits because they span multiple execution..."
-      ]
+        "VERIFY: Bridge and cross-chain vulnerabilities differ from standard DeFi exploits because they span multiple execution environments",
+        "PROVE: *Scenario 1: Cross-Chain Address Collision (Optimism/Wintermute); Wintermute receives 20M OP tokens on Optimism to their L1 Gnosis Safe address"
+      ],
+      "validWhen": "Bridge and cross-chain vulnerabilities differ from standard DeFi exploits because they span multiple execution environments"
     },
     {
       "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-vulnerable-pattern-examples-002",
@@ -768,10 +863,10 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Severity**: 🔴 CRITICAL | **Loss**: 20M OP (~$15M) | **Protocol**: Optimism/Wintermute | **Chain**: Optimism",
-        "ANTIPATTERN: while (childcontract != TARGET) {"
+        "VERIFY: while (childcontract != TARGET) {"
       ],
-      "antipattern": "while (childcontract != TARGET) {"
+      "antipattern": "while (childcontract != TARGET) {",
+      "validWhen": "while (childcontract != TARGET) {"
     },
     {
       "id": "bridge-defihacklabs-bridge-patterns-defihacklabs-bridge-exploit-pa-000",
@@ -792,10 +887,15 @@
       "neverPrune": true,
       "check": [
         "VERIFY: EthCrossChainManager can execute on ANY target contract",
-        "ANTIPATTERN: Signature verification doesn't include chain-specific nonce"
+        "PROVE: Signature verification doesn't include chain-specific nonce",
+        "FALSIFY: Restrict which contracts can be called via cross-chain messages",
+        "IMPACT: Complete bridge takeover: Replacing keeper keys gives total control over cross-chain validation"
       ],
       "antipattern": "Signature verification doesn't include chain-specific nonce",
-      "securePattern": "Restrict which contracts can be called via cross-chain messages"
+      "securePattern": "Restrict which contracts can be called via cross-chain messages",
+      "validWhen": "EthCrossChainManager can execute on ANY target contract",
+      "invalidWhen": "Restrict which contracts can be called via cross-chain messages",
+      "impact": "Complete bridge takeover: Replacing keeper keys gives total control over cross-chain validation"
     },
     {
       "id": "bridge-hyperlane-integration-vulnerabilities-1-ism-validation-vulnerabiliti-000",
@@ -814,11 +914,16 @@
         237
       ],
       "check": [
-        "VERIFY: Contracts that receive Hyperlane messages fail to configure or validate the ISM properly, allowing arbitrary message...",
-        "ANTIPATTERN: Always returns true"
+        "VERIFY: Contracts that receive Hyperlane messages fail to configure or validate the ISM properly, allowing arbitrary message acceptance without proper...",
+        "PROVE: Protocol deploys Hyperlane receiver without setting ISM; Default ISM may be permissive or not configured",
+        "FALSIFY: Deploy with MultisigISM for strong security",
+        "IMPACT: Message Forgery: Arbitrary messages processed as legitimate"
       ],
       "antipattern": "Always returns true",
-      "securePattern": "Deploy with MultisigISM for strong security"
+      "securePattern": "Deploy with MultisigISM for strong security",
+      "validWhen": "Contracts that receive Hyperlane messages fail to configure or validate the ISM properly, allowing arbitrary message acceptance without proper signature/proof...",
+      "invalidWhen": "Deploy with MultisigISM for strong security",
+      "impact": "Message Forgery: Arbitrary messages processed as legitimate"
     },
     {
       "id": "bridge-hyperlane-integration-vulnerabilities-2-message-replay-attacks-001",
@@ -838,10 +943,14 @@
       ],
       "check": [
         "VERIFY: When message processing fails (reverts), the protocol may not mark the message as consumed.",
+        "PROVE: Attacker initiates cross-chain token transfer; On destination, message processing partially succeeds but then reverts",
+        "FALSIFY: Mark processed before state changes",
         "ANTIPATTERN: State changed before potential revert"
       ],
       "antipattern": "State changed before potential revert",
-      "securePattern": "Mark processed before state changes"
+      "securePattern": "Mark processed before state changes",
+      "validWhen": "When message processing fails (reverts), the protocol may not mark the message as consumed.",
+      "invalidWhen": "Mark processed before state changes"
     },
     {
       "id": "bridge-hyperlane-integration-vulnerabilities-3-router-configuration-issues-002",
@@ -860,10 +969,13 @@
         484
       ],
       "check": [
-        "ANTIPATTERN: Wrong address format comparison"
+        "VERIFY: Wrong address format comparison",
+        "FALSIFY: Proper router enrollment and validation"
       ],
       "antipattern": "Wrong address format comparison",
-      "securePattern": "Proper router enrollment and validation"
+      "securePattern": "Proper router enrollment and validation",
+      "validWhen": "Wrong address format comparison",
+      "invalidWhen": "Proper router enrollment and validation"
     },
     {
       "id": "bridge-hyperlane-integration-vulnerabilities-4-handle-function-vulnerabilit-003",
@@ -882,10 +994,13 @@
         563
       ],
       "check": [
-        "VERIFY: State change after external call"
+        "VERIFY: State change after external call",
+        "FALSIFY: Proper access control and reentrancy protection"
       ],
       "antipattern": "State change after external call",
-      "securePattern": "Proper access control and reentrancy protection"
+      "securePattern": "Proper access control and reentrancy protection",
+      "validWhen": "State change after external call",
+      "invalidWhen": "Proper access control and reentrancy protection"
     },
     {
       "id": "bridge-hyperlane-integration-vulnerabilities-5-gas-payment-issues-004",
@@ -904,10 +1019,13 @@
         638
       ],
       "check": [
-        "VERIFY: Hardcoded gas may be insufficient"
+        "VERIFY: Hardcoded gas may be insufficient",
+        "FALSIFY: Dynamic gas based on message"
       ],
       "antipattern": "Hardcoded gas may be insufficient",
-      "securePattern": "Dynamic gas based on message"
+      "securePattern": "Dynamic gas based on message",
+      "validWhen": "Hardcoded gas may be insufficient",
+      "invalidWhen": "Dynamic gas based on message"
     },
     {
       "id": "bridge-layerzero-integration-vulnerabilities-1-channel-blocking-vulnerabili-000",
@@ -926,11 +1044,16 @@
         516
       ],
       "check": [
-        "VERIFY: Protocols inherit from `LzApp` without implementing the non-blocking pattern (`NonblockingLzApp`), or they implement it...",
-        "ANTIPATTERN: Inherits LzApp directly without non-blocking wrapper"
+        "VERIFY: Protocols inherit from LzApp without implementing the non-blocking pattern (NonblockingLzApp), or they implement it incorrectly.",
+        "PROVE: Attacker identifies a cross-chain contract without non-blocking implementation; Attacker sends a message designed to revert on destination (insufficient gas, malicious...",
+        "FALSIFY: Proper NonblockingLzApp implementation",
+        "IMPACT: Channel DoS: All messages from affected source chain are blocked"
       ],
       "antipattern": "Inherits LzApp directly without non-blocking wrapper",
-      "securePattern": "Proper NonblockingLzApp implementation"
+      "securePattern": "Proper NonblockingLzApp implementation",
+      "validWhen": "Protocols inherit from LzApp without implementing the non-blocking pattern (NonblockingLzApp), or they implement it incorrectly.",
+      "invalidWhen": "Proper NonblockingLzApp implementation",
+      "impact": "Channel DoS: All messages from affected source chain are blocked"
     },
     {
       "id": "bridge-layerzero-integration-vulnerabilities-2-minimum-gas-validation-vulne-001",
@@ -949,11 +1072,15 @@
         627
       ],
       "check": [
-        "VERIFY: Protocols allow users to specify arbitrary `adapterParams` without validating the gas limit meets minimum requirements...",
+        "VERIFY: Protocols allow users to specify arbitrary adapterParams without validating the gas limit meets minimum requirements for the destination chain...",
+        "PROVE: Attacker calls a cross-chain function with minimal gas in adapterParams; LayerZero relayer delivers message with specified gas",
+        "FALSIFY: Use built-in minimum gas configuration",
         "ANTIPATTERN: User controls gas amount without validation"
       ],
       "antipattern": "User controls gas amount without validation",
-      "securePattern": "Use built-in minimum gas configuration"
+      "securePattern": "Use built-in minimum gas configuration",
+      "validWhen": "Protocols allow users to specify arbitrary adapterParams without validating the gas limit meets minimum requirements for the destination chain operation.",
+      "invalidWhen": "Use built-in minimum gas configuration"
     },
     {
       "id": "bridge-layerzero-integration-vulnerabilities-3-gas-estimation-fee-calculati-002",
@@ -973,10 +1100,13 @@
       ],
       "check": [
         "VERIFY: Uses source chain gas config for destination",
-        "ANTIPATTERN: Fee estimation uses different payload than actual send"
+        "PROVE: Fee estimation uses different payload than actual send",
+        "FALSIFY: Use actual payload for estimation"
       ],
       "antipattern": "Fee estimation uses different payload than actual send",
-      "securePattern": "Use actual payload for estimation"
+      "securePattern": "Use actual payload for estimation",
+      "validWhen": "Uses source chain gas config for destination",
+      "invalidWhen": "Use actual payload for estimation"
     },
     {
       "id": "bridge-layerzero-integration-vulnerabilities-4-fee-refund-handling-003",
@@ -996,10 +1126,13 @@
       ],
       "check": [
         "VERIFY: Contract cannot receive refunds",
-        "ANTIPATTERN: Refunds go to contract, not user"
+        "PROVE: Refunds go to contract, not user",
+        "FALSIFY: Contract can receive ETH refunds"
       ],
       "antipattern": "Refunds go to contract, not user",
-      "securePattern": "Contract can receive ETH refunds"
+      "securePattern": "Contract can receive ETH refunds",
+      "validWhen": "Contract cannot receive refunds",
+      "invalidWhen": "Contract can receive ETH refunds"
     },
     {
       "id": "bridge-layerzero-integration-vulnerabilities-5-payload-size-address-validat-004",
@@ -1018,10 +1151,13 @@
         862
       ],
       "check": [
-        "VERIFY: No limit on _toAddress length"
+        "VERIFY: No limit on _toAddress length",
+        "FALSIFY: Validate address length"
       ],
       "antipattern": "No limit on _toAddress length",
-      "securePattern": "Validate address length"
+      "securePattern": "Validate address length",
+      "validWhen": "No limit on _toAddress length",
+      "invalidWhen": "Validate address length"
     },
     {
       "id": "bridge-layerzero-integration-vulnerabilities-6-composed-message-vulnerabili-005",
@@ -1040,11 +1176,14 @@
         965
       ],
       "check": [
-        "VERIFY: Composed messages introduce dual-transaction patterns where the initial receive and subsequent compose execution are...",
-        "ANTIPATTERN: Rejects compose when user sends with compose option"
+        "VERIFY: Composed messages introduce dual-transaction patterns where the initial receive and subsequent compose execution are separate transactions.",
+        "PROVE: Rejects compose when user sends with compose option",
+        "FALSIFY: Prevent users from sending with compose if not supported"
       ],
       "antipattern": "Rejects compose when user sends with compose option",
-      "securePattern": "Prevent users from sending with compose if not supported"
+      "securePattern": "Prevent users from sending with compose if not supported",
+      "validWhen": "Composed messages introduce dual-transaction patterns where the initial receive and subsequent compose execution are separate transactions.",
+      "invalidWhen": "Prevent users from sending with compose if not supported"
     },
     {
       "id": "bridge-layerzero-integration-vulnerabilities-7-oft-onft-specific-vulnerabil-006",
@@ -1064,10 +1203,13 @@
       ],
       "check": [
         "VERIFY: Doesn't account for different decimals on chains",
-        "ANTIPATTERN: Event building after _creditTill can run out of gas"
+        "PROVE: Event building after _creditTill can run out of gas",
+        "FALSIFY: Assert no ZRO fee when paying in native"
       ],
       "antipattern": "Event building after _creditTill can run out of gas",
-      "securePattern": "Assert no ZRO fee when paying in native"
+      "securePattern": "Assert no ZRO fee when paying in native",
+      "validWhen": "Doesn't account for different decimals on chains",
+      "invalidWhen": "Assert no ZRO fee when paying in native"
     },
     {
       "id": "bridge-layerzero-integration-vulnerabilities-8-peer-trust-configuration-vul-007",
@@ -1086,10 +1228,13 @@
         1141
       ],
       "check": [
-        "VERIFY: Uses sender address if peer not configured"
+        "VERIFY: Uses sender address if peer not configured",
+        "FALSIFY: Validate peer chain is different"
       ],
       "antipattern": "Uses sender address if peer not configured",
-      "securePattern": "Validate peer chain is different"
+      "securePattern": "Validate peer chain is different",
+      "validWhen": "Uses sender address if peer not configured",
+      "invalidWhen": "Validate peer chain is different"
     },
     {
       "id": "bridge-layerzero-integration-vulnerabilities-9-stargate-sgreceive-integrati-008",
@@ -1109,10 +1254,13 @@
       ],
       "check": [
         "VERIFY: Complex operations can run out of gas",
-        "ANTIPATTERN: Sends to msg.sender instead of destination contract"
+        "PROVE: Sends to msg.sender instead of destination contract",
+        "FALSIFY: Explicit gas limit ensures catch block executes"
       ],
       "antipattern": "Sends to msg.sender instead of destination contract",
-      "securePattern": "Explicit gas limit ensures catch block executes"
+      "securePattern": "Explicit gas limit ensures catch block executes",
+      "validWhen": "Complex operations can run out of gas",
+      "invalidWhen": "Explicit gas limit ensures catch block executes"
     },
     {
       "id": "bridge-layerzero-integration-vulnerabilities-10-cross-chain-payload-validat-009",
@@ -1132,10 +1280,13 @@
       ],
       "check": [
         "VERIFY: tapSendData.tapOftAddress not validated",
-        "ANTIPATTERN: Debits from msg.sender instead of 'from'"
+        "PROVE: Debits from msg.sender instead of 'from'",
+        "FALSIFY: Validate tapOftAddress is the expected token"
       ],
       "antipattern": "Debits from msg.sender instead of 'from'",
-      "securePattern": "Validate tapOftAddress is the expected token"
+      "securePattern": "Validate tapOftAddress is the expected token",
+      "validWhen": "tapSendData.tapOftAddress not validated",
+      "invalidWhen": "Validate tapOftAddress is the expected token"
     },
     {
       "id": "bridge-layerzero-integration-vulnerabilities-11-insufficient-gas-limit-calc-010",
@@ -1155,10 +1306,13 @@
       ],
       "check": [
         "VERIFY: 20k gas per token is insufficient for minting",
-        "ANTIPATTERN: MIN_FALLBACK_RESERVE doesn't cover all overhead"
+        "PROVE: MIN_FALLBACK_RESERVE doesn't cover all overhead",
+        "FALSIFY: Let users specify higher gas if needed"
       ],
       "antipattern": "MIN_FALLBACK_RESERVE doesn't cover all overhead",
-      "securePattern": "Let users specify higher gas if needed"
+      "securePattern": "Let users specify higher gas if needed",
+      "validWhen": "20k gas per token is insufficient for minting",
+      "invalidWhen": "Let users specify higher gas if needed"
     },
     {
       "id": "bridge-stargate-integration-vulnerabilities-1-sgreceive-out-of-gas-000",
@@ -1177,10 +1331,13 @@
         188
       ],
       "check": [
-        "VERIFY: Complex multi-step logic can run out of gas"
+        "VERIFY: Complex multi-step logic can run out of gas",
+        "FALSIFY: Reserve gas for catch block + token recovery"
       ],
       "antipattern": "Complex multi-step logic can run out of gas",
-      "securePattern": "Reserve gas for catch block + token recovery"
+      "securePattern": "Reserve gas for catch block + token recovery",
+      "validWhen": "Complex multi-step logic can run out of gas",
+      "invalidWhen": "Reserve gas for catch block + token recovery"
     },
     {
       "id": "bridge-stargate-integration-vulnerabilities-2-router-swap-slippage-001",
@@ -1199,10 +1356,13 @@
         264
       ],
       "check": [
-        "VERIFY: Zero slippage protection — sandwich attackable"
+        "VERIFY: Zero slippage protection — sandwich attackable",
+        "FALSIFY: Slippage in shared decimals + user-configurable"
       ],
       "antipattern": "Zero slippage protection — sandwich attackable",
-      "securePattern": "Slippage in shared decimals + user-configurable"
+      "securePattern": "Slippage in shared decimals + user-configurable",
+      "validWhen": "Zero slippage protection — sandwich attackable",
+      "invalidWhen": "Slippage in shared decimals + user-configurable"
     },
     {
       "id": "bridge-stargate-integration-vulnerabilities-3-pool-credit-imbalance-002",
@@ -1221,10 +1381,13 @@
         311
       ],
       "check": [
-        "VERIFY: No credit check before swap — reverts confusingly"
+        "VERIFY: No credit check before swap — reverts confusingly",
+        "FALSIFY: Check available liquidity before swap"
       ],
       "antipattern": "No credit check before swap — reverts confusingly",
-      "securePattern": "Check available liquidity before swap"
+      "securePattern": "Check available liquidity before swap",
+      "validWhen": "No credit check before swap — reverts confusingly",
+      "invalidWhen": "Check available liquidity before swap"
     },
     {
       "id": "bridge-stargate-integration-vulnerabilities-4-stargate-v2-compose-failures-003",
@@ -1243,10 +1406,13 @@
         372
       ],
       "check": [
-        "VERIFY: No error handling in lzCompose"
+        "VERIFY: No error handling in lzCompose",
+        "FALSIFY: Always handle compose failures gracefully"
       ],
       "antipattern": "No error handling in lzCompose",
-      "securePattern": "Always handle compose failures gracefully"
+      "securePattern": "Always handle compose failures gracefully",
+      "validWhen": "No error handling in lzCompose",
+      "invalidWhen": "Always handle compose failures gracefully"
     },
     {
       "id": "bridge-stargate-integration-vulnerabilities-5-dstgasforcall-misconfigurati-004",
@@ -1265,10 +1431,13 @@
         429
       ],
       "check": [
-        "VERIFY: dstGasForCall = 0 uses default 200k gas"
+        "VERIFY: dstGasForCall = 0 uses default 200k gas",
+        "FALSIFY: Gas tailored to destination operation"
       ],
       "antipattern": "dstGasForCall = 0 uses default 200k gas",
-      "securePattern": "Gas tailored to destination operation"
+      "securePattern": "Gas tailored to destination operation",
+      "validWhen": "dstGasForCall = 0 uses default 200k gas",
+      "invalidWhen": "Gas tailored to destination operation"
     },
     {
       "id": "bridge-stargate-integration-vulnerabilities-6-destination-address-mismatch-005",
@@ -1288,10 +1457,13 @@
       ],
       "check": [
         "VERIFY: Destination set to msg.",
-        "ANTIPATTERN: Destination set to msg.sender instead of helper contract"
+        "PROVE: Destination set to msg.sender instead of helper contract",
+        "FALSIFY: Send to destination helper contract"
       ],
       "antipattern": "Destination set to msg.sender instead of helper contract",
-      "securePattern": "Send to destination helper contract"
+      "securePattern": "Send to destination helper contract",
+      "validWhen": "Destination set to msg.",
+      "invalidWhen": "Send to destination helper contract"
     },
     {
       "id": "bridge-stargate-integration-vulnerabilities-7-fee-layer-exploitation-006",
@@ -1310,10 +1482,13 @@
         554
       ],
       "check": [
-        "VERIFY: quoteLayerZeroFee with different payload than actual swap"
+        "VERIFY: quoteLayerZeroFee with different payload than actual swap",
+        "FALSIFY: Quote with exact same parameters as swap"
       ],
       "antipattern": "quoteLayerZeroFee with different payload than actual swap",
-      "securePattern": "Quote with exact same parameters as swap"
+      "securePattern": "Quote with exact same parameters as swap",
+      "validWhen": "quoteLayerZeroFee with different payload than actual swap",
+      "invalidWhen": "Quote with exact same parameters as swap"
     },
     {
       "id": "bridge-stargate-integration-vulnerabilities-8-amount-trimming-decimal-dust-007",
@@ -1332,10 +1507,13 @@
         610
       ],
       "check": [
-        "VERIFY: Dust stays in bridge contract"
+        "VERIFY: Dust stays in bridge contract",
+        "FALSIFY: Only take the normalizable amount from user"
       ],
       "antipattern": "Dust stays in bridge contract",
-      "securePattern": "Only take the normalizable amount from user"
+      "securePattern": "Only take the normalizable amount from user",
+      "validWhen": "Dust stays in bridge contract",
+      "invalidWhen": "Only take the normalizable amount from user"
     },
     {
       "id": "bridge-wormhole-integration-vulnerabilities-1-vaa-parsing-vulnerabilities-000",
@@ -1355,11 +1533,16 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Protocols either use outdated/deprecated Wormhole methods for VAA parsing, fail to validate all VAA fields properly, or...",
-        "ANTIPATTERN: Sequence tracking not per-emitter"
+        "VERIFY: Protocols either use outdated/deprecated Wormhole methods for VAA parsing, fail to validate all VAA fields properly, or don't verify the guardian...",
+        "PROVE: Attacker identifies contract using deprecated parseAndVerifyVAA() method; Attacker crafts malicious VAA that passes weak validation",
+        "FALSIFY: Complete VAA validation",
+        "IMPACT: Message Forgery: Arbitrary messages processed as legitimate"
       ],
       "antipattern": "Sequence tracking not per-emitter",
-      "securePattern": "Complete VAA validation"
+      "securePattern": "Complete VAA validation",
+      "validWhen": "Protocols either use outdated/deprecated Wormhole methods for VAA parsing, fail to validate all VAA fields properly, or don't verify the guardian signatures correctly.",
+      "invalidWhen": "Complete VAA validation",
+      "impact": "Message Forgery: Arbitrary messages processed as legitimate"
     },
     {
       "id": "bridge-wormhole-integration-vulnerabilities-2-guardian-set-vulnerabilities-001",
@@ -1379,10 +1562,14 @@
       ],
       "check": [
         "VERIFY: Protocols don't account for guardian set transitions properly.",
+        "PROVE: Protocol has governance controlled by Wormhole guardian votes; Guardian set update is pending (old set still valid)",
+        "FALSIFY: Track guardian set for governance actions",
         "ANTIPATTERN: Doesn't track which guardian set signed"
       ],
       "antipattern": "Doesn't track which guardian set signed",
-      "securePattern": "Track guardian set for governance actions"
+      "securePattern": "Track guardian set for governance actions",
+      "validWhen": "Protocols don't account for guardian set transitions properly.",
+      "invalidWhen": "Track guardian set for governance actions"
     },
     {
       "id": "bridge-wormhole-integration-vulnerabilities-3-message-replay-attacks-002",
@@ -1401,10 +1588,13 @@
         386
       ],
       "check": [
-        "VERIFY: Same VAA can be replayed across instances"
+        "VERIFY: Same VAA can be replayed across instances",
+        "FALSIFY: Per-instance replay protection"
       ],
       "antipattern": "Same VAA can be replayed across instances",
-      "securePattern": "Per-instance replay protection"
+      "securePattern": "Per-instance replay protection",
+      "validWhen": "Same VAA can be replayed across instances",
+      "invalidWhen": "Per-instance replay protection"
     },
     {
       "id": "bridge-wormhole-integration-vulnerabilities-4-token-bridge-integration-003",
@@ -1424,10 +1614,12 @@
       ],
       "check": [
         "VERIFY: Uses transferWithPayload incorrectly",
-        "ANTIPATTERN: Uses transferWithPayload incorrectly"
+        "FALSIFY: Correct Token Bridge usage"
       ],
       "antipattern": "Uses transferWithPayload incorrectly",
-      "securePattern": "Correct Token Bridge usage"
+      "securePattern": "Correct Token Bridge usage",
+      "validWhen": "Uses transferWithPayload incorrectly",
+      "invalidWhen": "Correct Token Bridge usage"
     },
     {
       "id": "bridge-wormhole-integration-vulnerabilities-5-gas-limit-issues-004",
@@ -1446,10 +1638,13 @@
         551
       ],
       "check": [
-        "VERIFY: Gas limit cannot be updated"
+        "VERIFY: Gas limit cannot be updated",
+        "FALSIFY: Updatable gas configuration"
       ],
       "antipattern": "Gas limit cannot be updated",
-      "securePattern": "Updatable gas configuration"
+      "securePattern": "Updatable gas configuration",
+      "validWhen": "Gas limit cannot be updated",
+      "invalidWhen": "Updatable gas configuration"
     }
   ]
 }

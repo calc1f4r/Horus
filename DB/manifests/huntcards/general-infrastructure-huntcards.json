@@ -4,7 +4,7 @@
     "description": "Compressed hunt cards for general-infrastructure — one-line detection rules for bulk scanning",
     "totalCards": 44,
     "skipped": 41,
-    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly. Only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
     "enriched": 44
   },
   "cards": [
@@ -27,8 +27,9 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Proxy pattern vulnerabilities stem from the separation of contract logic (implementation) and state (proxy), combined..."
-      ]
+        "VERIFY: Proxy pattern vulnerabilities stem from the separation of contract logic (implementation) and state (proxy), combined with the use of delegatecall..."
+      ],
+      "validWhen": "Proxy pattern vulnerabilities stem from the separation of contract logic (implementation) and state (proxy), combined with the use of delegatecall for forwarding calls."
     },
     {
       "id": "general-infrastructure-proxy-pattern-vulnerabilities-vulnerability-patterns-001",
@@ -48,10 +49,13 @@
         1547
       ],
       "check": [
-        "VERIFY: Implementation contract constructor doesn't disable initializers"
+        "VERIFY: Implementation contract constructor doesn't disable initializers",
+        "FALSIFY: Use initializer instead of constructor"
       ],
       "antipattern": "Implementation contract constructor doesn't disable initializers",
-      "securePattern": "Use initializer instead of constructor"
+      "securePattern": "Use initializer instead of constructor",
+      "validWhen": "Implementation contract constructor doesn't disable initializers",
+      "invalidWhen": "Use initializer instead of constructor"
     },
     {
       "id": "general-infrastructure-uups-proxy-vulnerabilities-vulnerability-description-000",
@@ -71,10 +75,12 @@
         188
       ],
       "check": [
-        "VERIFY: UUPS proxy vulnerabilities arise from several fundamental issues:",
+        "VERIFY: UUPS proxy vulnerabilities arise from several fundamental issues",
+        "PROVE: *Scenario 1: Uninitialized Implementation Takeover (MEDIUM-HIGH); Protocol deploys UUPS proxy with OZ 4.3.1 but forgets to initialize implementation contract",
         "ANTIPATTERN: Implementation contract not initialized after deployment"
       ],
-      "antipattern": "Implementation contract not initialized after deployment"
+      "antipattern": "Implementation contract not initialized after deployment",
+      "validWhen": "UUPS proxy vulnerabilities arise from several fundamental issues"
     },
     {
       "id": "general-infrastructure-diamond-proxy-vulnerabilities-vulnerability-description-000",
@@ -94,10 +100,12 @@
         269
       ],
       "check": [
-        "VERIFY: Diamond proxy vulnerabilities arise from several fundamental issues:",
+        "VERIFY: Diamond proxy vulnerabilities arise from several fundamental issues",
+        "PROVE: *Scenario 1: Storage Collision Leading to System Failure (HIGH); Protocol upgrades Diamond with new struct that changes size from 7 to 2 slots",
         "ANTIPATTERN: Changing struct size shifts all subsequent storage"
       ],
-      "antipattern": "Changing struct size shifts all subsequent storage"
+      "antipattern": "Changing struct size shifts all subsequent storage",
+      "validWhen": "Diamond proxy vulnerabilities arise from several fundamental issues"
     },
     {
       "id": "general-infrastructure-storage-collision-vulnerabilities-vulnerability-categories-001",
@@ -118,7 +126,8 @@
       ],
       "check": [
         "VERIFY: Proxy variables collide with implementation's storage layout."
-      ]
+      ],
+      "validWhen": "Proxy variables collide with implementation's storage layout."
     },
     {
       "id": "general-infrastructure-storage-collision-vulnerabilities-vulnerable-pattern-examples-002",
@@ -140,10 +149,13 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Proxy upgrade caused storage collision",
-        "ANTIPATTERN: Governance proxy storage collision allowed malicious proposal"
+        "PROVE: Governance proxy storage collision allowed malicious proposal",
+        "FALSIFY: Unique storage positions"
       ],
       "antipattern": "Governance proxy storage collision allowed malicious proposal",
-      "securePattern": "Unique storage positions"
+      "securePattern": "Unique storage positions",
+      "validWhen": "Proxy upgrade caused storage collision",
+      "invalidWhen": "Unique storage positions"
     },
     {
       "id": "general-infrastructure-defi-reentrancy-patterns-vulnerability-categories-001",
@@ -164,7 +176,8 @@
       ],
       "check": [
         "VERIFY: State updates occur AFTER external calls, allowing recursive exploitation."
-      ]
+      ],
+      "validWhen": "State updates occur AFTER external calls, allowing recursive exploitation."
     },
     {
       "id": "general-infrastructure-defi-reentrancy-patterns-vulnerable-pattern-examples-002",
@@ -186,9 +199,10 @@
       "neverPrune": true,
       "check": [
         "VERIFY: State update AFTER external call",
-        "ANTIPATTERN: Oracle queries pool during withdrawal callback"
+        "PROVE: Oracle queries pool during withdrawal callback"
       ],
-      "antipattern": "Oracle queries pool during withdrawal callback"
+      "antipattern": "Oracle queries pool during withdrawal callback",
+      "validWhen": "State update AFTER external call"
     },
     {
       "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-1-erc-677-ontokentransfer-reen-000",
@@ -209,10 +223,12 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Aave V2 forks deployed on chains using ERC-677 bridged tokens (like Gnosis Chain)...",
+        "VERIFY: Aave V2 forks deployed on chains using ERC-677 bridged tokens (like Gnosis Chain) inherit a callback mechanism not originally accounted...",
+        "PROVE: Attacker creates a position with health factor barely above 1; Wait for interest accrual to push health factor below 1",
         "ANTIPATTERN: Aave V2 fork on Gnosis Chain uses ERC-677 bridged tokens"
       ],
-      "antipattern": "Aave V2 fork on Gnosis Chain uses ERC-677 bridged tokens"
+      "antipattern": "Aave V2 fork on Gnosis Chain uses ERC-677 bridged tokens",
+      "validWhen": "This vulnerability exists because Aave V2 forks deployed on chains using ERC-677 bridged tokens (like Gnosis Chain) inherit a callback mechanism not originally accounted..."
     },
     {
       "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-2-flash-loan-callback-reentran-001",
@@ -233,10 +249,11 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: flash loan function calls back to the borrower BEFORE verifying that the loan has...",
-        "ANTIPATTERN: flash() calls back BEFORE checking repayment"
+        "VERIFY: flash loan function calls back to the borrower BEFORE verifying that the loan has been repaid.",
+        "PROVE: flash() calls back BEFORE checking repayment"
       ],
-      "antipattern": "flash() calls back BEFORE checking repayment"
+      "antipattern": "flash() calls back BEFORE checking repayment",
+      "validWhen": "This vulnerability exists because the flash loan function calls back to the borrower BEFORE verifying that the loan has been repaid."
     },
     {
       "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-3-erc-1155-onerc1155received-r-002",
@@ -257,10 +274,11 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: ERC-1155 token transfers trigger `onERC1155Received()` callbacks on the recipient.",
-        "ANTIPATTERN: ERC-1155 mint triggers onERC1155Received callback"
+        "VERIFY: ERC-1155 token transfers trigger onERC1155Received() callbacks on the recipient.",
+        "PROVE: ERC-1155 mint triggers onERC1155Received callback"
       ],
-      "antipattern": "ERC-1155 mint triggers onERC1155Received callback"
+      "antipattern": "ERC-1155 mint triggers onERC1155Received callback",
+      "validWhen": "This vulnerability exists because ERC-1155 token transfers trigger onERC1155Received() callbacks on the recipient."
     },
     {
       "id": "general-infrastructure-defihacklabs-callback-reentrancy-2022-pa-4-native-eth-avax-receive-reen-003",
@@ -281,10 +299,11 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: native token transfers (ETH, AVAX) trigger the recipient's `receive()` or...",
-        "ANTIPATTERN: StarsArena sends AVAX during share operations"
+        "VERIFY: native token transfers (ETH, AVAX) trigger the recipient's receive() or fallback() function.",
+        "PROVE: StarsArena sends AVAX during share operations"
       ],
-      "antipattern": "StarsArena sends AVAX during share operations"
+      "antipattern": "StarsArena sends AVAX during share operations",
+      "validWhen": "This vulnerability exists because native token transfers (ETH, AVAX) trigger the recipient's receive() or fallback() function."
     },
     {
       "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-1-curve-pool-read-only-reentra-000",
@@ -305,10 +324,12 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Curve's `remove_liquidity()` function sends native ETH to the caller via `raw_call()` **before** updating the pool's internal balances.",
+        "VERIFY: Curve's remove_liquidity() function sends native ETH to the caller via raw_call() before updating the pool's internal balances.",
+        "PROVE: Flash loan massive amounts of ETH/WETH and other assets; Add liquidity to Curve pool (e.g., stETH/ETH) to obtain LP tokens",
         "ANTIPATTERN: dForce reads Curve LP token price via oracle during reentrancy"
       ],
-      "antipattern": "dForce reads Curve LP token price via oracle during reentrancy"
+      "antipattern": "dForce reads Curve LP token price via oracle during reentrancy",
+      "validWhen": "Curve's remove_liquidity() function sends native ETH to the caller via raw_call() before updating the pool's internal balances."
     },
     {
       "id": "general-infrastructure-defihacklabs-readonly-reentrancy-pattern-2-balancer-pool-read-only-reen-001",
@@ -329,10 +350,11 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Balancer's `exitPool()` function sends native ETH to the caller before updating the pool's internal share accounting.",
-        "ANTIPATTERN: Sturdy reads B-stETH-STABLE price from oracle during exitPool callback"
+        "VERIFY: Balancer's exitPool() function sends native ETH to the caller before updating the pool's internal share accounting.",
+        "PROVE: Sturdy reads B-stETH-STABLE price from oracle during exitPool callback"
       ],
-      "antipattern": "Sturdy reads B-stETH-STABLE price from oracle during exitPool callback"
+      "antipattern": "Sturdy reads B-stETH-STABLE price from oracle during exitPool callback",
+      "validWhen": "Balancer's exitPool() function sends native ETH to the caller before updating the pool's internal share accounting."
     },
     {
       "id": "general-infrastructure-defihacklabs-reentrancy-2021-2022-uncove-vulnerable-pattern-examples-002",
@@ -353,10 +375,10 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Severity**: 🔴 CRITICAL | **Loss**: WETH | **Protocol**: N00d Token | **Chain**: Ethereum",
-        "ANTIPATTERN: if (address(masterchef) != address(0) && msg.sender != address(masterchef)) {"
+        "VERIFY: if (address(masterchef) != address(0) && msg.sender != address(masterchef)) {"
       ],
-      "antipattern": "if (address(masterchef) != address(0) && msg.sender != address(masterchef)) {"
+      "antipattern": "if (address(masterchef) != address(0) && msg.sender != address(masterchef)) {",
+      "validWhen": "if (address(masterchef) != address(0) && msg.sender != address(masterchef)) {"
     },
     {
       "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-1-read-only-reentrancy-via-cur-000",
@@ -377,10 +399,12 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Curve pools use ETH transfers (via `call.value()`) during `remove_liquidity()`.",
+        "VERIFY: Curve pools use ETH transfers (via call.value()) during remove_liquidity().",
+        "PROVE: Flash loan massive ETH from 7+ sources (Balancer, Aave, Radiant, UniV3, Sushi x3, Zyber, SwapFlashLoan); Deposit ETH into Curve wstETH/ETH pool → receive LP tokens",
         "ANTIPATTERN: dForce prices wstETHCRV-gauge using Curve virtual price"
       ],
-      "antipattern": "dForce prices wstETHCRV-gauge using Curve virtual price"
+      "antipattern": "dForce prices wstETHCRV-gauge using Curve virtual price",
+      "validWhen": "Curve pools use ETH transfers (via call.value()) during remove_liquidity()."
     },
     {
       "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-2-read-only-reentrancy-via-cur-001",
@@ -402,9 +426,10 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Conic Finance's ETH omnipool used Curve LP tokens as underlying.",
-        "ANTIPATTERN: Conic ETH omnipool prices LP tokens using Curve reserves"
+        "PROVE: Conic ETH omnipool prices LP tokens using Curve reserves"
       ],
-      "antipattern": "Conic ETH omnipool prices LP tokens using Curve reserves"
+      "antipattern": "Conic ETH omnipool prices LP tokens using Curve reserves",
+      "validWhen": "Conic Finance's ETH omnipool used Curve LP tokens as underlying."
     },
     {
       "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-3-balancer-view-reentrancy-via-002",
@@ -426,9 +451,10 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Sentiment protocol used Balancer weighted LP tokens as collateral.",
-        "ANTIPATTERN: Sentiment uses Balancer LP getPrice() as collateral oracle"
+        "PROVE: Sentiment uses Balancer LP getPrice() as collateral oracle"
       ],
-      "antipattern": "Sentiment uses Balancer LP getPrice() as collateral oracle"
+      "antipattern": "Sentiment uses Balancer LP getPrice() as collateral oracle",
+      "validWhen": "Sentiment protocol used Balancer weighted LP tokens as collateral."
     },
     {
       "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-4-fake-token-reentrancy-in-dex-003",
@@ -449,10 +475,11 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Orion Protocol's `swapThroughOrionPool()` function allowed users to specify arbitrary token addresses in the swap path.",
-        "ANTIPATTERN: swapThroughOrionPool allows arbitrary token in path"
+        "VERIFY: Orion Protocol's swapThroughOrionPool() function allowed users to specify arbitrary token addresses in the swap path.",
+        "PROVE: swapThroughOrionPool allows arbitrary token in path"
       ],
-      "antipattern": "swapThroughOrionPool allows arbitrary token in path"
+      "antipattern": "swapThroughOrionPool allows arbitrary token in path",
+      "validWhen": "Orion Protocol's swapThroughOrionPool() function allowed users to specify arbitrary token addresses in the swap path."
     },
     {
       "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-5-native-token-receive-reentra-004",
@@ -473,10 +500,11 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: StarsArena (a social token trading platform on Avalanche) sent AVAX via `call.value()` during share selling.",
-        "ANTIPATTERN: Share selling sends AVAX before updating state"
+        "VERIFY: StarsArena (a social token trading platform on Avalanche) sent AVAX via call.value() during share selling.",
+        "PROVE: Share selling sends AVAX before updating state"
       ],
-      "antipattern": "Share selling sends AVAX before updating state"
+      "antipattern": "Share selling sends AVAX before updating state",
+      "validWhen": "StarsArena (a social token trading platform on Avalanche) sent AVAX via call.value() during share selling."
     },
     {
       "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-6-curve-reentrancy-in-read-onl-005",
@@ -496,10 +524,11 @@
         399
       ],
       "check": [
-        "VERIFY: Sturdy Finance (Aave V2 fork) used Curve stETH LP tokens as collateral, pricing them via Curve's `get_virtual_price()`.",
-        "ANTIPATTERN: Sturdy prices Curve stETH LP using get_virtual_price()"
+        "VERIFY: Sturdy Finance (Aave V2 fork) used Curve stETH LP tokens as collateral, pricing them via Curve's get_virtual_price().",
+        "PROVE: Sturdy prices Curve stETH LP using get_virtual_price()"
       ],
-      "antipattern": "Sturdy prices Curve stETH LP using get_virtual_price()"
+      "antipattern": "Sturdy prices Curve stETH LP using get_virtual_price()",
+      "validWhen": "Sturdy Finance (Aave V2 fork) used Curve stETH LP tokens as collateral, pricing them via Curve's get_virtual_price()."
     },
     {
       "id": "general-infrastructure-defihacklabs-reentrancy-2023-patterns-secure-implementations-006",
@@ -519,9 +548,12 @@
         450
       ],
       "check": [
-        "VERIFY: // ✅ SECURE: Check Curve's reentrancy lock before reading price"
+        "VERIFY: // SECURE: Check Curve's reentrancy lock before reading price",
+        "FALSIFY: Check Curve's reentrancy lock before reading price"
       ],
-      "securePattern": "Check Curve's reentrancy lock before reading price"
+      "securePattern": "Check Curve's reentrancy lock before reading price",
+      "validWhen": "// SECURE: Check Curve's reentrancy lock before reading price",
+      "invalidWhen": "Check Curve's reentrancy lock before reading price"
     },
     {
       "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-1-fake-token-reward-harvesting-000",
@@ -542,10 +574,12 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: When a protocol's batch reward harvesting function iterates over market pools and calls `rewardToken.claimRewards()` on...",
+        "VERIFY: When a protocol's batch reward harvesting function iterates over market pools and calls rewardToken.claimRewards() on each market's SY (Standardized...",
+        "PROVE: Deploy a fake SY token contract with a malicious claimRewards() function; Register the fake SY in a valid Pendle market (through market creation)",
         "ANTIPATTERN: batchHarvestMarketRewards iterates markets calling claimRewards()"
       ],
-      "antipattern": "batchHarvestMarketRewards iterates markets calling claimRewards()"
+      "antipattern": "batchHarvestMarketRewards iterates markets calling claimRewards()",
+      "validWhen": "When a protocol's batch reward harvesting function iterates over market pools and calls rewardToken.claimRewards() on each market's SY (Standardized Yield) token..."
     },
     {
       "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-2-empty-market-phantom-collate-001",
@@ -567,9 +601,11 @@
       "neverPrune": true,
       "check": [
         "VERIFY: In lending protocols, when a market is empty (no existing deposits), the first depositor sets the initial exchange rate.",
+        "PROVE: Flash loan SpookyV2 LP tokens; Deposit exactly 1e18 into the empty PolterFinance lending pool",
         "ANTIPATTERN: No minimum deposit, empty market allows exchange rate manipulation"
       ],
-      "antipattern": "No minimum deposit, empty market allows exchange rate manipulation"
+      "antipattern": "No minimum deposit, empty market allows exchange rate manipulation",
+      "validWhen": "In lending protocols, when a market is empty (no existing deposits), the first depositor sets the initial exchange rate."
     },
     {
       "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-3-erc-3156-flash-loan-callback-002",
@@ -589,10 +625,12 @@
         254
       ],
       "check": [
-        "VERIFY: ERC-3156 flash loans include an `onFlashLoan()` callback to the borrower.",
+        "VERIFY: ERC-3156 flash loans include an onFlashLoan() callback to the borrower.",
+        "PROVE: Request ERC-3156 flash loan from lending protocol; In onFlashLoan() callback: deposit the loaned tokens as collateral",
         "ANTIPATTERN: Lending protocol's deposit() is callable during flash loan callback"
       ],
-      "antipattern": "Lending protocol's deposit() is callable during flash loan callback"
+      "antipattern": "Lending protocol's deposit() is callable during flash loan callback",
+      "validWhen": "ERC-3156 flash loans include an onFlashLoan() callback to the borrower."
     },
     {
       "id": "general-infrastructure-defihacklabs-reentrancy-2024-patterns-4-strategy-callback-reentrancy-003",
@@ -612,10 +650,12 @@
         332
       ],
       "check": [
-        "VERIFY: DEX protocols with customizable strategies allow liquidity providers to register callback hooks (e.",
+        "VERIFY: DEX protocols with customizable strategies allow liquidity providers to register callback hooks (e.g., burnHook, mintHook) that execute when...",
+        "PROVE: Deploy a malicious strategy contract that implements burnHook(); Add liquidity to a DEX pool using the malicious strategy",
         "ANTIPATTERN: burnHook() calls attacker-controlled strategy contract"
       ],
-      "antipattern": "burnHook() calls attacker-controlled strategy contract"
+      "antipattern": "burnHook() calls attacker-controlled strategy contract",
+      "validWhen": "DEX protocols with customizable strategies allow liquidity providers to register callback hooks (e.g., burnHook, mintHook) that execute when positions are modified."
     },
     {
       "id": "general-infrastructure-defihacklabs-reentrancy-patterns-defihacklabs-reentrancy-patter-000",
@@ -637,10 +677,15 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Lending protocol borrows ERC-777 token, triggering receiver hook",
-        "ANTIPATTERN: deposit() calls delegatedTransferERC20() on user-supplied 'from' address"
+        "PROVE: deposit() calls delegatedTransferERC20() on user-supplied 'from' address",
+        "FALSIFY: OpenZeppelin ReentrancyGuard on all state-changing functions",
+        "IMPACT: Direct fund theft: Attacker drains pools by minting unbacked shares or borrowing against same collateral twice"
       ],
       "antipattern": "deposit() calls delegatedTransferERC20() on user-supplied 'from' address",
-      "securePattern": "OpenZeppelin ReentrancyGuard on all state-changing functions"
+      "securePattern": "OpenZeppelin ReentrancyGuard on all state-changing functions",
+      "validWhen": "Lending protocol borrows ERC-777 token, triggering receiver hook",
+      "invalidWhen": "OpenZeppelin ReentrancyGuard on all state-changing functions",
+      "impact": "Direct fund theft: Attacker drains pools by minting unbacked shares or borrowing against same collateral twice"
     },
     {
       "id": "general-infrastructure-reentrancy-vulnerable-code-patterns-001",
@@ -660,8 +705,9 @@
         71
       ],
       "check": [
-        "VERIFY: Reference**: h-13-balancerpairoracle-can-be-manipulated-using-read-only-reentrancy."
-      ]
+        "VERIFY: Reference: h-13-balancerpairoracle-can-be-manipulated-using-read-only-reentrancy."
+      ],
+      "validWhen": "Reference: h-13-balancerpairoracle-can-be-manipulated-using-read-only-reentrancy."
     },
     {
       "id": "general-infrastructure-cross-chain-bridge-vulnerabilities-1-merkle-proof-validation-fail-000",
@@ -682,11 +728,16 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Nomad Bridge Replica contract was incorrectly initialized with `committedRoot = 0x00`.",
-        "ANTIPATTERN: Root can be set by attacker"
+        "VERIFY: Nomad Bridge Replica contract was incorrectly initialized with committedRoot = 0x00.",
+        "PROVE: During a routine upgrade, the committedRoot was mistakenly set to 0x00; The process() function checks acceptableRoot(messages[_messageHash])",
+        "FALSIFY: Always require valid proof",
+        "IMPACT: Total Fund Drainage: All locked bridge funds can be withdrawn"
       ],
       "antipattern": "Root can be set by attacker",
-      "securePattern": "Always require valid proof"
+      "securePattern": "Always require valid proof",
+      "validWhen": "The Nomad Bridge Replica contract was incorrectly initialized with committedRoot = 0x00.",
+      "invalidWhen": "Always require valid proof",
+      "impact": "Total Fund Drainage: All locked bridge funds can be withdrawn"
     },
     {
       "id": "general-infrastructure-cross-chain-bridge-vulnerabilities-2-signature-verification-issue-001",
@@ -707,11 +758,14 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Bridge signature verification may fail to properly validate signer addresses, allow signature reuse, or accept...",
-        "ANTIPATTERN: Same signer can sign multiple times"
+        "VERIFY: Bridge signature verification may fail to properly validate signer addresses, allow signature reuse, or accept malleable signatures.",
+        "PROVE: Same signer can sign multiple times",
+        "FALSIFY: Comprehensive message hashing"
       ],
       "antipattern": "Same signer can sign multiple times",
-      "securePattern": "Comprehensive message hashing"
+      "securePattern": "Comprehensive message hashing",
+      "validWhen": "Bridge signature verification may fail to properly validate signer addresses, allow signature reuse, or accept malleable signatures.",
+      "invalidWhen": "Comprehensive message hashing"
     },
     {
       "id": "general-infrastructure-cross-chain-bridge-vulnerabilities-3-message-validation-bypasses-002",
@@ -732,11 +786,14 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Poly Network's EthCrossChainManager",
-        "ANTIPATTERN: Poly Network's EthCrossChainManager"
+        "VERIFY: EthCrossChainManager contract could relay cross-chain messages to ANY contract, including the privileged EthCrossChainData contract.",
+        "PROVE: Poly Network's EthCrossChainManager",
+        "FALSIFY: Complete source validation"
       ],
       "antipattern": "Poly Network's EthCrossChainManager",
-      "securePattern": "Complete source validation"
+      "securePattern": "Complete source validation",
+      "validWhen": "The EthCrossChainManager contract could relay cross-chain messages to ANY contract, including the privileged EthCrossChainData contract.",
+      "invalidWhen": "Complete source validation"
     },
     {
       "id": "general-infrastructure-cross-chain-bridge-vulnerabilities-4-centralization-key-managemen-003",
@@ -757,11 +814,14 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Low validator/signer thresholds combined with insufficient operational security make key compromise a viable attack...",
-        "ANTIPATTERN: 5 of 9 threshold controlled by one entity"
+        "VERIFY: Low validator/signer thresholds combined with insufficient operational security make key compromise a viable attack vector.",
+        "PROVE: 5 of 9 threshold controlled by one entity",
+        "FALSIFY: Time delays for large withdrawals"
       ],
       "antipattern": "5 of 9 threshold controlled by one entity",
-      "securePattern": "Time delays for large withdrawals"
+      "securePattern": "Time delays for large withdrawals",
+      "validWhen": "Low validator/signer thresholds combined with insufficient operational security make key compromise a viable attack vector.",
+      "invalidWhen": "Time delays for large withdrawals"
     },
     {
       "id": "general-infrastructure-cross-chain-bridge-vulnerabilities-5-token-validation-in-bridge-d-004",
@@ -782,11 +842,14 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Qubit's deposit handler",
-        "ANTIPATTERN: Anyswap's anySwapOutUnderlyingWithPermit"
+        "VERIFY: Qubit bridge handler called safeTransferFrom on address(0) for native token deposits.",
+        "PROVE: Anyswap's anySwapOutUnderlyingWithPermit",
+        "FALSIFY: Validate token implements expected interface"
       ],
       "antipattern": "Anyswap's anySwapOutUnderlyingWithPermit",
-      "securePattern": "Validate token implements expected interface"
+      "securePattern": "Validate token implements expected interface",
+      "validWhen": "The Qubit bridge handler called safeTransferFrom on address(0) for native token deposits.",
+      "invalidWhen": "Validate token implements expected interface"
     },
     {
       "id": "general-infrastructure-cross-chain-bridge-vulnerabilities-6-replay-attacks-across-chains-005",
@@ -807,10 +870,13 @@
       ],
       "check": [
         "VERIFY: Messages signed for one chain or bridge instance can potentially be replayed on another chain or instance if replay...",
+        "FALSIFY: Full EIP-712 domain separation",
         "ANTIPATTERN: Global nonce"
       ],
       "antipattern": "Global nonce",
-      "securePattern": "Full EIP-712 domain separation"
+      "securePattern": "Full EIP-712 domain separation",
+      "validWhen": "Messages signed for one chain or bridge instance can potentially be replayed on another chain or instance if replay...",
+      "invalidWhen": "Full EIP-712 domain separation"
     },
     {
       "id": "general-infrastructure-cross-chain-bridge-vulnerabilities-7-arbitrary-call-vulnerabiliti-006",
@@ -832,10 +898,13 @@
       "neverPrune": true,
       "check": [
         "VERIFY: Bridge aggregators accept user-provided calldata that is executed against arbitrary addresses.",
-        "ANTIPATTERN: ChaingeFinance's swap function"
+        "PROVE: ChaingeFinance's swap function",
+        "FALSIFY: Users don't approve router directly"
       ],
       "antipattern": "ChaingeFinance's swap function",
-      "securePattern": "Users don't approve router directly"
+      "securePattern": "Users don't approve router directly",
+      "validWhen": "Bridge aggregators accept user-provided calldata that is executed against arbitrary addresses.",
+      "invalidWhen": "Users don't approve router directly"
     },
     {
       "id": "general-infrastructure-erc7702-integration-vulnerabilities-understanding-eip-7702-000",
@@ -856,7 +925,8 @@
       ],
       "check": [
         "VERIFY: EIP-7702, introduced with the Ethereum Pectra upgrade, fundamentally changes the EOA/contract distinction that many..."
-      ]
+      ],
+      "validWhen": "EIP-7702, introduced with the Ethereum Pectra upgrade, fundamentally changes the EOA/contract distinction that many..."
     },
     {
       "id": "general-infrastructure-erc7702-integration-vulnerabilities-1-iscontract-extcodesize-logic-001",
@@ -877,14 +947,18 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Smart contracts commonly use `isContract()` checks to determine whether to verify signatures using ECDSA (for EOAs) or...",
+        "VERIFY: Smart contracts commonly use isContract() checks to determine whether to verify signatures using ECDSA (for EOAs) or EIP-1271 isValidSignature() (for...",
+        "PROVE: User has an EOA that uses EIP-7702 to delegate to a smart wallet implementation; User signs a valid ECDSA signature for an order/action",
+        "FALSIFY: Check both ECDSA and EIP-1271 regardless of code presence",
+        "IMPACT: Signature verification logic breaks for EIP-7702 enabled accounts",
         "Verify signature verification handles both ECDSA and EIP-1271",
-        "Check that isContract checks don't gate critical functionality",
-        "Ensure ECDSA is attempted regardless of code presence",
-        "LOOK FOR: isContract(address) checks before signature verification"
+        "Check that isContract checks don't gate critical functionality"
       ],
       "antipattern": "Relies on isContract to choose verification method",
-      "securePattern": "Check both ECDSA and EIP-1271 regardless of code presence"
+      "securePattern": "Check both ECDSA and EIP-1271 regardless of code presence",
+      "validWhen": "Smart contracts commonly use isContract() checks to determine whether to verify signatures using ECDSA (for EOAs) or EIP-1271 isValidSignature() (for contracts).",
+      "invalidWhen": "Check both ECDSA and EIP-1271 regardless of code presence",
+      "impact": "Signature verification logic breaks for EIP-7702 enabled accounts"
     },
     {
       "id": "general-infrastructure-erc7702-integration-vulnerabilities-2-reentrancy-via-eip-7702-dele-002",
@@ -904,14 +978,18 @@
         491
       ],
       "check": [
-        "VERIFY: Protocols that detect EIP-7702 delegated wallets may use low-level `.call` with unlimited gas to send ETH, enabling...",
+        "VERIFY: Protocols that detect EIP-7702 delegated wallets may use low-level .call with unlimited gas to send ETH, enabling complex operations in the...",
+        "PROVE: Attacker sets up an EIP-7702 EOA delegating to malicious contract code; Protocol detects the 7702 delegation and uses .call with unlimited gas to send ETH",
+        "FALSIFY: Limit gas regardless of recipient type",
+        "IMPACT: Reentrancy attacks possible from addresses that appear as EOAs",
         "Verify all external calls are protected by reentrancy guards",
-        "Check that CEI pattern is followed consistently",
-        "Ensure gas limits are appropriate for external calls",
-        "LOOK FOR: .call{value: amount}(\"\") without reentrancy guard"
+        "Check that CEI pattern is followed consistently"
       ],
       "antipattern": "Unlimited gas call to 7702 wallet enables reentrancy",
-      "securePattern": "Limit gas regardless of recipient type"
+      "securePattern": "Limit gas regardless of recipient type",
+      "validWhen": "Protocols that detect EIP-7702 delegated wallets may use low-level .call with unlimited gas to send ETH, enabling complex operations in the recipient's receive/fallback...",
+      "invalidWhen": "Limit gas regardless of recipient type",
+      "impact": "Reentrancy attacks possible from addresses that appear as EOAs"
     },
     {
       "id": "general-infrastructure-erc7702-integration-vulnerabilities-3-missing-token-receiver-callb-003",
@@ -931,14 +1009,18 @@
         662
       ],
       "check": [
-        "VERIFY: EIP-7702 smart wallet implementations that don't implement `IERC721Receiver` and `IERC1155Receiver` interfaces will...",
+        "VERIFY: EIP-7702 smart wallet implementations that don't implement IERC721Receiver and IERC1155Receiver interfaces will fail to receive NFTs via safeTransfer...",
+        "PROVE: User upgrades their EOA to use an EIP-7702 smart wallet delegation; User attempts to receive an NFT via safeTransferFrom",
+        "FALSIFY: Inherit from comprehensive handler",
+        "IMPACT: EIP-7702 enabled wallets cannot receive NFTs via safeTransfer",
         "Verify EIP-7702 delegate contracts implement IERC721Receiver",
-        "Check for IERC1155Receiver implementation",
-        "Ensure supportsInterface returns correct values",
-        "LOOK FOR: Smart wallet implementations without IERC721Receiver"
+        "Check for IERC1155Receiver implementation"
       ],
       "antipattern": "Only implements ERC-721, not ERC-1155",
-      "securePattern": "Inherit from comprehensive handler"
+      "securePattern": "Inherit from comprehensive handler",
+      "validWhen": "EIP-7702 smart wallet implementations that don't implement IERC721Receiver and IERC1155Receiver interfaces will fail to receive NFTs via safeTransfer functions.",
+      "invalidWhen": "Inherit from comprehensive handler",
+      "impact": "EIP-7702 enabled wallets cannot receive NFTs via safeTransfer"
     },
     {
       "id": "general-infrastructure-erc7702-integration-vulnerabilities-4-cross-chain-address-mismatch-004",
@@ -958,14 +1040,18 @@
         813
       ],
       "check": [
-        "VERIFY: Smart contract wallets are deployed using factory contracts with chain-specific parameters (deployment salts, nonces,...",
+        "VERIFY: Smart contract wallets are deployed using factory contracts with chain-specific parameters (deployment salts, nonces, factory addresses).",
+        "PROVE: User Alice uses a Safe wallet at address 0xAAA...111 on Ethereum; Alice bridges tokens to Polygon via a protocol that uses msg.sender as destination",
+        "FALSIFY: User specifies destination address explicitly",
+        "IMPACT: Tokens/assets sent to wrong addresses on destination chains",
         "Verify bridge functions allow explicit destination addresses",
-        "Check that users can specify different addresses per chain",
-        "Ensure proper validation of destination addresses",
-        "LOOK FOR: msg.sender used directly as cross-chain recipient"
+        "Check that users can specify different addresses per chain"
       ],
       "antipattern": "Assumes msg.sender is same on destination chain",
-      "securePattern": "User specifies destination address explicitly"
+      "securePattern": "User specifies destination address explicitly",
+      "validWhen": "Smart contract wallets are deployed using factory contracts with chain-specific parameters (deployment salts, nonces, factory addresses).",
+      "invalidWhen": "User specifies destination address explicitly",
+      "impact": "Tokens/assets sent to wrong addresses on destination chains"
     },
     {
       "id": "general-infrastructure-erc7702-integration-vulnerabilities-5-tx-origin-exploitation-with--005",
@@ -986,14 +1072,18 @@
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Smart wallets like Gnosis Safe accept signed transactions via `execTransaction()` and execute them on behalf of signers.",
+        "VERIFY: Smart wallets like Gnosis Safe accept signed transactions via execTransaction() and execute them on behalf of signers.",
+        "PROVE: User with Smart Wallet signs a transaction to create a dispute game with bond; Transaction is submitted to mempool calling Safe's execTransaction()",
+        "FALSIFY: Use msg.sender for identification",
+        "IMPACT: Rewards/bonds assigned to attackers instead of legitimate users",
         "Search for all tx.origin usages in codebase",
-        "Verify tx.origin is never used for authorization",
-        "Check that benefits/rewards use msg.sender",
-        "LOOK FOR: tx.origin usage for user identification"
+        "Verify tx.origin is never used for authorization"
       ],
       "antipattern": "Rewards go to tx.origin instead of actual caller",
-      "securePattern": "Use msg.sender for identification"
+      "securePattern": "Use msg.sender for identification",
+      "validWhen": "Smart wallets like Gnosis Safe accept signed transactions via execTransaction() and execute them on behalf of signers.",
+      "invalidWhen": "Use msg.sender for identification",
+      "impact": "Rewards/bonds assigned to attackers instead of legitimate users"
     },
     {
       "id": "general-infrastructure-erc7702-integration-vulnerabilities-6-fallback-receive-function-is-006",
@@ -1014,13 +1104,17 @@
       ],
       "check": [
         "VERIFY: EIP-7702 transforms an EOA into what appears to be a smart contract.",
+        "PROVE: Protocol sends ETH to an address using .call{value: amount}(\"\"); Address is an EIP-7702 EOA delegating to implementation without payable fallback",
+        "FALSIFY: Both functions handle ETH properly",
+        "IMPACT: EIP-7702 wallets cannot receive ETH through standard call patterns",
         "Verify EIP-7702 implementations have payable fallback",
-        "Check receive() function exists and is payable",
-        "Test ETH transfers to delegated accounts",
-        "LOOK FOR: fallback() without payable modifier"
+        "Check receive() function exists and is payable"
       ],
       "antipattern": "fallback cannot receive ETH",
-      "securePattern": "Both functions handle ETH properly"
+      "securePattern": "Both functions handle ETH properly",
+      "validWhen": "EIP-7702 transforms an EOA into what appears to be a smart contract.",
+      "invalidWhen": "Both functions handle ETH properly",
+      "impact": "EIP-7702 wallets cannot receive ETH through standard call patterns"
     },
     {
       "id": "general-infrastructure-erc7702-integration-vulnerabilities-7-session-key-impersonation-in-007",
@@ -1040,14 +1134,18 @@
         1227
       ],
       "check": [
-        "VERIFY: When a smart wallet allows multiple active sessions concurrently, the signature validation must ensure that the session...",
+        "VERIFY: When a smart wallet allows multiple active sessions concurrently, the signature validation must ensure that the session key that signed the...",
+        "PROVE: Smart Wallet (SCW) has multiple active session keys (SK1, SK2); SK2 signs a message for the claim() function, but passes SK1 as the sessionKey parameter",
+        "FALSIFY: Extract sessionKey from calldata and verify against signer",
+        "IMPACT: Unauthorized consumption of session key allowances",
         "Verify session key in calldata matches the signing session key",
-        "Check that validateUserOp binds the signer to the operation",
-        "Test with multiple session keys attempting cross-consumption",
-        "LOOK FOR: Session key passed as parameter without verification against signer"
+        "Check that validateUserOp binds the signer to the operation"
       ],
       "antipattern": "claim() uses sessionKey from parameter, not from signer",
-      "securePattern": "Extract sessionKey from calldata and verify against signer"
+      "securePattern": "Extract sessionKey from calldata and verify against signer",
+      "validWhen": "When a smart wallet allows multiple active sessions concurrently, the signature validation must ensure that the session key that signed the transaction is the same one...",
+      "invalidWhen": "Extract sessionKey from calldata and verify against signer",
+      "impact": "Unauthorized consumption of session key allowances"
     },
     {
       "id": "general-infrastructure-erc7702-integration-vulnerabilities-8-nft-permit-function-exploita-008",
@@ -1067,14 +1165,18 @@
         1432
       ],
       "check": [
-        "VERIFY: ERC-4494 adds a `permit()` function to ERC-721, allowing off-chain signed approvals.",
+        "VERIFY: ERC-4494 adds a permit() function to ERC-721, allowing off-chain signed approvals.",
+        "PROVE: Attacker rents an NFT, which is held in their rental safe; Attacker creates a permit signature to approve themselves as spender",
+        "FALSIFY: Check for permit support before accepting NFT",
+        "IMPACT: Bypass of transfer restrictions on held tokens",
         "Check if held NFTs support ERC-4494 (permit)",
-        "Verify isValidSignature blocks dangerous operations",
-        "Test permit() calls from wallet owners on held tokens",
-        "LOOK FOR: Smart wallets implementing EIP-1271 without signature filtering"
+        "Verify isValidSignature blocks dangerous operations"
       ],
       "antipattern": "Wallet owner can sign permit for tokens held by wallet",
-      "securePattern": "Check for permit support before accepting NFT"
+      "securePattern": "Check for permit support before accepting NFT",
+      "validWhen": "ERC-4494 adds a permit() function to ERC-721, allowing off-chain signed approvals.",
+      "invalidWhen": "Check for permit support before accepting NFT",
+      "impact": "Bypass of transfer restrictions on held tokens"
     }
   ]
 }

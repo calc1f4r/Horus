@@ -1,6 +1,6 @@
 ---
 name: db-quality-monitor
-description: 'Monitors, diagnoses, and fixes the full Vulnerability Database pipeline: 4-tier search architecture integrity, manifest generation correctness, hunt card ↔ manifest alignment, TEMPLATE.md compliance, line-range accuracy, protocolContext routing, keyword index fidelity, script health (generate_manifests.py, grep_prune.py, partition_shards.py, merge_shard_findings.py), context delivery quality for downstream agents, and duplicate detection. Can auto-remediate issues by spawning sub-agents for entry fixes, manifest regeneration, and frontmatter patching. Use for periodic DB health checks, CI validation after entry changes, pre-release quality gates, or diagnosing why an audit agent received wrong context.'
+description: 'Monitors, diagnoses, and fixes the full Vulnerability Database pipeline: 4-tier search architecture integrity, manifest generation correctness, hunt card ↔ manifest alignment, TEMPLATE.md compliance, legacy-entry migration, line-range accuracy, protocolContext routing, keyword index fidelity, script health (generate_manifests.py, grep_prune.py, partition_shards.py, merge_shard_findings.py), context delivery quality for downstream agents, and duplicate detection. Can auto-remediate issues by spawning sub-agents for entry fixes, entry migration, manifest regeneration, and frontmatter patching. Use for periodic DB health checks, CI validation after entry changes, pre-release quality gates, or diagnosing why an audit agent received wrong context.'
 tools: [vscode, execute, read, agent, browser, edit, search, todo]
 ---
 
@@ -90,10 +90,15 @@ For each entry, parse the YAML frontmatter block (between `---` delimiters).
 | Field | Valid Values | Check |
 |-------|-------------|-------|
 | `protocol` | Any non-empty string | Present + non-empty |
+| `chain` | Any non-empty string | Present + non-empty |
 | `category` | `oracle`, `reentrancy`, `access_control`, `arithmetic`, etc. | Present + non-empty |
 | `vulnerability_type` | Any non-empty string | Present + non-empty |
+| `root_cause_family` | Any non-empty string | Present + non-empty |
+| `pattern_key` | `<missing control> | <component> | <trigger> | <sink>` | Present + non-empty |
 | `attack_type` | `data_manipulation`, `economic_exploit`, `logical_error`, etc. | Present + non-empty |
 | `affected_component` | Any non-empty string | Present + non-empty |
+| `code_keywords` | YAML list of grep-able identifiers | Present + non-empty list |
+| `primitives` | YAML list | Present + non-empty list |
 | `severity` | `critical`, `high`, `medium`, `low` | Present + valid enum |
 | `impact` | Any non-empty string | Present + non-empty |
 
@@ -101,8 +106,6 @@ For each entry, parse the YAML frontmatter block (between `---` delimiters).
 
 | Field | Validation |
 |-------|-----------|
-| `chain` | Non-empty if present |
-| `primitives` | Must be a YAML list if present |
 | `exploitability` | Float 0.0-1.0 |
 | `financial_impact` | `none`, `low`, `medium`, `high`, `critical` |
 | `tags` | Must be a YAML list if present |
@@ -117,11 +120,17 @@ For each entry, check presence of these sections:
 | Required Section | Detection Method |
 |-----------------|------------------|
 | Vulnerability title | H2 heading (not "Table of Contents", "References", etc.) |
+| References & Source Reports | H2 `References & Source Reports` with at least 1 row or source reference |
 | Overview / Description | Text within 20 lines of first H2, OR H3 "Overview" |
+| Agent Quick View | H4 `Agent Quick View` |
 | Root Cause | H3/H4 containing "Root Cause" or "Fundamental Issue" |
+| Valid Bug Signals | H4 containing `Valid Bug Signals`, `Valid When`, or equivalent |
+| False Positive Guards | H4 containing `False Positive Guards`, `Invalid When`, or equivalent |
+| Path variants | `Path A` / `Path B` labels OR `Attack Scenario / Path Variants` heading where multi-route bugs exist |
 | Vulnerable examples | `❌ VULNERABLE` marker OR code block within "Vulnerable Pattern" section |
 | Secure implementation | `✅ SECURE` marker OR code block within "Secure Implementation" section |
 | Detection patterns | H3 "Detection Patterns" or "Audit Checklist" |
+| High-Signal Grep Seeds | H4 `High-Signal Grep Seeds` OR `code_keywords` frontmatter + grep seed block |
 | Keywords section | H3 "Keywords" with 5+ backtick-delimited terms |
 
 ### 1D: Content Quality Checks
@@ -130,9 +139,11 @@ For each entry, check presence of these sections:
 |-------|----------|----------|
 | Stub detection | File < 50 lines | WARNING |
 | Empty sections | Heading with < 3 lines of content before next heading | WARNING |
+| Legacy template drift | Missing new low-context sections required by current TEMPLATE.md | WARNING |
 | Missing code examples | No code blocks (```...```) in entire file | CRITICAL |
 | Broken internal links | `[text](DB/...)` pointing to non-existent files | CRITICAL |
-| Reference section | Has `## Reference` with at least 1 link | INFO |
+| Weak grep seeds | `code_keywords` missing or filled with generic prose | WARNING |
+| Reference section | Has `## References & Source Reports` or equivalent with at least 1 source | INFO |
 
 ### 1E: Output Table
 
@@ -277,9 +288,12 @@ For each card, check:
 | `cat` | YES | Non-empty list of category tags |
 | `ref` | YES | File path that exists on disk |
 | `lines` | YES | Array of [start, end] where start < end |
-| `check` | RECOMMENDED | List of 1-5 verification steps |
+| `check` | RECOMMENDED | List of 1-6 verification steps |
 | `antipattern` | RECOMMENDED | Non-empty if present |
 | `securePattern` | RECOMMENDED | Non-empty if present |
+| `validWhen` | RECOMMENDED | Non-empty if present; concise reportability rule |
+| `invalidWhen` | RECOMMENDED | Non-empty if present; concise false-positive filter |
+| `impact` | RECOMMENDED | Non-empty if present; concise consequence summary |
 | `neverPrune` | OPTIONAL | Only `true` on CRITICAL/HIGH severity cards |
 
 ### 3D: Grep Pattern Validity
@@ -672,6 +686,7 @@ Switch to **diagnose-and-fix mode**. After each skill completes, immediately rem
 | Orphaned .md files not in manifests | ✅ YES | Regenerate manifests to pick them up, or fix CATEGORY_MAP | Self — terminal + edit |
 | Broken hunt card `ref` paths | ✅ YES | Regenerate manifests (hunt cards are auto-generated) | No — run `python3 generate_manifests.py` |
 | Missing Keywords section | ✅ YES | Spawn `Explore` sub-agent to read entry, then add keywords | Yes — `Explore` for context |
+| Legacy entry missing new low-context sections | ⚠️ CONFIRM | Spawn `variant-template-writer` to migrate to current template | Yes — needs user confirmation |
 | Stub entries (< 50 lines) | ⚠️ CONFIRM | Spawn `variant-template-writer` to expand from reports | Yes — needs user confirmation |
 | Missing vulnerable/secure examples | ⚠️ CONFIRM | Spawn `variant-template-writer` to enrich from reports | Yes — needs user confirmation |
 | Broken internal links | ✅ YES | Update link targets or remove dead links | Self — edit file directly |
@@ -696,15 +711,17 @@ Pattern / Secure Implementation sections exist. Return a structured summary."
 
 Use this before patching frontmatter on entries you haven't read yet.
 
-#### Pattern 2: variant-template-writer for Entry Enrichment
+#### Pattern 2: variant-template-writer for Entry Migration / Enrichment
 
-When an entry is a stub or missing required sections:
+When an entry is a stub, missing required sections, or still follows the legacy template:
 
 ```
 Spawn sub-agent: variant-template-writer
 Prompt: "The entry at DB/<path>.md is missing [sections]. Check reports/<topic>/ for
-source reports that could be used to expand this entry. Enrich the entry following
-TEMPLATE.md structure. Preserve all existing content — only ADD missing sections."
+source reports that could be used to expand this entry. Migrate the entry to the current
+TEMPLATE.md structure using resources/entry-migration-guide.md. Preserve all existing
+evidence-rich content, references, and code examples. Prefer in-place migration over creating
+a duplicate file."
 ```
 
 **Always ask user confirmation before spawning this** — it modifies entry content significantly.
@@ -736,7 +753,7 @@ After regeneration, re-run Skills 2-4 as a **post-regeneration verification** to
 
 ### Fix Ordering Rules
 
-1. **Entry-level fixes first** (Skill 1) — frontmatter, keywords, sections. These change `.md` files.
+1. **Entry-level fixes first** (Skill 1) — frontmatter, keywords, low-context sections, migration. These change `.md` files.
 2. **Regenerate manifests second** (Skill 2) — picks up all entry-level changes.
 3. **Verify downstream** (Skills 3-6) — confirm hunt cards, index, and context delivery are now correct.
 
