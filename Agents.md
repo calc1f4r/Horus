@@ -190,28 +190,39 @@ python3 generate_manifests.py
 
 ## Audit Orchestrator — General Purpose Audit Agent
 
-The `audit-orchestrator` agent (`.github/agents/audit-orchestrator.md`) is the **primary entry point** for auditing an unfamiliar codebase. It takes a codebase path and an optional protocol hint, then runs a 7-phase pipeline using specialized sub-agents.
+The `audit-orchestrator` agent (`.github/agents/audit-orchestrator.md`) is the **primary entry point** for auditing an unfamiliar codebase. It takes a codebase path, an optional protocol hint, and optional flags for pipeline configuration.
 
 ### Invocation
 
 ```
-@audit-orchestrator <codebase-path> [protocol-hint]
+@audit-orchestrator <codebase-path> [protocol-hint] [--static-only] [--judge=sherlock|cantina|code4rena] [--discovery-rounds=N]
 ```
+
+**Flags**:
+- `--static-only` — Skip Phases 6-7 (no PoC generation, no FV execution). Findings confirmed through judging self-loop only.
+- `--judge=X` — Use a single judge instead of all 3. Consensus becomes 1/1.
+- `--discovery-rounds=N` — Number of iterative discovery rounds (default: 2, max: 5). Higher = more cross-pollination.
 
 ### Pipeline
 
 ```
-Phase 1: Reconnaissance      → Protocol detection, scope, manifest resolution
-Phase 2: Context Building     → Sub-agent: audit-context-building
-Phase 3: Invariant Extraction → Sub-agent: invariant-writer
-Phase 3a: Invariant Review    → Sub-agent: invariant-reviewer
-Phase 4: DB-powered Hunting   → Self (grep-prune + partition + merge) + N × Sub-agent: invariant-catcher (parallel shards)
-Phase 4a: Reasoning Discovery  → Sub-agent: protocol-reasoning
-Phase 5: Validation Gaps      → Sub-agent: missing-validation-reasoning
-Phase 6: Triage & PoC         → Self + Sub-agent: poc-writing
-Phase 7: Downstream Gen       → Sub-agents: medusa-fuzzing, certora-verification,
-                                 halmos-verification, sherlock-judging, cantina-judge
-Final:   Report Assembly      → Produces audit-output/AUDIT-REPORT.md
+Phase 1:  Reconnaissance      → Protocol detection, scope, manifest resolution
+Phase 2:  Context Building     → Sub-agent: audit-context-building
+Phase 3:  Invariant Extraction → Sub-agent: invariant-writer (3A) → invariant-reviewer (3B)
+Phase 4:  Iterative Discovery  → N rounds of 4-way parallel fan-out:
+  4A: DB-powered Hunting  → Self (grep-prune + partition) + N × Sub-agent: invariant-catcher
+  4B: Reasoning Discovery → Sub-agent: protocol-reasoning
+  4C: Multi-Persona Audit → Sub-agent: multi-persona-orchestrator (6 personas)
+  4D: Validation Gaps     → Sub-agent: missing-validation-reasoning
+  Between rounds: orchestrator writes discovery-state-round-N.md (cross-pollination bus)
+Phase 5:  Merge & Triage      → Self (cross-source correlation, dedup, falsification, severity)
+Phase 6:  PoC Gen + EXECUTION → [CONDITIONAL] Sub-agent: poc-writing × N → compile → run
+Phase 7:  FV Gen + EXECUTION  → [CONDITIONAL] Sub-agents: medusa-fuzzing, certora-verification,
+                                  halmos-verification → compile → run
+Phase 8:  Pre-Judging         → Judge(s) screen all triaged findings (VALID/INVALID)
+Phase 9:  Issue Polishing      → Sub-agent: issue-writer × N (valid findings only)
+Phase 10: Deep Review          → Same judge(s) do line-by-line verification (CONFIRMED/NEEDS-REVISION/REJECTED)
+Phase 11: Report Assembly     → Produces audit-output/CONFIRMED-REPORT.md
 ```
 
 ### Agent Dependency Graph
@@ -228,51 +239,60 @@ Final:   Report Assembly      → Produces audit-output/AUDIT-REPORT.md
 │ audit-context-   │  │ N × invariant-     │  │ missing-validation-  │
 │ building         │  │ catcher (parallel  │  │ reasoning            │
 └────────┬─────────┘  │ shards)            │  └──────────────────────┘
-         │                                     
+         │            └────────────────────┘
          ▼                                     ┌──────────────────────┐
 ┌──────────────────┐                           │ protocol-reasoning   │
 │ invariant-writer │                           │ (spawns domain       │
 └────────┬─────────┘                           │ sub-agents)          │
          │                                     └──────────────────────┘
-         ▼                                     
-┌──────────────────┐
-│ invariant-       │
-│ reviewer         │
-└────────┬─────────┘
+         ▼
+┌──────────────────┐                           ┌──────────────────────┐
+│ invariant-       │                           │ multi-persona-       │
+│ reviewer         │                           │ orchestrator         │
+└────────┬─────────┘                           │ (spawns 6 personas)  │
+         │                                     └──────────────────────┘
          │
-    ┌────┴─────────┐
-    ▼         ▼     ▼
+    Phase 4 runs iteratively (N rounds)
+    Between rounds: discovery-state-round-N.md cross-pollination
+         │
+    ┌────┴─────┬──────┐  ← [CONDITIONAL: skipped if --static-only]
+    ▼          ▼      ▼
 ┌────────┐ ┌──────┐ ┌────────┐
-│ medusa │ │certora│ │ halmos │
+│ medusa │ │certora│ │ halmos │  ← FV generated AND executed
 │ fuzzing│ │verif. │ │ verif. │
 └────────┘ └──────┘ └────────┘
 
 Post-triage:
-  ├── poc-writing (per CRITICAL/HIGH finding)
-  ├── issue-writer (polishes findings for submission)
-  ├── sherlock-judging (severity validation)
-  └── cantina-judge (severity validation)
+  ├── poc-writing (per CRITICAL/HIGH finding) → EXECUTION [CONDITIONAL]
+  ├── Phase 8: Pre-Judging ────────────────── judge(s) screen validity
+  │   (--judge=X: single judge; default: sherlock + cantina + code4rena)
+  ├── Phase 9: issue-writer (valid findings only)
+  ├── Phase 10: Deep Review ─────────────── same judge(s) line-by-line
+  │   CONFIRMED / NEEDS-REVISION / REJECTED
+  │   NEEDS-REVISION → retry once via Phase 9
+  └── CONFIRMED-REPORT.md
 ```
 
 ### Data Pipeline Producers & Consumers
 
 | Agent | Produces | Consumes |
 |-------|----------|----------|
-| `audit-orchestrator` | `00-scope.md`, `hunt-card-shards.json`, `03-findings-raw.md` (merged), `05-findings-triaged.md`, `AUDIT-REPORT.md` | All outputs |
-| `audit-context-building` | `01-context.md` | Scope |
+| `audit-orchestrator` | `00-scope.md`, `pipeline-state.md`, `hunt-card-shards.json`, `reasoning-seeds.md`, `discovery-state-round-*.md`, `03-findings-raw.md` (merged), `05-findings-triaged.md`, `08-pre-judge-results.md`, `10-deep-review.md`, `CONFIRMED-REPORT.md` | All outputs |
+| `audit-context-building` | `01-context.md`, `context/*.md` | Scope |
 | `invariant-writer` | `02-invariants.md` | Context |
 | `invariant-reviewer` | `02-invariants-reviewed.md` | Invariants, context, DB manifests |
 | `invariant-catcher` (×N shards) | `03-findings-shard-<id>.md` | Shard cards, invariants, target code |
-| `protocol-reasoning` | `04a-reasoning-findings.md` | Context, invariants, raw findings, manifests |
-| `missing-validation-reasoning` | `04-validation-findings.md` | Context |
+| `protocol-reasoning` | `04a-reasoning-findings.md` | Context, invariants, reasoning seeds, manifests |
+| `multi-persona-orchestrator` | `04c-persona-findings.md`, `personas/round-N/*.md`, `personas/shared-knowledge-round-N.md` | Context, invariants |
+| `missing-validation-reasoning` | `04d-validation-findings.md` | Context |
 | `poc-writing` | `pocs/F-NNN-poc.{ext}` | Individual findings |
-| `issue-writer` | Polished submission | Individual findings |
+| `issue-writer` | `issues/F-NNN-issue.md` | Individual findings + PoC results + FV results |
 | `medusa-fuzzing` | `fuzzing/` harnesses | Invariant specs |
 | `certora-verification` | `certora/` specs | Invariant specs |
-| `halmos-verification` | `test/halmos/` symbolic tests | Invariant specs |
-| `sherlock-judging` | `06-sherlock-validation.md` | Triaged findings |
-| `cantina-judge` | `07-cantina-validation.md` | Triaged findings |
-| `multi-persona-orchestrator` | `persona-findings.md`, `personas/round-N/*.md`, `personas/shared-knowledge-round-N.md` | Context (01-context.md), invariants (02-invariants.md) |
+| `halmos-verification` | `halmos/` symbolic tests | Invariant specs |
+| `sherlock-judging` | `08-pre-judge-sherlock.md`, `10-deep-review-sherlock.md` | Triaged findings (Phase 8), polished findings (Phase 10) |
+| `cantina-judge` | `08-pre-judge-cantina.md`, `10-deep-review-cantina.md` | Triaged findings (Phase 8), polished findings (Phase 10) |
+| `code4rena-judge` | `08-pre-judge-code4rena.md`, `10-deep-review-code4rena.md` | Triaged findings (Phase 8), polished findings (Phase 10) |
 | `persona-bfs` (×1 per round) | `personas/round-N/bfs.md` | Scope, shared knowledge, target code |
 | `persona-dfs` (×1 per round) | `personas/round-N/dfs.md` | Scope, shared knowledge, target code |
 | `persona-working-backward` (×1 per round) | `personas/round-N/backward.md` | Scope, shared knowledge, target code |
@@ -287,7 +307,7 @@ Post-triage:
 | `.github/agents/resources/inter-agent-data-format.md` | Standardized data contracts between pipeline phases |
 | `.github/agents/resources/protocol-detection.md` | Auto-classification decision tree for codebases |
 | `.github/agents/resources/audit-report-template.md` | Final report structure and quality checklist |
-| `.github/agents/resources/orchestration-pipeline.md` | 7-phase pipeline with error handling and context budgets |
+| `.github/agents/resources/orchestration-pipeline.md` | 11-phase pipeline with error handling, context budgets, and phase gates |
 | `.github/agents/resources/reasoning-skills.md` | Core reasoning framework for deep vulnerability analysis |
 | `.github/agents/resources/domain-decomposition.md` | Domain decomposition strategy for reasoning agent |
 | `.github/agents/resources/certora-sui-move-reference.md` | CVLM type system, manifest functions, ghosts, shadows, CLI reference for Sui Move |

@@ -19,7 +19,7 @@ Specialized reasoning-based auditor for input validation and hygiene. Focuses on
 When spawned by `audit-orchestrator`:
 1. Read context from `audit-output/01-context.md`
 2. Read invariants from `audit-output/02-invariants.md` (if available)
-3. Write findings to `audit-output/04-validation-findings.md` using the Finding Schema from [inter-agent-data-format.md](resources/inter-agent-data-format.md)
+3. Write findings to `audit-output/04d-validation-findings.md` using the Finding Schema from [inter-agent-data-format.md](resources/inter-agent-data-format.md)
 
 ---
 
