@@ -2,39 +2,17 @@
   "meta": {
     "manifest": "general-security",
     "description": "Compressed hunt cards for general-security — one-line detection rules for bulk scanning",
-    "totalCards": 43,
-    "skipped": 62,
+    "totalCards": 78,
+    "skipped": 75,
     "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 43
+    "enriched": 77
   },
   "cards": [
     {
-      "id": "general-security-access-control-vulnerabilities-vulnerability-categories-001",
-      "title": "Vulnerability Categories",
-      "severity": "LOW",
-      "grep": "initialize|init",
-      "detect": "Functions that should be restricted to admin/owner but are publicly callable.",
-      "cat": [
-        "access-control",
-        "signature",
-        "validation",
-        "input"
-      ],
-      "ref": "DB/general/access-control/access-control-vulnerabilities.md",
-      "lines": [
-        54,
-        77
-      ],
-      "check": [
-        "VERIFY: Functions that should be restricted to admin/owner but are publicly callable."
-      ],
-      "validWhen": "Functions that should be restricted to admin/owner but are publicly callable."
-    },
-    {
-      "id": "general-security-access-control-vulnerabilities-vulnerable-code-patterns-002",
-      "title": "Vulnerable Code Patterns",
+      "id": "general-security-access-control-vulnerabilities-pattern-1-unprotected-mint-bur-001",
+      "title": "Pattern 1: Unprotected Mint/Burn Functions (CRITICAL)",
       "severity": "CRITICAL",
-      "grep": "performAction|emergencyExit|transferFrom|sync|mint|init",
+      "grep": "missing_msg_sender_validation|incorrect_permission_checks|unprotected_initialization|multicall_arbitrary_call|missing_access_modifiers|arbitrary_external_call",
       "detect": "Real Exploit: SafeMoon (2023-03, $8.9M)**",
       "cat": [
         "access-control",
@@ -44,23 +22,23 @@
       ],
       "ref": "DB/general/access-control/access-control-vulnerabilities.md",
       "lines": [
-        78,
-        360
+        80,
+        119
       ],
       "neverPrune": true,
       "check": [
         "VERIFY: Real Exploit: SafeMoon (2023-03, $8.9M)",
-        "PROVE: Checks msg.sender instead of tx.origin or uses weak checks"
+        "PROVE: Anyone can burn tokens from any address"
       ],
-      "antipattern": "Checks msg.sender instead of tx.origin or uses weak checks",
+      "antipattern": "Anyone can burn tokens from any address",
       "validWhen": "Real Exploit: SafeMoon (2023-03, $8.9M)"
     },
     {
-      "id": "general-security-access-control-vulnerabilities-complete-exploit-list-by-year-003",
-      "title": "Complete Exploit List by Year",
-      "severity": "UNKNOWN",
-      "grep": "USDTStakingContract28|MulticallWithXera|MulticallWithETH|UnverifiedContr",
-      "detect": "Complete Exploit List by Year",
+      "id": "general-security-access-control-vulnerabilities-pattern-2-unprotected-initiali-002",
+      "title": "Pattern 2: Unprotected Initialization (CRITICAL)",
+      "severity": "CRITICAL",
+      "grep": "missing_msg_sender_validation|incorrect_permission_checks|unprotected_initialization|multicall_arbitrary_call|missing_access_modifiers|arbitrary_external_call",
+      "detect": "Real Exploit: DAO Maker (2021-09, $4M)**",
       "cat": [
         "access-control",
         "signature",
@@ -69,19 +47,222 @@
       ],
       "ref": "DB/general/access-control/access-control-vulnerabilities.md",
       "lines": [
-        361,
-        468
+        120,
+        160
       ],
+      "neverPrune": true,
       "check": [
-        "VERIFY: Complete Exploit List by Year"
+        "VERIFY: Real Exploit: DAO Maker (2021-09, $4M)",
+        "PROVE: init function can be called by anyone"
       ],
-      "validWhen": "Complete Exploit List by Year"
+      "antipattern": "init function can be called by anyone",
+      "validWhen": "Real Exploit: DAO Maker (2021-09, $4M)"
     },
     {
-      "id": "general-security-defihacklabs-access-control-2021-2022-pa-vulnerable-pattern-examples-002",
-      "title": "Vulnerable Pattern Examples",
+      "id": "general-security-access-control-vulnerabilities-pattern-3-arbitrary-external-c-003",
+      "title": "Pattern 3: Arbitrary External Call (CRITICAL)",
       "severity": "CRITICAL",
-      "grep": "ownerWithdrawAllTo|testExploit|onlyOwner|initialized|initialize|atomic",
+      "grep": "missing_msg_sender_validation|incorrect_permission_checks|unprotected_initialization|multicall_arbitrary_call|missing_access_modifiers|arbitrary_external_call",
+      "detect": "Real Exploit: SocketGateway (2024-01, $3.3M)**",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/access-control-vulnerabilities.md",
+      "lines": [
+        161,
+        213
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Real Exploit: SocketGateway (2024-01, $3.3M)",
+        "PROVE: Performs arbitrary call with user-controlled data"
+      ],
+      "antipattern": "Performs arbitrary call with user-controlled data",
+      "validWhen": "Real Exploit: SocketGateway (2024-01, $3.3M)"
+    },
+    {
+      "id": "general-security-access-control-vulnerabilities-pattern-4-missing-msg-sender-v-004",
+      "title": "Pattern 4: Missing msg.sender Validation (HIGH)",
+      "severity": "HIGH",
+      "grep": "missing_msg_sender_validation|incorrect_permission_checks|unprotected_initialization|multicall_arbitrary_call|missing_access_modifiers|arbitrary_external_call",
+      "detect": "Real Exploit: ChaingeFinance (2024-04, $560K)**",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/access-control-vulnerabilities.md",
+      "lines": [
+        214,
+        263
+      ],
+      "check": [
+        "VERIFY: Real Exploit: ChaingeFinance (2024-04, $560K)",
+        "PROVE: Doesn't verify caller has authority over tokenAddr"
+      ],
+      "antipattern": "Doesn't verify caller has authority over tokenAddr",
+      "validWhen": "Real Exploit: ChaingeFinance (2024-04, $560K)"
+    },
+    {
+      "id": "general-security-access-control-vulnerabilities-pattern-5-unprotected-critical-005",
+      "title": "Pattern 5: Unprotected Critical Parameter Updates (HIGH)",
+      "severity": "CRITICAL",
+      "grep": "missing_msg_sender_validation|incorrect_permission_checks|unprotected_initialization|multicall_arbitrary_call|missing_access_modifiers|arbitrary_external_call",
+      "detect": "Real Exploit: SuperRare (2025-07, $730K)**",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/access-control-vulnerabilities.md",
+      "lines": [
+        264,
+        305
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Real Exploit: SuperRare (2025-07, $730K)",
+        "PROVE: Anyone can update merkle root"
+      ],
+      "antipattern": "Anyone can update merkle root",
+      "validWhen": "Real Exploit: SuperRare (2025-07, $730K)"
+    },
+    {
+      "id": "general-security-access-control-vulnerabilities-pattern-6-unprotected-internal-006",
+      "title": "Pattern 6: Unprotected Internal Functions Made External (HIGH)",
+      "severity": "HIGH",
+      "grep": "_transferFeesSupportingTaxTokens|missing_msg_sender_validation|incorrect_permission_checks|unprotected_initialization|multicall_arbitrary_call|missing_access_modifiers",
+      "detect": "Real Exploit: LeetSwap (2023-08, $630K)**",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/access-control-vulnerabilities.md",
+      "lines": [
+        306,
+        337
+      ],
+      "check": [
+        "VERIFY: Real Exploit: LeetSwap (2023-08, $630K)",
+        "PROVE: Internal helper exposed as external"
+      ],
+      "antipattern": "Internal helper exposed as external",
+      "validWhen": "Real Exploit: LeetSwap (2023-08, $630K)"
+    },
+    {
+      "id": "general-security-access-control-vulnerabilities-pattern-7-mev-bot-access-contr-007",
+      "title": "Pattern 7: MEV Bot Access Control (HIGH)",
+      "severity": "HIGH",
+      "grep": "missing_msg_sender_validation|incorrect_permission_checks|unprotected_initialization|multicall_arbitrary_call|missing_access_modifiers|arbitrary_external_call",
+      "detect": "Real Exploits: Multiple MEV Bots (2023, $2.5M+)**",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/access-control-vulnerabilities.md",
+      "lines": [
+        338,
+        360
+      ],
+      "check": [
+        "VERIFY: Real Exploits: Multiple MEV Bots (2023, $2.5M+)",
+        "PROVE: Checks msg.sender instead of tx.origin or uses weak checks"
+      ],
+      "antipattern": "Checks msg.sender instead of tx.origin or uses weak checks",
+      "validWhen": "Real Exploits: Multiple MEV Bots (2023, $2.5M+)"
+    },
+    {
+      "id": "general-security-access-control-vulnerabilities-fix-3-validate-external-calls-011",
+      "title": "Fix 3: Validate External Calls",
+      "severity": "LOW",
+      "grep": "missing_msg_sender_validation|incorrect_permission_checks|unprotected_initialization|multicall_arbitrary_call|missing_access_modifiers|arbitrary_external_call",
+      "detect": "contract SecureRouter {",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/access-control-vulnerabilities.md",
+      "lines": [
+        515,
+        546
+      ],
+      "check": [
+        "VERIFY: contract SecureRouter {",
+        "FALSIFY: Never allow transferFrom on arbitrary tokens"
+      ],
+      "securePattern": "Never allow transferFrom on arbitrary tokens",
+      "validWhen": "contract SecureRouter {",
+      "invalidWhen": "Never allow transferFrom on arbitrary tokens"
+    },
+    {
+      "id": "general-security-access-control-vulnerabilities-fix-4-validate-msg-sender-auth-012",
+      "title": "Fix 4: Validate msg.sender Authority",
+      "severity": "LOW",
+      "grep": "missing_msg_sender_validation|incorrect_permission_checks|unprotected_initialization|multicall_arbitrary_call|missing_access_modifiers|arbitrary_external_call",
+      "detect": "contract SecureVault {",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/access-control-vulnerabilities.md",
+      "lines": [
+        547,
+        577
+      ],
+      "check": [
+        "VERIFY: contract SecureVault {",
+        "PROVE: Allows operating on any user",
+        "FALSIFY: Only allow operating on own balance"
+      ],
+      "antipattern": "Allows operating on any user",
+      "securePattern": "Only allow operating on own balance",
+      "validWhen": "contract SecureVault {",
+      "invalidWhen": "Only allow operating on own balance"
+    },
+    {
+      "id": "general-security-access-control-vulnerabilities-fix-5-protect-critical-paramet-013",
+      "title": "Fix 5: Protect Critical Parameter Updates",
+      "severity": "CRITICAL",
+      "grep": "missing_msg_sender_validation|incorrect_permission_checks|unprotected_initialization|multicall_arbitrary_call|missing_access_modifiers|arbitrary_external_call",
+      "detect": "contract SecureStaking {",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/access-control-vulnerabilities.md",
+      "lines": [
+        578,
+        616
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: contract SecureStaking {",
+        "FALSIFY: Only admin can update merkle root"
+      ],
+      "securePattern": "Only admin can update merkle root",
+      "validWhen": "contract SecureStaking {",
+      "invalidWhen": "Only admin can update merkle root"
+    },
+    {
+      "id": "general-security-defihacklabs-access-control-2021-2022-pa-pattern-1-missing-access-contr-002",
+      "title": "Pattern 1: Missing Access Control on Owner Withdrawal",
+      "severity": "CRITICAL",
+      "grep": "ownerWithdrawAllTo|approval_abuse|access_control|testExploit|getReserves|onlyOwner",
       "detect": "Severity**: 🔴 CRITICAL | **Loss**: All contract ETH | **Protocol**: FlippazOne | **Chain**: Ethereum",
       "cat": [
         "access-control",
@@ -91,21 +272,233 @@
       ],
       "ref": "DB/general/access-control/defihacklabs-access-control-2021-2022-patterns.md",
       "lines": [
-        162,
+        164,
+        193
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Severity: 🔴 CRITICAL | Loss: All contract ETH | Protocol: FlippazOne | Chain: Ethereum"
+      ]
+    },
+    {
+      "id": "general-security-defihacklabs-access-control-2021-2022-pa-pattern-2-public-burn-address--003",
+      "title": "Pattern 2: Public burn(address) Enables LP Drain",
+      "severity": "CRITICAL",
+      "grep": "approval_abuse|access_control|proxy_reinit|testExploit|getReserves|onlyOwner",
+      "detect": "Severity**: 🔴 CRITICAL | **Loss**: ~$300K | **Protocol**: ShadowFi (SDF) | **Chain**: BSC",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/defihacklabs-access-control-2021-2022-patterns.md",
+      "lines": [
+        194,
+        227
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Severity: 🔴 CRITICAL | Loss: ~$300K | Protocol: ShadowFi (SDF) | Chain: BSC"
+      ]
+    },
+    {
+      "id": "general-security-defihacklabs-access-control-2021-2022-pa-pattern-3-public-mint-without--004",
+      "title": "Pattern 3: Public mint() Without Any Restriction",
+      "severity": "HIGH",
+      "grep": "approval_abuse|access_control|proxy_reinit|testExploit|getReserves|onlyOwner",
+      "detect": "Severity**: 🟠 HIGH | **Loss**: ~$2.5K | **Protocol**: Uerii | **Chain**: Ethereum",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/defihacklabs-access-control-2021-2022-patterns.md",
+      "lines": [
+        228,
+        255
+      ],
+      "check": [
+        "VERIFY: Severity: 🟠 HIGH | Loss: ~$2.5K | Protocol: Uerii | Chain: Ethereum"
+      ]
+    },
+    {
+      "id": "general-security-defihacklabs-access-control-2021-2022-pa-pattern-4-unprotected-proxy-re-005",
+      "title": "Pattern 4: Unprotected Proxy Re-Initialization (Governance Takeover)",
+      "severity": "CRITICAL",
+      "grep": "approval_abuse|access_control|proxy_reinit|testExploit|getReserves|onlyOwner",
+      "detect": "Severity**: 🔴 CRITICAL | **Loss**: 704 ETH (~$1.08M) | **Protocol**: Audius | **Chain**: Ethereum",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/defihacklabs-access-control-2021-2022-patterns.md",
+      "lines": [
+        256,
+        307
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Severity: 🔴 CRITICAL | Loss: 704 ETH (~$1.08M) | Protocol: Audius | Chain: Ethereum"
+      ]
+    },
+    {
+      "id": "general-security-defihacklabs-access-control-2021-2022-pa-pattern-5-missing-approval-che-006",
+      "title": "Pattern 5: Missing Approval Check in ERC-4626 Redeem",
+      "severity": "CRITICAL",
+      "grep": "approval_abuse|access_control|proxy_reinit|testExploit|getReserves|onlyOwner",
+      "detect": "Severity**: 🔴 CRITICAL | **Loss**: ~$1.7M | **Protocol**: ReaperFarm | **Chain**: Fantom",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/defihacklabs-access-control-2021-2022-patterns.md",
+      "lines": [
+        308,
+        337
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Severity: 🔴 CRITICAL | Loss: ~$1.7M | Protocol: ReaperFarm | Chain: Fantom"
+      ]
+    },
+    {
+      "id": "general-security-defihacklabs-access-control-2021-2022-pa-pattern-6-public-function-drai-007",
+      "title": "Pattern 6: Public Function Drains User Approvals",
+      "severity": "CRITICAL",
+      "grep": "DPPFlashLoanCall|approval_abuse|access_control|testExploit|getReserves|onlyOwner",
+      "detect": "Severity**: 🔴 CRITICAL | **Loss**: ~$250K | **Protocol**: ULME | **Chain**: BSC",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/defihacklabs-access-control-2021-2022-patterns.md",
+      "lines": [
+        338,
+        376
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Severity: 🔴 CRITICAL | Loss: ~$250K | Protocol: ULME | Chain: BSC"
+      ]
+    },
+    {
+      "id": "general-security-defihacklabs-access-control-2021-2022-pa-pattern-7-router-swaps-from-ar-008",
+      "title": "Pattern 7: Router Swaps From Arbitrary Address",
+      "severity": "CRITICAL",
+      "grep": "approval_abuse|access_control|proxy_reinit|testExploit|getReserves|onlyOwner",
+      "detect": "Severity**: 🔴 CRITICAL | **Loss**: Variable (18 victims drained) | **Protocol**: GYM Network | **Chain**: BSC",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/defihacklabs-access-control-2021-2022-patterns.md",
+      "lines": [
+        377,
+        421
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Severity: 🔴 CRITICAL | Loss: Variable (18 victims drained) | Protocol: GYM Network | Chain: BSC"
+      ]
+    },
+    {
+      "id": "general-security-defihacklabs-access-control-2021-2022-pa-pattern-8-fake-factory-injecti-009",
+      "title": "Pattern 8: Fake Factory Injection Inflates Swap Mining Rewards",
+      "severity": "HIGH",
+      "grep": "approval_abuse|access_control|proxy_reinit|testExploit|getReserves|onlyOwner",
+      "detect": "Severity**: 🟠 HIGH | **Loss**: BABY token rewards | **Protocol**: BabySwap | **Chain**: BSC",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/defihacklabs-access-control-2021-2022-patterns.md",
+      "lines": [
+        422,
+        467
+      ],
+      "check": [
+        "VERIFY: Severity: 🟠 HIGH | Loss: BABY token rewards | Protocol: BabySwap | Chain: BSC"
+      ]
+    },
+    {
+      "id": "general-security-defihacklabs-access-control-2021-2022-pa-pattern-9-public-nft-burn-allo-010",
+      "title": "Pattern 9: Public NFT _burn() Allows Arbitrary Token Destruction",
+      "severity": "CRITICAL",
+      "grep": "_numNFTPerAddress|approval_abuse|access_control|testExploit|getReserves|onlyOwner",
+      "detect": "Severity**: 🔴 CRITICAL | **Loss**: NFT asset destruction | **Protocol**: The Sandbox Land | **Chain**: Ethereum",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/defihacklabs-access-control-2021-2022-patterns.md",
+      "lines": [
+        468,
         500
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: for (uint256 i = 0; i < victims.length; i++) {"
+        "VERIFY: Severity: 🔴 CRITICAL | Loss: NFT asset destruction | Protocol: The Sandbox Land | Chain: Ethereum"
+      ]
+    },
+    {
+      "id": "general-security-defihacklabs-access-control-2021-2022-pa-static-analysis-013",
+      "title": "Static Analysis",
+      "severity": "LOW",
+      "grep": "unauthorized_mint|unauthorized_burn|approval_abuse|access_control|proxy_reinit|getReserves",
+      "detect": "pattern: \"function.",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
       ],
-      "antipattern": "for (uint256 i = 0; i < victims.length; i++) {",
-      "validWhen": "for (uint256 i = 0; i < victims.length; i++) {"
+      "ref": "DB/general/access-control/defihacklabs-access-control-2021-2022-patterns.md",
+      "lines": [
+        628,
+        655
+      ]
+    },
+    {
+      "id": "general-security-defihacklabs-access-control-2021-2022-pa-invariant-checks-014",
+      "title": "Invariant Checks",
+      "severity": "LOW",
+      "grep": "unauthorized_mint|unauthorized_burn|approval_abuse|access_control|proxy_reinit|getReserves",
+      "detect": "INV-AC-001: Only the contract owner can withdraw contract funds",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/access-control/defihacklabs-access-control-2021-2022-patterns.md",
+      "lines": [
+        656,
+        670
+      ],
+      "check": [
+        "VERIFY: INV-AC-001: Only the contract owner can withdraw contract funds"
+      ],
+      "validWhen": "INV-AC-001: Only the contract owner can withdraw contract funds"
     },
     {
       "id": "general-security-defihacklabs-access-control-2023-pattern-1-public-mint-public-burn-on-t-001",
       "title": "1. Public Mint + Public Burn on Token Contract (SafeMoon $8.9M)",
       "severity": "CRITICAL",
-      "grep": "pancakeCall|pair.sync|doBurnHack|onlyOwner|atomic|sync",
+      "grep": "transferFeesSupportingTaxTokens|unprotected_burnFrom|LockAndClaimToken|_transferFees|DPPFlashLoanCall|testExploit",
       "detect": "SafeMoon's token contract had `mint()` and `burn()` functions that were callable by anyone — no `onlyOwner` or role check.",
       "cat": [
         "access-control",
@@ -131,7 +524,7 @@
       "id": "general-security-defihacklabs-access-control-2023-pattern-2-public-fee-transfer-function-002",
       "title": "2. Public Fee Transfer Function on DEX Pair (LeetSwap $630K)",
       "severity": "HIGH",
-      "grep": "_transferFeesSupportingTaxTokens|testExploit",
+      "grep": "_transferFeesSupportingTaxTokens|transferFeesSupportingTaxTokens|unprotected_burnFrom|LockAndClaimToken|_transferFees|DPPFlashLoanCall",
       "detect": "LeetSwap's pair contract had a public `_transferFeesSupportingTaxTokens()` function that allowed anyone to transfer tokens out of the pair as \"fees\".",
       "cat": [
         "access-control",
@@ -155,7 +548,7 @@
       "id": "general-security-defihacklabs-access-control-2023-pattern-3-aggregator-arbitrary-sender--003",
       "title": "3. Aggregator Arbitrary-Sender Swap (SwapX $1M)",
       "severity": "CRITICAL",
-      "grep": "testExploit|atomic",
+      "grep": "transferFeesSupportingTaxTokens|unprotected_burnFrom|LockAndClaimToken|_transferFees|DPPFlashLoanCall|testExploit",
       "detect": "SwapX aggregator's swap function accepted a `from` address parameter, allowing the caller to initiate swaps using...",
       "cat": [
         "access-control",
@@ -180,7 +573,7 @@
       "id": "general-security-defihacklabs-access-control-2023-pattern-4-token-lock-claim-with-migrat-004",
       "title": "4. Token Lock/Claim with Migration Vulnerability (SHIDO $230K)",
       "severity": "HIGH",
-      "grep": "LockAndClaimToken|DPPFlashLoanCall|atomic",
+      "grep": "transferFeesSupportingTaxTokens|unprotected_burnFrom|LockAndClaimToken|_transferFees|DPPFlashLoanCall|testExploit",
       "detect": "SHIDO's token migration system allowed users to lock SHIDOINU tokens and claim SHIDO tokens.",
       "cat": [
         "access-control",
@@ -204,7 +597,7 @@
       "id": "general-security-defihacklabs-access-control-2023-pattern-5-router-bot-authorization-fai-005",
       "title": "5. Router/Bot Authorization Failures (Maestro $630K, UniBot $84K)",
       "severity": "HIGH",
-      "grep": "atomic|MaestroRouter2|MaestroRouter|Authorization",
+      "grep": "transferFeesSupportingTaxTokens|unprotected_burnFrom|LockAndClaimToken|_transferFees|DPPFlashLoanCall|testExploit",
       "detect": "Trading bot routers (MaestroRouter, UniBot) processed swap transactions on behalf of users but failed to properly...",
       "cat": [
         "access-control",
@@ -225,35 +618,10 @@
       "validWhen": "Trading bot routers (MaestroRouter, UniBot) processed swap transactions on behalf of users but failed to properly verify that the calling address was authorized to..."
     },
     {
-      "id": "general-security-defihacklabs-access-control-2023-pattern-secure-implementations-006",
-      "title": "Secure Implementations",
-      "severity": "UNKNOWN",
-      "grep": "_transferFees|mint|burn",
-      "detect": "// ✅ SECURE: mint/burn restricted to authorized roles",
-      "cat": [
-        "access-control",
-        "signature",
-        "validation",
-        "input"
-      ],
-      "ref": "DB/general/access-control/defihacklabs-access-control-2023-patterns.md",
-      "lines": [
-        395,
-        439
-      ],
-      "check": [
-        "VERIFY: // SECURE: mint/burn restricted to authorized roles",
-        "FALSIFY: Swap function verifies sender matches from-address"
-      ],
-      "securePattern": "Swap function verifies sender matches from-address",
-      "validWhen": "// SECURE: mint/burn restricted to authorized roles",
-      "invalidWhen": "Swap function verifies sender matches from-address"
-    },
-    {
       "id": "general-security-defihacklabs-access-control-2024-2025-1-missing-access-control-on-mo-001",
       "title": "1. Missing Access Control on Module Initialization",
       "severity": "CRITICAL",
-      "grep": "initializeModuleCore|issueNewDs|onlyOwner|onlyAdmin|initializer|atomic",
+      "grep": "missing_onlyOwner|initializeModuleCore|public_mint|onlyMinter|issueNewDs|onlyOwner",
       "detect": "When a protocol's core module initialization function (`initializeModuleCore()`) lacks an access control modifier (e.",
       "cat": [
         "access-control",
@@ -279,7 +647,7 @@
       "id": "general-security-defihacklabs-access-control-2024-2025-2-missing-caller-restriction-o-002",
       "title": "2. Missing Caller Restriction on Core Execution Function",
       "severity": "CRITICAL",
-      "grep": "type(int128).max|velocore__execute|execute|int128|atomic",
+      "grep": "missing_onlyOwner|type(int128).max|velocore__execute|public_mint|onlyMinter|issueNewDs",
       "detect": "When a DEX or AMM exposes an `execute()` function that performs token swaps, liquidity operations, and balance...",
       "cat": [
         "access-control",
@@ -305,7 +673,7 @@
       "id": "general-security-defihacklabs-access-control-2024-2025-3-public-mint-function-on-coll-003",
       "title": "3. Public Mint Function on Collateral Token",
       "severity": "CRITICAL",
-      "grep": "onlyMinter|onlyOwner|mint",
+      "grep": "missing_access_control|missing_onlyOwner|initializeModuleCore|velocore__execute|public_mint|onlyMinter",
       "detect": "When a protocol's collateral token contract exposes a `mint()` function without an `onlyOwner` or `onlyMinter`...",
       "cat": [
         "access-control",
@@ -331,7 +699,7 @@
       "id": "general-security-defihacklabs-access-control-2024-2025-4-unverified-contract-with-ext-004",
       "title": "4. Unverified Contract with External Transfer Proxy",
       "severity": "CRITICAL",
-      "grep": "atomic|USDTBalance|ITarget|Destination",
+      "grep": "missing_access_control|missing_onlyOwner|initializeModuleCore|public_mint|onlyMinter|issueNewDs",
       "detect": "Unverified (non-open-source) contracts on blockchain explorers can hide malicious or vulnerable logic.",
       "cat": [
         "access-control",
@@ -356,7 +724,7 @@
       "id": "general-security-defihacklabs-access-control-2024-2025-5-missing-msg-sender-validatio-005",
       "title": "5. Missing msg.sender Validation in Pool Exit",
       "severity": "CRITICAL",
-      "grep": "exitPool|atomic",
+      "grep": "missing_access_control|missing_onlyOwner|initializeModuleCore|public_mint|onlyMinter|issueNewDs",
       "detect": "When a liquidity pool's `exitPool()` function accepts a `user` parameter to specify whose liquidity to withdraw but...",
       "cat": [
         "access-control",
@@ -382,7 +750,7 @@
       "id": "general-security-defihacklabs-access-control-patterns-1-unprotected-token-mint-burn-001",
       "title": "1. Unprotected Token Mint / Burn",
       "severity": "CRITICAL",
-      "grep": "bridgeBurnAddress|uniswapV2Pair|doBurnHack|onlyOwner|onlyRole|atomic",
+      "grep": "bridgeBurnAddress|uniswapV2Pair|doBurnHack|onlyOwner|onlyRole|setPool",
       "detect": "When ERC20 token contracts expose `mint()` and `burn()` functions without access control modifiers (`onlyOwner`,...",
       "cat": [
         "access-control",
@@ -408,7 +776,7 @@
       "id": "general-security-defihacklabs-access-control-patterns-2-unprotected-migration-functi-002",
       "title": "2. Unprotected Migration Function",
       "severity": "CRITICAL",
-      "grep": "migrateWithdraw|migrateStake|oldStaking|atomic",
+      "grep": "missing_onlyOwner|migrateWithdraw|migrateStake|oldStaking|SafeMoon|setPool",
       "detect": "When staking or vault contracts implement `migrateStake()` functions for protocol upgrades, these functions must be...",
       "cat": [
         "access-control",
@@ -433,7 +801,7 @@
       "id": "general-security-defihacklabs-access-control-patterns-3-unprotected-configuration-se-003",
       "title": "3. Unprotected Configuration Setter",
       "severity": "HIGH",
-      "grep": "setRewardToken|setToken|setPool|withdraw|stake",
+      "grep": "missing_onlyOwner|unprotected_mint|setRewardToken|setToken|SafeMoon|setPool",
       "detect": "When staking or reward contracts expose configuration functions like `setToken()`, `setRewardToken()`, or `setPool()`...",
       "cat": [
         "access-control",
@@ -457,7 +825,7 @@
       "id": "general-security-defihacklabs-access-control-patterns-4-missing-token-registry-valid-004",
       "title": "4. Missing Token Registry Validation",
       "severity": "HIGH",
-      "grep": "underlying|redeem|expiry|atomic|burn",
+      "grep": "missing_onlyOwner|unprotected_mint|unprotected_burn|SafeMoon|underlying|setPool",
       "detect": "When bond teller or similar contracts accept a `token` parameter in `redeem()` without validating that it is a...",
       "cat": [
         "access-control",
@@ -478,32 +846,10 @@
       "validWhen": "When bond teller or similar contracts accept a token parameter in redeem() without validating that it is a legitimately issued bond token, an attacker can deploy a fake..."
     },
     {
-      "id": "general-security-arbitrary-external-call-vulnerabilities-vulnerability-categories-001",
-      "title": "Vulnerability Categories",
-      "severity": "LOW",
-      "grep": "Vulnerabilities|Unvalidated|Exploiting|Categories",
-      "detect": "Contract allows user to specify any target address for `.call()`.",
-      "cat": [
-        "access-control",
-        "signature",
-        "validation",
-        "input"
-      ],
-      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
-      "lines": [
-        62,
-        83
-      ],
-      "check": [
-        "VERIFY: Contract allows user to specify any target address for .call()."
-      ],
-      "validWhen": "Contract allows user to specify any target address for .call()."
-    },
-    {
-      "id": "general-security-arbitrary-external-call-vulnerabilities-vulnerable-pattern-examples-002",
-      "title": "Vulnerable Pattern Examples",
+      "id": "general-security-arbitrary-external-call-vulnerabilities-example-1-router-with-unvalida-001",
+      "title": "Example 1: Router with Unvalidated External Call [CRITICAL]",
       "severity": "CRITICAL",
-      "grep": "routerCallNative|performAction|executeRoute|router|attack",
+      "grep": "token_approval_exploit|transferFrom_abuse|external_call_handler|unvalidated_calldata|unvalidated_target|router_aggregator",
       "detect": "User controls both 'router' and '_data' (calldata)",
       "cat": [
         "access-control",
@@ -513,22 +859,374 @@
       ],
       "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
       "lines": [
-        84,
-        759
+        86,
+        161
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: User controls both 'router' and '_data' (calldata)",
-        "PROVE: Route allows arbitrary external call via swapExtraData"
+        "VERIFY: User controls both 'router' and '_data' (calldata)"
+      ],
+      "antipattern": "User controls both 'router' and '_data' (calldata)",
+      "validWhen": "User controls both 'router' and '_data' (calldata)"
+    },
+    {
+      "id": "general-security-arbitrary-external-call-vulnerabilities-example-2-socket-gateway-arbit-002",
+      "title": "Example 2: Socket Gateway Arbitrary Route Execution [CRITICAL]",
+      "severity": "CRITICAL",
+      "grep": "token_approval_exploit|transferFrom_abuse|external_call_handler|unvalidated_calldata|unvalidated_target|router_aggregator",
+      "detect": "Route allows arbitrary external call via swapExtraData",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
+      "lines": [
+        162,
+        234
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Route allows arbitrary external call via swapExtraData"
       ],
       "antipattern": "Route allows arbitrary external call via swapExtraData",
-      "validWhen": "User controls both 'router' and '_data' (calldata)"
+      "validWhen": "Route allows arbitrary external call via swapExtraData"
+    },
+    {
+      "id": "general-security-arbitrary-external-call-vulnerabilities-example-3-sushiswap-routeproce-003",
+      "title": "Example 3: SushiSwap RouteProcessor Unchecked User Input [CRITICAL]",
+      "severity": "CRITICAL",
+      "grep": "IUniswapV3Pool.swap|token_approval_exploit|uniswapV3SwapCallback|transferFrom_abuse|external_call_handler|unvalidated_calldata",
+      "detect": "User controls 'route' parameter encoding pool address",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
+      "lines": [
+        235,
+        300
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: User controls 'route' parameter encoding pool address"
+      ],
+      "antipattern": "User controls 'route' parameter encoding pool address",
+      "validWhen": "User controls 'route' parameter encoding pool address"
+    },
+    {
+      "id": "general-security-arbitrary-external-call-vulnerabilities-example-4-seneca-cdp-chamber-a-004",
+      "title": "Example 4: Seneca CDP Chamber Arbitrary Operation [CRITICAL]",
+      "severity": "CRITICAL",
+      "grep": "token_approval_exploit|transferFrom_abuse|external_call_handler|unvalidated_calldata|_performOperation|unvalidated_target",
+      "detect": "OPERATION_CALL allows arbitrary external calls",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
+      "lines": [
+        301,
+        374
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: OPERATION_CALL allows arbitrary external calls",
+        "PROVE: Decodes and executes arbitrary call from 'data'"
+      ],
+      "antipattern": "Decodes and executes arbitrary call from 'data'",
+      "validWhen": "OPERATION_CALL allows arbitrary external calls"
+    },
+    {
+      "id": "general-security-arbitrary-external-call-vulnerabilities-example-5-dexible-self-swap-ar-005",
+      "title": "Example 5: Dexible Self-Swap Arbitrary Router [HIGH]",
+      "severity": "HIGH",
+      "grep": "token_approval_exploit|transferFrom_abuse|external_call_handler|unvalidated_calldata|unvalidated_target|router_aggregator",
+      "detect": "'router' and 'routerData' are user-controlled",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
+      "lines": [
+        375,
+        442
+      ],
+      "check": [
+        "VERIFY: 'router' and 'routerData' are user-controlled"
+      ],
+      "antipattern": "'router' and 'routerData' are user-controlled",
+      "validWhen": "'router' and 'routerData' are user-controlled"
+    },
+    {
+      "id": "general-security-arbitrary-external-call-vulnerabilities-example-6-lifi-protocol-swapda-006",
+      "title": "Example 6: LiFi Protocol SwapData Exploitation [CRITICAL]",
+      "severity": "CRITICAL",
+      "grep": "token_approval_exploit|transferFrom_abuse|external_call_handler|unvalidated_calldata|depositToGasZipERC20|unvalidated_target",
+      "detect": "SwapData allows arbitrary callTo and callData",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
+      "lines": [
+        443,
+        506
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: SwapData allows arbitrary callTo and callData"
+      ],
+      "antipattern": "SwapData allows arbitrary callTo and callData",
+      "validWhen": "SwapData allows arbitrary callTo and callData"
+    },
+    {
+      "id": "general-security-arbitrary-external-call-vulnerabilities-example-7-unibot-maestro-route-007",
+      "title": "Example 7: UniBot/Maestro Router Callback Exploitation [HIGH]",
+      "severity": "HIGH",
+      "grep": "token_approval_exploit|transferFrom_abuse|external_call_handler|unvalidated_calldata|vulnerableFunction|unvalidated_target",
+      "detect": "Function allows arbitrary calldata execution",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
+      "lines": [
+        507,
+        561
+      ],
+      "check": [
+        "VERIFY: Function allows arbitrary calldata execution"
+      ],
+      "antipattern": "Function allows arbitrary calldata execution",
+      "validWhen": "Function allows arbitrary calldata execution"
+    },
+    {
+      "id": "general-security-arbitrary-external-call-vulnerabilities-example-8-chaingefin-ance-brid-008",
+      "title": "Example 8: ChaingeFin ance Bridge Swap Exploitation [HIGH]",
+      "severity": "HIGH",
+      "grep": "token_approval_exploit|transferFrom_abuse|external_call_handler|unvalidated_calldata|unvalidated_target|router_aggregator",
+      "detect": "swap() allows arbitrary external call via callData",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
+      "lines": [
+        562,
+        637
+      ],
+      "check": [
+        "VERIFY: swap() allows arbitrary external call via callData"
+      ],
+      "antipattern": "swap() allows arbitrary external call via callData",
+      "validWhen": "swap() allows arbitrary external call via callData"
+    },
+    {
+      "id": "general-security-arbitrary-external-call-vulnerabilities-example-9-cowswap-swapguard-en-009",
+      "title": "Example 9: CowSwap SwapGuard Envelope [MEDIUM]",
+      "severity": "MEDIUM",
+      "grep": "token_approval_exploit|transferFrom_abuse|external_call_handler|unvalidated_calldata|unvalidated_target|router_aggregator",
+      "detect": "envelope() allows batch arbitrary calls",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
+      "lines": [
+        638,
+        673
+      ],
+      "check": [
+        "VERIFY: envelope() allows batch arbitrary calls",
+        "PROVE: Executes each interaction without validation"
+      ],
+      "antipattern": "Executes each interaction without validation",
+      "validWhen": "envelope() allows batch arbitrary calls"
+    },
+    {
+      "id": "general-security-arbitrary-external-call-vulnerabilities-example-10-bmi-zapper-aggregat-010",
+      "title": "Example 10: BMI Zapper Aggregator Data [MEDIUM]",
+      "severity": "MEDIUM",
+      "grep": "token_approval_exploit|transferFrom_abuse|external_call_handler|unvalidated_calldata|unvalidated_target|router_aggregator",
+      "detect": "_aggregator and _aggregatorData are user-controlled",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
+      "lines": [
+        674,
+        704
+      ],
+      "check": [
+        "VERIFY: _aggregator and _aggregatorData are user-controlled"
+      ],
+      "antipattern": "_aggregator and _aggregatorData are user-controlled",
+      "validWhen": "_aggregator and _aggregatorData are user-controlled"
+    },
+    {
+      "id": "general-security-arbitrary-external-call-vulnerabilities-example-11-olympusdao-bond-red-011",
+      "title": "Example 11: OlympusDAO Bond Redeem with Fake Token [HIGH]",
+      "severity": "HIGH",
+      "grep": "token_approval_exploit|transferFrom_abuse|external_call_handler|unvalidated_calldata|unvalidated_target|router_aggregator",
+      "detect": "No validation that token_ is legitimate",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
+      "lines": [
+        705,
+        759
+      ],
+      "check": [
+        "VERIFY: No validation that token_ is legitimate"
+      ],
+      "antipattern": "No validation that token_ is legitimate",
+      "validWhen": "No validation that token_ is legitimate"
+    },
+    {
+      "id": "general-security-arbitrary-external-call-vulnerabilities-fix-1-target-address-whitelist-012",
+      "title": "Fix 1: Target Address Whitelist",
+      "severity": "LOW",
+      "grep": "token_approval_exploit|transferFrom_abuse|external_call_handler|unvalidated_calldata|addWhitelistedRouter|unvalidated_target",
+      "detect": "// ✅ SECURE: Only allow calls to whitelisted addresses",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
+      "lines": [
+        762,
+        778
+      ],
+      "check": [
+        "VERIFY: // SECURE: Only allow calls to whitelisted addresses",
+        "FALSIFY: Only allow calls to whitelisted addresses"
+      ],
+      "securePattern": "Only allow calls to whitelisted addresses",
+      "validWhen": "// SECURE: Only allow calls to whitelisted addresses",
+      "invalidWhen": "Only allow calls to whitelisted addresses"
+    },
+    {
+      "id": "general-security-arbitrary-external-call-vulnerabilities-fix-2-function-selector-whitel-013",
+      "title": "Fix 2: Function Selector Whitelist",
+      "severity": "LOW",
+      "grep": "token_approval_exploit|transferFrom_abuse|external_call_handler|unvalidated_calldata|unvalidated_target|router_aggregator",
+      "detect": "// ✅ SECURE: Only allow specific function selectors",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
+      "lines": [
+        779,
+        795
+      ],
+      "check": [
+        "VERIFY: // SECURE: Only allow specific function selectors",
+        "FALSIFY: Only allow specific function selectors"
+      ],
+      "securePattern": "Only allow specific function selectors",
+      "validWhen": "// SECURE: Only allow specific function selectors",
+      "invalidWhen": "Only allow specific function selectors"
+    },
+    {
+      "id": "general-security-arbitrary-external-call-vulnerabilities-critical-exploits-1m-019",
+      "title": "Critical Exploits ($1M+)",
+      "severity": "CRITICAL",
+      "grep": "token_approval_exploit|transferFrom_abuse|external_call_handler|unvalidated_calldata|unvalidated_target|router_aggregator",
+      "detect": "Critical Exploits ($1M+)",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
+      "lines": [
+        916,
+        929
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Critical Exploits ($1M+)"
+      ],
+      "validWhen": "Critical Exploits ($1M+)"
+    },
+    {
+      "id": "general-security-arbitrary-external-call-vulnerabilities-high-severity-exploits-100k-1m-020",
+      "title": "High-Severity Exploits ($100K-$1M)",
+      "severity": "HIGH",
+      "grep": "token_approval_exploit|transferFrom_abuse|external_call_handler|unvalidated_calldata|unvalidated_target|router_aggregator",
+      "detect": "High-Severity Exploits ($100K-$1M)",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
+      "lines": [
+        930,
+        942
+      ],
+      "check": [
+        "VERIFY: High-Severity Exploits ($100K-$1M)"
+      ],
+      "validWhen": "High-Severity Exploits ($100K-$1M)"
+    },
+    {
+      "id": "general-security-arbitrary-external-call-vulnerabilities-medium-severity-exploits-100k-021",
+      "title": "Medium-Severity Exploits (<$100K)",
+      "severity": "MEDIUM",
+      "grep": "token_approval_exploit|transferFrom_abuse|external_call_handler|unvalidated_calldata|unvalidated_target|router_aggregator",
+      "detect": "Medium-Severity Exploits (<$100K)",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md",
+      "lines": [
+        943,
+        958
+      ],
+      "check": [
+        "VERIFY: Medium-Severity Exploits (<$100K)"
+      ],
+      "validWhen": "Medium-Severity Exploits (<$100K)"
     },
     {
       "id": "general-security-defihacklabs-arbitrary-call-2024-2025-1-unvalidated-callto-calldata--001",
       "title": "1. Unvalidated callTo/callData in Swap/Route Structs",
       "severity": "CRITICAL",
-      "grep": "transferFrom|getRouteData|getCallData|callData|callTo|atomic",
+      "grep": "unvalidated_callTo|arbitrary_call|transferFrom|getRouteData|getCallData|executeSwap",
       "detect": "Many DeFi protocols (routers, aggregators, bridges) accept user-supplied swap instructions containing a `callTo`...",
       "cat": [
         "access-control",
@@ -554,7 +1252,7 @@
       "id": "general-security-defihacklabs-arbitrary-call-2024-2025-2-unrestricted-external-call-a-002",
       "title": "2. Unrestricted External Call Actions (OPERATION_CALL)",
       "severity": "CRITICAL",
-      "grep": "OPERATION_CALL|transferFrom",
+      "grep": "unvalidated_callData|unvalidated_callTo|OPERATION_CALL|arbitrary_call|transferFrom|getCallData",
       "detect": "Multi-action contracts (like Kashi/Chamberss) implement an `OPERATION_CALL` action type that allows calling arbitrary...",
       "cat": [
         "access-control",
@@ -579,7 +1277,7 @@
       "id": "general-security-defihacklabs-arbitrary-call-2024-2025-3-bridge-signer-validation-byp-003",
       "title": "3. Bridge Signer Validation Bypass",
       "severity": "CRITICAL",
-      "grep": "withdraw|atomic",
+      "grep": "transferFrom_injection|unvalidated_callData|unvalidated_callTo|arbitrary_call|getCallData|executeSwap",
       "detect": "Cross-chain bridges use multi-signature validation on withdrawal requests — requiring N of M authorized validators to...",
       "cat": [
         "access-control",
@@ -604,7 +1302,7 @@
       "id": "general-security-defihacklabs-arbitrary-call-2024-2025-4-yul-integer-overflow-calldat-004",
       "title": "4. Yul Integer Overflow Calldata Corruption",
       "severity": "CRITICAL",
-      "grep": "interactionLength|atomic|add",
+      "grep": "unvalidated_callData|unvalidated_callTo|interactionLength|arbitrary_call|getCallData|executeSwap",
       "detect": "Contracts using Yul assembly for calldata manipulation are vulnerable to integer overflow, as Yul's `add()` opcode does...",
       "cat": [
         "access-control",
@@ -629,7 +1327,7 @@
       "id": "general-security-defihacklabs-arbitrary-call-2024-2025-5-unverified-aggregator-proxy--005",
       "title": "5. Unverified Aggregator Proxy Forwarding",
       "severity": "CRITICAL",
-      "grep": "atomic|aggregator_proxy|transferFrom|startPrank",
+      "grep": "transferFrom_injection|unvalidated_callData|unvalidated_callTo|arbitrary_call|getCallData|executeSwap",
       "detect": "Trade aggregator proxies that accept raw calldata and forward it to external contracts create a universal call gadget.",
       "cat": [
         "access-control",
@@ -654,7 +1352,7 @@
       "id": "general-security-defihacklabs-arbitrary-call-patterns-1-unvalidated-router-address-c-001",
       "title": "1. Unvalidated Router Address + Calldata in Swap Functions",
       "severity": "CRITICAL",
-      "grep": "router.call(data|routerCallNative|balanceOf|calldata|router|atomic",
+      "grep": "router.call(data|routerCallNative|balanceOf|addRouter|ACOWriter|BrahTOPG",
       "detect": "Swap aggregator and cross-chain proxy contracts often need to interact with multiple DEX routers.",
       "cat": [
         "access-control",
@@ -680,7 +1378,7 @@
       "id": "general-security-defihacklabs-arbitrary-call-patterns-2-additional-arbitrary-call-pa-002",
       "title": "2. Additional Arbitrary Call Patterns (2022)",
       "severity": "CRITICAL",
-      "grep": "mintToPayable|balanceOf|collateral|atomic",
+      "grep": "arbitrary_call|mintToPayable|balanceOf|addRouter|ACOWriter|BrahTOPG",
       "detect": "write() accepts arbitrary callData and executes it",
       "cat": [
         "access-control",
@@ -705,7 +1403,7 @@
       "id": "general-security-dex-aggregator-unvalidated-call-data-root-cause-analysis-001",
       "title": "Root Cause Analysis",
       "severity": "HIGH",
-      "grep": "swapExactTokensForETH|remaining_accounts|claimRewards|fromToken|toToken",
+      "grep": "swapExactTokensForETH|liquidation_callback|reentrancy_via_swap|remaining_accounts|unvalidated_bytes|prism_aggregator",
       "detect": "The protocol calls a DEX aggregator as part of a liquidation or position-close flow, passing user-supplied `bytes...",
       "cat": [
         "access-control",
@@ -727,7 +1425,7 @@
       "id": "general-security-dex-aggregator-unvalidated-call-data-vulnerable-pattern-examples-003",
       "title": "Vulnerable Pattern Examples",
       "severity": "HIGH",
-      "grep": "_directDepositIntoVault|performActionWithOneInch|liquidatePosition|liquidate",
+      "grep": "dex_aggregator_integration|_directDepositIntoVault|performActionWithOneInch|liquidation_callback|reentrancy_via_swap|unvalidated_bytes",
       "detect": "attacker controls dexTxnData — can encode swapExactTokensForETH",
       "cat": [
         "access-control",
@@ -747,11 +1445,11 @@
       "validWhen": "attacker controls dexTxnData — can encode swapExactTokensForETH"
     },
     {
-      "id": "general-security-missing-validation-template-vulnerability-pattern-categori-001",
-      "title": "VULNERABILITY PATTERN CATEGORIES",
-      "severity": "UNKNOWN",
-      "grep": "executeOnAdapter|setFeeCollector|callExternal|address(0|initialize",
-      "detect": "No zero address check",
+      "id": "general-security-missing-validation-template-2-numeric-bounds-validation-pa-002",
+      "title": "2. NUMERIC BOUNDS VALIDATION PATTERNS",
+      "severity": "LOW",
+      "grep": "state_verification|setVestingDuration|parameter_checking|bounds_enforcement|distributeRewards|validation_logic",
+      "detect": "Fee can exceed 100%",
       "cat": [
         "access-control",
         "signature",
@@ -760,46 +1458,76 @@
       ],
       "ref": "DB/general/missing-validations/MISSING_VALIDATION_TEMPLATE.md",
       "lines": [
-        53,
-        622
+        156,
+        289
       ],
       "check": [
-        "VERIFY: No zero address check",
-        "PROVE: No length check, division by zero possible",
-        "FALSIFY: Full relationship validation",
-        "IMPACT: Silent failures, unexpected behavior, delegatecall to EOA"
+        "VERIFY: No length check, division by zero possible",
+        "IMPACT: Division by zero, out-of-bounds access, gas DOS"
       ],
       "antipattern": "No length check, division by zero possible",
-      "securePattern": "Full relationship validation",
-      "validWhen": "No zero address check",
-      "invalidWhen": "Full relationship validation",
-      "impact": "Silent failures, unexpected behavior, delegatecall to EOA"
+      "securePattern": "Utilization check",
+      "validWhen": "No length check, division by zero possible",
+      "impact": "Division by zero, out-of-bounds access, gas DOS"
     },
     {
-      "id": "general-security-defihacklabs-input-validation-patterns-agent-quick-view-000",
-      "title": "Agent Quick View",
-      "severity": "CRITICAL",
-      "grep": "missing_validation|single_contract",
-      "detect": "Agent Quick View",
+      "id": "general-security-missing-validation-template-5-signature-nonce-validation-p-005",
+      "title": "5. SIGNATURE & NONCE VALIDATION PATTERNS",
+      "severity": "LOW",
+      "grep": "executeWithSignature|state_verification|parameter_checking|bounds_enforcement|validation_logic|input_validation",
+      "detect": "Nonce not validated before use",
       "cat": [
         "access-control",
         "signature",
         "validation",
         "input"
       ],
-      "ref": "DB/general/missing-validations/defihacklabs-input-validation-patterns.md",
+      "ref": "DB/general/missing-validations/MISSING_VALIDATION_TEMPLATE.md",
       "lines": [
-        96,
-        107
+        520,
+        574
       ],
-      "neverPrune": true,
       "check": [
-        "VERIFY: Pattern Key | missing_input_validation | external_functions | parameter_manipulation | fund_loss"
+        "VERIFY: Nonce not validated before use",
+        "FALSIFY: Proper nonce validation",
+        "IMPACT: Transaction replay attacks, duplicate operations"
       ],
-      "validWhen": "Pattern Key | missing_input_validation | external_functions | parameter_manipulation | fund_loss"
+      "antipattern": "Nonce not validated before use",
+      "securePattern": "Proper nonce validation",
+      "validWhen": "Nonce not validated before use",
+      "invalidWhen": "Proper nonce validation",
+      "impact": "Transaction replay attacks, duplicate operations"
     },
     {
-      "id": "general-security-defihacklabs-input-validation-patterns-vulnerable-pattern-examples-002",
+      "id": "general-security-missing-validation-template-6-oracle-external-data-validat-006",
+      "title": "6. ORACLE & EXTERNAL DATA VALIDATION PATTERNS",
+      "severity": "LOW",
+      "grep": "state_verification|parameter_checking|bounds_enforcement|validation_logic|input_validation|getPrice",
+      "detect": "No staleness or sanity checks",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/missing-validations/MISSING_VALIDATION_TEMPLATE.md",
+      "lines": [
+        575,
+        622
+      ],
+      "check": [
+        "VERIFY: No staleness or sanity checks",
+        "FALSIFY: Full oracle validation",
+        "IMPACT: Using stale/manipulated prices, incorrect liquidations"
+      ],
+      "antipattern": "No staleness or sanity checks",
+      "securePattern": "Full oracle validation",
+      "validWhen": "No staleness or sanity checks",
+      "invalidWhen": "Full oracle validation",
+      "impact": "Using stale/manipulated prices, incorrect liquidations"
+    },
+    {
+      "id": "general-security-defihacklabs-input-validation-patterns-vulnerable-pattern-examples-001",
       "title": "Vulnerable Pattern Examples",
       "severity": "CRITICAL",
       "grep": "anySwapOutUnderlyingWithPermit|token.call(swapExtraData|swapExtraData|performAction|transferFrom|executeRoute",
@@ -824,55 +1552,11 @@
       "validWhen": "Newly added route (ID 406) forwarded user swapExtraData as raw calldata to token.call(swapExtraData)."
     },
     {
-      "id": "general-security-defihacklabs-input-validation-patterns-defihacklabs-poc-references-003",
-      "title": "DeFiHackLabs PoC References",
-      "severity": "UNKNOWN",
-      "grep": "SocketGateway|DeFiHackLabs|TransitSwap|OrbitChain",
-      "detect": "OrbitChain** (2024-01, $81.0M): `DeFiHackLabs/src/test/2024-01/OrbitChain_exp.sol`",
-      "cat": [
-        "access-control",
-        "signature",
-        "validation",
-        "input"
-      ],
-      "ref": "DB/general/missing-validations/defihacklabs-input-validation-patterns.md",
-      "lines": [
-        559,
-        570
-      ],
-      "check": [
-        "VERIFY: OrbitChain (2024-01, $81.0M): DeFiHackLabs/src/test/2024-01/OrbitChain_exp.sol"
-      ],
-      "validWhen": "OrbitChain (2024-01, $81.0M): DeFiHackLabs/src/test/2024-01/OrbitChain_exp.sol"
-    },
-    {
-      "id": "general-security-defihacklabs-input-validation-patterns-keywords-004",
-      "title": "Keywords",
-      "severity": "UNKNOWN",
-      "grep": "parameter_manipulation|unvalidated_callback|token_impersonation|calldata_injection",
-      "detect": "transferFrom_injection",
-      "cat": [
-        "access-control",
-        "signature",
-        "validation",
-        "input"
-      ],
-      "ref": "DB/general/missing-validations/defihacklabs-input-validation-patterns.md",
-      "lines": [
-        583,
-        610
-      ],
-      "check": [
-        "VERIFY: transferFrom_injection"
-      ],
-      "validWhen": "transferFrom_injection"
-    },
-    {
-      "id": "general-security-slippage-input-validation-vulnerabilitie-slippage-input-validation-vuln-000",
-      "title": "Slippage & Input Validation Vulnerabilities",
-      "severity": "LOW",
-      "grep": "buyTokensAndDepositOnBehalf|execute",
-      "detect": "The root causes fall into several distinct categories:",
+      "id": "general-security-slippage-input-validation-vulnerabilitie-vulnerable-pattern-examples-001",
+      "title": "Vulnerable Pattern Examples",
+      "severity": "HIGH",
+      "grep": "buyTokensAndDepositOnBehalf|parameter_validation|slippage_protection|return_value_check|input_validation|allowance_check",
+      "detect": "execute() swaps without slippage protection",
       "cat": [
         "access-control",
         "signature",
@@ -881,51 +1565,21 @@
       ],
       "ref": "DB/general/validation/slippage-input-validation-vulnerabilities.md",
       "lines": [
-        39,
-        675
+        80,
+        410
       ],
       "check": [
-        "VERIFY: root causes fall into several distinct categories",
-        "PROVE: *Slippage Attack (Sandwich); Attacker monitors mempool for vulnerable swap transactions",
-        "FALSIFY: User-specified minimum output with reasonable bounds",
-        "IMPACT: Direct fund loss: Attackers extract value through sandwich attacks or parameter manipulation",
-        "All swap functions specify meaningful minimum output amounts",
-        "Deadline is user-specified and validated (not block.timestamp)"
+        "VERIFY: execute() swaps without slippage protection",
+        "PROVE: buyToken with user-controlled slippage parameter that can be set to 0"
       ],
       "antipattern": "buyToken with user-controlled slippage parameter that can be set to 0",
-      "securePattern": "User-specified minimum output with reasonable bounds",
-      "validWhen": "The root causes fall into several distinct categories",
-      "invalidWhen": "User-specified minimum output with reasonable bounds",
-      "impact": "Direct fund loss: Attackers extract value through sandwich attacks or parameter manipulation"
+      "validWhen": "execute() swaps without slippage protection"
     },
     {
-      "id": "general-security-defihacklabs-initialization-patterns-agent-quick-view-000",
-      "title": "Agent Quick View",
-      "severity": "CRITICAL",
-      "grep": "missing_validation|single_contract",
-      "detect": "Agent Quick View",
-      "cat": [
-        "access-control",
-        "signature",
-        "validation",
-        "input"
-      ],
-      "ref": "DB/general/initialization/defihacklabs-initialization-patterns.md",
-      "lines": [
-        84,
-        95
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Pattern Key | unprotected_initialization | proxy_initialization | initialization_hijack | fund_loss, total_control"
-      ],
-      "validWhen": "Pattern Key | unprotected_initialization | proxy_initialization | initialization_hijack | fund_loss, total_control"
-    },
-    {
-      "id": "general-security-defihacklabs-initialization-patterns-vulnerable-pattern-examples-002",
+      "id": "general-security-defihacklabs-initialization-patterns-vulnerable-pattern-examples-001",
       "title": "Vulnerable Pattern Examples",
       "severity": "CRITICAL",
-      "grep": "emergencyWithdraw|setRewards|onlyOwner|flashLoan|initialized|atomic",
+      "grep": "reinit_during_flashloan|uninitialized_library|proxy_initialization|missing_initializer|emergencyWithdraw|unprotected_init",
       "detect": "init() has NO access control — anyone can re-set depositToken",
       "cat": [
         "access-control",
@@ -947,52 +1601,10 @@
       "validWhen": "init() had no onlyOwner or initialized guard."
     },
     {
-      "id": "general-security-defihacklabs-initialization-patterns-keywords-003",
-      "title": "Keywords",
-      "severity": "UNKNOWN",
-      "grep": "proxy_initialization|initializer_modifier|unprotected_init|front_run_init",
-      "detect": "proxy_initialization",
-      "cat": [
-        "access-control",
-        "signature",
-        "validation",
-        "input"
-      ],
-      "ref": "DB/general/initialization/defihacklabs-initialization-patterns.md",
-      "lines": [
-        379,
-        395
-      ],
-      "validWhen": "proxy_initialization"
-    },
-    {
-      "id": "general-security-initialization-vulnerabilities-vulnerability-categories-001",
-      "title": "Vulnerability Categories",
+      "id": "general-security-initialization-vulnerabilities-example-1-uninitialized-proxy--001",
+      "title": "Example 1: Uninitialized Proxy - Pike Finance [CRITICAL]",
       "severity": "CRITICAL",
-      "grep": "Initialization|Uninitialized|Unprotected|Initializer",
-      "detect": "Proxy deployed without calling initializer, leaving critical state unset.",
-      "cat": [
-        "access-control",
-        "signature",
-        "validation",
-        "input"
-      ],
-      "ref": "DB/general/initialization/initialization-vulnerabilities.md",
-      "lines": [
-        56,
-        74
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Proxy deployed without calling initializer, leaving critical state unset."
-      ],
-      "validWhen": "Proxy deployed without calling initializer, leaving critical state unset."
-    },
-    {
-      "id": "general-security-initialization-vulnerabilities-vulnerable-pattern-examples-002",
-      "title": "Vulnerable Pattern Examples",
-      "severity": "CRITICAL",
-      "grep": "emergencyWithdraw|withdrawAll|initialize",
+      "grep": "implementation_takeover|contract_initialization|_disableInitializers|onlyInitializing|withdrawAll|uninitialized",
       "detect": "Proxy deployed without initialization",
       "cat": [
         "access-control",
@@ -1002,47 +1614,152 @@
       ],
       "ref": "DB/general/initialization/initialization-vulnerabilities.md",
       "lines": [
-        75,
-        361
+        77,
+        130
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Proxy deployed without initialization",
-        "PROVE: No validation on initialization parameters",
-        "FALSIFY: Initialize in constructor or same transaction"
+        "VERIFY: Proxy deployed without initialization"
       ],
-      "antipattern": "No validation on initialization parameters",
-      "securePattern": "Initialize in constructor or same transaction",
-      "validWhen": "Proxy deployed without initialization",
-      "invalidWhen": "Initialize in constructor or same transaction"
+      "antipattern": "Proxy deployed without initialization",
+      "validWhen": "Proxy deployed without initialization"
     },
     {
-      "id": "general-security-signature-verification-vulnerabilities-vulnerability-categories-001",
-      "title": "Vulnerability Categories",
-      "severity": "LOW",
-      "grep": "Verification|Malleability|Categories|Signature",
-      "detect": "No verification or insufficient checking of signature parameters.",
+      "id": "general-security-initialization-vulnerabilities-example-2-unprotected-implemen-002",
+      "title": "Example 2: Unprotected Implementation [CRITICAL]",
+      "severity": "CRITICAL",
+      "grep": "implementation_takeover|contract_initialization|_disableInitializers|emergencyWithdraw|onlyInitializing|uninitialized",
+      "detect": "Implementation can be taken over",
       "cat": [
         "access-control",
         "signature",
         "validation",
         "input"
       ],
-      "ref": "DB/general/signature/signature-verification-vulnerabilities.md",
+      "ref": "DB/general/initialization/initialization-vulnerabilities.md",
       "lines": [
-        55,
-        73
+        131,
+        177
       ],
+      "neverPrune": true,
       "check": [
-        "VERIFY: No verification or insufficient checking of signature parameters."
+        "VERIFY: Implementation can be taken over",
+        "FALSIFY: Disable initialization on implementation"
       ],
-      "validWhen": "No verification or insufficient checking of signature parameters."
+      "antipattern": "Implementation can be taken over",
+      "securePattern": "Disable initialization on implementation",
+      "validWhen": "Implementation can be taken over",
+      "invalidWhen": "Disable initialization on implementation"
     },
     {
-      "id": "general-security-signature-verification-vulnerabilities-vulnerable-pattern-examples-002",
-      "title": "Vulnerable Pattern Examples",
+      "id": "general-security-initialization-vulnerabilities-example-3-missing-parameter-va-003",
+      "title": "Example 3: Missing Parameter Validation [HIGH]",
+      "severity": "HIGH",
+      "grep": "implementation_takeover|contract_initialization|_disableInitializers|onlyInitializing|uninitialized|reinitialize",
+      "detect": "No validation on initialization parameters",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/initialization/initialization-vulnerabilities.md",
+      "lines": [
+        178,
+        231
+      ],
+      "check": [
+        "VERIFY: No validation on initialization parameters",
+        "FALSIFY: Validate all parameters"
+      ],
+      "antipattern": "No validation on initialization parameters",
+      "securePattern": "Validate all parameters",
+      "validWhen": "No validation on initialization parameters",
+      "invalidWhen": "Validate all parameters"
+    },
+    {
+      "id": "general-security-initialization-vulnerabilities-example-4-front-running-initia-004",
+      "title": "Example 4: Front-Running Initialization [HIGH]",
+      "severity": "HIGH",
+      "grep": "implementation_takeover|contract_initialization|_disableInitializers|onlyInitializing|createVault|uninitialized",
+      "detect": "Initialization can be front-run",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/initialization/initialization-vulnerabilities.md",
+      "lines": [
+        232,
+        270
+      ],
+      "check": [
+        "VERIFY: Initialization can be front-run",
+        "FALSIFY: Initialize in constructor or same transaction"
+      ],
+      "antipattern": "Initialization can be front-run",
+      "securePattern": "Initialize in constructor or same transaction",
+      "validWhen": "Initialization can be front-run",
+      "invalidWhen": "Initialize in constructor or same transaction"
+    },
+    {
+      "id": "general-security-initialization-vulnerabilities-example-5-reinitialize-vulnera-005",
+      "title": "Example 5: Reinitialize Vulnerability [HIGH]",
+      "severity": "HIGH",
+      "grep": "implementation_takeover|contract_initialization|_disableInitializers|onlyInitializing|initializeV2|uninitialized",
+      "detect": "Can be reinitialized after upgrade",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/initialization/initialization-vulnerabilities.md",
+      "lines": [
+        271,
+        328
+      ],
+      "check": [
+        "VERIFY: Can be reinitialized after upgrade",
+        "FALSIFY: Use OpenZeppelin reinitializer"
+      ],
+      "antipattern": "Can be reinitialized after upgrade",
+      "securePattern": "Use OpenZeppelin reinitializer",
+      "validWhen": "Can be reinitialized after upgrade",
+      "invalidWhen": "Use OpenZeppelin reinitializer"
+    },
+    {
+      "id": "general-security-initialization-vulnerabilities-example-6-parent-initializer-n-006",
+      "title": "Example 6: Parent Initializer Not Called [HIGH]",
+      "severity": "HIGH",
+      "grep": "implementation_takeover|contract_initialization|_disableInitializers|__BaseVault_init|onlyInitializing|uninitialized",
+      "detect": "Parent not initialized",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/initialization/initialization-vulnerabilities.md",
+      "lines": [
+        329,
+        361
+      ],
+      "check": [
+        "VERIFY: Parent not initialized",
+        "FALSIFY: Always call parent initializers"
+      ],
+      "antipattern": "Parent not initialized",
+      "securePattern": "Always call parent initializers",
+      "validWhen": "Parent not initialized",
+      "invalidWhen": "Always call parent initializers"
+    },
+    {
+      "id": "general-security-signature-verification-vulnerabilities-example-1-missing-signature-ve-001",
+      "title": "Example 1: Missing Signature Verification [CRITICAL]",
       "severity": "CRITICAL",
-      "grep": "executeWithSignature|claimWithSignature|claimReward",
+      "grep": "signature_malleability|signature_validation|claimWithSignature|signature_replay|domain_separator|missing_nonce",
       "detect": "Invalid signature verification logic",
       "cat": [
         "access-control",
@@ -1052,19 +1769,143 @@
       ],
       "ref": "DB/general/signature/signature-verification-vulnerabilities.md",
       "lines": [
-        74,
+        76,
+        107
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Invalid signature verification logic"
+      ],
+      "antipattern": "Invalid signature verification logic",
+      "validWhen": "Invalid signature verification logic"
+    },
+    {
+      "id": "general-security-signature-verification-vulnerabilities-example-2-signature-malleabili-002",
+      "title": "Example 2: Signature Malleability Exploit [HIGH]",
+      "severity": "HIGH",
+      "grep": "signature_malleability|signature_validation|executeWithSignature|signature_replay|domain_separator|missing_nonce",
+      "detect": "ECDSA signature malleability not handled",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/signature/signature-verification-vulnerabilities.md",
+      "lines": [
+        108,
+        161
+      ],
+      "check": [
+        "VERIFY: ECDSA signature malleability not handled",
+        "FALSIFY: Hash the hash to prevent malleability"
+      ],
+      "antipattern": "ECDSA signature malleability not handled",
+      "securePattern": "Hash the hash to prevent malleability",
+      "validWhen": "ECDSA signature malleability not handled",
+      "invalidWhen": "Hash the hash to prevent malleability"
+    },
+    {
+      "id": "general-security-signature-verification-vulnerabilities-example-3-missing-nonce-in-sig-003",
+      "title": "Example 3: Missing Nonce in Signature [HIGH]",
+      "severity": "HIGH",
+      "grep": "signature_malleability|signature_validation|signature_replay|domain_separator|missing_nonce|claimReward",
+      "detect": "No nonce prevents replay",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/signature/signature-verification-vulnerabilities.md",
+      "lines": [
+        162,
+        209
+      ],
+      "check": [
+        "VERIFY: No nonce prevents replay",
+        "FALSIFY: Include nonce in signed message"
+      ],
+      "antipattern": "No nonce prevents replay",
+      "securePattern": "Include nonce in signed message",
+      "validWhen": "No nonce prevents replay",
+      "invalidWhen": "Include nonce in signed message"
+    },
+    {
+      "id": "general-security-signature-verification-vulnerabilities-example-4-ecrecover-returns-ze-004",
+      "title": "Example 4: ecrecover Returns Zero Address [HIGH]",
+      "severity": "HIGH",
+      "grep": "signature_malleability|signature_validation|signature_replay|domain_separator|verifySignature|missing_nonce",
+      "detect": "No check for zero address from ecrecover",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/signature/signature-verification-vulnerabilities.md",
+      "lines": [
+        210,
+        258
+      ],
+      "check": [
+        "VERIFY: No check for zero address from ecrecover",
+        "FALSIFY: Explicit zero address check"
+      ],
+      "antipattern": "No check for zero address from ecrecover",
+      "securePattern": "Explicit zero address check",
+      "validWhen": "No check for zero address from ecrecover",
+      "invalidWhen": "Explicit zero address check"
+    },
+    {
+      "id": "general-security-signature-verification-vulnerabilities-example-5-missing-chain-id-in--005",
+      "title": "Example 5: Missing Chain ID in Permit [HIGH]",
+      "severity": "HIGH",
+      "grep": "signature_malleability|signature_validation|signature_replay|domain_separator|missing_nonce|ecrecover",
+      "detect": "Permit without chain ID",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/signature/signature-verification-vulnerabilities.md",
+      "lines": [
+        259,
+        330
+      ],
+      "check": [
+        "VERIFY: Permit without chain ID",
+        "FALSIFY: EIP-712 with domain separator including chain ID"
+      ],
+      "antipattern": "Permit without chain ID",
+      "securePattern": "EIP-712 with domain separator including chain ID",
+      "validWhen": "Permit without chain ID",
+      "invalidWhen": "EIP-712 with domain separator including chain ID"
+    },
+    {
+      "id": "general-security-signature-verification-vulnerabilities-example-6-invalid-signature-ve-006",
+      "title": "Example 6: Invalid Signature Verification - ODOS (2025-01) [CRITICAL]",
+      "severity": "CRITICAL",
+      "grep": "signature_malleability|signature_validation|signature_replay|domain_separator|missing_nonce|executeSwap",
+      "detect": "Signature verification can be bypassed",
+      "cat": [
+        "access-control",
+        "signature",
+        "validation",
+        "input"
+      ],
+      "ref": "DB/general/signature/signature-verification-vulnerabilities.md",
+      "lines": [
+        331,
         354
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Invalid signature verification logic",
-        "PROVE: ECDSA signature malleability not handled",
-        "FALSIFY: EIP-712 with domain separator including chain ID"
+        "VERIFY: Signature verification can be bypassed"
       ],
-      "antipattern": "ECDSA signature malleability not handled",
-      "securePattern": "EIP-712 with domain separator including chain ID",
-      "validWhen": "Invalid signature verification logic",
-      "invalidWhen": "EIP-712 with domain separator including chain ID"
+      "antipattern": "Signature verification can be bypassed",
+      "validWhen": "Signature verification can be bypassed"
     }
   ]
 }

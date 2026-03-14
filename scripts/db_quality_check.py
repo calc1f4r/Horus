@@ -264,6 +264,7 @@ def skill3():
         
         with open(hc_file) as f:
             cards_data = json.load(f)
+        meta = cards_data.get('meta', {}) if isinstance(cards_data, dict) else {}
         cards = cards_data.get('cards', []) if isinstance(cards_data, dict) else cards_data
         
         actual_cards = len(cards)
@@ -271,21 +272,18 @@ def skill3():
         
         if actual_cards != claimed_cards:
             issues.append(('WARNING', f'{mname}: index claims {claimed_cards} cards but file has {actual_cards}'))
-        
-        # Check manifest pattern counts vs huntcard counts
-        manifest_file = f'DB/manifests/{mname}.json'
-        if os.path.isfile(manifest_file):
-            with open(manifest_file) as f:
-                manifest = json.load(f)
-            manifest_patterns = sum(len(fe.get('patterns', [])) for fe in manifest.get('files', []))
-            if manifest_patterns != actual_cards:
-                issues.append(('WARNING', f'{mname}: manifest has {manifest_patterns} patterns but {actual_cards} hunt cards'))
+        meta_total = meta.get('totalCards')
+        if meta_total is not None and meta_total != actual_cards:
+            issues.append(('WARNING', f'{mname}: huntcard meta.totalCards={meta_total} but file has {actual_cards}'))
         
         # Check card quality
+        unknown_severity = 0
         for card in cards:
             cid = card.get('id', '')
             per_manifest_ids.add(cid)
             
+            if card.get('severity') not in {'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'}:
+                unknown_severity += 1
             if not card.get('grep'):
                 issues.append(('WARNING', f'{mname}: card {cid} has empty grep'))
             if not card.get('ref'):
@@ -296,6 +294,11 @@ def skill3():
             lines = card.get('lines', [])
             if len(lines) == 2 and lines[0] >= lines[1]:
                 issues.append(('CRITICAL', f'{mname}: card {cid} lines[0]({lines[0]}) >= lines[1]({lines[1]})'))
+            if card.get('neverPrune') and card.get('severity') != 'CRITICAL':
+                issues.append(('WARNING', f'{mname}: card {cid} is neverPrune but severity={card.get("severity")}'))
+
+        if unknown_severity:
+            issues.append(('WARNING', f'{mname}: {unknown_severity} cards have UNKNOWN/untagged severity'))
     
     if per_manifest_total != all_card_count:
         issues.append(('WARNING', f'Sum of per-manifest cards ({per_manifest_total}) != all-huntcards ({all_card_count})'))
@@ -312,8 +315,6 @@ def skill3():
     # neverPrune audit
     never_prune = [c for c in all_cards if c.get('neverPrune')]
     print(f"  neverPrune cards: {len(never_prune)}")
-    if len(never_prune) > 30:
-        issues.append(('WARNING', f'Too many neverPrune cards: {len(never_prune)} (>30 bloats shards)'))
     
     for level, msg in issues:
         icon = "🔴" if level == 'CRITICAL' else "⚠️"
@@ -380,6 +381,26 @@ def skill4():
         for m in cinfo.get('manifests', []):
             if m not in in_index:
                 issues.append(('CRITICAL', f'protocolContext {ctx} references non-existent manifest: {m}'))
+
+        haystacks = []
+        for m in cinfo.get('manifests', []):
+            if m not in index.get('manifests', {}):
+                continue
+            with open(index['manifests'][m]['file']) as f:
+                manifest = json.load(f)
+            for fe in manifest.get('files', []):
+                for pattern in fe.get('patterns', []):
+                    fragments = [pattern.get('title', ''), pattern.get('rootCause', '') or '']
+                    fragments.extend(pattern.get('codeKeywords', []))
+                    fragments.extend(pattern.get('searchKeywords', []))
+                    for subsection in pattern.get('subsections') or []:
+                        fragments.append(subsection.get('title', ''))
+                        fragments.extend(subsection.get('searchKeywords') or [])
+                    haystacks.append(' '.join(str(fragment) for fragment in fragments if fragment).lower())
+
+        for focus in cinfo.get('focusPatterns', []):
+            if haystacks and not any(focus.lower() in haystack for haystack in haystacks):
+                issues.append(('WARNING', f'protocolContext {ctx} focusPattern "{focus}" is not discoverable from its manifests'))
     
     # 4C: Keyword index
     kw_file = 'DB/manifests/keywords.json'

@@ -2,17 +2,17 @@
   "meta": {
     "manifest": "general-governance",
     "description": "Compressed hunt cards for general-governance — one-line detection rules for bulk scanning",
-    "totalCards": 57,
-    "skipped": 45,
+    "totalCards": 63,
+    "skipped": 55,
     "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 57
+    "enriched": 63
   },
   "cards": [
     {
       "id": "general-governance-defihacklabs-governance-attack-patterns-1-flash-loan-governance-takeov-001",
       "title": "1. Flash Loan Governance Takeover",
       "severity": "CRITICAL",
-      "grep": "emergencyCommit|sweep",
+      "grep": "flash_loan_governance|proxy_reinitialize|malicious_proposal|queueTransaction|emergency_commit|emergencyCommit",
       "detect": "When governance voting power is determined by token balances at the time of vote (snapshot-less) or uses LP tokens that...",
       "cat": [
         "governance",
@@ -39,7 +39,7 @@
       "id": "general-governance-defihacklabs-governance-attack-patterns-2-low-quorum-governance-exploi-002",
       "title": "2. Low Quorum Governance Exploitation",
       "severity": "CRITICAL",
-      "grep": "atomic|IGovernorAlpha|GovernorAlpha|ChainContract",
+      "grep": "flash_loan_governance|proxy_reinitialize|queueTransaction|emergency_commit|emergencyCommit|quorum_bypass",
       "detect": "When governance quorum requirements are set too low (or vote delegation concentrates power), an attacker with a...",
       "cat": [
         "governance",
@@ -65,7 +65,7 @@
       "id": "general-governance-defihacklabs-governance-attack-patterns-3-proxy-re-initialization-atta-003",
       "title": "3. Proxy Re-Initialization Attack",
       "severity": "CRITICAL",
-      "grep": "isGovernanceAddress|getContract|initializer|initialize",
+      "grep": "flash_loan_governance|isGovernanceAddress|proxy_reinitialize|queueTransaction|emergency_commit|emergencyCommit",
       "detect": "When governance, staking, and delegate manager contracts are deployed behind proxies (UUPS or Transparent), the...",
       "cat": [
         "governance",
@@ -91,7 +91,7 @@
       "id": "general-governance-defihacklabs-governance-attack-patterns-4-dao-module-oracle-self-answe-004",
       "title": "4. DAO Module Oracle Self-Answer Attack",
       "severity": "CRITICAL",
-      "grep": "atomic|executeProposalWithIndex|encodeWithSignature|getTransactionHash",
+      "grep": "flash_loan_governance|proxy_reinitialize|queueTransaction|emergency_commit|emergencyCommit|quorum_bypass",
       "detect": "When a DAO uses Gnosis Safe Modules with Reality.",
       "cat": [
         "governance",
@@ -117,7 +117,7 @@
       "id": "general-governance-defihacklabs-governance-attack-patterns-5-governance-treasury-drain-vi-005",
       "title": "5. Governance Treasury Drain via Token Acquisition",
       "severity": "CRITICAL",
-      "grep": "encodeWithSignature|BuildGovernance|transferFrom|BuildFinance",
+      "grep": "flash_loan_governance|proxy_reinitialize|malicious_proposal|queueTransaction|emergency_commit|emergencyCommit",
       "detect": "When governance token supply is small or concentrated, and the governance system has no minimum quorum percentage...",
       "cat": [
         "governance",
@@ -143,7 +143,7 @@
       "id": "general-governance-governance-takeover-1-51-attack-via-arbitrary-exec-000",
       "title": "1. 51% Attack via Arbitrary Execution",
       "severity": "HIGH",
-      "grep": "executeExtraordinaryProposal|executeProposal",
+      "grep": "executeExtraordinaryProposal|token_distribution|governance_control|51_percent_attack|admin_privileges|executeProposal",
       "detect": "Governance systems often designate certain assets as \"precious\" or \"protected\" - they shouldn't be transferable through...",
       "cat": [
         "governance",
@@ -173,7 +173,7 @@
       "id": "general-governance-governance-takeover-2-loss-of-veto-power-enabling--001",
       "title": "2. Loss of Veto Power Enabling Takeover",
       "severity": "MEDIUM",
-      "grep": "proposeGuardianChange|executeGuardianChange|setGuardian|initialize|veto",
+      "grep": "proposeGuardianChange|executeGuardianChange|token_distribution|governance_control|51_percent_attack|admin_privileges",
       "detect": "Veto power transfer or renunciation is not adequately protected:",
       "cat": [
         "governance",
@@ -202,7 +202,7 @@
       "id": "general-governance-governance-takeover-3-centralized-governance-contr-002",
       "title": "3. Centralized Governance Control",
       "severity": "CRITICAL",
-      "grep": "upgradeImplementation|withdrawTreasury|setParameters|pause|mint|gov",
+      "grep": "upgradeImplementation|token_distribution|governance_control|51_percent_attack|withdrawTreasury|admin_privileges",
       "detect": "Protocol design concentrates too much power in single addresses:",
       "cat": [
         "governance",
@@ -233,7 +233,7 @@
       "id": "general-governance-governance-takeover-4-emergency-function-abuse-003",
       "title": "4. Emergency Function Abuse",
       "severity": "MEDIUM",
-      "grep": "initiateEmergencyDrain|executeEmergencyDrain|emergencyWithdraw|emergencyDrain",
+      "grep": "initiateEmergencyDrain|executeEmergencyDrain|token_distribution|governance_control|emergencyWithdraw|51_percent_attack",
       "detect": "Emergency functions bypass normal governance security:",
       "cat": [
         "governance",
@@ -262,7 +262,7 @@
       "id": "general-governance-governance-takeover-5-unrestricted-deployment-elec-004",
       "title": "5. Unrestricted Deployment/Election Takeover",
       "severity": "CRITICAL",
-      "grep": "deployElectionMaster|approveBytecode|getWinner",
+      "grep": "deployElectionMaster|token_distribution|governance_control|51_percent_attack|admin_privileges|approveBytecode",
       "detect": "No access control on critical deployment or election functions:",
       "cat": [
         "governance",
@@ -292,7 +292,7 @@
       "id": "general-governance-proposal-lifecycle-manipulation-1-unrestricted-proposal-cancel-000",
       "title": "1. Unrestricted Proposal Cancellation",
       "severity": "CRITICAL",
-      "grep": "cancel|dao_governance_findings|ProposalCanceled|ProposalState",
+      "grep": "proposal_cancellation|proposal_execution|proposal_creation|state_machine|cancellation|expiration",
       "detect": "The `cancel()` function lacks proper access control, allowing anyone (or a broader class of users than intended) to...",
       "cat": [
         "governance",
@@ -323,7 +323,7 @@
       "id": "general-governance-proposal-lifecycle-manipulation-2-proposal-threshold-bypass-fo-001",
       "title": "2. Proposal Threshold Bypass for Griefing",
       "severity": "MEDIUM",
-      "grep": "propose|execute|cancel",
+      "grep": "proposal_cancellation|proposal_execution|proposal_creation|state_machine|cancellation|expiration",
       "detect": "Threshold is checked at proposal creation time using current voting power.",
       "cat": [
         "governance",
@@ -352,7 +352,7 @@
       "id": "general-governance-proposal-lifecycle-manipulation-3-proposal-expiration-logic-er-002",
       "title": "3. Proposal Expiration Logic Errors",
       "severity": "MEDIUM",
-      "grep": "_isExpired|dao_governance_findings|ProposalState|gracePeriod",
+      "grep": "proposal_cancellation|proposal_execution|proposal_creation|state_machine|_isExpired|cancellation",
       "detect": "Expiration timestamp calculation errors:",
       "cat": [
         "governance",
@@ -378,67 +378,10 @@
       "invalidWhen": "Proper expiration based on voting end time"
     },
     {
-      "id": "general-governance-proposal-lifecycle-manipulation-4-state-machine-transition-vul-003",
-      "title": "4. State Machine Transition Vulnerabilities",
-      "severity": "HIGH",
-      "grep": "execute|queue",
-      "detect": "State machine implementation errors:\n\n- Missing state checks before transitions\n\n- Wrong state returned from state()...",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/dao-governance-vulnerabilities/proposal-lifecycle-manipulation.md",
-      "lines": [
-        412,
-        480
-      ],
-      "check": [
-        "VERIFY: State machine implementation errors",
-        "PROVE: Can execute without going through queue",
-        "FALSIFY: Proper state machine with all transitions validated"
-      ],
-      "antipattern": "Can execute without going through queue",
-      "securePattern": "Proper state machine with all transitions validated",
-      "validWhen": "State machine implementation errors",
-      "invalidWhen": "Proper state machine with all transitions validated"
-    },
-    {
-      "id": "general-governance-proposal-lifecycle-manipulation-5-proposal-execution-vulnerabi-004",
-      "title": "5. Proposal Execution Vulnerabilities",
-      "severity": "CRITICAL",
-      "grep": "updateProposal|propose|execute",
-      "detect": "Execution-related issues:\n\n- Proposal content modified after creation\n\n- Execution without proper state checks\n\n-...",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/dao-governance-vulnerabilities/proposal-lifecycle-manipulation.md",
-      "lines": [
-        481,
-        556
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Execution-related issues",
-        "PROVE: Proposal data not immutable",
-        "FALSIFY: Proposal content stored by hash"
-      ],
-      "antipattern": "Proposal data not immutable",
-      "securePattern": "Proposal content stored by hash",
-      "validWhen": "Execution-related issues",
-      "invalidWhen": "Proposal content stored by hash"
-    },
-    {
       "id": "general-governance-quorum-manipulation-1-quorum-lowering-via-delegati-000",
       "title": "1. Quorum Lowering via Delegation Abuse",
       "severity": "MEDIUM",
-      "grep": "adjustedTotalSupply|_quorumReached|quorumVotes|propose",
+      "grep": "supply_based_quorum|adjustedTotalSupply|quorum_calculation|_quorumReached|voting_threshold|proposal_passing",
       "detect": "Quorum is calculated based on total adjusted supply at a snapshot block.",
       "cat": [
         "governance",
@@ -468,7 +411,7 @@
       "id": "general-governance-quorum-manipulation-2-dynamic-quorum-manipulation-001",
       "title": "2. Dynamic Quorum Manipulation",
       "severity": "MEDIUM",
-      "grep": "updateQuorum|getLastProposalParticipation|Participation|Automatically",
+      "grep": "supply_based_quorum|quorum_calculation|voting_threshold|proposal_passing|dynamic_quorum|voting_power",
       "detect": "Automatic quorum adjustment algorithms that lower quorum when participation drops can be gamed by coordinated...",
       "cat": [
         "governance",
@@ -497,7 +440,7 @@
       "id": "general-governance-quorum-manipulation-3-quorum-threshold-miscalculat-002",
       "title": "3. Quorum Threshold Miscalculation",
       "severity": "HIGH",
-      "grep": "_isProposalSucceeded|_quorumReached",
+      "grep": "_isProposalSucceeded|supply_based_quorum|quorum_calculation|_quorumReached|voting_threshold|proposal_passing",
       "detect": "Mathematical errors in quorum calculation - using wrong base values, missing percentage conversions, or comparing...",
       "cat": [
         "governance",
@@ -527,7 +470,7 @@
       "id": "general-governance-quorum-manipulation-4-quorum-not-enforced-in-state-003",
       "title": "4. Quorum Not Enforced in State Transitions",
       "severity": "MEDIUM",
-      "grep": "dao_governance_findings|ProposalState|block.timestamp|Transitions",
+      "grep": "supply_based_quorum|quorum_calculation|voting_threshold|proposal_passing|dynamic_quorum|voting_power",
       "detect": "The `state()` function determines proposal outcome but fails to check quorum in the success path, or quorum check is...",
       "cat": [
         "governance",
@@ -553,39 +496,10 @@
       "invalidWhen": "Quorum enforced in state transitions"
     },
     {
-      "id": "general-governance-quorum-manipulation-5-tie-handling-vulnerabilities-004",
-      "title": "5. Tie Handling Vulnerabilities",
-      "severity": "MEDIUM",
-      "grep": "_isSucceeded|dao_governance_findings|ProposalState|ProposalData",
-      "detect": "Using `>=` instead of `>` when comparing FOR votes to AGAINST votes causes ties to pass.",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/dao-governance-vulnerabilities/quorum-manipulation.md",
-      "lines": [
-        450,
-        537
-      ],
-      "check": [
-        "VERIFY: Using >= instead of > when comparing FOR votes to AGAINST votes causes ties to pass.",
-        "PROVE: Proposal: Transfer 1M tokens to attacker address; Voting: 500,000 FOR, 500,000 AGAINST (tie)",
-        "FALSIFY: Explicit tie handling",
-        "ANTIPATTERN: Doesn't require strict majority"
-      ],
-      "antipattern": "Doesn't require strict majority",
-      "securePattern": "Explicit tie handling",
-      "validWhen": "Using >= instead of > when comparing FOR votes to AGAINST votes causes ties to pass.",
-      "invalidWhen": "Explicit tie handling"
-    },
-    {
       "id": "general-governance-timelock-bypass-1-timelock-bypass-via-privileg-000",
       "title": "1. Timelock Bypass via Privileged Functions",
       "severity": "CRITICAL",
-      "grep": "setGovernor(attackerAddress|emergencyWithdraw|setDelay(0|setGovernor|setDelay|setAdmin",
+      "grep": "setGovernor(attackerAddress|timelock_controller|emergencyWithdraw|delay_enforcement|governance_admin|setDelay(0",
       "detect": "Critical governance functions that control the timelock parameters (delay, governor, admin) can be called directly by...",
       "cat": [
         "governance",
@@ -613,39 +527,10 @@
       "impact": "Complete bypass of all timelock security guarantees"
     },
     {
-      "id": "general-governance-timelock-bypass-2-zero-minimal-delay-vulnerabi-001",
-      "title": "2. Zero/Minimal Delay Vulnerabilities",
-      "severity": "MEDIUM",
-      "grep": "setDelay|dao_governance_findings|Vulnerabilities|Enforcement",
-      "detect": "Constructor or initialization code sets the delay to zero, or validation logic allows zero/minimal delays, effectively...",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/dao-governance-vulnerabilities/timelock-bypass.md",
-      "lines": [
-        220,
-        285
-      ],
-      "check": [
-        "VERIFY: Constructor or initialization code sets the delay to zero, or validation logic allows zero/minimal delays, effectively disabling the timelock.",
-        "PROVE: Protocol deploys timelock with delay = 0 (by accident or design flaw); Proposals can be executed immediately after creation",
-        "FALSIFY: Minimum delay enforced",
-        "ANTIPATTERN: Delay hardcoded to 0 despite parameter"
-      ],
-      "antipattern": "Delay hardcoded to 0 despite parameter",
-      "securePattern": "Minimum delay enforced",
-      "validWhen": "Constructor or initialization code sets the delay to zero, or validation logic allows zero/minimal delays, effectively disabling the timelock.",
-      "invalidWhen": "Minimum delay enforced"
-    },
-    {
-      "id": "general-governance-timelock-bypass-3-timelock-reduction-during-ac-002",
+      "id": "general-governance-timelock-bypass-3-timelock-reduction-during-ac-003",
       "title": "3. Timelock Reduction During Active Lock",
       "severity": "MEDIUM",
-      "grep": "_timelockMint|dao_governance_findings|block.timestamp|StakingZap",
+      "grep": "timelock_controller|delay_enforcement|governance_admin|_timelockMint|grace_period|cancellation",
       "detect": "Timelock end timestamp is calculated as `block.timestamp + timelockLength` every time a minting/locking function is...",
       "cat": [
         "governance",
@@ -671,10 +556,10 @@
       "invalidWhen": "Only extend timelock, never reduce"
     },
     {
-      "id": "general-governance-timelock-bypass-4-canceled-proposal-still-exec-003",
+      "id": "general-governance-timelock-bypass-4-canceled-proposal-still-exec-004",
       "title": "4. Canceled Proposal Still Executable",
       "severity": "MEDIUM",
-      "grep": "TimelockController.executeBatch|executeBatch|cancel",
+      "grep": "TimelockController.executeBatch|timelock_controller|delay_enforcement|governance_admin|grace_period|executeBatch",
       "detect": "The `cancel()` function in the governance contract only updates the governance state but does not call `cancel()` on...",
       "cat": [
         "governance",
@@ -700,10 +585,10 @@
       "invalidWhen": "Cancel propagates to timelock"
     },
     {
-      "id": "general-governance-timelock-bypass-5-storage-collision-attacks-004",
+      "id": "general-governance-timelock-bypass-5-storage-collision-attacks-005",
       "title": "5. Storage Collision Attacks",
       "severity": "CRITICAL",
-      "grep": "cancel(bytes32(0|initialize|bytes32|cancel",
+      "grep": "timelock_controller|cancel(bytes32(0|delay_enforcement|governance_admin|grace_period|cancellation",
       "detect": "The `cancel()` function takes a raw `bytes32` id as input without validation.",
       "cat": [
         "governance",
@@ -733,7 +618,7 @@
       "id": "general-governance-voting-power-manipulation-1-double-voting-via-delegation-000",
       "title": "1. Double Voting via Delegation Abuse",
       "severity": "HIGH",
-      "grep": "getVotes|withdraw|delegate|vote",
+      "grep": "checkpoint_system|governance_token|delegation_logic|voting_system|voting_power|vote_escrow",
       "detect": "When a user delegates their voting power and later withdraws/transfers their stake, there are no restrictions...",
       "cat": [
         "governance",
@@ -763,7 +648,7 @@
       "id": "general-governance-voting-power-manipulation-2-flash-loan-voting-attacks-001",
       "title": "2. Flash Loan Voting Attacks",
       "severity": "CRITICAL",
-      "grep": "countMemberVotes|getVotingPower|castVote|propose|vote",
+      "grep": "checkpoint_system|governance_token|delegation_logic|countMemberVotes|getVotingPower|voting_system",
       "detect": "Voting power is calculated based on current token balance at vote time, rather than a historical snapshot taken before...",
       "cat": [
         "governance",
@@ -793,7 +678,7 @@
       "id": "general-governance-voting-power-manipulation-3-unlimited-vote-minting-002",
       "title": "3. Unlimited Vote Minting",
       "severity": "HIGH",
-      "grep": "_initializeDistributionRecord|initializeDistributionRecord|again",
+      "grep": "_initializeDistributionRecord|initializeDistributionRecord|checkpoint_system|governance_token|delegation_logic|voting_system",
       "detect": "Public initialization functions that mint voting tokens lack proper access control or single-use enforcement, allowing...",
       "cat": [
         "governance",
@@ -822,7 +707,7 @@
       "id": "general-governance-voting-power-manipulation-4-missing-voting-power-snapsho-003",
       "title": "4. Missing Voting Power Snapshots",
       "severity": "HIGH",
-      "grep": "getVotingPower(msg.sender|castVote|propose",
+      "grep": "getVotingPower(msg.sender|checkpoint_system|governance_token|delegation_logic|voting_system|voting_power",
       "detect": "The governance contract uses current voting power (`getVotingPower(msg.sender)`) instead of historical voting power at...",
       "cat": [
         "governance",
@@ -851,7 +736,7 @@
       "id": "general-governance-voting-power-manipulation-5-delegation-logic-errors-004",
       "title": "5. Delegation Logic Errors",
       "severity": "MEDIUM",
-      "grep": "_delegate|Vulnerable|Delegation|Community",
+      "grep": "checkpoint_system|governance_token|delegation_logic|voting_system|voting_power|vote_escrow",
       "detect": "Self-delegation toggles community power",
       "cat": [
         "governance",
@@ -900,7 +785,7 @@
       "id": "general-governance-dao-governance-vulnerabilities-section-1-flash-loan-snapshot--001",
       "title": "Section 1: Flash Loan & Snapshot-Less Voting Power Manipulation",
       "severity": "HIGH",
-      "grep": "getPastVotes(proposalSnapshot|initializeDistributionRecord|getVotes(msg.sender|Governor.castVote|countMemberVotes|castVote",
+      "grep": "getPastVotes(proposalSnapshot|initializeDistributionRecord|GovernorVotesQuorumFraction|getVotes(msg.sender|Governor.castVote|_writeCheckpoint",
       "detect": "Governance contracts that use current token balance (instead of a historical snapshot at proposal creation) for voting...",
       "cat": [
         "governance",
@@ -926,7 +811,7 @@
       "id": "general-governance-dao-governance-vulnerabilities-section-2-quorum-manipulation--002",
       "title": "Section 2: Quorum Manipulation & Threshold Bypass",
       "severity": "HIGH",
-      "grep": "GovernorVotesQuorumFraction(4|VotingToken.delegate|VoteEscrow.withdraw|Governor.propose|quorum",
+      "grep": "GovernorVotesQuorumFraction(4|GovernorVotesQuorumFraction|VotingToken.delegate|VoteEscrow.withdraw|_writeCheckpoint|Governor.propose",
       "detect": "Quorum thresholds calculated dynamically from current total supply (instead of frozen at proposal creation) can be...",
       "cat": [
         "governance",
@@ -952,7 +837,7 @@
       "id": "general-governance-dao-governance-vulnerabilities-section-3-timelock-bypass-unau-003",
       "title": "Section 3: Timelock Bypass & Unauthorized Execution",
       "severity": "CRITICAL",
-      "grep": "TimelockController.executeBatch|Timelock.setGovernor(attacker|Timelock.cancel(operationId|Timelock.cancel(bytes32(0|Timelock.setGovernor|Timelock.setDelay(0",
+      "grep": "TimelockController.executeBatch|Timelock.setGovernor(attacker|Timelock.cancel(operationId|Timelock.cancel(bytes32(0|GovernorVotesQuorumFraction|Timelock.setGovernor",
       "detect": "Timelocks are meant to enforce a mandatory delay between proposal approval and execution.",
       "cat": [
         "governance",
@@ -979,7 +864,7 @@
       "id": "general-governance-dao-governance-vulnerabilities-section-4-delegation-checkpoin-004",
       "title": "Section 4: Delegation & Checkpoint Accounting Bugs",
       "severity": "HIGH",
-      "grep": "VotingToken.withdraw|VotingToken.delegate|VoteEscrow.delegate|_writeCheckpoint|delegatedTokenIds|oldCheckpoint",
+      "grep": "GovernorVotesQuorumFraction|VotingToken.withdraw|VotingToken.delegate|VoteEscrow.delegate|_writeCheckpoint|proposalThreshold",
       "detect": "Vote delegation and checkpoint systems track historical voting power for governance snapshots.",
       "cat": [
         "governance",
@@ -1005,7 +890,7 @@
       "id": "general-governance-dao-governance-vulnerabilities-section-5-proposal-cancellatio-005",
       "title": "Section 5: Proposal Cancellation & Execution Abuse",
       "severity": "MEDIUM",
-      "grep": "AddPartyCardsAuthority.addPartyCards|ArbitraryCallsProposal|Governor.execute|Governor.cancel|Succeeded|Executed",
+      "grep": "AddPartyCardsAuthority.addPartyCards|GovernorVotesQuorumFraction|ArbitraryCallsProposal|_writeCheckpoint|Governor.execute|proposalThreshold",
       "detect": "Proposal lifecycle functions (`cancel`, `execute`, `queue`) with insufficient state validation allow: executing...",
       "cat": [
         "governance",
@@ -1031,7 +916,7 @@
       "id": "general-governance-dao-governance-vulnerabilities-section-6-quadratic-voting-tal-006",
       "title": "Section 6: Quadratic Voting & Tally Errors",
       "severity": "CRITICAL",
-      "grep": "StandardFunding._fundingVote|Governor.state(proposalId|_fundingVote|Succeeded|Defeated",
+      "grep": "StandardFunding._fundingVote|Governor.state(proposalId|GovernorVotesQuorumFraction|_writeCheckpoint|proposalThreshold|_fundingVote",
       "detect": "Quadratic voting systems that fail to properly square individual votes before summing them, or that don't enforce...",
       "cat": [
         "governance",
@@ -1058,7 +943,7 @@
       "id": "general-governance-dao-governance-vulnerabilities-section-7-multisig-safe-module-007",
       "title": "Section 7: Multisig & Safe Module Exploits",
       "severity": "HIGH",
-      "grep": "Safe.execTransactionFromModule|isValidSigner(address(0|Safe.checkNSignatures|Safe.enableModule|checkAfterExecution|enabledModuleCount",
+      "grep": "Safe.execTransactionFromModule|isValidSigner(address(0|GovernorVotesQuorumFraction|Safe.checkNSignatures|Safe.enableModule|checkAfterExecution",
       "detect": "Gnosis Safe modules and signer gate contracts assume module counts remain consistent and that hat owners are always...",
       "cat": [
         "governance",
@@ -1084,7 +969,7 @@
       "id": "general-governance-dao-governance-vulnerabilities-section-8-governance-takeover--008",
       "title": "Section 8: Governance Takeover via Deployment/Factory Bugs",
       "severity": "HIGH",
-      "grep": "master.make_action|elections_master|create_elections|make_action",
+      "grep": "GovernorVotesQuorumFraction|master.make_action|_writeCheckpoint|proposalThreshold|elections_master|create_elections",
       "detect": "When governance contracts accept operations from instances whose deployment origin isn't verified (i.",
       "cat": [
         "governance",
@@ -1105,6 +990,52 @@
       ],
       "antipattern": "make_action() validates address but not deployment origin",
       "validWhen": "When governance contracts accept operations from instances whose deployment origin isn't verified (i.e., anyone can deploy a governance contract with favorable..."
+    },
+    {
+      "id": "general-governance-dao-governance-vulnerabilities-contract-call-graph-signals-011",
+      "title": "Contract / Call Graph Signals",
+      "severity": "LOW",
+      "grep": "GovernorVotesQuorumFraction|_writeCheckpoint|proposalThreshold|scheduleBatch|getPastVotes|votingPower",
+      "detect": "castVote/vote using getVotes(current) instead of getPastVotes(snapshot)",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/dao-governance/DAO_GOVERNANCE_VULNERABILITIES.md",
+      "lines": [
+        713,
+        725
+      ],
+      "check": [
+        "VERIFY: castVote/vote using getVotes(current) instead of getPastVotes(snapshot)"
+      ],
+      "validWhen": "castVote/vote using getVotes(current) instead of getPastVotes(snapshot)"
+    },
+    {
+      "id": "general-governance-dao-governance-vulnerabilities-high-signal-grep-seeds-012",
+      "title": "High-Signal Grep Seeds",
+      "severity": "HIGH",
+      "grep": "GovernorVotesQuorumFraction|ArbitraryCallsProposal|_writeCheckpoint|proposalThreshold|scheduleBatch|getPastVotes",
+      "detect": "GovernorVotesQuorumFraction",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/dao-governance/DAO_GOVERNANCE_VULNERABILITIES.md",
+      "lines": [
+        726,
+        755
+      ],
+      "check": [
+        "VERIFY: GovernorVotesQuorumFraction"
+      ],
+      "validWhen": "GovernorVotesQuorumFraction"
     },
     {
       "id": "general-governance-vetoken-voting-escrow-vulnerabilities-vulnerability-title-000",
@@ -1135,7 +1066,7 @@
       "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-1-bribe-reward-theft-e-001",
       "title": "Section 1: Bribe Reward Theft & Epoch Accounting Exploits",
       "severity": "LOW",
-      "grep": "Voter.claimBribes|getRewardForOwner|Bribe.withdraw|Bribe.deposit|Voter.poke|totalVoting",
+      "grep": "Voter.claimBribes|notifyRewardAmount|getRewardForOwner|Bribe.withdraw|increase_amount|Bribe.deposit",
       "detect": "Bribe contracts distribute rewards based on voting checkpoints recorded per epoch.",
       "cat": [
         "governance",
@@ -1187,7 +1118,7 @@
       "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-3-gauge-voting-emissio-003",
       "title": "Section 3: Gauge Voting & Emission Distribution Exploits",
       "severity": "LOW",
-      "grep": "GaugeController.vote|Voter.updateFor|notifyRewardAmount|Voter.distribute|_updateFor|vote",
+      "grep": "GaugeController.vote|Voter.updateFor|notifyRewardAmount|Voter.distribute|getRewardForOwner|increase_amount",
       "detect": "GaugeController contracts allow users to allocate voting weight across gauges to direct token emissions.",
       "cat": [
         "governance",
@@ -1210,36 +1141,10 @@
       "validWhen": "GaugeController contracts allow users to allocate voting weight across gauges to direct token emissions."
     },
     {
-      "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-4-poke-function-exploi-004",
-      "title": "Section 4: Poke Function Exploits",
-      "severity": "UNKNOWN",
-      "grep": "FluxToken.accrueFlux|onlyNewEpoch|Voter.poke|_vote|vote|poke",
-      "detect": "The `poke()` function updates a user's vote weights based on their current (potentially decayed) veNFT balance.",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/vetoken-governance/VETOKEN_VOTING_ESCROW_VULNERABILITIES.md",
-      "lines": [
-        480,
-        536
-      ],
-      "check": [
-        "VERIFY: poke() function updates a user's vote weights based on their current (potentially decayed) veNFT balance.",
-        "PROVE: *Path A: Unlimited Flux Token Minting via Poke; vote() and reset() have onlyNewEpoch modifier — can only be called once per epoch",
-        "ANTIPATTERN: poke() lacks onlyNewEpoch modifier, can be called repeatedly"
-      ],
-      "antipattern": "poke() lacks onlyNewEpoch modifier, can be called repeatedly",
-      "validWhen": "The poke() function updates a user's vote weights based on their current (potentially decayed) veNFT balance."
-    },
-    {
       "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-5-boost-mechanism-expl-005",
       "title": "Section 5: Boost Mechanism Exploits",
       "severity": "MEDIUM",
-      "grep": "BoostController.getBoostMultiplier|BoostController.delegateBoost|getBoostMultiplier|delegateBoost",
+      "grep": "BoostController.getBoostMultiplier|BoostController.delegateBoost|notifyRewardAmount|getBoostMultiplier|getRewardForOwner|increase_amount",
       "detect": "Boost controllers calculate reward multipliers based on veToken holdings.",
       "cat": [
         "governance",
@@ -1265,7 +1170,7 @@
       "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-6-reward-emission-dist-006",
       "title": "Section 6: Reward & Emission Distribution Bugs",
       "severity": "HIGH",
-      "grep": "Gauge.notifyRewardAmount|Voter.distribute|distributeEx|withdraw|stake",
+      "grep": "Gauge.notifyRewardAmount|notifyRewardAmount|Voter.distribute|getRewardForOwner|increase_amount|depositManaged",
       "detect": "Minter → Voter → Gauge reward pipelines can fail when: distribution functions don't track per-gauge amounts already...",
       "cat": [
         "governance",
@@ -1291,7 +1196,7 @@
       "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-7-checkpoint-voting-po-007",
       "title": "Section 7: Checkpoint & Voting Power Decay Bugs",
       "severity": "HIGH",
-      "grep": "VotingEscrow._checkpoint|Voter.vote|_checkpoint",
+      "grep": "VotingEscrow._checkpoint|notifyRewardAmount|getBoostMultiplier|getRewardForOwner|increase_amount|depositManaged",
       "detect": "VotingEscrow uses checkpoint systems to record point-in-time voting power that decays linearly over lock duration.",
       "cat": [
         "governance",
@@ -1317,7 +1222,7 @@
       "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-8-delegation-nft-opera-008",
       "title": "Section 8: Delegation & NFT Operation Exploits",
       "severity": "MEDIUM",
-      "grep": "VotingEscrow.depositManaged|VotingEscrow.delegate|_extendDuration",
+      "grep": "VotingEscrow.depositManaged|VotingEscrow.delegate|notifyRewardAmount|_extendDuration|getRewardForOwner|increase_amount",
       "detect": "veNFT-based systems allow delegation, merging, and managed deposits.",
       "cat": [
         "governance",
@@ -1340,10 +1245,33 @@
       "validWhen": "veNFT-based systems allow delegation, merging, and managed deposits."
     },
     {
+      "id": "general-governance-vetoken-voting-escrow-vulnerabilities-high-signal-grep-seeds-012",
+      "title": "High-Signal Grep Seeds",
+      "severity": "HIGH",
+      "grep": "_writeVotingCheckpoint|_writeSupplyCheckpoint|notifyRewardAmount|getBoostMultiplier|getRewardForOwner|increase_amount",
+      "detect": "_writeVotingCheckpoint",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/vetoken-governance/VETOKEN_VOTING_ESCROW_VULNERABILITIES.md",
+      "lines": [
+        840,
+        861
+      ],
+      "check": [
+        "VERIFY: _writeVotingCheckpoint"
+      ],
+      "validWhen": "_writeVotingCheckpoint"
+    },
+    {
       "id": "general-governance-stablecoin-vulnerabilities-vulnerability-description-000",
       "title": "Vulnerability Description",
       "severity": "HIGH",
-      "grep": "mint|stablecoin_findings|ChainlinkResponse|safeTransferFrom",
+      "grep": "decimal_normalization|collateral_valuation|oracle_price_feed|depeg_tolerance|stablecoin_peg|pricing_logic",
       "detect": "Stablecoins are treated as permanently pegged to $1 (or to another stablecoin) without real-time price validation.",
       "cat": [
         "governance",
@@ -1369,7 +1297,7 @@
       "id": "general-governance-rug-pull-detection-patterns-rug-pull-malicious-contract-de-000",
       "title": "Rug Pull & Malicious Contract Detection Patterns",
       "severity": "LOW",
-      "grep": "vulnerabilities|PancakeSwap|Marketing|Malicious",
+      "grep": "time_locked_malicious_upgrade|unverified_external_contract|owner_controlled_trading|selfdestruct_capability|malicious_proxy_upgrade|hidden_fee_extraction",
       "detect": "Malicious contracts contain intentionally hidden functionality that allows the contract deployer (or privileged...",
       "cat": [
         "governance",
@@ -1390,33 +1318,10 @@
       "validWhen": "Malicious contracts contain intentionally hidden functionality that allows the contract deployer (or privileged addresses) to"
     },
     {
-      "id": "general-governance-defihacklabs-mev-bot-2022-patterns-agent-quick-view-000",
-      "title": "Agent Quick View",
-      "severity": "HIGH",
-      "grep": "missing_access_control|single_contract",
-      "detect": "Agent Quick View",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/mev-bot/defihacklabs-mev-bot-2022-patterns.md",
-      "lines": [
-        88,
-        99
-      ],
-      "check": [
-        "VERIFY: Pattern Key | mev_bot_callback_exploitation | mev_bot_contract | arbitrary_call | fund_loss"
-      ],
-      "validWhen": "Pattern Key | mev_bot_callback_exploitation | mev_bot_contract | arbitrary_call | fund_loss"
-    },
-    {
-      "id": "general-governance-defihacklabs-mev-bot-2022-patterns-vulnerable-pattern-examples-002",
+      "id": "general-governance-defihacklabs-mev-bot-2022-patterns-vulnerable-pattern-examples-001",
       "title": "Vulnerable Pattern Examples",
       "severity": "HIGH",
-      "grep": "_USDCToWETH|transferFrom|testExploit|getReserves|userData|atomic",
+      "grep": "flash_loan_callback_exploit|callback_validation_failure|arbitrary_call_execution|fake_pair_impersonation|_flashLoanActive|_executeSandwich",
       "detect": "MEV Bot at 0x00000000000a47b1298f18cf67de547bbe0d723f",
       "cat": [
         "governance",
@@ -1438,56 +1343,10 @@
       "validWhen": "The MEV bot processes Balancer flash loan callbacks without verifying that the flash loan was self-initiated."
     },
     {
-      "id": "general-governance-defihacklabs-mev-bot-2022-patterns-keywords-004",
-      "title": "Keywords",
-      "severity": "UNKNOWN",
-      "grep": "arbitrary_call_execution|fake_pair_impersonation|approval_chain_attack|unverified_contract",
-      "detect": "arbitrary_call_execution",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/mev-bot/defihacklabs-mev-bot-2022-patterns.md",
-      "lines": [
-        436,
-        454
-      ],
-      "check": [
-        "VERIFY: arbitrary_call_execution"
-      ],
-      "validWhen": "arbitrary_call_execution"
-    },
-    {
-      "id": "general-governance-mev-bot-vulnerabilities-vulnerability-categories-001",
-      "title": "Vulnerability Categories",
-      "severity": "UNKNOWN",
-      "grep": "Exploitation|Validation|Privileged|Compromise",
-      "detect": "Privileged functions accessible without proper authentication.",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/mev-bot/mev-bot-vulnerabilities.md",
-      "lines": [
-        56,
-        74
-      ],
-      "check": [
-        "VERIFY: Privileged functions accessible without proper authentication."
-      ],
-      "validWhen": "Privileged functions accessible without proper authentication."
-    },
-    {
-      "id": "general-governance-mev-bot-vulnerabilities-vulnerable-pattern-examples-002",
-      "title": "Vulnerable Pattern Examples",
+      "id": "general-governance-mev-bot-vulnerabilities-example-1-0xbad-mev-bot-critic-001",
+      "title": "Example 1: 0xbad MEV Bot [CRITICAL]",
       "severity": "CRITICAL",
-      "grep": "uniswapV3SwapCallback|executeOperation|pancakeCall",
+      "grep": "private_transaction|callback_validation|executeOperation|sandwich_attack|frontrunning|backrunning",
       "detect": "Open callback function without access control",
       "cat": [
         "governance",
@@ -1498,25 +1357,22 @@
       ],
       "ref": "DB/general/mev-bot/mev-bot-vulnerabilities.md",
       "lines": [
-        75,
-        278
+        77,
+        117
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Open callback function without access control",
-        "FALSIFY: Validate callback caller"
+        "VERIFY: Open callback function without access control"
       ],
       "antipattern": "Open callback function without access control",
-      "securePattern": "Validate callback caller",
-      "validWhen": "Open callback function without access control",
-      "invalidWhen": "Validate callback caller"
+      "validWhen": "Open callback function without access control"
     },
     {
-      "id": "general-governance-weak-randomness-vulnerabilities-vulnerability-categories-001",
-      "title": "Vulnerability Categories",
-      "severity": "UNKNOWN",
-      "grep": "block.prevrandao|block.difficulty|block.timestamp|block.number|blockhash",
-      "detect": "Using `block.timestamp`, `block.number`, `block.difficulty` as randomness.",
+      "id": "general-governance-mev-bot-vulnerabilities-example-2-bnb48-mev-bot-critic-002",
+      "title": "Example 2: BNB48 MEV Bot [CRITICAL]",
+      "severity": "CRITICAL",
+      "grep": "private_transaction|callback_validation|sandwich_attack|pancakeCall|frontrunning|backrunning",
+      "detect": "Sandwich bot with exposed execution function",
       "cat": [
         "governance",
         "dao",
@@ -1524,21 +1380,121 @@
         "stablecoin",
         "mev"
       ],
-      "ref": "DB/general/randomness/weak-randomness-vulnerabilities.md",
+      "ref": "DB/general/mev-bot/mev-bot-vulnerabilities.md",
       "lines": [
-        57,
-        75
+        118,
+        149
       ],
+      "neverPrune": true,
       "check": [
-        "VERIFY: Using block.timestamp, block.number, block.difficulty as randomness."
+        "VERIFY: Sandwich bot with exposed execution function"
       ],
-      "validWhen": "Using block.timestamp, block.number, block.difficulty as randomness."
+      "antipattern": "Sandwich bot with exposed execution function",
+      "validWhen": "Sandwich bot with exposed execution function"
     },
     {
-      "id": "general-governance-weak-randomness-vulnerabilities-vulnerable-pattern-examples-002",
-      "title": "Vulnerable Pattern Examples",
+      "id": "general-governance-mev-bot-vulnerabilities-example-3-uniswap-v3-callback--003",
+      "title": "Example 3: Uniswap V3 Callback Exploitation [HIGH]",
+      "severity": "HIGH",
+      "grep": "uniswapV3SwapCallback|private_transaction|callback_validation|sandwich_attack|frontrunning|backrunning",
+      "detect": "Flash swap callback without proper validation",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/mev-bot/mev-bot-vulnerabilities.md",
+      "lines": [
+        150,
+        197
+      ],
+      "check": [
+        "VERIFY: Flash swap callback without proper validation",
+        "FALSIFY: Validate callback caller"
+      ],
+      "antipattern": "Flash swap callback without proper validation",
+      "securePattern": "Validate callback caller",
+      "validWhen": "Flash swap callback without proper validation",
+      "invalidWhen": "Validate callback caller"
+    },
+    {
+      "id": "general-governance-mev-bot-vulnerabilities-example-4-token-approval-expos-004",
+      "title": "Example 4: Token Approval Exposure [HIGH]",
+      "severity": "HIGH",
+      "grep": "private_transaction|callback_validation|emergencyExecute|sandwich_attack|setupApprovals|frontrunning",
+      "detect": "Bot maintains unlimited approvals",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/mev-bot/mev-bot-vulnerabilities.md",
+      "lines": [
+        198,
+        229
+      ],
+      "check": [
+        "VERIFY: Bot maintains unlimited approvals"
+      ],
+      "antipattern": "Bot maintains unlimited approvals",
+      "validWhen": "Bot maintains unlimited approvals"
+    },
+    {
+      "id": "general-governance-mev-bot-vulnerabilities-example-5-private-transaction--005",
+      "title": "Example 5: Private Transaction Leakage [MEDIUM]",
+      "severity": "MEDIUM",
+      "grep": "private_transaction|callback_validation|sandwich_attack|frontrunning|backrunning|mev_bot",
+      "detect": "Real Exploit: Multiple incidents via Flashbots**",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/mev-bot/mev-bot-vulnerabilities.md",
+      "lines": [
+        230,
+        250
+      ],
+      "check": [
+        "VERIFY: Real Exploit: Multiple incidents via Flashbots"
+      ],
+      "validWhen": "Real Exploit: Multiple incidents via Flashbots"
+    },
+    {
+      "id": "general-governance-mev-bot-vulnerabilities-example-6-omnidex-mev-bot-high-006",
+      "title": "Example 6: OmniDex MEV Bot [HIGH]",
+      "severity": "HIGH",
+      "grep": "private_transaction|callback_validation|executeArbitrage|sandwich_attack|frontrunning|backrunning",
+      "detect": "Insufficient validation in arbitrage callback",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/mev-bot/mev-bot-vulnerabilities.md",
+      "lines": [
+        251,
+        278
+      ],
+      "check": [
+        "VERIFY: Insufficient validation in arbitrage callback"
+      ],
+      "antipattern": "Insufficient validation in arbitrage callback",
+      "validWhen": "Insufficient validation in arbitrage callback"
+    },
+    {
+      "id": "general-governance-weak-randomness-vulnerabilities-example-1-block-timestamp-rand-001",
+      "title": "Example 1: Block Timestamp Randomness [CRITICAL]",
       "severity": "CRITICAL",
-      "grep": "pickWinner|buyTicket|tryMint|mint",
+      "grep": "random_number_generation|block.difficulty|block.timestamp|Chainlink_VRF|block.number|commit_reveal",
       "detect": "Predictable randomness from block.",
       "cat": [
         "governance",
@@ -1549,19 +1505,189 @@
       ],
       "ref": "DB/general/randomness/weak-randomness-vulnerabilities.md",
       "lines": [
-        76,
-        404
+        78,
+        118
       ],
       "neverPrune": true,
       "check": [
         "VERIFY: Predictable randomness from block.",
-        "PROVE: RFB uses on-chain pseudorandom fee for buy/sell taxes",
+        "PROVE: Predictable randomness from block.timestamp"
+      ],
+      "antipattern": "Predictable randomness from block.timestamp",
+      "validWhen": "Predictable randomness from block."
+    },
+    {
+      "id": "general-governance-weak-randomness-vulnerabilities-example-2-same-block-predictio-002",
+      "title": "Example 2: Same-Block Prediction [CRITICAL]",
+      "severity": "CRITICAL",
+      "grep": "random_number_generation|block.difficulty|block.timestamp|Chainlink_VRF|block.number|commit_reveal",
+      "detect": "Randomness computable in same transaction",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/randomness/weak-randomness-vulnerabilities.md",
+      "lines": [
+        119,
+        183
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Randomness computable in same transaction"
+      ],
+      "antipattern": "Randomness computable in same transaction",
+      "validWhen": "Randomness computable in same transaction"
+    },
+    {
+      "id": "general-governance-weak-randomness-vulnerabilities-example-3-blockhash-vulnerabil-003",
+      "title": "Example 3: Blockhash Vulnerability [HIGH]",
+      "severity": "HIGH",
+      "grep": "random_number_generation|block.difficulty|block.timestamp|Chainlink_VRF|block.number|commit_reveal",
+      "detect": "blockhash has limitations",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/randomness/weak-randomness-vulnerabilities.md",
+      "lines": [
+        184,
+        230
+      ],
+      "check": [
+        "VERIFY: blockhash has limitations"
+      ],
+      "antipattern": "blockhash has limitations",
+      "validWhen": "blockhash has limitations"
+    },
+    {
+      "id": "general-governance-weak-randomness-vulnerabilities-example-4-prevrandao-misconcep-004",
+      "title": "Example 4: Prevrandao Misconception [HIGH]",
+      "severity": "HIGH",
+      "grep": "random_number_generation|block.difficulty|block.timestamp|Chainlink_VRF|getRandomNumber|block.number",
+      "detect": "prevrandao is not truly random",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/randomness/weak-randomness-vulnerabilities.md",
+      "lines": [
+        231,
+        257
+      ],
+      "check": [
+        "VERIFY: prevrandao is not truly random"
+      ],
+      "antipattern": "prevrandao is not truly random",
+      "validWhen": "prevrandao is not truly random"
+    },
+    {
+      "id": "general-governance-weak-randomness-vulnerabilities-example-5-flawed-commit-reveal-005",
+      "title": "Example 5: Flawed Commit-Reveal [MEDIUM]",
+      "severity": "MEDIUM",
+      "grep": "random_number_generation|block.difficulty|block.timestamp|Chainlink_VRF|block.number|commit_reveal",
+      "detect": "Incomplete commit-reveal implementation",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/randomness/weak-randomness-vulnerabilities.md",
+      "lines": [
+        258,
+        322
+      ],
+      "check": [
+        "VERIFY: Incomplete commit-reveal implementation",
         "FALSIFY: Proper commit-reveal with time locks"
       ],
-      "antipattern": "RFB uses on-chain pseudorandom fee for buy/sell taxes",
+      "antipattern": "Incomplete commit-reveal implementation",
       "securePattern": "Proper commit-reveal with time locks",
-      "validWhen": "Predictable randomness from block.",
+      "validWhen": "Incomplete commit-reveal implementation",
       "invalidWhen": "Proper commit-reveal with time locks"
+    },
+    {
+      "id": "general-governance-weak-randomness-vulnerabilities-example-6-rnd-token-exploit-hi-006",
+      "title": "Example 6: RND Token Exploit [HIGH]",
+      "severity": "HIGH",
+      "grep": "random_number_generation|block.difficulty|block.timestamp|Chainlink_VRF|block.number|commit_reveal",
+      "detect": "Lottery with predictable randomness",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/randomness/weak-randomness-vulnerabilities.md",
+      "lines": [
+        323,
+        355
+      ],
+      "check": [
+        "VERIFY: Lottery with predictable randomness"
+      ],
+      "antipattern": "Lottery with predictable randomness",
+      "validWhen": "Lottery with predictable randomness"
+    },
+    {
+      "id": "general-governance-weak-randomness-vulnerabilities-example-7-rfb-token-determinis-007",
+      "title": "Example 7: RFB Token — Deterministic Fee Brute-Force (December 2022, BSC) [HIGH]",
+      "severity": "HIGH",
+      "grep": "random_number_generation|block.difficulty|block.timestamp|DPPFlashLoanCall|Chainlink_VRF|block.number",
+      "detect": "RFB uses on-chain pseudorandom fee for buy/sell taxes",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/randomness/weak-randomness-vulnerabilities.md",
+      "lines": [
+        356,
+        404
+      ],
+      "check": [
+        "VERIFY: RFB uses on-chain pseudorandom fee for buy/sell taxes"
+      ],
+      "antipattern": "RFB uses on-chain pseudorandom fee for buy/sell taxes",
+      "validWhen": "RFB uses on-chain pseudorandom fee for buy/sell taxes"
+    },
+    {
+      "id": "general-governance-weak-randomness-vulnerabilities-manual-checklist-011",
+      "title": "Manual Checklist",
+      "severity": "HIGH",
+      "grep": "random_number_generation|block.difficulty|block.timestamp|Chainlink_VRF|block.number|commit_reveal",
+      "detect": "[ ] Is randomness needed for high-value decisions?",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/randomness/weak-randomness-vulnerabilities.md",
+      "lines": [
+        532,
+        541
+      ],
+      "check": [
+        "VERIFY: [ ] Is randomness needed for high-value decisions?",
+        "Is randomness needed for high-value decisions?",
+        "Are any block properties (timestamp, number, prevrandao) used?"
+      ],
+      "validWhen": "[ ] Is randomness needed for high-value decisions?"
     }
   ]
 }

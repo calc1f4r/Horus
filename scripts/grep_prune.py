@@ -20,6 +20,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -43,19 +44,31 @@ def detect_language(target_path):
     return [f"*{ext}" for ext, _ in sorted_exts[:2]]
 
 
+def build_search_command(grep_pattern, target_path, include_patterns):
+    """Build a regex-capable search command, preferring ripgrep when available."""
+    rg_path = shutil.which("rg")
+    if rg_path:
+        command = [rg_path, "-n", "-e", grep_pattern]
+        for pat in include_patterns:
+            command.extend(["-g", pat])
+        command.append(target_path)
+        return command
+
+    command = ["grep", "-Ern", grep_pattern, target_path]
+    for pat in include_patterns:
+        command.extend(["--include", pat])
+    return command
+
+
 def grep_card(card, target_path, include_patterns):
     """Run grep for a single card's pattern. Returns list of file:line hits."""
     grep_pattern = card.get("grep", "")
     if not grep_pattern:
         return []
 
-    include_args = []
-    for pat in include_patterns:
-        include_args.extend(["--include", pat])
-
     try:
         result = subprocess.run(
-            ["grep", "-rn", grep_pattern, target_path] + include_args,
+            build_search_command(grep_pattern, target_path, include_patterns),
             capture_output=True, text=True, timeout=10
         )
         if result.returncode == 0 and result.stdout.strip():
@@ -128,7 +141,17 @@ def main():
                 "neverPrune": is_never_prune,
             }
             # Carry through micro-directive fields
-            for field in ["grep", "detect", "check", "antipattern", "securePattern", "cat"]:
+            for field in [
+                "grep",
+                "detect",
+                "check",
+                "antipattern",
+                "securePattern",
+                "validWhen",
+                "invalidWhen",
+                "impact",
+                "cat",
+            ]:
                 if field in card:
                     entry[field] = card[field]
             surviving.append(entry)

@@ -18,8 +18,10 @@ import json
 import os
 import re
 import sys
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
+
+import yaml
 
 DB_DIR = Path(__file__).parent / "DB"
 MANIFEST_DIR = DB_DIR / "manifests"
@@ -38,6 +40,58 @@ CATEGORY_MAP = {
     "zk-rollup": ["zk-rollup"],
     "sui-move": ["Sui-Move-specific"],
 }
+
+IGNORED_MARKDOWN_FILES = {"README.md", "ARTIFACT_INDEX.md"}
+
+STRUCTURAL_H2_TITLES = {
+    "table of contents", "references", "references & source reports",
+    "keywords for search", "related vulnerabilities", "prevention guidelines",
+    "testing requirements", "security research", "technical documentation",
+    "external links", "summary", "conclusion", "appendix",
+    "development best practices", "reference", "change log",
+    "vulnerability categories", "best practices", "agent quick view",
+    "contract / boundary map", "valid bug signals", "false positive guards",
+    "artifact location", "downloaded artifacts summary", "auditor coverage",
+    "protocol coverage",
+}
+
+STRUCTURAL_H3_TITLES = STRUCTURAL_H2_TITLES | {
+    "overview", "attack categories",
+    "secure implementation", "detection patterns", "audit checklist",
+    "code patterns to look for", "impact analysis", "technical impact",
+    "business impact", "affected scenarios", "known exploits",
+    "related cves/reports", "real-world examples", "sub-variant breakdown",
+    "complete defihacklabs exploit table", "top poc references",
+}
+
+TITLE_STOP_WORDS = {
+    "the", "and", "for", "with", "from", "into", "over", "under",
+    "pattern", "patterns", "category", "categories", "vulnerability",
+    "vulnerabilities", "attack", "attacks", "example", "examples",
+    "description", "secure", "implementation", "real", "world",
+    "complete", "table", "references", "reference", "overview",
+}
+
+FRONTMATTER_CODE_FIELDS = (
+    "code_keywords",
+    "primitives",
+    "affected_component",
+    "bridge_attack_vector",
+    "oracle_attack_vector",
+)
+
+FRONTMATTER_SEARCH_FIELDS = (
+    "code_keywords",
+    "primitives",
+    "affected_component",
+    "vulnerability_type",
+    "root_cause_family",
+    "pattern_key",
+    "attack_type",
+    "impact",
+    "bridge_attack_vector",
+    "oracle_attack_vector",
+)
 
 
 def extract_severity_from_context(lines, start, end):
@@ -90,6 +144,126 @@ def extract_root_cause(lines, start, end):
     if m:
         return m.group(1).strip()[:200]
     return None
+
+
+def parse_frontmatter(content):
+    """Parse YAML frontmatter from a markdown document."""
+    fm_match = re.match(r"^---\s*\n(.*?)\n---(?:\s*\n|$)", content, re.DOTALL)
+    if not fm_match:
+        return {}
+    try:
+        data = yaml.safe_load(fm_match.group(1)) or {}
+    except yaml.YAMLError:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def merge_unique(items, limit=None):
+    """Deduplicate strings while preserving order."""
+    merged = []
+    seen = set()
+
+    for item in items:
+        if item is None:
+            continue
+        cleaned = re.sub(r"\s+", " ", str(item).strip().strip('"').strip("'"))
+        if not cleaned:
+            continue
+        key = cleaned.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        merged.append(cleaned)
+        if limit and len(merged) >= limit:
+            break
+
+    return merged
+
+
+def iter_frontmatter_scalars(value):
+    """Yield scalar text values from YAML frontmatter structures."""
+    if value is None:
+        return
+    if isinstance(value, dict):
+        for nested in value.values():
+            yield from iter_frontmatter_scalars(nested)
+        return
+    if isinstance(value, (list, tuple, set)):
+        for nested in value:
+            yield from iter_frontmatter_scalars(nested)
+        return
+
+    text = str(value).strip().strip('"').strip("'")
+    if text:
+        yield text
+
+
+def split_frontmatter_terms(value):
+    """Split YAML frontmatter text on list-like separators."""
+    for raw in iter_frontmatter_scalars(value):
+        for fragment in re.split(r"[|,]", raw):
+            cleaned = fragment.strip().strip('"').strip("'")
+            if cleaned:
+                yield cleaned
+
+
+def humanize_identifier(text):
+    """Convert snake_case / camelCase / namespaced identifiers into readable search terms."""
+    if not text:
+        return ""
+    humanized = str(text)
+    humanized = humanized.replace("::", " ").replace("/", " ").replace(".", " ")
+    humanized = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", humanized)
+    humanized = re.sub(r"[_-]+", " ", humanized)
+    humanized = re.sub(r"\s+", " ", humanized)
+    return humanized.strip().lower()
+
+
+def extract_frontmatter_code_keywords(frontmatter):
+    """Collect grep-friendly identifiers from structured frontmatter fields."""
+    keywords = []
+    for field in FRONTMATTER_CODE_FIELDS:
+        for term in split_frontmatter_terms(frontmatter.get(field)):
+            if len(term) >= 3 and " " not in term:
+                keywords.append(term)
+    return merge_unique(keywords, limit=24)
+
+
+def extract_frontmatter_search_keywords(frontmatter):
+    """Collect semantic search terms from frontmatter for manifest discovery."""
+    keywords = []
+    for field in FRONTMATTER_SEARCH_FIELDS:
+        for term in split_frontmatter_terms(frontmatter.get(field)):
+            if len(term) < 3:
+                continue
+            keywords.append(term.lower())
+            humanized = humanize_identifier(term)
+            if humanized and humanized != term.lower():
+                keywords.append(humanized)
+    return merge_unique(keywords, limit=40)
+
+
+def extract_title_search_keywords(title):
+    """Turn section titles into compact semantic search hints."""
+    cleaned = re.sub(r"\[[^\]]*\]", "", title)
+    cleaned = re.sub(r"\([^\)]*\)", "", cleaned)
+    cleaned = re.sub(r"^(?:pattern|category)\s+\d+(?:\.\d+)*\s*:\s*", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"^\d+(?:\.\d+)*\s*[:.)-]?\s*", "", cleaned)
+    humanized = humanize_identifier(cleaned)
+    tokens = [
+        token for token in re.findall(r"[a-z][a-z0-9]{2,}", humanized)
+        if token not in TITLE_STOP_WORDS
+    ]
+
+    keywords = []
+    if tokens:
+        keywords.extend(tokens)
+        if len(tokens) <= 6:
+            keywords.append(" ".join(tokens))
+            for idx in range(len(tokens) - 1):
+                keywords.append(f"{tokens[idx]} {tokens[idx + 1]}")
+
+    return merge_unique(keywords, limit=16)
 
 
 def parse_md_file(filepath):
@@ -164,38 +338,15 @@ def build_file_manifest(filepath, category):
     if not sections:
         return None
 
-    # Extract frontmatter metadata if present
-    frontmatter = {}
     content = "".join(lines)
-    fm_match = re.match(r"^---\s*\n(.*?)\n---", content, re.DOTALL)
-    if fm_match:
-        for line in fm_match.group(1).split("\n"):
-            kv = line.split(":", 1)
-            if len(kv) == 2:
-                key = kv[0].strip().lstrip("# ")
-                val = kv[1].strip()
-                if key and val:
-                    frontmatter[key] = val
+    frontmatter = parse_frontmatter(content)
+    frontmatter_code_keywords = extract_frontmatter_code_keywords(frontmatter)
+    frontmatter_search_keywords = extract_frontmatter_search_keywords(frontmatter)
 
     # Filter out non-vulnerability structural sections
-    SKIP_H2_TITLES = {
-        "table of contents", "references", "references & source reports",
-        "keywords for search", "related vulnerabilities", "prevention guidelines",
-        "testing requirements", "security research", "technical documentation",
-        "external links", "summary", "conclusion", "appendix",
-        "development best practices", "reference", "change log",
-    }
-    SKIP_H3_TITLES = SKIP_H2_TITLES | {
-        "overview", "attack categories",
-        "secure implementation", "detection patterns", "audit checklist",
-        "code patterns to look for", "impact analysis", "technical impact",
-        "business impact", "affected scenarios", "known exploits",
-        "related cves/reports", "real-world examples",
-    }
-
     def is_h2_vulnerability(sec):
         title_lower = sec["title"].lower().strip()
-        if title_lower in SKIP_H2_TITLES:
+        if title_lower in STRUCTURAL_H2_TITLES:
             return False
         if sec["lineCount"] < 8:
             return False
@@ -203,7 +354,7 @@ def build_file_manifest(filepath, category):
 
     def is_h3_vulnerability(sec):
         title_lower = sec["title"].lower().strip()
-        if title_lower in SKIP_H3_TITLES:
+        if title_lower in STRUCTURAL_H3_TITLES:
             return False
         if sec["lineCount"] < 5:
             return False
@@ -212,38 +363,73 @@ def build_file_manifest(filepath, category):
     patterns = []
     h2_sections = [s for s in sections if s["heading_level"] == 2 and is_h2_vulnerability(s)]
     h3_all = [s for s in sections if s["heading_level"] == 3 and is_h3_vulnerability(s)]
+    h4_all = [s for s in sections if s["heading_level"] == 4 and s["lineCount"] >= 5]
 
     # If there are no good H2s but there are H3s (common in cosmos/template-based files),
     # promote H3s to be the primary patterns
+    primary_sections = h2_sections[:]
     if not h2_sections and h3_all:
-        h2_sections = h3_all
-        h3_all = [s for s in sections if s["heading_level"] == 4 and s["lineCount"] >= 5]
+        primary_sections = h3_all[:]
     # If only a template "Vulnerability Title" H2 wraps everything, use its H3 children instead
     all_h2 = [s for s in sections if s["heading_level"] == 2]
     vuln_title_h2 = [s for s in all_h2 if s["title"].lower().strip() == "vulnerability title"]
     if len(all_h2) <= 2 and len(vuln_title_h2) == 1 and h3_all:
-        h2_sections = h3_all
-        h3_all = [s for s in sections if s["heading_level"] == 4 and s["lineCount"] >= 5]
-
-    h3_sections = h3_all
+        primary_sections = h3_all[:]
+    elif primary_sections:
+        expanded_sections = []
+        for sec in primary_sections:
+            child_h3 = [
+                h3 for h3 in h3_all
+                if h3["lineStart"] > sec["lineStart"] and h3["lineEnd"] <= sec["lineEnd"]
+            ]
+            title_lower = sec["title"].lower().strip()
+            should_promote_children = (
+                len(child_h3) >= 2
+                and (
+                    title_lower.endswith("vulnerabilities")
+                    or "pattern" in title_lower
+                    or "categories" in title_lower
+                    or "examples" in title_lower
+                )
+            )
+            if should_promote_children:
+                expanded_sections.extend(child_h3)
+            else:
+                expanded_sections.append(sec)
+        primary_sections = expanded_sections
 
     # Use H2 as primary patterns, H3 as sub-patterns
-    for idx, sec in enumerate(h2_sections):
+    for idx, sec in enumerate(primary_sections):
         pattern_id = generate_pattern_id(category, filepath.stem, sec["title"], idx)
 
-        # Find child H3 sections
+        child_pool = h3_all if sec["heading_level"] == 2 else h4_all
+
+        # Find child sections one level below the primary section
         children = []
-        for h3 in h3_sections:
-            if h3["lineStart"] > sec["lineStart"] and h3["lineEnd"] <= sec["lineEnd"]:
+        child_title_search_keywords = []
+        for child in child_pool:
+            if child["lineStart"] > sec["lineStart"] and child["lineEnd"] <= sec["lineEnd"]:
+                child_search_keywords = extract_title_search_keywords(child["title"])
+                child_title_search_keywords.extend(child_search_keywords)
                 children.append(
                     {
-                        "title": h3["title"],
-                        "lineStart": h3["lineStart"],
-                        "lineEnd": h3["lineEnd"],
-                        "severity": h3["severity"],
-                        "codeKeywords": h3["codeKeywords"][:8],
+                        "title": child["title"],
+                        "lineStart": child["lineStart"],
+                        "lineEnd": child["lineEnd"],
+                        "severity": child["severity"],
+                        "codeKeywords": child["codeKeywords"][:8],
+                        "searchKeywords": child_search_keywords[:12] if child_search_keywords else None,
                     }
                 )
+
+        pattern_code_keywords = merge_unique(
+            sec["codeKeywords"] + frontmatter_code_keywords,
+            limit=20,
+        )
+        pattern_search_keywords = merge_unique(
+            extract_title_search_keywords(sec["title"]) + child_title_search_keywords + frontmatter_search_keywords,
+            limit=32,
+        )
 
         patterns.append(
             {
@@ -253,7 +439,8 @@ def build_file_manifest(filepath, category):
                 "lineEnd": sec["lineEnd"],
                 "lineCount": sec["lineCount"],
                 "severity": sec["severity"],
-                "codeKeywords": sec["codeKeywords"],
+                "codeKeywords": pattern_code_keywords,
+                "searchKeywords": pattern_search_keywords,
                 "rootCause": sec["rootCause"],
                 "subsections": children if children else None,
             }
@@ -275,7 +462,7 @@ def collect_files_for_category(category, folders):
         folder = DB_DIR / folder_name
         if folder.exists():
             for md_file in sorted(folder.rglob("*.md")):
-                if md_file.name == "README.md":
+                if md_file.name in IGNORED_MARKDOWN_FILES:
                     continue
                 files.append(md_file)
     return files
@@ -331,7 +518,7 @@ def build_lean_router(manifests):
                 {
                     "step": 3,
                     "action": "Find specific patterns",
-                    "detail": "Search manifest patterns by title, severity, codeKeywords. Each pattern has lineStart/lineEnd.",
+                    "detail": "Search manifest patterns by title, severity, codeKeywords, and searchKeywords. Each pattern has lineStart/lineEnd.",
                 },
                 {
                     "step": 4,
@@ -384,7 +571,7 @@ def add_protocol_context(router):
                 "manifests": ["tokens", "general-defi", "oracle", "unique"],
                 "focusPatterns": [
                     "ERC4626", "inflation attack", "first depositor",
-                    "rounding", "share manipulation", "harvest", "strategy"
+                    "rounding", "share price", "harvest", "strategy"
                 ],
             },
             "governance_dao": {
@@ -400,7 +587,7 @@ def add_protocol_context(router):
                 "manifests": ["bridge", "general-infrastructure"],
                 "focusPatterns": [
                     "replay", "message validation", "gas", "trusted remote",
-                    "VAA", "lzReceive", "channel blocking"
+                    "VAA", "lzReceive", "stored payload"
                 ],
             },
             "cosmos_appchain": {
@@ -423,7 +610,7 @@ def add_protocol_context(router):
                 "description": "Perpetual DEXes, options, derivatives",
                 "manifests": ["oracle", "general-defi", "amm"],
                 "focusPatterns": [
-                    "oracle staleness", "price manipulation", "liquidation",
+                    "staleness", "price manipulation", "liquidation",
                     "flash loan", "precision", "funding rate"
                 ],
             },
@@ -432,7 +619,7 @@ def add_protocol_context(router):
                 "manifests": ["general-governance", "tokens", "general-security"],
                 "focusPatterns": [
                     "rug pull", "honeypot", "backdoor", "hidden mint",
-                    "fee extraction", "access control", "proxy hijack"
+                    "fee extraction", "access control", "proxy initialization"
                 ],
             },
             "staking_liquid_staking": {
@@ -458,7 +645,7 @@ def add_protocol_context(router):
                     "UID", "object_id", "dynamic_field", "kiosk",
                     "overflow", "share_price", "package_upgrade",
                     "public_package", "capability", "flash_receipt",
-                    "sui_bridge", "zetachain", "snap_rpc"
+                    "sui_bridge", "cross_chain_bridge", "snap_rpc"
                 ],
             },
         },
@@ -480,6 +667,8 @@ def build_quick_keywords(manifests):
             for pattern in file_entry["patterns"]:
                 # Index by code keywords
                 for kw in pattern.get("codeKeywords", []):
+                    keyword_to_manifests[kw.lower()].add(cat_name)
+                for kw in pattern.get("searchKeywords", []):
                     keyword_to_manifests[kw.lower()].add(cat_name)
                 # Index by significant title words
                 stop_words = {
@@ -852,6 +1041,12 @@ def build_huntcard(pattern, file_path, manifest_name=""):
         "real-world examples summary", "real-world exploits summary",
         "real-world loss summary by category",
         "detection patterns summary", "semgrep detection rules",
+        "best practices", "automation best practices",
+        "vulnerability categories", "agent quick view",
+        "contract / boundary map", "valid bug signals",
+        "false positive guards", "artifact location",
+        "downloaded artifacts summary", "auditor coverage",
+        "protocol coverage",
     }
     if title_lower in ALWAYS_SKIP:
         return None
@@ -874,6 +1069,8 @@ def build_huntcard(pattern, file_path, manifest_name=""):
         return None
     # Skip category index headers ("Category N: ...", "BSC Token Exploit Patterns")
     if re.match(r"^(category\s+\d+|bsc\s+token\s+exploit)", title_lower):
+        return None
+    if re.match(r"^(top\s+poc\s+references|complete\s+.*\s+table|sub-variant\s+breakdown)$", title_lower):
         return None
 
     # Skip sections that are too small to be meaningful vulnerability patterns
@@ -950,6 +1147,8 @@ def build_huntcard(pattern, file_path, manifest_name=""):
     if len(severities) > 1:
         severities_sorted = sorted(severities, key=lambda s: severity_order.get(s, 99))
         top_severity = severities_sorted[0]
+    if top_severity == "UNKNOWN":
+        return None
 
     # ── Category tags ──
     categories = MANIFEST_CATEGORY_MAP.get(manifest_name, ["general"])
