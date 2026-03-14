@@ -21,6 +21,18 @@ When spawned by `audit-orchestrator`:
 2. Read invariants from `audit-output/02-invariants.md` (if available)
 3. Write findings to `audit-output/04d-validation-findings.md` using the Finding Schema from [inter-agent-data-format.md](resources/inter-agent-data-format.md)
 
+### Memory State Integration
+
+When spawned as part of the audit pipeline:
+1. **Read** `audit-output/memory-state.md` before starting — use PATTERN entries to identify recurring code idioms with potential validation gaps, DEAD_END entries to skip already-verified functions
+2. **Write** a memory entry after completing, appended to `audit-output/memory-state.md`:
+   - Entry ID: `MEM-4D-R<round>-VALIDATION-REASONING`
+   - Summary: Validation patterns checked, systematic gaps discovered
+   - Key Insights: Common validation idioms used (or missing) across the codebase
+   - Hypotheses: Functions where validation is surprisingly absent (may indicate deeper design issues)
+   - Dead Ends: Functions where validation was checked and found robust
+   - Open Questions: Cases where validation adequacy depends on external assumptions
+
 ---
 
 ## Rationalizations (Do Not Skip)

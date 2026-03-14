@@ -50,6 +50,92 @@ Spawned by `audit-orchestrator` with:
 
 Output: `audit-output/04a-reasoning-findings.md`
 
+### Memory State Integration
+
+This agent manages memory context in both standalone and pipeline modes. Read the full memory architecture in [memory-state.md](resources/memory-state.md).
+
+#### Standalone Mode (invoked directly, no orchestrator)
+
+When invoked as a standalone agent (not spawned by `audit-orchestrator`), this agent **owns the memory lifecycle**:
+
+1. **Initialize** `audit-output/memory-state.md` at the start of Phase A:
+   ```markdown
+   # Audit Memory State
+   > Cumulative knowledge from all agents across all phases. Read this BEFORE starting your work.
+   > Last updated: <timestamp> by protocol-reasoning (standalone)
+
+   ## Phase 0: Standalone Initialization
+   ### MEM-0-STANDALONE-INIT: Protocol reasoning standalone run
+   - **Agent**: protocol-reasoning
+   - **Phase**: 0 — Initialization
+   - **Type**: INSIGHT
+
+   #### Summary
+   Standalone reasoning-based vulnerability discovery. Target: <path>.
+   Protocol type: <type or "auto-detect">.
+   Context source: <01-context.md if exists, otherwise self-built>.
+   Reasoning seeds: <count from DB + count from memory hypotheses>.
+   ```
+
+2. **Propagate memory between rounds** — each round reads accumulated memory and writes new entries:
+   - Phase A (self) → writes `MEM-A-CONTEXT-SEEDS` with loaded context quality, seed count, domain structure
+   - Phase B (self) → writes `MEM-B-DOMAIN-MAP` with domain decomposition, seed-to-domain assignments
+   - Phase C Round 1 (fan-out) → each domain sub-agent reads memory, writes per-domain entry
+   - Post-Round 1 (self) → consolidates domain entries, identifies cross-domain leads
+   - Phase D Round 2 (fan-out) → cross-domain sub-agents read all memory including Round 1 dead ends
+   - Post-Round 2 (self) → consolidates, checks convergence
+   - Phase E Round 3 (fan-out) → edge case sub-agents read all memory to avoid re-testing covered boundaries
+   - Phase F Round 4 (self) → reads entire memory trail for completeness analysis
+
+3. **Per-round consolidation** — after each round completes:
+   - Read all domain/cross-domain sub-agent memory entries for that round
+   - Identify CONVERGENCE: which assumption layers have been fully explored across all domains?
+   - Surface CROSS-DOMAIN LEADS: domain A's hypothesis + domain B's insight → new investigation target
+   - Write `MEM-4B-R<N>-CONSOLIDATION` entry with coverage map and next-round priorities
+
+4. **Write final memory entry** after all rounds complete (same format as pipeline mode below)
+
+#### Pipeline Mode (spawned by audit-orchestrator)
+
+When spawned as part of the audit pipeline:
+1. **Read** `audit-output/memory-state.md` before starting — use HYPOTHESIS entries as reasoning seeds alongside DB seeds, DEAD_END entries to avoid re-analyzing verified-safe paths, PATTERN entries to understand code idioms
+2. **Merge memory hypotheses with DB seeds** — memory HYPOTHESIS entries become additional assumption seeds, categorized by the same 5 layers (Input, State, Ordering, Economic, Environmental)
+3. **Propagate** relevant pipeline memory entries into every domain sub-agent spawn prompt
+4. **Write per-round memory entries** throughout execution (not just one final entry)
+5. **Write** a final memory entry after completing, appended to `audit-output/memory-state.md`:
+   - Entry ID: `MEM-4B-R<round>-PROTOCOL-REASONING`
+   - Summary: Reasoning paths explored, domains decomposed, findings generated
+   - Key Insights: Cross-domain interactions discovered, assumption layers violated
+   - Hypotheses: Reasoning paths that are promising but need validation by other streams (e.g., "if X is true in module A, then module B may be vulnerable to Y")
+   - Dead Ends: Reasoning paths fully explored with no vulnerability found — include why
+   - Open Questions: Assumptions that couldn't be verified from code alone
+
+#### Internal Memory Flow Diagram
+
+```
+Phase A-B (self)           Round 1 (fan-out)           Consolidation           Round 2 (fan-out)
+┌──────────────┐          ┌─────────────────────┐      ┌──────────────┐       ┌───────────────────┐
+│ MEM-A-CONTEXT│          │ MEM-C-R1-DOMAIN-    │      │ MEM-4B-R1-   │       │ MEM-D-R2-XDOMAIN │
+│ -SEEDS       │─────────▶│  Oracle             │──┐   │ CONSOLIDATION│──────▶│  Oracle×Vault     │
+│              │          │ MEM-C-R1-DOMAIN-    │  │   │              │       │ MEM-D-R2-XDOMAIN │
+│ MEM-B-DOMAIN │          │  Vault              │  ├──▶│ Cross-domain │       │  Lending×Oracle   │
+│ -MAP         │─────────▶│ MEM-C-R1-DOMAIN-    │  │   │ leads found  │       │  ...              │
+│              │          │  Lending            │  │   │ Coverage map │       │                   │
+│ Seed catalog │          │  ...                │──┘   │ Dead ends    │       │ Reads: all prior  │
+│ Domain map   │          │ Each writes memory  │      │              │       │ + consolidation   │
+└──────────────┘          └─────────────────────┘      └──────────────┘       └───────────────────┘
+                                                              │
+                                                              ▼
+ Round 3 (edge cases)      Round 4 (completeness)      Final
+ ┌───────────────────┐    ┌──────────────────────┐    ┌──────────────────┐
+ │ Edge case agents   │    │ Self: reads ENTIRE   │    │ MEM-4B-FINAL-    │
+ │ read: dead ends    │    │ memory trail for     │    │ PROTOCOL-REASONING│
+ │ from R1+R2 to skip│    │ invariant coverage   │    │                  │
+ │ verified boundaries│    │ + adversarial review │    │ All findings     │
+ └───────────────────┘    └──────────────────────┘    │ Full memory trail│
+                                                       └──────────────────┘
+```
+
 ---
 
 ## Workflow
@@ -81,7 +167,22 @@ Read:
   - audit-output/01-context.md (architecture, functions, state variables, actors)
   - audit-output/02-invariants.md (invariant specifications)
   - audit-output/03-findings-raw.md (existing DB-matched findings — avoid duplication)
+  - audit-output/memory-state.md (accumulated knowledge — hypotheses become reasoning seeds)
 ```
+
+#### Memory-Enhanced Seed Loading
+
+After loading DB reasoning seeds (Step 2-3), merge memory HYPOTHESIS entries as additional seeds:
+
+```
+For each HYPOTHESIS entry in memory-state.md:
+  1. Classify by assumption layer: Input, State, Ordering, Economic, Environmental
+  2. Convert to seed format: "<hypothesis statement> — source: <memory entry ID>"
+  3. Append to the appropriate seed catalog category
+  4. If the hypothesis names specific code (file:line), assign to the matching domain
+```
+
+This means late-pipeline reasoning benefits from early-pipeline observations. A context builder's hypothesis about "fee calculation may truncate" becomes a concrete reasoning seed assigned to the fee-handling domain.
 
 ### Step 2: Load Pre-Computed Reasoning Seeds
 
@@ -182,6 +283,19 @@ For EVERY public/external function:
 2. Trace consequences of each violated assumption
 3. For MEDIUM+ exploitable consequences: provide reachability proof + impact
 
+★ MEMORY STATE:
+Read audit-output/memory-state.md before analysis. Use to:
+- Skip code paths marked DEAD_END by prior agents (confirmed safe)
+- Prioritize HYPOTHESIS areas from context building and invariant phases
+- Understand PATTERN entries about the team's coding style
+After completing, append a memory entry to audit-output/memory-state.md:
+  Entry ID: MEM-C-R1-DOMAIN-<DOMAIN_NAME>
+  Type: INSIGHT
+  Summary: Assumption layers explored, key findings, reachability results
+  Hypotheses: Cross-domain leads ("if function X in my domain is called after Y in another domain...")
+  Dead Ends: Assumption layers fully explored with no violation found (with brief justification)
+  Affected Code: Functions analyzed with line ranges
+
 Return findings using Finding Schema with reachability proofs.
 ```
 
@@ -190,8 +304,39 @@ Return findings using Finding Schema with reachability proofs.
 After all domain sub-agents return:
 1. Collect and deduplicate findings by root cause
 2. Cross-reference against `03-findings-raw.md` — mark Phase 4 duplicates
-3. **Count new unique findings this round**
-4. If 0 new findings → consider stopping early (convergence)
+3. **Read all `MEM-C-R1-DOMAIN-*` memory entries** — identify cross-domain leads
+4. **Count new unique findings this round**
+5. If 0 new findings → consider stopping early (convergence)
+
+#### Memory Consolidation: Post-Round 1
+
+Write a consolidation entry to `audit-output/memory-state.md`:
+
+```markdown
+### MEM-4B-R1-CONSOLIDATION: Round 1 reasoning synthesis
+- **Agent**: protocol-reasoning (self)
+- **Phase**: 4B — Round 1 consolidation
+- **Type**: INSIGHT
+
+#### Summary
+<N domains analyzed, M findings generated. Assumption layers covered: <list>.>
+
+#### Cross-Domain Leads
+- <Domain A hypothesis + Domain B context → potential cross-domain vulnerability>
+
+#### Assumption Layer Coverage
+| Domain | Input | State | Ordering | Economic | Environmental |
+|--------|-------|-------|----------|----------|---------------|
+| Oracle | ✓ | ✓ | partial | — | ✓ |
+| Vault  | ✓ | partial | ✓ | ✓ | — |
+
+#### Dead Ends (verified safe paths)
+- <Aggregated from all domain sub-agents>
+
+#### Priority for Round 2
+- <Cross-domain pairs to investigate based on leads>
+- <Partial assumption layers to complete>
+```
 
 ---
 
@@ -228,6 +373,18 @@ ROUND 1 FINDINGS: <relevant findings summary>
 ROUND: 2 — Cross-Domain Analysis
 Read resources/reasoning-skills.md (Cross-Function Interaction Patterns).
 
+★ MEMORY STATE:
+Read audit-output/memory-state.md — particularly MEM-4B-R1-CONSOLIDATION for:
+- Cross-domain leads that specifically involve YOUR domain pair
+- Dead ends from Round 1 domain analysis (don't re-analyze what's confirmed safe)
+- Hypotheses from individual domain sub-agents about cross-domain interactions
+After completing, append a memory entry:
+  Entry ID: MEM-D-R2-XDOMAIN-<DOMAIN_A>-<DOMAIN_B>
+  Type: INSIGHT
+  Summary: Cross-domain interaction analysis results
+  Hypotheses: Multi-step attack paths that need Round 3 boundary testing
+  Dead Ends: Cross-domain interactions verified as safe
+
 Analyze: data flow trust, state coupling, temporal coupling, trust mismatches.
 Return cross-domain findings with reachability proofs spanning BOTH domains.
 ```
@@ -235,6 +392,10 @@ Return cross-domain findings with reachability proofs spanning BOTH domains.
 ### Convergence Check
 
 Count new unique findings from Round 2. If 0 new findings AND Round 1 had ≤3 findings → skip Rounds 3-4 (convergence). Otherwise continue.
+
+#### Memory Consolidation: Post-Round 2
+
+Write `MEM-4B-R2-CONSOLIDATION` following the same template as Round 1, adding cross-domain coverage map.
 
 ---
 
@@ -258,11 +419,24 @@ ROUND: 3 — Edge Cases
 Test every function with: zero/empty state, maximum values,
 first-use scenarios, initialization/migration, concurrent access.
 For each MEDIUM+ exploitable edge case, provide reachability proof.
+
+★ MEMORY STATE:
+Read audit-output/memory-state.md — use Round 1-2 dead ends to skip already-tested
+boundaries. Focus on edge cases NOT covered by prior rounds.
+After completing, append a memory entry:
+  Entry ID: MEM-E-R3-EDGE-<DOMAIN_NAME>
+  Type: INSIGHT
+  Summary: Edge cases tested, boundary conditions verified or violated
+  Dead Ends: Boundary conditions confirmed safe (with specific test values)
 ```
 
 ### Convergence Check
 
 Count new unique findings from Round 3. If 0 AND Round 2 also had 0 → skip Round 4 (convergence).
+
+#### Memory Consolidation: Post-Round 3
+
+Write `MEM-4B-R3-CONSOLIDATION` with edge case coverage summary and remaining gaps for Round 4.
 
 ---
 
@@ -270,6 +444,14 @@ Count new unique findings from Round 3. If 0 AND Round 2 also had 0 → skip Rou
 
 **Agent**: Self (reviews all prior findings) + spawns targeted sub-agents for gaps
 **Focus**: What did we miss?
+
+### Step 0: Read Full Memory Trail
+
+Before starting completeness analysis, read the **entire** `audit-output/memory-state.md`. This is the only round where the agent itself reads all accumulated entries (Rounds 1-3 wrote entries; Round 4 consumes them). Use the memory trail to:
+- **Identify coverage gaps**: Which assumption layers are still partial/missing in the consolidation coverage table?
+- **Follow unresolved hypotheses**: Which HYPOTHESIS entries from Rounds 1-3 were never confirmed or refuted?
+- **Check dead-end completeness**: Are there any dead-end entries that contradict each other?
+- **Extract attack chain candidates**: Combine hypotheses from different rounds/domains into multi-step attack paths
 
 ### Step 1: Invariant Coverage Analysis
 
