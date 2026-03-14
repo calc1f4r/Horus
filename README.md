@@ -332,6 +332,133 @@ See [CodebaseStructure.md](CodebaseStructure.md) for the full branch-to-category
 
 ---
 
+## Install as a Claude Code Plugin
+
+This repository is a native [Claude Code plugin](https://code.claude.com/docs/en/plugins). Install it to get all 30 agents directly accessible via the `/vulnerability-db-agents:` namespace.
+
+### Prerequisites
+
+- [Claude Code](https://code.claude.com/docs/en/quickstart) v1.0.33+
+- Git
+
+### Option 1: Clone + Load
+
+```bash
+# Clone the repository
+git clone https://github.com/calc1f4r/Vulnerability-database.git
+
+# Launch Claude Code with the plugin loaded
+claude --plugin-dir ./Vulnerability-database
+```
+
+### Option 2: Load from an Existing Claude Code Session
+
+If you already have the repo cloned, load it on-the-fly:
+
+```
+/plugin install /path/to/Vulnerability-database
+```
+
+### Using Skills
+
+Once the plugin is loaded, all skills are namespaced under `vulnerability-db-agents:`:
+
+```bash
+# Run a full audit
+/vulnerability-db-agents:audit-orchestrator /path/to/contracts lending_protocol
+
+# Hunt for known vulnerability patterns
+/vulnerability-db-agents:invariant-catcher /path/to/contracts
+
+# Write a PoC for a finding
+/vulnerability-db-agents:poc-writing <finding-description>
+
+# Validate a finding against Sherlock criteria
+/vulnerability-db-agents:sherlock-judging <finding-file>
+
+# Generate Medusa fuzzing harnesses
+/vulnerability-db-agents:medusa-fuzzing <invariants-file>
+
+# Fetch reports from Solodit
+/vulnerability-db-agents:solodit-fetching <topic>
+```
+
+### Using Agents
+
+Agents are available in `/agents` and Claude can invoke them automatically:
+
+```bash
+# List all available agents
+/agents
+
+# Invoke an agent directly
+/agent audit-orchestrator /path/to/contracts
+```
+
+### All Available Skills
+
+| Skill | Category | Description |
+|---|---|---|
+| `audit-orchestrator` | Orchestration | Entry point — 11-phase audit pipeline with 20+ sub-agents |
+| `audit-context-building` | Orchestration | Deep line-by-line codebase analysis coordinator |
+| `db-quality-monitor` | Orchestration | Monitors 4-tier architecture integrity and auto-remediates |
+| `invariant-writer` | Invariants | Dual-mode invariant extraction: positive + adversarial |
+| `invariant-reviewer` | Invariants | Reviews and hardens invariants for FV readiness |
+| `invariant-indexer` | Invariants | Indexes canonical invariants from production DeFi protocols |
+| `invariant-catcher` | Hunting | DB-powered vulnerability pattern hunting in parallel shards |
+| `protocol-reasoning` | Hunting | Deep reasoning-based vulnerability discovery |
+| `missing-validation-reasoning` | Hunting | Input validation and hygiene scanner |
+| `multi-persona-orchestrator` | Hunting | 6 parallel auditing personas with cross-verification |
+| `poc-writing` | Output | Writes compilable exploit tests (Foundry, Hardhat, Anchor, etc.) |
+| `issue-writer` | Output | Polishes findings into submission-ready write-ups |
+| `variant-template-writer` | Output | Converts audit reports into DB entries |
+| `medusa-fuzzing` | Verification | Generates Medusa property test harnesses |
+| `certora-verification` | Verification | Generates Certora CVL formal specs |
+| `halmos-verification` | Verification | Generates Halmos symbolic test suites |
+| `certora-sui-move-verification` | Verification | Generates Certora CVLM specs for Sui Move |
+| `sui-prover-verification` | Verification | Generates Sui Prover specs for Sui Move |
+| `sherlock-judging` | Judging | Validates findings against Sherlock criteria |
+| `cantina-judge` | Judging | Validates findings against Cantina criteria |
+| `code4rena-judge` | Judging | Validates findings against Code4rena criteria |
+| `solodit-fetching` | Data | Fetches raw findings from Solodit/Cyfrin API |
+
+### Plugin Structure
+
+```
+Vulnerability-database/              ← Plugin root
+├── .claude-plugin/
+│   └── plugin.json                  ← Plugin manifest (name, version, description)
+├── .claude/
+│   ├── agents/                      ← 30 agent definitions
+│   ├── skills/                      ← 30 matching skill wrappers
+│   ├── resources/                   ← 34 shared reference files
+│   └── rules/                       ← 8 path-scoped rules
+├── settings.json                    ← Default settings (activates audit-orchestrator)
+├── DB/                              ← Vulnerability database (1,674 patterns)
+└── README.md
+```
+
+### Updating
+
+```bash
+cd /path/to/Vulnerability-database && git pull
+```
+
+### Developing / Testing Locally
+
+```bash
+# Load your local clone during development
+claude --plugin-dir ./Vulnerability-database
+
+# Reload after making changes (inside Claude Code)
+/reload-plugins
+
+# Debug plugin loading
+claude --debug --plugin-dir ./Vulnerability-database
+```
+
+---
+
 ## Getting Started
 
 ### Adding New Entries
