@@ -193,7 +193,7 @@ For unique files:
 
 #### A. DB Entry
 
-Follow [TEMPLATE.md](../TEMPLATE.md). At minimum:
+Follow [TEMPLATE.md](../../TEMPLATE.md). At minimum:
 
 1. Preserve PoC path and supporting report links in the references table.
 2. Put the canonical root cause, pattern key, and high-signal code keywords near the top.

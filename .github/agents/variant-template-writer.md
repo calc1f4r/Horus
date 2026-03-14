@@ -38,23 +38,24 @@ Analysis Progress:
 
 Output an index table:
 
-| Report | Type | Severity | Root Cause Family | Component | Trigger / Sink | Notes |
-|--------|------|----------|-------------------|-----------|----------------|-------|
-| file1.md | finding | HIGH | {family} | {component} | {trigger -> sink} | {dedupe/context note} |
+| Report | Type | Severity | Root Cause Family | Interaction Scope | Component | Path / Sink | Notes |
+|--------|------|----------|-------------------|-------------------|-----------|-------------|-------|
+| file1.md | finding | HIGH | {family} | {scope} | {component} | {entry -> sink} | {dedupe/context note} |
 
 ### Phase 2: Deduplicate And Form Fine-Grained Buckets
 
 1. Collapse hard duplicates using source identifiers and exact source links
 2. Review soft duplicates using normalized title + protocol + root cause + code-shape overlap
-3. Bucket only unique `finding` reports by `patternKey`: `missing control | affected component | trigger primitive | sink / invariant break`
-4. Split broad topic folders into separate buckets whenever the component, trigger, or sink differs, even if the reports share surface terms like `ERC4626` or `missing validation`
+3. Bucket only unique `finding` reports by family-level `patternKey`: `missing control | interaction scope | affected component | trigger primitive | sink / invariant break`
+4. Within each family bucket, sub-bucket by `pathKey`: `patternKey | entry surface | contract hop set`
+5. Split broad topic folders into separate buckets whenever the interaction scope, component, trigger, contract set, or sink differs, even if the reports share surface terms like `ERC4626` or `missing validation`
 5. If a bucket contains 15+ unique findings, chunk it into groups of 5-10 for focused analysis
 
 Output a bucket table:
 
-| Pattern Key | Unique Findings | Duplicates | Severity Range | Example Reports |
-|-------------|-----------------|------------|----------------|-----------------|
-| {patternKey} | {n} | {d} | {LOW-HIGH} | file1.md, file2.md |
+| Pattern Key | Path Keys | Unique Findings | Duplicates | Severity Range | Example Reports |
+|-------------|-----------|-----------------|------------|----------------|-----------------|
+| {patternKey} | {pathKeyA, pathKeyB} | {n} | {d} | {LOW-HIGH} | file1.md, file2.md |
 
 ### Phase 3: Deep Read By Bucket
 
@@ -64,6 +65,10 @@ For each unique `finding` in a bucket, extract:
 |-------|----------------|
 | Vulnerable code | Exact code snippets |
 | Root cause | Fundamental issue (use [root cause analysis](resources/root-cause-analysis.md)) |
+| Interaction scope | Single-contract, multi-contract, cross-protocol, cross-chain |
+| Contract set | Contracts / modules / programs materially involved |
+| Entry surface | User-callable function, callback, admin path, bridge message, etc. |
+| Boundary type | Callback, adapter, proxy, oracle, bridge, external token, etc. |
 | Missing control | Exact missing guard / validation |
 | Affected component | Contract, module, function family |
 | Trigger primitive | Attacker action or enabling condition |
@@ -78,15 +83,16 @@ For each unique `finding` in a bucket, extract:
 
 Build a matrix to surface consensus and outliers:
 
-| Report | Pattern Key | Severity | Duplicate Status | Unique Aspects |
-|--------|-------------|----------|------------------|----------------|
-| {report1} | {patternKey} | {sev} | unique | {what's different} |
-| {report2} | {patternKey} | {sev} | soft duplicate | {what's different} |
+| Report | Pattern Key | Path Key | Interaction Scope | Severity | Duplicate Status | Unique Aspects |
+|--------|-------------|----------|-------------------|----------|------------------|----------------|
+| {report1} | {patternKey} | {pathKey} | {scope} | {sev} | unique | {what's different} |
+| {report2} | {patternKey} | {pathKey} | {scope} | {sev} | soft duplicate | {what's different} |
 
 Identify:
 - **Consensus**: Common pattern across 3+ unique findings
 - **Severity range**: Using LOWEST rating across unique supporting findings (see [severity rules](resources/vector-search-optimization.md))
 - **Variants**: Different manifestations of the same root cause family after fine-grained bucketing
+- **Path families**: Reports that share one `patternKey` but need separate `pathKey` values because entry surfaces or contract hop sets differ
 - **Outliers**: Files that look related by keyword but are actually different patterns, duplicates, or non-findings
 
 ### Phase 5: Pattern Synthesis
@@ -96,6 +102,8 @@ For each pattern, document:
 ```
 Pattern: {name}
 Pattern key: {missing control} | {component} | {trigger} | {sink}
+Interaction scope: {single_contract|multi_contract|cross_protocol|cross_chain}
+Contracts involved: {ContractA, ContractB, ContractC}
 Unique evidence: {X} findings from {A} auditor(s) across {P} protocol(s)
 Duplicate/supporting files: {D}
 Severity consensus: {rating} (lowest across unique supporting findings)
@@ -104,6 +112,10 @@ Root cause statement: "This vulnerability exists because [MISSING] in [COMPONENT
 Variants:
 1. {Variant A} ({n} unique findings) — {code shape}
 2. {Variant B} ({n} unique findings) — {code shape}
+
+Path families:
+1. {Path A key} — {entry surface} — {contract hop set} — {sink}
+2. {Path B key} — {entry surface} — {contract hop set} — {sink}
 
 Impact across reports:
 - Technical: {common impacts with frequency}
@@ -119,15 +131,17 @@ Before writing a new file, search `DB/**/*.md` for an existing entry with the sa
 
 Key requirements:
 1. **YAML frontmatter** with all required fields, including `root_cause_family`, `pattern_key`, and `code_keywords`
-2. **References table** linking every example back to its source report file path and preserving source identifiers when available
-3. **Agent Quick View** near the top with root cause statement, pattern key, validation strength, primary component, typical sink, and high-signal keywords
-4. **Valid Bug Signals** and **False Positive Guards** so low-context agents can triage and falsify quickly
-5. **Attack Scenario / Path Variants** split into `Path A / B / C` when there are materially different exploit routes
-6. **5+ vulnerable pattern examples** — each from a REAL unique finding, labeled with severity
-7. **2-3 secure implementations** with explanations
-8. **Impact analysis** with frequency data: `Unfair liquidations (3/12 unique findings)`
-9. **Detection patterns** derived from actual vulnerable code, plus grep-able `code_keywords`
-10. **10+ keywords** for vector search (see [optimization guide](resources/vector-search-optimization.md))
+2. **Conditional interaction fields** for multi-contract or multi-path issues: `interaction_scope`, `involved_contracts`, and `path_keys`
+3. **References table** linking every example back to its source report file path and preserving source identifiers when available
+4. **Agent Quick View** near the top with root cause statement, pattern key, validation strength, primary component, interaction scope, path keys, and high-signal keywords
+5. **Contract / Boundary Map** for issues that cross contracts, adapters, callbacks, proxies, or bridge boundaries
+6. **Valid Bug Signals** and **False Positive Guards** so low-context agents can triage and falsify quickly
+7. **Attack Scenario / Path Variants** split into `Path A / B / C` when there are materially different exploit routes
+8. **5+ vulnerable pattern examples** — each from a REAL unique finding, labeled with severity
+9. **2-3 secure implementations** with explanations
+10. **Impact analysis** with frequency data: `Unfair liquidations (3/12 unique findings)`
+11. **Detection patterns** derived from actual vulnerable code, plus grep-able `code_keywords`
+12. **10+ keywords** for vector search (see [optimization guide](resources/vector-search-optimization.md))
 
 Migration rules:
 1. **Prefer in-place migration** when a legacy DB entry already covers the pattern
@@ -154,6 +168,9 @@ Verification Gate:
 - [ ] Existing overlapping DB entries were searched before deciding to create a new file
 - [ ] Any touched legacy entry was migrated using the [entry migration guide](resources/entry-migration-guide.md)
 - [ ] The first ~150 lines contain enough context for a low-window agent to triage the pattern
+- [ ] Multi-contract issues record `interaction_scope`, `involved_contracts`, and a `Contract / Boundary Map`
+- [ ] Multi-path issues use one family-level `pattern_key` and distinct `path_keys` instead of collapsing all routes together
+- [ ] Same root cause across different contract hop sets was not merged blindly into one path variant
 - [ ] `Valid Bug Signals` and `False Positive Guards` are evidence-backed, not generic filler
 - [ ] Distinct exploit routes are split into explicit path variants when the root cause can be reached multiple ways
 - [ ] Code examples are syntactically correct

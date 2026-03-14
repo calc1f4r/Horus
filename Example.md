@@ -27,6 +27,32 @@ primitives:
   - pull_oracle
   - EMA_price
 
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_staleness_check | oracle_price_feed | getPriceUnsafe | stale_price_consumption
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - getPriceUnsafe
+  - getPriceNoOlderThan
+  - publishTime
+  - updatePriceFeeds
+  - getPrice
+  - price.conf
+  - price.expo
+  - maxAge
+  - getUpdateFee
+  - parsePriceFeedUpdates
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+# involved_contracts:         # Uncomment for multi_contract patterns
+#   - ContractA
+#   - ContractB
+# path_keys:                  # Uncomment for multi-path patterns
+#   - pattern_key | entry_surface_1 | contract_hop_set
+#   - pattern_key | entry_surface_2 | contract_hop_set
+
 # Impact Classification (Required)
 severity: critical|high|medium|low
 impact: incorrect_pricing|fund_loss|dos|manipulation|liquidation
@@ -114,6 +140,41 @@ version: all
 
 **A Complete Pattern-Matching Guide for Pyth Oracle Security Audits**
 
+### Overview
+
+Pyth oracle integration vulnerabilities arise when protocols consuming Pyth pull-based price data fail to validate price freshness, confidence intervals, exponent normalization, or enforce single-price-per-transaction semantics. These missing validations enable stale price exploitation, same-transaction arbitrage, self-liquidation attacks, and cascading mispricing.
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because protocols consuming Pyth oracle data fail to validate price freshness, confidence intervals, exponent normalization, or enforce single-price-per-transaction semantics."
+- Pattern key: `missing_staleness_check | oracle_price_feed | getPriceUnsafe | stale_price_consumption`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `PythOracle adapter / price consumer contract`
+- High-signal code keywords: `getPriceUnsafe, getPriceNoOlderThan, publishTime, price.conf, price.expo, updatePriceFeeds, getUpdateFee`
+- Typical sink / impact: `stale/manipulated price → fund loss / unfair liquidation / arbitrage`
+- Validation strength: `weak` (most integrations miss at least one check)
+
+#### Contract / Boundary Map
+
+- Entry surface(s): `getPrice()`, `deposit()`, `liquidate()`, `executeOrder()`
+- Contract hop(s): `UserContract.getPrice -> PythOracle.getPriceUnsafe -> IPyth(endpoint)`
+- Trust boundary crossed: `oracle` (external data dependency on off-chain Pyth publisher network)
+- Shared state or sync assumption: `on-chain price cache is fresh relative to real market price`
+
+#### Valid Bug Signals
+
+- Signal 1: `getPriceUnsafe()` is called without any subsequent `publishTime` check against `block.timestamp`
+- Signal 2: `getPriceNoOlderThan()` is called with `type(uint64).max` or a very large constant as maxAge
+- Signal 3: `price.conf` is never read or compared to `price.price` magnitude
+- Signal 4: `price.expo` is ignored and raw `price.price` is used directly without scaling
+- Signal 5: `updatePriceFeeds()` is callable by the user immediately before paired deposit/withdraw operations
+
+#### False Positive Guards
+
+- Not this bug when: protocol uses Chainlink (push oracle) — Pyth-specific patterns do not apply
+- Safe if: `getPriceNoOlderThan()` is used with a reasonable maxAge (< 300 seconds)
+- Safe if: confidence ratio check exists (`price.conf * 10000 / abs(price.price) < threshold`)
+- Requires attacker control of: price update submission timing (standard for Pyth pull model — any external user can submit)
 
 ---
 
@@ -275,6 +336,28 @@ function getSafePriceWithUpdate(
 ```
 
 ### Detection Patterns
+
+#### High-Signal Grep Seeds
+```
+getPriceUnsafe
+getPriceNoOlderThan
+publishTime
+price.conf
+price.expo
+updatePriceFeeds
+getUpdateFee
+parsePriceFeedUpdates
+maxAge
+pyth.getPrice
+```
+
+#### Contract / Call Graph Signals
+```
+- External call to Pyth endpoint in price-sensitive path
+- User-callable updatePriceFeeds() before state-changing operation
+- Same oracle adapter used for paired deposit/withdraw without per-block caching
+- Price consumer trusts on-chain cache without freshness bound
+```
 
 #### Code Patterns to Look For
 ```
@@ -611,12 +694,39 @@ Pyth's pull-based model allows multiple price updates within a single transactio
 
 The protocol doesn't enforce that the same price is used throughout a transaction, or allows users to update prices between operations. Unlike push oracles, Pyth prices can be updated by anyone at any time.
 
-#### Attack Scenario
+#### Attack Scenario / Path Variants
 
+**Path A: [LP Deposit-Withdraw Arbitrage]**
+Path key: `missing_price_consistency | single_contract | deposit | stale_price_consumption`
+Entry surface: `deposit()` / `withdraw()`
+Contracts touched: `LPPool -> PythOracle`
+Boundary crossed: `oracle`
 1. Attacker collects two valid Pyth price signatures at different timestamps
-2. In a single transaction: update to price1 → deposit/open position → update to price2 → withdraw/close position
-3. Profit = position_size * (price2 - price1) - fees
-4. Attack is risk-free and can be amplified with flash loans
+2. Updates to price1 → deposits into LP pool
+3. Updates to price2 → withdraws from LP pool
+4. Profit = position_size * (price2 - price1) - fees
+
+**Path B: [Swap Function Arbitrage]**
+Path key: `missing_price_consistency | single_contract | swap | stale_price_consumption`
+Entry surface: `swapExactTokensForTokens()`
+Contracts touched: `DEX -> PythOracle`
+Boundary crossed: `oracle`
+1. Swap without updating price (uses old price)
+2. Update oracle to new price
+3. Swap in reverse direction at new price
+4. Net profit from price difference
+
+**Path C: [Perpetual Position Open-Close]**
+Path key: `missing_price_consistency | single_contract | openPosition | stale_price_consumption`
+Entry surface: `openPosition()` / `closePosition()`
+Contracts touched: `PerpDEX -> PythOracle`
+Boundary crossed: `oracle`
+1. Open leveraged position at favorable price
+2. Update oracle to different price
+3. Close position at new price
+4. Amplified profit via leverage
+
+> All paths are risk-free and can be amplified with flash loans.
 
 ### Vulnerable Pattern Examples
 

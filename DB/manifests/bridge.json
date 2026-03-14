@@ -3,7 +3,7 @@
     "category": "bridge",
     "description": "Pattern-level index for bridge vulnerabilities",
     "fileCount": 10,
-    "totalPatterns": 82,
+    "totalPatterns": 84,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
   },
   "files": [
@@ -1078,54 +1078,171 @@
     },
     {
       "file": "DB/bridge/custom/defihacklabs-bridge-2022-patterns.md",
-      "totalLines": 370,
+      "totalLines": 452,
       "frontmatter": {
-        "protocol": "\"generic\"",
-        "chain": "\"ethereum, bsc, moonriver\"",
-        "category": "\"bridge\"",
-        "vulnerability_type": "\"bridge_verification_bypass\"",
-        "attack_type": "\"logical_error\"",
-        "affected_component": "\"message_verification, deposit_validation, cross_chain_relay\"",
-        "severity": "\"critical\"",
-        "impact": "\"fund_loss\"",
+        "protocol": "generic",
+        "chain": "ethereum, bsc, moonriver",
+        "category": "bridge",
+        "vulnerability_type": "bridge_verification_bypass",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "missing_proof_validation | bridge_message_handler | deposit_or_process | fund_loss",
+        "interaction_scope": "cross_chain",
+        "attack_type": "logical_error",
+        "affected_component": "message_verification, deposit_validation, cross_chain_relay",
+        "severity": "critical",
+        "impact": "fund_loss",
         "exploitability": "0.8",
-        "financial_impact": "\"critical\"",
-        "language": "\"solidity\"",
+        "financial_impact": "critical",
+        "language": "solidity",
         "version": "\">=0.8.0\""
       },
-      "patternCount": 7,
+      "patternCount": 6,
       "patterns": [
         {
-          "id": "bridge-defihacklabs-bridge-2022-patterns-1-zero-hash-trusted-root-messa-000",
-          "title": "1. Zero-Hash Trusted Root — Message Proof Bypass",
-          "lineStart": 62,
-          "lineEnd": 111,
-          "lineCount": 50,
+          "id": "bridge-defihacklabs-bridge-2022-patterns-overview-000",
+          "title": "Overview",
+          "lineStart": 92,
+          "lineEnd": 130,
+          "lineCount": 39,
+          "severity": [
+            "CRITICAL",
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "MeterBridgeHandler.deposit",
+            "QBridge.deposit",
+            "Replica.process",
+            "address(0",
+            "amount",
+            "bytes32(0",
+            "contractWhitelist",
+            "cross_chain",
+            "deposit",
+            "msg.value",
+            "process",
+            "strong"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 96,
+              "lineEnd": 107,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "cross_chain",
+                "strong"
+              ]
+            },
+            {
+              "title": "Contract / Boundary Map",
+              "lineStart": 108,
+              "lineEnd": 114,
+              "severity": [],
+              "codeKeywords": [
+                "MeterBridgeHandler.deposit",
+                "QBridge.deposit",
+                "Replica.process"
+              ]
+            },
+            {
+              "title": "Valid Bug Signals",
+              "lineStart": 115,
+              "lineEnd": 121,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "address(0",
+                "amount",
+                "bytes32(0",
+                "contractWhitelist",
+                "msg.value"
+              ]
+            },
+            {
+              "title": "False Positive Guards",
+              "lineStart": 122,
+              "lineEnd": 130,
+              "severity": [],
+              "codeKeywords": [
+                "address(0",
+                "deposit",
+                "process"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-defihacklabs-bridge-2022-patterns-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 131,
+          "lineEnd": 274,
+          "lineCount": 144,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
-            "MessageStatus.Proven",
+            "MeterBridgeHandler.deposit",
             "Replica.process(modifiedMessage",
-            "bytes32(0",
-            "process"
+            "address(0",
+            "amount",
+            "atomic",
+            "contractWhitelist",
+            "deposit",
+            "msg.value",
+            "process",
+            "resourceID",
+            "resourceIDToTokenContractAddress",
+            "staged",
+            "transferFrom"
           ],
-          "rootCause": "During a routine upgrade, the Nomad Replica contract was initialized with a trusted root of `0x00` (zero hash). In the message verification logic, any unproven message defaults to `bytes32(0)` for its",
+          "rootCause": "Three variations of missing validation in bridge verification:\n\n\n\n1. **Zero-hash trusted root (Nomad)**: During a routine upgrade the Replica contract was initialized with `confirmAt[bytes32(0)]` set ",
           "subsections": [
             {
-              "title": "Attack Scenario",
-              "lineStart": 68,
-              "lineEnd": 76,
-              "severity": [],
+              "title": "Root Cause",
+              "lineStart": 133,
+              "lineEnd": 142,
+              "severity": [
+                "LOW"
+              ],
               "codeKeywords": [
-                "Replica.process(modifiedMessage"
+                "address(0",
+                "amount",
+                "deposit",
+                "msg.value",
+                "process",
+                "resourceID",
+                "transferFrom"
+              ]
+            },
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 143,
+              "lineEnd": 189,
+              "severity": [
+                "CRITICAL"
+              ],
+              "codeKeywords": [
+                "MeterBridgeHandler.deposit",
+                "Replica.process(modifiedMessage",
+                "address(0",
+                "atomic",
+                "contractWhitelist",
+                "msg.value",
+                "resourceID",
+                "resourceIDToTokenContractAddress"
               ]
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 77,
-              "lineEnd": 111,
+              "lineStart": 190,
+              "lineEnd": 274,
               "severity": [
                 "CRITICAL",
                 "LOW"
@@ -1135,84 +1252,28 @@
           ]
         },
         {
-          "id": "bridge-defihacklabs-bridge-2022-patterns-2-native-token-deposit-fakery--001",
-          "title": "2. Native Token Deposit Fakery — address(0) Whitelisting",
-          "lineStart": 112,
-          "lineEnd": 149,
-          "lineCount": 38,
-          "severity": [
-            "CRITICAL",
-            "LOW"
-          ],
-          "codeKeywords": [
-            "Deposit",
-            "address(0",
-            "contractWhitelist",
-            "deposit",
-            "msg.value",
-            "resourceID"
-          ],
-          "rootCause": "Qubit's QBridge mapped the ETH `resourceID` to `address(0)` in the deposit handler, and `address(0)` was whitelisted in `contractWhitelist`. The `deposit()` function did not validate that actual ETH w",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 118,
-              "lineEnd": 149,
-              "severity": [
-                "CRITICAL"
-              ],
-              "codeKeywords": []
-            }
-          ]
-        },
-        {
-          "id": "bridge-defihacklabs-bridge-2022-patterns-3-native-token-wrapping-bypass-002",
-          "title": "3. Native Token Wrapping Bypass",
-          "lineStart": 150,
-          "lineEnd": 193,
-          "lineCount": 44,
-          "severity": [
-            "CRITICAL",
-            "LOW"
-          ],
-          "codeKeywords": [
-            "msg.value"
-          ],
-          "rootCause": "Bridge deposit handlers that support both native tokens (ETH/BNB) and ERC20 tokens must correctly enforce that `msg.value` matches the deposited amount for native token deposits. When the handler bran",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 156,
-              "lineEnd": 193,
-              "severity": [
-                "CRITICAL",
-                "LOW"
-              ],
-              "codeKeywords": []
-            }
-          ]
-        },
-        {
-          "id": "bridge-defihacklabs-bridge-2022-patterns-impact-analysis-003",
+          "id": "bridge-defihacklabs-bridge-2022-patterns-impact-analysis-002",
           "title": "Impact Analysis",
-          "lineStart": 194,
-          "lineEnd": 216,
-          "lineCount": 23,
+          "lineStart": 275,
+          "lineEnd": 301,
+          "lineCount": 27,
           "severity": [
+            "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
-            "address(0"
+            "address(0",
+            "msg.value"
           ],
           "rootCause": null,
           "subsections": null
         },
         {
-          "id": "bridge-defihacklabs-bridge-2022-patterns-secure-implementation-004",
+          "id": "bridge-defihacklabs-bridge-2022-patterns-secure-implementation-003",
           "title": "Secure Implementation",
-          "lineStart": 217,
-          "lineEnd": 295,
-          "lineCount": 79,
+          "lineStart": 302,
+          "lineEnd": 371,
+          "lineCount": 70,
           "severity": [],
           "codeKeywords": [
             "deposit",
@@ -1223,33 +1284,54 @@
           "subsections": null
         },
         {
-          "id": "bridge-defihacklabs-bridge-2022-patterns-detection-patterns-005",
+          "id": "bridge-defihacklabs-bridge-2022-patterns-detection-patterns-004",
           "title": "Detection Patterns",
-          "lineStart": 296,
-          "lineEnd": 321,
-          "lineCount": 26,
-          "severity": [],
-          "codeKeywords": [
-            "address(0",
-            "amount"
+          "lineStart": 372,
+          "lineEnd": 416,
+          "lineCount": 45,
+          "severity": [
+            "HIGH"
           ],
-          "rootCause": null,
-          "subsections": null
-        },
-        {
-          "id": "bridge-defihacklabs-bridge-2022-patterns-real-world-examples-006",
-          "title": "Real-World Examples",
-          "lineStart": 322,
-          "lineEnd": 338,
-          "lineCount": 17,
-          "severity": [],
-          "codeKeywords": [],
+          "codeKeywords": [
+            "address(0"
+          ],
           "rootCause": null,
           "subsections": [
             {
-              "title": "Related Major Bridge Exploits (Not in DeFiHackLabs)",
-              "lineStart": 332,
-              "lineEnd": 338,
+              "title": "Contract / Call Graph Signals",
+              "lineStart": 374,
+              "lineEnd": 381,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "High-Signal Grep Seeds",
+              "lineStart": 382,
+              "lineEnd": 395,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "bridge-defihacklabs-bridge-2022-patterns-real-world-examples-005",
+          "title": "Real-World Examples",
+          "lineStart": 417,
+          "lineEnd": 437,
+          "lineCount": 21,
+          "severity": [],
+          "codeKeywords": [
+            "address(0",
+            "resourceID"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Related Entries",
+              "lineStart": 430,
+              "lineEnd": 437,
               "severity": [],
               "codeKeywords": []
             }
@@ -1259,145 +1341,168 @@
     },
     {
       "file": "DB/bridge/custom/defihacklabs-bridge-l2-replay-2022-patterns.md",
-      "totalLines": 410,
+      "totalLines": 454,
       "frontmatter": {
-        "protocol": "Multi-Protocol",
-        "chain": "Ethereum, Optimism, Harmony",
+        "protocol": "generic",
+        "chain": "ethereum, optimism, harmony",
         "category": "bridge",
-        "vulnerability_type": "Bridge and Cross-Chain Security Patterns",
-        "source": "DeFiHackLabs",
-        "total_exploits_analyzed": "3",
-        "total_losses": "\"$115M+\"",
-        "severity": "CRITICAL",
-        "impact": "Full bridge drain, token theft, address takeover",
-        "exploitability": "Medium to High",
-        "financial_impact": "\"$115M+ aggregate\""
+        "vulnerability_type": "cross_chain_identity_and_custody",
+        "root_cause_family": "identity_and_custody_assumption",
+        "pattern_key": "cross_chain_identity_mismatch | deployment_or_custody | deterministic_address_or_threshold | fund_loss",
+        "interaction_scope": "cross_chain",
+        "attack_type": "logical_error",
+        "affected_component": "cross_chain_deployment, multisig_custody, token_identity",
+        "severity": "critical",
+        "impact": "fund_loss",
+        "exploitability": "0.6",
+        "financial_impact": "critical",
+        "language": "solidity",
+        "version": "\">=0.6.0\""
       },
-      "patternCount": 8,
+      "patternCount": 6,
       "patterns": [
         {
           "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-overview-000",
           "title": "Overview",
-          "lineStart": 48,
-          "lineEnd": 58,
-          "lineCount": 11,
+          "lineStart": 96,
+          "lineEnd": 133,
+          "lineCount": 38,
           "severity": [
-            "HIGH"
-          ],
-          "codeKeywords": [],
-          "rootCause": null,
-          "subsections": null
-        },
-        {
-          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-vulnerability-description-001",
-          "title": "Vulnerability Description",
-          "lineStart": 59,
-          "lineEnd": 104,
-          "lineCount": 46,
-          "severity": [
-            "HIGH"
+            "HIGH",
+            "LOW"
           ],
           "codeKeywords": [
-            "CREATE"
+            "MultiSigWallet.submitTransaction",
+            "ProxyFactory.createProxy",
+            "cTUSD.sweepToken",
+            "cross_chain",
+            "strong"
           ],
           "rootCause": null,
           "subsections": [
             {
-              "title": "Root Cause Analysis",
-              "lineStart": 61,
-              "lineEnd": 70,
+              "title": "Agent Quick View",
+              "lineStart": 100,
+              "lineEnd": 111,
               "severity": [
-                "HIGH"
+                "HIGH",
+                "LOW"
               ],
               "codeKeywords": [
-                "CREATE"
+                "cross_chain",
+                "strong"
               ]
             },
             {
-              "title": "Attack Scenarios",
-              "lineStart": 71,
-              "lineEnd": 104,
+              "title": "Contract / Boundary Map",
+              "lineStart": 112,
+              "lineEnd": 118,
+              "severity": [],
+              "codeKeywords": [
+                "MultiSigWallet.submitTransaction",
+                "ProxyFactory.createProxy",
+                "cTUSD.sweepToken"
+              ]
+            },
+            {
+              "title": "Valid Bug Signals",
+              "lineStart": 119,
+              "lineEnd": 124,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "False Positive Guards",
+              "lineStart": 125,
+              "lineEnd": 133,
               "severity": [],
               "codeKeywords": []
             }
           ]
         },
         {
-          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-vulnerable-pattern-examples-002",
-          "title": "Vulnerable Pattern Examples",
-          "lineStart": 105,
-          "lineEnd": 221,
-          "lineCount": 117,
+          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 134,
+          "lineEnd": 269,
+          "lineCount": 136,
           "severity": [
             "CRITICAL",
             "LOW"
           ],
           "codeKeywords": [
             "CREATE",
-            "ProxyFactory",
+            "atomic",
+            "confirmTransaction(txId",
             "createProxy",
             "sweepToken",
-            "testExploit"
+            "sweepToken(tusdLegacy",
+            "testExploit",
+            "transfer",
+            "tusdLegacy.transfer"
           ],
-          "rootCause": null,
+          "rootCause": "Three vulnerabilities exploiting identity assumptions in cross-chain and cross-contract contexts:\n\n\n\n1. **CREATE nonce determinism across chains (Optimism/Wintermute)**: Addresses created via `CREATE`",
           "subsections": [
             {
-              "title": "Pattern 1: Cross-Chain Address Collision via CREATE Nonce Replay",
-              "lineStart": 107,
-              "lineEnd": 141,
-              "severity": [
-                "CRITICAL"
-              ],
+              "title": "Root Cause",
+              "lineStart": 136,
+              "lineEnd": 145,
+              "severity": [],
               "codeKeywords": [
                 "CREATE",
-                "ProxyFactory",
                 "createProxy",
-                "testExploit"
+                "sweepToken",
+                "transfer"
               ]
             },
             {
-              "title": "Pattern 2: Compromised Multisig Keys with Low Threshold",
-              "lineStart": 142,
-              "lineEnd": 183,
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 146,
+              "lineEnd": 189,
               "severity": [
                 "CRITICAL",
                 "LOW"
               ],
               "codeKeywords": [
-                "testExploit"
+                "atomic",
+                "confirmTransaction(txId",
+                "sweepToken",
+                "sweepToken(tusdLegacy",
+                "tusdLegacy.transfer"
               ]
             },
             {
-              "title": "Pattern 3: Token Proxy Dual-Address Bypass on Sweep Function",
-              "lineStart": 184,
-              "lineEnd": 221,
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 190,
+              "lineEnd": 269,
               "severity": [
                 "CRITICAL"
               ],
               "codeKeywords": [
-                "sweepToken",
                 "testExploit"
               ]
             }
           ]
         },
         {
-          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-impact-analysis-003",
+          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-impact-analysis-002",
           "title": "Impact Analysis",
-          "lineStart": 222,
-          "lineEnd": 233,
-          "lineCount": 12,
-          "severity": [],
+          "lineStart": 270,
+          "lineEnd": 295,
+          "lineCount": 26,
+          "severity": [
+            "LOW"
+          ],
           "codeKeywords": [],
           "rootCause": null,
           "subsections": null
         },
         {
-          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-secure-implementation-004",
+          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-secure-implementation-003",
           "title": "Secure Implementation",
-          "lineStart": 234,
-          "lineEnd": 351,
-          "lineCount": 118,
+          "lineStart": 296,
+          "lineEnd": 374,
+          "lineCount": 79,
           "severity": [
             "HIGH"
           ],
@@ -1409,157 +1514,316 @@
             "sweepToken"
           ],
           "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-detection-patterns-004",
+          "title": "Detection Patterns",
+          "lineStart": 375,
+          "lineEnd": 420,
+          "lineCount": 46,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
           "subsections": [
             {
-              "title": "Fix 1: Use CREATE2 with Immutable Salt for Cross-Chain Deployments",
-              "lineStart": 236,
-              "lineEnd": 269,
+              "title": "Contract / Call Graph Signals",
+              "lineStart": 377,
+              "lineEnd": 384,
               "severity": [],
-              "codeKeywords": [
-                "createProxyWithNonce"
-              ]
+              "codeKeywords": []
             },
             {
-              "title": "Fix 2: Higher Multisig Threshold + Time Delays for Bridges",
-              "lineStart": 270,
-              "lineEnd": 317,
+              "title": "High-Signal Grep Seeds",
+              "lineStart": 385,
+              "lineEnd": 400,
               "severity": [
                 "HIGH"
               ],
-              "codeKeywords": [
-                "confirmUnlock",
-                "submitUnlock"
-              ]
-            },
-            {
-              "title": "Fix 3: Comprehensive Token Identity Check for Sweep",
-              "lineStart": 318,
-              "lineEnd": 351,
-              "severity": [],
-              "codeKeywords": [
-                "initializeUnderlyingAddresses",
-                "sweepToken"
-              ]
+              "codeKeywords": []
             }
           ]
         },
         {
-          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-detection-patterns-005",
-          "title": "Detection Patterns",
-          "lineStart": 352,
-          "lineEnd": 385,
-          "lineCount": 34,
-          "severity": [],
+          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-real-world-examples-005",
+          "title": "Real-World Examples",
+          "lineStart": 421,
+          "lineEnd": 441,
+          "lineCount": 21,
+          "severity": [
+            "MEDIUM"
+          ],
           "codeKeywords": [],
           "rootCause": null,
           "subsections": [
             {
-              "title": "Static Analysis",
-              "lineStart": 354,
-              "lineEnd": 372,
-              "severity": [],
-              "codeKeywords": []
-            },
-            {
-              "title": "Invariant Checks",
-              "lineStart": 373,
-              "lineEnd": 385,
+              "title": "Related Entries",
+              "lineStart": 434,
+              "lineEnd": 441,
               "severity": [],
               "codeKeywords": []
             }
           ]
-        },
-        {
-          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-audit-checklist-006",
-          "title": "Audit Checklist",
-          "lineStart": 386,
-          "lineEnd": 397,
-          "lineCount": 12,
-          "severity": [],
-          "codeKeywords": [],
-          "rootCause": null,
-          "subsections": null
-        },
-        {
-          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-real-world-examples-007",
-          "title": "Real-World Examples",
-          "lineStart": 398,
-          "lineEnd": 407,
-          "lineCount": 10,
-          "severity": [],
-          "codeKeywords": [],
-          "rootCause": null,
-          "subsections": null
         }
       ]
     },
     {
       "file": "DB/bridge/custom/defihacklabs-bridge-patterns.md",
-      "totalLines": 361,
+      "totalLines": 467,
       "frontmatter": {
-        "protocol": "bridge",
+        "protocol": "generic",
         "chain": "ethereum, bsc, polygon, multi-chain",
-        "category": "bridge_exploit",
-        "vulnerability_type": "cross_chain_bridge_bypass",
-        "attack_type": "bridge_logic_flaw",
-        "affected_component": "cross_chain_messenger, signature_verification",
+        "category": "bridge",
+        "vulnerability_type": "cross_chain_access_control_bypass",
+        "root_cause_family": "missing_access_control",
+        "pattern_key": "unrestricted_cross_chain_target | bridge_executor | privileged_call | validator_takeover",
+        "interaction_scope": "cross_chain",
+        "attack_type": "logical_error",
+        "affected_component": "cross_chain_messenger, signature_verification, keeper_management",
         "severity": "critical",
-        "impact": "fund_loss, total_control",
+        "impact": "fund_loss",
         "exploitability": "0.7",
         "financial_impact": "critical",
-        "source": "DeFiHackLabs",
-        "total_exploits_analyzed": "3",
-        "total_losses": "\"$617M+\""
+        "language": "solidity",
+        "version": "\">=0.6.0\""
       },
-      "patternCount": 1,
+      "patternCount": 6,
       "patterns": [
         {
-          "id": "bridge-defihacklabs-bridge-patterns-defihacklabs-bridge-exploit-pa-000",
-          "title": "DeFiHackLabs Bridge Exploit Patterns Compendium",
-          "lineStart": 38,
-          "lineEnd": 305,
-          "lineCount": 268,
+          "id": "bridge-defihacklabs-bridge-patterns-overview-000",
+          "title": "Overview",
+          "lineStart": 87,
+          "lineEnd": 125,
+          "lineCount": 39,
           "severity": [
-            "CRITICAL",
             "HIGH",
             "LOW"
           ],
           "codeKeywords": [
+            "addKeeper",
+            "address(this",
+            "chainId",
+            "cross_chain",
+            "receive",
+            "strong",
+            "verifyHeaderAndExecuteTx"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Agent Quick View",
+              "lineStart": 91,
+              "lineEnd": 102,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "cross_chain",
+                "strong"
+              ]
+            },
+            {
+              "title": "Contract / Boundary Map",
+              "lineStart": 103,
+              "lineEnd": 109,
+              "severity": [],
+              "codeKeywords": [
+                "addKeeper",
+                "receive",
+                "verifyHeaderAndExecuteTx"
+              ]
+            },
+            {
+              "title": "Valid Bug Signals",
+              "lineStart": 110,
+              "lineEnd": 116,
+              "severity": [],
+              "codeKeywords": [
+                "address(this",
+                "chainId"
+              ]
+            },
+            {
+              "title": "False Positive Guards",
+              "lineStart": 117,
+              "lineEnd": 125,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "address(this",
+                "chainId"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-defihacklabs-bridge-patterns-vulnerability-description-001",
+          "title": "Vulnerability Description",
+          "lineStart": 126,
+          "lineEnd": 297,
+          "lineCount": 172,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "ChainswapBridge.addKeeper",
+            "ChainswapBridge.receive",
             "EthCrossChainData",
             "EthCrossChainData.putCurEpochConPubKeyBytes",
             "EthCrossChainManager",
+            "EthCrossChainManager.verifyHeaderAndExecuteTx",
+            "LockProxy.unlock",
             "_executeCrossChainTx",
+            "addKeeper",
+            "address(this",
+            "atomic",
+            "chainId",
+            "onlyOwner",
             "putCurEpochConPubKeyBytes",
-            "receive",
-            "toContract",
-            "verifyHeaderAndExecuteTx"
+            "receive"
           ],
-          "rootCause": "EthCrossChainManager can execute on ANY target contract",
+          "rootCause": "Two distinct access-control failures in bridge architectures:\n\n\n\n1. **Unrestricted cross-chain message targets**: The bridge executor contract (`EthCrossChainManager`) can call ANY contract, including",
           "subsections": [
             {
-              "title": "Root Cause Categories",
-              "lineStart": 44,
-              "lineEnd": 50,
+              "title": "Root Cause",
+              "lineStart": 128,
+              "lineEnd": 135,
+              "severity": [],
+              "codeKeywords": [
+                "EthCrossChainData",
+                "EthCrossChainManager"
+              ]
+            },
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 136,
+              "lineEnd": 183,
+              "severity": [
+                "CRITICAL",
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "ChainswapBridge.addKeeper",
+                "ChainswapBridge.receive",
+                "EthCrossChainData.putCurEpochConPubKeyBytes",
+                "EthCrossChainManager.verifyHeaderAndExecuteTx",
+                "LockProxy.unlock",
+                "_executeCrossChainTx",
+                "addKeeper",
+                "address(this"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 184,
+              "lineEnd": 297,
+              "severity": [
+                "CRITICAL",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_executeCrossChainTx",
+                "addKeeper",
+                "putCurEpochConPubKeyBytes",
+                "receive"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bridge-defihacklabs-bridge-patterns-impact-analysis-002",
+          "title": "Impact Analysis",
+          "lineStart": 298,
+          "lineEnd": 320,
+          "lineCount": 23,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "abi.encodePacked",
+            "address(this",
+            "chainId"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "bridge-defihacklabs-bridge-patterns-secure-implementation-003",
+          "title": "Secure Implementation",
+          "lineStart": 321,
+          "lineEnd": 393,
+          "lineCount": 73,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "addKeeper",
+            "executeCrossChainTx",
+            "receive"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "bridge-defihacklabs-bridge-patterns-detection-patterns-004",
+          "title": "Detection Patterns",
+          "lineStart": 394,
+          "lineEnd": 434,
+          "lineCount": 41,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "address(this",
+            "chainId"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Contract / Call Graph Signals",
+              "lineStart": 396,
+              "lineEnd": 403,
               "severity": [],
               "codeKeywords": []
             },
             {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 51,
-              "lineEnd": 208,
+              "title": "High-Signal Grep Seeds",
+              "lineStart": 404,
+              "lineEnd": 415,
               "severity": [
-                "CRITICAL"
+                "HIGH"
               ],
-              "codeKeywords": [
-                "EthCrossChainData",
-                "EthCrossChainData.putCurEpochConPubKeyBytes",
-                "EthCrossChainManager",
-                "_executeCrossChainTx",
-                "addKeeper",
-                "putCurEpochConPubKeyBytes",
-                "receive",
-                "toContract"
-              ]
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "bridge-defihacklabs-bridge-patterns-real-world-examples-005",
+          "title": "Real-World Examples",
+          "lineStart": 435,
+          "lineEnd": 454,
+          "lineCount": 20,
+          "severity": [],
+          "codeKeywords": [
+            "_executeCrossChainTx",
+            "addKeeper",
+            "ecrecover",
+            "onlyKeeper"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Related Entries",
+              "lineStart": 447,
+              "lineEnd": 454,
+              "severity": [],
+              "codeKeywords": []
             }
           ]
         }
