@@ -2,10 +2,10 @@
   "meta": {
     "manifest": "general-defi",
     "description": "Compressed hunt cards for general-defi — one-line detection rules for bulk scanning",
-    "totalCards": 196,
-    "skipped": 123,
+    "totalCards": 220,
+    "skipped": 128,
     "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 196
+    "enriched": 220
   },
   "cards": [
     {
@@ -5190,6 +5190,657 @@
       "securePattern": "Reentrancy guard and pause modifier",
       "validWhen": "update() callable during swap callback",
       "invalidWhen": "Reentrancy guard and pause modifier"
+    },
+    {
+      "id": "general-defi-perpetuals-derivatives-vulnerabilities-1-liquidation-mechanism-failur-000",
+      "title": "1. Liquidation Mechanism Failures",
+      "severity": "LOW",
+      "grep": "liquidate(ownPosition|calculateLiquidationReward|validateSelfLiquidate|debtInCollateralToken|getUnderlyingPrice|selfLiquidate",
+      "detect": "Liquidation functions either force full position closure (blocking whale liquidation), allow the position holder to...",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md",
+      "lines": [
+        250,
+        425
+      ],
+      "check": [
+        "VERIFY: Liquidation functions either force full position closure (blocking whale liquidation), allow the position holder to profit from their own...",
+        "PROVE: *Path A: [No Partial Liquidation → Bad Debt Accumulation]; Whale opens massive position, minting large debt",
+        "FALSIFY: Ensures minimum reward covers gas costs",
+        "IMPACT: Bad debt accrual from unliquidatable positions (8/44 findings)",
+        "Can positions be partially liquidated?",
+        "Is self-liquidation explicitly blocked or guaranteed unprofitable?"
+      ],
+      "antipattern": "Liquidation reward doesn't cover gas costs for small positions",
+      "securePattern": "Ensures minimum reward covers gas costs",
+      "validWhen": "Liquidation functions either force full position closure (blocking whale liquidation), allow the position holder to profit from their own liquidation, or can be DoS'd...",
+      "invalidWhen": "Ensures minimum reward covers gas costs",
+      "impact": "Bad debt accrual from unliquidatable positions (8/44 findings)"
+    },
+    {
+      "id": "general-defi-perpetuals-derivatives-vulnerabilities-2-funding-rate-vulnerabilities-001",
+      "title": "2. Funding Rate Vulnerabilities",
+      "severity": "HIGH",
+      "grep": "_settleUserFundingPayments|getCurrentFundingRate|closePosition|openPosition",
+      "detect": "Funding rate is calculated from a subset of the market (e.",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md",
+      "lines": [
+        426,
+        533
+      ],
+      "check": [
+        "VERIFY: Funding rate is calculated from a subset of the market (e.g., one maker's skew) but applied globally, or the rate direction is inverted, or payments...",
+        "PROVE: *Path A: [Skew-Only Funding → Extreme Rate Manipulation]; Funding rate is calculated from OracleMaker's skew only",
+        "FALSIFY: Funding rate from total market open interest across all makers",
+        "Is funding rate calculated from total market OI or just one maker?",
+        "Is the funding rate direction correct (majority pays minority)?"
+      ],
+      "antipattern": "Funding calculated in vBase, settled in UA without conversion",
+      "securePattern": "Funding rate from total market open interest across all makers",
+      "validWhen": "Funding rate is calculated from a subset of the market (e.g., one maker's skew) but applied globally, or the rate direction is inverted, or payments are denominated in...",
+      "invalidWhen": "Funding rate from total market open interest across all makers"
+    },
+    {
+      "id": "general-defi-perpetuals-derivatives-vulnerabilities-3-position-leverage-accounting-002",
+      "title": "3. Position & Leverage Accounting Bugs",
+      "severity": "HIGH",
+      "grep": "_calculateMargin|closePosition|openPosition|settle",
+      "detect": "Integer division precision loss in margin/leverage calculations, or missing state updates when positions are modified...",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md",
+      "lines": [
+        534,
+        635
+      ],
+      "check": [
+        "VERIFY: Integer division precision loss in margin/leverage calculations, or missing state updates when positions are modified (open interest, entry price,...",
+        "PROVE: Division before multiplication causes precision loss in margin",
+        "FALSIFY: Scale up before division to maintain precision",
+        "Does margin calculation use multiply-before-divide?",
+        "Can margin round to zero at maximum leverage?"
+      ],
+      "antipattern": "Division before multiplication causes precision loss in margin",
+      "securePattern": "Scale up before division to maintain precision",
+      "validWhen": "Integer division precision loss in margin/leverage calculations, or missing state updates when positions are modified (open interest, entry price, collateral).",
+      "invalidWhen": "Scale up before division to maintain precision"
+    },
+    {
+      "id": "general-defi-perpetuals-derivatives-vulnerabilities-4-order-execution-vulnerabilit-003",
+      "title": "4. Order Execution Vulnerabilities",
+      "severity": "HIGH",
+      "grep": "executeOrder|updateOrder",
+      "detect": "Order execution uses future prices, but order updates reset the execution window, allowing users to repeatedly delay...",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md",
+      "lines": [
+        636,
+        722
+      ],
+      "check": [
+        "VERIFY: Order execution uses future prices, but order updates reset the execution window, allowing users to repeatedly delay execution until prices are...",
+        "PROVE: Tight stop-loss with high leverage → capped downside, unlimited upside",
+        "FALSIFY: Order update restarts the full delay, no free look",
+        "Does order update reset execution eligibility window?",
+        "Is there minimum delay between order updates?"
+      ],
+      "antipattern": "Tight stop-loss with high leverage → capped downside, unlimited upside",
+      "securePattern": "Order update restarts the full delay, no free look",
+      "validWhen": "Order execution uses future prices, but order updates reset the execution window, allowing users to repeatedly delay execution until prices are favorable.",
+      "invalidWhen": "Order update restarts the full delay, no free look"
+    },
+    {
+      "id": "general-defi-perpetuals-derivatives-vulnerabilities-5-fee-reward-system-exploits-004",
+      "title": "5. Fee & Reward System Exploits",
+      "severity": "HIGH",
+      "grep": "perpetuals_derivatives_findings|Liquidations|Vulnerable|Reference",
+      "detect": "Fee precision loss, reward distribution timing, and token denomination errors cause direct fund losses or enable fee...",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md",
+      "lines": [
+        723,
+        733
+      ],
+      "check": [
+        "VERIFY: Fee precision loss, reward distribution timing, and token denomination errors cause direct fund losses or enable fee..."
+      ],
+      "validWhen": "Fee precision loss, reward distribution timing, and token denomination errors cause direct fund losses or enable fee..."
+    },
+    {
+      "id": "general-defi-perpetuals-derivatives-vulnerabilities-6-lp-vault-exploitation-005",
+      "title": "6. LP Vault Exploitation",
+      "severity": "HIGH",
+      "grep": "processWithdrawals|settlePnL|deposit",
+      "detect": "Classic first-depositor inflation in perp LP vault",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md",
+      "lines": [
+        798,
+        884
+      ],
+      "check": [
+        "VERIFY: Classic first-depositor inflation in perp LP vault",
+        "PROVE: Queued withdrawal can be blocked by manipulating vault state",
+        "FALSIFY: Trader PnL capped at available pool assets",
+        "Does LP vault use virtual shares or minimum first deposit?",
+        "Is trader PnL capped against pool solvency?"
+      ],
+      "antipattern": "Queued withdrawal can be blocked by manipulating vault state",
+      "securePattern": "Trader PnL capped at available pool assets",
+      "validWhen": "Classic first-depositor inflation in perp LP vault",
+      "invalidWhen": "Trader PnL capped at available pool assets"
+    },
+    {
+      "id": "general-defi-perpetuals-derivatives-vulnerabilities-7-bad-debt-protocol-insolvency-006",
+      "title": "7. Bad Debt & Protocol Insolvency",
+      "severity": "HIGH",
+      "grep": "liquidate|perpetuals_derivatives_findings|getCollateral|coverBadDebt",
+      "detect": "No path to clear bad debt — accrues indefinitely",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md",
+      "lines": [
+        885,
+        965
+      ],
+      "check": [
+        "VERIFY: No path to clear bad debt — accrues indefinitely",
+        "PROVE: Liquidation doesn't fully clear debt when collateral < debt",
+        "FALSIFY: Bad debt cleared via insurance fund, then socialized",
+        "Does protocol have insurance fund for bad debt?",
+        "Is bad debt socialized across LPs when insurance is exhausted?"
+      ],
+      "antipattern": "Liquidation doesn't fully clear debt when collateral < debt",
+      "securePattern": "Bad debt cleared via insurance fund, then socialized",
+      "validWhen": "No path to clear bad debt — accrues indefinitely",
+      "invalidWhen": "Bad debt cleared via insurance fund, then socialized"
+    },
+    {
+      "id": "general-defi-lending-rate-model-vulnerabilities-vulnerability-title-000",
+      "title": "Vulnerability Title",
+      "severity": "HIGH",
+      "grep": "Market.accrueInterest|LendingPool.withdraw|Market.borrow|AMO.update|multi_contract|blocksPerYear",
+      "detect": "Lending Interest Rate Model Vulnerabilities** — Miscalculations, manipulation, and DoS patterns in lending protocol...",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/lending-rate-model/LENDING_RATE_MODEL_VULNERABILITIES.md",
+      "lines": [
+        111,
+        172
+      ],
+      "check": [
+        "VERIFY: Signal 1: blocksPerYear constant doesn't match the deployment chain's actual block time; Signal 2: reserves included in utilization denominator but...",
+        "FALSIFY: Not this bug when: Protocol uses time-based rates (per-second) instead of per-block rates; Safe if: Utilization formula correctly excludes non-lendable reserves from..."
+      ],
+      "validWhen": "Signal 1: blocksPerYear constant doesn't match the deployment chain's actual block time; Signal 2: reserves included in utilization denominator but represents...",
+      "invalidWhen": "Not this bug when: Protocol uses time-based rates (per-second) instead of per-block rates; Safe if: Utilization formula correctly excludes non-lendable reserves from..."
+    },
+    {
+      "id": "general-defi-lending-rate-model-vulnerabilities-section-1-utilization-formula--001",
+      "title": "Section 1: Utilization Formula Errors",
+      "severity": "HIGH",
+      "grep": "InterestRateModel.utilizationRate|LendingPool.withdrawCollateral|require_utilization_below_max|LendingPool.withdraw|utilizationRate|total_supply",
+      "detect": "The standard Compound utilization formula is `borrows / (cash + borrows - reserves)`.",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/lending-rate-model/LENDING_RATE_MODEL_VULNERABILITIES.md",
+      "lines": [
+        173,
+        230
+      ],
+      "check": [
+        "VERIFY: standard Compound utilization formula is borrows / (cash + borrows - reserves).",
+        "PROVE: *Path A: Wrong Reserves in Utilization Denominator; Standard formula: utilization = borrows / (cash + borrows - reserves)",
+        "ANTIPATTERN: reserves represents cToken claims, not actual cash — denominator shrinks unboundedly"
+      ],
+      "antipattern": "reserves represents cToken claims, not actual cash — denominator shrinks unboundedly",
+      "validWhen": "The standard Compound utilization formula is borrows / (cash + borrows - reserves)."
+    },
+    {
+      "id": "general-defi-lending-rate-model-vulnerabilities-section-2-chain-specific-const-002",
+      "title": "Section 2: Chain-Specific Constant Errors",
+      "severity": "HIGH",
+      "grep": "blocksPerYear|WhitePaperInterestRateModel|lending_rate_model_findings|wrong_chain_constant",
+      "detect": "Compound-forked interest rate models use `blocksPerYear` to convert annualized rates to per-block rates.",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/lending-rate-model/LENDING_RATE_MODEL_VULNERABILITIES.md",
+      "lines": [
+        231,
+        271
+      ],
+      "check": [
+        "VERIFY: Compound-forked interest rate models use blocksPerYear to convert annualized rates to per-block rates.",
+        "PROVE: *Path A: Wrong blocksPerYear for Deployment Chain; WhitePaperInterestRateModel hardcodes blocksPerYear = 2102400 (assumes 15s block time)",
+        "ANTIPATTERN: blocksPerYear assumes 15s blocks (Ethereum), but deployed on BNB (3s blocks)"
+      ],
+      "antipattern": "blocksPerYear assumes 15s blocks (Ethereum), but deployed on BNB (3s blocks)",
+      "validWhen": "Compound-forked interest rate models use blocksPerYear to convert annualized rates to per-block rates."
+    },
+    {
+      "id": "general-defi-lending-rate-model-vulnerabilities-section-3-utilization-manipula-003",
+      "title": "Section 3: Utilization Manipulation & Rate Gaming",
+      "severity": "LOW",
+      "grep": "InterestRateModel.calculateRate|previewFloatingAssetsAverage|targetDeploymentAmount|currentBalances|Market.borrow|AMO.update",
+      "detect": "Interest rate models that use spot (instantaneous) balances for utilization calculation are vulnerable to manipulation.",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/lending-rate-model/LENDING_RATE_MODEL_VULNERABILITIES.md",
+      "lines": [
+        272,
+        349
+      ],
+      "check": [
+        "VERIFY: Interest rate models that use spot (instantaneous) balances for utilization calculation are vulnerable to manipulation.",
+        "PROVE: *Path A: AMO Forced to Fund Reduced Rates; SiloAMO's update() compares totalDeposits to targetDeploymentAmount = totalBorrows / uopt",
+        "ANTIPATTERN: averageFactor = 0 when block.timestamp == lastAverageUpdate"
+      ],
+      "antipattern": "averageFactor = 0 when block.timestamp == lastAverageUpdate",
+      "validWhen": "Interest rate models that use spot (instantaneous) balances for utilization calculation are vulnerable to manipulation."
+    },
+    {
+      "id": "general-defi-lending-rate-model-vulnerabilities-section-4-debt-token-scaling-r-004",
+      "title": "Section 4: Debt Token Scaling & Rate Accounting Errors",
+      "severity": "MEDIUM",
+      "grep": "IsolateLogic.executeIsolateLiquidate|debtToken.scaledTotalSupply|vars.totalExtraAmount|debtToken.totalSupply|Market.accrueInterest|executeIsolateLiquidate",
+      "detect": "When interest rate calculations use `debtToken.totalSupply()` or `debtToken.scaledTotalSupply()` as the borrows input,...",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/lending-rate-model/LENDING_RATE_MODEL_VULNERABILITIES.md",
+      "lines": [
+        350,
+        399
+      ],
+      "check": [
+        "VERIFY: When interest rate calculations use debtToken.totalSupply() or debtToken.scaledTotalSupply() as the borrows input, scaling mismatches between the...",
+        "PROVE: *Path A: Debt Token Total Supply Scaling Mismatch; debtToken.scaledTotalSupply() returns a normalized/index-divided value",
+        "ANTIPATTERN: liquidityAdded double-counts extraAmount"
+      ],
+      "antipattern": "liquidityAdded double-counts extraAmount",
+      "validWhen": "When interest rate calculations use debtToken.totalSupply() or debtToken.scaledTotalSupply() as the borrows input, scaling mismatches between the debt token's internal..."
+    },
+    {
+      "id": "general-defi-lending-rate-model-vulnerabilities-section-5-rate-model-dos-syste-005",
+      "title": "Section 5: Rate Model DoS & System Halt",
+      "severity": "HIGH",
+      "grep": "Market.accrueInterest|LendingPool.borrow|borrowRateMaxMantissa|accrueInterest",
+      "detect": "When interest rates grow beyond expected bounds (due to utilization >100%, compounding errors, or external rate caps),...",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/lending-rate-model/LENDING_RATE_MODEL_VULNERABILITIES.md",
+      "lines": [
+        400,
+        442
+      ],
+      "check": [
+        "VERIFY: When interest rates grow beyond expected bounds (due to utilization >100%, compounding errors, or external rate caps), the accrueInterest() function...",
+        "PROVE: *Path A: accrueInterest Reverts at Max Rate; Utilization reaches extreme levels (via manipulation or organic demand)",
+        "ANTIPATTERN: Market halts when rate exceeds max — no graceful degradation"
+      ],
+      "antipattern": "Market halts when rate exceeds max — no graceful degradation",
+      "validWhen": "When interest rates grow beyond expected bounds (due to utilization >100%, compounding errors, or external rate caps), the accrueInterest() function can revert, halting..."
+    },
+    {
+      "id": "general-defi-nft-marketplace-vulnerabilities-vulnerability-title-000",
+      "title": "Vulnerability Title",
+      "severity": "HIGH",
+      "grep": "ERC165.supportsInterface(0x80ac58cd|fallback_handler_swap|callback_reentrancy|auction_frontrun|bridge_erc721|addCollateral",
+      "detect": "NFT Marketplace & Protocol-Level Security Vulnerabilities** — Marketplace fee bypass, rental griefing, auction...",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md",
+      "lines": [
+        129,
+        173
+      ],
+      "check": [
+        "VERIFY: Signal 1: A _safeMint or safeTransferFrom call is followed by state-changing logic that reads/writes balances or reward accumulators — reentrancy via...",
+        "FALSIFY: Not this bug when: Marketplace only accepts msg.sender as the depositor/from address (no residual allowance); Safe if: Guard blocks ALL state-modifying Safe functions..."
+      ],
+      "validWhen": "Signal 1: A _safeMint or safeTransferFrom call is followed by state-changing logic that reads/writes balances or reward accumulators — reentrancy via onERC721Received...",
+      "invalidWhen": "Not this bug when: Marketplace only accepts msg.sender as the depositor/from address (no residual allowance); Safe if: Guard blocks ALL state-modifying Safe functions..."
+    },
+    {
+      "id": "general-defi-nft-marketplace-vulnerabilities-1-reentrancy-via-onerc721recei-001",
+      "title": "1. Reentrancy via onERC721Received / safeMint Callbacks",
+      "severity": "HIGH",
+      "grep": "lockCapital(lendingPoolAddress|calculateRemainingPrincipal|totalDepositedXDEFI|updateDistribution|_pointsPerUnit|safeTransferFrom",
+      "detect": "updateDistribution lacks noReenter modifier",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md",
+      "lines": [
+        174,
+        240
+      ],
+      "check": [
+        "VERIFY: _safeMint and safeTransferFrom invoke onERC721Received on the recipient before completing state updates.",
+        "PROVE: *Path A: safeMint reentrancy steals rewards; Attacker calls lock() to deposit tokens and trigger _safeMint",
+        "FALSIFY: Add reentrancy guard to all state-modifying functions",
+        "ANTIPATTERN: updateDistribution lacks noReenter modifier"
+      ],
+      "antipattern": "updateDistribution lacks noReenter modifier",
+      "securePattern": "Add reentrancy guard to all state-modifying functions",
+      "validWhen": "_safeMint and safeTransferFrom invoke onERC721Received on the recipient before completing state updates.",
+      "invalidWhen": "Add reentrancy guard to all state-modifying functions"
+    },
+    {
+      "id": "general-defi-nft-marketplace-vulnerabilities-2-residual-allowance-vault-dep-002",
+      "title": "2. Residual Allowance & Vault Deposit Exploitation",
+      "severity": "HIGH",
+      "grep": "batchDepositERC721|missing_msg_sender_check|batchDepositERC1155|batchDepositERC20",
+      "detect": "'from' can be any address with residual allowance",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md",
+      "lines": [
+        241,
+        293
+      ],
+      "check": [
+        "VERIFY: Vault or marketplace deposit functions accept a caller-specified from address, allowing anyone to pull tokens from users who granted approval to the...",
+        "PROVE: *Path A: Residual ERC20/ERC721/ERC1155 allowance theft; Alice approves BaseVault to transfer her tokens and deposits",
+        "FALSIFY: Force from to be msg.sender",
+        "ANTIPATTERN: 'from' can be any address with residual allowance"
+      ],
+      "antipattern": "'from' can be any address with residual allowance",
+      "securePattern": "Force from to be msg.sender",
+      "validWhen": "Vault or marketplace deposit functions accept a caller-specified from address, allowing anyone to pull tokens from users who granted approval to the contract.",
+      "invalidWhen": "Force from to be msg.sender"
+    },
+    {
+      "id": "general-defi-nft-marketplace-vulnerabilities-3-marketplace-fee-bypass-royal-003",
+      "title": "3. Marketplace Fee Bypass & Royalty Calculation Errors",
+      "severity": "MEDIUM",
+      "grep": "PrivatePool.buy(tokenIds|getRoyaltyInfoByArtifactId|buyEditions(orderId|royaltyFeeAmount|reservedAddress|_getRoyalty",
+      "detect": "Royalty collected even when recipient is address(0)",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md",
+      "lines": [
+        294,
+        361
+      ],
+      "check": [
+        "VERIFY: Marketplace fee and royalty logic contains inconsistencies: royalty amounts collected from buyers but not distributed when recipient is address(0),...",
+        "PROVE: *Path A: Zero-amount fee bypass; Maker sets o.totalAmt = 0 in the order struct",
+        "FALSIFY: Only collect royalty when recipient is valid",
+        "ANTIPATTERN: Royalty collected even when recipient is address(0)"
+      ],
+      "antipattern": "Royalty collected even when recipient is address(0)",
+      "securePattern": "Only collect royalty when recipient is valid",
+      "validWhen": "Marketplace fee and royalty logic contains inconsistencies: royalty amounts collected from buyers but not distributed when recipient is address(0), royalty permyriad...",
+      "invalidWhen": "Only collect royalty when recipient is valid"
+    },
+    {
+      "id": "general-defi-nft-marketplace-vulnerabilities-4-nft-rental-griefing-via-call-004",
+      "title": "4. NFT Rental Griefing via Callback Revert & Blocklist",
+      "severity": "MEDIUM",
+      "grep": "stopRent(rentalOrder|_reclaimRentedItems|reclaimRentedItems|reclaimRentalOrder|safeTransferFrom|onERC721Received",
+      "detect": "safeTransferFrom allows lender callback to revert entire settlement",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md",
+      "lines": [
+        362,
+        437
+      ],
+      "check": [
+        "VERIFY: Rental protocols (e.g., reNFT) use safeTransferFrom to return NFTs to lenders during stopRent().",
+        "PROVE: *Path A: Lender callback revert griefs renter payment; Lender creates PAY order rental with malicious wallet as recipient",
+        "FALSIFY: Use transferFrom (no callback) or pull-based pattern",
+        "ANTIPATTERN: safeTransferFrom allows lender callback to revert entire settlement"
+      ],
+      "antipattern": "safeTransferFrom allows lender callback to revert entire settlement",
+      "securePattern": "Use transferFrom (no callback) or pull-based pattern",
+      "validWhen": "Rental protocols (e.g., reNFT) use safeTransferFrom to return NFTs to lenders during stopRent().",
+      "invalidWhen": "Use transferFrom (no callback) or pull-based pattern"
+    },
+    {
+      "id": "general-defi-nft-marketplace-vulnerabilities-5-gnosis-safe-guard-bypass-via-005",
+      "title": "5. Gnosis Safe Guard Bypass via Fallback Handler",
+      "severity": "HIGH",
+      "grep": "execTransaction(setFallbackHandler(nftAddress|setFallbackHandler|setApprovalForAll|checkTransaction|execTransaction|transferFrom",
+      "detect": "Guard doesn't check setFallbackHandler",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md",
+      "lines": [
+        438,
+        493
+      ],
+      "check": [
+        "VERIFY: Gnosis Safe rental guards check common function signatures (transferFrom, approve, setApprovalForAll, etc.) but miss setFallbackHandler.",
+        "PROVE: *Path A: Fallback handler set to rented NFT contract; Attacker rents ERC721 NFT; it's held in their Gnosis rental Safe",
+        "FALSIFY: Block setFallbackHandler in guard",
+        "ANTIPATTERN: Guard doesn't check setFallbackHandler"
+      ],
+      "antipattern": "Guard doesn't check setFallbackHandler",
+      "securePattern": "Block setFallbackHandler in guard",
+      "validWhen": "Gnosis Safe rental guards check common function signatures (transferFrom, approve, setApprovalForAll, etc.) but miss setFallbackHandler.",
+      "invalidWhen": "Block setFallbackHandler in guard"
+    },
+    {
+      "id": "general-defi-nft-marketplace-vulnerabilities-6-auction-manipulation-frontru-006",
+      "title": "6. Auction Manipulation, Frontrunning & Debt Shortfall",
+      "severity": "HIGH",
+      "grep": "purchaseLiquidationAuctionNFT(auction2|execute(listOnOpenseaProposal|_reduceDebtWithoutBurn|_settleZoraAuction|settleZoraAuction|onERC721Received",
+      "detect": "Shortfall burned without tracking for future auctions",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md",
+      "lines": [
+        494,
+        563
+      ],
+      "check": [
+        "VERIFY: NFT auction systems allow majority holders to manipulate auction outcomes (e.g., forcing auction failure by bidding from non-ERC721-compatible...",
+        "PROVE: *Path A: Force Zora auction failure, steal NFT on Opensea; Attacker passes proposal listing NFT on Opensea with tiny price",
+        "FALSIFY: Track shortfall and fill it from future auction proceeds",
+        "ANTIPATTERN: Shortfall burned without tracking for future auctions"
+      ],
+      "antipattern": "Shortfall burned without tracking for future auctions",
+      "securePattern": "Track shortfall and fill it from future auction proceeds",
+      "validWhen": "NFT auction systems allow majority holders to manipulate auction outcomes (e.g., forcing auction failure by bidding from non-ERC721-compatible contracts), or fail to...",
+      "invalidWhen": "Track shortfall and fill it from future auction proceeds"
+    },
+    {
+      "id": "general-defi-nft-marketplace-vulnerabilities-7-nft-bridge-one-way-lock-migr-007",
+      "title": "7. NFT Bridge One-Way Lock & Migration Burn",
+      "severity": "HIGH",
+      "grep": "migrateVaultERC721|_safeDecimals|settleFractions|withdrawERC721|_proposalId|settleVault",
+      "detect": "newVault can be address(0) with invalid proposalId",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md",
+      "lines": [
+        564,
+        623
+      ],
+      "check": [
+        "VERIFY: Token bridge contracts intended only for ERC20 don't properly reject ERC721 tokens (which lack decimals()), allowing NFTs to be bridged one-way.",
+        "PROVE: *Path A: ERC721 bridged via ERC20 bridge — permanent lock; User calls bridgeToken() with ERC721 contract address",
+        "FALSIFY: Validate newVault is not zero address",
+        "ANTIPATTERN: newVault can be address(0) with invalid proposalId"
+      ],
+      "antipattern": "newVault can be address(0) with invalid proposalId",
+      "securePattern": "Validate newVault is not zero address",
+      "validWhen": "Token bridge contracts intended only for ERC20 don't properly reject ERC721 tokens (which lack decimals()), allowing NFTs to be bridged one-way.",
+      "invalidWhen": "Validate newVault is not zero address"
+    },
+    {
+      "id": "general-defi-nft-marketplace-vulnerabilities-8-merkle-criteria-resolution-o-008",
+      "title": "8. Merkle Criteria Resolution & Order Matching Bypass",
+      "severity": "MEDIUM",
+      "grep": "_verifyProof|merkleRoot|tokenId|root",
+      "detect": "tokenId used directly as leaf — collides with intermediate hashes",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md",
+      "lines": [
+        624,
+        669
+      ],
+      "check": [
+        "VERIFY: Seaport-style merkle tree criteria resolution uses raw tokenId as leaf values.",
+        "PROVE: *Path A: Intermediate merkle hash used as tokenId; Alice creates an offer for NFTs with tokenId 1 or 2 using merkle criteria",
+        "FALSIFY: Hash the tokenId before using as leaf",
+        "ANTIPATTERN: tokenId used directly as leaf — collides with intermediate hashes"
+      ],
+      "antipattern": "tokenId used directly as leaf — collides with intermediate hashes",
+      "securePattern": "Hash the tokenId before using as leaf",
+      "validWhen": "Seaport-style merkle tree criteria resolution uses raw tokenId as leaf values.",
+      "invalidWhen": "Hash the tokenId before using as leaf"
+    },
+    {
+      "id": "general-defi-nft-marketplace-vulnerabilities-9-flash-loan-pool-token-theft-009",
+      "title": "9. Flash Loan & Pool Token Theft",
+      "severity": "MEDIUM",
+      "grep": "transferFrom|flashLoan|execute",
+      "detect": "Caller chooses token address — can be exploit contract",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md",
+      "lines": [
+        670,
+        719
+      ],
+      "check": [
+        "VERIFY: NFT pool/marketplace flash loan functions allow the caller to specify an arbitrary token address rather than restricting to the pool's NFT.",
+        "PROVE: *Path A: Previous owner steals via flashLoan with arbitrary token; Bob creates PrivatePool with 5 NFTs and 500 USDC",
+        "FALSIFY: Restrict flash loan to pool's own NFT",
+        "ANTIPATTERN: Caller chooses token address — can be exploit contract"
+      ],
+      "antipattern": "Caller chooses token address — can be exploit contract",
+      "securePattern": "Restrict flash loan to pool's own NFT",
+      "validWhen": "NFT pool/marketplace flash loan functions allow the caller to specify an arbitrary token address rather than restricting to the pool's NFT.",
+      "invalidWhen": "Restrict flash loan to pool's own NFT"
+    },
+    {
+      "id": "general-defi-nft-marketplace-vulnerabilities-10-nft-wrap-unwrap-airdrop-id--010",
+      "title": "10. NFT Wrap/Unwrap Airdrop & ID Swap Exploitation",
+      "severity": "MEDIUM",
+      "grep": "getAirDrop|unwrap|wrap",
+      "detect": "Immediate unwrap allows NFT ID swapping and airdrop theft",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md",
+      "lines": [
+        720,
+        784
+      ],
+      "check": [
+        "VERIFY: NFT wrapping/fractionalization protocols allow wrapping one NFT and immediately unwrapping a different NFT (same collection, whitelisted ID),...",
+        "PROVE: *Path A: Wrap-unwrap cycle steals airdrops; Pool holds 100 NFTs from collection with upcoming airdrop",
+        "FALSIFY: Add unwrap delay or fee",
+        "ANTIPATTERN: Immediate unwrap allows NFT ID swapping and airdrop theft"
+      ],
+      "antipattern": "Immediate unwrap allows NFT ID swapping and airdrop theft",
+      "securePattern": "Add unwrap delay or fee",
+      "validWhen": "NFT wrapping/fractionalization protocols allow wrapping one NFT and immediately unwrapping a different NFT (same collection, whitelisted ID), enabling fee-free ID...",
+      "invalidWhen": "Add unwrap delay or fee"
     }
   ]
 }

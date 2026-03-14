@@ -1,9 +1,9 @@
 {
   "meta": {
     "category": "general-defi",
-    "description": "DeFi-specific: flash loans, slippage, vaults, precision, calculations, bonding curves, restaking",
-    "fileCount": 43,
-    "totalPatterns": 319,
+    "description": "DeFi-specific: flash loans, slippage, vaults, precision, calculations, bonding curves, restaking, perpetuals, lending rates, NFT marketplaces",
+    "fileCount": 46,
+    "totalPatterns": 348,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections"
   },
   "files": [
@@ -12915,6 +12915,1201 @@
                 "whenNotPaused",
                 "withdraw"
               ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md",
+      "totalLines": 975,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "perpetuals_derivatives",
+        "vulnerability_type": "perpetuals_mechanism_flaws",
+        "root_cause_family": "perpetual_protocol_logic_error",
+        "pattern_key": "missing_mechanism_validation | perpetual_position_engine | trade_execution | fund_loss_or_insolvency",
+        "interaction_scope": "multi_contract",
+        "attack_type": "economic_exploit|logical_error",
+        "affected_component": "position_engine|liquidation_engine|funding_rate|order_execution|vault_accounting",
+        "severity": "critical|high|medium",
+        "impact": "fund_loss|insolvency|unfair_liquidation|position_manipulation",
+        "exploitability": "0.75",
+        "financial_impact": "critical",
+        "language": "solidity|rust|vyper",
+        "version": "all"
+      },
+      "patternCount": 7,
+      "patterns": [
+        {
+          "id": "general-defi-perpetuals-derivatives-vulnerabilities-1-liquidation-mechanism-failur-000",
+          "title": "1. Liquidation Mechanism Failures",
+          "lineStart": 250,
+          "lineEnd": 425,
+          "lineCount": 176,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "CrTooHigh",
+            "calculateLiquidationReward",
+            "debtInCollateralToken",
+            "getUnderlyingPrice",
+            "liquidate",
+            "liquidate(ownPosition",
+            "selfLiquidate",
+            "validateSelfLiquidate"
+          ],
+          "rootCause": "Liquidation functions either force full position closure (blocking whale liquidation), allow the position holder to profit from their own liquidation, or can be DoS'd by frontrunning.",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 260,
+              "lineEnd": 293,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "CrTooHigh",
+                "debtInCollateralToken",
+                "liquidate",
+                "liquidate(ownPosition",
+                "selfLiquidate"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 294,
+              "lineEnd": 354,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "calculateLiquidationReward",
+                "getUnderlyingPrice",
+                "liquidate",
+                "validateSelfLiquidate"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-perpetuals-derivatives-vulnerabilities-2-funding-rate-vulnerabilities-001",
+          "title": "2. Funding Rate Vulnerabilities",
+          "lineStart": 426,
+          "lineEnd": 533,
+          "lineCount": 108,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_settleUserFundingPayments",
+            "closePosition",
+            "getCurrentFundingRate",
+            "openPosition"
+          ],
+          "rootCause": "Funding rate is calculated from a subset of the market (e.g., one maker's skew) but applied globally, or the rate direction is inverted, or payments are denominated in the wrong token.",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 436,
+              "lineEnd": 457,
+              "severity": [],
+              "codeKeywords": [
+                "_settleUserFundingPayments",
+                "closePosition",
+                "openPosition"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 458,
+              "lineEnd": 496,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_settleUserFundingPayments",
+                "getCurrentFundingRate"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-perpetuals-derivatives-vulnerabilities-3-position-leverage-accounting-002",
+          "title": "3. Position & Leverage Accounting Bugs",
+          "lineStart": 534,
+          "lineEnd": 635,
+          "lineCount": 102,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "_calculateMargin",
+            "closePosition",
+            "openPosition",
+            "settle"
+          ],
+          "rootCause": "Integer division precision loss in margin/leverage calculations, or missing state updates when positions are modified (open interest, entry price, collateral).",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 544,
+              "lineEnd": 596,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "_calculateMargin",
+                "closePosition",
+                "openPosition",
+                "settle"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-perpetuals-derivatives-vulnerabilities-4-order-execution-vulnerabilit-003",
+          "title": "4. Order Execution Vulnerabilities",
+          "lineStart": 636,
+          "lineEnd": 722,
+          "lineCount": 87,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "executeOrder",
+            "updateOrder"
+          ],
+          "rootCause": "Order execution uses future prices, but order updates reset the execution window, allowing users to repeatedly delay execution until prices are favorable.",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 646,
+              "lineEnd": 683,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "executeOrder",
+                "updateOrder"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-perpetuals-derivatives-vulnerabilities-5-fee-reward-system-exploits-004",
+          "title": "5. Fee & Reward System Exploits",
+          "lineStart": 723,
+          "lineEnd": 733,
+          "lineCount": 11,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 729,
+              "lineEnd": 733,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-perpetuals-derivatives-vulnerabilities-6-lp-vault-exploitation-005",
+          "title": "6. LP Vault Exploitation",
+          "lineStart": 798,
+          "lineEnd": 884,
+          "lineCount": 87,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "deposit",
+            "processWithdrawals",
+            "settlePnL"
+          ],
+          "rootCause": "Classic first-depositor inflation in perp LP vault",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 804,
+              "lineEnd": 845,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "deposit",
+                "processWithdrawals",
+                "settlePnL"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-perpetuals-derivatives-vulnerabilities-7-bad-debt-protocol-insolvency-006",
+          "title": "7. Bad Debt & Protocol Insolvency",
+          "lineStart": 885,
+          "lineEnd": 965,
+          "lineCount": 81,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "liquidate"
+          ],
+          "rootCause": "No path to clear bad debt — accrues indefinitely",
+          "subsections": [
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 891,
+              "lineEnd": 921,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "liquidate"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/lending-rate-model/LENDING_RATE_MODEL_VULNERABILITIES.md",
+      "totalLines": 601,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "interest_rate_model",
+        "vulnerability_type": "lending_rate_miscalculation",
+        "root_cause_family": "interest_rate_accounting_error",
+        "pattern_key": "flawed_rate_calculation | interest_rate_model | utilization_manipulation | incorrect_rates_or_dos",
+        "interaction_scope": "multi_contract",
+        "attack_type": "economic_exploit",
+        "affected_component": "interest_rate_calculation",
+        "severity": "high",
+        "impact": "incorrect_interest_rates",
+        "exploitability": "0.70",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 10,
+      "patterns": [
+        {
+          "id": "general-defi-lending-rate-model-vulnerabilities-vulnerability-title-000",
+          "title": "Vulnerability Title",
+          "lineStart": 111,
+          "lineEnd": 172,
+          "lineCount": 62,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "AMO.update",
+            "LendingPool.withdraw",
+            "Market.accrueInterest",
+            "Market.borrow",
+            "blocksPerYear",
+            "multi_contract",
+            "reserves",
+            "strong"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-lending-rate-model-vulnerabilities-section-1-utilization-formula--001",
+          "title": "Section 1: Utilization Formula Errors",
+          "lineStart": 173,
+          "lineEnd": 230,
+          "lineCount": 58,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "InterestRateModel.utilizationRate",
+            "LendingPool.withdraw",
+            "LendingPool.withdrawCollateral",
+            "borrow",
+            "cash",
+            "require_utilization_below_max",
+            "reserves",
+            "total_supply",
+            "utilizationRate",
+            "withdraw"
+          ],
+          "rootCause": "The standard Compound utilization formula is `borrows / (cash + borrows - reserves)`. When `reserves` doesn't represent tokens actually held by the market (e.g., in ERC721 markets where reserves count",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 179,
+              "lineEnd": 201,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "InterestRateModel.utilizationRate",
+                "LendingPool.withdraw",
+                "LendingPool.withdrawCollateral",
+                "borrow",
+                "cash",
+                "require_utilization_below_max",
+                "reserves",
+                "total_supply"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 202,
+              "lineEnd": 230,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "utilizationRate"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-lending-rate-model-vulnerabilities-section-2-chain-specific-const-002",
+          "title": "Section 2: Chain-Specific Constant Errors",
+          "lineStart": 231,
+          "lineEnd": 271,
+          "lineCount": 41,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "blocksPerYear"
+          ],
+          "rootCause": "Compound-forked interest rate models use `blocksPerYear` to convert annualized rates to per-block rates. When deployed on chains with different block times (BNB Chain: 3s, Ethereum: 12-15s, L2s: 2s), ",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 237,
+              "lineEnd": 251,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 252,
+              "lineEnd": 271,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-lending-rate-model-vulnerabilities-section-3-utilization-manipula-003",
+          "title": "Section 3: Utilization Manipulation & Rate Gaming",
+          "lineStart": 272,
+          "lineEnd": 349,
+          "lineCount": 78,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "AMO.update",
+            "InterestRateModel.calculateRate",
+            "Market.borrow",
+            "_update",
+            "currentBalances",
+            "errorTerm",
+            "previewFloatingAssetsAverage",
+            "targetDeploymentAmount",
+            "totalDeposits",
+            "update"
+          ],
+          "rootCause": "Interest rate models that use spot (instantaneous) balances for utilization calculation are vulnerable to manipulation. Attackers can temporarily alter pool state (via flash loans, large deposits/with",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 278,
+              "lineEnd": 312,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "AMO.update",
+                "InterestRateModel.calculateRate",
+                "Market.borrow",
+                "currentBalances",
+                "errorTerm",
+                "previewFloatingAssetsAverage",
+                "targetDeploymentAmount",
+                "totalDeposits"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 313,
+              "lineEnd": 349,
+              "severity": [
+                "HIGH",
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_update",
+                "previewFloatingAssetsAverage"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-lending-rate-model-vulnerabilities-section-4-debt-token-scaling-r-004",
+          "title": "Section 4: Debt Token Scaling & Rate Accounting Errors",
+          "lineStart": 350,
+          "lineEnd": 399,
+          "lineCount": 50,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "IsolateLogic.executeIsolateLiquidate",
+            "Market.accrueInterest",
+            "debtToken.scaledTotalSupply",
+            "debtToken.totalSupply",
+            "executeIsolateLiquidate",
+            "liquidityAdded",
+            "totalBorrowAmount",
+            "updateInterestRates",
+            "vars.totalExtraAmount"
+          ],
+          "rootCause": "When interest rate calculations use `debtToken.totalSupply()` or `debtToken.scaledTotalSupply()` as the borrows input, scaling mismatches between the debt token's internal representation and the actua",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 356,
+              "lineEnd": 376,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "IsolateLogic.executeIsolateLiquidate",
+                "Market.accrueInterest",
+                "debtToken.scaledTotalSupply",
+                "liquidityAdded",
+                "totalBorrowAmount",
+                "updateInterestRates",
+                "vars.totalExtraAmount"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 377,
+              "lineEnd": 399,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "executeIsolateLiquidate"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-lending-rate-model-vulnerabilities-section-5-rate-model-dos-syste-005",
+          "title": "Section 5: Rate Model DoS & System Halt",
+          "lineStart": 400,
+          "lineEnd": 442,
+          "lineCount": 43,
+          "severity": [
+            "HIGH",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "LendingPool.borrow",
+            "Market.accrueInterest",
+            "accrueInterest",
+            "borrowRateMaxMantissa"
+          ],
+          "rootCause": "When interest rates grow beyond expected bounds (due to utilization >100%, compounding errors, or external rate caps), the `accrueInterest()` function can revert, halting all market operations (borrow",
+          "subsections": [
+            {
+              "title": "Attack Scenario / Path Variants",
+              "lineStart": 406,
+              "lineEnd": 426,
+              "severity": [],
+              "codeKeywords": [
+                "LendingPool.borrow",
+                "Market.accrueInterest",
+                "accrueInterest",
+                "borrowRateMaxMantissa"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Examples",
+              "lineStart": 427,
+              "lineEnd": 442,
+              "severity": [
+                "HIGH",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "accrueInterest"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-lending-rate-model-vulnerabilities-impact-analysis-006",
+          "title": "Impact Analysis",
+          "lineStart": 443,
+          "lineEnd": 464,
+          "lineCount": 22,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-lending-rate-model-vulnerabilities-secure-implementation-007",
+          "title": "Secure Implementation",
+          "lineStart": 465,
+          "lineEnd": 505,
+          "lineCount": 41,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "utilizationRate"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-lending-rate-model-vulnerabilities-detection-patterns-008",
+          "title": "Detection Patterns",
+          "lineStart": 506,
+          "lineEnd": 557,
+          "lineCount": 52,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Contract / Call Graph Signals",
+              "lineStart": 508,
+              "lineEnd": 517,
+              "severity": [],
+              "codeKeywords": []
+            },
+            {
+              "title": "High-Signal Grep Seeds",
+              "lineStart": 518,
+              "lineEnd": 535,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-lending-rate-model-vulnerabilities-real-world-examples-009",
+          "title": "Real-World Examples",
+          "lineStart": 558,
+          "lineEnd": 571,
+          "lineCount": 14,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Known Exploits & Audit Findings",
+              "lineStart": 560,
+              "lineEnd": 571,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md",
+      "totalLines": 862,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "nft_marketplace",
+        "vulnerability_type": "marketplace_protocol_logic",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "missing_guard | marketplace_protocol | attacker_action | fund_loss_or_nft_lock",
+        "interaction_scope": "multi_contract",
+        "attack_type": "multiple",
+        "affected_component": "marketplace_contracts",
+        "severity": "high",
+        "impact": "fund_loss",
+        "exploitability": "0.8",
+        "financial_impact": "high",
+        "language": "solidity",
+        "version": "\">=0.8.0\""
+      },
+      "patternCount": 12,
+      "patterns": [
+        {
+          "id": "general-defi-nft-marketplace-vulnerabilities-vulnerability-title-000",
+          "title": "Vulnerability Title",
+          "lineStart": 129,
+          "lineEnd": 173,
+          "lineCount": 45,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "ERC165.supportsInterface(0x80ac58cd",
+            "_safeMint",
+            "addCollateral",
+            "auction_frontrun",
+            "bridgeToken",
+            "bridge_erc721",
+            "buy",
+            "callback_reentrancy",
+            "enableModule",
+            "fallback_handler_swap",
+            "fee_bypass",
+            "flashLoan",
+            "from",
+            "fulfillOrder",
+            "lock"
+          ],
+          "rootCause": null,
+          "subsections": null
+        },
+        {
+          "id": "general-defi-nft-marketplace-vulnerabilities-1-reentrancy-via-onerc721recei-001",
+          "title": "1. Reentrancy via onERC721Received / safeMint Callbacks",
+          "lineStart": 174,
+          "lineEnd": 240,
+          "lineCount": 67,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_pointsPerUnit",
+            "_safeMint",
+            "calculateRemainingPrincipal",
+            "lock",
+            "lock(amount",
+            "lockCapital",
+            "lockCapital(lendingPoolAddress",
+            "noReenter",
+            "onERC721Received",
+            "ownerOf",
+            "safeTransferFrom",
+            "totalDepositedXDEFI",
+            "unlock",
+            "updateDistribution"
+          ],
+          "rootCause": "updateDistribution lacks noReenter modifier",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 181,
+              "lineEnd": 202,
+              "severity": [],
+              "codeKeywords": [
+                "_pointsPerUnit",
+                "_safeMint",
+                "calculateRemainingPrincipal",
+                "lock",
+                "lock(amount",
+                "lockCapital",
+                "lockCapital(lendingPoolAddress",
+                "noReenter"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Example",
+              "lineStart": 203,
+              "lineEnd": 221,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "lock",
+                "updateDistribution"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-nft-marketplace-vulnerabilities-2-residual-allowance-vault-dep-002",
+          "title": "2. Residual Allowance & Vault Deposit Exploitation",
+          "lineStart": 241,
+          "lineEnd": 293,
+          "lineCount": 53,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "batchDepositERC721",
+            "from"
+          ],
+          "rootCause": "'from' can be any address with residual allowance",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 248,
+              "lineEnd": 259,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "from"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Example",
+              "lineStart": 260,
+              "lineEnd": 277,
+              "severity": [
+                "HIGH",
+                "LOW"
+              ],
+              "codeKeywords": [
+                "batchDepositERC721"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-nft-marketplace-vulnerabilities-3-marketplace-fee-bypass-royal-003",
+          "title": "3. Marketplace Fee Bypass & Royalty Calculation Errors",
+          "lineStart": 294,
+          "lineEnd": 361,
+          "lineCount": 68,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "PrivatePool.buy(tokenIds",
+            "_getRoyalty",
+            "address(0",
+            "buy",
+            "buyEditions(orderId",
+            "getRoyaltyInfoByArtifactId",
+            "order.root",
+            "prePaymentAmt",
+            "reservedAddress",
+            "royaltyAmount",
+            "royaltyFeeAmount",
+            "totalAmt"
+          ],
+          "rootCause": "Royalty collected even when recipient is address(0)",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 301,
+              "lineEnd": 330,
+              "severity": [],
+              "codeKeywords": [
+                "PrivatePool.buy(tokenIds",
+                "_getRoyalty",
+                "address(0",
+                "buy",
+                "buyEditions(orderId",
+                "getRoyaltyInfoByArtifactId",
+                "order.root",
+                "prePaymentAmt"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Example",
+              "lineStart": 331,
+              "lineEnd": 348,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-nft-marketplace-vulnerabilities-4-nft-rental-griefing-via-call-004",
+          "title": "4. NFT Rental Griefing via Callback Revert & Blocklist",
+          "lineStart": 362,
+          "lineEnd": 437,
+          "lineCount": 76,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_reclaimRentedItems",
+            "claimNFT",
+            "onERC721Received",
+            "pause",
+            "reclaimRentalOrder",
+            "reclaimRentedItems",
+            "safeTransferFrom",
+            "settlePayment",
+            "stopRent",
+            "stopRent(rentalOrder"
+          ],
+          "rootCause": "safeTransferFrom allows lender callback to revert entire settlement",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 369,
+              "lineEnd": 399,
+              "severity": [],
+              "codeKeywords": [
+                "_reclaimRentedItems",
+                "onERC721Received",
+                "pause",
+                "reclaimRentedItems",
+                "safeTransferFrom",
+                "settlePayment",
+                "stopRent",
+                "stopRent(rentalOrder"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Example",
+              "lineStart": 400,
+              "lineEnd": 418,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "reclaimRentalOrder"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-nft-marketplace-vulnerabilities-5-gnosis-safe-guard-bypass-via-005",
+          "title": "5. Gnosis Safe Guard Bypass via Fallback Handler",
+          "lineStart": 438,
+          "lineEnd": 493,
+          "lineCount": 56,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "approve",
+            "checkTransaction",
+            "execTransaction",
+            "execTransaction(setFallbackHandler(nftAddress",
+            "msg.sender",
+            "setApprovalForAll",
+            "setFallbackHandler",
+            "signatures",
+            "transferFrom"
+          ],
+          "rootCause": "Guard doesn't check setFallbackHandler",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 445,
+              "lineEnd": 458,
+              "severity": [],
+              "codeKeywords": [
+                "approve",
+                "checkTransaction",
+                "execTransaction",
+                "execTransaction(setFallbackHandler(nftAddress",
+                "msg.sender",
+                "setFallbackHandler",
+                "transferFrom"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Example",
+              "lineStart": 459,
+              "lineEnd": 479,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "checkTransaction"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-nft-marketplace-vulnerabilities-6-auction-manipulation-frontru-006",
+          "title": "6. Auction Manipulation, Frontrunning & Debt Shortfall",
+          "lineStart": 494,
+          "lineEnd": 563,
+          "lineCount": 70,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_reduceDebtWithoutBurn",
+            "_settleZoraAuction",
+            "execute(listOnOpenseaProposal",
+            "false",
+            "isLastCollateral",
+            "onERC721Received",
+            "purchaseLiquidationAuctionNFT(auction2",
+            "settleZoraAuction"
+          ],
+          "rootCause": "Shortfall burned without tracking for future auctions",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 501,
+              "lineEnd": 522,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": [
+                "_reduceDebtWithoutBurn",
+                "_settleZoraAuction",
+                "execute(listOnOpenseaProposal",
+                "false",
+                "isLastCollateral",
+                "onERC721Received",
+                "purchaseLiquidationAuctionNFT(auction2",
+                "settleZoraAuction"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Example",
+              "lineStart": 523,
+              "lineEnd": 539,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": []
+            }
+          ]
+        },
+        {
+          "id": "general-defi-nft-marketplace-vulnerabilities-7-nft-bridge-one-way-lock-migr-007",
+          "title": "7. NFT Bridge One-Way Lock & Migration Burn",
+          "lineStart": 564,
+          "lineEnd": 623,
+          "lineCount": 60,
+          "severity": [
+            "HIGH",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "_proposalId",
+            "_safeDecimals",
+            "address(0",
+            "bridgeToken",
+            "decimals",
+            "migrateVaultERC721",
+            "settleFractions",
+            "settleVault",
+            "withdrawERC721"
+          ],
+          "rootCause": "newVault can be address(0) with invalid proposalId",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 571,
+              "lineEnd": 592,
+              "severity": [],
+              "codeKeywords": [
+                "_proposalId",
+                "_safeDecimals",
+                "address(0",
+                "bridgeToken",
+                "migrateVaultERC721",
+                "settleFractions",
+                "settleVault",
+                "withdrawERC721"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Example",
+              "lineStart": 593,
+              "lineEnd": 611,
+              "severity": [
+                "HIGH"
+              ],
+              "codeKeywords": [
+                "migrateVaultERC721"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-nft-marketplace-vulnerabilities-8-merkle-criteria-resolution-o-008",
+          "title": "8. Merkle Criteria Resolution & Order Matching Bypass",
+          "lineStart": 624,
+          "lineEnd": 669,
+          "lineCount": 46,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "_verifyProof",
+            "merkleRoot",
+            "root",
+            "tokenId"
+          ],
+          "rootCause": "tokenId used directly as leaf — collides with intermediate hashes",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 631,
+              "lineEnd": 643,
+              "severity": [],
+              "codeKeywords": [
+                "merkleRoot",
+                "root"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Example",
+              "lineStart": 644,
+              "lineEnd": 657,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "_verifyProof"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-nft-marketplace-vulnerabilities-9-flash-loan-pool-token-theft-009",
+          "title": "9. Flash Loan & Pool Token Theft",
+          "lineStart": 670,
+          "lineEnd": 719,
+          "lineCount": 50,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "execute",
+            "flashLoan",
+            "transferFrom"
+          ],
+          "rootCause": "Caller chooses token address — can be exploit contract",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 677,
+              "lineEnd": 689,
+              "severity": [],
+              "codeKeywords": [
+                "execute",
+                "flashLoan",
+                "transferFrom"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Example",
+              "lineStart": 690,
+              "lineEnd": 708,
+              "severity": [
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "flashLoan"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-nft-marketplace-vulnerabilities-10-nft-wrap-unwrap-airdrop-id--010",
+          "title": "10. NFT Wrap/Unwrap Airdrop & ID Swap Exploitation",
+          "lineStart": 720,
+          "lineEnd": 784,
+          "lineCount": 65,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "getAirDrop",
+            "unwrap",
+            "wrap"
+          ],
+          "rootCause": "Immediate unwrap allows NFT ID swapping and airdrop theft",
+          "subsections": [
+            {
+              "title": "Attack Scenario",
+              "lineStart": 727,
+              "lineEnd": 738,
+              "severity": [],
+              "codeKeywords": [
+                "getAirDrop"
+              ]
+            },
+            {
+              "title": "Vulnerable Pattern Example",
+              "lineStart": 739,
+              "lineEnd": 762,
+              "severity": [
+                "LOW",
+                "MEDIUM"
+              ],
+              "codeKeywords": [
+                "unwrap",
+                "wrap"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "general-defi-nft-marketplace-vulnerabilities-impact-analysis-011",
+          "title": "Impact Analysis",
+          "lineStart": 785,
+          "lineEnd": 812,
+          "lineCount": 28,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Impact Frequency",
+              "lineStart": 801,
+              "lineEnd": 812,
+              "severity": [
+                "LOW"
+              ],
+              "codeKeywords": []
             }
           ]
         }
