@@ -1,4 +1,3 @@
----
 name: defihacklabs-indexer
 description: "Analyze DeFiHackLabs exploit PoCs or exploit folders to build attack-graph-aware DB entries and exploit-derived invariants. Use when indexing DeFiHackLabs cases, especially multi-step or multi-path exploit flows that do not fit flat report clustering."
 context: fork

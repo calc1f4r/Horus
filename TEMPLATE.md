@@ -6,6 +6,7 @@
 
 - Front-load the first `~120-150` lines with source references, root cause, triage guidance, and grep seeds.
 - Separate materially different exploit paths instead of collapsing them into one generic attack story.
+- Make cross-contract and cross-boundary issues explicit instead of hiding them inside one contract-level summary.
 - Include explicit false-positive guards so agents can reject weak matches earlier.
 - Keep optional deep-dive material near the bottom so agents can stop reading once they have enough evidence.
 
@@ -24,6 +25,15 @@ vulnerability_type: <specific_type>    # e.g., "stale_price", "price_manipulatio
 # Pattern Identity (Required)
 root_cause_family: <root_cause_family> # e.g., "missing_validation", "rounding_error", "callback_reentrancy"
 pattern_key: <missing_control> | <component> | <trigger> | <sink>
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: <single_contract|multi_contract|cross_protocol|cross_chain>
+involved_contracts:
+  - <contract_or_module_1>            # required when more than one contract / module / program is materially involved
+  - <contract_or_module_2>
+path_keys:
+  - <pattern_key> | <entry_surface> | <contract_hop_set>
+  - <pattern_key> | <alternate_entry_surface> | <contract_hop_set>
 
 # Attack Vector Details (Required)
 attack_type: <attack_classification>   # e.g., "data_manipulation", "economic_exploit", "logical_error"
@@ -82,10 +92,20 @@ Brief 1-2 sentence summary of the vulnerability that captures the essence for se
 
 - Root cause statement: "This vulnerability exists because ..."
 - Pattern key: `<missing_control> | <component> | <trigger> | <sink>`
+- Interaction scope: `<single_contract | multi_contract | cross_protocol | cross_chain>`
 - Primary affected component(s): `<component / contract / function family>`
+- Contracts / modules involved: `<ContractA>, <ContractB>, <AdapterX>, ...`
+- Path keys: `<pattern_key | entry_surface | contract_hop_set>`
 - High-signal code keywords: `<keyword_1>, <keyword_2>, <keyword_3>, ...`
 - Typical sink / impact: `<fund loss / accounting corruption / griefing / unfair liquidation / DoS>`
 - Validation strength: `<strong | moderate | weak>`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): `<deposit()>`, `<liquidate()>`, `<onTransfer()>`, `<governance execute()>`, etc.
+- Contract hop(s): `<ContractA.function -> ContractB.function -> ContractC.function>`
+- Trust boundary crossed: `<callback / adapter / proxy / oracle / bridge / external token / cross-chain message>`
+- Shared state or sync assumption: `<what state must stay consistent across contracts or steps>`
 
 #### Valid Bug Signals
 
@@ -115,18 +135,28 @@ Explain the fundamental issue that causes this vulnerability. Be specific about:
 Describe each materially distinct exploit path separately. Use `Path A`, `Path B`, `Path C` when the bug can be reached through different entry points, trust assumptions, or sinks.
 
 **Path A: [Primary Exploit Path]**
+Path key: `<pattern_key> | <entry_surface> | <contract_hop_set>`
+Entry surface: `<user-callable function / privileged route / callback / bridge message>`
+Contracts touched: `<ContractA -> ContractB -> ContractC>`
+Boundary crossed: `<internal / callback / adapter / proxy / oracle / bridge>`
 1. Initial conditions/setup required
 2. Actions taken by attacker
 3. State changes that occur
 4. Final outcome/impact
 
 **Path B: [Alternate Exploit Path]**
+Path key: `<pattern_key> | <alternate_entry_surface> | <contract_hop_set>`
+Entry surface: `<alternate route>`
+Contracts touched: `<ContractX -> ContractY>`
+Boundary crossed: `<boundary type>`
 1. Different setup or trigger
 2. Different attacker action or dependency
 3. State change / invariant break
 4. Final outcome/impact
 
 **Path C: [Edge / Cross-Function Path]**
+Path key: `<pattern_key> | <edge_entry_surface> | <contract_hop_set>`
+Contracts touched: `<optional multi-step route>`
 1. Optional multi-step or cross-contract route
 2. ...
 
@@ -198,6 +228,14 @@ function alternativeSecureImplementation() public {
 ```
 
 ### Detection Patterns
+
+#### Contract / Call Graph Signals
+```
+- External call / callback into state-sensitive path
+- Adapter / plugin / strategy hop with stale or unsynchronized assumptions
+- Shared accounting state updated in one contract but trusted in another
+- Same root cause reachable from multiple entry surfaces with different sinks
+```
 
 #### High-Signal Grep Seeds
 ```
@@ -286,18 +324,21 @@ function alternativeSecureImplementation() public {
 2. Create a new file under `DB/<category-or-subfolder>/...` using the existing repository layout
 3. Fill in all required fields in the frontmatter, especially `root_cause_family`, `pattern_key`, and `code_keywords`
 4. Front-load the entry: the top of the file should let an agent understand the bug without reading the appendix
-5. If there are multiple exploit routes, enumerate them explicitly as `Path A`, `Path B`, `Path C`
-6. Include multiple code examples showing variations
-7. Run `python3 generate_manifests.py` after adding or substantially changing DB content
+5. If the issue spans multiple contracts or trust boundaries, fill `interaction_scope` and `involved_contracts`
+6. If there are multiple exploit routes, enumerate them explicitly as `Path A`, `Path B`, `Path C` and give each a `path_key`
+7. Distinguish the family-level `pattern_key` from the path-level keys: keep one `pattern_key` for the vulnerability class, then use `path_keys` for entry-surface / hop-specific variants
+8. Include multiple code examples showing variations
+9. Run `python3 generate_manifests.py` after adding or substantially changing DB content
 
 ### 1A. Migrating An Existing Vulnerability Entry
 
 1. If a legacy `DB/**/*.md` entry already covers the pattern, migrate that file in-place instead of creating a new duplicate
 2. Upgrade the frontmatter to include all current required fields, especially `root_cause_family`, `pattern_key`, and `code_keywords`
-3. Add the low-context triage sections near the top: `Agent Quick View`, `Valid Bug Signals`, and `False Positive Guards`
-4. Split blended exploit narratives into explicit `Path A / Path B / Path C` variants when the trigger or sink changes
-5. Preserve evidence-rich legacy content, references, and code examples; reorganize rather than delete whenever possible
-6. Regenerate manifests after migration so hunt cards and keyword routing reflect the new structure
+3. Add `interaction_scope`, `involved_contracts`, and `path_keys` when the issue spans multiple contracts or has materially different path variants
+4. Add the low-context triage sections near the top: `Agent Quick View`, `Contract / Boundary Map`, `Valid Bug Signals`, and `False Positive Guards`
+5. Split blended exploit narratives into explicit `Path A / Path B / Path C` variants when the trigger, contract hop set, or sink changes
+6. Preserve evidence-rich legacy content, references, and code examples; reorganize rather than delete whenever possible
+7. Regenerate manifests after migration so hunt cards and keyword routing reflect the new structure
 
 ### 2. Optimizing for Vector Search
 
@@ -309,6 +350,8 @@ function alternativeSecureImplementation() public {
 - **Clear Categorization**: Use precise, hierarchical categories in frontmatter
 - **Low-Context Retrieval**: Put the root cause statement, valid bug signals, false-positive guards, and grep seeds near the top
 - **Exploit Path Separation**: Split distinct paths instead of mixing deposit-path, withdraw-path, callback-path, and governance-path logic together
+- **Interaction Boundary Mapping**: Name the contract hops and trust boundary for multi-contract issues instead of burying that context in prose
+- **Path-Level Indexing**: Use one family-level `pattern_key`, then separate path-level `path_keys` for entry surfaces or hop sets that should not be merged blindly
 - **False-Positive Control**: Explicitly document when the pattern is *not* reportable
 
 **Example Categories**:
@@ -362,8 +405,10 @@ When the vulnerability database is indexed:
 Before committing a new vulnerability:
 - [ ] All required frontmatter fields are filled
 - [ ] `root_cause_family`, `pattern_key`, and `code_keywords` are present and specific
+- [ ] `interaction_scope`, `involved_contracts`, and `path_keys` are present when the issue spans multiple contracts or materially different path variants
 - [ ] The first ~150 lines contain enough context for a low-window agent to triage the bug
 - [ ] `Valid Bug Signals` and `False Positive Guards` are explicit
+- [ ] `Contract / Boundary Map` explains the contract hops and trust boundary when relevant
 - [ ] Distinct exploit routes are split into `Path A / B / C` where applicable
 - [ ] At least 3 vulnerable code examples provided
 - [ ] At least 2 secure implementation examples included

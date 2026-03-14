@@ -31,6 +31,7 @@ Migrate an entry when any of the following is true:
 
 3. **Upgrade frontmatter**
    - Add or normalize: `chain`, `root_cause_family`, `pattern_key`, `code_keywords`, `primitives`, `severity`, `impact`, and other required template fields.
+   - For cross-contract or multi-path issues, also add `interaction_scope`, `involved_contracts`, and `path_keys`.
    - Keep `code_keywords` grep-able: function names, modifiers, selectors, storage vars, error names, critical identifiers.
 
 4. **Upgrade the top-of-file triage layer**
@@ -41,7 +42,8 @@ Migrate an entry when any of the following is true:
    - Add `High-Signal Grep Seeds` under `Detection Patterns`.
 
 5. **Split materially distinct exploit paths**
-   - Replace one blended attack story with `Path A / Path B / Path C` when the trigger, component, or sink differs.
+   - Replace one blended attack story with `Path A / Path B / Path C` when the trigger, component, contract hop set, or sink differs.
+   - For multi-contract findings, add a `Contract / Boundary Map` and give each path a `path_key`.
 
 6. **Preserve and reorganize evidence**
    - Keep real-world examples, code snippets, and references.
@@ -56,6 +58,7 @@ Migrate an entry when any of the following is true:
 - The entry follows the current `TEMPLATE.md` structure.
 - The first `~150` lines are sufficient for low-context triage.
 - `root_cause_family`, `pattern_key`, and `code_keywords` are present and specific.
+- Multi-contract or multi-path findings also include `interaction_scope`, `involved_contracts`, and `path_keys`.
 - `Valid Bug Signals` and `False Positive Guards` are evidence-backed.
 - Distinct exploit paths are split instead of blended.
 - No duplicate DB entry remains for the same pattern unless there is a justified category boundary.

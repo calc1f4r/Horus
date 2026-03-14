@@ -3,8 +3,44 @@ protocol: generic
 chain: everychain
 category: vault
 vulnerability_type: erc4626_vault_integration
+
+# Pattern Identity (Required)
+root_cause_family: share_price_manipulation
+pattern_key: missing_initial_deposit_protection | vault_share_accounting | deposit | inflated_share_price_theft
+
+# Interaction Scope (Required for multi-contract)
+interaction_scope: multi_contract
+involved_contracts:
+  - ERC4626Vault
+  - UnderlyingERC20Token
+  - ExternalYieldSource
+path_keys:
+  - missing_initial_deposit_protection | vault_share_accounting | deposit | inflated_share_price
+  - missing_rounding_direction | vault_share_accounting | withdraw | share_amount_rounding_loss
+  - missing_erc4626_compliance | vault_interface | maxDeposit | broken_integration_assumption
+  - missing_reentrancy_guard | vault_state_callback | deposit | cross_contract_state_manipulation
+
 attack_type: economic_exploit
 affected_component: share_calculation
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - convertToShares
+  - convertToAssets
+  - totalAssets
+  - totalSupply
+  - previewDeposit
+  - previewMint
+  - previewRedeem
+  - previewWithdraw
+  - _decimalsOffset
+  - virtual shares
+  - balanceOf(address(this))
+  - mulDivDown
+  - mulDivUp
+  - deposit(uint256,address)
+  - mint(uint256,address)
+
 severity: critical
 impact: fund_loss
 exploitability: 0.80
@@ -45,6 +81,45 @@ version: all
 # ERC4626 Tokenized Vault Vulnerabilities - Comprehensive Database
 
 **A Complete Pattern-Matching Guide for ERC4626 Vault Security Audits**
+
+#### Agent Quick View
+
+- Root cause statement: "ERC4626 vault vulnerabilities exist because share/asset conversion arithmetic is manipulable when total supply is zero or low, rounding direction is inconsistent, or external token interactions break accounting assumptions."
+- Pattern key: `missing_initial_deposit_protection | vault_share_accounting | deposit | inflated_share_price_theft`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `ERC4626 vault share calculation, underlying token transfers, yield source callbacks`
+- Contracts / modules involved: `ERC4626Vault, UnderlyingERC20Token, ExternalYieldSource/Strategy`
+- Path keys:
+  - `missing_initial_deposit_protection | deposit | {Vault, Token}`
+  - `missing_rounding_direction | withdraw | {Vault}`
+  - `missing_erc4626_compliance | maxDeposit | {Vault, Integrator}`
+  - `missing_reentrancy_guard | deposit | {Vault, Token, Callback}`
+- High-signal code keywords: `convertToShares, convertToAssets, totalAssets, totalSupply, previewDeposit, mulDivDown, mulDivUp, _decimalsOffset, balanceOf(address(this))`
+- Typical sink / impact: `inflated share price → first depositor theft / rounding loss / broken integrations`
+- Validation strength: `moderate` (some vaults use virtual shares, but many still lack protection)
+
+#### Contract / Boundary Map
+
+- Entry surface(s): `deposit()`, `mint()`, `withdraw()`, `redeem()`, `totalAssets()`, `convertToShares()`
+- Contract hop(s): `User -> Vault.deposit() -> Token.transferFrom() -> [YieldSource.deposit()]`
+- Trust boundary crossed:nal token transfer (ERC20 with hooks / fee-on-transfer / rebasing)`, `yield source callback`, `direct token donation`
+- Shared state or sync assumption: `totalAssets() must equal actual vault holdi `externgs; share/asset ratio must be monotonically accurate`
+
+#### Valid Bug Signals
+
+- Signal 1: No virtual shares/assets offset and no minimum first deposit — first depositor attack is live
+- Signal 2: `totalAssets()` uses `balanceOf(address(this))` without internal accounting — donation attack vector is open
+- Signal 3: Rounding uses `mulDivDown` for both deposit and withdraw — one direction must round against the user
+- Signal 4: Vault does not implement `maxDeposit()`, `maxMint()`, etc. per EIP-4626 — integrator contracts assume spec compliance
+- Signal 5: Deposit or mint function does not use a reentrancy guard and underlying token has transfer hooks (ERC777, ERC1155)
+
+#### False Positive Guards
+
+- Not this bug when: vault uses OpenZeppelin v4.9+ `ERC4626` with `_decimalsOffset()` > 0 (virtual shares mitigate inflation)
+- Safe if: protocol burns dead shares on first deposit (e.g., mints to `address(0xdead)` or `address(1)`)
+- Safe if: minimum deposit amount is enforced that makes donation attack economically unfeasible
+- Not this bug when: `totalAssets()` uses internal accounting separate from `balanceOf()` — donation does not affect share math
+- Requires attacker control of: first deposit timing (frontrunning), or ability to call `transfer()` directly to vault address
 
 ---
 
@@ -156,14 +231,38 @@ When `totalSupply` is 0, shares are typically minted 1:1 with assets. An attacke
 3. The share price becomes extremely inflated
 4. Subsequent depositors receive 0 shares due to rounding down
 
-#### Attack Scenario
+#### Attack Scenario / Path Variants
 
-1. Vault is deployed with `totalAssets() = 0` and `totalSupply() = 0`
-2. Attacker deposits 1 wei, receiving 1 share (owns 100% of vault)
-3. Attacker directly transfers 20,000e18 tokens to the vault
-4. Victim attempts to deposit 2,000e18 tokens
-5. Shares calculation: `2_000e18 * 1 / ((20_000e18 + 1) - 2_000e18) = 0`
-6. Victim receives 0 shares, attacker withdraws all funds
+**Path A: [Classic First Depositor Front-Run]**
+Path key: `missing_initial_deposit_protection | deposit | {Vault, Token}`
+Entry surface: `deposit()`
+Contracts touched: `Vault -> UnderlyingToken`
+Boundary crossed: `external token transfer (donation via direct transfer)`
+1. Vault deployed with totalSupply = 0
+2. Attacker front-runs first legitimate depositor
+3. Deposits 1 wei → receives 1 share
+4. Donates large amount directly to vault via token.transfer()
+5. Victim's deposit calculates shares = 0 due to rounding
+6. Attacker withdraws all funds
+
+**Path B: [Balance-Based totalAssets Manipulation]**
+Path key: `missing_internal_accounting | totalAssets | {Vault, Token}`
+Entry surface: `totalAssets()` (read by `convertToShares`)
+Contracts touched: `Vault -> Token.balanceOf()`
+Boundary crossed: `external token balance query`
+1. Vault uses `balanceOf(address(this))` for totalAssets
+2. Attacker sends tokens directly to vault (not via deposit)
+3. Share price inflates without minting new shares
+4. Subsequent depositors get fewer shares than expected
+
+**Path C: [Incorrect Dead Shares Implementation]**
+Path key: `incorrect_dead_shares | deposit | {Vault, Factory}`
+Entry surface: `createVault()` or `initialize()`
+Contracts touched: `Factory -> Vault.deposit()`
+Boundary crossed: `internal (factory call to vault)`
+1. Factory mints initial "dead shares" but to msg.sender instead of dead address
+2. Dead shares can be redeemed, eliminating the protection
+3. First depositor attack becomes viable again
 
 ### Vulnerable Pattern Examples
 
@@ -342,6 +441,31 @@ function _withdraw(address caller, address receiver, address owner, uint256 asse
 ```
 
 ### Detection Patterns
+
+#### High-Signal Grep Seeds
+```
+convertToShares
+convertToAssets
+totalAssets
+totalSupply() == 0
+balanceOf(address(this))
+previewDeposit
+previewMint
+_decimalsOffset
+virtual shares
+mulDivDown
+mulDivUp
+ERC4626
+```
+
+#### Contract / Call Graph Signals
+```
+- Vault deposit/withdraw calls external token with potential hooks
+- totalAssets relies on token.balanceOf instead of internal accounting
+- First deposit path has no special handling or minimum amount
+- Share minting rounds down for depositor (correct) but also rounds down for withdrawer (vulnerable)
+- Cross-contract reentrancy via ERC777/ERC1155 transfer hooks during deposit
+```
 
 #### Code Patterns to Look For
 ```

