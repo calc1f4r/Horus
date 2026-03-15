@@ -1,33 +1,77 @@
 ---
+# Core Classification
 protocol: generic
-chain: cosmos
+chain: cosmos|ethereum|everychain
 category: slashing
 vulnerability_type: slashing_evasion_frontrunning
 
-attack_type: logical_error|economic_exploit|dos
-affected_component: slashing_logic
+# Pattern Identity
+root_cause_family: missing_timing_guard
+pattern_key: missing_frontrun_protection | slashing_module | withdrawal_before_slash | penalty_evasion
 
+# Interaction Scope
+interaction_scope: multi_contract
+involved_contracts:
+  - StakingManager
+  - SlashingModule
+  - WithdrawalQueue
+  - CooldownController
+path_keys:
+  - missing_frontrun_protection | withdrawal_request | StakingManager→WithdrawalQueue | slash_evasion
+  - missing_cooldown_guard | cooldown_activation | StakedToken→SlashingModule | penalty_bypass
+  - missing_queued_inclusion | queued_withdrawal_state | DelegationManager→StrategyManager | slashable_exclusion
+  - missing_delegation_lock | delegate_transfer | OperatorToken→SlashingModule | slash_bypass
+
+# Attack Vector Details
+attack_type: economic_exploit|logical_error|dos
+affected_component: slashing_logic|withdrawal_queue|cooldown_mechanism
+
+# Technical Primitives
 primitives:
   - frontrun_exit
   - cooldown_exploit
   - delegation_bypass
-  - insufficient_deposit
-  - external_block
   - queued_excluded
-  - unregistered_operator
+  - withdrawal_delay_bypass
   - mechanism_abuse
+  - governance_timing_attack
 
+# Grep / Hunt-Card Seeds
+code_keywords:
+  - slash
+  - cooldown
+  - unstake
+  - withdrawal
+  - requestWithdrawal
+  - fullClaimAndExit
+  - decreaseStakeLockupDuration
+  - votingPeriod
+  - whenNotPaused
+  - pendingWithdrawals
+  - queueWithdrawal
+  - slashableShares
+  - beaconChainETHStrategy
+  - SLASHING_WINDOW
+  - MIN_WITHDRAWAL_DELAY
+  - _stakersCooldowns
+
+# Impact Classification
 severity: high
 impact: fund_loss|dos|state_corruption
 exploitability: 0.7
 financial_impact: high
 
+# Context Tags
 tags:
   - cosmos
   - appchain
   - slashing
   - staking
   - defi
+  - frontrunning
+  - withdrawal
+  - cooldown
+  - evasion
 
 language: go|solidity|rust
 version: all
@@ -107,9 +151,45 @@ version: all
 
 ---
 
-# Slashing Evasion Frontrunning - Comprehensive Database
+## Slashing Evasion & Frontrunning Vulnerabilities
 
-**A Complete Pattern-Matching Guide for Slashing Evasion Frontrunning in Cosmos/AppChain Security Audits**
+### Overview
+
+Slashing evasion through frontrunning is a family of vulnerabilities where stakers, operators, or delegators can avoid or reduce slashing penalties by manipulating transaction ordering, exploiting timing windows between slash detection and execution, or leveraging gaps in withdrawal queue accounting. Found across 55+ audit reports (HIGH: 24, MEDIUM: 31) from 10+ independent auditors across 15+ protocols.
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because slashing execution lacks atomic coordination with withdrawal, cooldown, and delegation state transitions — allowing actors to move funds out of slashable scope before penalties are applied."
+- Pattern key: `missing_frontrun_protection | slashing_module | withdrawal_before_slash | penalty_evasion`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `SlashingModule, WithdrawalQueue, StakedToken, CooldownController, DelegationManager`
+- Contracts / modules involved: `StakingManager, SlashingModule, WithdrawalQueue, CooldownController, StrategyManager, NativeVault`
+- Path keys: `withdrawal_request | StakingManager→WithdrawalQueue`, `cooldown_activation | StakedToken→SlashingModule`, `queued_withdrawal_state | DelegationManager→StrategyManager`, `delegate_transfer | OperatorToken→SlashingModule`
+- High-signal code keywords: `slash`, `cooldown`, `unstake`, `requestWithdrawal`, `fullClaimAndExit`, `queueWithdrawal`, `pendingWithdrawals`, `SLASHING_WINDOW`, `whenNotPaused`
+- Typical sink / impact: `penalty evasion / fund loss for remaining stakers / protocol insolvency / socialized slashing amplification`
+- Validation strength: `strong (10+ independent auditors)`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): `requestWithdrawal()`, `cooldown()`, `unstake()`, `fullClaimAndExit()`, `revokePending()`, `transfer()`
+- Contract hop(s): `StakingManager.unstake() → WithdrawalQueue.queue()` bypasses `SlashingModule.slash()` scope; `StakedToken.cooldown()` pre-positions for `redeem()` before `slash()` executes
+- Trust boundary crossed: `mempool visibility (public slashing tx can be frontrun)`, `state transition ordering (withdrawal state escapes slashing scope)`, `governance timing (lockup < voting period)`
+- Shared state or sync assumption: `slashable balance must include queued/pending withdrawals; cooldown activation must be blocked during slashing; withdrawal delays must exceed slash execution window`
+
+#### Valid Bug Signals
+
+- Signal 1: `requestWithdrawal()` or `unstake()` can be called between slash detection and slash execution with no lock or freeze
+- Signal 2: Cooldown activation (`cooldown()`) is not gated by `whenNotPaused` or a slashing-pending flag
+- Signal 3: Queued withdrawals or pending delegation state are excluded from `slashableShares` calculation
+- Signal 4: `decreaseStakeLockupDuration` ≤ `votingPeriod` for governance-based slashing
+- Signal 5: Withdrawal request timestamps can be pre-set before actual staking occurs
+
+#### False Positive Guards
+
+- Not this bug when: withdrawal delay exceeds slashing window + veto window (e.g., `MIN_WITHDRAWAL_DELAY > SLASHING_WINDOW + SLASHING_VETO_WINDOW`)
+- Safe if: protocol freezes all exit paths (withdraw, transfer, cooldown) during slashing execution via a global `slashingPending` flag
+- Safe if: slashable shares calculation includes queued/pending withdrawal amounts
+- Requires attacker control of: mempool ordering (frontrunning) OR governance timing parameters OR cooldown entry during pause
 
 ---
 
