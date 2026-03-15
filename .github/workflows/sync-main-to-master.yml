@@ -39,21 +39,32 @@ jobs:
       - name: Switch to master
         run: git checkout master
 
-      - name: Overlay curated files from source branch
+      - name: Replace curated files from source branch
         run: |
           SRC="origin/${{ github.event.inputs.source_branch }}"
 
-          # ── Core database (manifests, hunt cards, vulnerability entries) ──
-          git checkout "$SRC" -- DB/
+          # Remove previously synced paths first so stale master-only files
+          # (for example legacy *-agent.md names) cannot survive the sync.
+          git rm -r --ignore-unmatch \
+            DB \
+            .github/agents \
+            .claude \
+            .claude-plugin \
+            Agents.md \
+            README.md \
+            LICENSE \
+            TEMPLATE.md \
+            Example.md \
+            CodebaseStructure.md \
+            CONTRIBUTING.md \
+            Architecture.png
 
-          # ── Agent skill definitions (no workflows — they stay on hunt-cards) ──
-          git checkout "$SRC" -- .github/agents/
-
-          # ── Claude config (agents, skills, rules, resources, plugins) ──
-          git checkout "$SRC" -- .claude/
+          # Restore the exact curated snapshot from the selected source.
+          git checkout "$SRC" -- DB
+          git checkout "$SRC" -- .github/agents
+          git checkout "$SRC" -- .claude
           git checkout "$SRC" -- .claude-plugin
 
-          # ── Project definition files ──
           git checkout "$SRC" -- \
             Agents.md \
             README.md \
