@@ -2,17 +2,17 @@
   "meta": {
     "manifest": "oracle",
     "description": "Compressed hunt cards for oracle — one-line detection rules for bulk scanning",
-    "totalCards": 61,
-    "skipped": 46,
+    "totalCards": 63,
+    "skipped": 27,
     "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 61
+    "enriched": 63
   },
   "cards": [
     {
       "id": "oracle-chainlink-automation-vulnerabilities-1-checkupkeep-performupkeep-mi-000",
       "title": "1. CheckUpkeep/PerformUpkeep Mismatch",
       "severity": "MEDIUM",
-      "grep": "AutomationCompatible|encoding_mismatch|callback_revert|upkeep_failure|fulfillRequest|performUpkeep",
+      "grep": "performUpkeep|performData|checkUpkeep",
       "detect": "`checkUpkeep` returns data encoded in one format, but `performUpkeep` expects a different format.",
       "cat": [
         "oracle",
@@ -42,7 +42,7 @@
       "id": "oracle-chainlink-automation-vulnerabilities-2-gas-limit-issues-001",
       "title": "2. Gas Limit Issues",
       "severity": "MEDIUM",
-      "grep": "AutomationCompatible|encoding_mismatch|callback_revert|upkeep_failure|fulfillRequest|performUpkeep",
+      "grep": "performUpkeep|checkUpkeep",
       "detect": "`performUpkeep` contains unbounded loops, multiple external calls, or complex operations that can exceed the registered...",
       "cat": [
         "oracle",
@@ -68,7 +68,7 @@
       "id": "oracle-chainlink-automation-vulnerabilities-3-unbounded-operations-002",
       "title": "3. Unbounded Operations",
       "severity": "HIGH",
-      "grep": "AutomationCompatible|encoding_mismatch|callback_revert|upkeep_failure|fulfillRequest|performUpkeep",
+      "grep": "performUpkeep|checkLog",
       "detect": "All logs in block must be processed",
       "cat": [
         "oracle",
@@ -93,7 +93,7 @@
       "id": "oracle-chainlink-automation-vulnerabilities-4-callback-safety-003",
       "title": "4. Callback Safety",
       "severity": "LOW",
-      "grep": "AutomationCompatible|encoding_mismatch|callback_revert|upkeep_failure|fulfillRequest|performUpkeep",
+      "grep": "performUpkeep|UpdateSuccessful|updatePrices|UpdateFailed",
       "detect": "Strict requirements can cause repeated failures",
       "cat": [
         "oracle",
@@ -118,7 +118,7 @@
       "id": "oracle-chainlink-automation-vulnerabilities-5-authentication-missing-004",
       "title": "5. Authentication Missing",
       "severity": "MEDIUM",
-      "grep": "AutomationCompatible|encoding_mismatch|callback_revert|upkeep_failure|fulfillRequest|uploadSecrets",
+      "grep": "uploadSecrets|chainlink_findings|makeHttpRequest|encodeString",
       "detect": "Functions source code contains hardcoded API endpoints without authentication, making them publicly callable and...",
       "cat": [
         "oracle",
@@ -146,7 +146,7 @@
       "id": "oracle-chainlink-automation-vulnerabilities-6-response-validation-005",
       "title": "6. Response Validation",
       "severity": "LOW",
-      "grep": "AutomationCompatible|encoding_mismatch|callback_revert|upkeep_failure|fulfillRequest|performUpkeep",
+      "grep": "fulfillRequest|chainlink_findings|FunctionsFailed|FunctionsError",
       "detect": "Blindly trusts response",
       "cat": [
         "oracle",
@@ -168,10 +168,64 @@
       "invalidWhen": "Validate response thoroughly"
     },
     {
-      "id": "oracle-chainlink-ccip-vulnerabilities-2-router-configuration-issues-002",
+      "id": "oracle-chainlink-automation-vulnerabilities-7-secrets-management-006",
+      "title": "7. Secrets Management",
+      "severity": "UNKNOWN",
+      "grep": "updateSecretsConfig|sendRequest",
+      "detect": "Chainlink Functions secrets should be properly encrypted and managed to prevent exposure.",
+      "cat": [
+        "oracle",
+        "price-feed",
+        "data-freshness"
+      ],
+      "ref": "DB/oracle/chainlink/CHAINLINK_AUTOMATION_VULNERABILITIES.md",
+      "lines": [
+        563,
+        598
+      ],
+      "check": [
+        "VERIFY: Chainlink Functions secrets should be properly encrypted and managed to prevent exposure.",
+        "FALSIFY: Proper secrets management"
+      ],
+      "securePattern": "Proper secrets management",
+      "validWhen": "Chainlink Functions secrets should be properly encrypted and managed to prevent exposure.",
+      "invalidWhen": "Proper secrets management"
+    },
+    {
+      "id": "oracle-chainlink-ccip-vulnerabilities-1-message-decoding-vulnerabili-000",
+      "title": "1. Message Decoding Vulnerabilities",
+      "severity": "HIGH",
+      "grep": "decodeBridgeSendPayload|_ccipReceive|receiveMessage|sendMessage|uint64|uint32",
+      "detect": "Chainlink CCIP uses `uint64` for chain selectors, but protocols often use smaller types like `uint32`.",
+      "cat": [
+        "oracle",
+        "price-feed",
+        "data-freshness"
+      ],
+      "ref": "DB/oracle/chainlink/CHAINLINK_CCIP_VULNERABILITIES.md",
+      "lines": [
+        103,
+        226
+      ],
+      "check": [
+        "VERIFY: Chainlink CCIP uses uint64 for chain selectors, but protocols often use smaller types like uint32.",
+        "PROVE: Protocol encodes CCIP message with wrong type size; Message is sent cross-chain successfully",
+        "FALSIFY: Import and use Chainlink's exact types",
+        "IMPACT: All CCIP messages fail to decode",
+        "Verify all chain selectors use uint64",
+        "Check encoding/decoding types match exactly"
+      ],
+      "antipattern": "uint32 cannot hold Chainlink chain selectors",
+      "securePattern": "Import and use Chainlink's exact types",
+      "validWhen": "Chainlink CCIP uses uint64 for chain selectors, but protocols often use smaller types like uint32.",
+      "invalidWhen": "Import and use Chainlink's exact types",
+      "impact": "All CCIP messages fail to decode"
+    },
+    {
+      "id": "oracle-chainlink-ccip-vulnerabilities-2-router-configuration-issues-001",
       "title": "2. Router Configuration Issues",
       "severity": "MEDIUM",
-      "grep": "Client.EVM2AnyMessage|allowOutOfOrderExecution|message_handling|token_transfer|message_decode|EVMExtraArgsV2",
+      "grep": "updateRouter|getRouter",
       "detect": "Router address stored as immutable or constant without update mechanism.",
       "cat": [
         "oracle",
@@ -194,10 +248,10 @@
       "invalidWhen": "Following Chainlink's recommended pattern"
     },
     {
-      "id": "oracle-chainlink-ccip-vulnerabilities-3-extra-args-configuration-003",
+      "id": "oracle-chainlink-ccip-vulnerabilities-3-extra-args-configuration-002",
       "title": "3. Extra Args Configuration",
       "severity": "LOW",
-      "grep": "Client.EVM2AnyMessage|allowOutOfOrderExecution|setDefaultExtraArgs|message_handling|token_transfer|message_decode",
+      "grep": "setDefaultExtraArgs|sendMessage|extraArgs",
       "detect": "`extraArgs` hardcoded in code rather than passed as parameters or stored in upgradeable storage.",
       "cat": [
         "oracle",
@@ -220,10 +274,10 @@
       "invalidWhen": "extraArgs is configurable"
     },
     {
-      "id": "oracle-chainlink-ccip-vulnerabilities-4-source-sender-validation-004",
+      "id": "oracle-chainlink-ccip-vulnerabilities-4-source-sender-validation-003",
       "title": "4. Source/Sender Validation",
       "severity": "HIGH",
-      "grep": "Client.EVM2AnyMessage|allowOutOfOrderExecution|setAllowedSender|message_handling|_ccipReceive|token_transfer",
+      "grep": "setAllowedSender|_ccipReceive",
       "detect": "`_ccipReceive` processes messages without validating the source chain selector or sender address, allowing malicious...",
       "cat": [
         "oracle",
@@ -246,10 +300,10 @@
       "invalidWhen": "Validate both chain and sender"
     },
     {
-      "id": "oracle-chainlink-ccip-vulnerabilities-5-callback-receive-handling-005",
+      "id": "oracle-chainlink-ccip-vulnerabilities-5-callback-receive-handling-004",
       "title": "5. Callback/Receive Handling",
       "severity": "MEDIUM",
-      "grep": "Client.EVM2AnyMessage|allowOutOfOrderExecution|message_handling|_ccipReceive|token_transfer|processMessage",
+      "grep": "_ccipReceive|processMessage",
       "detect": "Complex logic, external calls, or state validations in `_ccipReceive` that can fail, causing permanent message loss.",
       "cat": [
         "oracle",
@@ -272,10 +326,10 @@
       "invalidWhen": "Store for later processing"
     },
     {
-      "id": "oracle-chainlink-ccip-vulnerabilities-6-gas-limit-configuration-006",
+      "id": "oracle-chainlink-ccip-vulnerabilities-6-gas-limit-configuration-005",
       "title": "6. Gas Limit Configuration",
       "severity": "MEDIUM",
-      "grep": "Client.EVM2AnyMessage|allowOutOfOrderExecution|source_validation|message_handling|token_transfer|message_decode",
+      "grep": "sendMessage|chainlink_findings|EVMTokenAmount|EVMExtraArgsV2",
       "detect": "Default might not be enough",
       "cat": [
         "oracle",
@@ -297,11 +351,11 @@
       "invalidWhen": "Appropriate gas limit for operation"
     },
     {
-      "id": "oracle-chainlink-price-feed-vulnerabilities-vulnerable-pattern-examples-001",
-      "title": "Vulnerable Pattern Examples",
+      "id": "oracle-chainlink-price-feed-vulnerabilities-1-staleness-vulnerabilities-000",
+      "title": "1. Staleness Vulnerabilities",
       "severity": "MEDIUM",
-      "grep": "sequencer_uptime_feed|AggregatorV3Interface|validation_logic|state_transition|staleness_check|latestRoundData",
-      "detect": "No validation of updatedAt timestamp",
+      "grep": "latestRoundData|getLatestPrice|updatedAt|getPrice",
+      "detect": "Protocols call `latestRoundData()` but ignore the `updatedAt` return value, or use hardcoded heartbeat thresholds that...",
       "cat": [
         "oracle",
         "price-feed",
@@ -309,21 +363,88 @@
       ],
       "ref": "DB/oracle/chainlink/CHAINLINK_PRICE_FEED_VULNERABILITIES.md",
       "lines": [
-        157,
-        208
+        133,
+        289
       ],
       "check": [
-        "VERIFY: No validation of updatedAt timestamp",
-        "PROVE: Same threshold for all feeds (24 hours)"
+        "VERIFY: Protocols call latestRoundData() but ignore the updatedAt return value, or use hardcoded heartbeat thresholds that don't match the actual feed's...",
+        "PROVE: Market volatility causes significant price movement; Chainlink feed hasn't updated within heartbeat interval (but within threshold)",
+        "FALSIFY: Full validation of all return values",
+        "IMPACT: Incorrect price inputs for financial calculations",
+        "Verify updatedAt is checked against reasonable threshold",
+        "Check startedAt > 0 validation exists"
       ],
       "antipattern": "Same threshold for all feeds (24 hours)",
-      "validWhen": "No validation of updatedAt timestamp"
+      "securePattern": "Full validation of all return values",
+      "validWhen": "Protocols call latestRoundData() but ignore the updatedAt return value, or use hardcoded heartbeat thresholds that don't match the actual feed's update frequency.",
+      "invalidWhen": "Full validation of all return values",
+      "impact": "Incorrect price inputs for financial calculations"
     },
     {
-      "id": "oracle-chainlink-price-feed-vulnerabilities-4-deprecated-api-usage-006",
+      "id": "oracle-chainlink-price-feed-vulnerabilities-2-l2-sequencer-uptime-vulnerab-001",
+      "title": "2. L2 Sequencer Uptime Vulnerabilities",
+      "severity": "MEDIUM",
+      "grep": "latestRoundData|getLatestPrice|getPrice",
+      "detect": "When the L2 sequencer is down, transactions are queued but not processed.",
+      "cat": [
+        "oracle",
+        "price-feed",
+        "data-freshness"
+      ],
+      "ref": "DB/oracle/chainlink/CHAINLINK_PRICE_FEED_VULNERABILITIES.md",
+      "lines": [
+        290,
+        407
+      ],
+      "check": [
+        "VERIFY: When the L2 sequencer is down, transactions are queued but not processed.",
+        "PROVE: L2 sequencer goes down; Significant price movement occurs on L1",
+        "FALSIFY: Full sequencer validation with grace period",
+        "IMPACT: Stale prices used during/after sequencer downtime",
+        "Check if protocol deploys to L2 (Arbitrum, Optimism, Base)",
+        "Verify sequencer uptime feed is integrated"
+      ],
+      "antipattern": "No grace period after sequencer restart",
+      "securePattern": "Full sequencer validation with grace period",
+      "validWhen": "When the L2 sequencer is down, transactions are queued but not processed.",
+      "invalidWhen": "Full sequencer validation with grace period",
+      "impact": "Stale prices used during/after sequencer downtime"
+    },
+    {
+      "id": "oracle-chainlink-price-feed-vulnerabilities-3-circuit-breaker-min-max-pric-002",
+      "title": "3. Circuit Breaker / Min-Max Price Vulnerabilities",
+      "severity": "MEDIUM",
+      "grep": "_compareMinMax|minAnswer|maxAnswer|getPrice",
+      "detect": "When an asset's actual price drops below `minAnswer` or rises above `maxAnswer`, Chainlink returns the boundary value...",
+      "cat": [
+        "oracle",
+        "price-feed",
+        "data-freshness"
+      ],
+      "ref": "DB/oracle/chainlink/CHAINLINK_PRICE_FEED_VULNERABILITIES.md",
+      "lines": [
+        408,
+        520
+      ],
+      "check": [
+        "VERIFY: When an asset's actual price drops below minAnswer or rises above maxAnswer, Chainlink returns the boundary value instead of the real price.",
+        "PROVE: Asset price crashes (e.g., LUNA went from $80 to $0.001); Chainlink returns minAnswer (e.g., $0.10) instead of actual price",
+        "FALSIFY: Check if price equals boundary values",
+        "IMPACT: Incorrect price during extreme market conditions",
+        "Verify minAnswer/maxAnswer bounds are checked",
+        "Check boundary comparison uses >= and <= (not > and <)"
+      ],
+      "antipattern": "Off-by-one allows boundary prices through",
+      "securePattern": "Check if price equals boundary values",
+      "validWhen": "When an asset's actual price drops below minAnswer or rises above maxAnswer, Chainlink returns the boundary value instead of the real price.",
+      "invalidWhen": "Check if price equals boundary values",
+      "impact": "Incorrect price during extreme market conditions"
+    },
+    {
+      "id": "oracle-chainlink-price-feed-vulnerabilities-4-deprecated-api-usage-003",
       "title": "4. Deprecated API Usage",
       "severity": "LOW",
-      "grep": "sequencer_uptime_feed|AggregatorV3Interface|validation_logic|state_transition|staleness_check|latestRoundData",
+      "grep": "latestRoundData|latestAnswer|getPrice",
       "detect": "`latestAnswer()` only returns the price without timestamps or round information, making it impossible to validate...",
       "cat": [
         "oracle",
@@ -346,10 +467,10 @@
       "invalidWhen": "Use modern API with proper validation"
     },
     {
-      "id": "oracle-chainlink-price-feed-vulnerabilities-5-access-denial-revert-handlin-007",
+      "id": "oracle-chainlink-price-feed-vulnerabilities-5-access-denial-revert-handlin-004",
       "title": "5. Access Denial / Revert Handling",
       "severity": "LOW",
-      "grep": "sequencer_uptime_feed|AggregatorV3Interface|validation_logic|state_transition|staleness_check|latestRoundData",
+      "grep": "latestRoundData|getPrice",
       "detect": "Direct calls to `latestRoundData()` without try/catch.",
       "cat": [
         "oracle",
@@ -372,10 +493,10 @@
       "invalidWhen": "Graceful handling with fallback oracle"
     },
     {
-      "id": "oracle-chainlink-price-feed-vulnerabilities-6-decimal-precision-handling-008",
+      "id": "oracle-chainlink-price-feed-vulnerabilities-6-decimal-precision-handling-005",
       "title": "6. Decimal/Precision Handling",
       "severity": "HIGH",
-      "grep": "sequencer_uptime_feed|AggregatorV3Interface|validation_logic|state_transition|staleness_check|latestRoundData",
+      "grep": "getPrice|AggregatorV3Interface|chainlink_findings|latestRoundData",
       "detect": "Hardcoded assumption that all Chainlink feeds use 8 decimals.",
       "cat": [
         "oracle",
@@ -398,10 +519,10 @@
       "invalidWhen": "Properly scale based on actual feed decimals"
     },
     {
-      "id": "oracle-chainlink-price-feed-vulnerabilities-7-phase-id-round-id-handling-009",
+      "id": "oracle-chainlink-price-feed-vulnerabilities-7-phase-id-round-id-handling-006",
       "title": "7. Phase ID / Round ID Handling",
       "severity": "MEDIUM",
-      "grep": "sequencer_uptime_feed|AggregatorV3Interface|getHistoricalPrice|validation_logic|state_transition|staleness_check",
+      "grep": "getHistoricalPrice|chainlink_findings|aggregatorRoundId|getRoundData",
       "detect": "Protocols that query historical rounds using `roundId - 1` will fail after a phase change because that round doesn't...",
       "cat": [
         "oracle",
@@ -424,10 +545,10 @@
       "invalidWhen": "Handle phase transitions gracefully"
     },
     {
-      "id": "oracle-chainlink-price-feed-vulnerabilities-8-price-manipulation-front-run-010",
+      "id": "oracle-chainlink-price-feed-vulnerabilities-8-price-manipulation-front-run-007",
       "title": "8. Price Manipulation / Front-Running",
       "severity": "LOW",
-      "grep": "sequencer_uptime_feed|AggregatorV3Interface|validation_logic|state_transition|staleness_check|latestRoundData",
+      "grep": "chainlink_findings|Manipulation|Predictable|Detection",
       "detect": "Predictable oracle updates allow MEV bots to sandwich transactions or front-run price changes for profit.",
       "cat": [
         "oracle",
@@ -447,10 +568,34 @@
       "validWhen": "Predictable oracle updates allow MEV bots to sandwich transactions or front-run price changes for profit."
     },
     {
+      "id": "oracle-chainlink-price-feed-vulnerabilities-9-heartbeat-configuration-issu-008",
+      "title": "9. Heartbeat Configuration Issues",
+      "severity": "UNKNOWN",
+      "grep": "setFeedHeartbeat|getPrice",
+      "detect": "Different Chainlink feeds have different heartbeat intervals.",
+      "cat": [
+        "oracle",
+        "price-feed",
+        "data-freshness"
+      ],
+      "ref": "DB/oracle/chainlink/CHAINLINK_PRICE_FEED_VULNERABILITIES.md",
+      "lines": [
+        793,
+        838
+      ],
+      "check": [
+        "VERIFY: Different Chainlink feeds have different heartbeat intervals.",
+        "FALSIFY: Configurable heartbeat per feed"
+      ],
+      "securePattern": "Configurable heartbeat per feed",
+      "validWhen": "Different Chainlink feeds have different heartbeat intervals.",
+      "invalidWhen": "Configurable heartbeat per feed"
+    },
+    {
       "id": "oracle-chainlink-vrf-vulnerabilities-1-vrf-re-roll-manipulation-att-000",
       "title": "1. VRF Re-Roll / Manipulation Attacks",
       "severity": "HIGH",
-      "grep": "subscription_drain|requestRandomWords|fulfillRandomWords|requestRandomness|VRFConsumerBaseV2|vrf_manipulation",
+      "grep": "fulfillRandomWords|requestRandomness|requestAndUse",
       "detect": "When VRF request and fulfillment happen in quick succession without sufficient block confirmations, miners can...",
       "cat": [
         "oracle",
@@ -477,10 +622,40 @@
       "impact": "Randomness can be biased by block producers"
     },
     {
-      "id": "oracle-chainlink-vrf-vulnerabilities-3-callback-revert-issues-003",
+      "id": "oracle-chainlink-vrf-vulnerabilities-2-subscription-drain-vulnerabi-001",
+      "title": "2. Subscription Drain Vulnerabilities",
+      "severity": "HIGH",
+      "grep": "requestWithPayment|requestRandomness|startQuest|spin",
+      "detect": "Missing or inadequate access controls and rate limiting on functions that trigger VRF requests.",
+      "cat": [
+        "oracle",
+        "price-feed",
+        "data-freshness"
+      ],
+      "ref": "DB/oracle/chainlink/CHAINLINK_VRF_VULNERABILITIES.md",
+      "lines": [
+        226,
+        354
+      ],
+      "check": [
+        "VERIFY: Missing or inadequate access controls and rate limiting on functions that trigger VRF requests.",
+        "PROVE: Attacker identifies function that triggers VRF request; Function lacks rate limiting or has negligible cost",
+        "FALSIFY: Enforce minimum cost per request",
+        "IMPACT: Subscription LINK balance depleted",
+        "Verify minimum cost per VRF request",
+        "Check rate limiting on request functions"
+      ],
+      "antipattern": "No limit on request frequency",
+      "securePattern": "Enforce minimum cost per request",
+      "validWhen": "Missing or inadequate access controls and rate limiting on functions that trigger VRF requests.",
+      "invalidWhen": "Enforce minimum cost per request",
+      "impact": "Subscription LINK balance depleted"
+    },
+    {
+      "id": "oracle-chainlink-vrf-vulnerabilities-3-callback-revert-issues-002",
       "title": "3. Callback Revert Issues",
       "severity": "MEDIUM",
-      "grep": "subscription_drain|requestRandomWords|fulfillRandomWords|processRandomness|VRFConsumerBaseV2|vrf_manipulation",
+      "grep": "fulfillRandomWords|processRandomness",
       "detect": "Complex logic, external calls, or state validations in `fulfillRandomWords` that can fail under certain conditions.",
       "cat": [
         "oracle",
@@ -507,10 +682,10 @@
       "impact": "Lost randomness that cannot be recovered"
     },
     {
-      "id": "oracle-chainlink-vrf-vulnerabilities-4-vrf-version-deprecation-004",
+      "id": "oracle-chainlink-vrf-vulnerabilities-4-vrf-version-deprecation-003",
       "title": "4. VRF Version Deprecation",
       "severity": "LOW",
-      "grep": "subscription_drain|requestRandomWords|fulfillRandomWords|VRFConsumerBaseV2|vrf_manipulation|callbackGasLimit",
+      "grep": "requestRandomWords|fulfillRandomWords",
       "detect": "VRF V1 has security limitations and is no longer maintained.",
       "cat": [
         "oracle",
@@ -530,10 +705,10 @@
       "validWhen": "VRF V1 has security limitations and is no longer maintained."
     },
     {
-      "id": "oracle-chainlink-vrf-vulnerabilities-5-weak-randomness-sources-005",
+      "id": "oracle-chainlink-vrf-vulnerabilities-5-weak-randomness-sources-004",
       "title": "5. Weak Randomness Sources",
       "severity": "HIGH",
-      "grep": "subscription_drain|requestRandomWords|fulfillRandomWords|VRFConsumerBaseV2|vrf_manipulation|callbackGasLimit",
+      "grep": "fulfillRandomWords|getRandomNumber|pseudoRandom",
       "detect": "Predictable randomness",
       "cat": [
         "oracle",
@@ -556,10 +731,10 @@
       "invalidWhen": "True randomness from VRF"
     },
     {
-      "id": "oracle-chainlink-vrf-vulnerabilities-6-request-configuration-issues-006",
+      "id": "oracle-chainlink-vrf-vulnerabilities-6-request-configuration-issues-005",
       "title": "6. Request Configuration Issues",
       "severity": "MEDIUM",
-      "grep": "subscription_drain|requestRandomWords|fulfillRandomWords|VRFConsumerBaseV2|vrf_manipulation|callbackGasLimit",
+      "grep": "requestRandomWords|chainlink_findings|Confirmations|Configuration",
       "detect": "Below Chainlink minimum (3)",
       "cat": [
         "oracle",
@@ -582,10 +757,10 @@
       "invalidWhen": "Proper VRF configuration"
     },
     {
-      "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-pattern-1-flash-swap-reserve-d-002",
-      "title": "Pattern 1: Flash Swap Reserve Drain → Inflated Reward Claims",
+      "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
       "severity": "CRITICAL",
-      "grep": "price_manipulation|pair_reserve_drain|amm_spot_price|transferFrom|testExploit|pancakeCall",
+      "grep": "withdrawReturnAmountByReferral|withdrawReturnAmountByMerchant|withdrawReturnAmountByConsumer|swapAndLiquifyStepv1|swapTokensForOther|DPPFlashLoanCall",
       "detect": "Severity**: 🔴 CRITICAL | **Loss**: ~$127K | **Protocol**: ATK (Journey of Awakening) | **Chain**: BSC",
       "cat": [
         "oracle",
@@ -594,185 +769,21 @@
       ],
       "ref": "DB/oracle/price-manipulation/defihacklabs-bsc-oracle-manipulation-2022.md",
       "lines": [
-        174,
-        206
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Severity: 🔴 CRITICAL | Loss: ~$127K | Protocol: ATK (Journey of Awakening) | Chain: BSC"
-      ]
-    },
-    {
-      "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-pattern-2-multi-function-rewar-003",
-      "title": "Pattern 2: Multi-function Reward Drain via Pair Price Manipulation",
-      "severity": "HIGH",
-      "grep": "withdrawReturnAmountByReferral|withdrawReturnAmountByMerchant|withdrawReturnAmountByConsumer|transferFrom|testExploit|pancakeCall",
-      "detect": "Severity**: 🟠 HIGH | **Loss**: USDT profit | **Protocol**: YYDS | **Chain**: BSC",
-      "cat": [
-        "oracle",
-        "price-feed",
-        "data-freshness"
-      ],
-      "ref": "DB/oracle/price-manipulation/defihacklabs-bsc-oracle-manipulation-2022.md",
-      "lines": [
-        207,
-        238
-      ],
-      "check": [
-        "VERIFY: Severity: 🟠 HIGH | Loss: USDT profit | Protocol: YYDS | Chain: BSC"
-      ]
-    },
-    {
-      "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-pattern-3-batchtoken-mint-dire-004",
-      "title": "Pattern 3: batchToken Mint Directly Into LP Pair",
-      "severity": "CRITICAL",
-      "grep": "price_manipulation|DPPFlashLoanCall|amm_spot_price|transferFrom|testExploit|pancakeCall",
-      "detect": "Severity**: 🔴 CRITICAL | **Loss**: ~$3M | **Protocol**: ZoomproFinance | **Chain**: BSC",
-      "cat": [
-        "oracle",
-        "price-feed",
-        "data-freshness"
-      ],
-      "ref": "DB/oracle/price-manipulation/defihacklabs-bsc-oracle-manipulation-2022.md",
-      "lines": [
-        239,
-        276
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Severity: 🔴 CRITICAL | Loss: ~$3M | Protocol: ZoomproFinance | Chain: BSC"
-      ]
-    },
-    {
-      "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-pattern-4-public-token-functio-005",
-      "title": "Pattern 4: Public Token Function Skews LP Reserves",
-      "severity": "HIGH",
-      "grep": "swapAndLiquifyStepv1|swapTokensForOther|price_manipulation|transferFrom|testExploit|pancakeCall",
-      "detect": "Severity**: 🟠 HIGH | **Loss**: ~$25K | **Protocol**: SpaceGodzilla | **Chain**: BSC",
-      "cat": [
-        "oracle",
-        "price-feed",
-        "data-freshness"
-      ],
-      "ref": "DB/oracle/price-manipulation/defihacklabs-bsc-oracle-manipulation-2022.md",
-      "lines": [
-        277,
-        311
-      ],
-      "check": [
-        "VERIFY: Severity: 🟠 HIGH | Loss: ~$25K | Protocol: SpaceGodzilla | Chain: BSC"
-      ]
-    },
-    {
-      "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-pattern-5-broken-transferfrom--006",
-      "title": "Pattern 5: Broken transferFrom Drains LP Pair Reserves",
-      "severity": "CRITICAL",
-      "grep": "price_manipulation|pair_reserve_drain|amm_spot_price|transferFrom|testExploit|pancakeCall",
-      "detect": "Severity**: 🔴 CRITICAL | **Loss**: ~17 WBNB | **Protocol**: NOVO | **Chain**: BSC",
-      "cat": [
-        "oracle",
-        "price-feed",
-        "data-freshness"
-      ],
-      "ref": "DB/oracle/price-manipulation/defihacklabs-bsc-oracle-manipulation-2022.md",
-      "lines": [
-        312,
-        350
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Severity: 🔴 CRITICAL | Loss: ~17 WBNB | Protocol: NOVO | Chain: BSC"
-      ]
-    },
-    {
-      "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-pattern-6-flash-loan-vault-sha-007",
-      "title": "Pattern 6: Flash Loan Vault Share Inflation",
-      "severity": "CRITICAL",
-      "grep": "balanceOf(address(this|price_manipulation|uniswapV2Call|transferFrom|testExploit|pancakeCall",
-      "detect": "Severity**: 🔴 CRITICAL | **Loss**: ~$2M | **Protocol**: OneRing Finance | **Chain**: Fantom",
-      "cat": [
-        "oracle",
-        "price-feed",
-        "data-freshness"
-      ],
-      "ref": "DB/oracle/price-manipulation/defihacklabs-bsc-oracle-manipulation-2022.md",
-      "lines": [
-        351,
-        382
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Severity: 🔴 CRITICAL | Loss: ~$2M | Protocol: OneRing Finance | Chain: Fantom"
-      ]
-    },
-    {
-      "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-pattern-7-spot-price-swap-prox-008",
-      "title": "Pattern 7: Spot Price Swap Proxy Arbitrage",
-      "severity": "CRITICAL",
-      "grep": "price_manipulation|DPPFlashLoanCall|amm_spot_price|transferFrom|testExploit|pancakeCall",
-      "detect": "Severity**: 🔴 CRITICAL | **Loss**: ~$500K | **Protocol**: APC | **Chain**: BSC",
-      "cat": [
-        "oracle",
-        "price-feed",
-        "data-freshness"
-      ],
-      "ref": "DB/oracle/price-manipulation/defihacklabs-bsc-oracle-manipulation-2022.md",
-      "lines": [
-        383,
-        418
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Severity: 🔴 CRITICAL | Loss: ~$500K | Protocol: APC | Chain: BSC"
-      ]
-    },
-    {
-      "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-pattern-8-balanceof-based-rewa-009",
-      "title": "Pattern 8: balanceOf-Based Reward Recycling Across Contracts",
-      "severity": "CRITICAL",
-      "grep": "balanceOf(msg.sender|price_manipulation|DPPFlashLoanCall|transferFrom|testExploit|pancakeCall",
-      "detect": "Severity**: 🔴 CRITICAL | **Loss**: ~$1.25M (4,481 BNB) | **Protocol**: NewFreeDAO (NFD) | **Chain**: BSC",
-      "cat": [
-        "oracle",
-        "price-feed",
-        "data-freshness"
-      ],
-      "ref": "DB/oracle/price-manipulation/defihacklabs-bsc-oracle-manipulation-2022.md",
-      "lines": [
-        419,
+        172,
         465
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Severity: 🔴 CRITICAL | Loss: ~$1.25M (4,481 BNB) | Protocol: NewFreeDAO (NFD) | Chain: BSC"
-      ]
-    },
-    {
-      "id": "oracle-defihacklabs-bsc-oracle-manipulation-202-invariant-checks-013",
-      "title": "Invariant Checks",
-      "severity": "LOW",
-      "grep": "vault_share_inflation|price_manipulation|pair_reserve_drain|amm_spot_price|transferFrom|testExploit",
-      "detect": "INV-ORACLE-001: Token price must not change >10% within a single block",
-      "cat": [
-        "oracle",
-        "price-feed",
-        "data-freshness"
+        "VERIFY: function uniswapV2Call(address, uint256 amount0, uint256, bytes calldata) external {"
       ],
-      "ref": "DB/oracle/price-manipulation/defihacklabs-bsc-oracle-manipulation-2022.md",
-      "lines": [
-        597,
-        611
-      ],
-      "check": [
-        "VERIFY: INV-ORACLE-001: Token price must not change >10% within a single block"
-      ],
-      "validWhen": "INV-ORACLE-001: Token price must not change >10% within a single block"
+      "antipattern": "function uniswapV2Call(address, uint256 amount0, uint256, bytes calldata) external {",
+      "validWhen": "function uniswapV2Call(address, uint256 amount0, uint256, bytes calldata) external {"
     },
     {
       "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-1-amm-reserve-based-price-orac-001",
       "title": "1. AMM Reserve-Based Price Oracle — Direct LP Pool Manipulation",
       "severity": "HIGH",
-      "grep": "curve_virtual_price|amm_reserve_oracle|lp_token_price|claimAllReward|addCollateral|calculateAll",
+      "grep": "claimAllReward|calculateAll|getEGDPrice|getPrice|redeem|stake",
       "detect": "This vulnerability exists because the price calculation function reads **real-time AMM pool reserve balances** to...",
       "cat": [
         "oracle",
@@ -796,7 +807,7 @@
       "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-2-curve-lp-virtual-price-oracl-002",
       "title": "2. Curve LP / Virtual Price Oracle Manipulation",
       "severity": "CRITICAL",
-      "grep": "curve_virtual_price|amm_reserve_oracle|lp_token_price|addCollateral|calculateAll|getReserves",
+      "grep": "atomic|InverseFinanceDola|YVCrv3CryptoFeed|virtual_price",
       "detect": "This vulnerability exists because lending protocols use Curve pool's **internal state** (virtual_price, LP token value)...",
       "cat": [
         "oracle",
@@ -821,7 +832,7 @@
       "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-3-solidly-lp-oracle-weak-signa-003",
       "title": "3. Solidly LP Oracle + Weak Signature Validation",
       "severity": "CRITICAL",
-      "grep": "vault_exchange_rate|curve_virtual_price|amm_reserve_oracle|lp_token_price|addCollateral|calculateAll",
+      "grep": "addCollateral|deposit|borrow",
       "detect": "This vulnerability exists because the lending protocol uses a Solidly/Solidex LP token as collateral with an oracle...",
       "cat": [
         "oracle",
@@ -845,7 +856,7 @@
       "id": "oracle-defihacklabs-flashloan-oracle-2022-patte-4-vault-share-price-inflation--004",
       "title": "4. Vault Share Price Inflation via Donation",
       "severity": "CRITICAL",
-      "grep": "mintAndStakeGlpETH|amm_reserve_oracle|mintAndStakeGlp|addCollateral|calculateAll|getReserves",
+      "grep": "mintAndStakeGlpETH|mintAndStakeGlp|redeem|donate|atomic",
       "detect": "This vulnerability exists because lending protocols accept vault tokens (plvGLP, yearn vault shares) as collateral and...",
       "cat": [
         "oracle",
@@ -869,7 +880,7 @@
       "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-1-low-cost-oracle-reporter-man-001",
       "title": "1. Low-Cost Oracle Reporter Manipulation (BonqDAO $88M)",
       "severity": "CRITICAL",
-      "grep": "tx2_liquidateMassiveAmountOfALBT|tx1_mintMassiveAmountOfBEUR|liquidity_bin_manipulation|curve_add_remove_liquidity|spot_price_getReserves|low_cost_oracle_report",
+      "grep": "tx2_liquidateMassiveAmountOfALBT|tx1_mintMassiveAmountOfBEUR|getCurrentValue|updatePrice",
       "detect": "BonqDAO used TellorFlex oracle for wALBT token pricing.",
       "cat": [
         "oracle",
@@ -894,7 +905,7 @@
       "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-2-concentrated-liquidity-bin-m-002",
       "title": "2. Concentrated Liquidity Bin Manipulation (Jimbo $8M)",
       "severity": "CRITICAL",
-      "grep": "tx2_liquidateMassiveAmountOfALBT|tx1_mintMassiveAmountOfBEUR|liquidity_bin_manipulation|curve_add_remove_liquidity|spot_price_getReserves|low_cost_oracle_report",
+      "grep": "executeOperation|shift|reset",
       "detect": "Jimbo Protocol used a custom liquidity distribution mechanism on Trader Joe V2.1 (Liquidity Book).",
       "cat": [
         "oracle",
@@ -918,7 +929,7 @@
       "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-3-curve-lp-token-price-manipul-003",
       "title": "3. Curve LP Token Price Manipulation (Zunami $2M)",
       "severity": "HIGH",
-      "grep": "tx2_liquidateMassiveAmountOfALBT|tx1_mintMassiveAmountOfBEUR|liquidity_bin_manipulation|curve_add_remove_liquidity|low_cost_oracle_report|tellor_submitValue",
+      "grep": "atomic|Manipulation|Vulnerable|Protocol",
       "detect": "Zunami Protocol used Curve LP tokens (sETH/ETH, frxETH/ETH) whose price was derived from pool reserves.",
       "cat": [
         "oracle",
@@ -941,7 +952,7 @@
       "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-4-vtoken-collateral-oracle-man-004",
       "title": "4. vToken Collateral Oracle Manipulation (0vix $2M)",
       "severity": "HIGH",
-      "grep": "tx2_liquidateMassiveAmountOfALBT|tx1_mintMassiveAmountOfBEUR|liquidity_bin_manipulation|curve_add_remove_liquidity|low_cost_oracle_report|tellor_submitValue",
+      "grep": "atomic|Manipulation|Vulnerable|Collateral",
       "detect": "0vix Protocol (Compound V2 fork on Polygon) used vGHST as a collateral token.",
       "cat": [
         "oracle",
@@ -964,7 +975,7 @@
       "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-5-flash-loan-spot-price-compou-005",
       "title": "5. Flash Loan + Spot Price (CompounderFinance $27.2M, Gamma $6.3M, Allbridge $550K)",
       "severity": "CRITICAL",
-      "grep": "tx2_liquidateMassiveAmountOfALBT|tx1_mintMassiveAmountOfBEUR|liquidity_bin_manipulation|curve_add_remove_liquidity|low_cost_oracle_report|tellor_submitValue",
+      "grep": "getReserves|atomic",
       "detect": "Multiple protocols in 2023 continued to use DEX spot prices (pair reserves, `getReserves()`) as oracle prices.",
       "cat": [
         "oracle",
@@ -988,7 +999,7 @@
       "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-6-lending-protocol-oracle-mani-006",
       "title": "6. Lending Protocol Oracle Manipulation (RodeoFinance $888K)",
       "severity": "HIGH",
-      "grep": "tx2_liquidateMassiveAmountOfALBT|tx1_mintMassiveAmountOfBEUR|liquidity_bin_manipulation|curve_add_remove_liquidity|low_cost_oracle_report|tellor_submitValue",
+      "grep": "atomic|RodeoFinance|Manipulation|Insufficient",
       "detect": "RodeoFinance on Arbitrum used a TWAP oracle for collateral pricing, but the TWAP window was too short (1 hour or less).",
       "cat": [
         "oracle",
@@ -1011,7 +1022,7 @@
       "id": "oracle-defihacklabs-oracle-manipulation-2023-pa-secure-implementations-007",
       "title": "Secure Implementations",
       "severity": "HIGH",
-      "grep": "tx2_liquidateMassiveAmountOfALBT|tx1_mintMassiveAmountOfBEUR|liquidity_bin_manipulation|curve_add_remove_liquidity|spot_price_getReserves|low_cost_oracle_report",
+      "grep": "getPrice|shift",
       "detect": "// ✅ SECURE: Read Tellor price with sufficient dispute window",
       "cat": [
         "oracle",
@@ -1035,7 +1046,7 @@
       "id": "oracle-defihacklabs-oracle-manipulation-2024-20-1-curve-pool-based-oracle-mani-001",
       "title": "1. Curve Pool-Based Oracle Manipulation for Lending Liquidation",
       "severity": "CRITICAL",
-      "grep": "driveDownsUSDEPrice|driveUpsUSDEPrice|curve_pool_price|MAX_DEVIATION|sPMM_oracle|calculatePrice",
+      "grep": "driveDownsUSDEPrice|driveUpsUSDEPrice|atomic",
       "detect": "Lending protocols that derive collateral/debt asset prices from Curve pool spot prices are vulnerable to...",
       "cat": [
         "oracle",
@@ -1060,7 +1071,7 @@
       "id": "oracle-defihacklabs-oracle-manipulation-2024-20-2-self-referencing-oracle-spmm-002",
       "title": "2. Self-Referencing Oracle (sPMM) Manipulation",
       "severity": "CRITICAL",
-      "grep": "flash_loan_manipulation|driveUpsUSDEPrice|curve_pool_price|MAX_DEVIATION|sPMM_oracle|calculatePrice",
+      "grep": "atomic|woo_liquidity_amount|uni_flash_amount|IUniswapV3Flash",
       "detect": "Proactive market maker (PMM) DEXes like WooPPV2 use an internal oracle (WooracleV2) that updates its price state based...",
       "cat": [
         "oracle",
@@ -1084,7 +1095,7 @@
       "id": "oracle-defihacklabs-oracle-manipulation-2024-20-3-concentrated-liquidity-vault-003",
       "title": "3. Concentrated Liquidity Vault Deposit/Withdraw Cycling",
       "severity": "CRITICAL",
-      "grep": "flash_loan_manipulation|driveUpsUSDEPrice|curve_pool_price|MAX_DEVIATION|sPMM_oracle|calculatePrice",
+      "grep": "calculatePrice|atomic",
       "detect": "Concentrated liquidity vaults (e.",
       "cat": [
         "oracle",
@@ -1108,7 +1119,7 @@
       "id": "oracle-defihacklabs-oracle-manipulation-2024-20-4-defective-token-transfer-hoo-004",
       "title": "4. Defective Token Transfer Hook Price Disruption",
       "severity": "CRITICAL",
-      "grep": "flash_loan_manipulation|driveUpsUSDEPrice|curve_pool_price|MAX_DEVIATION|sPMM_oracle|calculatePrice",
+      "grep": "pair.sync|_transfer|_update|atomic|sync",
       "detect": "Custom ERC20 tokens that call `pair.sync()` inside their `_update()` or `_transfer()` function disrupt AMM pricing mechanics.",
       "cat": [
         "oracle",
@@ -1132,7 +1143,7 @@
       "id": "oracle-defihacklabs-oracle-manipulation-2024-20-5-broken-vault-mint-ratio-005",
       "title": "5. Broken Vault Mint Ratio",
       "severity": "CRITICAL",
-      "grep": "flash_loan_manipulation|driveUpsUSDEPrice|curve_pool_price|MAX_DEVIATION|sPMM_oracle|calculatePrice",
+      "grep": "atomic|swapExactTokensForTokensSupportingFeeOnTransferTokens|IPancakeRouter|block.timestamp",
       "detect": "Vaults or proxy contracts with misconfigured exchange rates or missing decimal normalization can mint vastly...",
       "cat": [
         "oracle",
@@ -1156,7 +1167,7 @@
       "id": "oracle-defihacklabs-oracle-manipulation-2024-20-6-faulty-chainlink-oracle-pric-006",
       "title": "6. Faulty Chainlink Oracle Price Feed",
       "severity": "HIGH",
-      "grep": "flash_loan_manipulation|liquidation_bonus|driveUpsUSDEPrice|curve_pool_price|MAX_DEVIATION|sPMM_oracle",
+      "grep": "enterMarkets|Vulnerable|Chainlink|Attackers",
       "detect": "When Chainlink oracle feeds report incorrect prices for wrapped staked tokens (e.",
       "cat": [
         "oracle",
@@ -1176,10 +1187,32 @@
       "validWhen": "When Chainlink oracle feeds report incorrect prices for wrapped staked tokens (e.g., wrsETH vs wstETH), the price discrepancy between oracle-reported value and actual..."
     },
     {
-      "id": "oracle-defihacklabs-price-manipulation-patterns-root-cause-categories-000",
+      "id": "oracle-defihacklabs-price-manipulation-patterns-agent-quick-view-000",
+      "title": "Agent Quick View",
+      "severity": "CRITICAL",
+      "grep": "missing_validation|single_contract",
+      "detect": "Agent Quick View",
+      "cat": [
+        "oracle",
+        "price-feed",
+        "data-freshness"
+      ],
+      "ref": "DB/oracle/price-manipulation/defihacklabs-price-manipulation-patterns.md",
+      "lines": [
+        98,
+        109
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Pattern Key | oracle_price_manipulation | price_oracle | flash_loan_price_manipulation | fund_loss"
+      ],
+      "validWhen": "Pattern Key | oracle_price_manipulation | price_oracle | flash_loan_price_manipulation | fund_loss"
+    },
+    {
+      "id": "oracle-defihacklabs-price-manipulation-patterns-root-cause-categories-001",
       "title": "Root Cause Categories",
       "severity": "LOW",
-      "grep": "pricePerShare_inflation|index_weight_manipulation|yUSD.pricePerShare|swapExactTokenForToken|Swap_Mono_For_USDC|getCollateralValue",
+      "grep": "pricePerShare|balanceOf",
       "detect": "Self-Swap Price Inflation** — Protocol allows swapping token A for token A, inflating virtual price each swap",
       "cat": [
         "oracle",
@@ -1197,10 +1230,10 @@
       "validWhen": "Self-Swap Price Inflation — Protocol allows swapping token A for token A, inflating virtual price each swap"
     },
     {
-      "id": "oracle-defihacklabs-price-manipulation-patterns-vulnerable-pattern-examples-001",
+      "id": "oracle-defihacklabs-price-manipulation-patterns-vulnerable-pattern-examples-002",
       "title": "Vulnerable Pattern Examples",
       "severity": "CRITICAL",
-      "grep": "IERC20.balanceOf(address(this|Swap_Mono_for_Mono_55_Times|yUSD.pricePerShare|swapExactTokenForToken|Swap_Mono_For_USDC|getCollateralValue",
+      "grep": "IERC20.balanceOf(address(this|Swap_Mono_for_Mono_55_Times|yUSD.pricePerShare|swapExactTokenForToken|Swap_Mono_For_USDC|removeLiquidity",
       "detect": "swapExactTokenForToken allows tokenIn == tokenOut",
       "cat": [
         "oracle",
@@ -1221,10 +1254,28 @@
       "validWhen": "swapExactTokenForToken has no check that tokenIn != tokenOut."
     },
     {
+      "id": "oracle-defihacklabs-price-manipulation-patterns-keywords-003",
+      "title": "Keywords",
+      "severity": "UNKNOWN",
+      "grep": "collateral_inflation|oracle_manipulation|price_manipulation|donation_attack",
+      "detect": "collateral_inflation",
+      "cat": [
+        "oracle",
+        "price-feed",
+        "data-freshness"
+      ],
+      "ref": "DB/oracle/price-manipulation/defihacklabs-price-manipulation-patterns.md",
+      "lines": [
+        504,
+        522
+      ],
+      "validWhen": "collateral_inflation"
+    },
+    {
       "id": "oracle-dex-amm-oracle-price-manipulation-attack-scenarios-002",
       "title": "Attack Scenarios",
       "severity": "LOW",
-      "grep": "MagicLpAggregator.latestAnswer|flash_loan_manipulation|concentrated_liquidity|pair.getReserves|implied_volatility|lp_reserve_price",
+      "grep": "MagicLpAggregator.latestAnswer|pair.getReserves|quoteReserve|baseReserve|minPrice|getPrice",
       "detect": "Attacker takes flash loan of large amounts of base or quote token",
       "cat": [
         "oracle",
@@ -1245,7 +1296,7 @@
       "id": "oracle-dex-amm-oracle-price-manipulation-vulnerable-pattern-examples-003",
       "title": "Vulnerable Pattern Examples",
       "severity": "HIGH",
-      "grep": "flash_loan_manipulation|dex_based_price_oracle|concentrated_liquidity|implied_volatility|lp_reserve_price|uniswap_v3_twap",
+      "grep": "getLPTokenValue|_getReserves|latestAnswer|getPrice",
       "detect": "uses live pool reserves — manipulable via flash loan in same tx",
       "cat": [
         "oracle",
@@ -1268,7 +1319,7 @@
       "id": "oracle-flash-loan-oracle-manipulation-flash-loan-oracle-manipulation-000",
       "title": "Flash Loan Oracle Manipulation",
       "severity": "CRITICAL",
-      "grep": "calculateCollateralValue|lp_token_pricing|scaling_factor|precision_loss|reserve_ratio|oracle_update",
+      "grep": "calculateCollateralValue|getTokenPrice|getTWAPPrice|getReserves|getEGDPrice",
       "detect": "Protocols that derive prices from on-chain state (AMM reserves, vault share prices, LP token values) without adequate...",
       "cat": [
         "oracle",
@@ -1296,34 +1347,11 @@
       "impact": "Incorrect pricing: Assets valued at manipulated rates"
     },
     {
-      "id": "oracle-pyth-oracle-vulnerabilities-vulnerable-pattern-examples-001",
-      "title": "Vulnerable Pattern Examples",
-      "severity": "MEDIUM",
-      "grep": "getPriceNoOlderThan|confidence_interval|assetExchangeRate|validation_logic|updatePriceFeeds|state_transition",
-      "detect": "No staleness validation at all",
-      "cat": [
-        "oracle",
-        "price-feed",
-        "data-freshness"
-      ],
-      "ref": "DB/oracle/pyth/PYTH_ORACLE_VULNERABILITIES.md",
-      "lines": [
-        159,
-        217
-      ],
-      "check": [
-        "VERIFY: No staleness validation at all",
-        "PROVE: Exchange rate calculation with potentially stale price"
-      ],
-      "antipattern": "Exchange rate calculation with potentially stale price",
-      "validWhen": "No staleness validation at all"
-    },
-    {
-      "id": "oracle-pyth-oracle-vulnerabilities-vulnerable-pattern-examples-005",
-      "title": "Vulnerable Pattern Examples",
+      "id": "oracle-pyth-oracle-vulnerabilities-1-staleness-vulnerabilities-000",
+      "title": "1. Staleness Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "getPriceNoOlderThan|confidence_interval|validation_logic|updatePriceFeeds|state_transition|_getPythPrice",
-      "detect": "Raw price without exponent scaling",
+      "grep": "getPriceNoOlderThan|assetExchangeRate|getPriceUnsafe|getSafePrice|checkInRange|getPrice",
+      "detect": "Protocols use `getPriceUnsafe()` or fail to enforce proper staleness checks with `getPriceNoOlderThan()`.",
       "cat": [
         "oracle",
         "price-feed",
@@ -1331,22 +1359,90 @@
       ],
       "ref": "DB/oracle/pyth/PYTH_ORACLE_VULNERABILITIES.md",
       "lines": [
-        462,
-        517
+        135,
+        305
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Raw price without exponent scaling",
-        "PROVE: Factor can be negative, causing SafeCast revert"
+        "VERIFY: Protocols use getPriceUnsafe() or fail to enforce proper staleness checks with getPriceNoOlderThan().",
+        "PROVE: Price feed hasn't been updated for an extended period; Significant price movement occurs in the real market",
+        "FALSIFY: Force fresh price update before reading",
+        "IMPACT: Incorrect price inputs for swaps, lending, liquidation logic",
+        "Verify all getPriceUnsafe calls have manual staleness checks",
+        "Check getPriceNoOlderThan maxAge parameter is reasonable (< 5 minutes)"
       ],
-      "antipattern": "Factor can be negative, causing SafeCast revert",
-      "validWhen": "Raw price without exponent scaling"
+      "antipattern": "Exchange rate calculation with potentially stale price",
+      "securePattern": "Force fresh price update before reading",
+      "validWhen": "Protocols use getPriceUnsafe() or fail to enforce proper staleness checks with getPriceNoOlderThan().",
+      "invalidWhen": "Force fresh price update before reading",
+      "impact": "Incorrect price inputs for swaps, lending, liquidation logic"
     },
     {
-      "id": "oracle-pyth-oracle-vulnerabilities-4-same-transaction-price-manip-006",
+      "id": "oracle-pyth-oracle-vulnerabilities-2-confidence-interval-vulnerab-001",
+      "title": "2. Confidence Interval Vulnerabilities",
+      "severity": "HIGH",
+      "grep": "validateAndGetPrice|getPrimaryPrice|price.conf|getSafePrice|getPrice|conf",
+      "detect": "Protocols ignore the `price.conf` field or use arbitrary constant thresholds instead of ratio-based validation.",
+      "cat": [
+        "oracle",
+        "price-feed",
+        "data-freshness"
+      ],
+      "ref": "DB/oracle/pyth/PYTH_ORACLE_VULNERABILITIES.md",
+      "lines": [
+        306,
+        437
+      ],
+      "check": [
+        "VERIFY: Protocols ignore the price.conf field or use arbitrary constant thresholds instead of ratio-based validation.",
+        "PROVE: Market experiences high volatility or low liquidity; Pyth reports price with wide confidence interval",
+        "FALSIFY: Confidence as percentage of price",
+        "IMPACT: Acceptance of unreliable price data",
+        "Verify confidence interval is checked on all price reads",
+        "Ensure confidence thresholds are ratio-based, not absolute"
+      ],
+      "antipattern": "Wide confidence causes large price spreads",
+      "securePattern": "Confidence as percentage of price",
+      "validWhen": "Protocols ignore the price.conf field or use arbitrary constant thresholds instead of ratio-based validation.",
+      "invalidWhen": "Confidence as percentage of price",
+      "impact": "Acceptance of unreliable price data"
+    },
+    {
+      "id": "oracle-pyth-oracle-vulnerabilities-3-exponent-handling-vulnerabil-002",
+      "title": "3. Exponent Handling Vulnerabilities",
+      "severity": "CRITICAL",
+      "grep": "getNormalizedPrice|_getPythPrice|normalizePrice|price.price|getRawPrice|getPrice",
+      "detect": "Protocols use raw `price.price` without applying the exponent scaling, or fail to handle edge cases where exponent...",
+      "cat": [
+        "oracle",
+        "price-feed",
+        "data-freshness"
+      ],
+      "ref": "DB/oracle/pyth/PYTH_ORACLE_VULNERABILITIES.md",
+      "lines": [
+        438,
+        596
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Protocols use raw price.price without applying the exponent scaling, or fail to handle edge cases where exponent values are outside expected ranges.",
+        "PROVE: Protocol reads Pyth price without applying exponent; Price is interpreted with wrong decimal precision",
+        "FALSIFY: Handles both positive and negative exponents",
+        "IMPACT: Prices off by orders of magnitude",
+        "Verify exponent is applied in all price calculations",
+        "Check for proper handling of both positive and negative exponents"
+      ],
+      "antipattern": "Factor can be negative, causing SafeCast revert",
+      "securePattern": "Handles both positive and negative exponents",
+      "validWhen": "Protocols use raw price.price without applying the exponent scaling, or fail to handle edge cases where exponent values are outside expected ranges.",
+      "invalidWhen": "Handles both positive and negative exponents",
+      "impact": "Prices off by orders of magnitude"
+    },
+    {
+      "id": "oracle-pyth-oracle-vulnerabilities-4-same-transaction-price-manip-003",
       "title": "4. Same-Transaction Price Manipulation",
       "severity": "CRITICAL",
-      "grep": "swapExactTokensForTokens|getPriceNoOlderThan|confidence_interval|getConsistentPrice|validation_logic|updatePriceFeeds",
+      "grep": "swapExactTokensForTokens|getConsistentPrice|withdraw|deposit",
       "detect": "The protocol doesn't enforce that the same price is used throughout a transaction, or allows users to update prices...",
       "cat": [
         "oracle",
@@ -1374,10 +1470,10 @@
       "impact": "Protocol's oracle can return different prices in same transaction"
     },
     {
-      "id": "oracle-pyth-oracle-vulnerabilities-5-pull-based-oracle-exploitati-007",
+      "id": "oracle-pyth-oracle-vulnerabilities-5-pull-based-oracle-exploitati-004",
       "title": "5. Pull-Based Oracle Exploitation",
       "severity": "HIGH",
-      "grep": "getPriceNoOlderThan|confidence_interval|validation_logic|updatePriceFeeds|state_transition|getPriceUnsafe",
+      "grep": "updatePriceFeeds|executeVault|updatePrice|execute|commit",
       "detect": "Anyone can call `updatePriceFeeds()` with any valid (signed) price that's newer than the current on-chain price.",
       "cat": [
         "oracle",
@@ -1404,10 +1500,39 @@
       "impact": "User controls which price is used for their operations"
     },
     {
-      "id": "oracle-pyth-oracle-vulnerabilities-7-self-liquidation-attacks-010",
+      "id": "oracle-pyth-oracle-vulnerabilities-6-price-update-fee-vulnerabili-005",
+      "title": "6. Price Update Fee Vulnerabilities",
+      "severity": "HIGH",
+      "grep": "executeWithOracle|updatePrice",
+      "detect": "Protocols don't properly calculate the required fee, don't refund excess ETH, or don't provide adequate fee handling in...",
+      "cat": [
+        "oracle",
+        "price-feed",
+        "data-freshness"
+      ],
+      "ref": "DB/oracle/pyth/PYTH_ORACLE_VULNERABILITIES.md",
+      "lines": [
+        954,
+        1057
+      ],
+      "check": [
+        "VERIFY: Protocols don't properly calculate the required fee, don't refund excess ETH, or don't provide adequate fee handling in payable functions.",
+        "PROVE: Function can't receive ETH for oracle fees",
+        "FALSIFY: Proper fee handling with refund",
+        "Verify fee is calculated with getUpdateFee()",
+        "Check excess ETH is refunded to sender",
+        "LOOK FOR: updatePriceFeeds() called without calculating fee first"
+      ],
+      "antipattern": "Function can't receive ETH for oracle fees",
+      "securePattern": "Proper fee handling with refund",
+      "validWhen": "Protocols don't properly calculate the required fee, don't refund excess ETH, or don't provide adequate fee handling in payable functions.",
+      "invalidWhen": "Proper fee handling with refund"
+    },
+    {
+      "id": "oracle-pyth-oracle-vulnerabilities-7-self-liquidation-attacks-006",
       "title": "7. Self-Liquidation Attacks",
       "severity": "HIGH",
-      "grep": "getPriceNoOlderThan|getBlockLockedPrice|confidence_interval|validation_logic|updatePriceFeeds|state_transition",
+      "grep": "getBlockLockedPrice|liquidate|borrow",
       "detect": "The ability to update prices on-demand allows attackers to create positions at one price and immediately liquidate at...",
       "cat": [
         "oracle",
@@ -1433,10 +1558,10 @@
       "invalidWhen": "Minimum time between position open and liquidation"
     },
     {
-      "id": "oracle-pyth-oracle-vulnerabilities-8-timestamp-validation-vulnera-011",
+      "id": "oracle-pyth-oracle-vulnerabilities-8-timestamp-validation-vulnera-007",
       "title": "8. Timestamp Validation Vulnerabilities",
       "severity": "HIGH",
-      "grep": "getPriceNoOlderThan|confidence_interval|getValidatedPrice|validation_logic|updatePriceFeeds|state_transition",
+      "grep": "getValidatedPrice|checkFreshness|validatePrice|publishTime|commit",
       "detect": "Uses < instead of >=, logic is inverted",
       "cat": [
         "oracle",
@@ -1459,10 +1584,10 @@
       "invalidWhen": "Complete timestamp validation"
     },
     {
-      "id": "oracle-pyth-oracle-vulnerabilities-9-pyth-entropy-vrf-vulnerabili-012",
+      "id": "oracle-pyth-oracle-vulnerabilities-9-pyth-entropy-vrf-vulnerabili-008",
       "title": "9. Pyth Entropy (VRF) Vulnerabilities",
       "severity": "HIGH",
-      "grep": "getPriceNoOlderThan|confidence_interval|_entropyCallback|requestRandomness|validation_logic|updatePriceFeeds",
+      "grep": "_entropyCallback|requestRandomness",
       "detect": "Same sequence can exist for different providers",
       "cat": [
         "oracle",
@@ -1486,10 +1611,10 @@
       "invalidWhen": "Include provider in request tracking"
     },
     {
-      "id": "oracle-pyth-oracle-vulnerabilities-10-integration-configuration-v-013",
+      "id": "oracle-pyth-oracle-vulnerabilities-10-integration-configuration-v-009",
       "title": "10. Integration & Configuration Vulnerabilities",
       "severity": "HIGH",
-      "grep": "getPriceNoOlderThan|confidence_interval|validation_logic|updatePriceFeeds|state_transition|setPythAddress",
+      "grep": "setPythAddress|setFeedMaxAge|createMarket|getPrice",
       "detect": "Cannot change endpoint if it moves",
       "cat": [
         "oracle",
