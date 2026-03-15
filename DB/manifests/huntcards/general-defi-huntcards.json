@@ -2,17 +2,17 @@
   "meta": {
     "manifest": "general-defi",
     "description": "Compressed hunt cards for general-defi — one-line detection rules for bulk scanning",
-    "totalCards": 259,
-    "skipped": 175,
+    "totalCards": 234,
+    "skipped": 133,
     "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 259
+    "enriched": 234
   },
   "cards": [
     {
-      "id": "general-defi-flash-loan-attack-patterns-example-1-flash-loan-callback--002",
-      "title": "Example 1: Flash Loan Callback Without Initiator Validation [CRITICAL]",
+      "id": "general-defi-flash-loan-attack-patterns-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
       "severity": "CRITICAL",
-      "grep": "state_update_ordering|initiator_validation|flash_loan_mechanism|collateral_valuation|flash_loan_callback|callback_validation",
+      "grep": "depositByAddLiquidity|receiveFlashLoan|transferFrom|depositFor",
       "detect": "No validation of flash loan initiator",
       "cat": [
         "defi",
@@ -22,281 +22,22 @@
       ],
       "ref": "DB/general/flash-loan/flash-loan-attack-patterns.md",
       "lines": [
-        93,
-        135
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: No validation of flash loan initiator"
-      ],
-      "antipattern": "No validation of flash loan initiator",
-      "validWhen": "No validation of flash loan initiator"
-    },
-    {
-      "id": "general-defi-flash-loan-attack-patterns-example-2-flash-loan-reentranc-003",
-      "title": "Example 2: Flash Loan + Reentrancy via Custom Token [CRITICAL]",
-      "severity": "CRITICAL",
-      "grep": "state_update_ordering|initiator_validation|flash_loan_mechanism|collateral_valuation|flash_loan_callback|governance_voting",
-      "detect": "depositFor allows arbitrary token that can callback",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/flash-loan/flash-loan-attack-patterns.md",
-      "lines": [
-        136,
-        193
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: depositFor allows arbitrary token that can callback"
-      ],
-      "antipattern": "depositFor allows arbitrary token that can callback",
-      "validWhen": "depositFor allows arbitrary token that can callback"
-    },
-    {
-      "id": "general-defi-flash-loan-attack-patterns-example-3-flash-loan-reentranc-004",
-      "title": "Example 3: Flash Loan + Reentrancy via EvilToken [CRITICAL]",
-      "severity": "CRITICAL",
-      "grep": "state_update_ordering|depositByAddLiquidity|initiator_validation|flash_loan_mechanism|collateral_valuation|flash_loan_callback",
-      "detect": "depositByAddLiquidity accepts arbitrary token pairs",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/flash-loan/flash-loan-attack-patterns.md",
-      "lines": [
-        194,
-        254
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: depositByAddLiquidity accepts arbitrary token pairs"
-      ],
-      "antipattern": "depositByAddLiquidity accepts arbitrary token pairs",
-      "validWhen": "depositByAddLiquidity accepts arbitrary token pairs"
-    },
-    {
-      "id": "general-defi-flash-loan-attack-patterns-example-4-flash-loan-donation--005",
-      "title": "Example 4: Flash Loan + Donation Attack for Self-Liquidation [CRITICAL]",
-      "severity": "CRITICAL",
-      "grep": "state_update_ordering|initiator_validation|flash_loan_mechanism|collateral_valuation|flash_loan_callback|governance_voting",
-      "detect": "donateToReserves can be called to destroy collateral",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/flash-loan/flash-loan-attack-patterns.md",
-      "lines": [
-        255,
-        311
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: donateToReserves can be called to destroy collateral"
-      ],
-      "antipattern": "donateToReserves can be called to destroy collateral",
-      "validWhen": "donateToReserves can be called to destroy collateral"
-    },
-    {
-      "id": "general-defi-flash-loan-attack-patterns-example-5-flash-loan-governanc-006",
-      "title": "Example 5: Flash Loan + Governance Manipulation [CRITICAL]",
-      "severity": "CRITICAL",
-      "grep": "state_update_ordering|initiator_validation|collateral_valuation|flash_loan_callback|governance_voting|callback_function",
-      "detect": "Governance allows same-block deposit/vote/execute",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/flash-loan/flash-loan-attack-patterns.md",
-      "lines": [
-        312,
-        367
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Governance allows same-block deposit/vote/execute"
-      ],
-      "antipattern": "Governance allows same-block deposit/vote/execute",
-      "validWhen": "Governance allows same-block deposit/vote/execute"
-    },
-    {
-      "id": "general-defi-flash-loan-attack-patterns-example-6-flash-loan-pool-rein-007",
-      "title": "Example 6: Flash Loan + Pool Reinitialization [CRITICAL]",
-      "severity": "CRITICAL",
-      "grep": "state_update_ordering|initiator_validation|collateral_valuation|flash_loan_callback|governance_voting|callback_function",
-      "detect": "init() can be called during flash loan callback",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/flash-loan/flash-loan-attack-patterns.md",
-      "lines": [
-        368,
-        422
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: init() can be called during flash loan callback"
-      ],
-      "antipattern": "init() can be called during flash loan callback",
-      "validWhen": "init() can be called during flash loan callback"
-    },
-    {
-      "id": "general-defi-flash-loan-attack-patterns-example-7-flash-loan-rari-fei--008",
-      "title": "Example 7: Flash Loan + Rari/Fei Reentrancy [CRITICAL]",
-      "severity": "CRITICAL",
-      "grep": "state_update_ordering|initiator_validation|flash_loan_mechanism|collateral_valuation|flash_loan_callback|callback_validation",
-      "detect": "exitMarket can be called during ETH transfer callback",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/flash-loan/flash-loan-attack-patterns.md",
-      "lines": [
-        423,
-        482
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: exitMarket can be called during ETH transfer callback"
-      ],
-      "antipattern": "exitMarket can be called during ETH transfer callback",
-      "validWhen": "exitMarket can be called during ETH transfer callback"
-    },
-    {
-      "id": "general-defi-flash-loan-attack-patterns-example-8-flash-loan-xsurge-re-009",
-      "title": "Example 8: Flash Loan + XSURGE Reentrancy via sell() [CRITICAL]",
-      "severity": "CRITICAL",
-      "grep": "state_update_ordering|initiator_validation|flash_loan_mechanism|collateral_valuation|flash_loan_callback|callback_validation",
-      "detect": "sell() sends ETH before updating state",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/flash-loan/flash-loan-attack-patterns.md",
-      "lines": [
-        483,
-        539
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: sell() sends ETH before updating state"
-      ],
-      "antipattern": "sell() sends ETH before updating state",
-      "validWhen": "sell() sends ETH before updating state"
-    },
-    {
-      "id": "general-defi-flash-loan-attack-patterns-example-9-flash-loan-nft-flash-010",
-      "title": "Example 9: Flash Loan + NFT Flash Loan Airdrop Gaming [HIGH]",
-      "severity": "HIGH",
-      "grep": "state_update_ordering|initiator_validation|flash_loan_mechanism|collateral_valuation|flash_loan_callback|callback_validation",
-      "detect": "Airdrop doesn't track if NFT was held long-term",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/flash-loan/flash-loan-attack-patterns.md",
-      "lines": [
-        540,
-        585
-      ],
-      "check": [
-        "VERIFY: Airdrop doesn't track if NFT was held long-term"
-      ],
-      "antipattern": "Airdrop doesn't track if NFT was held long-term",
-      "validWhen": "Airdrop doesn't track if NFT was held long-term"
-    },
-    {
-      "id": "general-defi-flash-loan-attack-patterns-example-10-nested-flash-loans--011",
-      "title": "Example 10: Nested Flash Loans for Maximum Capital [HIGH]",
-      "severity": "HIGH",
-      "grep": "state_update_ordering|initiator_validation|flash_loan_mechanism|collateral_valuation|flash_loan_callback|governance_voting",
-      "detect": "Real Exploit: OverNight (2022-12) - $170K Lost**",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/flash-loan/flash-loan-attack-patterns.md",
-      "lines": [
-        586,
-        633
-      ],
-      "check": [
-        "VERIFY: Real Exploit: OverNight (2022-12) - $170K Lost"
-      ],
-      "validWhen": "Real Exploit: OverNight (2022-12) - $170K Lost"
-    },
-    {
-      "id": "general-defi-flash-loan-attack-patterns-example-11-flash-loan-beefy-va-012",
-      "title": "Example 11: Flash Loan + Beefy Vault Harvest Timing [HIGH]",
-      "severity": "HIGH",
-      "grep": "state_update_ordering|initiator_validation|flash_loan_mechanism|collateral_valuation|flash_loan_callback|callback_validation",
-      "detect": "Anyone can trigger harvest",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/flash-loan/flash-loan-attack-patterns.md",
-      "lines": [
-        634,
-        676
-      ],
-      "check": [
-        "VERIFY: Anyone can trigger harvest"
-      ],
-      "antipattern": "Anyone can trigger harvest",
-      "validWhen": "Anyone can trigger harvest"
-    },
-    {
-      "id": "general-defi-flash-loan-attack-patterns-example-12-flash-loan-empty-ma-013",
-      "title": "Example 12: Flash Loan + Empty Market Manipulation [CRITICAL]",
-      "severity": "CRITICAL",
-      "grep": "state_update_ordering|initiator_validation|flash_loan_mechanism|collateral_valuation|flash_loan_callback|governance_voting",
-      "detect": "New market with no liquidity can be manipulated",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/flash-loan/flash-loan-attack-patterns.md",
-      "lines": [
-        677,
+        91,
         726
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: New market with no liquidity can be manipulated"
+        "VERIFY: No validation of flash loan initiator",
+        "PROVE: exitMarket can be called during ETH transfer callback"
       ],
-      "antipattern": "New market with no liquidity can be manipulated",
-      "validWhen": "New market with no liquidity can be manipulated"
+      "antipattern": "exitMarket can be called during ETH transfer callback",
+      "validWhen": "No validation of flash loan initiator"
     },
     {
       "id": "general-defi-flash-loan-vulnerabilities-vulnerability-description-000",
       "title": "Vulnerability Description",
       "severity": "HIGH",
-      "grep": "getDebtWithAccruedInterest|repayment_validation|state_transition|repayment_check|governance_vote|fee_calculation",
+      "grep": "getDebtWithAccruedInterest|totalBorrows|flashLoan|fillOrder|flashFee|liquidate",
       "detect": "Flash loan handlers are often implemented as “special-case” entry points.",
       "cat": [
         "defi",
@@ -321,7 +62,7 @@
       "id": "general-defi-dex-aggregator-slippage-balance-bypass-vulnerable-pattern-examples-003",
       "title": "Vulnerable Pattern Examples",
       "severity": "MEDIUM",
-      "grep": "absolute_vs_delta_balance|swap_output_validation|holdTokenFlashCallback|pre_existing_balance|balance_snapshot|sandwich_attack",
+      "grep": "holdTokenFlashCallback|swapOn1INCH",
       "detect": "slippage check uses ABSOLUTE balance, not delta",
       "cat": [
         "defi",
@@ -342,10 +83,10 @@
       "validWhen": "slippage check uses ABSOLUTE balance, not delta"
     },
     {
-      "id": "general-defi-slippage-protection-example-1-unused-slippage-para-001",
-      "title": "Example 1: Unused Slippage Parameters (HIGH - Vader Protocol)",
+      "id": "general-defi-slippage-protection-vulnerable-code-patterns-001",
+      "title": "Vulnerable Code Patterns",
       "severity": "HIGH",
-      "grep": "addLiquidity|amountBMin|amountAMin",
+      "grep": "buyNSendToVoltTreasury|_removeLeverage|block.timestamp|addLiquidity|totalAssets|amountBMin",
       "detect": "Reference**: [h-31-unused-slippage-params.",
       "cat": [
         "defi",
@@ -355,114 +96,22 @@
       ],
       "ref": "DB/general/slippage-protection/slippage-protection.md",
       "lines": [
-        78,
-        104
+        76,
+        212
       ],
       "check": [
-        "VERIFY: Slippage parameters declared but never used"
-      ],
-      "antipattern": "Slippage parameters declared but never used",
-      "validWhen": "Slippage parameters declared but never used"
-    },
-    {
-      "id": "general-defi-slippage-protection-example-2-zero-slippage-in-swa-002",
-      "title": "Example 2: Zero Slippage in Swap Operations (MEDIUM - Kaizen)",
-      "severity": "MEDIUM",
-      "grep": "buyNSendToVoltTreasury|yield_protocol_findings|notExpired|notAmount0",
-      "detect": "Reference**: [m-01-voltburnbuynsendtovolttreasury-function-is-subjected-to-a-sandwich-attack.",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/slippage-protection/slippage-protection.md",
-      "lines": [
-        105,
-        131
-      ],
-      "check": [
-        "VERIFY: User can set zero slippage allowing sandwich attacks"
-      ],
-      "antipattern": "User can set zero slippage allowing sandwich attacks",
-      "validWhen": "User can set zero slippage allowing sandwich attacks"
-    },
-    {
-      "id": "general-defi-slippage-protection-example-3-missing-withdrawal-s-003",
-      "title": "Example 3: Missing Withdrawal Slippage Protection (MEDIUM - Sentiment V2)",
-      "severity": "MEDIUM",
-      "grep": "totalAssets|withdraw",
-      "detect": "Reference**: [m-15-lack-of-slippage-protection-during-withdrawal-in-superpool-and-pool-contrac.",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/slippage-protection/slippage-protection.md",
-      "lines": [
-        132,
-        157
-      ],
-      "check": [
-        "VERIFY: No slippage protection during bad debt events"
-      ],
-      "antipattern": "No slippage protection during bad debt events",
-      "validWhen": "No slippage protection during bad debt events"
-    },
-    {
-      "id": "general-defi-slippage-protection-example-4-block-timestamp-as-d-004",
-      "title": "Example 4: block.timestamp as Deadline (MEDIUM - Particle Protocol)",
-      "severity": "MEDIUM",
-      "grep": "block.timestamp|INonfungiblePositionManager|yield_protocol_findings|MintParams",
-      "detect": "Reference**: [m-02-dangerous-use-of-deadline-parameter.",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/slippage-protection/slippage-protection.md",
-      "lines": [
-        158,
-        184
-      ],
-      "check": [
-        "VERIFY: Using block.timestamp defeats the purpose of deadline"
-      ],
-      "antipattern": "Using block.timestamp defeats the purpose of deadline",
-      "validWhen": "Using block.timestamp defeats the purpose of deadline"
-    },
-    {
-      "id": "general-defi-slippage-protection-example-5-zero-slippage-in-lev-005",
-      "title": "Example 5: Zero Slippage in Leverage Operations (HIGH - Peapods)",
-      "severity": "HIGH",
-      "grep": "_removeLeverage|yield_protocol_findings|Operations|Reference",
-      "detect": "Reference**: [h-06-no-slippage-checks-when-removing-leverage.",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/slippage-protection/slippage-protection.md",
-      "lines": [
-        185,
-        207
-      ],
-      "check": [
-        "VERIFY: Exact output swap with no slippage protection",
+        "VERIFY: Using block.timestamp defeats the purpose of deadline",
         "IMPACT: User removing leverage can have nearly all their pod tokens consumed by a sandwich attack, receiving far fewer tokens than expected."
       ],
-      "antipattern": "Exact output swap with no slippage protection",
-      "validWhen": "Exact output swap with no slippage protection",
+      "antipattern": "Using block.timestamp defeats the purpose of deadline",
+      "validWhen": "Using block.timestamp defeats the purpose of deadline",
       "impact": "User removing leverage can have nearly all their pod tokens consumed by a sandwich attack, receiving far fewer tokens than expected."
     },
     {
       "id": "general-defi-defihacklabs-vault-inflation-patterns-1-empty-market-exchange-rate-i-001",
       "title": "1. Empty Market Exchange Rate Inflation",
       "severity": "CRITICAL",
-      "grep": "_convertToShares|_convertToAssets|redeemUnderlying|pseudoTotalPool|rounding_error|exchange_rate",
+      "grep": "redeemUnderlying|totalSupply|atomic",
       "detect": "When a CompoundV2-fork cToken market has extremely low `totalSupply` (e.",
       "cat": [
         "defi",
@@ -488,7 +137,7 @@
       "id": "general-defi-defihacklabs-vault-inflation-patterns-2-share-price-inflation-via-do-002",
       "title": "2. Share Price Inflation via Donation",
       "severity": "CRITICAL",
-      "grep": "withdrawExactAmount|_convertToShares|_convertToAssets|redeemUnderlying|pseudoTotalPool|rounding_error",
+      "grep": "withdrawExactAmount|pseudoTotalPool|totalShares",
       "detect": "Protocols that track asset balances using variables like `pseudoTotalPool` are vulnerable when the actual token balance...",
       "cat": [
         "defi",
@@ -514,7 +163,7 @@
       "id": "general-defi-vault-inflation-attack-vulnerability-description-001",
       "title": "Vulnerability Description",
       "severity": "LOW",
-      "grep": "vault_exchange_rate|share_calculation|price_per_share|convertToShares|convertToAssets|vault_deposit",
+      "grep": "totalAssets|Subsequent|Calculated|Withdraws",
       "detect": "The fundamental issue stems from the share minting formula used in vault-based systems:",
       "cat": [
         "defi",
@@ -537,7 +186,7 @@
       "id": "general-defi-vault-inflation-attack-vulnerable-pattern-examples-002",
       "title": "Vulnerable Pattern Examples",
       "severity": "HIGH",
-      "grep": "vault_exchange_rate|_convertToShares|share_calculation|registerDeposit|price_per_share|convertToShares",
+      "grep": "_convertToShares|registerDeposit|finalizeStake|_mint_shares|deposit",
       "detect": "Standard ERC4626 without inflation protection",
       "cat": [
         "defi",
@@ -558,32 +207,10 @@
       "validWhen": "Standard ERC4626 without inflation protection"
     },
     {
-      "id": "general-defi-vault-inflation-attack-known-exploits-findings-006",
-      "title": "Known Exploits & Findings",
-      "severity": "HIGH",
-      "grep": "vault_exchange_rate|share_calculation|price_per_share|convertToShares|convertToAssets|vault_deposit",
-      "detect": "Known Exploits & Findings",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/vault-inflation-attack/vault-inflation-attack.md",
-      "lines": [
-        563,
-        574
-      ],
-      "check": [
-        "VERIFY: Known Exploits & Findings"
-      ],
-      "validWhen": "Known Exploits & Findings"
-    },
-    {
       "id": "general-defi-yield-strategy-vulnerabilities-1-first-depositor-inflation-at-000",
       "title": "1. First Depositor / Inflation Attack",
       "severity": "HIGH",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|_convertToShares|deposit_withdrawal|_decimalsOffset",
+      "grep": "_convertToShares|_decimalsOffset|previewMintShares|convertToShares|initialize|deposit",
       "detect": "ERC4626 and similar vault implementations calculate shares as `assets * totalSupply / totalAssets`.",
       "cat": [
         "defi",
@@ -614,7 +241,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-2-exchange-rate-manipulation-v-001",
       "title": "2. Exchange Rate Manipulation via Donation",
       "severity": "HIGH",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|inflation_attack",
+      "grep": "exchangeRate|totalAssets|deposit|donate",
       "detect": "Vault exchange rates are calculated from on-chain balances that can be artificially inflated through direct token...",
       "cat": [
         "defi",
@@ -642,7 +269,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-3-reward-distribution-edge-cas-002",
       "title": "3. Reward Distribution Edge Cases",
       "severity": "HIGH",
-      "grep": "_updateRewardsPerToken|slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism",
+      "grep": "_updateRewardsPerToken|lastUpdated",
       "detect": "Reward-per-token calculations use `lastUpdated` timestamps that aren't updated when `totalSupply == 0`, causing reward...",
       "cat": [
         "defi",
@@ -670,7 +297,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-4-stale-reward-accumulator-sta-003",
       "title": "4. Stale Reward Accumulator State",
       "severity": "HIGH",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|share_calculation",
+      "grep": "stake|lastTimeRewardApplicable|rewardPerToken|updateReward",
       "detect": "Rewards not updated before stake change",
       "cat": [
         "defi",
@@ -696,7 +323,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-5-flash-loan-lp-fee-extraction-004",
       "title": "5. Flash Loan LP Fee Extraction",
       "severity": "MEDIUM",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|inflation_attack",
+      "grep": "withdraw|deposit",
       "detect": "No timelock between deposits and withdrawals allows attackers to front-run legitimate transactions with flash-loaned...",
       "cat": [
         "defi",
@@ -724,7 +351,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-6-cross-function-reentrancy-in-005",
       "title": "6. Cross-Function Reentrancy in Token Hooks",
       "severity": "CRITICAL",
-      "grep": "_beforeTokenTransfer|_afterTokenTransfer|slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal",
+      "grep": "_beforeTokenTransfer|_afterTokenTransfer",
       "detect": "Hooks read state at start of transfer but external calls allow that state to be modified before the hook completes...",
       "cat": [
         "defi",
@@ -753,7 +380,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-7-read-only-reentrancy-in-orac-006",
       "title": "7. Read-Only Reentrancy in Oracle Integration",
       "severity": "HIGH",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|share_calculation",
+      "grep": "getPrice|ensureNotInVaultContext|yield_protocol_findings|VaultReentrancyLib",
       "detect": "Balancer (and similar AMMs) update BPT supply before updating token balances during joins.",
       "cat": [
         "defi",
@@ -781,7 +408,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-8-partial-withdrawal-token-fre-007",
       "title": "8. Partial Withdrawal Token Freeze",
       "severity": "HIGH",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|share_calculation",
+      "grep": "withdraw|yield_protocol_findings|transferFrom|safeTransfer",
       "detect": "Provider contracts transfer full requested share amount from user but underlying withdrawal may only consume partial...",
       "cat": [
         "defi",
@@ -809,7 +436,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-9-reward-multiplication-via-me-008",
       "title": "9. Reward Multiplication via Merge Operations",
       "severity": "CRITICAL",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|inflation_attack",
+      "grep": "claimableFlux|claimFlux|merge",
       "detect": "Claimable rewards are calculated based on current balance at claim time.",
       "cat": [
         "defi",
@@ -838,7 +465,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-10-state-machine-hijacking-009",
       "title": "10. State Machine Hijacking",
       "severity": "HIGH",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|share_calculation",
+      "grep": "createMinipool|requireValidStateTransition|yield_protocol_findings|resetMinipoolData",
       "detect": "State machines allow transitions from completed/error states back to initial states, and the function allowing...",
       "cat": [
         "defi",
@@ -866,7 +493,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-11-penalty-and-fee-bypass-via--010",
       "title": "11. Penalty and Fee Bypass via Secondary Markets",
       "severity": "MEDIUM",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|inflation_attack",
+      "grep": "_transfer|unstake",
       "detect": "transfer() and transferFrom() functions not disabled or overridden to apply penalties/fees, allowing penalty-free exit...",
       "cat": [
         "defi",
@@ -894,7 +521,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-12-claim-function-arithmetic-u-011",
       "title": "12. Claim Function Arithmetic Underflow",
       "severity": "MEDIUM",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|_rewardPerToken|staking_mechanism",
+      "grep": "_rewardPerToken|lastUpdateTime|periodFinish",
       "detect": "After the first user claims post-period, `lastUpdateTime` is set beyond `periodFinish`.",
       "cat": [
         "defi",
@@ -922,7 +549,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-13-missing-slippage-protection-012",
       "title": "13. Missing Slippage Protection in Yield Operations",
       "severity": "HIGH",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|share_calculation",
+      "grep": "harvest|swapExactTokensForTokens|getExpectedOutput|block.timestamp",
       "detect": "No minimum output specified",
       "cat": [
         "defi",
@@ -948,7 +575,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-14-incorrect-share-calculation-013",
       "title": "14. Incorrect Share Calculation on Edge Cases",
       "severity": "HIGH",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|inflation_attack",
+      "grep": "convertToShares|deposit",
       "detect": "Division by zero possible",
       "cat": [
         "defi",
@@ -974,7 +601,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-15-reward-lockup-on-period-tra-014",
       "title": "15. Reward Lockup on Period Transitions",
       "severity": "MEDIUM",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|notifyRewardAmount|deposit_withdrawal|staking_mechanism",
+      "grep": "notifyRewardAmount|block.timestamp|Transitions|Vulnerable",
       "detect": "Old rewards potentially lost",
       "cat": [
         "defi",
@@ -997,7 +624,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-16-vault-accounting-desync-015",
       "title": "16. Vault Accounting Desync",
       "severity": "HIGH",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|inflation_attack",
+      "grep": "totalAssets|deposit",
       "detect": "Doesn't account for rebases",
       "cat": [
         "defi",
@@ -1023,7 +650,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-17-external-call-context-confu-016",
       "title": "17. External Call Context Confusion",
       "severity": "HIGH",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|inflation_attack",
+      "grep": "this.function|batchOffer|_offer|offer",
       "detect": "`this.function()` makes an external call with the contract as msg.",
       "cat": [
         "defi",
@@ -1050,7 +677,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-18-deposit-withdrawal-same-blo-017",
       "title": "18. Deposit/Withdrawal Same-Block Arbitrage",
       "severity": "MEDIUM",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|inflation_attack",
+      "grep": "withdraw|deposit",
       "detect": "Same block operations allowed",
       "cat": [
         "defi",
@@ -1076,7 +703,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-19-strategy-migration-token-lo-018",
       "title": "19. Strategy Migration Token Loss",
       "severity": "HIGH",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|share_calculation",
+      "grep": "migrateStrategy|withdrawAll|totalAssets|IStrategy",
       "detect": "May leave tokens in old strategy",
       "cat": [
         "defi",
@@ -1102,7 +729,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-20-compound-interest-manipulat-019",
       "title": "20. Compound Interest Manipulation",
       "severity": "MEDIUM",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|share_calculation",
+      "grep": "compound|calculateInterest|block.timestamp|Manipulation",
       "detect": "No limit on compound frequency",
       "cat": [
         "defi",
@@ -1128,7 +755,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-21-time-weighted-voting-power--020",
       "title": "21. Time-Weighted Voting Power Exploitation",
       "severity": "MEDIUM",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|inflation_attack",
+      "grep": "createLock|vote",
       "detect": "Can lock and vote in same transaction",
       "cat": [
         "defi",
@@ -1154,7 +781,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-22-emergency-withdrawal-accoun-021",
       "title": "22. Emergency Withdrawal Accounting Errors",
       "severity": "MEDIUM",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|share_calculation",
+      "grep": "emergencyWithdraw|msg.sender|Withdrawal|Vulnerable",
       "detect": "Accounting not updated",
       "cat": [
         "defi",
@@ -1180,7 +807,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-23-yield-aggregator-fund-isola-022",
       "title": "23. Yield Aggregator Fund Isolation Failures",
       "severity": "HIGH",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|inflation_attack",
+      "grep": "createVault|deposit",
       "detect": "All vaults share same strategy balance",
       "cat": [
         "defi",
@@ -1206,7 +833,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-24-vote-manipulation-via-dupli-023",
       "title": "24. Vote Manipulation via Duplicate Pool Entries",
       "severity": "CRITICAL",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|share_calculation",
+      "grep": "vote|yield_protocol_findings|ZeroLend|Manipulation",
       "detect": "Vote function doesn't validate that pools in the array are unique.",
       "cat": [
         "defi",
@@ -1235,7 +862,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-25-vesting-contract-interface--024",
       "title": "25. Vesting Contract Interface Spoofing",
       "severity": "CRITICAL",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|share_calculation",
+      "grep": "claim|getContributionTokenAmount|yield_protocol_findings|getClaimablePercent",
       "detect": "Claim function accepts any address as \"DAO contract\" and reads token address, contribution amounts, and vesting...",
       "cat": [
         "defi",
@@ -1264,7 +891,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-26-unbounded-reward-accrual-af-025",
       "title": "26. Unbounded Reward Accrual After Period End",
       "severity": "HIGH",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|share_calculation",
+      "grep": "getRewardPerToken|lastTimeRewardApplicable|yield_protocol_findings|totalSupply",
       "detect": "getRewardPerToken() continues calculating rewards when `lastUpdateTime < periodFinish` regardless of whether...",
       "cat": [
         "defi",
@@ -1292,7 +919,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-27-precision-library-mismatch-026",
       "title": "27. Precision Library Mismatch",
       "severity": "HIGH",
-      "grep": "_setTreasuryRewardCutRate|updateTranscoderWithFees|slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal",
+      "grep": "_setTreasuryRewardCutRate|updateTranscoderWithFees",
       "detect": "Rate is set using PreciseMathUtils (10^27 divisor) but calculated using MathUtils (10^6 divisor), causing result to be...",
       "cat": [
         "defi",
@@ -1320,7 +947,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-28-unbounded-loop-dos-via-arra-027",
       "title": "28. Unbounded Loop DoS via Array Growth",
       "severity": "HIGH",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|_claimableAmount|deposit_withdrawal|staking_mechanism",
+      "grep": "_claimableAmount|vest",
       "detect": "vest() allows anyone to create vestments for any beneficiary without minimum amount.",
       "cat": [
         "defi",
@@ -1348,7 +975,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-29-minimum-deposit-bypass-via--028",
       "title": "29. Minimum Deposit Bypass via Withdrawal",
       "severity": "MEDIUM",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|inflation_attack",
+      "grep": "withdraw|deposit",
       "detect": "Deposit function checks MIN_INITIAL_DEPOSIT when totalSupply == 0, but withdraw doesn't prevent reducing supply below...",
       "cat": [
         "defi",
@@ -1376,7 +1003,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-30-strategy-migration-state-lo-029",
       "title": "30. Strategy Migration State Loss",
       "severity": "HIGH",
-      "grep": "setInterestRateStrategy|slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism",
+      "grep": "setInterestRateStrategy|NewInterestRateStrategy|yield_protocol_findings|IInterestRateStrategy",
       "detect": "setInterestRateStrategy() replaces strategy contract but new contract has zeroed vault-specific parameters...",
       "cat": [
         "defi",
@@ -1404,7 +1031,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-31-double-subtraction-accounti-030",
       "title": "31. Double Subtraction Accounting Error",
       "severity": "MEDIUM",
-      "grep": "_getUserManagerState|slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism",
+      "grep": "_getUserManagerState|withdrawRewards",
       "detect": "Function retrieves totalStaked which already has totalFrozen subtracted, then subtracts totalFrozen again, resulting in...",
       "cat": [
         "defi",
@@ -1432,7 +1059,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-32-reentrancy-lock-bypass-via--031",
       "title": "32. Reentrancy Lock Bypass via Storage Mode Switch",
       "severity": "MEDIUM",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|__activateTstore|deposit_withdrawal|staking_mechanism",
+      "grep": "__activateTstore|_useTstore",
       "detect": "Lock set in regular storage before activation.",
       "cat": [
         "defi",
@@ -1460,7 +1087,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-33-timestamp-boundary-conditio-032",
       "title": "33. Timestamp Boundary Condition in Activity Checks",
       "severity": "HIGH",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|share_calculation",
+      "grep": "_wasActiveAt|yield_protocol_findings|Vulnerable|Inequality",
       "detect": "`_wasActiveAt()` returns true when `disabledTime >= timestamp`.",
       "cat": [
         "defi",
@@ -1488,7 +1115,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-34-first-depositor-market-bric-033",
       "title": "34. First Depositor Market Bricking",
       "severity": "MEDIUM",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|inflation_attack",
+      "grep": "utilizationRate|getBorrowRate",
       "detect": "Utilization rate formula allows results > 100% when `borrows > cash + borrows - reserves`.",
       "cat": [
         "defi",
@@ -1516,7 +1143,7 @@
       "id": "general-defi-yield-strategy-vulnerabilities-35-collateral-rebalancing-gaps-034",
       "title": "35. Collateral Rebalancing Gaps",
       "severity": "MEDIUM",
-      "grep": "slippage_protection|reward_distribution|liquidity_provision|deposit_withdrawal|staking_mechanism|inflation_attack",
+      "grep": "setRatio|rebalance|deposit",
       "detect": "setRatio() changes target allocation but only affects new deposits.",
       "cat": [
         "defi",
@@ -1541,10 +1168,33 @@
       "invalidWhen": "Allow admin to rebalance"
     },
     {
-      "id": "general-defi-defihacklabs-deflationary-patterns-vulnerable-pattern-examples-001",
+      "id": "general-defi-defihacklabs-deflationary-patterns-agent-quick-view-000",
+      "title": "Agent Quick View",
+      "severity": "CRITICAL",
+      "grep": "missing_validation|single_contract",
+      "detect": "Agent Quick View",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/fee-on-transfer-tokens/defihacklabs-deflationary-patterns.md",
+      "lines": [
+        83,
+        94
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Pattern Key | deflationary_token_incompatibility | farm_staking | repeated_deposit_drain | fund_loss"
+      ],
+      "validWhen": "Pattern Key | deflationary_token_incompatibility | farm_staking | repeated_deposit_drain | fund_loss"
+    },
+    {
+      "id": "general-defi-defihacklabs-deflationary-patterns-vulnerable-pattern-examples-002",
       "title": "Vulnerable Pattern Examples",
       "severity": "CRITICAL",
-      "grep": "repeated_deposit_withdraw|transferFrom(amount|deflationary_token|balance_divergence|swapExactAmountIn|fee_on_transfer",
+      "grep": "swapExactAmountIn|_transfer|_amount|withdraw|deposit|atomic",
       "detect": "Farm credits `amount` deposited, not actual tokens received",
       "cat": [
         "defi",
@@ -1567,10 +1217,32 @@
       "validWhen": "ZABU Finance farm used amount parameter for accounting instead of measuring actual tokens received (balanceAfter - balanceBefore)."
     },
     {
+      "id": "general-defi-defihacklabs-deflationary-patterns-keywords-003",
+      "title": "Keywords",
+      "severity": "UNKNOWN",
+      "grep": "deposit_withdraw_loop|balance_before_after|deflationary_token|balance_divergence",
+      "detect": "deposit_withdraw_loop",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/fee-on-transfer-tokens/defihacklabs-deflationary-patterns.md",
+      "lines": [
+        355,
+        371
+      ],
+      "check": [
+        "VERIFY: deposit_withdraw_loop"
+      ],
+      "validWhen": "deposit_withdraw_loop"
+    },
+    {
       "id": "general-defi-fee-on-transfer-tokens-vulnerable-pattern-examples-002",
       "title": "Vulnerable Pattern Examples",
       "severity": "MEDIUM",
-      "grep": "deflationary_token|withdrawal_logic|token_accounting|depositAndStake|token_transfer|rebasing_token",
+      "grep": "depositAndStake|depositWithFee|withdraw|deposit",
       "detect": "Uses _amount for accounting without measuring actual received",
       "cat": [
         "defi",
@@ -1590,7 +1262,29 @@
       "validWhen": "Uses _amount for accounting without measuring actual received"
     },
     {
-      "id": "general-defi-defihacklabs-bsc-token-exploit-patterns--vulnerability-description-000",
+      "id": "general-defi-defihacklabs-bsc-token-exploit-patterns--agent-quick-view-000",
+      "title": "Agent Quick View",
+      "severity": "HIGH",
+      "grep": "missing_validation|single_contract",
+      "detect": "Agent Quick View",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/token-compatibility/defihacklabs-bsc-token-exploit-patterns-2022.md",
+      "lines": [
+        98,
+        109
+      ],
+      "check": [
+        "VERIFY: Pattern Key | bsc_token_exploit_patterns | token_contract | economic_exploit | fund_loss"
+      ],
+      "validWhen": "Pattern Key | bsc_token_exploit_patterns | token_contract | economic_exploit | fund_loss"
+    },
+    {
+      "id": "general-defi-defihacklabs-bsc-token-exploit-patterns--vulnerability-description-001",
       "title": "Vulnerability Description",
       "severity": "HIGH",
       "grep": "token.swapAndLiquifyStepv1|swapAndLiquifyStepv1|_isAddLiquidityV1|excludeFromReward|includeInReward|getReserves",
@@ -1613,7 +1307,7 @@
       "validWhen": "Reflection Token Accounting Desync: SafeMoon-fork tokens track balances via dual accounting (_rOwned / _tOwned)."
     },
     {
-      "id": "general-defi-defihacklabs-bsc-token-exploit-patterns--vulnerable-pattern-examples-001",
+      "id": "general-defi-defihacklabs-bsc-token-exploit-patterns--vulnerable-pattern-examples-002",
       "title": "Vulnerable Pattern Examples",
       "severity": "HIGH",
       "grep": "transferOwnership|DPPFlashLoanCall|includeInReward|transferBBOX|testExploit|_tOwned",
@@ -1635,6 +1329,50 @@
       ],
       "antipattern": "Sell cooldown tracked per-address, bypassable with fresh contract",
       "validWhen": "transferOwnership() missing onlyOwner modifier allows anyone to take control."
+    },
+    {
+      "id": "general-defi-defihacklabs-bsc-token-exploit-patterns--defihacklabs-poc-references-003",
+      "title": "DeFiHackLabs PoC References",
+      "severity": "UNKNOWN",
+      "grep": "DeFiHackLabs|References|Wdoge",
+      "detect": "XST** (2022-08): `DeFiHackLabs/src/test/2022-08/XST_exp.sol`, `DeFiHackLabs/src/test/2022-08/XST_exp2.sol`",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/token-compatibility/defihacklabs-bsc-token-exploit-patterns-2022.md",
+      "lines": [
+        727,
+        740
+      ],
+      "check": [
+        "VERIFY: XST (2022-08): DeFiHackLabs/src/test/2022-08/XST_exp.sol, DeFiHackLabs/src/test/2022-08/XST_exp2.sol"
+      ],
+      "validWhen": "XST (2022-08): DeFiHackLabs/src/test/2022-08/XST_exp.sol, DeFiHackLabs/src/test/2022-08/XST_exp2.sol"
+    },
+    {
+      "id": "general-defi-defihacklabs-bsc-token-exploit-patterns--keywords-004",
+      "title": "Keywords",
+      "severity": "UNKNOWN",
+      "grep": "flash_loan_price_manipulation|bond_pricing_manipulation|skim_loop_amplification|skim_sync_manipulation",
+      "detect": "skim_sync_manipulation",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/token-compatibility/defihacklabs-bsc-token-exploit-patterns-2022.md",
+      "lines": [
+        741,
+        766
+      ],
+      "check": [
+        "VERIFY: skim_sync_manipulation"
+      ],
+      "validWhen": "skim_sync_manipulation"
     },
     {
       "id": "general-defi-defihacklabs-reflection-token-2023-2024--reflection-tax-token-exploit-p-000",
@@ -1662,7 +1400,7 @@
       "id": "general-defi-defihacklabs-reflection-token-2023-2024--variant-1-deliver-skim-pattern-001",
       "title": "Variant 1: deliver() + skim() Pattern (7/15 exploits)",
       "severity": "CRITICAL",
-      "grep": "reflection_rate_manipulation|deliver_function_abuse|receiveFlashLoan|DPPFlashLoanCall|pancakeCall|_transfer",
+      "grep": "receiveFlashLoan|DPPFlashLoanCall|pancakeCall",
       "detect": "Example 1: FDP — deliver() Inflates Pair Balance ($16 WBNB, Feb 2023)** [CRITICAL] `@audit` [FDP-POC]",
       "cat": [
         "defi",
@@ -1687,7 +1425,7 @@
       "id": "general-defi-defihacklabs-reflection-token-2023-2024--variant-2-burn-sync-pattern-2--002",
       "title": "Variant 2: burn() + sync() Pattern (2/15 exploits)",
       "severity": "CRITICAL",
-      "grep": "reflection_rate_manipulation|deliver_function_abuse|burn_supply_reduction|executeOperation|DPPFlashLoanCall|_transfer",
+      "grep": "executeOperation|DPPFlashLoanCall",
       "detect": "Example 6: BIGFI — Public burn() Collapses Pair Balance ($200K USDT, Mar 2023)** [CRITICAL] `@audit` [BIGFI-POC]",
       "cat": [
         "defi",
@@ -1712,7 +1450,7 @@
       "id": "general-defi-defihacklabs-reflection-token-2023-2024--variant-3-self-transfer-balanc-003",
       "title": "Variant 3: Self-Transfer Balance Doubling (3/15 exploits)",
       "severity": "CRITICAL",
-      "grep": "reflection_rate_manipulation|deliver_function_abuse|burn_supply_reduction|testExploit|pancakeCall|_transfer",
+      "grep": "testExploit|pancakeCall",
       "detect": "Example 8: GPU — 87 Self-Transfers Double Balance Each Time ($32K, May 2024)** [HIGH] `@audit` [GPU-POC]",
       "cat": [
         "defi",
@@ -1737,7 +1475,7 @@
       "id": "general-defi-defihacklabs-reflection-token-2023-2024--variant-4-deflationary-pair-bu-004",
       "title": "Variant 4: Deflationary Pair Burn (2/15 exploits)",
       "severity": "HIGH",
-      "grep": "reflection_rate_manipulation|self_transfer_doubling|deliver_function_abuse|burn_supply_reduction|DPPFlashLoanCall|_transfer",
+      "grep": "DPPFlashLoanCall|swapExactTokensForTokens|transferToken|block.timestamp",
       "detect": "Example 10: 3913 Token — burnPairs() Drains LP ($31K, Nov 2023)** [HIGH] `@audit` [3913-POC]",
       "cat": [
         "defi",
@@ -1761,7 +1499,7 @@
       "id": "general-defi-defihacklabs-reflection-token-2023-2024--variant-5-tax-reflection-to-pa-005",
       "title": "Variant 5: Tax Reflection to Pair (1/15 exploits)",
       "severity": "HIGH",
-      "grep": "reflection_rate_manipulation|self_transfer_doubling|pancakeV3FlashCallback|deliver_function_abuse|burn_supply_reduction|_transfer",
+      "grep": "pancakeV3FlashCallback|swapExactTokensForTokensSupportingFeeOnTransferTokens|lending_amount|TokenReceiver",
       "detect": "Example 12: MARS — Tax Reflections Accumulate in Pair ($100K, Apr 2024)** [HIGH] `@audit` [MARS-POC]",
       "cat": [
         "defi",
@@ -1783,33 +1521,11 @@
       "validWhen": "Example 12: MARS — Tax Reflections Accumulate in Pair ($100K, Apr 2024) [HIGH] @audit [MARS-POC]"
     },
     {
-      "id": "general-defi-defihacklabs-reflection-token-2023-2024--dynamic-analysis-runtime-check-009",
-      "title": "Dynamic Analysis / Runtime Checks",
-      "severity": "LOW",
-      "grep": "reflection_rate_manipulation|self_transfer_doubling|deliver_function_abuse|burn_supply_reduction|skim_sync_mismatch|_transfer",
-      "detect": "// Monitor for reflection rate manipulation",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/token-compatibility/defihacklabs-reflection-token-2023-2024-patterns.md",
-      "lines": [
-        642,
-        659
-      ],
-      "check": [
-        "VERIFY: // Monitor for reflection rate manipulation"
-      ],
-      "validWhen": "// Monitor for reflection rate manipulation"
-    },
-    {
-      "id": "general-defi-non-standard-token-vulnerabilities-vulnerable-pattern-example-amm-003",
-      "title": "Vulnerable Pattern Example (AMM Pair with Reflection Token) [CRITICAL]",
+      "id": "general-defi-non-standard-token-vulnerabilities-1-reflection-token-vulnerabili-001",
+      "title": "1. Reflection Token Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "balance_manipulation|deflationary_token|reflection_token|balance_tracking|onTokenTransfer|fee_on_transfer",
-      "detect": "AMM pair holding reflection token",
+      "grep": "receiveFlashLoan|pancakeCall|getReserves|_tOwned|_rOwned|balanceOf",
+      "detect": "AMM pairs (Uniswap V2 style) track reserves via the `sync()` function which updates `reserve0`/`reserve1` to match `balanceOf()`.",
       "cat": [
         "defi",
         "calculation",
@@ -1818,22 +1534,24 @@
       ],
       "ref": "DB/general/token-compatibility/non-standard-token-vulnerabilities.md",
       "lines": [
-        169,
-        194
+        139,
+        267
       ],
       "neverPrune": true,
       "check": [
-        "VERIFY: AMM pair holding reflection token"
+        "VERIFY: AMM pairs (Uniswap V2 style) track reserves via the sync() function which updates reserve0/reserve1 to match balanceOf().",
+        "PROVE: Attacker flash loans WBNB (192.5 BNB); Swap WBNB -> BEVO (reflection token)",
+        "ANTIPATTERN: AMM pair holding reflection token"
       ],
       "antipattern": "AMM pair holding reflection token",
-      "validWhen": "AMM pair holding reflection token"
+      "validWhen": "AMM pairs (Uniswap V2 style) track reserves via the sync() function which updates reserve0/reserve1 to match balanceOf()."
     },
     {
-      "id": "general-defi-non-standard-token-vulnerabilities-vulnerable-pattern-deflationar-009",
-      "title": "Vulnerable Pattern (Deflationary + Skim Loop) [HIGH]",
+      "id": "general-defi-non-standard-token-vulnerabilities-2-deflationary-token-vulnerabi-002",
+      "title": "2. Deflationary Token Vulnerabilities",
       "severity": "HIGH",
-      "grep": "balance_manipulation|deflationary_token|reflection_token|balance_tracking|onTokenTransfer|fee_on_transfer",
-      "detect": "Skim-to-self loop with deflationary token",
+      "grep": "DPPFlashLoanCall|distributeFee|sync|skim",
+      "detect": "When deflationary tokens are transferred TO a pair:",
       "cat": [
         "defi",
         "calculation",
@@ -1842,20 +1560,22 @@
       ],
       "ref": "DB/general/token-compatibility/non-standard-token-vulnerabilities.md",
       "lines": [
-        294,
-        320
+        268,
+        409
       ],
       "check": [
-        "VERIFY: Skim-to-self loop with deflationary token"
+        "VERIFY: When deflationary tokens are transferred TO a pair",
+        "PROVE: Flash loan USDT; Swap USDT -> AES (deflationary token)",
+        "ANTIPATTERN: Skim-to-self loop with deflationary token"
       ],
       "antipattern": "Skim-to-self loop with deflationary token",
-      "validWhen": "Skim-to-self loop with deflationary token"
+      "validWhen": "When deflationary tokens are transferred TO a pair"
     },
     {
-      "id": "general-defi-non-standard-token-vulnerabilities-3-erc777-erc667-callback-reent-014",
+      "id": "general-defi-non-standard-token-vulnerabilities-3-erc777-erc667-callback-reent-003",
       "title": "3. ERC777/ERC667 Callback Reentrancy",
       "severity": "CRITICAL",
-      "grep": "deflationary_token|reflection_token|onTokenTransfer|fee_on_transfer|_attackLogic|tokensReceived",
+      "grep": "onTokenTransfer|_attackLogic|tokensReceived|tokensToSend|borrowTokens|attackLogic",
       "detect": "Lending protocols (Compound forks like Agave, Hundred Finance) perform state updates AFTER external calls to token...",
       "cat": [
         "defi",
@@ -1878,11 +1598,11 @@
       "validWhen": "Lending protocols (Compound forks like Agave, Hundred Finance) perform state updates AFTER external calls to token contracts."
     },
     {
-      "id": "general-defi-non-standard-token-vulnerabilities-vulnerable-pattern-rebasing-st-016",
-      "title": "Vulnerable Pattern (Rebasing Staking) [HIGH]",
+      "id": "general-defi-non-standard-token-vulnerabilities-4-rebasing-token-vulnerabiliti-004",
+      "title": "4. Rebasing Token Vulnerabilities",
       "severity": "HIGH",
-      "grep": "balance_manipulation|deflationary_token|reflection_token|balance_tracking|onTokenTransfer|fee_on_transfer",
-      "detect": "No rate limiting between stake/unstake",
+      "grep": "uniswapV3FlashCallback|receiveFlashLoan|uniswapV2Call|unstake|stake",
+      "detect": "OHM-style staking contracts convert tokens to \"staked\" tokens (sOHM) at a dynamic exchange rate.",
       "cat": [
         "defi",
         "calculation",
@@ -1891,20 +1611,22 @@
       ],
       "ref": "DB/general/token-compatibility/non-standard-token-vulnerabilities.md",
       "lines": [
-        562,
-        580
+        539,
+        669
       ],
       "check": [
-        "VERIFY: No rate limiting between stake/unstake"
+        "VERIFY: OHM-style staking contracts convert tokens to \"staked\" tokens (sOHM) at a dynamic exchange rate.",
+        "PROVE: Flash loan FLOOR tokens; Loop: stake() -> immediately unstake() with _rebase=true",
+        "ANTIPATTERN: No rate limiting between stake/unstake"
       ],
       "antipattern": "No rate limiting between stake/unstake",
-      "validWhen": "No rate limiting between stake/unstake"
+      "validWhen": "OHM-style staking contracts convert tokens to \"staked\" tokens (sOHM) at a dynamic exchange rate."
     },
     {
-      "id": "general-defi-non-standard-token-vulnerabilities-5-self-transfer-edge-cases-020",
+      "id": "general-defi-non-standard-token-vulnerabilities-5-self-transfer-edge-cases-005",
       "title": "5. Self-Transfer Edge Cases",
       "severity": "CRITICAL",
-      "grep": "balance_manipulation|deflationary_token|reflection_token|onTokenTransfer|fee_on_transfer|tokensReceived",
+      "grep": "testExploit|pancakeCall|_transfer",
       "detect": "Faulty `_transfer()` implementation that doesn't handle `from == to`:",
       "cat": [
         "defi",
@@ -1927,10 +1649,10 @@
       "validWhen": "Faulty _transfer() implementation that doesn't handle from == to"
     },
     {
-      "id": "general-defi-non-standard-token-vulnerabilities-6-low-no-decimals-token-issues-021",
+      "id": "general-defi-non-standard-token-vulnerabilities-6-low-no-decimals-token-issues-006",
       "title": "6. Low/No Decimals Token Issues",
       "severity": "MEDIUM",
-      "grep": "balance_manipulation|deflationary_token|reflection_token|balance_tracking|onTokenTransfer|fee_on_transfer",
+      "grep": "calculateShares|getAmountOut",
       "detect": "Precision loss with low decimal tokens",
       "cat": [
         "defi",
@@ -1951,10 +1673,10 @@
       "validWhen": "Precision loss with low decimal tokens"
     },
     {
-      "id": "general-defi-non-standard-token-vulnerabilities-7-pausable-blacklistable-token-022",
+      "id": "general-defi-non-standard-token-vulnerabilities-7-pausable-blacklistable-token-007",
       "title": "7. Pausable/Blacklistable Token Risks",
       "severity": "HIGH",
-      "grep": "balance_manipulation|deflationary_token|reflection_token|balance_tracking|onTokenTransfer|fee_on_transfer",
+      "grep": "liquidate|withdraw",
       "detect": "No handling for paused tokens",
       "cat": [
         "defi",
@@ -1978,7 +1700,7 @@
       "id": "general-defi-defihacklabs-precision-share-manipulatio-1-empty-market-exchange-rate-i-001",
       "title": "1. Empty Market Exchange Rate Inflation via Donation",
       "severity": "CRITICAL",
-      "grep": "exchange_rate_inflation|exchangeRate|totalSupply|totalCash|batchSwap|DegenBox",
+      "grep": "exchangeRate|totalSupply|totalCash|atomic",
       "detect": "When Compound V2 fork cToken markets are newly deployed with zero total supply, the `exchangeRate = totalCash / totalSupply` formula becomes exploitable.",
       "cat": [
         "defi",
@@ -2004,7 +1726,7 @@
       "id": "general-defi-defihacklabs-precision-share-manipulatio-2-elastic-base-rebase-math-rou-002",
       "title": "2. Elastic/Base Rebase Math Rounding Exploitation",
       "severity": "CRITICAL",
-      "grep": "totalBorrow.elastic|repayForAll|borrowPart|toElastic|batchSwap|DegenBox",
+      "grep": "totalBorrow.elastic|repayForAll|borrowPart|toElastic|toBase|mulDiv",
       "detect": "Kashi-based lending protocols (BentoBox/DegenBox) track debt using an elastic/base rebase structure where `elastic`...",
       "cat": [
         "defi",
@@ -2030,7 +1752,7 @@
       "id": "general-defi-defihacklabs-precision-share-manipulatio-3-liquidityindex-inflation-via-003",
       "title": "3. LiquidityIndex Inflation via Recursive Flash Loans",
       "severity": "CRITICAL",
-      "grep": "exchange_rate_inflation|siphonFundsFromPool|first_depositor|liquidityIndex|empty_market|batchSwap",
+      "grep": "siphonFundsFromPool|liquidityIndex|rayDiv",
       "detect": "Aave V2 fork lending pools that allow flash loans from their own pool create a recursive amplification vector.",
       "cat": [
         "defi",
@@ -2056,7 +1778,7 @@
       "id": "general-defi-defihacklabs-precision-share-manipulatio-4-scaling-factor-precision-los-004",
       "title": "4. Scaling Factor Precision Loss in StableMath",
       "severity": "CRITICAL",
-      "grep": "liquidityIndex_inflation|exchange_rate_inflation|elastic_base_rounding|first_depositor|empty_market|batchSwap",
+      "grep": "batchSwap|IComposableStablePool|ComposableStablePools|manageUserBalance",
       "detect": "Balancer V2 ComposableStablePools use scaling factors to normalize token amounts with different decimals or wrapped...",
       "cat": [
         "defi",
@@ -2082,7 +1804,7 @@
       "id": "general-defi-defihacklabs-precision-share-manipulatio-5-share-price-inflation-via-di-005",
       "title": "5. Share Price Inflation via Direct Contract Donation",
       "severity": "CRITICAL",
-      "grep": "exchange_rate_inflation|first_depositor|empty_market|totalAssets|batchSwap|DegenBox",
+      "grep": "totalAssets|atomic",
       "detect": "When vault or lending protocols use `totalAssets() / totalShares()` for share pricing and rely on the contract's token...",
       "cat": [
         "defi",
@@ -2107,7 +1829,7 @@
       "id": "general-defi-defihacklabs-precision-share-manipulatio-6-virtual-balance-math-manipul-006",
       "title": "6. Virtual Balance Math Manipulation",
       "severity": "CRITICAL",
-      "grep": "liquidityIndex_inflation|exchange_rate_inflation|elastic_base_rounding|first_depositor|empty_market|batchSwap",
+      "grep": "vb_prod|vb_sum",
       "detect": "Multi-asset pools using virtual balance models (e.",
       "cat": [
         "defi",
@@ -2129,10 +1851,32 @@
       "validWhen": "Multi-asset pools using virtual balance models (e.g., yETH with 8 LST assets) track invariants via vb_prod and vb_sum variables."
     },
     {
-      "id": "general-defi-rounding-precision-loss-example-1-division-before-mult-001",
-      "title": "Example 1: Division Before Multiplication (MEDIUM - Virtuals Protocol)",
-      "severity": "MEDIUM",
-      "grep": "launchFor|Multiplication|Reference|Virtuals",
+      "id": "general-defi-precision-loss-rounding-vulnerabilities-vulnerability-categories-001",
+      "title": "Vulnerability Categories",
+      "severity": "UNKNOWN",
+      "grep": "HundredFinance|WiseLending|CompoundV2|BalancerV2",
+      "detect": "Vulnerability Categories",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/precision/precision-loss-rounding-vulnerabilities.md",
+      "lines": [
+        136,
+        147
+      ],
+      "check": [
+        "VERIFY: Vulnerability Categories"
+      ],
+      "validWhen": "Vulnerability Categories"
+    },
+    {
+      "id": "general-defi-rounding-precision-loss-vulnerable-code-patterns-001",
+      "title": "Vulnerable Code Patterns",
+      "severity": "HIGH",
+      "grep": "convertToShares|launchFor",
       "detect": "Reference**: m-26-imprecise-calculations-in-launchfor-lead-to-less-liquidity-be-added-to-the-.",
       "cat": [
         "defi",
@@ -2142,8 +1886,8 @@
       ],
       "ref": "DB/general/rounding-precision-loss/rounding-precision-loss.md",
       "lines": [
-        37,
-        56
+        35,
+        92
       ],
       "check": [
         "VERIFY: Reference: m-26-imprecise-calculations-in-launchfor-lead-to-less-liquidity-be-added-to-the-.",
@@ -2152,76 +1896,10 @@
       "invalidWhen": "Fix: Multiply before dividing"
     },
     {
-      "id": "general-defi-rounding-precision-loss-example-2-rounding-causes-lock-002",
-      "title": "Example 2: Rounding Causes Locked Funds (HIGH - Fabric)",
+      "id": "general-defi-defihacklabs-reward-calculation-2022-pat-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
       "severity": "HIGH",
-      "grep": "Reference|Rounding|updated|Similar",
-      "detect": "Reference**: funds-allocated-for-rewards-can-be-locked-in-the-contract.",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/rounding-precision-loss/rounding-precision-loss.md",
-      "lines": [
-        57,
-        72
-      ],
-      "check": [
-        "VERIFY: Reference: funds-allocated-for-rewards-can-be-locked-in-the-contract."
-      ]
-    },
-    {
-      "id": "general-defi-rounding-precision-loss-example-3-share-calculation-ro-003",
-      "title": "Example 3: Share Calculation Rounding (MEDIUM - ERC4626)",
-      "severity": "MEDIUM",
-      "grep": "convertToShares|totalSupply|totalAssets|mulDivDown",
-      "detect": "Reference**: m-13-first-erc4626-deposit-can-break-share-calculation.",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/rounding-precision-loss/rounding-precision-loss.md",
-      "lines": [
-        73,
-        92
-      ],
-      "check": [
-        "VERIFY: Reference: m-13-first-erc4626-deposit-can-break-share-calculation."
-      ]
-    },
-    {
-      "id": "general-defi-rounding-precision-loss-fix-2-use-high-precision-libra-005",
-      "title": "Fix 2: Use High-Precision Libraries",
-      "severity": "HIGH",
-      "grep": "calculateLiquidity|UD60x18|PRBMath|Precision",
-      "detect": "// SECURE: Use PRBMath or similar fixed-point libraries",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/rounding-precision-loss/rounding-precision-loss.md",
-      "lines": [
-        103,
-        113
-      ],
-      "check": [
-        "VERIFY: // SECURE: Use PRBMath or similar fixed-point libraries",
-        "FALSIFY: Fix 2: Use High-Precision Libraries"
-      ],
-      "validWhen": "// SECURE: Use PRBMath or similar fixed-point libraries",
-      "invalidWhen": "Fix 2: Use High-Precision Libraries"
-    },
-    {
-      "id": "general-defi-defihacklabs-reward-calculation-2022-pat-pattern-1-mass-contract-deploy-002",
-      "title": "Pattern 1: Mass Contract Deployment Reward Farming",
-      "severity": "HIGH",
-      "grep": "_getReflectedAmount|_getStandardAmount|skim_amplification|reward_calculation|_spendAllowance|updateUserBalance",
+      "grep": "updateUserBalance|distributeAirdrop|airDropReward|claimStakeLp|testExploit|atomic",
       "detect": "Severity**: 🟠 HIGH | **Loss**: ~$50K | **Protocol**: VTF Token | **Chain**: BSC",
       "cat": [
         "defi",
@@ -2231,169 +1909,65 @@
       ],
       "ref": "DB/general/calculation/defihacklabs-reward-calculation-2022-patterns.md",
       "lines": [
-        144,
-        195
-      ],
-      "check": [
-        "VERIFY: Severity: 🟠 HIGH | Loss: ~$50K | Protocol: VTF Token | Chain: BSC"
-      ]
-    },
-    {
-      "id": "general-defi-defihacklabs-reward-calculation-2022-pat-pattern-2-airdrop-recycling-vi-003",
-      "title": "Pattern 2: Airdrop Recycling via LP Transfer",
-      "severity": "HIGH",
-      "grep": "_getReflectedAmount|_getStandardAmount|reward_calculation|_spendAllowance|updateUserBalance|reflection_desync",
-      "detect": "Severity**: 🟠 HIGH | **Loss**: RL tokens | **Protocol**: RL Token | **Chain**: BSC",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/calculation/defihacklabs-reward-calculation-2022-patterns.md",
-      "lines": [
-        196,
-        234
-      ],
-      "check": [
-        "VERIFY: Severity: 🟠 HIGH | Loss: RL tokens | Protocol: RL Token | Chain: BSC"
-      ]
-    },
-    {
-      "id": "general-defi-defihacklabs-reward-calculation-2022-pat-pattern-3-multiple-claim-witho-004",
-      "title": "Pattern 3: Multiple Claim Without Cooldown",
-      "severity": "HIGH",
-      "grep": "_getReflectedAmount|_getStandardAmount|reward_calculation|_spendAllowance|updateUserBalance|reflection_desync",
-      "detect": "Severity**: 🟠 HIGH | **Loss**: $103,755 | **Protocol**: DPC Token | **Chain**: BSC",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/calculation/defihacklabs-reward-calculation-2022-patterns.md",
-      "lines": [
-        235,
-        270
-      ],
-      "check": [
-        "VERIFY: Severity: 🟠 HIGH | Loss: $103,755 | Protocol: DPC Token | Chain: BSC"
-      ]
-    },
-    {
-      "id": "general-defi-defihacklabs-reward-calculation-2022-pat-pattern-4-zero-value-transfer--005",
-      "title": "Pattern 4: Zero-Value Transfer Burns Tokens From LP Pair",
-      "severity": "HIGH",
-      "grep": "_getReflectedAmount|_getStandardAmount|reward_calculation|_spendAllowance|updateUserBalance|reflection_desync",
-      "detect": "Severity**: 🟠 HIGH | **Loss**: ~16.64 BNB | **Protocol**: HEALTH Token | **Chain**: BSC",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/calculation/defihacklabs-reward-calculation-2022-patterns.md",
-      "lines": [
-        271,
-        308
-      ],
-      "check": [
-        "VERIFY: Severity: 🟠 HIGH | Loss: ~16.64 BNB | Protocol: HEALTH Token | Chain: BSC"
-      ]
-    },
-    {
-      "id": "general-defi-defihacklabs-reward-calculation-2022-pat-pattern-5-reflection-token-all-006",
-      "title": "Pattern 5: Reflection Token Allowance Bypass",
-      "severity": "CRITICAL",
-      "grep": "_getReflectedAmount|_getStandardAmount|reward_calculation|_spendAllowance|updateUserBalance|reflection_desync",
-      "detect": "Severity**: 🔴 CRITICAL | **Loss**: 104 ETH | **Protocol**: SNOOD Token | **Chain**: Ethereum",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/calculation/defihacklabs-reward-calculation-2022-patterns.md",
-      "lines": [
-        309,
-        345
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Severity: 🔴 CRITICAL | Loss: 104 ETH | Protocol: SNOOD Token | Chain: Ethereum"
-      ]
-    },
-    {
-      "id": "general-defi-defihacklabs-reward-calculation-2022-pat-pattern-6-skim-loop-fee-amplif-007",
-      "title": "Pattern 6: Skim Loop Fee Amplification Across Multiple Pairs",
-      "severity": "CRITICAL",
-      "grep": "_getReflectedAmount|_getStandardAmount|skim_amplification|reward_calculation|_spendAllowance|updateUserBalance",
-      "detect": "Severity**: 🔴 CRITICAL | **Loss**: ~$1M | **Protocol**: Zeed Finance (YEED) | **Chain**: BSC",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/calculation/defihacklabs-reward-calculation-2022-patterns.md",
-      "lines": [
-        346,
+        142,
         383
       ],
+      "check": [
+        "VERIFY: require(SNOOD.transferFrom(address(uniLP), address(this), balance - 1));"
+      ],
+      "antipattern": "require(SNOOD.transferFrom(address(uniLP), address(this), balance - 1));",
+      "validWhen": "require(SNOOD.transferFrom(address(uniLP), address(this), balance - 1));"
+    },
+    {
+      "id": "general-defi-incorrect-calculation-vulnerabilities-vulnerability-categories-001",
+      "title": "Vulnerability Categories",
+      "severity": "LOW",
+      "grep": "BankrollNetwork|SWAPPStaking|Gangsterfinance|SorStaking",
+      "detect": "Vulnerability Categories",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/calculation/incorrect-calculation-vulnerabilities.md",
+      "lines": [
+        152,
+        164
+      ],
+      "check": [
+        "VERIFY: Vulnerability Categories"
+      ],
+      "validWhen": "Vulnerability Categories"
+    },
+    {
+      "id": "general-defi-defihacklabs-overflow-patterns-agent-quick-view-000",
+      "title": "Agent Quick View",
+      "severity": "CRITICAL",
+      "grep": "arithmetic_invariant_break|single_contract",
+      "detect": "Agent Quick View",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/integer-overflow/defihacklabs-overflow-patterns.md",
+      "lines": [
+        74,
+        85
+      ],
       "neverPrune": true,
       "check": [
-        "VERIFY: Severity: 🔴 CRITICAL | Loss: ~$1M | Protocol: Zeed Finance (YEED) | Chain: BSC"
-      ]
+        "VERIFY: Pattern Key | arithmetic_overflow | token_transfer | integer_overflow_underflow | fund_loss, token_minting"
+      ],
+      "validWhen": "Pattern Key | arithmetic_overflow | token_transfer | integer_overflow_underflow | fund_loss, token_minting"
     },
     {
-      "id": "general-defi-defihacklabs-reward-calculation-2022-pat-static-analysis-010",
-      "title": "Static Analysis",
-      "severity": "LOW",
-      "grep": "_getReflectedAmount|_getStandardAmount|skim_amplification|reward_calculation|_spendAllowance|updateUserBalance",
-      "detect": "pattern: \"updateUserBalance|distributeAirdrop|claimReward\"",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/calculation/defihacklabs-reward-calculation-2022-patterns.md",
-      "lines": [
-        492,
-        513
-      ],
-      "check": [
-        "VERIFY: pattern: \"updateUserBalance|distributeAirdrop|claimReward"
-      ],
-      "validWhen": "pattern: \"updateUserBalance|distributeAirdrop|claimReward"
-    },
-    {
-      "id": "general-defi-defihacklabs-reward-calculation-2022-pat-invariant-checks-011",
-      "title": "Invariant Checks",
-      "severity": "LOW",
-      "grep": "_getReflectedAmount|_getStandardAmount|skim_amplification|reward_calculation|_spendAllowance|updateUserBalance",
-      "detect": "INV-CALC-001: Each address can only claim airdrop rewards once per eligibility period",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/calculation/defihacklabs-reward-calculation-2022-patterns.md",
-      "lines": [
-        514,
-        526
-      ],
-      "check": [
-        "VERIFY: INV-CALC-001: Each address can only claim airdrop rewards once per eligibility period"
-      ],
-      "validWhen": "INV-CALC-001: Each address can only claim airdrop rewards once per eligibility period"
-    },
-    {
-      "id": "general-defi-defihacklabs-overflow-patterns-root-cause-000",
+      "id": "general-defi-defihacklabs-overflow-patterns-root-cause-001",
       "title": "Root Cause",
       "severity": "LOW",
-      "grep": "transferProxy_overflow|batchTransfer_overflow|unchecked_arithmetic|uint256_overflow|pre_solidity_0_8|token_transfer",
+      "grep": "Solidity|Cause",
       "detect": "In Solidity < 0.8.0, arithmetic operations silently overflow/underflow:",
       "cat": [
         "defi",
@@ -2412,10 +1986,10 @@
       "validWhen": "In Solidity < 0.8.0, arithmetic operations silently overflow/underflow"
     },
     {
-      "id": "general-defi-defihacklabs-overflow-patterns-vulnerable-pattern-examples-001",
+      "id": "general-defi-defihacklabs-overflow-patterns-vulnerable-pattern-examples-002",
       "title": "Vulnerable Pattern Examples",
       "severity": "CRITICAL",
-      "grep": "transferProxy_overflow|batchTransfer_overflow|unchecked_arithmetic|uint256_overflow|pre_solidity_0_8|token_transfer",
+      "grep": "transferProxy|batchTransfer|_value|atomic",
       "detect": "batchTransfer has unchecked multiplication overflow",
       "cat": [
         "defi",
@@ -2437,10 +2011,10 @@
       "validWhen": "uint256(cnt) * _value overflows to 0 when cnt * _value >= 2^256."
     },
     {
-      "id": "general-defi-defihacklabs-overflow-patterns-general-overflow-pattern-002",
+      "id": "general-defi-defihacklabs-overflow-patterns-general-overflow-pattern-003",
       "title": "General Overflow Pattern",
       "severity": "LOW",
-      "grep": "transferProxy_overflow|batchTransfer_overflow|unchecked_arithmetic|uint256_overflow|pre_solidity_0_8|token_transfer",
+      "grep": "Multiplication|Subtraction|Solidity|Overflow",
       "detect": "ANY of these patterns in Solidity < 0.8.0",
       "cat": [
         "defi",
@@ -2460,10 +2034,10 @@
       "validWhen": "ANY of these patterns in Solidity < 0.8.0"
     },
     {
-      "id": "general-defi-defihacklabs-overflow-patterns-keywords-003",
+      "id": "general-defi-defihacklabs-overflow-patterns-keywords-004",
       "title": "Keywords",
       "severity": "LOW",
-      "grep": "transferProxy_overflow|batchTransfer_overflow|unchecked_arithmetic|uint256_overflow|pre_solidity_0_8|token_transfer",
+      "grep": "multiplication_overflow|addition_overflow|uint256_overflow|pre_solidity_0_8",
       "detect": "multiplication_overflow",
       "cat": [
         "defi",
@@ -2482,10 +2056,32 @@
       "validWhen": "multiplication_overflow"
     },
     {
-      "id": "general-defi-integer-overflow-vulnerabilities-example-1-classic-pre-0-8-0-un-001",
-      "title": "Example 1: Classic Pre-0.8.0 Underflow [CRITICAL]",
+      "id": "general-defi-integer-overflow-vulnerabilities-vulnerability-categories-001",
+      "title": "Vulnerability Categories",
+      "severity": "LOW",
+      "grep": "unchecked|Multiplication|SafeMath|Downcasting",
+      "detect": "Operations without SafeMath in older Solidity versions.",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/integer-overflow/integer-overflow-vulnerabilities.md",
+      "lines": [
+        55,
+        73
+      ],
+      "check": [
+        "VERIFY: Operations without SafeMath in older Solidity versions."
+      ],
+      "validWhen": "Operations without SafeMath in older Solidity versions."
+    },
+    {
+      "id": "general-defi-integer-overflow-vulnerabilities-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
       "severity": "CRITICAL",
-      "grep": "numeric_operations|batchTransfer|type_casting|unsafe_cast|SafeMath|underflow",
+      "grep": "processWithdraw|transferProxy|processReward|batchTransfer",
       "detect": "No SafeMath, underflow possible",
       "cat": [
         "defi",
@@ -2495,190 +2091,25 @@
       ],
       "ref": "DB/general/integer-overflow/integer-overflow-vulnerabilities.md",
       "lines": [
-        76,
-        111
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: No SafeMath, underflow possible"
-      ],
-      "antipattern": "No SafeMath, underflow possible",
-      "validWhen": "No SafeMath, underflow possible"
-    },
-    {
-      "id": "general-defi-integer-overflow-vulnerabilities-example-2-smartmesh-overflow-c-002",
-      "title": "Example 2: SmartMesh Overflow [CRITICAL]",
-      "severity": "CRITICAL",
-      "grep": "numeric_operations|transferProxy|type_casting|unsafe_cast|SafeMath|underflow",
-      "detect": "Overflow in transfer fee calculation",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/integer-overflow/integer-overflow-vulnerabilities.md",
-      "lines": [
-        112,
-        142
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Overflow in transfer fee calculation"
-      ],
-      "antipattern": "Overflow in transfer fee calculation",
-      "validWhen": "Overflow in transfer fee calculation"
-    },
-    {
-      "id": "general-defi-integer-overflow-vulnerabilities-example-3-unchecked-block-misu-003",
-      "title": "Example 3: Unchecked Block Misuse [HIGH]",
-      "severity": "HIGH",
-      "grep": "numeric_operations|type_casting|unsafe_cast|SafeMath|underflow|unchecked",
-      "detect": "Unchecked block allows underflow",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/integer-overflow/integer-overflow-vulnerabilities.md",
-      "lines": [
-        143,
-        176
-      ],
-      "check": [
-        "VERIFY: Unchecked block allows underflow",
-        "FALSIFY: Check before unchecked arithmetic"
-      ],
-      "antipattern": "Unchecked block allows underflow",
-      "securePattern": "Check before unchecked arithmetic",
-      "validWhen": "Unchecked block allows underflow",
-      "invalidWhen": "Check before unchecked arithmetic"
-    },
-    {
-      "id": "general-defi-integer-overflow-vulnerabilities-example-4-unsafe-type-casting--004",
-      "title": "Example 4: Unsafe Type Casting [HIGH]",
-      "severity": "HIGH",
-      "grep": "numeric_operations|processWithdraw|processReward|type_casting|unsafe_cast|SafeMath",
-      "detect": "Unsafe downcast loses significant bits",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/integer-overflow/integer-overflow-vulnerabilities.md",
-      "lines": [
-        177,
-        223
-      ],
-      "check": [
-        "VERIFY: Unsafe downcast loses significant bits",
-        "FALSIFY: Use SafeCast library"
-      ],
-      "antipattern": "Unsafe downcast loses significant bits",
-      "securePattern": "Use SafeCast library",
-      "validWhen": "Unsafe downcast loses significant bits",
-      "invalidWhen": "Use SafeCast library"
-    },
-    {
-      "id": "general-defi-integer-overflow-vulnerabilities-example-5-pandora-erc404-under-005",
-      "title": "Example 5: Pandora ERC404 Underflow [HIGH]",
-      "severity": "HIGH",
-      "grep": "numeric_operations|type_casting|unsafe_cast|_transfer|SafeMath|underflow",
-      "detect": "Integer underflow in ERC404 implementation",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/integer-overflow/integer-overflow-vulnerabilities.md",
-      "lines": [
-        224,
-        257
-      ],
-      "check": [
-        "VERIFY: Integer underflow in ERC404 implementation"
-      ],
-      "antipattern": "Integer underflow in ERC404 implementation",
-      "validWhen": "Integer underflow in ERC404 implementation"
-    },
-    {
-      "id": "general-defi-integer-overflow-vulnerabilities-example-6-lw-token-underflow-h-006",
-      "title": "Example 6: LW Token Underflow [HIGH]",
-      "severity": "HIGH",
-      "grep": "numeric_operations|type_casting|claimRewards|unsafe_cast|SafeMath|underflow",
-      "detect": "Underflow in reward calculation",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/integer-overflow/integer-overflow-vulnerabilities.md",
-      "lines": [
-        258,
-        283
-      ],
-      "check": [
-        "VERIFY: Underflow in reward calculation"
-      ],
-      "antipattern": "Underflow in reward calculation",
-      "validWhen": "Underflow in reward calculation"
-    },
-    {
-      "id": "general-defi-integer-overflow-vulnerabilities-example-7-qixi-underflow-mediu-007",
-      "title": "Example 7: Qixi Underflow [MEDIUM]",
-      "severity": "MEDIUM",
-      "grep": "numeric_operations|type_casting|unsafe_cast|_transfer|SafeMath|underflow",
-      "detect": "Transfer with unchecked math",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/integer-overflow/integer-overflow-vulnerabilities.md",
-      "lines": [
-        284,
+        74,
         309
       ],
+      "neverPrune": true,
       "check": [
-        "VERIFY: Transfer with unchecked math"
+        "VERIFY: No SafeMath, underflow possible",
+        "PROVE: Integer underflow in ERC404 implementation",
+        "FALSIFY: Check before unchecked arithmetic"
       ],
-      "antipattern": "Transfer with unchecked math",
-      "validWhen": "Transfer with unchecked math"
-    },
-    {
-      "id": "general-defi-integer-overflow-vulnerabilities-manual-checklist-011",
-      "title": "Manual Checklist",
-      "severity": "LOW",
-      "grep": "numeric_operations|type_casting|unsafe_cast|SafeMath|underflow|unchecked",
-      "detect": "[ ] Is Solidity version 0.8.0+ or SafeMath used?",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/integer-overflow/integer-overflow-vulnerabilities.md",
-      "lines": [
-        408,
-        417
-      ],
-      "check": [
-        "VERIFY: [ ] Is Solidity version 0.8.0+ or SafeMath used?",
-        "Is Solidity version 0.8.0+ or SafeMath used?",
-        "Are `unchecked` blocks preceded by appropriate checks?"
-      ],
-      "validWhen": "[ ] Is Solidity version 0.8.0+ or SafeMath used?"
+      "antipattern": "Integer underflow in ERC404 implementation",
+      "securePattern": "Check before unchecked arithmetic",
+      "validWhen": "No SafeMath, underflow possible",
+      "invalidWhen": "Check before unchecked arithmetic"
     },
     {
       "id": "general-defi-defi-business-logic-flaws-defi-business-logic-flaw-vulne-000",
       "title": "DeFi Business Logic Flaw Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "reward_distribution|state_transitions|share_calculation|calculation_logic|validation_logic|token_accounting",
+      "grep": "HedgeyFinance|DeFiHackLabs|Vulnerabilities|Manipulation",
       "detect": "Business logic flaws are the most prevalent vulnerability class in DeFi, encompassing errors in protocol state machine...",
       "cat": [
         "defi",
@@ -2698,10 +2129,32 @@
       "validWhen": "Business logic flaws stem from multiple root causes"
     },
     {
+      "id": "general-defi-defi-business-logic-flaws-complete-incident-reference-20-009",
+      "title": "Complete Incident Reference (2022-2025)",
+      "severity": "UNKNOWN",
+      "grep": "BlueberryProtocol|UnverifiedContr|AstridProtocol|SharwaFinance",
+      "detect": "Complete Incident Reference (2022-2025)",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/business-logic/defi-business-logic-flaws.md",
+      "lines": [
+        828,
+        983
+      ],
+      "check": [
+        "VERIFY: Complete Incident Reference (2022-2025)"
+      ],
+      "validWhen": "Complete Incident Reference (2022-2025)"
+    },
+    {
       "id": "general-defi-defihacklabs-business-logic-2023-pattern-1-donate-to-reserves-self-liqu-001",
       "title": "1. Donate-to-Reserves Self-Liquidation (Euler $200M)",
       "severity": "CRITICAL",
-      "grep": "duplicate_epoch_claim|emergencyWithdraw|_flashCallback|self_liquidation|donateToReserves|computeSwapStep",
+      "grep": "donateToReserves|liquidator|liquidate|violator|atomic|mint",
       "detect": "Euler's `donateToReserves()` function allowed a borrower to donate their own eTokens (collateral tokens) to the protocol reserves.",
       "cat": [
         "defi",
@@ -2727,7 +2180,7 @@
       "id": "general-defi-defihacklabs-business-logic-2023-pattern-2-tick-boundary-precision-erro-002",
       "title": "2. Tick Boundary Precision Error (KyberSwap $48M)",
       "severity": "CRITICAL",
-      "grep": "stakeNft_unstakeNft|duplicate_epoch_claim|emergencyWithdraw|_flashCallback|self_liquidation|donateToReserves",
+      "grep": "_flashCallback|computeSwapStep|sqrtP",
       "detect": "KyberSwap's concentrated liquidity AMM (Elastic) had a precision error in the `computeSwapStep()` function when...",
       "cat": [
         "defi",
@@ -2753,7 +2206,7 @@
       "id": "general-defi-defihacklabs-business-logic-2023-pattern-3-unprotected-burnfrom-transfe-003",
       "title": "3. Unprotected burnFrom + transferFrom (DEI $5.4M)",
       "severity": "CRITICAL",
-      "grep": "stakeNft_unstakeNft|duplicate_epoch_claim|emergencyWithdraw|_flashCallback|self_liquidation|donateToReserves",
+      "grep": "transferFrom|testExploit|burnFrom|_approve",
       "detect": "DEI stablecoin's `burnFrom()` function was callable by anyone with zero amount (`burnFrom(pair, 0)`), which...",
       "cat": [
         "defi",
@@ -2778,7 +2231,7 @@
       "id": "general-defi-defihacklabs-business-logic-2023-pattern-4-duplicate-array-elements-in--004",
       "title": "4. Duplicate Array Elements in Reward Claiming (Level $1M)",
       "severity": "CRITICAL",
-      "grep": "LevelReferralControllerV2.claimMultiple|_flashCallback|self_liquidation|donateToReserves|DPPFlashLoanCall|computeSwapStep",
+      "grep": "LevelReferralControllerV2.claimMultiple|DPPFlashLoanCall|claimMultiple|claimReward|atomic",
       "detect": "Level Finance's `LevelReferralControllerV2.claimMultiple()` function accepted an array of epoch IDs to claim rewards...",
       "cat": [
         "defi",
@@ -2804,7 +2257,7 @@
       "id": "general-defi-defihacklabs-business-logic-2023-pattern-5-emergency-withdraw-without-n-005",
       "title": "5. Emergency Withdraw Without NFT Unstake (BNO $505K)",
       "severity": "HIGH",
-      "grep": "duplicate_epoch_claim|callEmergencyWithdraw|emergencyWithdraw|_flashCallback|self_liquidation|donateToReserves",
+      "grep": "callEmergencyWithdraw|emergencyWithdraw|pancakeCall|unstakeNft",
       "detect": "BNO's staking pool had an `emergencyWithdraw()` function that reset a user's staked token balance but did not reclaim...",
       "cat": [
         "defi",
@@ -2828,7 +2281,7 @@
       "id": "general-defi-defihacklabs-business-logic-2023-pattern-6-flash-loan-liquidity-manipul-006",
       "title": "6. Flash Loan Liquidity Manipulation (Palmswap $900K)",
       "severity": "HIGH",
-      "grep": "duplicate_epoch_claim|_flashCallback|self_liquidation|executeOperation|donateToReserves|computeSwapStep",
+      "grep": "executeOperation|atomic",
       "detect": "Palmswap's liquidity event contract allowed users to purchase PLP tokens at a 1:1 ratio with USDP, but the withdrawal...",
       "cat": [
         "defi",
@@ -2852,7 +2305,7 @@
       "id": "general-defi-defihacklabs-business-logic-2023-pattern-7-convertdusttoearned-price-ma-007",
       "title": "7. convertDustToEarned Price Manipulation (BEARNDAO $769K)",
       "severity": "HIGH",
-      "grep": "duplicate_epoch_claim|convertDustToEarned|_flashCallback|self_liquidation|donateToReserves|computeSwapStep",
+      "grep": "convertDustToEarned|pancakeCall|atomic",
       "detect": "BEARNDAO's Bvaults strategy had a public `convertDustToEarned()` function that swapped residual \"dust\" tokens to the...",
       "cat": [
         "defi",
@@ -2876,7 +2329,7 @@
       "id": "general-defi-defihacklabs-business-logic-2023-pattern-8-flash-loan-bad-debt-creation-008",
       "title": "8. Flash Loan Bad Debt Creation (Platypus $10.5M Total, 3 Exploits)",
       "severity": "CRITICAL",
-      "grep": "duplicate_epoch_claim|emergencyWithdraw|_flashCallback|self_liquidation|donateToReserves|computeSwapStep",
+      "grep": "emergencyWithdraw|atomic",
       "detect": "Platypus Finance's lending system allowed users to borrow the protocol's stablecoin (USP) against staked LP tokens.",
       "cat": [
         "defi",
@@ -2901,7 +2354,7 @@
       "id": "general-defi-defihacklabs-business-logic-2023-pattern-secure-implementations-009",
       "title": "Secure Implementations",
       "severity": "CRITICAL",
-      "grep": "stakeNft_unstakeNft|duplicate_epoch_claim|emergencyWithdraw|_flashCallback|self_liquidation|donateToReserves",
+      "grep": "emergencyWithdraw|donateToReserves|claimMultiple",
       "detect": "// ✅ SECURE: Check solvency AFTER donation",
       "cat": [
         "defi",
@@ -2927,7 +2380,7 @@
       "id": "general-defi-defihacklabs-business-logic-2024-2025-1-dangling-approval-after-oper-001",
       "title": "1. Dangling Approval After Operation Cancellation",
       "severity": "CRITICAL",
-      "grep": "tranche_not_invalidated|_burn(trancheID|create_cancel_approve|createLockedCampaign|repeated_withdrawal|dangling_approval",
+      "grep": "createLockedCampaign|cancelCampaign|transferFrom|create|cancel",
       "detect": "When a protocol's `create` function pulls tokens via `transferFrom()` and stores them, a corresponding `cancel`...",
       "cat": [
         "defi",
@@ -2953,7 +2406,7 @@
       "id": "general-defi-defihacklabs-business-logic-2024-2025-2-repeated-withdrawal-without--002",
       "title": "2. Repeated Withdrawal Without State Invalidation",
       "severity": "CRITICAL",
-      "grep": "withdrawWithoutHedge(trancheID|_burn(trancheID|create_cancel_approve|withdrawWithoutHedge|repeated_withdrawal|dangling_approval",
+      "grep": "withdrawWithoutHedge(trancheID|_burn(trancheID|withdrawWithoutHedge",
       "detect": "When a withdrawal or redemption function processes a tranche/position but fails to burn, delete, or otherwise...",
       "cat": [
         "defi",
@@ -2979,7 +2432,7 @@
       "id": "general-defi-defihacklabs-business-logic-2024-2025-3-uninitialized-uups-proxy-tak-003",
       "title": "3. Uninitialized UUPS Proxy Takeover",
       "severity": "CRITICAL",
-      "grep": "tranche_not_invalidated|_burn(trancheID|create_cancel_approve|repeated_withdrawal|dangling_approval|upgradeToAndCall",
+      "grep": "upgradeToAndCall|proxiableUUID|initialize|withdraw",
       "detect": "UUPS (Universal Upgradeable Proxy Standard) proxies require `initialize()` to be called after deployment to set the...",
       "cat": [
         "defi",
@@ -3005,7 +2458,7 @@
       "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-vulnerability-description-001",
       "title": "Vulnerability Description",
       "severity": "MEDIUM",
-      "grep": "state_inconsistency|price_manipulation|_xftmOut|flash_loan|_exploit|reentrancy",
+      "grep": "selector|register",
       "detect": "Protocol logic flaws arise when the contract's state machine allows transitions that violate implicit invariants.",
       "cat": [
         "defi",
@@ -3025,10 +2478,10 @@
       "validWhen": "Protocol logic flaws arise when the contract's state machine allows transitions that violate implicit invariants."
     },
     {
-      "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-pattern-1-nft-pledge-record-no-002",
-      "title": "Pattern 1: NFT Pledge Record Not Invalidated After Withdrawal",
+      "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-vulnerable-pattern-examples-002",
+      "title": "Vulnerable Pattern Examples",
       "severity": "CRITICAL",
-      "grep": "XNFT.pledgeAndBorrow|withdrawNFT|testExploit|_xftmOut|makePledge|_exploit",
+      "grep": "XNFT.pledgeAndBorrow|remove_liquidity|withdrawNFT|testExploit|makePledge|_exploit",
       "detect": "Severity**: 🔴 CRITICAL | **Loss**: 3,087 ETH (~$3.87M) | **Protocol**: XCarnival | **Chain**: Ethereum",
       "cat": [
         "defi",
@@ -3038,191 +2491,44 @@
       ],
       "ref": "DB/general/business-logic/defihacklabs-protocol-logic-flaws-2021-2022.md",
       "lines": [
-        184,
-        231
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Severity: 🔴 CRITICAL | Loss: 3,087 ETH (~$3.87M) | Protocol: XCarnival | Chain: Ethereum"
-      ]
-    },
-    {
-      "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-pattern-2-read-only-reentrancy-003",
-      "title": "Pattern 2: Read-Only Reentrancy via Curve LP Pricing",
-      "severity": "CRITICAL",
-      "grep": "state_inconsistency|price_manipulation|remove_liquidity|_xftmOut|flash_loan|_exploit",
-      "detect": "Severity**: 🔴 CRITICAL | **Loss**: ~$180K | **Protocol**: Market.",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/business-logic/defihacklabs-protocol-logic-flaws-2021-2022.md",
-      "lines": [
-        232,
-        272
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Severity: 🔴 CRITICAL | Loss: ~$180K | Protocol: Market."
-      ]
-    },
-    {
-      "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-pattern-3-game-economics-abuse-004",
-      "title": "Pattern 3: Game Economics Abuse via Unrestricted Registration",
-      "severity": "HIGH",
-      "grep": "price_manipulation|testExploit|_xftmOut|flash_loan|_exploit|reentrancy",
-      "detect": "Severity**: 🟠 HIGH | **Loss**: BNB (variable) | **Protocol**: SheepFarm | **Chain**: BSC",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/business-logic/defihacklabs-protocol-logic-flaws-2021-2022.md",
-      "lines": [
-        273,
-        323
-      ],
-      "check": [
-        "VERIFY: Severity: 🟠 HIGH | Loss: BNB (variable) | Protocol: SheepFarm | Chain: BSC"
-      ]
-    },
-    {
-      "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-pattern-4-decimal-miscalculati-005",
-      "title": "Pattern 4: Decimal Miscalculation in Synthetic Minting",
-      "severity": "CRITICAL",
-      "grep": "price_manipulation|testExploit|pool.mint|_xftmOut|flash_loan|_exploit",
-      "detect": "Severity**: 🔴 CRITICAL | **Loss**: Variable (xFTM drained) | **Protocol**: Fantasm Finance | **Chain**: Fantom",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/business-logic/defihacklabs-protocol-logic-flaws-2021-2022.md",
-      "lines": [
-        324,
-        353
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Severity: 🔴 CRITICAL | Loss: Variable (xFTM drained) | Protocol: Fantasm Finance | Chain: Fantom"
-      ]
-    },
-    {
-      "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-pattern-5-flash-loan-reward-pr-006",
-      "title": "Pattern 5: Flash Loan Reward Price Manipulation",
-      "severity": "CRITICAL",
-      "grep": "price_manipulation|_xftmOut|flash_loan|BiswapCall|getReward|_exploit",
-      "detect": "Severity**: 🔴 CRITICAL | **Loss**: GNIMB + NIMB (significant) | **Protocol**: Nmbplatform (Nimbus) | **Chain**: BSC",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/business-logic/defihacklabs-protocol-logic-flaws-2021-2022.md",
-      "lines": [
-        354,
-        391
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Severity: 🔴 CRITICAL | Loss: GNIMB + NIMB (significant) | Protocol: Nmbplatform (Nimbus) | Chain: BSC"
-      ]
-    },
-    {
-      "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-pattern-6-arbitrary-external-c-007",
-      "title": "Pattern 6: Arbitrary External Call in Zap Contract",
-      "severity": "HIGH",
-      "grep": "executeSwapAndDeposit|initiateDeposit|swapAndDeposit|_xftmOut|swapTarget|balanceOf",
-      "detect": "Severity**: 🟠 HIGH | **Loss**: ~$1.4K | **Protocol**: Polynomial (Zap) | **Chain**: Optimism",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/business-logic/defihacklabs-protocol-logic-flaws-2021-2022.md",
-      "lines": [
-        392,
-        434
-      ],
-      "check": [
-        "VERIFY: Severity: 🟠 HIGH | Loss: ~$1.4K | Protocol: Polynomial (Zap) | Chain: Optimism"
-      ]
-    },
-    {
-      "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-pattern-7-auction-dos-via-reve-008",
-      "title": "Pattern 7: Auction DoS via Reverting Fallback + Permanent Fund Lock",
-      "severity": "CRITICAL",
-      "grep": "testclaimProjectFunds|price_manipulation|claimProjectFunds|processRefunds|_xftmOut|flash_loan",
-      "detect": "Severity**: 🔴 CRITICAL | **Loss**: >$34M locked permanently | **Protocol**: AkutarNFT | **Chain**: Ethereum",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/business-logic/defihacklabs-protocol-logic-flaws-2021-2022.md",
-      "lines": [
-        435,
-        478
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Severity: 🔴 CRITICAL | Loss: >$34M locked permanently | Protocol: AkutarNFT | Chain: Ethereum"
-      ]
-    },
-    {
-      "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-pattern-8-public-strategy-func-009",
-      "title": "Pattern 8: Public Strategy Function Enables Sandwich Attack",
-      "severity": "HIGH",
-      "grep": "BvaultsStrategy.convertDustToEarned|price_manipulation|testExploit|_xftmOut|flash_loan|_exploit",
-      "detect": "Severity**: 🟠 HIGH | **Loss**: ~BNB profit | **Protocol**: BDEX | **Chain**: BSC",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/business-logic/defihacklabs-protocol-logic-flaws-2021-2022.md",
-      "lines": [
-        479,
-        512
-      ],
-      "check": [
-        "VERIFY: Severity: 🟠 HIGH | Loss: ~BNB profit | Protocol: BDEX | Chain: BSC"
-      ]
-    },
-    {
-      "id": "general-defi-defihacklabs-protocol-logic-flaws-2021-2-pattern-9-token-transfer-side--010",
-      "title": "Pattern 9: Token Transfer Side-Effect Price Manipulation",
-      "severity": "HIGH",
-      "grep": "DPPFlashLoanCall|testExploit|_xftmOut|flash_loan|_exploit|orderId",
-      "detect": "Severity**: 🟠 HIGH | **Loss**: USDT profit | **Protocol**: SEAMAN | **Chain**: BSC",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/business-logic/defihacklabs-protocol-logic-flaws-2021-2022.md",
-      "lines": [
-        513,
+        182,
         545
       ],
+      "neverPrune": true,
       "check": [
-        "VERIFY: Severity: 🟠 HIGH | Loss: USDT profit | Protocol: SEAMAN | Chain: BSC"
-      ]
+        "VERIFY: function BiswapCall(address sender, uint256 baseAmount, uint256 quoteAmount, bytes calldata data) external {"
+      ],
+      "antipattern": "function BiswapCall(address sender, uint256 baseAmount, uint256 quoteAmount, bytes calldata data) external {",
+      "validWhen": "function BiswapCall(address sender, uint256 baseAmount, uint256 quoteAmount, bytes calldata data) external {"
     },
     {
-      "id": "general-defi-defihacklabs-share-accounting-patterns-root-cause-categories-000",
+      "id": "general-defi-defihacklabs-share-accounting-patterns-agent-quick-view-000",
+      "title": "Agent Quick View",
+      "severity": "CRITICAL",
+      "grep": "stale_accounting|single_contract",
+      "detect": "Agent Quick View",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/business-logic/defihacklabs-share-accounting-patterns.md",
+      "lines": [
+        92,
+        103
+      ],
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Pattern Key | share_fee_accounting_error | share_accounting | accounting_manipulation | fund_loss"
+      ],
+      "validWhen": "Pattern Key | share_fee_accounting_error | share_accounting | accounting_manipulation | fund_loss"
+    },
+    {
+      "id": "general-defi-defihacklabs-share-accounting-patterns-root-cause-categories-001",
       "title": "Root Cause Categories",
       "severity": "LOW",
-      "grep": "emergency_withdraw_no_burn|self_transfer_duplication|fee_not_reset_on_transfer|donation_inflated_balance|deposit_withdraw_mismatch|emergencyBurn",
+      "grep": "balanceOf|Duplication|Accumulator|Categories",
       "detect": "Fee Not Reset on Transfer** — LP tokens carry accumulated fee rights that aren't reset when transferred",
       "cat": [
         "defi",
@@ -3241,10 +2547,10 @@
       "validWhen": "Fee Not Reset on Transfer — LP tokens carry accumulated fee rights that aren't reset when transferred"
     },
     {
-      "id": "general-defi-defihacklabs-share-accounting-patterns-vulnerable-pattern-examples-001",
+      "id": "general-defi-defihacklabs-share-accounting-patterns-vulnerable-pattern-examples-002",
       "title": "Vulnerable Pattern Examples",
       "severity": "CRITICAL",
-      "grep": "emergency_withdraw_no_burn|fee_not_reset_on_transfer|donation_inflated_balance|deposit_withdraw_mismatch|emergencyBurn|transferFrom",
+      "grep": "emergencyBurn|userFeeDebt|totalShares|collectFees|_transfer|deposit",
       "detect": "Sorbetto Fragola (concentrated liquidity optimizer)",
       "cat": [
         "defi",
@@ -3266,10 +2572,32 @@
       "validWhen": "LP token _transfer() did not reset userFeeDebt for the recipient."
     },
     {
+      "id": "general-defi-defihacklabs-share-accounting-patterns-keywords-003",
+      "title": "Keywords",
+      "severity": "UNKNOWN",
+      "grep": "deposit_withdraw_mismatch|balance_duplication|reward_accumulator|emergency_withdraw",
+      "detect": "deposit_withdraw_mismatch",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/business-logic/defihacklabs-share-accounting-patterns.md",
+      "lines": [
+        504,
+        520
+      ],
+      "check": [
+        "VERIFY: deposit_withdraw_mismatch"
+      ],
+      "validWhen": "deposit_withdraw_mismatch"
+    },
+    {
       "id": "general-defi-defihacklabs-solvency-business-logic-pat-1-missing-solvency-check-on-do-001",
       "title": "1. Missing Solvency Check on Donation Functions",
       "severity": "CRITICAL",
-      "grep": "missing_health_check|donate_to_reserves|_flashCallback|self_liquidation|donateToReserves|_syncBalances",
+      "grep": "donateToReserves|liquidate|violator|atomic|mint",
       "detect": "Euler Finance's `donateToReserves()` function allowed users to move their eTokens (collateral) to the protocol's...",
       "cat": [
         "defi",
@@ -3295,7 +2623,7 @@
       "id": "general-defi-defihacklabs-solvency-business-logic-pat-2-precision-loss-in-concentrat-002",
       "title": "2. Precision Loss in Concentrated Liquidity Tick Math",
       "severity": "CRITICAL",
-      "grep": "missing_health_check|donate_to_reserves|tick_manipulation|_flashCallback|self_liquidation|_syncBalances",
+      "grep": "_flashCallback|IKyberswapPositionManager|removeLiquidity|IKyberswapPool",
       "detect": "KyberSwap's concentrated liquidity implementation had numeric precision errors in the tick-crossing calculation.",
       "cat": [
         "defi",
@@ -3320,7 +2648,7 @@
       "id": "general-defi-defihacklabs-solvency-business-logic-pat-3-internal-vs-actual-balance-d-003",
       "title": "3. Internal vs Actual Balance Divergence",
       "severity": "HIGH",
-      "grep": "quoteTokenReserveQty|missing_health_check|baseTokenReserveQty|donate_to_reserves|_flashCallback|_syncBalances",
+      "grep": "quoteTokenReserveQty|baseTokenReserveQty|removeLiquidity|addLiquidity|kLast",
       "detect": "ElasticSwap tracked internal balances (`baseTokenReserveQty`, `quoteTokenReserveQty`, `kLast`) separately from actual ERC20 token balances.",
       "cat": [
         "defi",
@@ -3344,7 +2672,7 @@
       "id": "general-defi-defihacklabs-solvency-business-logic-pat-4-unchecked-swap-router-callba-004",
       "title": "4. Unchecked Swap Router Callback Trust",
       "severity": "CRITICAL",
-      "grep": "uniswapV3SwapCallback|missing_health_check|donate_to_reserves|_flashCallback|self_liquidation|_syncBalances",
+      "grep": "uniswapV3SwapCallback|atomic|route",
       "detect": "SushiSwap's RouteProcessor2 accepted arbitrary `route` bytes that could specify any contract address as a \"pool\" for...",
       "cat": [
         "defi",
@@ -3369,7 +2697,7 @@
       "id": "general-defi-bonding-curve-access-control-state-vulne-1-freeze-authority-not-revoked-000",
       "title": "1. Freeze Authority Not Revoked After Pool Creation",
       "severity": "HIGH",
-      "grep": "revoke_freeze_authority|editionMaxMintable|validation_bypass|registry_override|bond_curve_update|state_management",
+      "grep": "revoke_freeze_authority|locker.rs",
       "detect": "`revoke_freeze_authority` function exists in `locker.rs` but is never called during pool creation, leaving the bonding...",
       "cat": [
         "defi",
@@ -3396,7 +2724,7 @@
       "id": "general-defi-bonding-curve-access-control-state-vulne-2-unvalidated-edition-in-sam-c-001",
       "title": "2. Unvalidated Edition in SAM create() Drains All Funds",
       "severity": "LOW",
-      "grep": "onlyEditionOwnerOrAdmin|onlyBeforeMintConcluded|editionMaxMintable|validation_bypass|registry_override|state_management",
+      "grep": "onlyEditionOwnerOrAdmin|onlyBeforeMintConcluded|editionMaxMintable|sam.sell(...|mintConcluded|sapienzeMint",
       "detect": "`create()` accepts any address as an edition without verifying it's a legitimate `SoundEdition` contract.",
       "cat": [
         "defi",
@@ -3424,7 +2752,7 @@
       "id": "general-defi-bonding-curve-access-control-state-vulne-3-reentrancy-during-cred-creat-002",
       "title": "3. Reentrancy During Cred Creation Steals All Ether",
       "severity": "CRITICAL",
-      "grep": "_createCredInternal|editionMaxMintable|validation_bypass|registry_override|bond_curve_update|state_management",
+      "grep": "_createCredInternal|sellShareCred|credIdCounter|buyShareCred|createCred|receive",
       "detect": "No reentrancy guard on `createCred`, `buyShareCred`, `sellShareCred`.",
       "cat": [
         "defi",
@@ -3452,7 +2780,7 @@
       "id": "general-defi-bonding-curve-access-control-state-vulne-4-denom-change-while-active-bi-003",
       "title": "4. Denom Change While Active Bids Exist",
       "severity": "HIGH",
-      "grep": "editionMaxMintable|validation_bypass|registry_override|bond_curve_update|state_management|revoke_authority",
+      "grep": "bonding_curve_findings|MessageInfo|setlistforsell|add_message",
       "detect": "No check for active bids when changing denom",
       "cat": [
         "defi",
@@ -3478,7 +2806,7 @@
       "id": "general-defi-bonding-curve-access-control-state-vulne-5-missing-access-control-on-or-004",
       "title": "5. Missing Access Control on Oracle/Manager Address Setters",
       "severity": "CRITICAL",
-      "grep": "setTwapOracleAddress|editionMaxMintable|validation_bypass|registry_override|bond_curve_update|state_management",
+      "grep": "setTwapOracleAddress|bonding_curve_findings|TwapOracleUpdated|Unprotected",
       "detect": "No access control modifier",
       "cat": [
         "defi",
@@ -3503,7 +2831,7 @@
       "id": "general-defi-bonding-curve-access-control-state-vulne-6-unprotected-orderbook-functi-005",
       "title": "6. Unprotected Orderbook Functions Enable Manipulation",
       "severity": "MEDIUM",
-      "grep": "editionMaxMintable|validation_bypass|registry_override|bond_curve_update|state_management|revoke_authority",
+      "grep": "insert|offer",
       "detect": "No access control — bypasses matching engine",
       "cat": [
         "defi",
@@ -3526,7 +2854,7 @@
       "id": "general-defi-bonding-curve-access-control-state-vulne-7-golden-egg-state-drift-via-n-006",
       "title": "7. Golden Egg State Drift via Non-Frozen editionMaxMintable",
       "severity": "HIGH",
-      "grep": "editionMaxMintableForGoldenEgg|getGoldenEggTokenId|editionMaxMintable|validation_bypass|registry_override|bond_curve_update",
+      "grep": "editionMaxMintableForGoldenEgg|getGoldenEggTokenId|editionMaxMintable|_totalMinted|startSAM",
       "detect": "editionMaxMintable keeps growing with SAM mints",
       "cat": [
         "defi",
@@ -3552,7 +2880,7 @@
       "id": "general-defi-bonding-curve-access-control-state-vulne-8-inconsistent-bond-curve-upda-007",
       "title": "8. Inconsistent Bond Curve Update Breaks Deposit Accounting",
       "severity": "MEDIUM",
-      "grep": "editionMaxMintable|validation_bypass|registry_override|bond_curve_update|state_management|revoke_authority",
+      "grep": "updateBondCurve|bonding_curve_findings|Inconsistent|Depositable",
       "detect": "updateBondCurve changes unbonded keys but not depositable keys",
       "cat": [
         "defi",
@@ -3578,7 +2906,7 @@
       "id": "general-defi-bonding-curve-access-control-state-vulne-9-race-condition-between-buyer-008",
       "title": "9. Race Condition Between Buyer and Owner Withdrawal",
       "severity": "MEDIUM",
-      "grep": "pauseAndWithdrawToPurple|editionMaxMintable|validation_bypass|registry_override|bond_curve_update|state_management",
+      "grep": "pauseAndWithdrawToPurple|bonding_curve_findings|InvalidCurveState|BondingCurve",
       "detect": "No check if curve already completed before pausing",
       "cat": [
         "defi",
@@ -3604,7 +2932,7 @@
       "id": "general-defi-bonding-curve-access-control-state-vulne-10-registry-admin-can-override-009",
       "title": "10. Registry Admin Can Override Upgrade Contract",
       "severity": "CRITICAL",
-      "grep": "DynamicContractRegistry|editionMaxMintable|validation_bypass|registry_override|bond_curve_update|state_management",
+      "grep": "DynamicContractRegistry|registerAddress",
       "detect": "Owner can override any entry including the upgrader",
       "cat": [
         "defi",
@@ -3631,7 +2959,7 @@
       "id": "general-defi-bonding-curve-access-control-state-vulne-11-converter-isactive-before-f-010",
       "title": "11. Converter isActive Before Full Configuration",
       "severity": "MEDIUM",
-      "grep": "editionMaxMintable|validation_bypass|registry_override|bond_curve_update|state_management|revoke_authority",
+      "grep": "isActive|bonding_curve_findings|Configuration|Vulnerable",
       "detect": "Returns true before configuration is complete",
       "cat": [
         "defi",
@@ -3654,10 +2982,32 @@
       "invalidWhen": "Require full configuration before active"
     },
     {
+      "id": "general-defi-bonding-curve-access-control-state-vulne-12-factory-breaking-api-compat-011",
+      "title": "12. Factory Breaking API Compatibility",
+      "severity": "UNKNOWN",
+      "grep": "ITypedConverterFactory|bonding_curve_findings|ConverterUpgrader|Compatibility",
+      "detect": "When a custom factory doesn't implement the expected interface (`ITypedConverterFactory`), the upgrade system breaks...",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/bonding-curve/BONDING_CURVE_ACCESS_CONTROL_STATE_VULNERABILITIES.md",
+      "lines": [
+        603,
+        619
+      ],
+      "check": [
+        "VERIFY: When a custom factory doesn't implement the expected interface (ITypedConverterFactory), the upgrade system breaks..."
+      ],
+      "validWhen": "When a custom factory doesn't implement the expected interface (ITypedConverterFactory), the upgrade system breaks..."
+    },
+    {
       "id": "general-defi-bonding-curve-access-control-state-vulne-13-frontrunning-reduceweight-v-012",
       "title": "13. Frontrunning reduceWeight via Marketcap Manipulation",
       "severity": "MEDIUM",
-      "grep": "editionMaxMintable|validation_bypass|registry_override|bond_curve_update|state_management|revoke_authority",
+      "grep": "reduceWeight|bonding_curve_findings|getTwapMarketCap|getMarketCap",
       "detect": "Marketcap easily manipulable via spot reserves",
       "cat": [
         "defi",
@@ -3683,7 +3033,7 @@
       "id": "general-defi-bonding-curve-access-control-state-vulne-14-force-sent-native-token-dos-013",
       "title": "14. Force-Sent Native Token DOS Graduation",
       "severity": "MEDIUM",
-      "grep": "address(this).balance|editionMaxMintable|validation_bypass|registry_override|bond_curve_update|state_management",
+      "grep": "address(this).balance|graduateToken|addLiquidity|selfdestruct",
       "detect": "Uses raw balance instead of tracked amount",
       "cat": [
         "defi",
@@ -3709,7 +3059,7 @@
       "id": "general-defi-bonding-curve-dos-griefing-vulnerabiliti-vulnerable-pattern-examples-001",
       "title": "Vulnerable Pattern Examples",
       "severity": "HIGH",
-      "grep": "bonding_curve_creation|deterministic_address|PDA_pre_funding|real_sol_reserves|escrow_invariant|_updateSlices",
+      "grep": "real_sol_reserves|_updateSlices|_findSlice|lock_escrow|sol_escrow|distribute",
       "detect": "sol_escrow PDA is deterministic; pre-funding breaks invariant",
       "cat": [
         "defi",
@@ -3735,7 +3085,7 @@
       "id": "general-defi-bonding-curve-fee-rounding-vulnerabiliti-1-fee-calculated-on-wrong-base-000",
       "title": "1. Fee Calculated on Wrong Base Amount",
       "severity": "HIGH",
-      "grep": "_validateBondingCurveBuy|cumulativeFeePerToken|reward_distribution|integer_division|fee_on_transfer|fee_calculation",
+      "grep": "_validateBondingCurveBuy|msg.value|ethNeeded",
       "detect": "The fee is `(ethNeeded * feeBps) / 10000` which gives the fee *on the pre-fee amount*.",
       "cat": [
         "defi",
@@ -3762,7 +3112,7 @@
       "id": "general-defi-bonding-curve-fee-rounding-vulnerabiliti-2-last-buy-fee-mismatch-on-bon-001",
       "title": "2. Last Buy Fee Mismatch on Bonding Curve",
       "severity": "MEDIUM",
-      "grep": "cumulativeFeePerToken|reward_distribution|integer_division|fee_on_transfer|fee_calculation|exact_in_amount",
+      "grep": "exact_in_amount|apply_buy",
       "detect": "Fee calculated before actual amount is known",
       "cat": [
         "defi",
@@ -3788,7 +3138,7 @@
       "id": "general-defi-bonding-curve-fee-rounding-vulnerabiliti-3-swap-fee-omitted-in-order-re-002",
       "title": "3. Swap Fee Omitted in Order Reflections",
       "severity": "MEDIUM",
-      "grep": "cumulativeFeePerToken|reward_distribution|integer_division|fee_on_transfer|fee_calculation|rounding_error",
+      "grep": "reflect_curve|quote_reserve_div_price|bonding_curve_findings|fee_adjusted_quote",
       "detect": "Missing (1-f) multiplier on bid/ask sizing",
       "cat": [
         "defi",
@@ -3814,7 +3164,7 @@
       "id": "general-defi-bonding-curve-fee-rounding-vulnerabiliti-4-inconsistent-fee-between-quo-003",
       "title": "4. Inconsistent Fee Between Quoter and Execution",
       "severity": "MEDIUM",
-      "grep": "cumulativeFeePerToken|reward_distribution|computeEffectiveFee|integer_division|fee_on_transfer|fee_calculation",
+      "grep": "computeEffectiveFee|bonding_curve_findings|BunniHookLogic|BunniQuoter",
       "detect": "Quoter adds hook fee but execution doesn't",
       "cat": [
         "defi",
@@ -3840,7 +3190,7 @@
       "id": "general-defi-bonding-curve-fee-rounding-vulnerabiliti-5-expansion-mint-precision-los-004",
       "title": "5. Expansion Mint Precision Loss Causes DOS",
       "severity": "HIGH",
-      "grep": "cumulativeFeePerToken|reward_distribution|integer_division|fee_on_transfer|fee_calculation|rounding_error",
+      "grep": "reserveRatio|bonding_curve_findings|Vulnerable|precision",
       "detect": "newRatio computed at 1e18, stored at 1e8 precision",
       "cat": [
         "defi",
@@ -3866,7 +3216,7 @@
       "id": "general-defi-bonding-curve-fee-rounding-vulnerabiliti-6-root-exponent-library-trunca-005",
       "title": "6. Root/Exponent Library Truncation Compounds Error",
       "severity": "MEDIUM",
-      "grep": "threeHalfsRoot(x|cumulativeFeePerToken|twoThirdsRoot(x|integer_division|fee_on_transfer|fee_calculation",
+      "grep": "threeHalfsRoot(x|twoThirdsRoot(x|threeHalfsRoot|twoThirdsRoot|getAmountOut|cubeRoot",
       "detect": "`twoThirdsRoot(x)` computes `cubeRoot(x)^2` — the truncation in `cubeRoot` is squared.",
       "cat": [
         "defi",
@@ -3893,7 +3243,7 @@
       "id": "general-defi-bonding-curve-fee-rounding-vulnerabiliti-7-invariant-rounding-direction-006",
       "title": "7. Invariant Rounding Direction Mismatch",
       "severity": "HIGH",
-      "grep": "cumulativeFeePerToken|reward_distribution|integer_division|fee_on_transfer|fee_calculation|rounding_error",
+      "grep": "bonding_curve_findings|ComposableStablePool|StableMath|Vulnerable",
       "detect": "Notional rounds up, Balancer always rounds down",
       "cat": [
         "defi",
@@ -3916,7 +3266,7 @@
       "id": "general-defi-bonding-curve-fee-rounding-vulnerabiliti-8-underpriced-quote-via-intege-007",
       "title": "8. Underpriced Quote via Integer Division Truncation",
       "severity": "MEDIUM",
-      "grep": "cumulativeFeePerToken|reward_distribution|_getQuoteAmount|integer_division|fee_on_transfer|fee_calculation",
+      "grep": "_getQuoteAmount|bonding_curve_findings|Underpriced|Vulnerable",
       "detect": "Integer division always truncates — favors buyer",
       "cat": [
         "defi",
@@ -3942,7 +3292,7 @@
       "id": "general-defi-bonding-curve-fee-rounding-vulnerabiliti-9-invariant-check-invalidated--008",
       "title": "9. Invariant Check Invalidated by Rent Inclusion",
       "severity": "MEDIUM",
-      "grep": "sol_escrow.lamports|cumulativeFeePerToken|reward_distribution|real_sol_reserves|integer_division|fee_on_transfer",
+      "grep": "sol_escrow.lamports|real_sol_reserves",
       "detect": "lamports() includes rent, real_sol_reserves does not",
       "cat": [
         "defi",
@@ -3968,7 +3318,7 @@
       "id": "general-defi-bonding-curve-fee-rounding-vulnerabiliti-10-fee-reward-dust-permanently-009",
       "title": "10. Fee Reward Dust Permanently Stuck in Contract",
       "severity": "MEDIUM",
-      "grep": "cumulativeFeePerToken|reward_distribution|integer_division|fee_on_transfer|fee_calculation|rounding_error",
+      "grep": "addFees|bonding_curve_findings|totalSupply|TokenData",
       "detect": "Division truncation creates permanent dust",
       "cat": [
         "defi",
@@ -3994,7 +3344,7 @@
       "id": "general-defi-bonding-curve-fee-rounding-vulnerabiliti-11-fee-on-transfer-token-accou-010",
       "title": "11. Fee-on-Transfer Token Accounting Mismatch",
       "severity": "MEDIUM",
-      "grep": "cumulativeFeePerToken|reward_distribution|integer_division|fee_on_transfer|fee_calculation|rounding_error",
+      "grep": "buy|transferFrom|balanceOf|msg.sender",
       "detect": "Assumes full amount is received",
       "cat": [
         "defi",
@@ -4049,7 +3399,7 @@
       "id": "general-defi-bonding-curve-misc-vulnerabilities-1-oracle-price-denomination-mi-000",
       "title": "1. Oracle Price Denomination Mismatch (USD vs DAI)",
       "severity": "HIGH",
-      "grep": "supply_invariant|self_liquidation|collateral_depeg|batch_operations|getOwnValuation|curve_metapool",
+      "grep": "getOwnValuation|getPriceUSD|getPriceDAI",
       "detect": "All oracles (WETH, WBTC, DAI, USDC) return USD price, but the stablecoin targets DAI peg.",
       "cat": [
         "defi",
@@ -4076,7 +3426,7 @@
       "id": "general-defi-bonding-curve-misc-vulnerabilities-2-stale-twap-oracle-due-to-unp-001",
       "title": "2. Stale TWAP Oracle Due to Unpoked Metapool",
       "severity": "MEDIUM",
-      "grep": "supply_invariant|self_liquidation|collateral_depeg|batch_operations|curve_metapool|rate_limiting",
+      "grep": "_update|update",
       "detect": "Reads stale cumulative balances from metapool",
       "cat": [
         "defi",
@@ -4102,7 +3452,7 @@
       "id": "general-defi-bonding-curve-misc-vulnerabilities-3-flash-loan-protection-bypass-002",
       "title": "3. Flash Loan Protection Bypass via Self-Liquidation",
       "severity": "HIGH",
-      "grep": "idToBlockOfLastDeposit|supply_invariant|collateral_depeg|batch_operations|rate_limiting|bonding_curve",
+      "grep": "idToBlockOfLastDeposit|vault.move|liquidate|withdraw|deposit|move",
       "detect": "`deposit()` sets `idToBlockOfLastDeposit[id] = block.number`.",
       "cat": [
         "defi",
@@ -4130,7 +3480,7 @@
       "id": "general-defi-bonding-curve-misc-vulnerabilities-4-rebalance-rate-limiting-miss-003",
       "title": "4. Rebalance Rate Limiting Missing — Vault Drainage",
       "severity": "MEDIUM",
-      "grep": "supply_invariant|self_liquidation|collateral_depeg|batch_operations|curve_metapool|rate_limiting",
+      "grep": "rebalance|totalUnderlyingWithFees|bonding_curve_findings|RebalanceParams",
       "detect": "~1% slippage per call, but unlimited calls per transaction",
       "cat": [
         "defi",
@@ -4156,7 +3506,7 @@
       "id": "general-defi-bonding-curve-misc-vulnerabilities-5-wash-trading-to-steal-keeper-004",
       "title": "5. Wash Trading to Steal Keeper/Spot Trading Rewards",
       "severity": "MEDIUM",
-      "grep": "closePositionByCondition|CLOSE_BY_TRADER|supply_invariant|self_liquidation|collateral_depeg|batch_operations",
+      "grep": "closePositionByCondition|CLOSE_BY_TRADER|openPosition|claimReward",
       "detect": "`closePositionByCondition()` accepts `CLOSE_BY_TRADER` as a close reason.",
       "cat": [
         "defi",
@@ -4183,7 +3533,7 @@
       "id": "general-defi-bonding-curve-misc-vulnerabilities-6-batch-operation-fails-atomic-005",
       "title": "6. Batch Operation Fails Atomically on Single Asset",
       "severity": "MEDIUM",
-      "grep": "supply_invariant|self_liquidation|collateral_depeg|batch_operations|curve_metapool|rate_limiting",
+      "grep": "purchase|bonding_curve_findings|PurchaseSucceeded|PurchaseFailed",
       "detect": "Single failure reverts the entire batch",
       "cat": [
         "defi",
@@ -4209,7 +3559,7 @@
       "id": "general-defi-bonding-curve-misc-vulnerabilities-7-unsafe-downcast-breaks-suppl-006",
       "title": "7. Unsafe Downcast Breaks Supply Invariant",
       "severity": "MEDIUM",
-      "grep": "type(uint128).max|supply_invariant|self_liquidation|collateral_depeg|batch_operations|curve_metapool",
+      "grep": "type(uint128).max|getPrice|uint128",
       "detect": "Supply > 2^128 overflows silently",
       "cat": [
         "defi",
@@ -4235,7 +3585,7 @@
       "id": "general-defi-bonding-curve-misc-vulnerabilities-8-collateral-depeg-cascading-t-007",
       "title": "8. Collateral Depeg Cascading to Bonding Curve",
       "severity": "MEDIUM",
-      "grep": "supply_invariant|self_liquidation|collateral_depeg|batch_operations|curve_metapool|rate_limiting",
+      "grep": "getAmountOut|Vulnerable|Collateral|Detection",
       "detect": "Assumes 1 DAI = $1 always",
       "cat": [
         "defi",
@@ -4258,7 +3608,7 @@
       "id": "general-defi-bonding-curve-misc-vulnerabilities-9-asymmetric-base-quote-treatm-008",
       "title": "9. Asymmetric Base/Quote Treatment in Virtual Bonding Curve",
       "severity": "MEDIUM",
-      "grep": "supply_invariant|self_liquidation|collateral_depeg|batch_operations|curve_metapool|rate_limiting",
+      "grep": "sell|buy",
       "detect": "Fee applied to base on buy, but to quote on sell",
       "cat": [
         "defi",
@@ -4281,7 +3631,7 @@
       "id": "general-defi-bonding-curve-misc-vulnerabilities-10-protocol-fees-stuck-after-g-009",
       "title": "10. Protocol Fees Stuck After Graduation",
       "severity": "MEDIUM",
-      "grep": "supply_invariant|self_liquidation|collateral_depeg|batch_operations|curve_metapool|rate_limiting",
+      "grep": "claimFees|Vulnerable|Graduation|Graduated",
       "detect": "Fees locked after graduation",
       "cat": [
         "defi",
@@ -4307,7 +3657,7 @@
       "id": "general-defi-bonding-curve-misc-vulnerabilities-11-token-supply-not-correctly--010",
       "title": "11. Token Supply Not Correctly Burned on Graduation",
       "severity": "MEDIUM",
-      "grep": "supply_invariant|self_liquidation|collateral_depeg|batch_operations|curve_metapool|rate_limiting",
+      "grep": "graduate|addLiquidity|balanceOf|Vulnerable",
       "detect": "Unsold tokens not burned during graduation",
       "cat": [
         "defi",
@@ -4333,7 +3683,7 @@
       "id": "general-defi-bonding-curve-misc-vulnerabilities-12-graduation-stuck-due-to-thi-011",
       "title": "12. Graduation Stuck Due to Third-Party Contract Interference",
       "severity": "MEDIUM",
-      "grep": "supply_invariant|self_liquidation|rescueGraduation|collateral_depeg|batch_operations|curve_metapool",
+      "grep": "rescueGraduation|graduate",
       "detect": "If Uniswap router call fails, graduation is permanently stuck",
       "cat": [
         "defi",
@@ -4359,7 +3709,7 @@
       "id": "general-defi-bonding-curve-oracle-twap-vulnerabilitie-vulnerability-description-000",
       "title": "Vulnerability Description",
       "severity": "MEDIUM",
-      "grep": "LibTWAPOracle.update|_updateTWAV|_getTwav|updateTWAV|rebalance|Chainlink",
+      "grep": "LibTWAPOracle.update|_updateTWAV|_getTwav|updateTWAV|rebalance",
       "detect": "Oracle and TWAP vulnerabilities in bonding curves manifest in several ways:",
       "cat": [
         "defi",
@@ -4431,7 +3781,7 @@
       "id": "general-defi-bonding-curve-slippage-protection-vulner-vulnerable-pattern-examples-001",
       "title": "Vulnerable Pattern Examples",
       "severity": "MEDIUM",
-      "grep": "IBondingCurve(bondingCurve).getPriceAndFee|token_supply_dependent_pricing|VisibilityCredits.sol|bonding_curve_pricing|slippage_protection|mempool_monitoring",
+      "grep": "IBondingCurve(bondingCurve).getPriceAndFee|VisibilityCredits.sol|minAmountOut|getSellPrice|sellCredits|getBuyPrice",
       "detect": "No slippage parameter — price depends on current tokenCount",
       "cat": [
         "defi",
@@ -4460,7 +3810,7 @@
       "id": "general-defi-bonding-curve-token-launch-graduation-vu-1-premature-launch-via-default-000",
       "title": "1. Premature Launch via Default Value Bypass",
       "severity": "HIGH",
-      "grep": "launchGroupCoinToUniswapV3|enableUniswapV3Launch|pair_initialization|uniswap_v3_pool|uniswap_v2_pair|launchGroupCoin",
+      "grep": "launchGroupCoinToUniswapV3|enableUniswapV3Launch|launchGroupCoin|executeLaunch",
       "detect": "The `commitLaunch[tokenId]` defaults to 0, so the check `block.number <= commitLaunch[tokenId]` always passes for...",
       "cat": [
         "defi",
@@ -4488,7 +3838,7 @@
       "id": "general-defi-bonding-curve-token-launch-graduation-vu-2-flash-loan-genesis-graduatio-001",
       "title": "2. Flash Loan Genesis / Graduation Exploit",
       "severity": "CRITICAL",
-      "grep": "uniswap_v3_pool|uniswap_v2_pair|maxGenesisPrice|pool_creation|dutch_auction|bonding_curve",
+      "grep": "maxGenesisPrice|unwrapToken|redeem|launch|buy",
       "detect": "All operations (deposit → launch → redeem → sell) can execute atomically in a single transaction with no time...",
       "cat": [
         "defi",
@@ -4517,7 +3867,7 @@
       "id": "general-defi-bonding-curve-token-launch-graduation-vu-3-flash-loan-premature-graduat-002",
       "title": "3. Flash Loan Premature Graduation with Atomic Unwrap",
       "severity": "LOW",
-      "grep": "pair_initialization|uniswap_v3_pool|uniswap_v2_pair|pool_creation|dutch_auction|bonding_curve",
+      "grep": "unwrapToken|bonding_curve_findings|transferFrom|assetToken",
       "detect": "`unwrapToken()` has no time-based restrictions—it allows converting memecoin to agentToken atomically upon graduation,...",
       "cat": [
         "defi",
@@ -4544,7 +3894,7 @@
       "id": "general-defi-bonding-curve-token-launch-graduation-vu-4-new-bonding-curve-launch-vol-003",
       "title": "4. New Bonding Curve Launch Volatility Arbitrage",
       "severity": "HIGH",
-      "grep": "pair_initialization|uniswap_v3_pool|uniswap_v2_pair|pool_creation|dutch_auction|bonding_curve",
+      "grep": "purchase|bonding_curve_findings|getAmountOut|BondingCurve",
       "detect": "New bonding curve offers discounted tokens (e.",
       "cat": [
         "defi",
@@ -4566,10 +3916,61 @@
       "validWhen": "New bonding curve offers discounted tokens (e.g., 5% off), and flash loans can atomically buy discounted tokens and sell on existing DEX pools for profit."
     },
     {
+      "id": "general-defi-bonding-curve-token-launch-graduation-vu-5-griefing-uniswapv3-launch-by-004",
+      "title": "5. Griefing UniswapV3 Launch by Pre-Creating Pool",
+      "severity": "UNKNOWN",
+      "grep": "uniswapV3Factory.createPool|_initUniV3PoolIfNecessary|launchGroupCoinToUniswapV3|launchToUniswapV3|createPool|getPool",
+      "detect": "`launchGroupCoinToUniswapV3()` calls `uniswapV3Factory.createPool()` which reverts if the pool already exists, and there's no fallback to `getPool()`.",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/bonding-curve/BONDING_CURVE_TOKEN_LAUNCH_GRADUATION_VULNERABILITIES.md",
+      "lines": [
+        343,
+        402
+      ],
+      "check": [
+        "VERIFY: launchGroupCoinToUniswapV3() calls uniswapV3Factory.createPool() which reverts if the pool already exists, and there's no fallback to getPool().",
+        "PROVE: No check for existing pool before creating",
+        "FALSIFY: Check if pool exists before creating"
+      ],
+      "antipattern": "No check for existing pool before creating",
+      "securePattern": "Check if pool exists before creating",
+      "validWhen": "launchGroupCoinToUniswapV3() calls uniswapV3Factory.createPool() which reverts if the pool already exists, and there's no fallback to getPool().",
+      "invalidWhen": "Check if pool exists before creating"
+    },
+    {
+      "id": "general-defi-bonding-curve-token-launch-graduation-vu-6-create2-pair-address-mismatc-005",
+      "title": "6. CREATE2 Pair Address Mismatch Permanently Stuck",
+      "severity": "UNKNOWN",
+      "grep": "endRewards|pairFor",
+      "detect": "The factory's salt includes `(token0, token1, launchpadLp, launchpadFeeDistributor)` but `pairFor()` only uses `(token0, token1)`.",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/bonding-curve/BONDING_CURVE_TOKEN_LAUNCH_GRADUATION_VULNERABILITIES.md",
+      "lines": [
+        403,
+        449
+      ],
+      "check": [
+        "VERIFY: factory's salt includes (token0, token1, launchpadLp, launchpadFeeDistributor) but pairFor() only uses (token0, token1).",
+        "PROVE: pairFor() uses standard salt, factory uses extended salt"
+      ],
+      "antipattern": "pairFor() uses standard salt, factory uses extended salt",
+      "validWhen": "The factory's salt includes (token0, token1, launchpadLp, launchpadFeeDistributor) but pairFor() only uses (token0, token1)."
+    },
+    {
       "id": "general-defi-bonding-curve-token-launch-graduation-vu-7-early-pair-creation-breaks-f-006",
       "title": "7. Early Pair Creation Breaks Fair Launch",
       "severity": "LOW",
-      "grep": "pair_initialization|uniswap_v3_pool|uniswap_v2_pair|addLiquidityKAS|pool_creation|graduateToken",
+      "grep": "addLiquidityKAS|graduateToken|addLiquidity",
       "detect": "No restriction on creating a DEX pair for the token before graduation.",
       "cat": [
         "defi",
@@ -4597,7 +3998,7 @@
       "id": "general-defi-bonding-curve-token-launch-graduation-vu-8-donation-guard-bypass-via-wr-007",
       "title": "8. Donation Guard Bypass via Wrong Pair Address",
       "severity": "LOW",
-      "grep": "_assertValidRecipient|pair_initialization|uniswap_v3_pool|uniswap_v2_pair|pool_creation|dutch_auction",
+      "grep": "_assertValidRecipient|pairFor",
       "detect": "pairFor() returns wrong address, so check always passes",
       "cat": [
         "defi",
@@ -4617,10 +4018,56 @@
       "validWhen": "pairFor() returns wrong address, so check always passes"
     },
     {
+      "id": "general-defi-bonding-curve-token-launch-graduation-vu-9-front-running-createpair-bre-008",
+      "title": "9. Front-Running createPair Breaks Bootstrap",
+      "severity": "UNKNOWN",
+      "grep": "_addLiquidity|addLiquidity|initParams|createPair",
+      "detect": "If pair exists, falls through to AMM logic instead of bootstrap",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/bonding-curve/BONDING_CURVE_TOKEN_LAUNCH_GRADUATION_VULNERABILITIES.md",
+      "lines": [
+        534,
+        563
+      ],
+      "check": [
+        "VERIFY: If pair exists, falls through to AMM logic instead of bootstrap"
+      ],
+      "antipattern": "If pair exists, falls through to AMM logic instead of bootstrap",
+      "validWhen": "If pair exists, falls through to AMM logic instead of bootstrap"
+    },
+    {
+      "id": "general-defi-bonding-curve-token-launch-graduation-vu-10-double-stake-migration-lock-009",
+      "title": "10. Double-Stake Migration Locks Founder Tokens",
+      "severity": "UNKNOWN",
+      "grep": "migrateAgent|veToken",
+      "detect": "No mechanism to unlock old LP tokens during migration",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/bonding-curve/BONDING_CURVE_TOKEN_LAUNCH_GRADUATION_VULNERABILITIES.md",
+      "lines": [
+        564,
+        593
+      ],
+      "check": [
+        "VERIFY: No mechanism to unlock old LP tokens during migration"
+      ],
+      "antipattern": "No mechanism to unlock old LP tokens during migration",
+      "validWhen": "No mechanism to unlock old LP tokens during migration"
+    },
+    {
       "id": "general-defi-bonding-curve-token-launch-graduation-vu-11-presale-tokens-grant-premat-010",
       "title": "11. Presale Tokens Grant Premature Voting Power",
       "severity": "LOW",
-      "grep": "pair_initialization|uniswap_v3_pool|uniswap_v2_pair|pool_creation|dutch_auction|bonding_curve",
+      "grep": "contribute|claim",
       "detect": "Directly minting tokens during presale grants immediate governance power",
       "cat": [
         "defi",
@@ -4646,7 +4093,7 @@
       "id": "general-defi-bonding-curve-token-launch-graduation-vu-12-dutch-auction-price-manipul-011",
       "title": "12. Dutch Auction Price Manipulation",
       "severity": "MEDIUM",
-      "grep": "purchaseArbitrageTokens|stabilizeBackoffPeriod|pair_initialization|uniswap_v3_pool|uniswap_v2_pair|_endAuction",
+      "grep": "purchaseArbitrageTokens|stabilizeBackoffPeriod|_endAuction",
       "detect": "`_endAuction()` only triggers when commitments >= maxCommitments.",
       "cat": [
         "defi",
@@ -4669,7 +4116,7 @@
       "id": "general-defi-bonding-curve-token-launch-graduation-vu-13-crowdfund-rug-pull-via-zero-012",
       "title": "13. Crowdfund Rug Pull via Zero MaxPrice NFT Listing",
       "severity": "LOW",
-      "grep": "pair_initialization|uniswap_v3_pool|uniswap_v2_pair|pool_creation|dutch_auction|bonding_curve",
+      "grep": "maximumPrice|buy",
       "detect": "maximumPrice of 0 allows any NFT to be \"purchased\"",
       "cat": [
         "defi",
@@ -4693,7 +4140,7 @@
       "id": "general-defi-sandwich-attack-mev-bonding-curve-vulner-vulnerable-pattern-examples-001",
       "title": "Vulnerable Pattern Examples",
       "severity": "HIGH",
-      "grep": "test_AttackerDrainsProtocolViaSetPositionWidth|StrategyPassiveManagerUniswap::setPositionWidth|uni.swapExactTokensForTokens|liquidity_manipulation|slippage_protection|mempool_monitoring",
+      "grep": "test_AttackerDrainsProtocolViaSetPositionWidth|StrategyPassiveManagerUniswap::setPositionWidth|uni.swapExactTokensForTokens|setPositionWidth|getAmountOut|minTokens",
       "detect": "minTokens calculated dynamically on-chain from current reserves — sandwichable",
       "cat": [
         "defi",
@@ -4722,7 +4169,7 @@
       "id": "general-defi-eigenpod-beacon-chain-vulnerabilities-1-proof-forgery-via-missing-bo-000",
       "title": "1. Proof Forgery via Missing Bounds Checks",
       "severity": "CRITICAL",
-      "grep": "_processWithdrawalBeforeRestaking|stakedButUnverifiedNativeETH|verifyWithdrawalCredentials|verifyAndProcessWithdrawals|withdrawal_credentials|verifyInclusionSha256",
+      "grep": "_processWithdrawalBeforeRestaking|verifyInclusionSha256|historySummaryIndex|verifyWithdrawal|withdrawalIndex|blockRootIndex",
       "detect": "This vulnerability exists because **Merkle proof indices lack proper size validation**.",
       "cat": [
         "defi",
@@ -4754,7 +4201,7 @@
       "id": "general-defi-eigenpod-beacon-chain-vulnerabilities-2-beacon-state-root-upgrade-br-001",
       "title": "2. Beacon State Root Upgrade Breakage",
       "severity": "HIGH",
-      "grep": "_getExecutionPayloadTreeHeight|stakedButUnverifiedNativeETH|_podWithdrawalCredentials|verifyWithdrawalCredentials|verifyAndProcessWithdrawals|withdrawal_credentials",
+      "grep": "_getExecutionPayloadTreeHeight|_podWithdrawalCredentials|verifyCheckpointProofs|ExecutionPayload|BeaconState",
       "detect": "This vulnerability exists because **Merkle tree heights and SSZ container layouts are hardcoded** as constants.",
       "cat": [
         "defi",
@@ -4785,7 +4232,7 @@
       "id": "general-defi-eigenpod-beacon-chain-vulnerabilities-3-stakedbutunverifiednativeeth-002",
       "title": "3. stakedButUnverifiedNativeETH Accounting Bugs",
       "severity": "HIGH",
-      "grep": "initiateNativeEthWithdrawBeforeRestaking|removeNodeDelegatorContractFromQueue|stakedButUnverifiedNativeETH|verifyWithdrawalCredentials|verifyAndProcessWithdrawals|initiateNativeEthWithdraw",
+      "grep": "initiateNativeEthWithdrawBeforeRestaking|removeNodeDelegatorContractFromQueue|stakedButUnverifiedNativeETH|verifyWithdrawalCredentials|initiateNativeEthWithdraw|claimNativeEthWithdraw",
       "detect": "This vulnerability exists because **stakedButUnverifiedNativeETH tracks only one direction** of the validator lifecycle.",
       "cat": [
         "defi",
@@ -4816,7 +4263,7 @@
       "id": "general-defi-eigenpod-beacon-chain-vulnerabilities-4-permissionless-proof-verific-003",
       "title": "4. Permissionless Proof Verification Bypass",
       "severity": "HIGH",
-      "grep": "stakedButUnverifiedNativeETH|verifyWithdrawalCredentials|verifyAndProcessWithdrawals|withdrawal_credentials|historical_summaries|verifyBalanceUpdate",
+      "grep": "verifyAndProcessWithdrawals|verifyBalanceUpdate|withdrawRewards|syncRewards",
       "detect": "This vulnerability exists because **wrapping protocols assume proof verification will flow through their contracts**,...",
       "cat": [
         "defi",
@@ -4845,7 +4292,7 @@
       "id": "general-defi-eigenpod-beacon-chain-vulnerabilities-5-slashing-factor-miscalculati-004",
       "title": "5. Slashing Factor Miscalculation",
       "severity": "HIGH",
-      "grep": "stakedButUnverifiedNativeETH|verifyWithdrawalCredentials|verifyAndProcessWithdrawals|_reduceSlashingFactor|withdrawal_credentials|historical_summaries",
+      "grep": "_reduceSlashingFactor|depositScalingFactor|maxMagnitude",
       "detect": "This vulnerability exists because **`_reduceSlashingFactor()` uses unscaled restaked balances**, ignoring existing `maxMagnitude` and `depositScalingFactor`.",
       "cat": [
         "defi",
@@ -4874,7 +4321,7 @@
       "id": "general-defi-eigenpod-beacon-chain-vulnerabilities-6-timestamp-boundary-errors-005",
       "title": "6. Timestamp Boundary Errors",
       "severity": "HIGH",
-      "grep": "beaconChainSlashingFactor|proofIsForValidTimestamp|depositScalingFactor|beacon_state_root|balance_container|withdrawal_proof",
+      "grep": "beaconChainSlashingFactor|proofIsForValidTimestamp|depositScalingFactor|maxMagnitude|compounding|eigenlayer",
       "detect": "Uses > instead of >= for timestamp comparison",
       "cat": [
         "defi",
@@ -4900,7 +4347,7 @@
       "id": "general-defi-lrt-exchange-rate-oracle-vulnerabilities-1-lst-oracle-manipulation-via--000",
       "title": "1. LST Oracle Manipulation via Upgradeable Proxies",
       "severity": "MEDIUM",
-      "grep": "swETH.swETHToETHRate|oracle_manipulation|upgradeable_proxy|circuit_breaker|swETHToETHRate|rate_provider",
+      "grep": "swETH.swETHToETHRate|swETHToETHRate|getPriceInEth|getAssetPrice",
       "detect": "This vulnerability exists because **LST rate functions are trusted as gospel with no bounds checking, rate-of-change...",
       "cat": [
         "defi",
@@ -4929,7 +4376,7 @@
       "id": "general-defi-lrt-exchange-rate-oracle-vulnerabilities-2-exchange-rate-sandwich-front-001",
       "title": "2. Exchange Rate Sandwich / Frontrunning",
       "severity": "HIGH",
-      "grep": "oracle_manipulation|upgradeable_proxy|requestWithdrawal|claimWithdrawal|circuit_breaker|rate_provider",
+      "grep": "requestWithdrawal|claimWithdrawal|updateRate|deposit",
       "detect": "This vulnerability exists because **deposits and withdrawals use the current exchange rate with zero fees and zero...",
       "cat": [
         "defi",
@@ -4956,7 +4403,7 @@
       "id": "general-defi-lrt-exchange-rate-oracle-vulnerabilities-3-stale-or-divergent-rate-prov-002",
       "title": "3. Stale or Divergent Rate Providers",
       "severity": "MEDIUM",
-      "grep": "oracle_manipulation|upgradeable_proxy|circuit_breaker|rate_provider|front_running|exchange_rate",
+      "grep": "getMintRate|lastPrice|getRate",
       "detect": "This vulnerability exists because **`getRate()` (used by Balancer pools) returns `lastPrice` from the previous rate...",
       "cat": [
         "defi",
@@ -4983,7 +4430,7 @@
       "id": "general-defi-lrt-exchange-rate-oracle-vulnerabilities-4-exchange-rate-calculation-er-003",
       "title": "4. Exchange Rate Calculation Errors",
       "severity": "HIGH",
-      "grep": "getTokenBalanceFromStrategy|oracle_manipulation|upgradeable_proxy|circuit_breaker|rate_provider|front_running",
+      "grep": "getTokenBalanceFromStrategy|depositAsset|totalAssets|balanceOf",
       "detect": "Transfer BEFORE share calculation",
       "cat": [
         "defi",
@@ -5010,7 +4457,7 @@
       "id": "general-defi-lrt-exchange-rate-oracle-vulnerabilities-5-withdrawal-pricing-during-be-004",
       "title": "5. Withdrawal Pricing During Beacon Chain Exits",
       "severity": "MEDIUM",
-      "grep": "oracle_manipulation|getCollateralValue|upgradeable_proxy|initiateWithdraw|circuit_breaker|rate_provider",
+      "grep": "getCollateralValue|initiateWithdraw",
       "detect": "This vulnerability exists because **after `initiateWithdraw` burns LSTs and enters the beacon chain exit queue, the...",
       "cat": [
         "defi",
@@ -5037,7 +4484,7 @@
       "id": "general-defi-lrt-exchange-rate-oracle-vulnerabilities-6-share-value-appreciation-blo-005",
       "title": "6. Share Value Appreciation Blocking Settlement",
       "severity": "HIGH",
-      "grep": "getExchangeRate|rate_provider|getRSETHPrice|front_running|exchange_rate|price_oracle",
+      "grep": "getExchangeRate|getRSETHPrice|getMintRate|lastPrice|frontrunning|getRate",
       "detect": "This vulnerability exists because **withdrawal requests record absolute share counts, but EigenLayer strategy shares...",
       "cat": [
         "defi",
@@ -5064,7 +4511,7 @@
       "id": "general-defi-lrt-share-accounting-vulnerabilities-1-first-depositor-donation-att-000",
       "title": "1. First Depositor / Donation Attacks",
       "severity": "HIGH",
-      "grep": "supply_desynchronization|getRsETHAmountToMint|strategy_allocation|shares_not_burned|queued_withdrawal|prefundedDeposit",
+      "grep": "getRsETHAmountToMint|prefundedDeposit|totalETHInPool|previewDeposit|getRSETHPrice|totalSupply",
       "detect": "This vulnerability exists because **share pricing uses `totalAssets / totalShares` where `totalAssets` includes direct...",
       "cat": [
         "defi",
@@ -5093,7 +4540,7 @@
       "id": "general-defi-lrt-share-accounting-vulnerabilities-2-tvl-calculation-errors-001",
       "title": "2. TVL Calculation Errors",
       "severity": "HIGH",
-      "grep": "getTokenBalanceFromStrategy|supply_desynchronization|strategy_allocation|shares_not_burned|share_calculation|queued_withdrawal",
+      "grep": "getTokenBalanceFromStrategy|getTotalAssetTVL",
       "detect": "Wrong key — always returns 0 for queued withdrawals",
       "cat": [
         "defi",
@@ -5120,7 +4567,7 @@
       "id": "general-defi-lrt-share-accounting-vulnerabilities-3-transfer-before-calculation--002",
       "title": "3. Transfer-Before-Calculation (CEI Violations)",
       "severity": "HIGH",
-      "grep": "balanceOf(address(this|supply_desynchronization|strategy_allocation|shares_not_burned|share_calculation|queued_withdrawal",
+      "grep": "balanceOf(address(this|transferFrom|depositAsset|totalAssets|balanceOf",
       "detect": "This vulnerability exists because **tokens are transferred to the contract before the share calculation, and the share...",
       "cat": [
         "defi",
@@ -5147,7 +4594,7 @@
       "id": "general-defi-lrt-share-accounting-vulnerabilities-4-share-accounting-desynchroni-003",
       "title": "4. Share Accounting Desynchronization",
       "severity": "HIGH",
-      "grep": "setOperatorStrategyShareCaps|verifyWithdrawalCredentials|supply_desynchronization|strategy_allocation|shares_not_burned|share_calculation",
+      "grep": "setOperatorStrategyShareCaps|verifyWithdrawalCredentials|fulfillWithdrawal|effectiveBalance|assetRegistry|req.shares",
       "detect": "Request removed BEFORE shares are read",
       "cat": [
         "defi",
@@ -5174,7 +4621,7 @@
       "id": "general-defi-lrt-share-accounting-vulnerabilities-5-slashing-induced-accounting--004",
       "title": "5. Slashing-Induced Accounting Breakage",
       "severity": "HIGH",
-      "grep": "eigenLayerPendingWithdrawalSharesAmount|claimWithdrawalFromEigenLayer|supply_desynchronization|completeQueuedWithdrawal|handleSlashedWithdrawal|slashQueuedWithdrawal",
+      "grep": "eigenLayerPendingWithdrawalSharesAmount|claimWithdrawalFromEigenLayer|completeQueuedWithdrawal|handleSlashedWithdrawal|slashQueuedWithdrawal|totalAssets",
       "detect": "This vulnerability exists because **`slashQueuedWithdrawal()` sets the withdrawal's `pending` flag to false, making...",
       "cat": [
         "defi",
@@ -5201,7 +4648,7 @@
       "id": "general-defi-lrt-share-accounting-vulnerabilities-6-supply-inflation-via-unaccou-005",
       "title": "6. Supply Inflation via Unaccounted Operations",
       "severity": "HIGH",
-      "grep": "supply_desynchronization|BaseLocker.merge|strategy_allocation|shares_not_burned|share_calculation|queued_withdrawal",
+      "grep": "BaseLocker.merge|staked_amounts|_depositFor|MERGE_TYPE|compound|supply",
       "detect": "`BaseLocker.merge()` calls `_depositFor()` with `MERGE_TYPE`, which unconditionally adds to `supply` even though no new...",
       "cat": [
         "defi",
@@ -5228,7 +4675,7 @@
       "id": "general-defi-lrt-share-accounting-vulnerabilities-7-rounding-and-precision-failu-006",
       "title": "7. Rounding and Precision Failures",
       "severity": "MEDIUM",
-      "grep": "eigenLayerPendingWithdrawalSharesAmount|depositIntoStrategy|queued_withdrawal|tvl_calculation|share_inflation|first_depositor",
+      "grep": "eigenLayerPendingWithdrawalSharesAmount|depositIntoStrategy|queuedShares|balanceOf|RestakeFi|eigenlayer",
       "detect": "This vulnerability exists because **`underlyingToSharesView` rounds down and `sharesToUnderlyingView` also rounds down**, creating 1-wei discrepancies.",
       "cat": [
         "defi",
@@ -5255,7 +4702,7 @@
       "id": "general-defi-restaking-operator-delegation-vulnerabil-1-operator-censorship-via-forc-000",
       "title": "1. Operator Censorship via Forced Undelegation",
       "severity": "MEDIUM",
-      "grep": "minipool_state_machine|requestUndelegation|delegation_enforcer|delegation_manager|operator_registry|heap_corruption",
+      "grep": "requestUndelegation|undelegate",
       "detect": "This vulnerability exists because **`undelegate()` is callable by the operator or delegation approver, not just the...",
       "cat": [
         "defi",
@@ -5284,7 +4731,7 @@
       "id": "general-defi-restaking-operator-delegation-vulnerabil-2-minipool-state-machine-hijac-001",
       "title": "2. Minipool State Machine Hijacking",
       "severity": "CRITICAL",
-      "grep": "minipool_state_machine|delegation_enforcer|delegation_manager|operator_registry|heap_corruption|createMinipool",
+      "grep": "createMinipool|Withdrawable|nodeID",
       "detect": "This vulnerability exists because **`createMinipool()` allows anyone to call it with any `nodeID`, and the state...",
       "cat": [
         "defi",
@@ -5314,7 +4761,7 @@
       "id": "general-defi-restaking-operator-delegation-vulnerabil-3-undelegation-breaking-lrt-ex-002",
       "title": "3. Undelegation Breaking LRT Exchange Rate",
       "severity": "HIGH",
-      "grep": "DelegationManager.undelegate|minipool_state_machine|delegation_enforcer|_verifyDelegated|delegation_manager|operator_registry",
+      "grep": "DelegationManager.undelegate|_verifyDelegated|getEigenPodShares|getTVLForAsset",
       "detect": "This vulnerability exists because **`DelegationManager.undelegate()` sets EigenPod shares to 0 and queues withdrawals,...",
       "cat": [
         "defi",
@@ -5343,7 +4790,7 @@
       "id": "general-defi-restaking-operator-delegation-vulnerabil-4-heap-corruption-from-operato-003",
       "title": "4. Heap Corruption from Operator Removal",
       "severity": "HIGH",
-      "grep": "allocation.divWad(cap|minipool_state_machine|delegation_enforcer|numActiveOperators|delegation_manager|operator_registry",
+      "grep": "allocation.divWad(cap|numActiveOperators|self.count|DivWadFailed|_remove",
       "detect": "This vulnerability exists because **`_remove()` decrements `self.count` and copies the last element to the removed...",
       "cat": [
         "defi",
@@ -5370,7 +4817,7 @@
       "id": "general-defi-restaking-operator-delegation-vulnerabil-5-delegation-enforcer-bypasses-004",
       "title": "5. Delegation Enforcer Bypasses",
       "severity": "HIGH",
-      "grep": "TotalBalanceChangeEnforcer|minipool_state_machine|delegation_enforcer|delegation_manager|operator_registry|heap_corruption",
+      "grep": "TotalBalanceChangeEnforcer|delegationHash|afterAllHook|afterHook",
       "detect": "delegationHash identical regardless of redeemer",
       "cat": [
         "defi",
@@ -5397,7 +4844,7 @@
       "id": "general-defi-restaking-operator-delegation-vulnerabil-6-stakes-not-forwarded-post-de-005",
       "title": "6. Stakes Not Forwarded Post-Delegation",
       "severity": "CRITICAL",
-      "grep": "minipool_state_machine|delegation_enforcer|delegation_manager|operator_registry|instantWithdraw|heap_corruption",
+      "grep": "instantWithdraw|address(this|unbond|stake",
       "detect": "This vulnerability exists because **`stake()` transfers tokens to `address(this)` regardless of delegation state**, but...",
       "cat": [
         "defi",
@@ -5425,7 +4872,7 @@
       "id": "general-defi-restaking-operator-delegation-vulnerabil-7-front-running-operator-regis-006",
       "title": "7. Front-Running Operator Registration",
       "severity": "CRITICAL",
-      "grep": "NativeTokenPaymentEnforcer|depositToBeaconChain|TotalBalanceEnforcer|delegation_enforcer|DelegationSurrogate|heap_corruption",
+      "grep": "NativeTokenPaymentEnforcer|depositToBeaconChain|TotalBalanceEnforcer|DelegationSurrogate|ANY_DELEGATE|DivWadFailed",
       "detect": "The protocol checks only operator pubkey validity but doesn't verify withdrawal credentials against the expected...",
       "cat": [
         "defi",
@@ -5451,7 +4898,7 @@
       "id": "general-defi-restaking-reward-distribution-vulnerabil-1-sandwich-front-running-rewar-000",
       "title": "1. Sandwich / Front-Running Reward Claims",
       "severity": "HIGH",
-      "grep": "execution_layer_rewards|permissionless_claim|msg_sender_confusion|reward_distribution|reward_distributor|reward_accounting",
+      "grep": "claimRewards|compound",
       "detect": "This vulnerability exists because **reward claim functions are permissionless and instantly increase the contract's...",
       "cat": [
         "defi",
@@ -5480,7 +4927,7 @@
       "id": "general-defi-restaking-reward-distribution-vulnerabil-2-msg-sender-confusion-in-rewa-001",
       "title": "2. msg.sender Confusion in Reward Re-Staking",
       "severity": "CRITICAL",
-      "grep": "execution_layer_rewards|permissionless_claim|msg_sender_confusion|this.stake(reward|reward_distribution|reward_distributor",
+      "grep": "this.stake(reward|address(this|reStake|stake",
       "detect": "This vulnerability exists because **`this.stake(reward)` makes an external call, changing `msg.sender` from the user to...",
       "cat": [
         "defi",
@@ -5508,7 +4955,7 @@
       "id": "general-defi-restaking-reward-distribution-vulnerabil-3-reward-accounting-double-cou-002",
       "title": "3. Reward Accounting Double-Counting",
       "severity": "HIGH",
-      "grep": "execution_layer_rewards|permissionless_claim|msg_sender_confusion|reward_distribution|rewardStakeRatioSum|reward_distributor",
+      "grep": "rewardStakeRatioSum|reportSweptBalance|completeReport",
       "detect": "This vulnerability exists because **delayed effective balance and delayed rewards are assumed to be claimed between...",
       "cat": [
         "defi",
@@ -5535,7 +4982,7 @@
       "id": "general-defi-restaking-reward-distribution-vulnerabil-4-stale-snapshot-data-after-un-003",
       "title": "4. Stale Snapshot Data After Unstaking",
       "severity": "HIGH",
-      "grep": "execution_layer_rewards|permissionless_claim|msg_sender_confusion|reward_distribution|reward_distributor|reward_accounting",
+      "grep": "unstake|delete|stake",
       "detect": "This vulnerability exists because **`delete stakes[tokenId_]` doesn't clear the `mapping(uint256 => BucketState) snapshot` nested inside the struct** (Solidity limitation).",
       "cat": [
         "defi",
@@ -5562,7 +5009,7 @@
       "id": "general-defi-restaking-reward-distribution-vulnerabil-5-rewards-lost-missing-impleme-004",
       "title": "5. Rewards Lost — Missing Implementations",
       "severity": "MEDIUM",
-      "grep": "distributeRemainingBalance|execution_layer_rewards|permissionless_claim|msg_sender_confusion|claimExternalRewards|reward_distribution",
+      "grep": "distributeRemainingBalance|claimExternalRewards|RewardsCoordinator|claimAllRewards|_ethTOeEth|transferETH",
       "detect": "10,000 gas insufficient for multi-hop forwarding",
       "cat": [
         "defi",
@@ -5589,7 +5036,7 @@
       "id": "general-defi-restaking-reward-distribution-vulnerabil-6-reentrancy-based-reward-thef-005",
       "title": "6. Reentrancy-Based Reward Theft",
       "severity": "HIGH",
-      "grep": "execution_layer_rewards|permissionless_claim|msg_sender_confusion|_claimRewardToken|reward_distribution|claimAccountRewards",
+      "grep": "_claimRewardToken|claimAccountRewards|withdrawStake",
       "detect": "This vulnerability exists because **reward tokens are transferred before the debt tracker is fully updated, and the...",
       "cat": [
         "defi",
@@ -5616,7 +5063,7 @@
       "id": "general-defi-restaking-reward-distribution-vulnerabil-7-reward-dilution-via-just-in--006",
       "title": "7. Reward Dilution via Just-In-Time Staking",
       "severity": "MEDIUM",
-      "grep": "claimDelayedWithdrawals|permissionless_claim|reward_distribution|recoverUnstaking|sandwich_attack|front_running",
+      "grep": "claimDelayedWithdrawals|recoverUnstaking|claimRewards|distribution|reentrancy|reStake",
       "detect": "This vulnerability exists because **`rewardValidators()` distributes rewards proportionally to all current stakes...",
       "cat": [
         "defi",
@@ -5643,7 +5090,7 @@
       "id": "general-defi-restaking-slashing-vulnerabilities-1-unslashable-vault-creation-000",
       "title": "1. Unslashable Vault Creation",
       "severity": "HIGH",
-      "grep": "NativeVault.slashAssets|updateAssetSlashingHandler|assetSlashingHandlers|penalty_distribution|protocol_insolvency|validator_penalty",
+      "grep": "NativeVault.slashAssets|updateAssetSlashingHandler|assetSlashingHandlers|updateSlashStore|deployVaults|slashAssets",
       "detect": "This vulnerability exists because **the `NativeVault.slashAssets()` function checks `slashingHandler == self.slashStore`**, but these values can diverge.",
       "cat": [
         "defi",
@@ -5674,7 +5121,7 @@
       "id": "general-defi-restaking-slashing-vulnerabilities-2-over-slashing-and-double-red-001",
       "title": "2. Over-Slashing and Double-Reduction",
       "severity": "HIGH",
-      "grep": "getExpectedAVAXRewardsAmt|_transferToSlashStore|validateSnapshotProofs|penalty_distribution|vault_configuration|protocol_insolvency",
+      "grep": "getExpectedAVAXRewardsAmt|_transferToSlashStore|validateSnapshotProofs|totalRestakedETH|slashAssets",
       "detect": "This vulnerability exists because **slashing accounting applies reductions in multiple places without coordination**.",
       "cat": [
         "defi",
@@ -5703,7 +5150,7 @@
       "id": "general-defi-restaking-slashing-vulnerabilities-3-slashing-bypass-via-timing-002",
       "title": "3. Slashing Bypass via Timing",
       "severity": "MEDIUM",
-      "grep": "penalty_distribution|vault_configuration|protocol_insolvency|validator_penalty|slashing_handler|slashing_factor",
+      "grep": "slashShares|overCommitmentProof|eigenlayer_findings|slashOperator",
       "detect": "This vulnerability exists because **over-commitment proofs reduce shares to 0, and slashing 0 shares has no effect**.",
       "cat": [
         "defi",
@@ -5730,7 +5177,7 @@
       "id": "general-defi-restaking-slashing-vulnerabilities-4-protocol-insolvency-from-lst-003",
       "title": "4. Protocol Insolvency from LST Slashing",
       "severity": "MEDIUM",
-      "grep": "penalty_distribution|_updateSharePrice|vault_configuration|protocol_insolvency|validator_penalty|slashing_handler",
+      "grep": "_updateSharePrice|totalAssets|getRewards",
       "detect": "This vulnerability exists because **reward tracking functions floor negative returns at zero** (`max(0, balance -...",
       "cat": [
         "defi",
@@ -5759,7 +5206,7 @@
       "id": "general-defi-restaking-slashing-vulnerabilities-5-unfair-penalty-distribution-004",
       "title": "5. Unfair Penalty Distribution",
       "severity": "MEDIUM",
-      "grep": "settleEpochFromEigenLayer|penalty_distribution|vault_configuration|protocol_insolvency|validator_penalty|slashing_handler",
+      "grep": "settleEpochFromEigenLayer|balanceBefore|balanceAfter",
       "detect": "This vulnerability exists because **settlement functions use `balanceBefore`/`balanceAfter` patterns** that capture any...",
       "cat": [
         "defi",
@@ -5786,7 +5233,7 @@
       "id": "general-defi-restaking-slashing-vulnerabilities-6-slashing-accounting-errors-005",
       "title": "6. Slashing Accounting Errors",
       "severity": "HIGH",
-      "grep": "beaconChainSlashingFactor|_decreaseBalance|slashing_handler|under_slashing|finalizeReport|over_slashing",
+      "grep": "beaconChainSlashingFactor|_decreaseBalance|finalizeReport|GoGoPool|eigenlayer|restaking",
       "detect": "Slashing reduces balance metrics but recovery doesn't increase them",
       "cat": [
         "defi",
@@ -5812,7 +5259,7 @@
       "id": "general-defi-restaking-withdrawal-vulnerabilities-1-withdrawal-queue-manipulatio-000",
       "title": "1. Withdrawal Queue Manipulation",
       "severity": "HIGH",
-      "grep": "share_to_asset_conversion|settleEpochFromEigenLayer|pending_withdrawal_amount|claimCompletedWithdrawals|partial_failure_handling|initiateEpochSettlement",
+      "grep": "settleEpochFromEigenLayer|claimCompletedWithdrawals|initiateEpochSettlement|setOperatorStrategyCap|requestWithdrawal",
       "detect": "This vulnerability exists because **epoch/queue state transitions are not atomic** with EigenLayer's settlement process.",
       "cat": [
         "defi",
@@ -5843,7 +5290,7 @@
       "id": "general-defi-restaking-withdrawal-vulnerabilities-2-share-amount-calculation-err-001",
       "title": "2. Share/Amount Calculation Errors During Withdrawal",
       "severity": "CRITICAL",
-      "grep": "_getValueOfWithdrawRequest|share_to_asset_conversion|pending_withdrawal_amount|_processFullWithdrawal|partial_failure_handling|eigenlayer_settlement",
+      "grep": "_getValueOfWithdrawRequest|_processFullWithdrawal|initiateWithdrawal|requestWithdrawal|claimWithdrawal|totalAssets",
       "detect": "This vulnerability exists because **share-to-asset conversions are performed at a fixed point in time** (request time)...",
       "cat": [
         "defi",
@@ -5875,7 +5322,7 @@
       "id": "general-defi-restaking-withdrawal-vulnerabilities-3-fund-lockup-during-withdrawa-002",
       "title": "3. Fund Lockup During Withdrawal",
       "severity": "HIGH",
-      "grep": "payable(msg.sender).transfer(amount|share_to_asset_conversion|pending_withdrawal_amount|partial_failure_handling|eigenlayer_settlement|_finalizeCooldown",
+      "grep": "payable(msg.sender).transfer(amount|_finalizeCooldown|finalizeWithdrawals|initiate_unstake|process_unstake|withdraw",
       "detect": "This vulnerability exists because **withdrawal flows assume ideal execution conditions** — strategies always have...",
       "cat": [
         "defi",
@@ -5906,7 +5353,7 @@
       "id": "general-defi-restaking-withdrawal-vulnerabilities-4-slashing-interaction-with-wi-003",
       "title": "4. Slashing Interaction with Withdrawals",
       "severity": "HIGH",
-      "grep": "eigenLayerPendingWithdrawalSharesAmount|share_to_asset_conversion|pending_withdrawal_amount|partial_failure_handling|withdrawalRootPending|slashQueuedWithdrawal",
+      "grep": "eigenLayerPendingWithdrawalSharesAmount|withdrawalRootPending|slashQueuedWithdrawal|initiateWithdrawal|claimWithdrawal|totalAssets",
       "detect": "This vulnerability exists because **mid-withdrawal slashing invalidates the withdrawal root** used to claim.",
       "cat": [
         "defi",
@@ -5937,7 +5384,7 @@
       "id": "general-defi-restaking-withdrawal-vulnerabilities-5-withdrawal-delay-bypass-004",
       "title": "5. Withdrawal Delay Bypass",
       "severity": "HIGH",
-      "grep": "setMinWithdrawalDelayBlocks|share_to_asset_conversion|pending_withdrawal_amount|partial_failure_handling|eigenlayer_settlement|completequeuedwithdrawal",
+      "grep": "setMinWithdrawalDelayBlocks|initialize|stake",
       "detect": "This vulnerability exists because **withdrawal delays are either recalculable, uninitialized after upgrades, or not...",
       "cat": [
         "defi",
@@ -5966,7 +5413,7 @@
       "id": "general-defi-restaking-withdrawal-vulnerabilities-6-missing-slippage-deadline-pr-005",
       "title": "6. Missing Slippage/Deadline Protection",
       "severity": "HIGH",
-      "grep": "share_to_asset_conversion|pending_withdrawal_amount|partial_failure_handling|eigenlayer_settlement|completequeuedwithdrawal|slippage_protection",
+      "grep": "minAmountOut|redeemPxGlp|withdraw|deadline",
       "detect": "No minimum output or deadline",
       "cat": [
         "defi",
@@ -5995,7 +5442,7 @@
       "id": "general-defi-restaking-withdrawal-vulnerabilities-7-partial-failure-handling-006",
       "title": "7. Partial Failure Handling",
       "severity": "MEDIUM",
-      "grep": "share_to_asset_conversion|pending_withdrawal_amount|partial_failure_handling|executeBatchWithdrawals|eigenlayer_settlement|completequeuedwithdrawal",
+      "grep": "executeBatchWithdrawals|executeWithdrawal",
       "detect": "63/64 gas rule allows targeted failure",
       "cat": [
         "defi",
@@ -6021,7 +5468,7 @@
       "id": "general-defi-restaking-withdrawal-vulnerabilities-8-reentrancy-and-access-contro-007",
       "title": "8. Reentrancy and Access Control in Withdrawal Flows",
       "severity": "CRITICAL",
-      "grep": "share_to_asset_conversion|completeQueuedWithdrawal|queued_withdrawal|withdrawal_queue|withdrawal_delay|onERC721Received",
+      "grep": "completeQueuedWithdrawal|onERC721Received|claimWithdrawal|nonReentrant|minAmountOut|reentrancy",
       "detect": "update() callable during swap callback",
       "cat": [
         "defi",
@@ -6049,7 +5496,7 @@
       "id": "general-defi-perpetuals-derivatives-vulnerabilities-1-liquidation-mechanism-failur-000",
       "title": "1. Liquidation Mechanism Failures",
       "severity": "LOW",
-      "grep": "liquidate(ownPosition|calculateLiquidationReward|validateSelfLiquidate|getCurrentFundingRate|debtInCollateralToken|getUnderlyingPrice",
+      "grep": "liquidate(ownPosition|calculateLiquidationReward|validateSelfLiquidate|debtInCollateralToken|getUnderlyingPrice|selfLiquidate",
       "detect": "Liquidation functions either force full position closure (blocking whale liquidation), allow the position holder to...",
       "cat": [
         "defi",
@@ -6077,10 +5524,39 @@
       "impact": "Bad debt accrual from unliquidatable positions (8/44 findings)"
     },
     {
-      "id": "general-defi-perpetuals-derivatives-vulnerabilities-3-position-leverage-accounting-003",
+      "id": "general-defi-perpetuals-derivatives-vulnerabilities-2-funding-rate-vulnerabilities-001",
+      "title": "2. Funding Rate Vulnerabilities",
+      "severity": "HIGH",
+      "grep": "_settleUserFundingPayments|getCurrentFundingRate|closePosition|openPosition",
+      "detect": "Funding rate is calculated from a subset of the market (e.",
+      "cat": [
+        "defi",
+        "calculation",
+        "vault",
+        "flash-loan"
+      ],
+      "ref": "DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md",
+      "lines": [
+        426,
+        533
+      ],
+      "check": [
+        "VERIFY: Funding rate is calculated from a subset of the market (e.g., one maker's skew) but applied globally, or the rate direction is inverted, or payments...",
+        "PROVE: *Path A: [Skew-Only Funding → Extreme Rate Manipulation]; Funding rate is calculated from OracleMaker's skew only",
+        "FALSIFY: Funding rate from total market open interest across all makers",
+        "Is funding rate calculated from total market OI or just one maker?",
+        "Is the funding rate direction correct (majority pays minority)?"
+      ],
+      "antipattern": "Funding calculated in vBase, settled in UA without conversion",
+      "securePattern": "Funding rate from total market open interest across all makers",
+      "validWhen": "Funding rate is calculated from a subset of the market (e.g., one maker's skew) but applied globally, or the rate direction is inverted, or payments are denominated in...",
+      "invalidWhen": "Funding rate from total market open interest across all makers"
+    },
+    {
+      "id": "general-defi-perpetuals-derivatives-vulnerabilities-3-position-leverage-accounting-002",
       "title": "3. Position & Leverage Accounting Bugs",
       "severity": "HIGH",
-      "grep": "getCurrentFundingRate|_calculateMargin|marginRequirement|decreasePosition|collateralRatio|settlePosition",
+      "grep": "_calculateMargin|closePosition|openPosition|settle",
       "detect": "Integer division precision loss in margin/leverage calculations, or missing state updates when positions are modified...",
       "cat": [
         "defi",
@@ -6106,10 +5582,10 @@
       "invalidWhen": "Scale up before division to maintain precision"
     },
     {
-      "id": "general-defi-perpetuals-derivatives-vulnerabilities-4-order-execution-vulnerabilit-004",
+      "id": "general-defi-perpetuals-derivatives-vulnerabilities-4-order-execution-vulnerabilit-003",
       "title": "4. Order Execution Vulnerabilities",
       "severity": "HIGH",
-      "grep": "getCurrentFundingRate|marginRequirement|decreasePosition|collateralRatio|settlePosition|settleFunding",
+      "grep": "executeOrder|updateOrder",
       "detect": "Order execution uses future prices, but order updates reset the execution window, allowing users to repeatedly delay...",
       "cat": [
         "defi",
@@ -6135,10 +5611,10 @@
       "invalidWhen": "Order update restarts the full delay, no free look"
     },
     {
-      "id": "general-defi-perpetuals-derivatives-vulnerabilities-5-fee-reward-system-exploits-005",
+      "id": "general-defi-perpetuals-derivatives-vulnerabilities-5-fee-reward-system-exploits-004",
       "title": "5. Fee & Reward System Exploits",
       "severity": "HIGH",
-      "grep": "getCurrentFundingRate|marginRequirement|increasePosition|decreasePosition|collateralRatio|settlePosition",
+      "grep": "perpetuals_derivatives_findings|Liquidations|Vulnerable|Reference",
       "detect": "Fee precision loss, reward distribution timing, and token denomination errors cause direct fund losses or enable fee...",
       "cat": [
         "defi",
@@ -6157,10 +5633,10 @@
       "validWhen": "Fee precision loss, reward distribution timing, and token denomination errors cause direct fund losses or enable fee..."
     },
     {
-      "id": "general-defi-perpetuals-derivatives-vulnerabilities-6-lp-vault-exploitation-006",
+      "id": "general-defi-perpetuals-derivatives-vulnerabilities-6-lp-vault-exploitation-005",
       "title": "6. LP Vault Exploitation",
       "severity": "HIGH",
-      "grep": "getCurrentFundingRate|processWithdrawals|marginRequirement|collateralRatio|settlePosition|settleFunding",
+      "grep": "processWithdrawals|settlePnL|deposit",
       "detect": "Classic first-depositor inflation in perp LP vault",
       "cat": [
         "defi",
@@ -6186,10 +5662,10 @@
       "invalidWhen": "Trader PnL capped at available pool assets"
     },
     {
-      "id": "general-defi-perpetuals-derivatives-vulnerabilities-7-bad-debt-protocol-insolvency-007",
+      "id": "general-defi-perpetuals-derivatives-vulnerabilities-7-bad-debt-protocol-insolvency-006",
       "title": "7. Bad Debt & Protocol Insolvency",
       "severity": "HIGH",
-      "grep": "getCurrentFundingRate|marginRequirement|increasePosition|decreasePosition|collateralRatio|settlePosition",
+      "grep": "liquidate|perpetuals_derivatives_findings|getCollateral|coverBadDebt",
       "detect": "No path to clear bad debt — accrues indefinitely",
       "cat": [
         "defi",
@@ -6218,7 +5694,7 @@
       "id": "general-defi-lending-rate-model-vulnerabilities-vulnerability-title-000",
       "title": "Vulnerability Title",
       "severity": "HIGH",
-      "grep": "Market.accrueInterest|LendingPool.withdraw|optimalUtilization|multiplierPerBlock|borrowRatePerBlock|baseRatePerBlock",
+      "grep": "Market.accrueInterest|LendingPool.withdraw|Market.borrow|AMO.update|multi_contract|blocksPerYear",
       "detect": "Lending Interest Rate Model Vulnerabilities** — Miscalculations, manipulation, and DoS patterns in lending protocol...",
       "cat": [
         "defi",
@@ -6242,7 +5718,7 @@
       "id": "general-defi-lending-rate-model-vulnerabilities-section-1-utilization-formula--001",
       "title": "Section 1: Utilization Formula Errors",
       "severity": "HIGH",
-      "grep": "InterestRateModel.utilizationRate|LendingPool.withdrawCollateral|require_utilization_below_max|LendingPool.withdraw|multiplierPerBlock|borrowRatePerBlock",
+      "grep": "InterestRateModel.utilizationRate|LendingPool.withdrawCollateral|require_utilization_below_max|LendingPool.withdraw|utilizationRate|total_supply",
       "detect": "The standard Compound utilization formula is `borrows / (cash + borrows - reserves)`.",
       "cat": [
         "defi",
@@ -6267,7 +5743,7 @@
       "id": "general-defi-lending-rate-model-vulnerabilities-section-2-chain-specific-const-002",
       "title": "Section 2: Chain-Specific Constant Errors",
       "severity": "HIGH",
-      "grep": "previewFloatingAssetsAverage|updateInterestRates|optimal_utilization|supplyRatePerBlock|optimalUtilization|multiplierPerBlock",
+      "grep": "blocksPerYear|WhitePaperInterestRateModel|lending_rate_model_findings|wrong_chain_constant",
       "detect": "Compound-forked interest rate models use `blocksPerYear` to convert annualized rates to per-block rates.",
       "cat": [
         "defi",
@@ -6292,7 +5768,7 @@
       "id": "general-defi-lending-rate-model-vulnerabilities-section-3-utilization-manipula-003",
       "title": "Section 3: Utilization Manipulation & Rate Gaming",
       "severity": "LOW",
-      "grep": "InterestRateModel.calculateRate|previewFloatingAssetsAverage|targetDeploymentAmount|multiplierPerBlock|borrowRatePerBlock|baseRatePerBlock",
+      "grep": "InterestRateModel.calculateRate|previewFloatingAssetsAverage|targetDeploymentAmount|currentBalances|Market.borrow|AMO.update",
       "detect": "Interest rate models that use spot (instantaneous) balances for utilization calculation are vulnerable to manipulation.",
       "cat": [
         "defi",
@@ -6342,7 +5818,7 @@
       "id": "general-defi-lending-rate-model-vulnerabilities-section-5-rate-model-dos-syste-005",
       "title": "Section 5: Rate Model DoS & System Halt",
       "severity": "HIGH",
-      "grep": "previewFloatingAssetsAverage|Market.accrueInterest|LendingPool.borrow|borrowRateMaxMantissa|updateInterestRates|optimalUtilization",
+      "grep": "Market.accrueInterest|LendingPool.borrow|borrowRateMaxMantissa|accrueInterest",
       "detect": "When interest rates grow beyond expected bounds (due to utilization >100%, compounding errors, or external rate caps),...",
       "cat": [
         "defi",
@@ -6364,32 +5840,10 @@
       "validWhen": "When interest rates grow beyond expected bounds (due to utilization >100%, compounding errors, or external rate caps), the accrueInterest() function can revert, halting..."
     },
     {
-      "id": "general-defi-lending-rate-model-vulnerabilities-high-signal-grep-seeds-009",
-      "title": "High-Signal Grep Seeds",
-      "severity": "HIGH",
-      "grep": "previewFloatingAssetsAverage|updateInterestRates|optimal_utilization|supplyRatePerBlock|optimalUtilization|multiplierPerBlock",
-      "detect": "borrowRateMaxMantissa",
-      "cat": [
-        "defi",
-        "calculation",
-        "vault",
-        "flash-loan"
-      ],
-      "ref": "DB/general/lending-rate-model/LENDING_RATE_MODEL_VULNERABILITIES.md",
-      "lines": [
-        518,
-        535
-      ],
-      "check": [
-        "VERIFY: borrowRateMaxMantissa"
-      ],
-      "validWhen": "borrowRateMaxMantissa"
-    },
-    {
       "id": "general-defi-nft-marketplace-vulnerabilities-vulnerability-title-000",
       "title": "Vulnerability Title",
       "severity": "HIGH",
-      "grep": "ERC165.supportsInterface(0x80ac58cd|fallback_handler_swap|callback_reentrancy|setFallbackHandler|reclaimRentedItems|safeTransferFrom",
+      "grep": "ERC165.supportsInterface(0x80ac58cd|fallback_handler_swap|callback_reentrancy|auction_frontrun|bridge_erc721|addCollateral",
       "detect": "NFT Marketplace & Protocol-Level Security Vulnerabilities** — Marketplace fee bypass, rental griefing, auction...",
       "cat": [
         "defi",
@@ -6413,7 +5867,7 @@
       "id": "general-defi-nft-marketplace-vulnerabilities-1-reentrancy-via-onerc721recei-001",
       "title": "1. Reentrancy via onERC721Received / safeMint Callbacks",
       "severity": "HIGH",
-      "grep": "lockCapital(lendingPoolAddress|calculateRemainingPrincipal|totalDepositedXDEFI|updateDistribution|setFallbackHandler|reclaimRentedItems",
+      "grep": "lockCapital(lendingPoolAddress|calculateRemainingPrincipal|totalDepositedXDEFI|updateDistribution|_pointsPerUnit|safeTransferFrom",
       "detect": "updateDistribution lacks noReenter modifier",
       "cat": [
         "defi",
@@ -6441,7 +5895,7 @@
       "id": "general-defi-nft-marketplace-vulnerabilities-2-residual-allowance-vault-dep-002",
       "title": "2. Residual Allowance & Vault Deposit Exploitation",
       "severity": "HIGH",
-      "grep": "identifierOrCriteria|setFallbackHandler|reclaimRentedItems|batchDepositERC721|safeTransferFrom|onERC721Received",
+      "grep": "batchDepositERC721|missing_msg_sender_check|batchDepositERC1155|batchDepositERC20",
       "detect": "'from' can be any address with residual allowance",
       "cat": [
         "defi",
@@ -6469,7 +5923,7 @@
       "id": "general-defi-nft-marketplace-vulnerabilities-3-marketplace-fee-bypass-royal-003",
       "title": "3. Marketplace Fee Bypass & Royalty Calculation Errors",
       "severity": "MEDIUM",
-      "grep": "PrivatePool.buy(tokenIds|getRoyaltyInfoByArtifactId|buyEditions(orderId|setFallbackHandler|reclaimRentedItems|safeTransferFrom",
+      "grep": "PrivatePool.buy(tokenIds|getRoyaltyInfoByArtifactId|buyEditions(orderId|royaltyFeeAmount|reservedAddress|_getRoyalty",
       "detect": "Royalty collected even when recipient is address(0)",
       "cat": [
         "defi",
@@ -6497,7 +5951,7 @@
       "id": "general-defi-nft-marketplace-vulnerabilities-4-nft-rental-griefing-via-call-004",
       "title": "4. NFT Rental Griefing via Callback Revert & Blocklist",
       "severity": "MEDIUM",
-      "grep": "stopRent(rentalOrder|_reclaimRentedItems|setFallbackHandler|reclaimRentedItems|reclaimRentalOrder|safeTransferFrom",
+      "grep": "stopRent(rentalOrder|_reclaimRentedItems|reclaimRentedItems|reclaimRentalOrder|safeTransferFrom|onERC721Received",
       "detect": "safeTransferFrom allows lender callback to revert entire settlement",
       "cat": [
         "defi",
@@ -6525,7 +5979,7 @@
       "id": "general-defi-nft-marketplace-vulnerabilities-5-gnosis-safe-guard-bypass-via-005",
       "title": "5. Gnosis Safe Guard Bypass via Fallback Handler",
       "severity": "HIGH",
-      "grep": "execTransaction(setFallbackHandler(nftAddress|setFallbackHandler|reclaimRentedItems|setApprovalForAll|safeTransferFrom|onERC721Received",
+      "grep": "execTransaction(setFallbackHandler(nftAddress|setFallbackHandler|setApprovalForAll|checkTransaction|execTransaction|transferFrom",
       "detect": "Guard doesn't check setFallbackHandler",
       "cat": [
         "defi",
@@ -6553,7 +6007,7 @@
       "id": "general-defi-nft-marketplace-vulnerabilities-6-auction-manipulation-frontru-006",
       "title": "6. Auction Manipulation, Frontrunning & Debt Shortfall",
       "severity": "HIGH",
-      "grep": "purchaseLiquidationAuctionNFT(auction2|execute(listOnOpenseaProposal|_reduceDebtWithoutBurn|_settleZoraAuction|setFallbackHandler|reclaimRentedItems",
+      "grep": "purchaseLiquidationAuctionNFT(auction2|execute(listOnOpenseaProposal|_reduceDebtWithoutBurn|_settleZoraAuction|settleZoraAuction|onERC721Received",
       "detect": "Shortfall burned without tracking for future auctions",
       "cat": [
         "defi",
@@ -6581,7 +6035,7 @@
       "id": "general-defi-nft-marketplace-vulnerabilities-7-nft-bridge-one-way-lock-migr-007",
       "title": "7. NFT Bridge One-Way Lock & Migration Burn",
       "severity": "HIGH",
-      "grep": "setFallbackHandler|reclaimRentedItems|migrateVaultERC721|safeTransferFrom|onERC721Received|_safeDecimals",
+      "grep": "migrateVaultERC721|_safeDecimals|settleFractions|withdrawERC721|_proposalId|settleVault",
       "detect": "newVault can be address(0) with invalid proposalId",
       "cat": [
         "defi",
@@ -6609,7 +6063,7 @@
       "id": "general-defi-nft-marketplace-vulnerabilities-8-merkle-criteria-resolution-o-008",
       "title": "8. Merkle Criteria Resolution & Order Matching Bypass",
       "severity": "MEDIUM",
-      "grep": "setFallbackHandler|reclaimRentedItems|safeTransferFrom|onERC721Received|reservedAddress|_verifyProof",
+      "grep": "_verifyProof|merkleRoot|tokenId|root",
       "detect": "tokenId used directly as leaf — collides with intermediate hashes",
       "cat": [
         "defi",
@@ -6637,7 +6091,7 @@
       "id": "general-defi-nft-marketplace-vulnerabilities-9-flash-loan-pool-token-theft-009",
       "title": "9. Flash Loan & Pool Token Theft",
       "severity": "MEDIUM",
-      "grep": "identifierOrCriteria|setFallbackHandler|reclaimRentedItems|safeTransferFrom|onERC721Received|reservedAddress",
+      "grep": "transferFrom|flashLoan|execute",
       "detect": "Caller chooses token address — can be exploit contract",
       "cat": [
         "defi",
@@ -6665,7 +6119,7 @@
       "id": "general-defi-nft-marketplace-vulnerabilities-10-nft-wrap-unwrap-airdrop-id--010",
       "title": "10. NFT Wrap/Unwrap Airdrop & ID Swap Exploitation",
       "severity": "MEDIUM",
-      "grep": "identifierOrCriteria|setFallbackHandler|reclaimRentedItems|safeTransferFrom|onERC721Received|reservedAddress",
+      "grep": "getAirDrop|unwrap|wrap",
       "detect": "Immediate unwrap allows NFT ID swapping and airdrop theft",
       "cat": [
         "defi",
