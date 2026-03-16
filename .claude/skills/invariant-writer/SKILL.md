@@ -30,6 +30,7 @@ Each invariant includes: ID, category, property statement, boundary conditions, 
 
 - [/invariant-reviewer](../invariant-reviewer/SKILL.md) — Reviews and hardens the output
 - [/audit-context-building](../audit-context-building/SKILL.md) — Produces the context this skill consumes
-- [/medusa-fuzzing](../medusa-fuzzing/SKILL.md) — Converts invariants to Medusa harnesses
-- [/halmos-verification](../halmos-verification/SKILL.md) — Converts invariants to Halmos tests
+- [/chimera-setup](../chimera-setup/SKILL.md) — Converts invariants to a multi-tool harness (Medusa + Echidna + Halmos). Preferred for new Solidity suites
+- [/medusa-fuzzing](../medusa-fuzzing/SKILL.md) — Converts invariants to Medusa-only harnesses
+- [/halmos-verification](../halmos-verification/SKILL.md) — Converts invariants to Halmos symbolic tests
 - [/certora-verification](../certora-verification/SKILL.md) — Converts invariants to CVL specs

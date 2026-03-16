@@ -32,5 +32,6 @@ For templates, see [medusa-templates.md](../../resources/medusa-templates.md).
 
 - [/invariant-writer](../invariant-writer/SKILL.md) — Produces the invariant specs this consumes
 - [/invariant-reviewer](../invariant-reviewer/SKILL.md) — Hardens invariants before conversion
+- [/chimera-setup](../chimera-setup/SKILL.md) — Alternative: multi-tool scaffold (Medusa + Echidna + Halmos from one harness). Prefer for new suites; use this skill for advanced Medusa-only tuning beyond the template
 - [/halmos-verification](../halmos-verification/SKILL.md) — Alternative: symbolic testing
 - [/certora-verification](../certora-verification/SKILL.md) — Alternative: formal verification

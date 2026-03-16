@@ -38,8 +38,10 @@ All agents live in `.claude/agents/`. The entry point for a full audit is `audit
 | `invariant-catcher` | DB-powered vulnerability pattern hunting |
 | `poc-writing` | Exploit test generation |
 | `issue-writer` | Polishes findings into submission-ready write-ups |
-| `sherlock-judging` / `cantina-judge` / `code4rena-judge` | Platform-specific finding validation |
-| `medusa-fuzzing` / `certora-verification` / `halmos-verification` | Formal verification suites |
+| `judge-orchestrator` | Cross-platform consensus — runs all 3 judges in parallel with two-round cross-challenge protocol and persistent memory log |
+| `sherlock-judging` / `cantina-judge` / `code4rena-judge` | Platform-specific finding validation (single-platform) |
+| `chimera-setup` | Multi-tool property testing scaffold — Echidna + Medusa + Halmos from one shared harness |
+| `medusa-fuzzing` / `certora-verification` / `halmos-verification` | Formal verification suites (single-tool) |
 | `certora-mutation-testing` | Mutation campaigns with Gambit + certoraMutate; triage and hardens specs |
 
 ### Invoking the Audit Pipeline
@@ -78,6 +80,7 @@ Path-scoped rules in `.claude/rules/` auto-load when Claude works with matching 
 - `reports.md` — Reports directory rules (`reports/**/*.md`)
 - `audit-output.md` — Pipeline output conventions (`audit-output/**`)
 - `resources.md` — Shared resource management (`.claude/resources/**`)
+- `chimera.md` — Chimera framework conventions (`test/recon/**`)
 
 ## Common Commands
 
