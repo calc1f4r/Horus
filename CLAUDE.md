@@ -40,6 +40,7 @@ All agents live in `.claude/agents/`. The entry point for a full audit is `audit
 | `issue-writer` | Polishes findings into submission-ready write-ups |
 | `sherlock-judging` / `cantina-judge` / `code4rena-judge` | Platform-specific finding validation |
 | `medusa-fuzzing` / `certora-verification` / `halmos-verification` | Formal verification suites |
+| `certora-mutation-testing` | Mutation campaigns with Gambit + certoraMutate; triage and hardens specs |
 
 ### Invoking the Audit Pipeline
 
@@ -68,9 +69,10 @@ Shared reference material lives in `.claude/resources/` (global, not per-skill):
 ### Rules
 
 Path-scoped rules in `.claude/rules/` auto-load when Claude works with matching files:
-- `db-entries.md` — DB vulnerability entry conventions (`DB/**/*.md`)
+- `db-entries.md` — DB vulnerability entry conventions (`DB/**/*.md`, `TEMPLATE.md`, `Example.md`)
 - `manifests.md` — Manifest/index generation rules (`DB/manifests/**`)
-- `scripts.md` — Python script conventions (`scripts/**/*.py`)
+- `invariants.md` — Invariant library format and ID conventions (`invariants/**/*.md`)
+- `scripts.md` — Python script conventions (`scripts/**/*.py`, root scripts)
 - `agents.md` — Agent file conventions (`.claude/agents/*.md`)
 - `skills.md` — Skill file conventions (`.claude/skills/*/SKILL.md`)
 - `reports.md` — Reports directory rules (`reports/**/*.md`)

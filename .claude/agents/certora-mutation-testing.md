@@ -54,11 +54,11 @@ Do NOT use this agent for first-time spec authoring. Use `certora-verification` 
 
 | Resource | Contents |
 |----------|----------|
-| `.github/agents/resources/certora-mutation-verifier-reference.md` | Installation, CLI, config fields, dashboard statuses, troubleshooting, Gambit operators |
-| `.github/agents/resources/certora-mutation-templates.md` | Copy-paste mutation blocks, command templates, triage templates, patch generation |
-| `.github/agents/resources/certora-reference.md` | CVL type system, methods block, ghosts, hooks, conf options — used when patching spec gaps |
-| `.github/agents/resources/certora-templates.md` | CVL spec patterns per invariant category — used when writing hardening rules |
-| `.github/agents/resources/output-requirements.md` | Report structure and pipeline output conventions |
+| `.claude/resources/certora-mutation-verifier-reference.md` | Installation, CLI, config fields, dashboard statuses, troubleshooting, Gambit operators |
+| `.claude/resources/certora-mutation-templates.md` | Copy-paste mutation blocks, command templates, triage templates, patch generation |
+| `.claude/resources/certora-reference.md` | CVL type system, methods block, ghosts, hooks, conf options — used when patching spec gaps |
+| `.claude/resources/certora-templates.md` | CVL spec patterns per invariant category — used when writing hardening rules |
+| `.claude/resources/output-requirements.md` | Report structure and pipeline output conventions |
 
 Always read the relevant resource before taking action in that area. Do not guess at CLI flags, config fields, or operator names from memory.
 

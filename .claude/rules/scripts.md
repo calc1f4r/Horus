@@ -3,6 +3,7 @@ paths:
   - "scripts/**/*.py"
   - "generate_manifests.py"
   - "solodit_fetcher.py"
+  - "generate_diagram.py"
 ---
 
 # Python Script Rules
