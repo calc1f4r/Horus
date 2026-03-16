@@ -69,11 +69,11 @@ Orchestration Progress:
 Before judging, read the persistent memory store to inform the current session:
 
 ```
-audit-output/judge-memory/verdict-log.md       — append-only verdict history
-audit-output/judge-memory/pattern-insights.md  — cross-platform divergence patterns
+judge-memory/verdict-log.md       — append-only verdict history
+judge-memory/pattern-insights.md  — cross-platform divergence patterns
 ```
 
-If neither file exists, create `audit-output/judge-memory/` and initialize both with empty headers. Do not fail if memory is absent — it simply means this is the first run.
+If neither file exists, create `judge-memory/` and initialize both with empty headers. Do not fail if memory is absent — it simply means this is the first run.
 
 Extract from memory:
 - Any prior verdicts on the **same root cause** (match by vulnerability class + affected function)
@@ -121,7 +121,7 @@ Sub-agents to spawn:
 
 Wait for **all** judges to complete before proceeding.
 
-Write Round 1 verdicts to `audit-output/judge-memory/active-session.md`:
+Write Round 1 verdicts to `judge-memory/active-session.md`:
 
 ```markdown
 # Active Judging Session — Round 1
@@ -199,7 +199,7 @@ Check if the divergence is explained by a **documented platform difference** (se
 
 For every **unexpected divergence** (not explained by documented platform differences):
 
-**Prepare the shared challenge brief** by writing to `audit-output/judge-memory/active-session.md`:
+**Prepare the shared challenge brief** by writing to `judge-memory/active-session.md`:
 
 ```markdown
 # Round 2 — Cross-Judge Challenge Brief
@@ -232,7 +232,7 @@ For each judge:
 
 Wait for all Round 2 responses.
 
-**Write Round 2 responses** to `audit-output/judge-memory/active-session.md`:
+**Write Round 2 responses** to `judge-memory/active-session.md`:
 
 ```markdown
 # Round 2 — Challenge Responses
@@ -296,7 +296,7 @@ Based on severity outcomes, if `--primary` is not set, recommend:
 
 After every run, append to the memory store:
 
-### `audit-output/judge-memory/verdict-log.md`
+### `judge-memory/verdict-log.md`
 
 Append a new entry:
 
@@ -318,7 +318,7 @@ Append a new entry:
 **Resolution:** [rule_difference / arbitration / challenge_revised / human_review]
 ```
 
-### `audit-output/judge-memory/pattern-insights.md`
+### `judge-memory/pattern-insights.md`
 
 After every 5 entries, run a pattern synthesis pass:
 1. Read the last 20 verdict-log entries
@@ -392,7 +392,7 @@ Submit as: [HIGH / MEDIUM / LOW / QA / INFO]
 
 ─── MEMORY ──────────────────────────────────────────
 
-Memory log updated: audit-output/judge-memory/verdict-log.md
+Memory log updated: judge-memory/verdict-log.md
 Pattern insights refreshed: [YES / NO — only every 5 entries]
 Prior similar findings consulted: [N entries]
 ```

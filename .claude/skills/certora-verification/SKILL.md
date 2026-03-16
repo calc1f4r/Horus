@@ -42,4 +42,5 @@ For templates, see [certora-templates.md](../../resources/certora-templates.md).
 - [/invariant-writer](../invariant-writer/SKILL.md) — Produces the invariant specs this consumes
 - [/medusa-fuzzing](../medusa-fuzzing/SKILL.md) — Alternative: property-based fuzzing
 - [/halmos-verification](../halmos-verification/SKILL.md) — Alternative: symbolic testing
+- [/certora-mutation-testing](../certora-mutation-testing/SKILL.md) — Downstream: mutation campaigns to validate spec coverage
 - [/certora-sui-move-verification](../certora-sui-move-verification/SKILL.md) — Certora for Sui Move

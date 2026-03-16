@@ -56,16 +56,20 @@ If no hint is provided, protocol type is auto-detected.
 | Flag | Effect | Default |
 |------|--------|---------|
 | `--static-only` | Skip Phases 6 (PoC) and 7 (FV). No dynamic testing. | OFF (full mode) |
-| `--judge=sherlock` | Use ONLY Sherlock judge in the judging self-loop | All 3 judges |
-| `--judge=cantina` | Use ONLY Cantina judge in the judging self-loop | All 3 judges |
-| `--judge=code4rena` | Use ONLY Code4rena judge in the judging self-loop | All 3 judges |
+| `--judge=sherlock` | Use ONLY Sherlock judge in the judging self-loop | All 3 via `judge-orchestrator` |
+| `--judge=cantina` | Use ONLY Cantina judge in the judging self-loop | All 3 via `judge-orchestrator` |
+| `--judge=code4rena` | Use ONLY Code4rena judge in the judging self-loop | All 3 via `judge-orchestrator` |
 | `--discovery-rounds=N` | Number of iterative discovery rounds in Phase 4 (1-5) | 4 |
+| `--fuzzer=chimera` | Phase 7: use `chimera-setup` (Echidna + Medusa + Halmos, single harness) | `medusa` |
+| `--fuzzer=medusa` | Phase 7: use `medusa-fuzzing` (Medusa-only, more configuration control) | `medusa` |
+| `--fork=<rpc-url>` | Pass fork URL to `chimera-setup` for live-state fuzzing (requires `--fuzzer=chimera`) | OFF |
 
 **Natural language equivalents** — users can also say:
 - "only do static analysis" → `--static-only`
 - "use sherlock to judge" → `--judge=sherlock`
 - "run 3 rounds of discovery" → `--discovery-rounds=3`
 - "skip PoC and fuzzing" → `--static-only`
+- "use chimera for fuzzing" → `--fuzzer=chimera`
 
 ### Examples
 
@@ -1215,7 +1219,7 @@ Update `pipeline-state.md` Finding Tracker: PoC Status column.
 > When skipped: Log `Phase 7: SKIPPED (--static-only mode)` to pipeline-state.md.
 > Set all FV statuses to `N/A` in the Finding Tracker.
 
-**Agent**: `medusa-fuzzing` + `certora-verification` + `halmos-verification` → Self (execution)
+**Agent**: `chimera-setup` OR `medusa-fuzzing` (per `--fuzzer` flag) + `certora-verification` + `halmos-verification` → Self (execution)
 **Input**: `02-invariants-reviewed.md` + codebase
 **Output**: `audit-output/fuzzing/` + `audit-output/certora/` + `audit-output/halmos/` + `audit-output/07-fv-results.md`
 
@@ -1223,9 +1227,32 @@ This phase generates AND runs formal verification suites.
 
 ### Step 1: Generate FV Suites (Parallel)
 
-Spawn all three **in parallel**:
+**Fuzzer selection** (based on `--fuzzer` flag):
+- `--fuzzer=chimera` (recommended for Solidity): Spawn `chimera-setup` — produces Echidna + Medusa + Halmos from a single shared harness. Pass `--fork=<url>` if provided.
+- `--fuzzer=medusa` (default): Spawn `medusa-fuzzing` — Medusa-only, more configuration control.
 
-**Medusa Fuzzing**:
+Spawn fuzzer + Certora + Halmos **in parallel**:
+
+**IF `--fuzzer=chimera`** — Chimera multi-tool scaffold:
+```
+Scaffold a Chimera property testing suite for the target codebase.
+
+TARGET CODEBASE: <path>
+INVARIANT SPEC: audit-output/02-invariants-reviewed.md
+
+PIPELINE CONTEXT:
+- Read audit-output/01-context.md for architecture
+
+Write all output to audit-output/chimera/
+Every harness MUST compile with forge build before reporting success.
+<If --fork provided:> Use --fork=<rpc-url> mode.
+
+★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
+Use INSIGHT and HYPOTHESIS entries to inform which invariants to prioritize.
+After completing, append a memory entry (MEM-7-CHIMERA-SETUP).
+```
+
+**IF `--fuzzer=medusa` (default)** — Medusa-only harness:
 ```
 Generate Medusa fuzzing harnesses for the target codebase.
 
@@ -1346,24 +1373,46 @@ This is the **first pass** of the judging self-loop. Judge(s) review raw triaged
 
 ```
 IF --judge=sherlock:
-  judges = [sherlock-judging]
+  mode = single  →  spawn sherlock-judging directly
   consensus_threshold = 1/1
 ELIF --judge=cantina:
-  judges = [cantina-judge]
+  mode = single  →  spawn cantina-judge directly
   consensus_threshold = 1/1
 ELIF --judge=code4rena:
-  judges = [code4rena-judge]
+  mode = single  →  spawn code4rena-judge directly
   consensus_threshold = 1/1
-ELSE (default — triple judging):
-  judges = [sherlock-judging, cantina-judge, code4rena-judge]
-  consensus_threshold = 2/3
+ELSE (default — triple judging via judge-orchestrator):
+  mode = orchestrated  →  spawn judge-orchestrator with --mode=consensus
+  consensus_threshold = 2/3 (judge-orchestrator handles internally)
 ```
 
 ### Step 1: Spawn Judge(s) for Pre-Screening
 
-Spawn all selected judges **in parallel** (or single judge if `--judge=X`):
+**IF triple-judge mode (default)** — use `judge-orchestrator`:
+```
+PRE-JUDGE validity screen for these security findings using all three platform judges.
 
-**Template for each judge** (adapt criteria file per judge):
+FINDINGS: Read audit-output/05-findings-triaged.md
+MODE: --mode=consensus
+MEMORY: judge-memory/  (persistent cross-run verdict history)
+
+EXECUTION EVIDENCE (if available):
+- audit-output/06-poc-results.md
+- audit-output/07-fv-results.md
+
+For EACH finding:
+1. Run sherlock-judging, cantina-judge, code4rena-judge in parallel (Round 1)
+2. Cross-challenge judges on divergences (Round 2)
+3. Synthesize consensus verdict
+4. Return: VALID/INVALID, consensus severity, best-platform recommendation
+
+Write per-finding verdicts to audit-output/08-pre-judge-orchestrated.md
+Append to judge-memory/verdict-log.md
+
+★ MEMORY STATE: Read audit-output/memory-state.md for pipeline context.
+```
+
+**IF single-judge mode (`--judge=X`)** — spawn that judge directly:
 ```
 PRE-JUDGE validity screen for these security findings.
 

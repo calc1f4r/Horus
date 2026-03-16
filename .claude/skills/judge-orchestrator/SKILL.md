@@ -12,12 +12,12 @@ Run all three platform judges against the finding at `$ARGUMENTS`, synthesize th
 
 | Round | What happens |
 |-------|-------------|
-| **Load memory** | Reads `audit-output/judge-memory/` for prior similar findings |
+| **Load memory** | Reads `judge-memory/` for prior similar findings |
 | **Round 1** | Sherlock + Cantina + Code4rena judges run in parallel, independently |
 | **Divergence check** | Compares verdicts; flags unexpected disagreements |
 | **Round 2** | Each judge receives the other judges' reasoning and issues a challenge response (revised or held-firm) |
 | **Synthesis** | Consensus verdict assembled; best-platform recommendation produced |
-| **Memory write** | Verdict appended to `audit-output/judge-memory/verdict-log.md` |
+| **Memory write** | Verdict appended to `judge-memory/verdict-log.md` |
 
 ## Platform severity models
 
@@ -38,7 +38,7 @@ Run all three platform judges against the finding at `$ARGUMENTS`, synthesize th
 ## Output locations
 
 ```
-audit-output/judge-memory/
+judge-memory/
   active-session.md    — Round 1 + Round 2 communication log (current session)
   verdict-log.md       — Append-only history of all past verdicts
   pattern-insights.md  — Synthesized cross-platform divergence patterns

@@ -1,10 +1,12 @@
 # AGENTS.md
 
-This document gives agent models (like you) practical guidance for making safe, correct, and minimal changes in this repository. It captures project conventions, architecture, invariants, and how to run and extend tests.
+> **This file covers DB-entry conventions only.** For the full agent system, audit pipeline, and all available agents, see [`CLAUDE.md`](./CLAUDE.md).
+
+This document gives agent models practical guidance for making safe, correct, and minimal changes to **vulnerability database entries** in `DB/`. It covers the 4-tier search architecture, entry format, and how to run and extend DB scripts.
 
 ## Scope & Goals
 
-- Primary domain: Creation and migration of Vulnerability database entries for smart contract security and blockchain appchains. 
+- Primary domain: Creation and migration of Vulnerability database entries for smart contract security and blockchain appchains.
 - Core guarantees:
   - Making sure every vulnerability entry is well-structured, semantically rich, and optimized for vector search.
   - Ensuring consistency with existing entries, migrating touched legacy entries forward, and adhering to the provided template.

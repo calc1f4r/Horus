@@ -39,6 +39,15 @@ BaseSetup                        ← abstract; setup() virtual
 
 ---
 
+## Flags
+
+- `--fork=<rpc-url>` — scaffold in fork mode: `medusa.json` sets `forkModeEnabled: true` with the given RPC URL, `foundry.toml` sets `fork_url`, and `Setup.sol` references existing deployed contracts instead of deploying new ones. See fork-mode templates in [chimera-templates.md](.claude/resources/chimera-templates.md).
+- `--fork-block=<N>` — pin the fork to a specific block (default: latest). Only valid with `--fork`.
+- `--no-echidna` — skip `echidna.yaml` generation. Use when the protocol uses `startPrank` or `etch` which Echidna doesn't support.
+- `--medusa-only` — generate only the Medusa + Foundry path; skip Echidna config entirely.
+
+---
+
 ## Workflow
 
 ```
@@ -945,9 +954,10 @@ Halmos (symbolic, bounded):
 
 ## Resources
 
+- **Framework reference**: [chimera-reference.md](.claude/resources/chimera-reference.md) — class hierarchy, assert backends, cheatcode compatibility, recon-utils API
+- **Config templates**: [chimera-templates.md](.claude/resources/chimera-templates.md) — foundry.toml, echidna.yaml, medusa.json (standard + fork), CryticTester, CryticToFoundry, BeforeAfter templates
+- **Halmos reference**: [halmos-reference.md](.claude/resources/halmos-reference.md) — symbolic variable API, run commands, limitations
 - **Invariant spec input**: `audit-output/02-invariants.md` (from `invariant-writer`)
-- **Chimera source**: `lib/chimera/src/`
-- **recon-utils source**: `lib/recon-utils/src/`
-- **Downstream**: `medusa-fuzzing` — advanced Medusa harness configuration
-- **Downstream**: `halmos-verification` — symbolic verification specs
+- **Downstream**: `medusa-fuzzing` — advanced Medusa-only harness configuration beyond the template
+- **Downstream**: `halmos-verification` — standalone Halmos symbolic verification specs
 - **Downstream**: `certora-verification` — formal verification with CVL

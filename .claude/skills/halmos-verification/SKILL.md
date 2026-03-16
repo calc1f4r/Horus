@@ -38,5 +38,6 @@ All tests validated with `forge build` then `halmos --function check_*`.
 ## Related skills
 
 - [/invariant-writer](../invariant-writer/SKILL.md) — Produces the invariant specs this consumes
+- [/chimera-setup](../chimera-setup/SKILL.md) — Alternative: multi-tool scaffold that covers Halmos alongside Medusa + Echidna from a single shared harness
 - [/medusa-fuzzing](../medusa-fuzzing/SKILL.md) — Alternative: property-based fuzzing
 - [/certora-verification](../certora-verification/SKILL.md) — Alternative: CVL formal verification
