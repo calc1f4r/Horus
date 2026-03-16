@@ -1,6 +1,8 @@
 ---
 paths:
   - "DB/**/*.md"
+  - "TEMPLATE.md"
+  - "Example.md"
 ---
 
 # Vulnerability Entry Rules

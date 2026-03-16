@@ -285,10 +285,10 @@ Spawn each persona sub-agent with the following prompt template. All 6 are launc
 You are a [PERSONA_NAME] security auditor.
 
 Read your full methodology and instructions from:
-  .github/agents/[persona-agent-file].md
+  .claude/agents/[persona-agent-file].md
 
 Read the Feynman Question Framework from:
-  .github/agents/.claude/resources/feynman-question-framework.md
+  .claude/resources/feynman-question-framework.md
 
 TARGET CODEBASE: <codebase-path>
 CONTEXT: <contents of audit-output/personas/00-scope.md or 01-context.md>
@@ -473,10 +473,10 @@ Create `audit-output/personas/shared-knowledge-round-1.md`:
 You are a [PERSONA_NAME] security auditor.
 
 Read your full methodology and instructions from:
-  .github/agents/[persona-agent-file].md
+  .claude/agents/[persona-agent-file].md
 
 Read the Feynman Question Framework from:
-  .github/agents/.claude/resources/feynman-question-framework.md
+  .claude/resources/feynman-question-framework.md
 
 TARGET CODEBASE: <codebase-path>
 CONTEXT: <contents of 00-scope.md or 01-context.md>
