@@ -4,8 +4,6 @@ title: "Reentrancy Vulnerabilities"
 category: Access Control/State Management
 severity_range: "MEDIUM to HIGH"
 
-references:
-  - file: "reports/yield_protocol_findings/h-13-balancerpairoracle-can-be-manipulated-using-read-only-reentrancy.md"
     protocol: "Blueberry Update"
     severity: "HIGH"
     auditor: "Sherlock"
@@ -17,7 +15,34 @@ references:
     protocol: "Uniswap: The Compact"
     severity: "MEDIUM"
     auditor: "Spearbit"
+
+# Pattern Identity (Required)
+root_cause_family: callback_reentrancy
+pattern_key: callback_reentrancy | unknown | unknown
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - deposit
+  - getPrice
+  - liquidate
+  - msg.sender
+  - settleVault
+  - swap
+  - totalSupply
+  - withdraw
 ---
+
+## References & Source Reports
+
+| Label | Path | Severity | Auditor | Source ID / Link |
+|-------|------|----------|---------|------------------|
+| [Blueberry Update] | reports/yield_protocol_findings/h-13-balancerpairoracle-can-be-manipulated-using-read-only-reentrancy.md | HIGH | Sherlock | - |
+| [Cega (Eth V2)] | reports/yield_protocol_findings/reentrancy-in-vault-settlement.md | HIGH | OtterSec | - |
+| [Uniswap: The Compact] | reports/yield_protocol_findings/attacker-can-bypass-reentrancy-lock-to-double-spend-deposit.md | MEDIUM | Spearbit | - |
+
 
 # Reentrancy Vulnerabilities
 
@@ -31,6 +56,38 @@ Reentrancy vulnerabilities occur when external calls allow attackers to re-enter
 **Consensus Severity**: MEDIUM to HIGH
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of callback_reentrancy"
+- Pattern key: `callback_reentrancy | unknown | unknown`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `unknown`
+- High-signal code keywords: `deposit`, `getPrice`, `liquidate`, `msg.sender`, `settleVault`, `swap`, `totalSupply`, `withdraw`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `SecureVault.function -> before.function -> state.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: External call (`.call`, `.transfer`, token transfer) occurs before state variable update
+- Signal 2: Token implements callback hooks (ERC-777, ERC-721) and protocol doesn't use `nonReentrant`
+- Signal 3: User-supplied token address passed to `transferFrom` without callback protection
+- Signal 4: Read-only function's return value consumed cross-contract during an active callback window
+
+#### False Positive Guards
+
+- Not this bug when: Contract uses `ReentrancyGuard` (`nonReentrant`) on all entry points
+- Safe if: All state updates complete before any external call (strict CEI)
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerable Code Patterns
 
@@ -134,3 +191,24 @@ Check Balancer Vault reentrancy state before querying:
 ## Keywords
 
 reentrancy, reentrant, nonReentrant, read-only reentrancy, CEI pattern, callback, Balancer, Curve, double spend
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`Access Control/State Management`, `deposit`, `getPrice`, `liquidate`, `msg.sender`, `settleVault`, `swap`, `totalSupply`, `withdraw`

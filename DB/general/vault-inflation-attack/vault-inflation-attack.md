@@ -46,6 +46,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: first_depositor_attack
+pattern_key: first_depositor_attack | share_calculation | vault_share_inflation
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - ERC4626
+  - _convertToAssets
+  - _convertToShares
+  - _decimalsOffset
+  - _deposit
+  - _mint_shares
+  - _withdraw
+  - balanceOf
+  - burn
+  - convertToAssets
+  - convertToShares
+  - deposit
+  - depositExactAmount
+  - donation
+  - execute
+  - finalizeStake
+  - first_deposit
+  - mint
+  - msg.sender
+  - mulDiv
 ---
 
 ## References & Source Reports
@@ -107,6 +137,38 @@ The Vault Inflation Attack (also known as First Depositor Attack, Share Price Ma
 **Affected Protocols**: ERC4626 vaults, staking pools, lending vaults, LP token systems, any share-based accounting
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of first_depositor_attack"
+- Pattern key: `first_depositor_attack | share_calculation | vault_share_inflation`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `share_calculation|vault_deposit|token_minting`
+- High-signal code keywords: `ERC4626`, `_convertToAssets`, `_convertToShares`, `_decimalsOffset`, `_deposit`, `_mint_shares`, `_withdraw`, `balanceOf`
+- Typical sink / impact: `fund_loss|share_dilution|zero_share_minting`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `3.function -> DonationImmuneVault.function -> MinimumDepositVault.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: First deposit to vault with zero total supply has manipulable share calculation
+- Signal 2: Direct asset transfer (donation) changes exchange rate before victim's deposit
+- Signal 3: No minimum initial deposit or dead shares mechanism
+- Signal 4: Share price can be inflated atomically in a single transaction
+
+#### False Positive Guards
+
+- Not this bug when: Vault uses virtual offset (ERC4626 `_decimalsOffset()`) to prevent inflation
+- Safe if: Dead shares mechanism: minimum initial deposit burned to address(dead)
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerability Description
 
@@ -657,7 +719,7 @@ function testDonationDoesNotAffectExchangeRate() public {
 
 - [Fee-on-Transfer Token Incompatibility](../token-handling/fee-on-transfer.md) - Compounds with inflation attack
 - [Reentrancy in Vault Operations](../reentrancy/vault-reentrancy.md) - Can enable atomic inflation
-- [Flash Loan Attacks](../economic/flash-loan-attacks.md) - Can fund inflation attack
+- [Flash Loan Attacks](../flash-loan/FLASH_LOAN_VULNERABILITIES.md) - Can fund inflation attack
 - [Rounding Errors](../arithmetic/rounding-errors.md) - Root cause of share loss
 
 ---
@@ -705,3 +767,24 @@ function testDonationDoesNotAffectExchangeRate() public {
 - **MahaLend** (2023-11, $20K): `DeFiHackLabs/src/test/2023-11/MahaLend_exp.sol`
 - **kTAF** (2023-10, $8K): `DeFiHackLabs/src/test/2023-10/kTAF_exp.sol`
 - **MetaLend** (2023-11, $4K): `DeFiHackLabs/src/test/2023-11/MetaLend_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`ERC4626`, `_convertToAssets`, `_convertToShares`, `_decimalsOffset`, `_deposit`, `_mint_shares`, `_withdraw`, `balanceOf`, `burn`, `convertToAssets`, `convertToShares`, `defi`, `deposit`, `depositExactAmount`, `donation`, `donation_attack`, `economic`, `erc4626`, `execute`, `finalizeStake`, `first_deposit`, `first_depositor`, `inflation_attack`, `lending`, `mint`, `msg.sender`, `mulDiv`, `price_per_share`, `rounding_down`, `share_calculation`, `share_manipulation`, `staking`, `totalAssets`, `totalSupply`, `vault`, `vault_exchange_rate`, `vault_share_inflation`, `yield`

@@ -51,6 +51,36 @@ version: all
 
 # Source
 source: DeFiHackLabs
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | flash_loan_mechanism | flash_loan_attack
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - Aave_flash
+  - Balancer_flash
+  - DODO_DVM
+  - DVMFlashLoanCall
+  - ERC3156
+  - Reinitialization
+  - Uniswap_flash
+  - addLiquidity
+  - approve
+  - attack
+  - balanceOf
+  - block.number
+  - block.timestamp
+  - borrow
+  - burn
+  - callback_function
+  - claimTokens
+  - collateral_valuation
+  - deposit
+  - depositByAddLiquidity
 ---
 
 # Flash Loan Attack Vulnerability Patterns
@@ -62,6 +92,38 @@ Flash loan attacks exploit the atomic nature of blockchain transactions to borro
 **Total Historical Losses from Analyzed Exploits: >$500M USD**
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | flash_loan_mechanism | flash_loan_attack`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `flash_loan_mechanism|callback_validation|state_transition|collateral_calculation`
+- High-signal code keywords: `Aave_flash`, `Balancer_flash`, `DODO_DVM`, `DVMFlashLoanCall`, `ERC3156`, `Reinitialization`, `Uniswap_flash`, `addLiquidity`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `AttackerToken.function -> EvilToken.function -> SecureAirdrop.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ## Attack Categories
 
@@ -986,7 +1048,7 @@ contract SecureAirdrop {
 - [Reentrancy Patterns](../reentrancy/defi-reentrancy-patterns.md) - Flash loan callbacks enable reentrancy
 - [Price Manipulation](../../oracle/price-manipulation/flash-loan-oracle-manipulation.md) - Flash loans fund price manipulation
 - [Governance Vulnerabilities](../dao-governance-vulnerabilities/) - Flash loans enable governance attacks
-- [Flash Loan Implementation Issues](../flash-loan-attacks/FLASH_LOAN_VULNERABILITIES.md) - Protocol-side flash loan bugs
+- [Flash Loan Implementation Issues](../flash-loan/FLASH_LOAN_VULNERABILITIES.md) - Protocol-side flash loan bugs
 
 ---
 
@@ -1082,3 +1144,24 @@ contract SecureAirdrop {
 - **ElephantMoney** (2022-04, $11.2M): `DeFiHackLabs/src/test/2022-04/Elephant_Money_exp.sol`
 - **PolterFinance** (2024-11, $7.0M): `DeFiHackLabs/src/test/2024-11/PolterFinance_exploit.sol`
 - **XSURGE** (2021-08, $5.0M): `DeFiHackLabs/src/test/2021-08/XSURGE_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`Aave_flash`, `Balancer_flash`, `DODO_DVM`, `DVMFlashLoanCall`, `DeFiHackLabs`, `ERC3156`, `Reinitialization`, `Uniswap_flash`, `addLiquidity`, `approve`, `attack`, `balanceOf`, `block.number`, `block.timestamp`, `borrow`, `burn`, `callback_function`, `claimTokens`, `collateral_valuation`, `defi`, `deposit`, `depositByAddLiquidity`, `dex`, `donation_attack`, `economic`, `flash_loan`, `flash_loan_attack`, `flash_loan_callback`, `flash_mint`, `governance`, `governance_voting`, `initiator_validation`, `lending`, `real_exploit`, `reentrancy_guard`, `repayment_check`, `self_liquidation`, `state_update_ordering`, `vault`

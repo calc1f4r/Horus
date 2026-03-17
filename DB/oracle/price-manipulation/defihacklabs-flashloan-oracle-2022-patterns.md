@@ -595,5 +595,5 @@ contract SecureVaultOracle {
 
 - `DB/oracle/price-manipulation/defihacklabs-price-manipulation-patterns.md` — 2021 flash loan price manipulation patterns
 - `DB/general/vault-inflation-attack/defihacklabs-vault-inflation-patterns.md` — ERC4626/CompoundV2 vault inflation
-- `DB/general/flash-loan-attacks/` — Flash loan attack patterns
+- `DB/general/flash-loan/` — Flash loan attack patterns
 - `DB/oracle/` — Oracle vulnerability patterns (Chainlink, Pyth)

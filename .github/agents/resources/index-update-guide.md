@@ -29,7 +29,7 @@ Place the file in the correct category folder:
 | Bridge | `DB/bridge/{protocol}/` |
 | Tokens | `DB/tokens/{standard}/` |
 | Cosmos | `DB/cosmos/{type}/` |
-| Solana | `DB/Solona-chain-specific/` |
+| Solana | `DB/Solana-chain-specific/` |
 | General | `DB/general/{vulnerability-class}/` |
 | Unique | `DB/unique/{category}/` |
 
@@ -75,7 +75,7 @@ cat DB/index.json | grep -A2 '"<category>"'
 | `bridge.json` | `DB/bridge/**` |
 | `tokens.json` | `DB/tokens/**` |
 | `cosmos.json` | `DB/cosmos/**` |
-| `solana.json` | `DB/Solona-chain-specific/**` |
+| `solana.json` | `DB/Solana-chain-specific/**` |
 | `general-security.json` | `DB/general/access-control/`, `signature/`, `validation/`, `reentrancy/`, `randomness/` |
 | `general-defi.json` | `DB/general/flash-loan*/`, `vault-inflation*/`, `precision/`, `calculation/`, `rounding*/`, etc. |
 | `general-infrastructure.json` | `DB/general/proxy*/`, `storage*/`, `initialization/`, `diamond-proxy/`, `uups-proxy/`, etc. |

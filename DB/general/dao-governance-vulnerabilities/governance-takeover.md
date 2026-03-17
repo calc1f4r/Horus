@@ -39,6 +39,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | governance_control | governance_takeover
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - 51_percent_attack
+  - access_control
+  - admin
+  - approveBytecode
+  - balanceOf
+  - block.timestamp
+  - centralization
+  - deployElectionMaster
+  - emergencyDrain
+  - emergencyWithdraw
+  - execute
+  - executeEmergencyDrain
+  - executeExtraordinaryProposal
+  - executeGuardianChange
+  - executeProposal
+  - getWinner
+  - governance_control
+  - initialize
+  - initiateEmergencyDrain
+  - mint
 ---
 
 ## References & Source Reports
@@ -90,6 +120,38 @@ When governance allows arbitrary proposal execution (arbitrary target addresses 
 > **📚 Source Reports for Deep Dive:**
 > - `reports/dao_governance_findings/h-01-the-51-majority-can-hijack-the-partys-precious-tokens-through-an-arbitrary-.md` (Party DAO - Code4rena)
 > - `reports/dao_governance_findings/m-12-governance-attack-on-extraordinary-proposals.md` (Isomorph - Code4rena)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | governance_control | governance_takeover`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `governance_control|veto_power|admin_privileges|token_distribution`
+- High-signal code keywords: `51_percent_attack`, `access_control`, `admin`, `approveBytecode`, `balanceOf`, `block.timestamp`, `centralization`, `deployElectionMaster`
+- Typical sink / impact: `complete_governance_takeover|fund_loss|protocol_control`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `MaliciousElectionMaster.function -> Protocol.function -> code.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -730,3 +792,24 @@ function approveBytecode(bytes32 hash) external onlyGovernance {
 - **Fortress Loans** (2022-05, $3.0M): `DeFiHackLabs/src/test/2022-05/FortressLoans_exp.sol`
 - **BuildFinance** (2022-02, $470K): `DeFiHackLabs/src/test/2022-02/BuildF_exp.sol`
 - **Audius** (2022-07, $704): `DeFiHackLabs/src/test/2022-07/Audius_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`51_attack`, `51_percent_attack`, `access_control`, `admin`, `approveBytecode`, `balanceOf`, `block.timestamp`, `centralization`, `dao`, `defi`, `deployElectionMaster`, `emergencyDrain`, `emergencyWithdraw`, `execute`, `executeEmergencyDrain`, `executeExtraordinaryProposal`, `executeGuardianChange`, `executeProposal`, `getWinner`, `governance`, `governance_control`, `governance_takeover`, `initialize`, `initiateEmergencyDrain`, `mint`, `multisig`, `token_distribution`, `veto`

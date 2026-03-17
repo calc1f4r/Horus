@@ -31,18 +31,27 @@ All agents live in `.claude/agents/`. The entry point for a full audit is `audit
 |-------|---------|
 | `audit-orchestrator` | **ENTRY POINT** — 11-phase audit pipeline with configurable modes |
 | `audit-context-building` | Deep line-by-line codebase analysis coordinator |
+| `function-analyzer` | Per-contract ultra-granular function analysis (spawned by audit-context-building) |
+| `system-synthesizer` | Synthesizes per-contract context into global context document |
 | `multi-persona-orchestrator` | 6 parallel auditing personas with cross-verification |
 | `protocol-reasoning` | Deep reasoning-based vulnerability discovery |
-| `defihacklabs-indexer` | Attack-graph-aware indexing of DeFiHackLabs PoCs into DB entries and invariants |
+| `missing-validation-reasoning` | Input validation and hygiene scanner |
 | `invariant-writer` / `invariant-reviewer` | Invariant extraction and hardening |
 | `invariant-catcher` | DB-powered vulnerability pattern hunting |
+| `invariant-indexer` | Indexes canonical invariants from production DeFi protocols |
 | `poc-writing` | Exploit test generation |
 | `issue-writer` | Polishes findings into submission-ready write-ups |
-| `judge-orchestrator` | Cross-platform consensus — runs all 3 judges in parallel with two-round cross-challenge protocol and persistent memory log |
+| `report-aggregator` | Assembles judge-verified findings into final Sherlock-format report |
+| `variant-template-writer` | Converts audit reports into TEMPLATE.md-compliant DB entries |
+| `defihacklabs-indexer` | Attack-graph-aware indexing of DeFiHackLabs PoCs into DB entries and invariants |
+| `judge-orchestrator` | Cross-platform consensus — runs all 3 judges in parallel |
 | `sherlock-judging` / `cantina-judge` / `code4rena-judge` | Platform-specific finding validation (single-platform) |
-| `chimera-setup` | Multi-tool property testing scaffold — Echidna + Medusa + Halmos from one shared harness |
+| `chimera-setup` | Multi-tool property testing scaffold — Echidna + Medusa + Halmos |
 | `medusa-fuzzing` / `certora-verification` / `halmos-verification` | Formal verification suites (single-tool) |
-| `certora-mutation-testing` | Mutation campaigns with Gambit + certoraMutate; triage and hardens specs |
+| `certora-mutation-testing` | Mutation campaigns with Gambit + certoraMutate |
+| `certora-sui-move-verification` / `sui-prover-verification` | Sui Move formal verification |
+| `db-quality-monitor` | Monitors 4-tier architecture integrity and auto-remediates |
+| `solodit-fetching` | Fetches raw findings from Solodit/Cyfrin API |
 
 ### Invoking the Audit Pipeline
 

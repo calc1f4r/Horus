@@ -55,6 +55,36 @@ version: all
 
 # Source
 source: DeFiHackLabs
+
+# Pattern Identity (Required)
+root_cause_family: rounding_error
+pattern_key: rounding_error | math_operations | precision_loss
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - CompoundV2_cToken
+  - ERC4626
+  - FixedPoint
+  - WithdrawAllWBTC
+  - _convertToShares
+  - _decimalsOffset
+  - _deposit
+  - _firstDeposit
+  - approve
+  - balanceOf
+  - borrow
+  - burn
+  - calculateAmount
+  - calculateLiquidity
+  - calculateLiquidityFixed
+  - convertToShares
+  - deposit
+  - division_before_multiplication
+  - donation_attack
+  - exchange_rate
 ---
 
 ## References & Source Reports
@@ -132,6 +162,38 @@ Precision loss and rounding vulnerabilities occur when integer arithmetic in Sol
 **Affected Protocols**: AMMs, lending protocols, vaults, staking systems, any share-based accounting
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of rounding_error"
+- Pattern key: `rounding_error | math_operations | precision_loss`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `math_operations|share_calculation|token_scaling|index_manipulation`
+- High-signal code keywords: `CompoundV2_cToken`, `ERC4626`, `FixedPoint`, `WithdrawAllWBTC`, `_convertToShares`, `_decimalsOffset`, `_deposit`, `_firstDeposit`
+- Typical sink / impact: `fund_loss|share_dilution|protocol_insolvency`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `ETHDrain.function -> HelperExploit.function -> IntermediateContractETH.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Division before multiplication truncates intermediate result
+- Signal 2: Reward/share calculation uses insufficient decimal precision
+- Signal 3: Rounding direction favors attacker during mint/redeem operations
+- Signal 4: Fee calculation rounds to zero for small amounts enabling free operations
+
+#### False Positive Guards
+
+- Not this bug when: Multiplication performed before division to preserve precision
+- Safe if: Scaling factor (1e18, 1e27) applied before division operations
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerability Categories
 
@@ -720,7 +782,7 @@ function swapGivenOut(uint256 tokenAmountOut, uint256 scalingFactor) internal re
 
 - [Vault Inflation Attack](../vault-inflation-attack/vault-inflation-attack.md) - Specific ERC4626 inflation patterns
 - [Rounding and Precision Loss (Basic)](../rounding-precision-loss/rounding-precision-loss.md) - Simpler rounding issues
-- [Flash Loan Attacks](../flash-loan-attacks/FLASH_LOAN_VULNERABILITIES.md) - Often combined with precision loss
+- [Flash Loan Attacks](../flash-loan/FLASH_LOAN_VULNERABILITIES.md) - Often combined with precision loss
 - [Oracle Price Manipulation](../../oracle/price-manipulation/flash-loan-oracle-manipulation.md) - Economic attacks that leverage precision issues
 
 ---
@@ -793,3 +855,24 @@ function swapGivenOut(uint256 tokenAmountOut, uint256 scalingFactor) internal re
 - **Balancer** (2023-08, $2.0M): `DeFiHackLabs/src/test/2023-08/Balancer_exp.sol`
 - **Hopelend** (2023-10, $825K): `DeFiHackLabs/src/test/2023-10/Hopelend_exp.sol`
 - **MidasCapitalXYZ** (2023-06, $600K): `DeFiHackLabs/src/test/2023-06/MidasCapitalXYZ_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`CompoundV2_cToken`, `ERC4626`, `FixedPoint`, `WithdrawAllWBTC`, `_convertToShares`, `_decimalsOffset`, `_deposit`, `_firstDeposit`, `amm`, `approve`, `arithmetic`, `balanceOf`, `borrow`, `burn`, `calculateAmount`, `calculateLiquidity`, `calculateLiquidityFixed`, `convertToShares`, `defi`, `deposit`, `division_before_multiplication`, `donation_attack`, `exchange_rate`, `first_depositor`, `inflation_attack`, `integer_truncation`, `lending`, `liquidity_index`, `mulDiv`, `mulDivDown`, `mulDivUp`, `precision`, `precision_loss`, `rayDiv`, `real_exploit`, `rounding`, `scaling_factor`, `share_calculation`, `totalAssets`, `totalSupply`, `vault`, `wadDiv`

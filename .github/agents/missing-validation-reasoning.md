@@ -384,7 +384,7 @@ If multiple functions share the **same root cause** (e.g., 5 setters all missing
 
 ## Resources
 
-- **DB index**: [DB/index.json](../../DB/index.json)
+- **DB index**: [../../DB/index.json](../../DB/index.json)
 - **Primary DB patterns**: `DB/general/missing-validations/MISSING_VALIDATION_TEMPLATE.md`
 - **Real exploit patterns**: `DB/general/missing-validations/defihacklabs-input-validation-patterns.md`
 - **Quick reference**: [missing-validation-knowledge.md](resources/missing-validation-knowledge.md)

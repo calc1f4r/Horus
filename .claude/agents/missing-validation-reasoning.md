@@ -1,7 +1,7 @@
 ---
 name: missing-validation-reasoning
 description: Specialized reasoning-based auditor for input validation and hygiene vulnerabilities. Scans for zero-address checks, stale oracle data, array length mismatches, numeric bounds, arbitrary calldata forwarding, unvalidated token/callback addresses, and access control gaps in constructors, setters, and external data parsers. Use when reviewing constructors, initialize functions, admin setters, oracle integrations, or batch operations for missing validation checks.
-tools: [Agent, Bash, Edit, Glob, Grep, Read, WebSearch]
+tools: [Agent, Bash, Edit, Glob, Grep, Read, Write, WebFetch, WebSearch]
 maxTurns: 50
 ---
 
@@ -385,7 +385,7 @@ If multiple functions share the **same root cause** (e.g., 5 setters all missing
 
 ## Resources
 
-- **DB index**: [DB/index.json](DB/index.json)
+- **DB index**: [DB/index.json](../../DB/index.json)
 - **Primary DB patterns**: `DB/general/missing-validations/MISSING_VALIDATION_TEMPLATE.md`
 - **Real exploit patterns**: `DB/general/missing-validations/defihacklabs-input-validation-patterns.md`
 - **Quick reference**: [missing-validation-knowledge.md](.claude/resources/missing-validation-knowledge.md)

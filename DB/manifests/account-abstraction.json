@@ -9,7 +9,7 @@
   "files": [
     {
       "file": "DB/account-abstraction/aa-erc7579-module-system-enable-mode.md",
-      "totalLines": 434,
+      "totalLines": 517,
       "frontmatter": {
         "protocol": "generic",
         "chain": "everychain",
@@ -17,20 +17,74 @@
         "vulnerability_type": "module_system_misconfiguration",
         "attack_type": "logical_error",
         "affected_component": "module_installation",
+        "primitives": [
+          "ERC-7579",
+          "ERC-7484",
+          "ERC-7739",
+          "withRegistry",
+          "enableMode",
+          "moduleType",
+          "_getEnableModeDataHash",
+          "_installFallbackHandler",
+          "onUninstall",
+          "postCheck",
+          "hook",
+          "validator",
+          "executor",
+          "fallback"
+        ],
         "severity": "high",
         "impact": "unauthorized_module_installation",
-        "exploitability": "0.65",
+        "exploitability": 0.65,
         "financial_impact": "high",
+        "tags": [
+          "account-abstraction",
+          "ERC-7579",
+          "ERC-7484",
+          "modular-account",
+          "module-installation",
+          "enable-mode",
+          "registry",
+          "hook",
+          "fallback",
+          "Biconomy",
+          "Nexus"
+        ],
         "language": "solidity",
-        "version": "\">=0.8.0\""
+        "version": ">=0.8.0",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "missing_validation | module_installation | module_system_misconfiguration",
+        "interaction_scope": "multi_contract",
+        "code_keywords": [
+          "ERC-7484",
+          "ERC-7579",
+          "ERC-7739",
+          "_enableMode",
+          "_getEnableModeDataHash",
+          "_handleFallback",
+          "_handleFallbackWithHook",
+          "_installFallbackHandler",
+          "checkERC7739Support",
+          "delegatecall",
+          "enableMode",
+          "execute",
+          "executeFromExecutor",
+          "executor",
+          "fallback",
+          "griefing",
+          "hook",
+          "installModule",
+          "is",
+          "its"
+        ]
       },
       "patternCount": 1,
       "patterns": [
         {
           "id": "account-abstraction-aa-erc7579-module-system-enable-mode-erc-7579-module-system-registr-000",
           "title": "ERC-7579 Module System — Registry Bypass, moduleType Confusion, Hook PostCheck Skip, Fallback Flaws",
-          "lineStart": 83,
-          "lineEnd": 260,
+          "lineStart": 145,
+          "lineEnd": 322,
           "lineCount": 178,
           "severity": [
             "LOW"
@@ -50,14 +104,53 @@
             "installModule",
             "moduleType",
             "onUninstall",
-            "onlyExecutorModule"
+            "onlyExecutorModule",
+            "ERC-7484",
+            "ERC-7579",
+            "ERC-7739",
+            "_installFallbackHandler",
+            "checkERC7739Support"
+          ],
+          "searchKeywords": [
+            "erc",
+            "module",
+            "system",
+            "registry",
+            "bypass",
+            "type",
+            "confusion",
+            "hook",
+            "post",
+            "check",
+            "skip",
+            "fallback",
+            "flaws",
+            "root",
+            "cause",
+            "root cause",
+            "scenario",
+            "vulnerable",
+            "erc-7484",
+            "erc 7484",
+            "erc-7579",
+            "erc 7579",
+            "erc-7739",
+            "erc 7739",
+            "_enablemode",
+            "enable mode",
+            "_getenablemodedatahash",
+            "get enable mode data hash",
+            "_handlefallback",
+            "handle fallback",
+            "_handlefallbackwithhook",
+            "handle fallback with hook"
           ],
           "rootCause": "ERC-7579 module management has multiple independent failure modes:\n\n\n\n1. **ERC-7484 registry not checked at call-time** — The `withRegistry` modifier is only applied during module installation. At exe",
           "subsections": [
             {
               "title": "Root Cause",
-              "lineStart": 85,
-              "lineEnd": 100,
+              "lineStart": 147,
+              "lineEnd": 162,
               "severity": [
                 "LOW"
               ],
@@ -70,12 +163,17 @@
                 "onUninstall",
                 "postCheck",
                 "preCheck"
+              ],
+              "searchKeywords": [
+                "root",
+                "cause",
+                "root cause"
               ]
             },
             {
               "title": "Attack Scenario",
-              "lineStart": 101,
-              "lineEnd": 129,
+              "lineStart": 163,
+              "lineEnd": 191,
               "severity": [
                 "LOW"
               ],
@@ -88,12 +186,15 @@
                 "moduleType",
                 "onlyExecutorModule",
                 "postCheck"
+              ],
+              "searchKeywords": [
+                "scenario"
               ]
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 130,
-              "lineEnd": 260,
+              "lineStart": 192,
+              "lineEnd": 322,
               "severity": [
                 "HIGH"
               ],
@@ -106,6 +207,9 @@
                 "executeFromExecutor",
                 "installModule",
                 "uninstallModule"
+              ],
+              "searchKeywords": [
+                "vulnerable"
               ]
             }
           ]
@@ -114,7 +218,7 @@
     },
     {
       "file": "DB/account-abstraction/aa-paymaster-gas-accounting-vulnerabilities.md",
-      "totalLines": 381,
+      "totalLines": 464,
       "frontmatter": {
         "protocol": "generic",
         "chain": "everychain",
@@ -122,20 +226,69 @@
         "vulnerability_type": "gas_accounting_error",
         "attack_type": "logical_error",
         "affected_component": "paymaster_gas_validation",
+        "primitives": [
+          "paymaster",
+          "validatePaymasterUserOp",
+          "postOp",
+          "prefund",
+          "verificationGasLimit",
+          "preVerificationGas",
+          "callGasLimit",
+          "handleOp",
+          "stake",
+          "reputation",
+          "ERC-4337",
+          "EntryPoint"
+        ],
         "severity": "high",
         "impact": "fund_loss",
-        "exploitability": "0.65",
+        "exploitability": 0.65,
         "financial_impact": "high",
+        "tags": [
+          "account-abstraction",
+          "ERC-4337",
+          "paymaster",
+          "gas-accounting",
+          "stake",
+          "fee-bypass",
+          "smart-wallet",
+          "bundler"
+        ],
         "language": "solidity",
-        "version": "\">=0.8.0\""
+        "version": ">=0.8.0",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "missing_validation | paymaster_gas_validation | gas_accounting_error",
+        "interaction_scope": "single_contract",
+        "code_keywords": [
+          "ERC-4337",
+          "EntryPoint",
+          "_executeUserOp",
+          "_getRequiredPrefund",
+          "_handlePostOp",
+          "_validatePrepayment",
+          "callGasLimit",
+          "deposit",
+          "execute",
+          "handleOp",
+          "paymaster",
+          "postOp",
+          "preVerificationGas",
+          "prefund",
+          "receive",
+          "reputation",
+          "stake",
+          "validatePaymasterUserOp",
+          "verificationGasLimit",
+          "withdraw"
+        ]
       },
       "patternCount": 1,
       "patterns": [
         {
           "id": "account-abstraction-aa-paymaster-gas-accounting-vulnerabilit-aa-paymaster-gas-accounting-pr-000",
           "title": "AA Paymaster Gas Accounting — Prefund Errors, Duplicate Snapshots, Stake Bypass, and Fee Escape",
-          "lineStart": 83,
-          "lineEnd": 238,
+          "lineStart": 145,
+          "lineEnd": 300,
           "lineCount": 156,
           "severity": [
             "HIGH",
@@ -153,14 +306,56 @@
             "preGas",
             "tokenGasPrice",
             "validatePaymasterUserOp",
-            "verificationGasLimit"
+            "verificationGasLimit",
+            "ERC-4337",
+            "EntryPoint",
+            "_executeUserOp",
+            "_getRequiredPrefund",
+            "callGasLimit",
+            "execute",
+            "paymaster",
+            "preVerificationGas"
+          ],
+          "searchKeywords": [
+            "paymaster",
+            "gas",
+            "accounting",
+            "prefund",
+            "errors",
+            "duplicate",
+            "snapshots",
+            "stake",
+            "bypass",
+            "fee",
+            "escape",
+            "root",
+            "cause",
+            "root cause",
+            "scenario",
+            "vulnerable",
+            "erc-4337",
+            "erc 4337",
+            "entrypoint",
+            "entry point",
+            "_executeuserop",
+            "execute user op",
+            "_getrequiredprefund",
+            "get required prefund",
+            "_handlepostop",
+            "handle post op",
+            "_validateprepayment",
+            "validate prepayment",
+            "callgaslimit",
+            "call gas limit",
+            "deposit",
+            "execute"
           ],
           "rootCause": "Gas accounting in ERC-4337 is a multi-phase process (validation → execution → postOp) with several hand-off points where gas values can be measured incorrectly:\n\n\n\n1. **Inverted `verificationGasLimit`",
           "subsections": [
             {
               "title": "Root Cause",
-              "lineStart": 85,
-              "lineEnd": 95,
+              "lineStart": 147,
+              "lineEnd": 157,
               "severity": [
                 "LOW"
               ],
@@ -173,12 +368,17 @@
                 "tokenGasPrice",
                 "validatePaymasterUserOp",
                 "verificationGasLimit"
+              ],
+              "searchKeywords": [
+                "root",
+                "cause",
+                "root cause"
               ]
             },
             {
               "title": "Attack Scenario",
-              "lineStart": 96,
-              "lineEnd": 128,
+              "lineStart": 158,
+              "lineEnd": 190,
               "severity": [
                 "HIGH"
               ],
@@ -189,12 +389,15 @@
                 "paymasterAndData",
                 "preGas",
                 "validatePaymasterUserOp"
+              ],
+              "searchKeywords": [
+                "scenario"
               ]
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 129,
-              "lineEnd": 238,
+              "lineStart": 191,
+              "lineEnd": 300,
               "severity": [
                 "HIGH"
               ],
@@ -204,6 +407,9 @@
                 "_validatePrepayment",
                 "handleOp",
                 "validatePaymasterUserOp"
+              ],
+              "searchKeywords": [
+                "vulnerable"
               ]
             }
           ]
@@ -212,7 +418,7 @@
     },
     {
       "file": "DB/account-abstraction/aa-session-key-permission-abuse.md",
-      "totalLines": 466,
+      "totalLines": 549,
       "frontmatter": {
         "protocol": "generic",
         "chain": "everychain",
@@ -220,20 +426,70 @@
         "vulnerability_type": "session_key_abuse",
         "attack_type": "logical_error",
         "affected_component": "session_key_validation",
+        "primitives": [
+          "session_key",
+          "sessionData",
+          "permissionId",
+          "validateUserOp",
+          "CredibleAccountModule",
+          "ResourceLockValidator",
+          "NativeTokenLimitModule",
+          "SmartSession",
+          "ERC-7579",
+          "ERC-4337",
+          "_validateSessionKeyParams",
+          "enableMode"
+        ],
         "severity": "high",
         "impact": "fund_loss",
-        "exploitability": "0.70",
+        "exploitability": 0.7,
         "financial_impact": "high",
+        "tags": [
+          "account-abstraction",
+          "session-key",
+          "permission",
+          "smart-wallet",
+          "ERC-4337",
+          "ERC-7579",
+          "front-running",
+          "spend-limit",
+          "cross-wallet"
+        ],
         "language": "solidity",
-        "version": "\">=0.8.0\""
+        "version": ">=0.8.0",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "missing_validation | session_key_validation | session_key_abuse",
+        "interaction_scope": "multi_contract",
+        "code_keywords": [
+          "CredibleAccountModule",
+          "ERC-4337",
+          "ERC-7579",
+          "NativeTokenLimitModule",
+          "ResourceLockValidator",
+          "SmartSession",
+          "_validateBatchCall",
+          "_validateSessionKeyParams",
+          "_validateSingleCall",
+          "approve",
+          "block.timestamp",
+          "delegatecall",
+          "enableMode",
+          "getAndVerifyDigest",
+          "msg.sender",
+          "permissionId",
+          "replay",
+          "sessionData",
+          "sessionKeyDataKey",
+          "session_key"
+        ]
       },
       "patternCount": 1,
       "patterns": [
         {
           "id": "account-abstraction-aa-session-key-permission-abuse-session-key-abuse-spend-limit--000",
           "title": "Session Key Abuse — Spend Limit Bypass, Cross-Wallet Consumption, Permission Overwrite, PermissionId Frontrun",
-          "lineStart": 71,
-          "lineEnd": 271,
+          "lineStart": 133,
+          "lineEnd": 333,
           "lineCount": 201,
           "severity": [
             "CRITICAL",
@@ -255,14 +511,53 @@
             "true",
             "updateKeyPermissions",
             "userOp.signature",
-            "userOpHash"
+            "userOpHash",
+            "ERC-4337",
+            "ERC-7579",
+            "NativeTokenLimitModule",
+            "ResourceLockValidator",
+            "SmartSession"
+          ],
+          "searchKeywords": [
+            "session",
+            "key",
+            "abuse",
+            "spend",
+            "limit",
+            "bypass",
+            "cross",
+            "wallet",
+            "consumption",
+            "permission",
+            "overwrite",
+            "frontrun",
+            "root",
+            "cause",
+            "root cause",
+            "scenario",
+            "vulnerable",
+            "credibleaccountmodule",
+            "credible account module",
+            "erc-4337",
+            "erc 4337",
+            "erc-7579",
+            "erc 7579",
+            "nativetokenlimitmodule",
+            "native token limit module",
+            "resourcelockvalidator",
+            "resource lock validator",
+            "smartsession",
+            "smart session",
+            "_validatebatchcall",
+            "validate batch call",
+            "_validatesessionkeyparams"
           ],
           "rootCause": "Session key security depends on correct enforcement of four invariants:\n\n1. The key's allowed spenders, targets, and amounts are validated during every call.\n\n2. The key is bound to a specific smart w",
           "subsections": [
             {
               "title": "Root Cause",
-              "lineStart": 73,
-              "lineEnd": 90,
+              "lineStart": 135,
+              "lineEnd": 152,
               "severity": [
                 "LOW"
               ],
@@ -275,12 +570,17 @@
                 "sessionKeyId",
                 "sessionKeySigner",
                 "true"
+              ],
+              "searchKeywords": [
+                "root",
+                "cause",
+                "root cause"
               ]
             },
             {
               "title": "Attack Scenario",
-              "lineStart": 91,
-              "lineEnd": 125,
+              "lineStart": 153,
+              "lineEnd": 187,
               "severity": [
                 "CRITICAL",
                 "HIGH"
@@ -294,12 +594,15 @@
                 "updateKeyPermissions",
                 "userOp.signature",
                 "validateUserOp"
+              ],
+              "searchKeywords": [
+                "scenario"
               ]
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 126,
-              "lineEnd": 271,
+              "lineStart": 188,
+              "lineEnd": 333,
               "severity": [
                 "CRITICAL",
                 "HIGH",
@@ -311,6 +614,9 @@
                 "getAndVerifyDigest",
                 "sessionKeyDataKey",
                 "validateUserOp"
+              ],
+              "searchKeywords": [
+                "vulnerable"
               ]
             }
           ]
@@ -319,7 +625,7 @@
     },
     {
       "file": "DB/account-abstraction/aa-signature-replay-attacks.md",
-      "totalLines": 400,
+      "totalLines": 483,
       "frontmatter": {
         "protocol": "generic",
         "chain": "everychain",
@@ -327,20 +633,68 @@
         "vulnerability_type": "replay_attack",
         "attack_type": "signature_replay",
         "affected_component": "signature_validation",
+        "primitives": [
+          "userOpHash",
+          "enableModeDataHash",
+          "entryPoint",
+          "nonce",
+          "chainId",
+          "EIP-712",
+          "ERC-4337",
+          "ERC-7579",
+          "validateUserOp",
+          "_getEnableModeDataHash"
+        ],
         "severity": "high",
         "impact": "fund_loss",
-        "exploitability": "0.70",
+        "exploitability": 0.7,
         "financial_impact": "high",
+        "tags": [
+          "account-abstraction",
+          "ERC-4337",
+          "ERC-7579",
+          "smart-wallet",
+          "signature",
+          "replay",
+          "cross-chain",
+          "enable-mode",
+          "bundler"
+        ],
         "language": "solidity",
-        "version": "\">=0.8.0\""
+        "version": ">=0.8.0",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "missing_validation | signature_validation | replay_attack",
+        "interaction_scope": "multi_contract",
+        "code_keywords": [
+          "EIP-712",
+          "ERC-4337",
+          "ERC-7579",
+          "_buildDomainSeparator",
+          "_enableMode",
+          "_getCoSignerHash",
+          "_getEnableModeDataHash",
+          "_hashExecution",
+          "bundler",
+          "chainId",
+          "enableModeDataHash",
+          "entryPoint",
+          "execute",
+          "getPackedUserOperationHash",
+          "msg.sender",
+          "nonce",
+          "swap",
+          "type",
+          "userOpHash",
+          "validateUserOp"
+        ]
       },
       "patternCount": 1,
       "patterns": [
         {
           "id": "account-abstraction-aa-signature-replay-attacks-aa-signature-replay-missing-bi-000",
           "title": "AA Signature Replay — Missing Binding Fields in UserOperation and Enable Mode Hashes",
-          "lineStart": 71,
-          "lineEnd": 248,
+          "lineStart": 133,
+          "lineEnd": 310,
           "lineCount": 178,
           "severity": [
             "HIGH",
@@ -356,14 +710,58 @@
             "getPackedUserOperationHash",
             "nonce",
             "userOpHash",
-            "validateUserOp"
+            "validateUserOp",
+            "EIP-712",
+            "ERC-4337",
+            "ERC-7579",
+            "_buildDomainSeparator",
+            "_getCoSignerHash",
+            "bundler",
+            "enableModeDataHash",
+            "execute",
+            "msg.sender",
+            "swap"
+          ],
+          "searchKeywords": [
+            "signature",
+            "replay",
+            "missing",
+            "binding",
+            "fields",
+            "user",
+            "operation",
+            "enable",
+            "mode",
+            "hashes",
+            "root",
+            "cause",
+            "root cause",
+            "scenario",
+            "vulnerable",
+            "eip-712",
+            "eip 712",
+            "erc-4337",
+            "erc 4337",
+            "erc-7579",
+            "erc 7579",
+            "_builddomainseparator",
+            "build domain separator",
+            "_enablemode",
+            "enable mode",
+            "_getcosignerhash",
+            "get co signer hash",
+            "_getenablemodedatahash",
+            "get enable mode data hash",
+            "_hashexecution",
+            "hash execution",
+            "bundler"
           ],
           "rootCause": "This vulnerability exists because **inner EIP-712 hashes computed by the smart account omit one or more domain-binding fields** (`entryPoint` address, `nonce`, `chainId`, `userOpHash`) that would make",
           "subsections": [
             {
               "title": "Root Cause",
-              "lineStart": 73,
-              "lineEnd": 82,
+              "lineStart": 135,
+              "lineEnd": 144,
               "severity": [
                 "LOW"
               ],
@@ -376,12 +774,17 @@
                 "nonce",
                 "userOpHash",
                 "validateUserOp"
+              ],
+              "searchKeywords": [
+                "root",
+                "cause",
+                "root cause"
               ]
             },
             {
               "title": "Attack Scenario",
-              "lineStart": 83,
-              "lineEnd": 106,
+              "lineStart": 145,
+              "lineEnd": 168,
               "severity": [],
               "codeKeywords": [
                 "_getEnableModeDataHash",
@@ -389,12 +792,15 @@
                 "enableModeSignature",
                 "entryPoint",
                 "userOpHash"
+              ],
+              "searchKeywords": [
+                "scenario"
               ]
             },
             {
               "title": "Vulnerable Pattern Examples",
-              "lineStart": 107,
-              "lineEnd": 248,
+              "lineStart": 169,
+              "lineEnd": 310,
               "severity": [
                 "HIGH"
               ],
@@ -406,6 +812,9 @@
                 "_hashExecution",
                 "getPackedUserOperationHash",
                 "validateUserOp"
+              ],
+              "searchKeywords": [
+                "vulnerable"
               ]
             }
           ]

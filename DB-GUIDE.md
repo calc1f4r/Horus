@@ -1,6 +1,6 @@
-# AGENTS.md
+# DB Guide
 
-> **This file covers DB-entry conventions only.** For the full agent system, audit pipeline, and all available agents, see [`CLAUDE.md`](./CLAUDE.md).
+> **This file covers DB-entry conventions and search workflows.** For the full agent system, audit pipeline, and all available agents, see [`CLAUDE.md`](./CLAUDE.md).
 
 This document gives agent models practical guidance for making safe, correct, and minimal changes to **vulnerability database entries** in `DB/`. It covers the 4-tier search architecture, entry format, and how to run and extend DB scripts.
 
@@ -192,7 +192,7 @@ python3 generate_manifests.py
 
 ## Audit Orchestrator — General Purpose Audit Agent
 
-The `audit-orchestrator` agent (`.github/agents/audit-orchestrator.md`) is the **primary entry point** for auditing an unfamiliar codebase. It takes a codebase path, an optional protocol hint, and optional flags for pipeline configuration.
+The `audit-orchestrator` agent (`.claude/agents/audit-orchestrator.md`) is the **primary entry point** for auditing an unfamiliar codebase. It takes a codebase path, an optional protocol hint, and optional flags for pipeline configuration.
 
 ### Invocation
 
@@ -277,7 +277,7 @@ Post-triage:
 
 ### Data Pipeline Producers & Consumers
 
-> **Cross-cutting**: `memory-state.md` is read and written by ALL agents. Every agent reads it before starting and appends a memory entry after completing. The orchestrator consolidates between phases. See [memory-state.md](.github/agents/resources/memory-state.md).
+> **Cross-cutting**: `memory-state.md` is read and written by ALL agents. Every agent reads it before starting and appends a memory entry after completing. The orchestrator consolidates between phases. See [memory-state.md](.claude/resources/memory-state.md).
 
 | Agent | Produces | Consumes |
 |-------|----------|----------|
@@ -297,6 +297,7 @@ Post-triage:
 | `sherlock-judging` | `08-pre-judge-sherlock.md`, `10-deep-review-sherlock.md` | Triaged findings (Phase 8), polished findings (Phase 10) |
 | `cantina-judge` | `08-pre-judge-cantina.md`, `10-deep-review-cantina.md` | Triaged findings (Phase 8), polished findings (Phase 10) |
 | `code4rena-judge` | `08-pre-judge-code4rena.md`, `10-deep-review-code4rena.md` | Triaged findings (Phase 8), polished findings (Phase 10) |
+| `report-aggregator` | `CONFIRMED-REPORT.md` | Judge verdicts, polished findings, PoC results, scope |
 | `persona-bfs` (×1 per round) | `personas/round-N/bfs.md` | Scope, shared knowledge, target code |
 | `persona-dfs` (×1 per round) | `personas/round-N/dfs.md` | Scope, shared knowledge, target code |
 | `persona-working-backward` (×1 per round) | `personas/round-N/backward.md` | Scope, shared knowledge, target code |
@@ -308,50 +309,52 @@ Post-triage:
 
 | Resource | Purpose |
 |----------|---------|
-| `.github/agents/resources/inter-agent-data-format.md` | Standardized data contracts between pipeline phases |
-| `.github/agents/resources/protocol-detection.md` | Auto-classification decision tree for codebases |
-| `.github/agents/resources/audit-report-template.md` | Final report structure and quality checklist |
-| `.github/agents/resources/orchestration-pipeline.md` | 11-phase pipeline with error handling, context budgets, and phase gates |
-| `.github/agents/resources/reasoning-skills.md` | Core reasoning framework for deep vulnerability analysis |
-| `.github/agents/resources/domain-decomposition.md` | Domain decomposition strategy for reasoning agent |
-| `.github/agents/resources/certora-sui-move-reference.md` | CVLM type system, manifest functions, ghosts, shadows, CLI reference for Sui Move |
-| `.github/agents/resources/certora-sui-move-templates.md` | Copy-paste CVLM spec patterns for Sui Move verification |
-| `.github/agents/resources/sui-prover-reference.md` | Sui Prover spec API, math types, ghost variables, quantifiers, CLI, debugging |
-| `.github/agents/resources/memory-state.md` | Mem0-inspired cross-cutting memory bus architecture for inter-agent knowledge sharing |
+| `.claude/resources/inter-agent-data-format.md` | Standardized data contracts between pipeline phases |
+| `.claude/resources/protocol-detection.md` | Auto-classification decision tree for codebases |
+| `.claude/resources/audit-report-template.md` | Final report structure and quality checklist |
+| `.claude/resources/orchestration-pipeline.md` | 11-phase pipeline with error handling, context budgets, and phase gates |
+| `.claude/resources/reasoning-skills.md` | Core reasoning framework for deep vulnerability analysis |
+| `.claude/resources/domain-decomposition.md` | Domain decomposition strategy for reasoning agent |
+| `.claude/resources/certora-sui-move-reference.md` | CVLM type system, manifest functions, ghosts, shadows, CLI reference for Sui Move |
+| `.claude/resources/certora-sui-move-templates.md` | Copy-paste CVLM spec patterns for Sui Move verification |
+| `.claude/resources/sui-prover-reference.md` | Sui Prover spec API, math types, ghost variables, quantifiers, CLI, debugging |
+| `.claude/resources/memory-state.md` | Mem0-inspired cross-cutting memory bus architecture for inter-agent knowledge sharing |
 
 ### All Agents
 
 | Agent | File | Purpose |
 |-------|------|---------|
-| `audit-orchestrator` | `.github/agents/audit-orchestrator.md` | **Entry point** — orchestrates full audit pipeline |
-| `audit-context-building` | `.github/agents/audit-context-building.md` | Line-by-line codebase analysis |
-| `invariant-writer` | `.github/agents/invariant-writer.md` | Extracts all system invariants |
-| `invariant-reviewer` | `.github/agents/invariant-reviewer.md` | Reviews & hardens invariants for multi-step coverage and FV readiness |
-| `invariant-catcher` | `.github/agents/invariant-catcher.md` | Hunts for DB vulnerability patterns |
-| `protocol-reasoning` | `.github/agents/protocol-reasoning.md` | Deep reasoning-based vulnerability discovery |
-| `missing-validation-reasoning` | `.github/agents/missing-validation-reasoning.md` | Input validation scanner |
-| `poc-writing` | `.github/agents/poc-writing.md` | Writes exploit tests using the target codebase's native test framework |
-| `issue-writer` | `.github/agents/issue-writer.md` | Polishes findings for submission |
-| `medusa-fuzzing` | `.github/agents/medusa-fuzzing.md` | Generates Medusa fuzzing harnesses |
-| `certora-verification` | `.github/agents/certora-verification.md` | Generates Certora CVL specs |
-| `halmos-verification` | `.github/agents/halmos-verification.md` | Generates Halmos symbolic test suites for Solidity formal verification |
-| `certora-sui-move-verification` | `.github/agents/certora-sui-move-verification.md` | Generates Certora CVLM specs for Sui Move contracts |
-| `sui-prover-verification` | `.github/agents/sui-prover-verification.md` | Generates Asymptotic Sui Prover specs for Sui Move contracts |
-| `sherlock-judging` | `.github/agents/sherlock-judging.md` | Validates against Sherlock criteria |
-| `cantina-judge` | `.github/agents/cantina-judge.md` | Validates against Cantina criteria |
-| `code4rena-judge` | `.github/agents/code4rena-judge.md` | Validates against Code4rena criteria |
-| `variant-template-writer` | `.github/agents/variant-template-writer.md` | Creates DB entries from reports |
-| `defihacklabs-indexer` | `.github/agents/defihacklabs-indexer.md` | Indexes DeFiHackLabs exploit PoCs into attack-graph-aware DB entries and invariants |
-| `solodit-fetching` | `.github/agents/solodit-fetching.md` | Fetches reports from Solodit API |
-| `function-analyzer` | `.github/agents/function-analyzer.md` | Per-contract ultra-granular function analysis (spawned by audit-context-building) |
-| `system-synthesizer` | `.github/agents/system-synthesizer.md` | Synthesizes per-contract context into global context document (spawned by audit-context-building) |
-| `invariant-indexer` | `.github/agents/invariant-indexer.md` | Indexes canonical invariants from production DeFi protocols into per-category reference files for invariant-writer |
-| `db-quality-monitor` | `.github/agents/db-quality-monitor.md` | Monitors full pipeline: 4-tier architecture integrity, manifest generation, hunt cards, script health, context delivery quality, and auto-fixes via sub-agents |
-| `multi-persona-orchestrator` | `.github/agents/multi-persona-orchestrator.md` | Orchestrates 6 parallel auditing personas (BFS, DFS, Working Backward, State Machine, Mirror, Re-Implementation) with iterative knowledge sharing and cross-verification |
-| `persona-bfs` | `.github/agents/persona-bfs.md` | BFS auditing persona — maps entry points then progressively deepens (spawned by multi-persona-orchestrator) |
-| `persona-dfs` | `.github/agents/persona-dfs.md` | DFS auditing persona — verifies leaf functions then works upward (spawned by multi-persona-orchestrator) |
-| `persona-working-backward` | `.github/agents/persona-working-backward.md` | Working Backward persona — traces from critical sinks to attacker-controllable sources (spawned by multi-persona-orchestrator) |
-| `persona-state-machine` | `.github/agents/persona-state-machine.md` | State Machine persona — maps all protocol states and transitions to find illegal paths to bad states (spawned by multi-persona-orchestrator) |
-| `persona-mirror` | `.github/agents/persona-mirror.md` | Mirror persona — analyzes paired/opposite functions for asymmetries (spawned by multi-persona-orchestrator) |
-| `persona-reimplementer` | `.github/agents/persona-reimplementer.md` | Re-Implementation persona — hypothetically re-implements functions then diffs (spawned by multi-persona-orchestrator) |
+| `audit-orchestrator` | `.claude/agents/audit-orchestrator.md` | **Entry point** — orchestrates full audit pipeline |
+| `audit-context-building` | `.claude/agents/audit-context-building.md` | Line-by-line codebase analysis |
+| `invariant-writer` | `.claude/agents/invariant-writer.md` | Extracts all system invariants |
+| `invariant-reviewer` | `.claude/agents/invariant-reviewer.md` | Reviews & hardens invariants for multi-step coverage and FV readiness |
+| `invariant-catcher` | `.claude/agents/invariant-catcher.md` | Hunts for DB vulnerability patterns |
+| `protocol-reasoning` | `.claude/agents/protocol-reasoning.md` | Deep reasoning-based vulnerability discovery |
+| `missing-validation-reasoning` | `.claude/agents/missing-validation-reasoning.md` | Input validation scanner |
+| `poc-writing` | `.claude/agents/poc-writing.md` | Writes exploit tests using the target codebase's native test framework |
+| `issue-writer` | `.claude/agents/issue-writer.md` | Polishes findings for submission |
+| `medusa-fuzzing` | `.claude/agents/medusa-fuzzing.md` | Generates Medusa fuzzing harnesses |
+| `certora-verification` | `.claude/agents/certora-verification.md` | Generates Certora CVL specs |
+| `halmos-verification` | `.claude/agents/halmos-verification.md` | Generates Halmos symbolic test suites for Solidity formal verification |
+| `certora-sui-move-verification` | `.claude/agents/certora-sui-move-verification.md` | Generates Certora CVLM specs for Sui Move contracts |
+| `sui-prover-verification` | `.claude/agents/sui-prover-verification.md` | Generates Asymptotic Sui Prover specs for Sui Move contracts |
+| `sherlock-judging` | `.claude/agents/sherlock-judging.md` | Validates against Sherlock criteria |
+| `cantina-judge` | `.claude/agents/cantina-judge.md` | Validates against Cantina criteria |
+| `code4rena-judge` | `.claude/agents/code4rena-judge.md` | Validates against Code4rena criteria |
+| `judge-orchestrator` | `.claude/agents/judge-orchestrator.md` | Cross-platform judging — runs Sherlock + Cantina + Code4rena in parallel with two-round challenge protocol |
+| `report-aggregator` | `.claude/agents/report-aggregator.md` | Assembles judge-verified findings into final Sherlock-format report with verified code citations |
+| `variant-template-writer` | `.claude/agents/variant-template-writer.md` | Creates DB entries from reports |
+| `defihacklabs-indexer` | `.claude/agents/defihacklabs-indexer.md` | Indexes DeFiHackLabs exploit PoCs into attack-graph-aware DB entries and invariants |
+| `solodit-fetching` | `.claude/agents/solodit-fetching.md` | Fetches reports from Solodit API |
+| `function-analyzer` | `.claude/agents/function-analyzer.md` | Per-contract ultra-granular function analysis (spawned by audit-context-building) |
+| `system-synthesizer` | `.claude/agents/system-synthesizer.md` | Synthesizes per-contract context into global context document (spawned by audit-context-building) |
+| `invariant-indexer` | `.claude/agents/invariant-indexer.md` | Indexes canonical invariants from production DeFi protocols into per-category reference files for invariant-writer |
+| `db-quality-monitor` | `.claude/agents/db-quality-monitor.md` | Monitors full pipeline: 4-tier architecture integrity, manifest generation, hunt cards, script health, context delivery quality, and auto-fixes via sub-agents |
+| `multi-persona-orchestrator` | `.claude/agents/multi-persona-orchestrator.md` | Orchestrates 6 parallel auditing personas (BFS, DFS, Working Backward, State Machine, Mirror, Re-Implementation) with iterative knowledge sharing and cross-verification |
+| `persona-bfs` | `.claude/agents/persona-bfs.md` | BFS auditing persona — maps entry points then progressively deepens (spawned by multi-persona-orchestrator) |
+| `persona-dfs` | `.claude/agents/persona-dfs.md` | DFS auditing persona — verifies leaf functions then works upward (spawned by multi-persona-orchestrator) |
+| `persona-working-backward` | `.claude/agents/persona-working-backward.md` | Working Backward persona — traces from critical sinks to attacker-controllable sources (spawned by multi-persona-orchestrator) |
+| `persona-state-machine` | `.claude/agents/persona-state-machine.md` | State Machine persona — maps all protocol states and transitions to find illegal paths to bad states (spawned by multi-persona-orchestrator) |
+| `persona-mirror` | `.claude/agents/persona-mirror.md` | Mirror persona — analyzes paired/opposite functions for asymmetries (spawned by multi-persona-orchestrator) |
+| `persona-reimplementer` | `.claude/agents/persona-reimplementer.md` | Re-Implementation persona — hypothetically re-implements functions then diffs (spawned by multi-persona-orchestrator) |
 

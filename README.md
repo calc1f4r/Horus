@@ -4,13 +4,13 @@
 
 **A production-grade, agent-optimized vulnerability pattern database for smart contract security auditing.**
 
-1,674 vulnerability patterns from real-world audits and on-chain exploits, structured into a tiered search system built for LLM-powered audit agents — spanning EVM, Solana, Cosmos, Sui Move, and ZK Rollup ecosystems.
+2,258 vulnerability patterns from real-world audits and on-chain exploits, structured into a tiered search system built for LLM-powered audit agents — spanning EVM, Solana, Cosmos, Sui Move, and ZK Rollup ecosystems.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Patterns](https://img.shields.io/badge/patterns-1%2C674-brightgreen)](DB/manifests)
+[![Patterns](https://img.shields.io/badge/patterns-2%2C258-brightgreen)](DB/manifests)
 [![Manifests](https://img.shields.io/badge/manifests-14-orange)](DB/manifests)
-[![Hunt Cards](https://img.shields.io/badge/hunt%20cards-1%2C267-red)](DB/manifests/huntcards)
-[![Agents](https://img.shields.io/badge/agents-30-blueviolet)](.github/agents)
+[![Hunt Cards](https://img.shields.io/badge/hunt%20cards-1%2C522-red)](DB/manifests/huntcards)
+[![Agents](https://img.shields.io/badge/agents-35-blueviolet)](.github/agents)
 [![Reports](https://img.shields.io/badge/raw%20reports-22%2C200%2B-yellow)](reports)
 
 </div>
@@ -21,18 +21,18 @@
 
 The Vulnerability Database is a curated knowledge base purpose-built for AI-assisted smart contract auditing. Rather than storing flat lists of findings, it uses a **4-tier precision architecture** that lets agents load only the context they need — reducing token usage by 60–80% compared to naive full-file reads.
 
-The database ships with a **30-agent audit pipeline** that can take an unfamiliar codebase from zero to a triaged report with PoCs, fuzzing harnesses, formal verification specs, and multi-platform severity validation — all powered by the patterns stored here.
+The database ships with a **35-agent audit pipeline** that can take an unfamiliar codebase from zero to a triaged report with PoCs, fuzzing harnesses, formal verification specs, and multi-platform severity validation — all powered by the patterns stored here.
 
 ### Key Numbers
 
 | Metric | Count |
 |--------|-------|
-| Vulnerability patterns | 1,674 |
-| Hunt cards (compressed detection cards) | 1,267 |
+| Vulnerability patterns | 2,258 |
+| Hunt cards (compressed detection cards) | 1,522 |
 | Manifests (category indexes) | 14 |
-| DB content files | 214 |
+| DB content files | 218 |
 | Raw source reports | 22,200+ |
-| Specialized audit agents | 30 |
+| Specialized audit agents | 35 |
 | Supported ecosystems | EVM, Solana, Cosmos, Sui Move, ZK Rollups |
 
 ---
@@ -42,7 +42,7 @@ The database ships with a **30-agent audit pipeline** that can take an unfamilia
 ```
 Tier 1    DB/index.json                            ← Lean router. ALWAYS start here.
    ↓
-Tier 1.5  DB/manifests/huntcards/all-huntcards.json ← 1,267 compressed detection cards
+Tier 1.5  DB/manifests/huntcards/all-huntcards.json ← 1,522 compressed detection cards
    ↓                                                   with grep patterns & micro-directives
 Tier 2    DB/manifests/<name>.json                  ← Full pattern index with line ranges
    ↓
@@ -50,7 +50,7 @@ Tier 3    DB/**/*.md                                ← Vulnerability content.
                                                        Read ONLY targeted line ranges.
 ```
 
-**Why it matters:** An agent auditing a lending protocol loads ~3 manifests (~2K patterns) instead of reading all 214 files. Hunt cards compress those patterns further into grep-first detection cards, letting agents scan a full codebase in a single pass and only read detailed content for confirmed hits.
+**Why it matters:** An agent auditing a lending protocol loads ~3 manifests (~2K patterns) instead of reading all 218 files. Hunt cards compress those patterns further into grep-first detection cards, letting agents scan a full codebase in a single pass and only read detailed content for confirmed hits.
 
 ### Hunt Cards (Tier 1.5)
 
@@ -72,21 +72,21 @@ Hunt cards are the primary interface for bulk auditing. Each card contains:
 
 | Manifest | Patterns | Files | Focus |
 |---|---|---|---|
-| `cosmos` | 374 | 43 | Cosmos SDK, IBC, staking, CometBFT, app-chain invariants |
-| `general-defi` | 319 | 43 | Flash loans, vaults, slippage, precision, calculations, yield |
-| `sui-move` | 243 | 17 | Sui Move object model, access control, DeFi logic, bridges |
+| `general-defi` | 438 | 46 | Flash loans, vaults, slippage, precision, calculations, yield |
+| `cosmos` | 416 | 43 | Cosmos SDK, IBC, staking, CometBFT, app-chain invariants |
+| `sui-move` | 304 | 16 | Sui Move object model, access control, DeFi logic, bridges |
+| `general-security` | 153 | 15 | Access control, signatures, input validation, initialization |
+| `amm` | 148 | 9 | Concentrated liquidity, constant product, sandwich attacks |
+| `general-infrastructure` | 142 | 14 | Proxies, reentrancy, storage collision, upgrades |
+| `unique` | 121 | 21 | Protocol-specific exploits from real-world incidents |
+| `general-governance` | 118 | 13 | DAOs, stablecoins, MEV, randomness, malicious patterns |
+| `oracle` | 107 | 12 | Chainlink, Pyth, price manipulation, staleness |
 | `zk-rollup` | 100 | 10 | Circuit constraints, fraud proofs, sequencer, L1-L2 messaging |
-| `general-security` | 93 | 15 | Access control, signatures, input validation, initialization |
-| `general-infrastructure` | 85 | 14 | Proxies, reentrancy, storage collision, upgrades |
-| `oracle` | 84 | 12 | Chainlink, Pyth, price manipulation, staleness |
-| `bridge` | 82 | 10 | LayerZero, Wormhole, Hyperlane, CCIP, Axelar, Stargate |
-| `unique` | 79 | 21 | Protocol-specific exploits from real-world incidents |
-| `general-governance` | 71 | 11 | DAOs, stablecoins, MEV, randomness, malicious patterns |
-| `amm` | 67 | 9 | Concentrated liquidity, constant product, sandwich attacks |
-| `solana` | 40 | 2 | Solana programs, Anchor, Token-2022, SPL |
-| `tokens` | 33 | 3 | ERC20, ERC4626, ERC721, token compatibility |
+| `bridge` | 92 | 10 | LayerZero, Wormhole, Hyperlane, CCIP, Axelar, Stargate |
+| `solana` | 68 | 2 | Solana programs, Anchor, Token-2022, SPL |
+| `tokens` | 47 | 3 | ERC20, ERC4626, ERC721, token compatibility |
 | `account-abstraction` | 4 | 4 | ERC-4337, ERC-7579, paymasters, session keys |
-| **Total** | **1,674** | **214** | |
+| **Total** | **2,258** | **218** | |
 
 ---
 
@@ -113,7 +113,7 @@ The `protocolContext` section of `DB/index.json` maps protocol types to the mani
 
 ## Agent Ecosystem
 
-The `.github/agents/` directory contains **30 specialized agents** organized into a multi-phase audit pipeline with parallel execution, multi-persona reasoning, and downstream formal verification.
+The `.github/agents/` directory contains **35 specialized agents** organized into a multi-phase audit pipeline with parallel execution, multi-persona reasoning, and downstream formal verification.
 
 ### Entry Point
 
@@ -193,23 +193,26 @@ Phase 7  Downstream Generation → medusa-fuzzing, certora-verification, halmos-
 </details>
 
 <details>
-<summary><strong>Output & Reporting (3 agents)</strong></summary>
+<summary><strong>Output & Reporting (4 agents)</strong></summary>
 
 | Agent | Role |
 |---|---|
 | `poc-writing` | Writes compilable exploit tests (Foundry, Hardhat, Anchor, etc.) |
 | `issue-writer` | Polishes findings into submission-ready write-ups |
+| `report-aggregator` | Assembles judge-verified findings into final Sherlock-format report |
 | `variant-template-writer` | Converts audit reports into TEMPLATE.md-compliant DB entries |
 
 </details>
 
 <details>
-<summary><strong>Formal Verification (5 agents)</strong></summary>
+<summary><strong>Formal Verification (6 agents)</strong></summary>
 
 | Agent | Role |
 |---|---|
+| `chimera-setup` | Scaffolds multi-tool property testing suite (Echidna + Medusa + Halmos) |
 | `medusa-fuzzing` | Generates Medusa-compatible property test harnesses |
 | `certora-verification` | Generates Certora CVL formal specs + Gambit mutation configs |
+| `certora-mutation-testing` | Mutation campaigns with Gambit + certoraMutate |
 | `halmos-verification` | Generates Halmos symbolic test suites for Foundry |
 | `certora-sui-move-verification` | Generates Certora CVLM specs for Sui Move |
 | `sui-prover-verification` | Generates Asymptotic Sui Prover specs for Sui Move |
@@ -217,10 +220,11 @@ Phase 7  Downstream Generation → medusa-fuzzing, certora-verification, halmos-
 </details>
 
 <details>
-<summary><strong>Severity Validation (3 agents)</strong></summary>
+<summary><strong>Severity Validation (4 agents)</strong></summary>
 
 | Agent | Role |
 |---|---|
+| `judge-orchestrator` | Cross-platform consensus — runs all 3 judges in parallel |
 | `sherlock-judging` | Validates findings against Sherlock audit platform criteria |
 | `cantina-judge` | Validates findings against Cantina severity matrix |
 | `code4rena-judge` | Validates findings against Code4rena competition standards |
@@ -228,11 +232,12 @@ Phase 7  Downstream Generation → medusa-fuzzing, certora-verification, halmos-
 </details>
 
 <details>
-<summary><strong>Data Collection (1 agent)</strong></summary>
+<summary><strong>Data Collection (2 agents)</strong></summary>
 
 | Agent | Role |
 |---|---|
 | `solodit-fetching` | Fetches raw findings from the Solodit/Cyfrin API |
+| `defihacklabs-indexer` | Indexes DeFiHackLabs exploit PoCs into attack-graph-aware DB entries |
 
 </details>
 
@@ -260,7 +265,7 @@ Phase 7  Downstream Generation → medusa-fuzzing, certora-verification, halmos-
 ### Bulk Audit (Recommended for Full Audits)
 
 ```
-1. Load DB/manifests/huntcards/all-huntcards.json (1,267 cards)
+1. Load DB/manifests/huntcards/all-huntcards.json (1,522 cards, ~15K tokens)
 2. grep target code for each card.grep pattern
 3. Cards with neverPrune: true always survive regardless of grep hits
 4. Prune cards with zero hits → typically removes 60-80%
@@ -275,11 +280,11 @@ Phase 7  Downstream Generation → medusa-fuzzing, certora-verification, halmos-
 
 ```
 Vulnerability-database/
-├── DB/                               # Vulnerability database (214 files, 1,674 patterns)
+├── DB/                               # Vulnerability database (218 files, 2,258 patterns)
 │   ├── index.json                    #   Master router — START HERE
 │   ├── SEARCH_GUIDE.md               #   Detailed agent search guide
 │   ├── manifests/                    #   14 pattern-level indexes + keywords
-│   │   ├── huntcards/                #   1,267 compressed detection cards
+│   │   ├── huntcards/                    #   1,522 compressed detection cards
 │   │   │   ├── all-huntcards.json    #     All cards in one file
 │   │   │   └── *-huntcards.json      #     Per-manifest cards (15 files)
 │   │   ├── *.json                    #     Category manifests with line ranges
@@ -289,7 +294,7 @@ Vulnerability-database/
 │   ├── bridge/                       #   LayerZero, Wormhole, Hyperlane, CCIP, Axelar
 │   ├── tokens/                       #   ERC20, ERC4626, ERC721
 │   ├── cosmos/                       #   Cosmos SDK, IBC, CometBFT, app-chains
-│   ├── Solona-chain-specific/        #   Solana programs, Token-2022
+│   ├── Solana-chain-specific/        #   Solana programs, Token-2022
 │   ├── Sui-Move-specific/            #   Sui Move object model, DeFi, bridges
 │   ├── account-abstraction/          #   ERC-4337, ERC-7579, paymasters
 │   ├── zk-rollup/                    #   ZK circuits, fraud proofs, sequencers
@@ -300,12 +305,12 @@ Vulnerability-database/
 ├── DeFiHackLabs/                     # Real-world exploit PoCs (submodule)
 ├── scripts/                          # Automation and utility scripts (15 files)
 │
-├── .github/agents/                   # 30 specialized audit agents
-│   └── resources/                    #   Agent reference materials (34 files)
+├── .github/agents/                   # 35 specialized audit agents
+│   └── resources/                    #   Agent reference materials (39 files)
 │
 ├── TEMPLATE.md                       # Canonical DB entry structure
 ├── Example.md                        # Reference implementation of an entry
-├── Agents.md                         # Agent guidance & workflow documentation
+├── DB-GUIDE.md                         # DB entry conventions & search workflows
 ├── CodebaseStructure.md              # Detailed codebase structure reference
 ├── CONTRIBUTING.md                   # Contribution guidelines
 ├── generate_manifests.py             # Regenerates manifests + hunt cards
@@ -334,7 +339,7 @@ See [CodebaseStructure.md](CodebaseStructure.md) for the full branch-to-category
 
 ## Install as a Claude Code Plugin
 
-This repository is a native [Claude Code plugin](https://code.claude.com/docs/en/plugins). Install it to get all 30 agents directly accessible via the `/vulnerability-db-agents:` namespace.
+This repository is a native [Claude Code plugin](https://code.claude.com/docs/en/plugins). Install it to get all 35 agents directly accessible via the `/vulnerability-db-agents:` namespace.
 
 ### Prerequisites
 
@@ -420,6 +425,11 @@ Agents are available in `/agents` and Claude can invoke them automatically:
 | `sherlock-judging` | Judging | Validates findings against Sherlock criteria |
 | `cantina-judge` | Judging | Validates findings against Cantina criteria |
 | `code4rena-judge` | Judging | Validates findings against Code4rena criteria |
+| `judge-orchestrator` | Judging | Cross-platform consensus — runs all 3 judges in parallel |
+| `report-aggregator` | Output | Assembles judge-verified findings into final report |
+| `chimera-setup` | Verification | Scaffolds multi-tool property testing (Echidna + Medusa + Halmos) |
+| `certora-mutation-testing` | Verification | Mutation campaigns with Gambit + certoraMutate |
+| `defihacklabs-indexer` | Data | Indexes DeFiHackLabs exploit PoCs into DB entries |
 | `solodit-fetching` | Data | Fetches raw findings from Solodit/Cyfrin API |
 
 ### Plugin Structure
@@ -429,12 +439,12 @@ Vulnerability-database/              ← Plugin root
 ├── .claude-plugin/
 │   └── plugin.json                  ← Plugin manifest (name, version, description)
 ├── .claude/
-│   ├── agents/                      ← 30 agent definitions
-│   ├── skills/                      ← 30 matching skill wrappers
-│   ├── resources/                   ← 34 shared reference files
-│   └── rules/                       ← 8 path-scoped rules
+│   ├── agents/                      ← 35 agent definitions
+│   ├── skills/                      ← 35 matching skill wrappers
+│   ├── resources/                   ← 39 shared reference files
+│   └── rules/                       ← 13 path-scoped rules
 ├── settings.json                    ← Default settings (activates audit-orchestrator)
-├── DB/                              ← Vulnerability database (1,674 patterns)
+├── DB/                              ← Vulnerability database (2,258 patterns)
 └── README.md
 ```
 

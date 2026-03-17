@@ -593,5 +593,5 @@ grep -rn "setInterfaceImplementer\|ERC777\|tokensReceived\|tokensToSend" --inclu
 ### Related Vulnerabilities
 
 - [ERC-777 / Token Compatibility](../token-compatibility/non-standard-token-vulnerabilities.md)
-- [Flash Loan Attack Patterns](../flash-loan-attacks/FLASH_LOAN_VULNERABILITIES.md)
+- [Flash Loan Attack Patterns](../flash-loan/FLASH_LOAN_VULNERABILITIES.md)
 - [Input Validation Patterns](../missing-validations/defihacklabs-input-validation-patterns.md)

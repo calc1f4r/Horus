@@ -45,6 +45,36 @@ version: all
 
 # Source
 source: DeFiHackLabs
+
+# Pattern Identity (Required)
+root_cause_family: missing_access_control
+pattern_key: missing_access_control | external_call_handler | arbitrary_external_call
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - Token
+  - _executeSwap
+  - _performOperation
+  - addWhitelistedRouter
+  - allowance
+  - approve
+  - attack
+  - attackDexible
+  - attackMaestro
+  - balanceOf
+  - block.timestamp
+  - bridge_contract
+  - burn
+  - delegatecall
+  - depositToGasZipERC20
+  - envelope
+  - execute
+  - executeCall
+  - executeRoute
+  - executeSwap
 ---
 
 # Arbitrary External Call Vulnerabilities
@@ -58,6 +88,38 @@ Arbitrary external call vulnerabilities occur when a contract allows attackers t
 **Total Historical Losses from Analyzed Exploits: >$50M USD (2021-2025)**
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_access_control"
+- Pattern key: `missing_access_control | external_call_handler | arbitrary_external_call`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `external_call_handler`
+- High-signal code keywords: `Token`, `_executeSwap`, `_performOperation`, `addWhitelistedRouter`, `allowance`, `approve`, `attack`, `attackDexible`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `BMIZapper.function -> BondFixedExpiryTeller.function -> ChaingeAttacker.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State-changing function lacks `onlyOwner`/`onlyRole` modifier
+- Signal 2: External function accepts arbitrary address and calls interface methods without registry validation
+- Signal 3: Configuration setter is callable by non-owner accounts
+- Signal 4: Initialization or migration function is unprotected
+
+#### False Positive Guards
+
+- Not this bug when: Function is `internal`/`private` and only called from access-controlled paths
+- Safe if: Function is restricted via `onlyOwner`/`onlyRole`/`require(msg.sender == ...)`
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerability Categories
 
@@ -1006,7 +1068,7 @@ function processRoute(
 
 - [Access Control Vulnerabilities](../access-control/access-control-vulnerabilities.md)
 - [Missing Validations](../missing-validations/MISSING_VALIDATION_TEMPLATE.md)
-- [Flash Loan Attacks](../flash-loan-attacks/FLASH_LOAN_VULNERABILITIES.md)
+- [Flash Loan Attacks](../flash-loan/FLASH_LOAN_VULNERABILITIES.md)
 - [Proxy Pattern Vulnerabilities](../proxy-vulnerabilities/PROXY_PATTERN_VULNERABILITIES.md)
 
 ---
@@ -1083,3 +1145,24 @@ function processRoute(
 - **Rabby Wallet SwapRouter** (2022-10, $200K): `DeFiHackLabs/src/test/2022-10/RabbyWallet_SwapRouter_exp.sol`
 - **ChaingeFinance** (2024-04, $200K): `DeFiHackLabs/src/test/2024-04/ChaingeFinance_exp.sol`
 - **CowSwap** (2023-02, $120K): `DeFiHackLabs/src/test/2023-02/CowSwap_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`DeFiHackLabs`, `Token`, `_executeSwap`, `_performOperation`, `access_control`, `addWhitelistedRouter`, `aggregator`, `allowance`, `approve`, `arbitrary_external_call`, `attack`, `attackDexible`, `attackMaestro`, `balanceOf`, `block.timestamp`, `bridge`, `bridge_contract`, `burn`, `cross_chain`, `defi`, `delegatecall`, `depositToGasZipERC20`, `envelope`, `execute`, `executeCall`, `executeRoute`, `executeSwap`, `low_level_call`, `multicall`, `real_exploit`, `router`, `router_aggregator`, `swap`, `swap_callback`, `token_approval_exploit`, `transferFrom_abuse`, `unvalidated_calldata`, `unvalidated_target`

@@ -431,5 +431,5 @@ grep -rn "flashLoan\|DPPFlashLoanCall" --include="*.sol" | head -20
 ### Related Vulnerabilities
 
 - [Fee-on-Transfer Token Issues](../../general/fee-on-transfer-tokens/) — Token compatibility patterns
-- [Flash Loan Attack Patterns](../../general/flash-loan-attacks/) — Flash loan enabled attacks
+- [Flash Loan Attack Patterns](../../general/flash-loan/) — Flash loan enabled attacks
 - [AMM Vulnerabilities](../../amm/) — General AMM security patterns

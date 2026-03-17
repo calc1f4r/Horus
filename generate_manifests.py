@@ -33,7 +33,7 @@ CATEGORY_MAP = {
     "bridge": ["bridge"],
     "tokens": ["tokens"],
     "cosmos": ["cosmos"],
-    "solana": ["Solona-chain-specific"],
+    "solana": ["Solana-chain-specific"],
     "general": ["general"],
     "unique": ["unique"],
     "account-abstraction": ["account-abstraction"],
@@ -750,7 +750,7 @@ GENERAL_SUBCATEGORIES = {
     },
     "general-defi": {
         "folders": [
-            "flash-loan", "flash-loan-attacks", "slippage-protection",
+            "flash-loan", "slippage-protection",
             "vault-inflation-attack", "yield-strategy-vulnerabilities",
             "fee-on-transfer-tokens", "token-compatibility",
             "precision", "rounding-precision-loss", "calculation",

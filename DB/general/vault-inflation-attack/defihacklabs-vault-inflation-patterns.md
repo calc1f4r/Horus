@@ -490,6 +490,6 @@ contract SecureLendingPool {
 ## Related Vulnerabilities
 
 - `DB/general/precision/` — Rounding and precision loss patterns
-- `DB/general/flash-loan-attacks/` — Flash loan attack patterns
+- `DB/general/flash-loan/` — Flash loan attack patterns
 - `DB/general/business-logic/defihacklabs-share-accounting-patterns.md` — Share/vault accounting flaws
 - `DB/general/rounding-precision-loss/` — Integer rounding exploitation
