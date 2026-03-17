@@ -29,6 +29,26 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | abci_lifecycle_logic | abci_lifecycle_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - AnteHandle
+  - FinalizeBlock
+  - beginblock_error
+  - checktx_bypass
+  - endblock_error
+  - finalize_block
+  - malicious
+  - mint
+  - prepare_process
+  - vote_extension_abuse
 ---
 
 ## References & Source Reports
@@ -83,6 +103,38 @@ version: all
 Implementation flaw in abci endblock error logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 2 audit reports with severity distribution: HIGH: 1, MEDIUM: 1.
 
 > **Key Finding**: The bug report highlights an issue with the RemoveStakes and RemoveDelegateStakes functions in the Allora network's code. These functions are responsible for removing stakes from users' accounts. The bug allows for errors to occur during the removal process, which can result in an inconsistent state
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | abci_lifecycle_logic | abci_lifecycle_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `abci_lifecycle_logic`
+- High-signal code keywords: `AnteHandle`, `FinalizeBlock`, `beginblock_error`, `checktx_bypass`, `endblock_error`, `finalize_block`, `malicious`, `mint`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -448,3 +500,24 @@ grep -rn 'abci|finalize|block' --include='*.go' --include='*.sol'
 ## Keywords
 
 `abci`, `abci lifecycle`, `abuse`, `antehandler`, `appchain`, `been`, `beginblock`, `being`, `block`, `bypass`, `causing`, `checktx`, `cosmos`, `disguised`, `endblock`, `endblocker`, `error`, `errors`, `extension`, `extensions`, `finalize`, `finalizeblock`, `from`, `handle`, `incorrect`, `indexed`, `injected`, `issue`, `lack`, `message`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`AnteHandle`, `FinalizeBlock`, `abci_lifecycle`, `abci_lifecycle_vulnerabilities`, `appchain`, `beginblock_error`, `checktx_bypass`, `cosmos`, `defi`, `endblock_error`, `finalize_block`, `malicious`, `mint`, `prepare_process`, `staking`, `vote_extension_abuse`

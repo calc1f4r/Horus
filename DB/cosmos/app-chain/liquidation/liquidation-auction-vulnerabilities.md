@@ -33,6 +33,31 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | liquidation_logic | liquidation_auction_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - accounting
+  - accounting_error
+  - approve
+  - bot_dos
+  - buyoutLien
+  - cascade
+  - cdp_dust
+  - deposit
+  - exploit
+  - frontrunning
+  - liens
+  - manipulation
+  - mint
+  - ratio_bypass
+  - threshold_error
 ---
 
 ## References & Source Reports
@@ -103,6 +128,38 @@ version: all
 Implementation flaw in auction manipulation logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 3 audit reports with severity distribution: MEDIUM: 3.
 
 > **Key Finding**: This bug report is about a vulnerability in the SIZE protocol where attackers can submit invalid bids to DOS auctions. The bids can be invalid due to passing a wrong public key, commitment or quote amount. In the code, the public key is never validated and the base amount is not encrypted. This allo
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | liquidation_logic | liquidation_auction_vulnerabilities`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `liquidation_logic`
+- High-signal code keywords: `accounting`, `accounting_error`, `approve`, `bot_dos`, `buyoutLien`, `cascade`, `cdp_dust`, `deposit`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -520,3 +577,24 @@ grep -rn 'liquidation|accounting' --include='*.go' --include='*.sol'
 ## Keywords
 
 `accounting`, `adversary`, `after`, `allocation`, `allowing`, `always`, `amount`, `anyone`, `appchain`, `approve`, `attacker`, `auction`, `auctions`, `block`, `bot`, `buggy`, `bypass`, `call`, `called`, `cascade`, `cause`, `causing`, `cdp`, `collateral`, `cosmos`, `could`, `creation`, `curve`, `debt`, `despite`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`accounting`, `accounting_error`, `appchain`, `approve`, `bot_dos`, `buyoutLien`, `cascade`, `cdp_dust`, `cosmos`, `defi`, `deposit`, `exploit`, `frontrunning`, `liens`, `liquidation`, `liquidation_auction_vulnerabilities`, `manipulation`, `mint`, `ratio_bypass`, `staking`, `threshold_error`

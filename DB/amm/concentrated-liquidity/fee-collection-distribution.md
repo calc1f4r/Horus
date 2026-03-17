@@ -41,6 +41,34 @@ audit_sources:
   - "OpenZeppelin"
   - "Pashov Audit Group"
   - "OtterSec"
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | unknown | unknown
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _distributeFilledOrderFees
+  - addMakerLiquidity
+  - balanceOf
+  - borrow
+  - claim
+  - claimFees
+  - collectFees
+  - deposit
+  - executeIncreasePositionSizeMarket
+  - getEquivalentLiquidity
+  - getOwedFee
+  - manipulation
+  - msg.sender
+  - receive
+  - swap
+  - withdraw
+  - withdrawFees
+  - withdrawNative
 ---
 
 ## Overview
@@ -51,6 +79,38 @@ Fee collection and distribution mechanisms in AMMs are critical revenue sources 
 > These vulnerabilities exist because AMM fee mechanisms rely on precise accounting, proper segregation between principal and fees, temporal ordering assumptions, and underflow-dependent arithmetic that developers frequently misimplement, allowing attackers to steal fees, manipulate fee distribution, or cause DoS.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | unknown | unknown`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `unknown`
+- High-signal code keywords: `_distributeFilledOrderFees`, `addMakerLiquidity`, `balanceOf`, `borrow`, `claim`, `claimFees`, `collectFees`, `deposit`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerable Pattern Examples
 
@@ -487,3 +547,24 @@ function withdrawFees() external onlyOwner {
 **Vulnerability:** JIT attack, flash loan, fee drain, fee DoS, fee underflow, permissionless withdrawal
 
 **Protocols:** uniswap_v3, uniswap_v4, ammplify, goat_trading, particle, serum, good_entry
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_distributeFilledOrderFees`, `addMakerLiquidity`, `amm/concentrated-liquidity`, `balanceOf`, `borrow`, `claim`, `claimFees`, `collectFees`, `deposit`, `executeIncreasePositionSizeMarket`, `getEquivalentLiquidity`, `getOwedFee`, `manipulation`, `msg.sender`, `receive`, `swap`, `withdraw`, `withdrawFees`, `withdrawNative`

@@ -49,6 +49,36 @@ tags:
 
 language: solidity|go
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: arithmetic_error
+pattern_key: arithmetic_error | batcher | batch_decoding_error
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - EIP4844_blobs
+  - _hashBatchHeader
+  - basefee_calculation
+  - batch_commitment
+  - batch_frames
+  - batch_hashes
+  - batcher_frames
+  - blob_versioned_hash
+  - block_submission
+  - calldata_batch
+  - consensus_split
+  - finalize_blocks
+  - getBasefee
+  - honest
+  - inChallenge
+  - manual
+  - msg.sender
+  - race
+  - revertBatch
+  - rollup_node
 ---
 
 ## References & Source Reports
@@ -83,6 +113,38 @@ version: all
 ZK and optimistic rollup batch processing involves complex interactions between the L2 batcher/sequencer and the L1 settlement contract. Bugs in frame decoding, EIP-4844 blob handling, basefee calculation, and batch commitment logic can lead to chain halts, consensus splits between rollup nodes, incorrect fee estimation, and denial-of-service conditions that prevent honest operators from finalizating batches.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of arithmetic_error"
+- Pattern key: `arithmetic_error | batcher | batch_decoding_error`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `batcher|sequencer|node|blob_submission|batch_commitment|finalization|l1_block_submission`
+- High-signal code keywords: `EIP4844_blobs`, `_hashBatchHeader`, `basefee_calculation`, `batch_commitment`, `batch_frames`, `batch_hashes`, `batcher_frames`, `blob_versioned_hash`
+- Typical sink / impact: `chain_halt|dos|consensus_split|incorrect_fees|fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `BatchSubmitter.function -> Rollup.function -> TaikoL2.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Arithmetic operation on user-controlled input without overflow protection
+- Signal 2: Casting between different-width integer types without bounds check
+- Signal 3: Multiplication before division where intermediate product can exceed type max
+- Signal 4: Accumulator variable can wrap around causing incorrect accounting
+
+#### False Positive Guards
+
+- Not this bug when: Solidity >= 0.8.0 with default checked arithmetic
+- Safe if: SafeMath library used for all arithmetic on user-controlled values
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -398,3 +460,24 @@ function revertBatch(uint256 batchId) external {
 ### Keywords for Search
 
 `batch decoding consensus split`, `EIP-4844 blob incompatibility`, `batcher frame ambiguity`, `blob versioned hash validation`, `Scroll batch hash memory corruption`, `Taiko basefee calculation`, `inChallenge reset premature`, `block stuffing blob size limit`, `malformed blob transaction validator crash`, `multi-blob batch submission`, `op-node frame decoding bug`, `batch commitment DoS`, `rollup block submission validation`, `Nethermind validator crash blob`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`DoS`, `EIP4844`, `EIP4844_blobs`, `_hashBatchHeader`, `arbitrum`, `basefee_calculation`, `batch_commitment`, `batch_decoding_error|blob_incompatibility|dos|consensus_split|incorrect_finalization|basefee_error`, `batch_frames`, `batch_hashes`, `batch_processing`, `batcher`, `batcher_frames`, `blob_versioned_hash`, `blobs`, `block_submission`, `calldata_batch`, `consensus`, `consensus_split`, `finalization`, `finalize_blocks`, `getBasefee`, `honest`, `inChallenge`, `manual`, `msg.sender`, `optimism`, `race`, `revertBatch`, `rollup_node`, `scroll`, `sequencer`, `taiko`, `zk_rollup_batch_processing`

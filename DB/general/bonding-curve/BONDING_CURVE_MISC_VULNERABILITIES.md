@@ -48,6 +48,36 @@ tags:
 # Version Info
 language: solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | oracle | miscellaneous
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - addLiquidity
+  - balanceOf
+  - batch_operations
+  - block.number
+  - block.timestamp
+  - bonding_curve
+  - borrow
+  - burn
+  - buy
+  - claimFees
+  - claimReward
+  - closePositionByCondition
+  - collateral_depeg
+  - curve_metapool
+  - deposit
+  - downcast
+  - fallback
+  - flash_loan
+  - getAmountOut
+  - getOwnValuation
 ---
 
 ## References & Source Reports
@@ -109,6 +139,38 @@ version: all
 A stablecoin bonding curve pegged to DAI uses all oracle price feeds denominated in USD instead of DAI. When DAI depegs upward (e.g., DAI > $1.01), the system moves *away* from the peg instead of toward it, because it believes the stablecoin is worth more USD than it actually is worth in DAI.
 
 > 📖 Reference: `reports/bonding_curve_findings/h-11-oracle-price-should-be-denominated-in-dai-instead-of-usd.md`
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | oracle | miscellaneous`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `oracle|twap|stablecoin|rebalance|wash_trading|flash_loan|batch_operations|configuration`
+- High-signal code keywords: `addLiquidity`, `balanceOf`, `batch_operations`, `block.number`, `block.timestamp`, `bonding_curve`, `borrow`, `burn`
+- Typical sink / impact: `fund_loss|manipulation|dos|value_leak`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `StableOracleWETH.function -> but.function -> can.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -640,3 +702,24 @@ function rescueGraduation() external onlyAdmin {
 ### Keywords for Search
 
 `oracle denomination`, `DAI`, `USD`, `TWAP`, `stale oracle`, `metapool`, `update`, `flash loan protection`, `idToBlockOfLastDeposit`, `self-liquidation`, `vault.move`, `rebalance`, `rate limit`, `slippage`, `wash trading`, `traderActivity`, `batch purchase`, `try catch`, `unsafe downcast`, `uint128`, `SafeCast`, `depeg`, `collateral`, `protocol fees`, `graduation`, `burn`, `unsold tokens`, `addLiquidityETH`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`addLiquidity`, `balanceOf`, `batch_operations`, `block.number`, `block.timestamp`, `bonding_curve`, `borrow`, `burn`, `buy`, `claimFees`, `claimReward`, `closePositionByCondition`, `collateral_depeg`, `curve_metapool`, `defi`, `deposit`, `downcast`, `fallback`, `flash_loan`, `getAmountOut`, `getOwnValuation`, `kerosene`, `miscellaneous`, `oracle`, `rate_limiting`, `rebalance`, `self_liquidation`, `selfdestruct`, `stablecoin`, `supply_invariant`, `twap`, `wash_trading`

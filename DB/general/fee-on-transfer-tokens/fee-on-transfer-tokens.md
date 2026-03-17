@@ -45,6 +45,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_token_compatibility
+pattern_key: missing_token_compatibility | token_transfer | fee_on_transfer_incompatibility
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - ERC20
+  - actual_amount
+  - approve
+  - approveToken
+  - balanceOf
+  - deflationary_token
+  - deposit
+  - depositAndStake
+  - depositWithFee
+  - fee_deduction
+  - mint
+  - msg.sender
+  - rebasing_token
+  - receive
+  - testDepositWithFoTToken
+  - testFoTTokenRejection
+  - testWithdrawWithFoTToken
+  - token_accounting
+  - transfer
+  - transferFrom
 ---
 
 ## References & Source Reports
@@ -97,6 +127,38 @@ Fee-on-Transfer (FoT) token incompatibility occurs when protocols assume that th
 **Affected Protocols**: Vaults, DEXs, lending pools, staking contracts, any token-handling contract
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_token_compatibility"
+- Pattern key: `missing_token_compatibility | token_transfer | fee_on_transfer_incompatibility`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `token_transfer|deposit_logic|withdrawal_logic`
+- High-signal code keywords: `ERC20`, `actual_amount`, `approve`, `approveToken`, `balanceOf`, `deflationary_token`, `deposit`, `depositAndStake`
+- Typical sink / impact: `incorrect_accounting|fund_loss|transaction_revert`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `FoTTokenTest.function -> RebasingVault.function -> has.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Protocol assumes all ERC20 tokens behave identically (no fees, no rebasing)
+- Signal 2: Token balance check uses cached amount instead of actual balanceOf() after transfer
+- Signal 3: Missing support for tokens with non-standard return values (USDT, BNB)
+- Signal 4: Rebasing or fee-on-transfer token breaks accounting assumptions
+
+#### False Positive Guards
+
+- Not this bug when: Protocol uses SafeERC20 for all token interactions
+- Safe if: Token whitelist restricts to known-safe implementations
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerability Description
 
@@ -539,3 +601,24 @@ contract FoTTokenTest {
 - [Vault Inflation Attack](../vault-inflation-attack/vault-inflation-attack.md) - Can compound with FoT issues
 - [Reentrancy](../reentrancy/) - Token transfers can trigger callbacks
 - [Flash Loan Attacks](../economic/) - Token behavior during flash operations
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`ERC20`, `accounting`, `actual_amount`, `approve`, `approveToken`, `balanceOf`, `defi`, `deflationary`, `deflationary_token`, `deposit`, `depositAndStake`, `depositWithFee`, `erc20`, `fee_deduction`, `fee_on_transfer`, `fee_on_transfer_incompatibility`, `mint`, `msg.sender`, `rebasing`, `rebasing_token`, `receive`, `testDepositWithFoTToken`, `testFoTTokenRejection`, `testWithdrawWithFoTToken`, `token`, `token_accounting`, `token_handling`, `transfer`, `transferFrom`, `vault`, `withdraw`

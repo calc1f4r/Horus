@@ -28,6 +28,30 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: denial_of_service
+pattern_key: denial_of_service | dos_logic | gas_resource_exhaustion
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - block.timestamp
+  - calcFee
+  - dispatchMessage
+  - distribute
+  - execute
+  - executeJob
+  - gas_limit_exploit
+  - gas_metering_bypass
+  - large_payload
+  - memory_exhaustion
+  - mint
+  - msg.sender
+  - storage_exhaustion
+  - verifyDoubleSigning
 ---
 
 ## References & Source Reports
@@ -103,6 +127,38 @@ version: all
 Implementation flaw in dos gas limit exploit logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 16 audit reports with severity distribution: HIGH: 9, MEDIUM: 7.
 
 > **Key Finding**: The client has acknowledged an important issue with the cross-chain protocol. The problem occurs when a packet times out instead of being executed, which can lead to a denial of service attack. This is because different chains have different gas limits, causing one chain to run out of gas while proc
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of denial_of_service"
+- Pattern key: `denial_of_service | dos_logic | gas_resource_exhaustion`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `dos_logic`
+- High-signal code keywords: `block.timestamp`, `calcFee`, `dispatchMessage`, `distribute`, `execute`, `executeJob`, `gas_limit_exploit`, `gas_metering_bypass`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Unbounded loop over user-controlled array can exceed block gas limit
+- Signal 2: External call failure causes entire transaction to revert
+- Signal 3: Attacker can grief operations by manipulating state to cause reverts
+- Signal 4: Resource exhaustion through repeated operations without rate limiting
+
+#### False Positive Guards
+
+- Not this bug when: Loop iterations are bounded by a reasonable constant
+- Safe if: External call failures are handled gracefully (try/catch or pull pattern)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -694,3 +750,24 @@ grep -rn 'dos|large|payload' --include='*.go' --include='*.sol'
 ## Keywords
 
 `abusing`, `allowing`, `appchain`, `attack`, `being`, `between`, `block`, `bridge`, `bypass`, `calls`, `chain`, `chains`, `channel`, `close`, `collision`, `combined`, `consumed`, `consumption`, `cosmos`, `denial`, `deposits`, `different`, `dispatching`, `dos`, `error`, `exhaustion`, `exploit`, `exploited`, `field`, `freeze`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`appchain`, `block.timestamp`, `calcFee`, `cosmos`, `defi`, `dispatchMessage`, `distribute`, `dos`, `execute`, `executeJob`, `gas_limit_exploit`, `gas_metering_bypass`, `gas_resource_exhaustion`, `large_payload`, `memory_exhaustion`, `mint`, `msg.sender`, `staking`, `storage_exhaustion`, `verifyDoubleSigning`

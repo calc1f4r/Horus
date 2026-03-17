@@ -29,7 +29,33 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | oracle_manipulation | read_only_reentrancy
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - attack
+  - canLiquidate
+  - fallback
+  - getPrice
+  - liquidate
+  - msg.sender
+  - receive
+  - remove_liquidity
+  - totalSupply
 ---
+
+## References & Source Reports
+
+| Label | Path | Severity | Auditor | Source ID / Link |
+|-------|------|----------|---------|------------------|
+| [Sentiment] | reports/constantproduct/h-1-h-01-wsteth-eth-curve-lp-token-price-can-be-manipulated-to-cause-unexpected-.md | HIGH | Sherlock | - |
+
 
 # Sentiment - Curve Read-Only Reentrancy Liquidation Attack
 
@@ -43,6 +69,38 @@ version: all
 ## Overview
 
 Sentiment used Curve's `virtual_price` to price wstETH-ETH LP tokens as collateral. Through "view-only reentrancy" during Curve's `remove_liquidity`, the attacker could temporarily suppress the virtual_price, making healthy positions appear undercollateralized and trigger unfair liquidations.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | oracle_manipulation | read_only_reentrancy`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `oracle_manipulation`
+- High-signal code keywords: `attack`, `canLiquidate`, `fallback`, `getPrice`, `liquidate`, `msg.sender`, `receive`, `remove_liquidity`
+- Typical sink / impact: `unfair_liquidations`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `CrossValidatedOracle.function -> CurveLPOracle.function -> CurveReentrancyAttack.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ## Why This Is Unique
 
@@ -251,3 +309,24 @@ function getPrice() view returns (uint256) {
 ## Keywords
 
 `read_only_reentrancy`, `view_reentrancy`, `curve_virtual_price`, `liquidation_manipulation`, `wsteth_eth`, `sentiment`, `LP_token_pricing`, `flash_loan_attack`, `callback_attack`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`amm`, `attack`, `canLiquidate`, `curve_virtual_price`, `fallback`, `getPrice`, `liquidate`, `liquidation_manipulation`, `msg.sender`, `read_only_reentrancy`, `receive`, `remove_liquidity`, `totalSupply`, `view_reentrancy`

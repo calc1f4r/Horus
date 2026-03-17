@@ -34,6 +34,36 @@ tags:
   - real_exploit
 
 source: DeFiHackLabs
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | swap_functions | slippage_input_validation
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _swapTokens
+  - allowance
+  - allowance_check
+  - amountOutMin
+  - balanceOf
+  - block.timestamp
+  - buyToken
+  - buyTokensAndDepositOnBehalf
+  - claimCvgCvxMultiple
+  - claimMultipleStaking
+  - deadline
+  - deposit
+  - execute
+  - executeOperation
+  - getAmount0ToReachK
+  - input_validation
+  - leverage
+  - minReceived
+  - mint
+  - msg.sender
 ---
 
 ## Slippage & Input Validation Vulnerabilities
@@ -41,6 +71,38 @@ source: DeFiHackLabs
 ### Overview
 
 Slippage protection and input validation vulnerabilities occur when protocols fail to properly validate user inputs, enforce minimum output amounts for swaps, or check deadlines for transactions. These vulnerabilities enable attackers to perform sandwich attacks, drain funds through price manipulation, or exploit permissive function parameters to steal user funds.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | swap_functions | slippage_input_validation`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `swap_functions`
+- High-signal code keywords: `_swapTokens`, `allowance`, `allowance_check`, `amountOutMin`, `balanceOf`, `block.timestamp`, `buyToken`, `buyTokensAndDepositOnBehalf`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `CurveBurner.function -> CvxRewardDistributor.function -> DebtManager.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -673,3 +735,24 @@ function executeOperation(
 - [Concentrated Liquidity Slippage](../amm/concentrated-liquidity/slippage-sandwich-frontrun.md)
 - [Access Control Vulnerabilities](../access-control/)
 - [Business Logic Flaws](../business-logic/)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_swapTokens`, `allowance`, `allowance_check`, `amm`, `amountOutMin`, `balanceOf`, `block.timestamp`, `buyToken`, `buyTokensAndDepositOnBehalf`, `claimCvgCvxMultiple`, `claimMultipleStaking`, `deadline`, `defi`, `deposit`, `dex`, `execute`, `executeOperation`, `getAmount0ToReachK`, `input_validation`, `leverage`, `mev`, `minReceived`, `mint`, `msg.sender`, `parameter_validation`, `real_exploit`, `return_value_check`, `sandwich`, `slippage`, `slippage_input_validation`, `slippage_protection`, `swap`, `validation`

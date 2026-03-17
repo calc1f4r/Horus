@@ -40,6 +40,36 @@ tags:
 # Version Info
 language: solidity
 version: ">=0.8.0"
+
+# Pattern Identity (Required)
+root_cause_family: storage_layout_error
+pattern_key: storage_layout_error | proxy_storage | diamond_proxy
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - EIP-2535
+  - _getAccessControlStorage
+  - _settleWithAmountCheck
+  - access_control
+  - advancedFarm
+  - bipSeedGauge
+  - delegatecall
+  - diamondCut
+  - facet_management
+  - fallback
+  - freezeChain
+  - getModifiedFacets
+  - hasRole
+  - initialization
+  - initialize
+  - msg.sender
+  - nonReentrantFarm
+  - pairs
+  - proxy_upgrade
+  - receive
 ---
 
 ## References
@@ -64,6 +94,38 @@ version: ">=0.8.0"
 ### Overview
 
 Diamond proxies implementing EIP-2535 introduce unique security challenges due to their multi-facet architecture, shared storage model, and complex upgrade mechanisms. Vulnerabilities manifest as storage collisions during upgrades, reentrancy through facet callbacks, improper facet management, and initialization oversights that can lead to fund loss, privilege escalation, or complete system failure.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of storage_layout_error"
+- Pattern key: `storage_layout_error | proxy_storage | diamond_proxy`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `proxy_storage`
+- High-signal code keywords: `EIP-2535`, `_getAccessControlStorage`, `_settleWithAmountCheck`, `access_control`, `advancedFarm`, `bipSeedGauge`, `delegatecall`, `diamondCut`
+- Typical sink / impact: `state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `AccessControlDS.function -> AccessControlUpgradeable.function -> NewFacet.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Storage slot collision between proxy and implementation contracts
+- Signal 2: Upgrade changes storage layout order, corrupting existing state
+- Signal 3: Diamond proxy selector collision between facets
+- Signal 4: Inherited contract storage layout breaks upgrade compatibility
+
+#### False Positive Guards
+
+- Not this bug when: Storage gaps used in all upgradeable base contracts
+- Safe if: Upgrade tested with storage layout comparison tooling
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -514,3 +576,24 @@ contract ThreeDNSRegControl {
 - [Standard Reentrancy Patterns](../reentrancy/reentrancy.md)
 - [Upgradeable Contract Storage Gaps](../storage/storage-gaps.md)
 - [Access Control Misconfigurations](../access-control/access-control.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`EIP-2535`, `_getAccessControlStorage`, `_settleWithAmountCheck`, `access_control`, `advancedFarm`, `bipSeedGauge`, `defi`, `delegatecall`, `diamondCut`, `diamond_proxy`, `diamond_standard`, `facet_management`, `fallback`, `freezeChain`, `getModifiedFacets`, `hasRole`, `initialization`, `initialize`, `msg.sender`, `multi_facet`, `nonReentrantFarm`, `pairs`, `proxy_pattern`, `proxy_upgrade`, `receive`, `reentrancy_guard`, `storage_collision`, `storage_layout`, `storage_management`, `upgradeability`, `upgradeable_contracts`

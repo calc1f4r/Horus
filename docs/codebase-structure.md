@@ -1,6 +1,6 @@
 # Vulnerability Database — Codebase Structure
 
-> Comprehensive reference for repository layout, data flow, and conventions. For search workflows, see [DB/SEARCH_GUIDE.md](DB/SEARCH_GUIDE.md). For agent guidance, see [DB-GUIDE.md](DB-GUIDE.md).
+> Comprehensive reference for repository layout, data flow, and conventions. For search workflows, see [DB/SEARCH_GUIDE.md](../DB/SEARCH_GUIDE.md). For agent guidance, see [db-guide.md](db-guide.md).
 
 ---
 
@@ -193,12 +193,14 @@ Vulnerability-database/
 │       └── ...                            #   (21 more reference files)
 │
 ├── generate_manifests.py                  # Regenerates all manifests + hunt cards
-├── solodit_fetcher.py                     # Fetches reports from Solodit/Cyfrin API
 ├── TEMPLATE.md                            # Canonical vulnerability entry structure
 ├── Example.md                             # Reference implementation of an entry
-├── DB-GUIDE.md                            # DB entry conventions & search workflows
+├── docs/
+│   ├── architecture.png                   #   Architecture diagram (PNG)
+│   ├── architecture.excalidraw            #   Architecture diagram (editable)
+│   ├── db-guide.md                        #   DB entry conventions & search workflows
+│   └── codebase-structure.md              #   This file
 ├── CONTRIBUTING.md                        # Contribution guidelines
-├── CodebaseStructure.md                   # This file
 ├── LICENSE                                # MIT License
 └── README.md                              # Project overview and quick start
 ```
@@ -239,7 +241,7 @@ DB/manifests/huntcards/all-huntcards.json
   → grep target code per card.grep → prune zero-hit cards → shard → spawn sub-agents
 ```
 
-For the full search guide, see [DB/SEARCH_GUIDE.md](DB/SEARCH_GUIDE.md).
+For the full search guide, see [DB/SEARCH_GUIDE.md](../DB/SEARCH_GUIDE.md).
 
 ---
 
@@ -254,9 +256,9 @@ For the full search guide, see [DB/SEARCH_GUIDE.md](DB/SEARCH_GUIDE.md).
 | `DB/SEARCH_GUIDE.md` | Comprehensive search guide for agent consumption |
 | `TEMPLATE.md` | Canonical structure for all vulnerability entries |
 | `Example.md` | Reference implementation showing a complete entry |
-| `DB-GUIDE.md` | DB entry conventions, search workflows, audit mode |
+| `docs/db-guide.md` | DB entry conventions, search workflows, audit mode |
 | `generate_manifests.py` | Regenerates all manifests and hunt cards from DB content |
-| `solodit_fetcher.py` | Fetches vulnerability reports from the Solodit/Cyfrin API |
+| `scripts/solodit_fetcher.py` | Fetches vulnerability reports from the Solodit/Cyfrin API |
 
 ---
 
@@ -414,7 +416,7 @@ See [TEMPLATE.md](TEMPLATE.md) for the full specification and [Example.md](Examp
 | Script | Purpose |
 |--------|---------|
 | `generate_manifests.py` | Regenerates all manifests and hunt cards from DB/ content |
-| `solodit_fetcher.py` | Fetches vulnerability reports from the Solodit/Cyfrin API |
+| `scripts/solodit_fetcher.py` | Fetches vulnerability reports from the Solodit/Cyfrin API |
 | `scripts/classify_and_group.py` | Classifies raw reports by vulnerability type |
 | `scripts/generate_entries.py` | Generates DB entries from classified reports |
 | `scripts/generate_micro_directives.py` | Enriches hunt cards with micro-directives |
@@ -438,9 +440,9 @@ See [TEMPLATE.md](TEMPLATE.md) for the full specification and [Example.md](Examp
 | Document | Purpose |
 |----------|---------|
 | [DB/index.json](DB/index.json) | Master router — agents start here |
-| [DB/SEARCH_GUIDE.md](DB/SEARCH_GUIDE.md) | Detailed search workflows for agents |
+| [DB/SEARCH_GUIDE.md](../DB/SEARCH_GUIDE.md) | Detailed search workflows for agents |
 | [TEMPLATE.md](TEMPLATE.md) | Canonical entry structure specification |
 | [Example.md](Example.md) | Reference implementation of a complete entry |
-| [DB-GUIDE.md](DB-GUIDE.md) | DB entry conventions, search workflows, audit mode |
+| [docs/db-guide.md](db-guide.md) | DB entry conventions, search workflows, audit mode |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines and quality checklist |
 | [README.md](README.md) | Project overview, quick start, and coverage tables |

@@ -48,6 +48,36 @@ tags:
 
 language: solidity
 version: ">=0.8.0"
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | module_installation | module_system_misconfiguration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - ERC-7484
+  - ERC-7579
+  - ERC-7739
+  - _enableMode
+  - _getEnableModeDataHash
+  - _handleFallback
+  - _handleFallbackWithHook
+  - _installFallbackHandler
+  - checkERC7739Support
+  - delegatecall
+  - enableMode
+  - execute
+  - executeFromExecutor
+  - executor
+  - fallback
+  - griefing
+  - hook
+  - installModule
+  - is
+  - its
 ---
 
 ## References
@@ -79,6 +109,38 @@ version: ">=0.8.0"
 ### Overview
 
 ERC-7579 modular smart accounts (e.g., Biconomy Nexus) expose a rich surface of bugs in the module lifecycle: the ERC-7484 security registry is not consistently applied at call-time (only at install), `moduleType` is not committed to in the enable-mode signature hash, fallback execution paths skip hook `postCheck`, and re-entrancy in `onUninstall` hooks can permanently lock modules in place.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | module_installation | module_system_misconfiguration`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `module_installation`
+- High-signal code keywords: `ERC-7484`, `ERC-7579`, `ERC-7739`, `_enableMode`, `_getEnableModeDataHash`, `_handleFallback`, `_handleFallbackWithHook`, `_installFallbackHandler`
+- Typical sink / impact: `unauthorized_module_installation`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### ERC-7579 Module System — Registry Bypass, moduleType Confusion, Hook PostCheck Skip, Fallback Flaws
 
@@ -432,3 +494,24 @@ function _handleFallbackWithHook(address handler, bytes calldata data)
 - `DB/general/reentrancy/` — reentrancy in module lifecycle hooks
 
 ---
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`Biconomy`, `ERC-7484`, `ERC-7579`, `ERC-7739`, `Nexus`, `_enableMode`, `_getEnableModeDataHash`, `_handleFallback`, `_handleFallbackWithHook`, `_installFallbackHandler`, `account-abstraction`, `account_abstraction`, `checkERC7739Support`, `delegatecall`, `enable-mode`, `enableMode`, `execute`, `executeFromExecutor`, `executor`, `fallback`, `griefing`, `hook`, `installModule`, `is`, `its`, `modular-account`, `module-installation`, `moduleType`, `module_system_misconfiguration`, `onUninstall`, `postCheck`, `registry`, `validator`, `withRegistry`

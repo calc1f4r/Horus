@@ -23,6 +23,36 @@ tags:
   - nft-amm
   - crowdfund
   - fake-edition
+
+# Pattern Identity (Required)
+root_cause_family: callback_reentrancy
+pattern_key: callback_reentrancy | unknown | Reentrancy, Flash Loan Bypass, Callback Exploitation, Atomic Arbitrage
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - Atomic
+  - Bonding Curve
+  - Crowdfund
+  - Genesis Launch
+  - NFT AMM
+  - Rebalance Orders
+  - _createCredInternal
+  - approve
+  - balanceOf
+  - block.number
+  - borrow
+  - create
+  - createCred
+  - deposit
+  - launch
+  - liquidate
+  - mint
+  - mintConcluded
+  - msg.sender
+  - receive
 ---
 
 # Bonding Curve Reentrancy and Flash Loan Vulnerabilities
@@ -33,6 +63,38 @@ Bonding curve protocols are particularly susceptible to reentrancy and flash loa
 
 **Pattern Frequency:** Common — 10/131 bonding curve reports (7.6%)
 **Cross-Auditor Validation:** Strong — confirmed by Code4rena, Cyfrin, Spearbit, Sherlock, Pashov, OpenZeppelin, Obront
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of callback_reentrancy"
+- Pattern key: `callback_reentrancy | unknown | Reentrancy, Flash Loan Bypass, Callback Exploitation, Atomic Arbitrage`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `unknown`
+- High-signal code keywords: `Atomic`, `Bonding Curve`, `Crowdfund`, `Genesis Launch`, `NFT AMM`, `Rebalance Orders`, `_createCredInternal`, `approve`
+- Typical sink / impact: `Fund Theft, Protocol Drain, Flash Loan Protection Bypass, Unfair Token Distribution`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: External call (`.call`, `.transfer`, token transfer) occurs before state variable update
+- Signal 2: Token implements callback hooks (ERC-777, ERC-721) and protocol doesn't use `nonReentrant`
+- Signal 3: User-supplied token address passed to `transferFrom` without callback protection
+- Signal 4: Read-only function's return value consumed cross-contract during an active callback window
+
+#### False Positive Guards
+
+- Not this bug when: Contract uses `ReentrancyGuard` (`nonReentrant`) on all entry points
+- Safe if: All state updates complete before any external call (strict CEI)
+- Requires attacker control of: specific conditions per pattern
 
 ## Root Cause
 
@@ -342,3 +404,24 @@ bonding curve reentrancy, flash loan protection bypass, callback exploitation, n
 | 8 | Fei Protocol | OpenZeppelin | HIGH | `reports/bonding_curve_findings/fei_openzeppelin_flash_genesis_profit.md` |
 | 9 | Bunni | Pashov | HIGH | `reports/bonding_curve_findings/bunni_pashov_rebalance_callback_arbitrage.md` |
 | 10 | Bunni | Cyfrin | MEDIUM | `reports/bonding_curve_findings/bunni_cyfrin_rebalance_token_collision.md` |
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`Atomic`, `Bonding Curve`, `Crowdfund`, `Genesis Launch`, `NFT AMM`, `Rebalance Orders`, `Reentrancy, Flash Loan Bypass, Callback Exploitation, Atomic Arbitrage`, `Reentrancy, Flash Loans`, `_createCredInternal`, `approve`, `atomic-arbitrage`, `balance-caching`, `balanceOf`, `block.number`, `bonding-curve`, `borrow`, `callback-exploitation`, `create`, `createCred`, `crowdfund`, `deposit`, `fake-edition`, `flash-loan`, `genesis-launch`, `graduation`, `launch`, `liquidate`, `mint`, `mintConcluded`, `msg.sender`, `nft-amm`, `nonReentrant`, `rebalance-callback`, `receive`, `reentrancy`, `self-liquidation`

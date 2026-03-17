@@ -30,7 +30,31 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | uniswap_v3_integration | unrestricted_callback
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - approve
+  - attack
+  - balanceOf
+  - msg.sender
+  - safeTransferFrom
+  - swap
+  - uniswapV3MintCallback
 ---
+
+## References & Source Reports
+
+| Label | Path | Severity | Auditor | Source ID / Link |
+|-------|------|----------|---------|------------------|
+| [Burve] | reports/constantproduct/c-04-draining-approved-tokens-by-unrestricted-uniswapv3mintcallback.md | CRITICAL | Pashov Audit Group | - |
+
 
 # Burve Protocol - Unrestricted Uniswap V3 Mint Callback Vulnerability
 
@@ -44,6 +68,38 @@ version: all
 ## Overview
 
 The Burve protocol implemented a Uniswap V3 integration with a flaw: the `uniswapV3MintCallback` function has no access control. This callback, which is designed to be called only by the Uniswap V3 pool during liquidity minting operations, can be called by anyone with arbitrary data, allowing attackers to drain tokens from any address that has approved the Burve contract.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | uniswap_v3_integration | unrestricted_callback`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `uniswap_v3_integration`
+- High-signal code keywords: `approve`, `attack`, `balanceOf`, `msg.sender`, `safeTransferFrom`, `swap`, `uniswapV3MintCallback`
+- Typical sink / impact: `complete_fund_drainage`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ## Why This Is Unique to Burve
 
@@ -142,3 +198,24 @@ Look for these red flags when auditing Uniswap V3 integrations:
 ## Keywords
 
 `uniswapV3MintCallback`, `callback_access_control`, `approval_exploit`, `transferFrom_arbitrary_source`, `pool_verification`, `burve`, `uniswap_v3_integration`, `fund_drainage`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`access_control`, `amm`, `approval_exploit`, `approve`, `attack`, `balanceOf`, `callback`, `fund_theft`, `msg.sender`, `safeTransferFrom`, `swap`, `uniswapV3MintCallback`, `uniswap_v3`, `unrestricted_callback`

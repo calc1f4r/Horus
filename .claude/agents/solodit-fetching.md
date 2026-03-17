@@ -1,7 +1,7 @@
 ---
 name: solodit-fetching
 description: Fetches vulnerability reports from the Solodit/Cyfrin API for a given topic and stores them in reports/<topic>_findings/. Preserve the raw source metadata needed for downstream fine-grained report indexing. Use when collecting raw audit findings for a new vulnerability topic, populating the reports/ directory with source data, or preparing input for the variant-template-writer agent.
-tools: [Agent, Bash, Edit, Glob, Grep, Read, WebSearch]
+tools: [Agent, Bash, Edit, Glob, Grep, Read, Write, WebFetch, WebSearch]
 maxTurns: 50
 ---
 
@@ -35,10 +35,10 @@ source .venv/bin/activate
 
 ### Step 2: Fetch Primary Topic
 
-Use `solodit_fetcher.py` to fetch all reports. Do NOT apply quality filters.
+Use `scripts/solodit_fetcher.py` to fetch all reports. Do NOT apply quality filters.
 
 ```bash
-python3 solodit_fetcher.py --keyword "<topic>" --output ./reports/<topic>_findings
+python3 scripts/solodit_fetcher.py --keyword "<topic>" --output ./reports/<topic>_findings
 ```
 
 For API specification details, see the [Cyfrin Solodit API docs](https://cyfrin.notion.site/Cyfrin-Solodit-Findings-API-Specification-299f46a1865c80bcaaf0d8672fece2d6).
@@ -54,7 +54,7 @@ Many protocols use shared infrastructure. Search for protocols that integrate th
 | Pyth | Any protocol using Pyth price feeds |
 
 ```bash
-python3 solodit_fetcher.py --keyword "<related_protocol>" --output ./reports/<topic>_findings
+python3 scripts/solodit_fetcher.py --keyword "<related_protocol>" --output ./reports/<topic>_findings
 ```
 
 ### Step 4: Preserve Provenance
@@ -97,4 +97,4 @@ Confirm reports are stored in `reports/<topic>_findings/`.
 - **Never** add duplicate findings when the source identity is clear
 - **Always** search for related protocols that use the target feature
 - **If duplicate status is unclear, keep both raw files and resolve it later during report indexing**
-- For repository structure, see [CodebaseStructure.md](../../CodebaseStructure.md)
+- For repository structure, see [docs/codebase-structure.md](../../docs/codebase-structure.md)

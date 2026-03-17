@@ -31,6 +31,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | staking_logic | unstake_withdrawal_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _addQueuedSlashableShares
+  - _addRebalanceRequest
+  - before
+  - before_slash
+  - block.number
+  - block.timestamp
+  - cooldown_bypass
+  - deposit
+  - emergency
+  - lock_funds
+  - msg.sender
+  - pending_not_tracked
+  - queue_manipulation
+  - requestUnstake
+  - safeTransferFrom
+  - service
+  - stake
+  - stakeMany
+  - swap
+  - transferFrom
 ---
 
 ## References & Source Reports
@@ -161,6 +191,38 @@ version: all
 Implementation flaw in unstake cooldown bypass logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 13 audit reports with severity distribution: HIGH: 6, MEDIUM: 7.
 
 > **Key Finding**: The client has marked a bug as "Fixed" and provided an explanation for the fix. The bug was related to the staking contract, which determines the multiplier a user gets based on staking amount and lockup period. However, the contract did not check if the lockup period had actually elapsed before all
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | staking_logic | unstake_withdrawal_vulnerabilities`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `staking_logic`
+- High-signal code keywords: `_addQueuedSlashableShares`, `_addRebalanceRequest`, `before`, `before_slash`, `block.number`, `block.timestamp`, `cooldown_bypass`, `deposit`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `address.function -> allows.function -> did.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1261,3 +1323,24 @@ grep -rn 'unstake|lock|funds' --include='*.go' --include='*.sol'
 ## Keywords
 
 `account`, `accounting`, `activation`, `address`, `admin`, `affect`, `after`, `allows`, `appchain`, `attack`, `avoid`, `balances`, `beaconchainethstrategy`, `before`, `bloating`, `blocked`, `board`, `bond`, `bypass`, `bypassing`, `change`, `conditions`, `cooldown`, `cosmos`, `could`, `cutting`, `delay`, `delegators`, `deposited`, `deregistering`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_addQueuedSlashableShares`, `_addRebalanceRequest`, `appchain`, `before`, `before_slash`, `block.number`, `block.timestamp`, `cooldown_bypass`, `cosmos`, `defi`, `deposit`, `emergency`, `lock_funds`, `msg.sender`, `pending_not_tracked`, `queue_manipulation`, `requestUnstake`, `safeTransferFrom`, `service`, `stake`, `stakeMany`, `staking`, `swap`, `transferFrom`, `unstake_withdrawal_vulnerabilities`, `withdrawal_accounting`, `withdrawal_dos`

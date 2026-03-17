@@ -51,6 +51,36 @@ tags:
 # Version Info
 language: move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_access_control
+pattern_key: missing_access_control | access_control | missing_access_control
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - admin_cap
+  - assert
+  - blocklist
+  - capability_pattern
+  - claim_tokens
+  - deposit
+  - donate
+  - emergency_withdraw
+  - entry
+  - finalize_snapshot_update
+  - flash_receipt
+  - gas
+  - generate_proof_as_owner
+  - generate_proof_as_trader
+  - get_share_price
+  - limit
+  - match_orders
+  - mint
+  - object_id
+  - open_position
 ---
 
 ## References & Source Reports
@@ -151,6 +181,38 @@ Sui Move's visibility modifiers (`public`, `public(friend)`, `public(package)`, 
 
 > **Validation strength**: Strong — 1 report from OtterSec on Sui Core + generalizable
 > **Frequency**: 1/69 reports explicitly, but underlying pattern is systemic
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_access_control"
+- Pattern key: `missing_access_control | access_control | missing_access_control`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `access_control|visibility|role_management|input_validation|owner_verification|zk_proof`
+- High-signal code keywords: `admin_cap`, `assert`, `blocklist`, `capability_pattern`, `claim_tokens`, `deposit`, `donate`, `emergency_withdraw`
+- Typical sink / impact: `fund_loss|unauthorized_access|state_corruption|security_bypass`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `access_control.function -> input_validation.function -> owner_verification.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State-changing function lacks `onlyOwner`/`onlyRole` modifier
+- Signal 2: External function accepts arbitrary address and calls interface methods without registry validation
+- Signal 3: Configuration setter is callable by non-owner accounts
+- Signal 4: Initialization or migration function is unprotected
+
+#### False Positive Guards
+
+- Not this bug when: Function is `internal`/`private` and only called from access-controlled paths
+- Safe if: Function is restricted via `onlyOwner`/`onlyRole`/`require(msg.sender == ...)`
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -988,3 +1050,24 @@ public fun get_share_price(pool: &Pool): u128 {
 - `DB/general/access-control/` — Generic access control patterns
 - `DB/general/flash-loans/` — Flash loan patterns
 - `DB/general/signatures/` — Signature validation patterns
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`access_control`, `access_control_validation`, `admin_cap`, `assert`, `authorization`, `blocklist`, `capability_pattern`, `claim_tokens`, `deposit`, `donate`, `emergency_withdraw`, `entry`, `finalize_snapshot_update`, `flash_loan`, `flash_receipt`, `gas`, `generate_proof_as_owner`, `generate_proof_as_trader`, `get_share_price`, `limit`, `match_orders`, `mint`, `missing_access_control|visibility_misconfiguration|input_validation|role_mismanagement`, `move`, `object_id`, `open_position`, `owner_check`, `public`, `public_friend`, `public_package`, `role_management`, `security_level`, `sui`, `trade_proof`, `tx_context_sender`, `uid_to_inner`, `validation`, `visibility`, `zk_proof`

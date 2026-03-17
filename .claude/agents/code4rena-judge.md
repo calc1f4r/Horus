@@ -1,7 +1,7 @@
 ---
 name: code4rena-judge
 description: Validates smart contract security findings against Code4rena audit competition standards. Determines correct severity (High/Medium/QA/Invalid), checks in-scope validity, applies severity caps, and assesses submission quality. Use when validating findings for Code4rena contests, determining C4 severity levels, checking if issues meet C4 judging criteria, or reviewing audit reports for C4 submission.
-tools: [Agent, Bash, Edit, Glob, Grep, Read, WebSearch]
+tools: [Agent, Bash, Edit, Glob, Grep, Read, Write, WebFetch, WebSearch]
 maxTurns: 50
 ---
 

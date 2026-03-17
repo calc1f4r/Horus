@@ -52,6 +52,36 @@ version: all
 
 # Source
 source: DeFiHackLabs
+
+# Pattern Identity (Required)
+root_cause_family: arithmetic_error
+pattern_key: arithmetic_error | reward_calculation | incorrect_calculation
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _executeExploitSequence
+  - _harvest
+  - _transfer
+  - _updateDividends
+  - _withdraw
+  - approve
+  - balanceOf
+  - block.timestamp
+  - burn
+  - buy
+  - buyFor
+  - calculateReward
+  - claim
+  - deposit
+  - depositTo
+  - dividend_calculation
+  - dividendsOf
+  - donate
+  - donatePool
+  - double
 ---
 
 ## References & Source Reports
@@ -148,6 +178,38 @@ Incorrect calculation vulnerabilities occur when mathematical operations in smar
 **Affected Protocols**: Staking platforms, dividend tokens, AMMs, reward pools, deflationary tokens
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of arithmetic_error"
+- Pattern key: `arithmetic_error | reward_calculation | incorrect_calculation`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `reward_calculation|staking_system|dividend_distribution|amm_pool|transfer_logic`
+- High-signal code keywords: `_executeExploitSequence`, `_harvest`, `_transfer`, `_updateDividends`, `_withdraw`, `approve`, `balanceOf`, `block.timestamp`
+- Typical sink / impact: `fund_loss|reward_theft|dividend_siphoning|pool_draining`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `199.function -> 3.function -> AIZPTExploit.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Arithmetic operation on user-controlled input without overflow protection
+- Signal 2: Casting between different-width integer types without bounds check
+- Signal 3: Multiplication before division where intermediate product can exceed type max
+- Signal 4: Accumulator variable can wrap around causing incorrect accounting
+
+#### False Positive Guards
+
+- Not this bug when: Solidity >= 0.8.0 with default checked arithmetic
+- Safe if: SafeMath library used for all arithmetic on user-controlled values
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerability Categories
 
@@ -1128,3 +1190,24 @@ function _transfer(address from, address to, uint256 amount) internal {
 - **LPMine** (2025-01, $24K): `DeFiHackLabs/src/test/2025-01/LPMine_exp.sol`
 - **BTNFT** (2025-04, $19K): `DeFiHackLabs/src/test/2025-04/BTNFT_exp.sol`
 - **Gangsterfinance** (2025-06, $16K): `DeFiHackLabs/src/test/2025-06/Gangsterfinance_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_executeExploitSequence`, `_harvest`, `_transfer`, `_updateDividends`, `_withdraw`, `amm`, `approve`, `arithmetic`, `balanceOf`, `block.timestamp`, `burn`, `buy`, `buyFor`, `calculateReward`, `calculation`, `claim`, `defi`, `deposit`, `depositTo`, `dividend_calculation`, `dividends`, `dividendsOf`, `donate`, `donatePool`, `double`, `epoch_multiplier`, `incorrect_calculation`, `integer_overflow`, `integer_underflow`, `k_value_check`, `overflow`, `pair_balance_dependency`, `pool_donation`, `real_exploit`, `reward`, `reward_per_share`, `skim_function`, `staking`, `staking_balance`, `sync_function`, `time_based_reward`, `transfer`, `transfer_fee_logic`, `underflow`, `unsafe_math`

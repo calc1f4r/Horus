@@ -41,6 +41,36 @@ tags:
   - real_exploit
 
 source: DeFiHackLabs
+
+# Pattern Identity (Required)
+root_cause_family: malicious_code
+pattern_key: malicious_code | token_contract | rug_pull_detection
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - EmergencyWithdraw
+  - _getAdmin
+  - _secretMint
+  - _transfer
+  - admin
+  - allowance
+  - approve
+  - attack
+  - backdoor_function
+  - balanceOf
+  - block.number
+  - block.timestamp
+  - burn
+  - burnFrom
+  - delegatecall
+  - deposit
+  - emergencyDrain
+  - emergencyWithdraw
+  - emission
+  - enableTrading
 ---
 
 ## Rug Pull & Malicious Contract Detection Patterns
@@ -48,6 +78,38 @@ source: DeFiHackLabs
 ### Overview
 
 Rug pulls and malicious contracts are intentionally designed to steal user funds through hidden backdoors, transfer restrictions, or privileged functions. This database entry catalogs detection patterns derived from real-world exploits to aid auditors in identifying malicious code during security reviews. Unlike typical vulnerabilities (unintentional bugs), these patterns represent deliberate malicious design.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of malicious_code"
+- Pattern key: `malicious_code | token_contract | rug_pull_detection`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `token_contract`
+- High-signal code keywords: `EmergencyWithdraw`, `_getAdmin`, `_secretMint`, `_transfer`, `admin`, `allowance`, `approve`, `attack`
+- Typical sink / impact: `total_fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `AttackContract.function -> Backdoor.function -> IRYSAI.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Missing validation or guard on state-changing operation
+- Signal 2: User-supplied input passed to sensitive operation without sanitization
+- Signal 3: State update occurs after external interaction (CEI violation)
+- Signal 4: Protocol assumption about external component behavior is violated
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns are in place
+- Safe if: Protocol only interacts with whitelisted/trusted contracts
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -997,3 +1059,24 @@ rg "emergency|withdraw|drain|sweep" --type sol
 - **VRug** (2024-11, $8K): `DeFiHackLabs/src/test/2024-11/VRug_exp.sol`
 - **YziAI** (2025-03, $376): `DeFiHackLabs/src/test/2025-03/YziAIToken_exp.sol`
 - **NOVAToken** (2022-12, $330): `DeFiHackLabs/src/test/2022-12/NovaExchange_exp.sol`\n- **Levyathan** (2021-07, LEV inflated): `DeFiHackLabs/src/test/2021-07/Levyathan_exp.sol`\n- **PAID Network** (2021-03, ~$3M): `DeFiHackLabs/src/test/2021-03/PAID_exp.sol`\n- **SheepFarm** (2022-11, BNB profit): `DeFiHackLabs/src/test/2022-11/SheepFarm_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`EmergencyWithdraw`, `_getAdmin`, `_secretMint`, `_transfer`, `admin`, `allowance`, `approve`, `attack`, `audit_detection`, `backdoor_function`, `balanceOf`, `block.number`, `block.timestamp`, `burn`, `burnFrom`, `defi`, `delegatecall`, `deposit`, `emergencyDrain`, `emergencyWithdraw`, `emission`, `enableTrading`, `hidden_fee_extraction`, `hidden_mint_function`, `honeypot`, `honeypot_mechanism`, `magic_number_trigger`, `malicious_code`, `malicious_contract`, `malicious_proxy_upgrade`, `owner_controlled_trading`, `real_exploit`, `rug_pull`, `rug_pull_detection`, `scam`, `selfdestruct_capability`, `time_locked_malicious_upgrade`, `token`, `transfer_restriction`, `unverified_external_contract`

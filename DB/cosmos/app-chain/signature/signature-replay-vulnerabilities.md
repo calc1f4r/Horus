@@ -32,6 +32,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | signature_logic | signature_replay_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - AnteHandle
+  - Indexers
+  - _verifySignatures
+  - block.number
+  - cross_chain_replay
+  - deposit
+  - depositBufferedEther
+  - duplicate
+  - eip155_missing
+  - forgery
+  - key_management
+  - malicious
+  - malleability
+  - markBeetleSafe
+  - mint
+  - msg.sender
+  - nonce_manipulation
+  - receive
+  - replay
+  - verification_missing
 ---
 
 ## References & Source Reports
@@ -124,6 +154,38 @@ version: all
 Implementation flaw in signature verification missing logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 5 audit reports with severity distribution: HIGH: 3, MEDIUM: 2.
 
 > **Key Finding**: The `redeem` function in `Escrow.sol` allows Indexers to receive query rewards by submitting a signed Receipt Aggregate Voucher (RAV) and `allocationIDProof`. However, anyone with knowledge of a valid `signedRAV` and `allocationIDProof` can call `redeem` and receive the rewards, regardless of whethe
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | signature_logic | signature_replay_vulnerabilities`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `signature_logic`
+- High-signal code keywords: `AnteHandle`, `Indexers`, `_verifySignatures`, `block.number`, `cross_chain_replay`, `deposit`, `depositBufferedEther`, `duplicate`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `has.function -> is.function -> signature.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -917,3 +979,24 @@ grep -rn 'signature|malleability' --include='*.go' --include='*.sol'
 ## Keywords
 
 `accounting`, `allocations`, `allows`, `amount`, `antehandler`, `appchain`, `argument`, `attack`, `between`, `bypassing`, `chain`, `channel`, `check`, `checks`, `claims`, `collection`, `collision`, `cosmos`, `cross`, `deny`, `duplicate`, `eip155`, `enabling`, `ethereum`, `forgery`, `fork`, `from`, `functions`, `hard`, `historical`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`AnteHandle`, `Indexers`, `_verifySignatures`, `appchain`, `block.number`, `cosmos`, `cross_chain_replay`, `defi`, `deposit`, `depositBufferedEther`, `duplicate`, `eip155_missing`, `forgery`, `key_management`, `malicious`, `malleability`, `markBeetleSafe`, `mint`, `msg.sender`, `nonce_manipulation`, `receive`, `replay`, `signature`, `signature_replay_vulnerabilities`, `staking`, `verification_missing`

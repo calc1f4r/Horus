@@ -46,6 +46,36 @@ tags:
 # Version Info
 language: solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | access_control | access_control_state_management
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _createCredInternal
+  - access_control
+  - addLiquidity
+  - approve
+  - block.timestamp
+  - bond_curve_update
+  - bonding_curve
+  - checks
+  - create
+  - denom
+  - deposit
+  - editionMaxMintable
+  - editionMaxMintableForGoldenEgg
+  - freeze_authority
+  - function
+  - getGoldenEggTokenId
+  - graduateToken
+  - insert
+  - isActive
+  - mint
 ---
 
 ## References & Source Reports
@@ -111,6 +141,38 @@ version: all
 When a Solana bonding curve program retains freeze authority over token accounts after migration to a DEX, the bonding curve (or its admin) can freeze user tokens at any time, creating a centralization/rug-pull risk.
 
 > 📖 Reference: `reports/bonding_curve_findings/h-03-revoke_freeze_authority-is-not-called-during-pool-creation.md`
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | access_control | access_control_state_management`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `access_control|state_management|reentrancy|freeze_authority|upgrade|registry|validation`
+- High-signal code keywords: `_createCredInternal`, `access_control`, `addLiquidity`, `approve`, `block.timestamp`, `bond_curve_update`, `bonding_curve`, `checks`
+- Typical sink / impact: `fund_loss|manipulation|dos|unauthorized_access`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `EvilEdition.function -> addresses.function -> in.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -722,3 +784,24 @@ function graduateToken() internal {
 ### Keywords for Search
 
 `access control`, `freeze authority`, `revoke authority`, `reentrancy`, `nonReentrant`, `credIdCounter`, `createCred`, `setlistforsell`, `setTwapOracleAddress`, `create()`, `edition`, `SAM`, `golden egg`, `editionMaxMintable`, `isActive`, `reduceWeight`, `marketCapThreshold`, `DynamicContractRegistry`, `pauseAndWithdrawToPurple`, `address(this).balance`, `selfdestruct`, `force-send`, `bond curve update`, `depositable validators`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_createCredInternal`, `access_control`, `access_control_state_management`, `addLiquidity`, `approve`, `block.timestamp`, `bond_curve_update`, `bonding_curve`, `checks`, `create`, `defi`, `denom`, `deposit`, `editionMaxMintable`, `editionMaxMintableForGoldenEgg`, `freeze_authority`, `function`, `getGoldenEggTokenId`, `graduateToken`, `insert`, `isActive`, `mint`, `oracle_address`, `orderbook`, `proxy_upgrade`, `reentrancy`, `registry_override`, `revoke_authority`, `state_management`, `upgrade`, `validation`, `validation_bypass`, `zbanc`

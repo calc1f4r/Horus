@@ -36,6 +36,32 @@ tags:
 # Version Info
 language: solidity
 version: ">=0.8.0"
+
+# Pattern Identity (Required)
+root_cause_family: callback_reentrancy
+pattern_key: callback_reentrancy | WithdrawalRequestManager | cross_contract_reentrancy
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _exactInBatch
+  - balanceOf
+  - balance_accounting
+  - crossNonReentrant
+  - cross_contract_reentrancy
+  - deposit
+  - erc4626_deposit
+  - erc4626_withdraw
+  - initiateWithdraw
+  - msg.sender
+  - multi_vault_architecture
+  - safeTransferFrom
+  - stakeTokens
+  - swap
+  - uniswap_callback
+  - withdraw
 ---
 
 ## Reference
@@ -54,6 +80,38 @@ This represents a novel attack vector combining:
 2. Balance-based accounting before external calls
 3. Uniswap V3 swap callbacks as reentrancy vectors
 4. Pending withdrawal requests as "free" yield tokens
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of callback_reentrancy"
+- Pattern key: `callback_reentrancy | WithdrawalRequestManager | cross_contract_reentrancy`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `WithdrawalRequestManager`
+- High-signal code keywords: `_exactInBatch`, `balanceOf`, `balance_accounting`, `crossNonReentrant`, `cross_contract_reentrancy`, `deposit`, `erc4626_deposit`, `erc4626_withdraw`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `CrossContractReentrancyGuard.function -> dependencies.function -> reentrancy.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: External call (`.call`, `.transfer`, token transfer) occurs before state variable update
+- Signal 2: Token implements callback hooks (ERC-777, ERC-721) and protocol doesn't use `nonReentrant`
+- Signal 3: User-supplied token address passed to `transferFrom` without callback protection
+- Signal 4: Read-only function's return value consumed cross-contract during an active callback window
+
+#### False Positive Guards
+
+- Not this bug when: Contract uses `ReentrancyGuard` (`nonReentrant`) on all entry points
+- Safe if: All state updates complete before any external call (strict CEI)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -399,3 +457,24 @@ rules:
 - [ERC4626 First Depositor Attack](../ERC4626_VAULT_VULNERABILITIES.md#first-depositor-attack)
 - [Read-Only Reentrancy](../../reentrancy/READ_ONLY_REENTRANCY.md)
 - [Flash Loan Attacks](../../economic/FLASH_LOAN_ATTACKS.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_exactInBatch`, `balanceOf`, `balance_accounting`, `crossNonReentrant`, `cross_contract`, `cross_contract_reentrancy`, `deposit`, `erc4626`, `erc4626_deposit`, `erc4626_withdraw`, `initiateWithdraw`, `msg.sender`, `multi_vault_architecture`, `reentrancy`, `safeTransferFrom`, `stakeTokens`, `swap`, `uniswap_callback`, `uniswap_v3`, `withdraw`, `withdrawal_manager`, `yield_strategy`

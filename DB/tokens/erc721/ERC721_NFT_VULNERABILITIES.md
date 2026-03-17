@@ -40,6 +40,36 @@ tags:
   - approval
   - royalty
   - metadata
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | nft_contracts | erc721_nft
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _afterTokenTransfer
+  - _beforeTokenTransfer
+  - _delegate
+  - _mint
+  - _moveDelegateVotes
+  - _transfer
+  - afterUpdate
+  - approve
+  - approveTransferERC721
+  - balanceOf
+  - burn
+  - buy
+  - claimNFT
+  - delegates
+  - delegation
+  - fallback
+  - fillOrder
+  - initializeBundle
+  - liquidate
+  - liquidatePosition
 ---
 
 # ERC721/NFT Security Vulnerabilities Database
@@ -51,6 +81,38 @@ ERC721 (Non-Fungible Token) vulnerabilities represent a critical class of smart 
 NFT security vulnerabilities manifest across multiple dimensions: transfer safety issues, reentrancy via callbacks, approval management flaws, voting/delegation bugs, royalty manipulation, and ERC-721 standard non-compliance. Understanding these patterns is essential for secure NFT protocol development and auditing.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | nft_contracts | erc721_nft`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `nft_contracts`
+- High-signal code keywords: `_afterTokenTransfer`, `_beforeTokenTransfer`, `_delegate`, `_mint`, `_moveDelegateVotes`, `_transfer`, `afterUpdate`, `approve`
+- Typical sink / impact: `fund_loss, locked_tokens, governance_manipulation`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `2.function -> 3.function -> VulnerableNFT.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ## Table of Contents
 
@@ -882,3 +944,24 @@ function afterUpdate(address _from, address _to, uint256 _tokenID) public {
 ---
 
 *This database was generated from analysis of 1,730+ vulnerability reports from Solodit/Cyfrin audit database. Last updated: 2026-01-15.*
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_afterTokenTransfer`, `_beforeTokenTransfer`, `_delegate`, `_mint`, `_moveDelegateVotes`, `_transfer`, `access_control`, `afterUpdate`, `approval`, `approve`, `approveTransferERC721`, `balanceOf`, `burn`, `buy`, `claimNFT`, `delegates`, `delegation`, `erc721`, `erc721_nft`, `fallback`, `fillOrder`, `initializeBundle`, `liquidate`, `liquidatePosition`, `metadata`, `nft`, `onERC721Received`, `ownerOf`, `reentrancy`, `royalty`, `safeMint`, `safeTransferFrom`, `setApprovalForAll`, `tokenURI`, `token_standard`, `voting`, `voting_power`

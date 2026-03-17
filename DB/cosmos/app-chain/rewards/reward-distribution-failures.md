@@ -30,6 +30,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: arithmetic_error
+pattern_key: arithmetic_error | rewards_logic | reward_distribution_failures
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _calculateOperatorShare
+  - _checkOnERC721Received
+  - _ethTOeEth
+  - _initValidatorScore
+  - _safeMint
+  - _unstakeNFTs
+  - addValidator
+  - after_removal
+  - balanceOf
+  - block.number
+  - block.timestamp
+  - calcAndCacheStakes
+  - claimRewards
+  - deRegisterKnotFromSyndicate
+  - deposit
+  - distribution_dos
+  - distribution_unfair
+  - epoch_timing
+  - for
+  - getExpectedAVAXRewardsAmt
 ---
 
 ## References & Source Reports
@@ -141,6 +171,38 @@ version: all
 Implementation flaw in reward stuck locked logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 21 audit reports with severity distribution: HIGH: 12, MEDIUM: 9.
 
 > **Key Finding**: A bug has been identified in the `deleteOperators` method, which is used when operators must be slashed. This bug leaves the `operatorRewards` mapping untouched when an operator is removed, meaning they can still claim their accrued rewards, even if they are acting maliciously or are inactive. This 
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of arithmetic_error"
+- Pattern key: `arithmetic_error | rewards_logic | reward_distribution_failures`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `rewards_logic`
+- High-signal code keywords: `_calculateOperatorShare`, `_checkOnERC721Received`, `_ethTOeEth`, `_initValidatorScore`, `_safeMint`, `_unstakeNFTs`, `addValidator`, `after_removal`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `can.function -> owner.function -> that.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Arithmetic operation on user-controlled input without overflow protection
+- Signal 2: Casting between different-width integer types without bounds check
+- Signal 3: Multiplication before division where intermediate product can exceed type max
+- Signal 4: Accumulator variable can wrap around causing incorrect accounting
+
+#### False Positive Guards
+
+- Not this bug when: Solidity >= 0.8.0 with default checked arithmetic
+- Safe if: SafeMath library used for all arithmetic on user-controlled values
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1176,3 +1238,24 @@ grep -rn 'reward|epoch|timing' --include='*.go' --include='*.sol'
 ## Keywords
 
 `access`, `accounting`, `activation`, `after`, `allocated`, `allow`, `allowing`, `allows`, `amounts`, `appchain`, `approved`, `assignment`, `attacker`, `balance`, `being`, `board`, `cache`, `calculation`, `causes`, `claim`, `continue`, `contract`, `control`, `cosmos`, `cutting`, `decrease`, `delayed`, `denial`, `distorts`, `distribution`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_calculateOperatorShare`, `_checkOnERC721Received`, `_ethTOeEth`, `_initValidatorScore`, `_safeMint`, `_unstakeNFTs`, `addValidator`, `after_removal`, `appchain`, `balanceOf`, `block.number`, `block.timestamp`, `calcAndCacheStakes`, `claimRewards`, `cosmos`, `deRegisterKnotFromSyndicate`, `defi`, `deposit`, `distribution_dos`, `distribution_unfair`, `epoch_timing`, `for`, `getExpectedAVAXRewardsAmt`, `missing_update`, `reward_distribution_failures`, `rewards`, `staking`, `stuck_locked`, `unclaimed_loss`

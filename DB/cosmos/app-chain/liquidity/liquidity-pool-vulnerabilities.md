@@ -28,6 +28,27 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | liquidity_logic | liquidity_pool_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - block.timestamp
+  - concentrated
+  - deposit
+  - fee_error
+  - imbalance
+  - mint
+  - pool_manipulation
+  - rebalanceBadDebt
+  - receive
+  - recordStakingStart
+  - removal_dos
 ---
 
 ## References & Source Reports
@@ -75,6 +96,38 @@ version: all
 Implementation flaw in liquidity pool manipulation logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 8 audit reports with severity distribution: HIGH: 5, MEDIUM: 3.
 
 > **Key Finding**: The report highlights a potential vulnerability in the CVGT staking state that can be exploited by manipulating the CVGT mint and CVGTStakingPoolState accounts. This allows attackers to set any CVGT on a poolstate and stability_pool_state, as well as spoof the CVGTStakingPoolState, potentially enabl
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | liquidity_logic | liquidity_pool_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `liquidity_logic`
+- High-signal code keywords: `block.timestamp`, `concentrated`, `deposit`, `fee_error`, `imbalance`, `mint`, `pool_manipulation`, `rebalanceBadDebt`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -285,3 +338,24 @@ grep -rn 'liquidity|imbalance' --include='*.go' --include='*.sol'
 ## Keywords
 
 `appchain`, `assigned`, `attacker`, `avax`, `cause`, `claim`, `concentrated`, `cosmos`, `curve`, `cvgt`, `debt`, `depending`, `dos`, `during`, `error`, `fee`, `from`, `funds`, `high`, `imbalance`, `incorrectly`, `inflict`, `liquidation`, `liquidations`, `liquidity`, `lock`, `losses`, `manipulated`, `manipulation`, `node`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`appchain`, `block.timestamp`, `concentrated`, `cosmos`, `defi`, `deposit`, `fee_error`, `imbalance`, `liquidity`, `liquidity_pool_vulnerabilities`, `mint`, `pool_manipulation`, `rebalanceBadDebt`, `receive`, `recordStakingStart`, `removal_dos`, `staking`

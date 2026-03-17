@@ -9,7 +9,7 @@ Thank you for contributing to the Vulnerability Database. This guide covers how 
 1. **Fetch reports** using the solodit fetcher:
    ```bash
    source .venv/bin/activate
-   python3 solodit_fetcher.py --keyword "<topic>" --output ./reports/<topic>_findings
+   python3 scripts/solodit_fetcher.py --keyword "<topic>" --output ./reports/<topic>_findings
    ```
 
 2. **Analyze patterns** across 5+ reports to identify recurring vulnerability classes.

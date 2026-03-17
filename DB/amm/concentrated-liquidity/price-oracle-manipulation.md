@@ -19,6 +19,36 @@ tags:
   - "observation-cardinality"
   - "tick-calculation"
 last_updated: "2025-01-15"
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | unknown | unknown
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _calculatePriceFromLiquidity
+  - _gasSwapIn
+  - _getOracleData
+  - _getReferencePoolPriceX96
+  - beforeSwap
+  - consult
+  - deployNewPool
+  - getPriceInEth
+  - getPriceUnsafe
+  - getTWAPPrice
+  - liquidate
+  - observe
+  - reallocate
+  - rebalance
+  - repay
+  - safeObserve
+  - setPositionTicks
+  - swap
+  - totalSupply
+  - validateAndGetPrice
 ---
 
 # Price Oracle Manipulation in Concentrated Liquidity AMMs
@@ -33,6 +63,38 @@ Concentrated liquidity AMMs like Uniswap V3 provide on-chain price data through 
 **Observed Frequency:** 68+ reports analyzed covering slot0 manipulation, TWAP bypasses, oracle cardinality attacks, and tick calculation errors.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | unknown | unknown`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `unknown`
+- High-signal code keywords: `_calculatePriceFromLiquidity`, `_gasSwapIn`, `_getOracleData`, `_getReferencePoolPriceX96`, `beforeSwap`, `consult`, `deployNewPool`, `getPriceInEth`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `DualPriceOracle.function -> SecureOracle.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerable Pattern Examples
 
@@ -561,3 +623,24 @@ rules:
 2. [Uniswap TWAP Oracle Study](https://blog.uniswap.org/uniswap-v3-oracles)
 3. [Euler TWAP Parameters](https://docs.euler.finance/euler-protocol/eulers-default-parameters#twap-length)
 4. [Rari Fuse VUSD Hack Analysis](https://cmichel.io/replaying-ethereum-hacks-rari-fuse-vusd-price-manipulation/)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_calculatePriceFromLiquidity`, `_gasSwapIn`, `_getOracleData`, `_getReferencePoolPriceX96`, `beforeSwap`, `consult`, `deployNewPool`, `getPriceInEth`, `getPriceUnsafe`, `getTWAPPrice`, `liquidate`, `observation-cardinality`, `observe`, `oracle-attack`, `price-manipulation`, `reallocate`, `rebalance`, `repay`, `safeObserve`, `setPositionTicks`, `slot0-manipulation`, `sqrtPriceX96`, `swap`, `tick-calculation`, `totalSupply`, `twap-bypass`, `validateAndGetPrice`

@@ -33,6 +33,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: denial_of_service
+pattern_key: denial_of_service | tokens_logic | token_handling_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - Legitimate
+  - MintCoins
+  - SyncStateDBWithAccount
+  - _checkOnERC721Received
+  - _depositETHForStaking
+  - _safeMint
+  - a
+  - addValidator
+  - approval_error
+  - approve
+  - balanceOf
+  - burn
+  - burn_error
+  - decimal_handling
+  - deposit
+  - fee_on_transfer
+  - getOperatorStake
+  - getPrice
+  - handleSlashing
+  - lend
 ---
 
 ## References & Source Reports
@@ -162,6 +192,38 @@ version: all
 Implementation flaw in token fee on transfer logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 9 audit reports with severity distribution: HIGH: 2, MEDIUM: 7.
 
 > **Key Finding**: This bug report is about a vulnerability in the code for the GiantMevAndFeesPool contract. This vulnerability can be exploited by an attacker to transfer real LPTokens out of the GiantMevAndFeesPool contract. The proof of concept is that the contract does not check the validity of the _stakingFundsV
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of denial_of_service"
+- Pattern key: `denial_of_service | tokens_logic | token_handling_vulnerabilities`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `tokens_logic`
+- High-signal code keywords: `Legitimate`, `MintCoins`, `SyncStateDBWithAccount`, `_checkOnERC721Received`, `_depositETHForStaking`, `_safeMint`, `a`, `addValidator`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `Safe.function -> at.function -> balance.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Unbounded loop over user-controlled array can exceed block gas limit
+- Signal 2: External call failure causes entire transaction to revert
+- Signal 3: Attacker can grief operations by manipulating state to cause reverts
+- Signal 4: Resource exhaustion through repeated operations without rate limiting
+
+#### False Positive Guards
+
+- Not this bug when: Loop iterations are bounded by a reasonable constant
+- Safe if: External call failures are handled gracefully (try/catch or pull pattern)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1442,3 +1504,24 @@ grep -rn 'token|supply|tracking' --include='*.go' --include='*.sol'
 ## Keywords
 
 `able`, `accounting`, `across`, `allows`, `amounts`, `appchain`, `approval`, `approve`, `asset`, `assumes`, `balance`, `bank`, `because`, `being`, `bringunusedethbackintogiantpool`, `burn`, `burns`, `bypass`, `calculated`, `calculation`, `captokendecimals`, `cause`, `causes`, `charged`, `check`, `checked`, `claims`, `classes`, `coin`, `collateral`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`Legitimate`, `MintCoins`, `SyncStateDBWithAccount`, `_checkOnERC721Received`, `_depositETHForStaking`, `_safeMint`, `a`, `addValidator`, `appchain`, `approval_error`, `approve`, `balanceOf`, `burn`, `burn_error`, `cosmos`, `decimal_handling`, `defi`, `deposit`, `fee_on_transfer`, `getOperatorStake`, `getPrice`, `handleSlashing`, `lend`, `nft_handling`, `rebasing`, `staking`, `supply_tracking`, `token_handling_vulnerabilities`, `tokens`, `transfer_hook`, `unlimited_mint`, `zrc20_bypass`

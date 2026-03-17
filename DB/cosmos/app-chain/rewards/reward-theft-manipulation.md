@@ -31,6 +31,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: arithmetic_error
+pattern_key: arithmetic_error | rewards_logic | reward_theft_manipulation
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - Indexers
+  - _updateDAORevenueCommission
+  - _wasActiveAt
+  - balanceOf
+  - block.timestamp
+  - commission_error
+  - deposit
+  - dilution
+  - escrow_assignment
+  - flashloan_theft
+  - frontrunning
+  - gauge_exploit
+  - mint
+  - occurs
+  - orphaned_capture
+  - receive
+  - swap
+  - totalSupply
+  - transferFrom
+  - transfer_in_rewards
 ---
 
 ## References & Source Reports
@@ -138,6 +168,38 @@ version: all
 Implementation flaw in reward flashloan theft logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 4 audit reports with severity distribution: HIGH: 1, MEDIUM: 3.
 
 > **Key Finding**: This bug report is about an issue found in the Telcoin Staking Module. It was found by WATCHPUG and is known as Issue H-1. It is related to a vulnerability in the Checkpoints#getAtBlock() function. This vulnerability allows a malicious user to fake their stake and gain high rewards with minimal mate
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of arithmetic_error"
+- Pattern key: `arithmetic_error | rewards_logic | reward_theft_manipulation`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `rewards_logic`
+- High-signal code keywords: `Indexers`, `_updateDAORevenueCommission`, `_wasActiveAt`, `balanceOf`, `block.timestamp`, `commission_error`, `deposit`, `dilution`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `NoRewards.function -> and.function -> called.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Arithmetic operation on user-controlled input without overflow protection
+- Signal 2: Casting between different-width integer types without bounds check
+- Signal 3: Multiplication before division where intermediate product can exceed type max
+- Signal 4: Accumulator variable can wrap around causing incorrect accounting
+
+#### False Positive Guards
+
+- Not this bug when: Solidity >= 0.8.0 with default checked arithmetic
+- Safe if: SafeMath library used for all arithmetic on user-controlled values
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1037,3 +1099,24 @@ grep -rn 'reward|commission|error' --include='*.go' --include='*.sol'
 ## Keywords
 
 `accounting`, `accumulation`, `actual`, `actually`, `adversary`, `after`, `allocations`, `allowing`, `amount`, `amounts`, `anymore`, `anyone`, `appchain`, `assignment`, `attackers`, `attacks`, `avax`, `before`, `between`, `block`, `both`, `call`, `called`, `cannot`, `capture`, `captured`, `casting`, `cause`, `claim`, `claiming`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`Indexers`, `_updateDAORevenueCommission`, `_wasActiveAt`, `appchain`, `balanceOf`, `block.timestamp`, `commission_error`, `cosmos`, `defi`, `deposit`, `dilution`, `escrow_assignment`, `flashloan_theft`, `frontrunning`, `gauge_exploit`, `mint`, `occurs`, `orphaned_capture`, `receive`, `reward_theft_manipulation`, `rewards`, `staking`, `swap`, `totalSupply`, `transferFrom`, `transfer_in_rewards`, `vault_interaction`

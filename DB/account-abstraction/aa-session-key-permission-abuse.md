@@ -44,6 +44,36 @@ tags:
 
 language: solidity
 version: ">=0.8.0"
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | session_key_validation | session_key_abuse
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - CredibleAccountModule
+  - ERC-4337
+  - ERC-7579
+  - NativeTokenLimitModule
+  - ResourceLockValidator
+  - SmartSession
+  - _validateBatchCall
+  - _validateSessionKeyParams
+  - _validateSingleCall
+  - approve
+  - block.timestamp
+  - delegatecall
+  - enableMode
+  - getAndVerifyDigest
+  - msg.sender
+  - permissionId
+  - replay
+  - sessionData
+  - sessionKeyDataKey
+  - session_key
 ---
 
 ## References
@@ -67,6 +97,38 @@ version: ">=0.8.0"
 ### Overview
 
 Session keys in ERC-4337 / ERC-7579 smart accounts are meant to grant restricted, time-limited execution rights. Across 9+ audit reports, session key implementations consistently fail to enforce their own restrictions: session keys can approve arbitrary spenders (draining the wallet entirely), be consumed by any wallet instead of just the intended one, share storage slots with other keys (overwriting each other's permissions), and have their `permissionId` swapped via frontrunning during enable-mode installation.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | session_key_validation | session_key_abuse`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `session_key_validation`
+- High-signal code keywords: `CredibleAccountModule`, `ERC-4337`, `ERC-7579`, `NativeTokenLimitModule`, `ResourceLockValidator`, `SmartSession`, `_validateBatchCall`, `_validateSessionKeyParams`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Session Key Abuse — Spend Limit Bypass, Cross-Wallet Consumption, Permission Overwrite, PermissionId Frontrun
 
@@ -464,3 +526,24 @@ function validateUserOp(
 - `DB/general/access-control/` — missing authorization checks
 
 ---
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`CredibleAccountModule`, `ERC-4337`, `ERC-7579`, `NativeTokenLimitModule`, `ResourceLockValidator`, `SmartSession`, `_validateBatchCall`, `_validateSessionKeyParams`, `_validateSingleCall`, `account-abstraction`, `account_abstraction`, `approve`, `block.timestamp`, `cross-wallet`, `delegatecall`, `enableMode`, `front-running`, `getAndVerifyDigest`, `msg.sender`, `permission`, `permissionId`, `replay`, `session-key`, `sessionData`, `sessionKeyDataKey`, `session_key`, `session_key_abuse`, `smart-wallet`, `spend-limit`, `validateUserOp`

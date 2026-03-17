@@ -44,6 +44,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: weak_randomness
+pattern_key: weak_randomness | vrf | chainlink_vrf_integration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - VRF
+  - VRFConsumerBaseV2
+  - block.timestamp
+  - callbackGasLimit
+  - confirmations
+  - fulfillRandomWords
+  - getRandomNumber
+  - keyHash
+  - msg.sender
+  - processRandomness
+  - pseudoRandom
+  - randomWords
+  - requestAndUse
+  - requestId
+  - requestRandomWords
+  - requestRandomness
+  - requestWithPayment
+  - spin
+  - startQuest
+  - subscription
 ---
 
 ## References & Source Reports
@@ -106,6 +136,38 @@ Miners and block producers can potentially manipulate VRF outcomes by choosing w
 > **📚 Source Reports for Deep Dive:**
 > - `reports/chainlink_findings/h-02-miners-can-re-roll-the-vrf-output-to-game-the-protocol.md`
 > - `reports/chainlink_findings/c-01-polygon-chain-reorgs-will-often-change-game-results.md`
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of weak_randomness"
+- Pattern key: `weak_randomness | vrf | chainlink_vrf_integration`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `vrf|randomness|callback`
+- High-signal code keywords: `VRF`, `VRFConsumerBaseV2`, `block.timestamp`, `callbackGasLimit`, `confirmations`, `fulfillRandomWords`, `getRandomNumber`, `keyHash`
+- Typical sink / impact: `manipulation|fund_loss|dos|unfair_outcomes`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `ModernVRF.function -> OldVRF.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: On-chain randomness derived from block.timestamp, block.number, or blockhash
+- Signal 2: Randomness source observable by miners/validators before commitment
+- Signal 3: No commit-reveal or VRF scheme for random number generation
+- Signal 4: Seed is predictable or manipulable by transaction ordering
+
+#### False Positive Guards
+
+- Not this bug when: Chainlink VRF or similar verifiable randomness is used
+- Safe if: Commit-reveal scheme with sufficient delay prevents prediction
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -713,3 +775,24 @@ function requestRandomWords() internal returns (uint256) {
 - [Chainlink Price Feed Vulnerabilities](./CHAINLINK_PRICE_FEED_VULNERABILITIES.md)
 - [Chainlink CCIP Vulnerabilities](./CHAINLINK_CCIP_VULNERABILITIES.md)
 - [Chainlink Automation Vulnerabilities](./CHAINLINK_AUTOMATION_VULNERABILITIES.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`VRF`, `VRFConsumerBaseV2`, `block.timestamp`, `callbackGasLimit`, `chainlink_vrf_integration`, `confirmations`, `defi`, `external_dependency`, `fulfillRandomWords`, `gaming`, `getRandomNumber`, `keyHash`, `lottery`, `msg.sender`, `nft`, `processRandomness`, `pseudoRandom`, `randomWords`, `randomness`, `requestAndUse`, `requestId`, `requestRandomWords`, `requestRandomness`, `requestWithPayment`, `spin`, `startQuest`, `subscription`

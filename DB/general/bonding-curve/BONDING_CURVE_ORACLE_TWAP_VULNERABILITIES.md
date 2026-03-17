@@ -21,6 +21,28 @@ tags:
   - collateral-depeg
   - observation-array
   - time-weighted-average
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | unknown | Stale TWAP, TWAP Design Flaws, Oracle Denomination Errors, Collateral Depeg Arbitrage
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - Bonding Curve
+  - Chainlink
+  - Curve Metapool
+  - TWAP Oracle
+  - Uniswap V2 Oracle
+  - _updateTWAV
+  - balanceOf
+  - getCollateralPriceInDAI
+  - getTWAP
+  - receive
+  - swap
+  - updateAndRead
 ---
 
 # Bonding Curve Oracle and TWAP Vulnerabilities
@@ -31,6 +53,38 @@ Bonding curve protocols often use time-weighted average prices (TWAPs) or extern
 
 **Pattern Frequency:** Moderate — 6/131 bonding curve reports (4.6%)
 **Cross-Auditor Validation:** Strong — confirmed by Code4rena, Sherlock, and multiple independent researchers
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | unknown | Stale TWAP, TWAP Design Flaws, Oracle Denomination Errors, Collateral Depeg Arbitrage`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `unknown`
+- High-signal code keywords: `Bonding Curve`, `Chainlink`, `Curve Metapool`, `TWAP Oracle`, `Uniswap V2 Oracle`, `_updateTWAV`, `balanceOf`, `getCollateralPriceInDAI`
+- Typical sink / impact: `Price Manipulation, DoS, Stablecoin Depeg, Collateral Draining`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ## Root Cause
 
@@ -273,3 +327,24 @@ bonding curve oracle manipulation, TWAP manipulation, TWAV insufficient observat
 | 4 | USSD | Sherlock | HIGH | `reports/bonding_curve_findings/ussd_sherlock_oracle_usd_denomination.md` |
 | 5 | Ubiquity | Sherlock | MEDIUM | `reports/bonding_curve_findings/ubiquity_sherlock_collateral_depeg_arbitrage.md` |
 | 6 | Unlock Protocol | Code4rena | MEDIUM | `reports/bonding_curve_findings/unlock_c4rena_udt_oracle_arbitrage.md` |
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`Bonding Curve`, `Chainlink`, `Curve Metapool`, `Oracle Manipulation`, `Stale TWAP, TWAP Design Flaws, Oracle Denomination Errors, Collateral Depeg Arbitrage`, `TWAP Oracle`, `Uniswap V2 Oracle`, `_updateTWAV`, `balanceOf`, `bonding-curve`, `chainlink`, `collateral-depeg`, `curve-metapool`, `denomination-mismatch`, `getCollateralPriceInDAI`, `getTWAP`, `observation-array`, `oracle`, `receive`, `stale-oracle`, `swap`, `time-weighted-average`, `twap`, `twav`, `uniswap-oracle`, `updateAndRead`

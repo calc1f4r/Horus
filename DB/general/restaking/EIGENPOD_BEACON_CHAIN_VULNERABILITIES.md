@@ -47,6 +47,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | eigenpod | eigenpod_beacon_chain_verification
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _getExecutionPayloadTreeHeight
+  - _podWithdrawalCredentials
+  - _processWithdrawalBeforeRestaking
+  - _reduceSlashingFactor
+  - balance_container
+  - beacon_state_root
+  - block.timestamp
+  - claimNativeEthWithdraw
+  - deposit
+  - historical_summaries
+  - initiateNativeEthWithdraw
+  - initiateNativeEthWithdrawBeforeRestaking
+  - merkle_proof
+  - proofIsForValidTimestamp
+  - receive
+  - removeNodeDelegatorContractFromQueue
+  - ssz_container
+  - stake32ETH
+  - stake32Eth
+  - stakedButUnverifiedNativeETH
 ---
 
 ## References & Source Reports
@@ -124,6 +154,38 @@ EigenLayer's beacon chain proof verification uses multi-tree Merkle traversal wi
 > - `reports/eigenlayer_findings/eig-10-withdrawal-proofs-can-be-forged-due-to-missing-index-bit-size-check.md` (EigenLayer - Hexens)
 > - `reports/eigenlayer_findings/h-01-slot-and-block-number-proofs-not-required-for-verification-of-withdrawal-mu.md` (EigenLayer - Code4rena)
 > - `reports/eigenlayer_findings/eig-14-m1-eigenpods-can-restake-and-withdraw-without-proving-and-burning-shares.md` (EigenLayer - Hexens)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | eigenpod | eigenpod_beacon_chain_verification`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `eigenpod|beacon_chain_proofs|merkle_verification|validator_status`
+- High-signal code keywords: `_getExecutionPayloadTreeHeight`, `_podWithdrawalCredentials`, `_processWithdrawalBeforeRestaking`, `_reduceSlashingFactor`, `balance_container`, `beacon_state_root`, `block.timestamp`, `claimNativeEthWithdraw`
+- Typical sink / impact: `fund_loss|proof_forgery|dos|upgrade_breakage`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `CasimirManager.function -> SecureManager.function -> upgrade.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -803,3 +865,24 @@ function proofIsForValidTimestamp(uint256 timestamp) internal view returns (bool
 - [Restaking Withdrawal Vulnerabilities](RESTAKING_WITHDRAWAL_VULNERABILITIES.md)
 - [Restaking Slashing Mechanism](RESTAKING_SLASHING_VULNERABILITIES.md)
 - [LRT Share Accounting Errors](LRT_SHARE_ACCOUNTING_VULNERABILITIES.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_getExecutionPayloadTreeHeight`, `_podWithdrawalCredentials`, `_processWithdrawalBeforeRestaking`, `_reduceSlashingFactor`, `balance_container`, `beacon_chain`, `beacon_state_root`, `block.timestamp`, `claimNativeEthWithdraw`, `consensus_layer`, `defi`, `deneb`, `deposit`, `eigenlayer`, `eigenpod_beacon_chain_verification`, `electra`, `ethereum_upgrade`, `fulu`, `historical_summaries`, `initiateNativeEthWithdraw`, `initiateNativeEthWithdrawBeforeRestaking`, `merkle_proof`, `proofIsForValidTimestamp`, `receive`, `removeNodeDelegatorContractFromQueue`, `restaking`, `ssz_container`, `stake32ETH`, `stake32Eth`, `stakedButUnverifiedNativeETH`, `tree_height`, `validator_fields`, `verifyAndProcessWithdrawals`, `verifyBalanceUpdate`, `verifyWithdrawalCredentials`, `withdrawal_credentials`, `withdrawal_proof`

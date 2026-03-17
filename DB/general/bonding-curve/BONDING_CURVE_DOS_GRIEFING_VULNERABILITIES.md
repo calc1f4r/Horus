@@ -45,6 +45,36 @@ tags:
 # Version Info
 language: solidity
 version: ">=0.6.0"
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | bonding_curve_creation, pool_migration, share_distribution, liquidity_provision | bonding_curve_dos_griefing
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - EnumerableMap
+  - PDA_pre_funding
+  - _findSlice
+  - approve
+  - block.timestamp
+  - buy
+  - buyShareCredFor
+  - deposit
+  - deterministic_address
+  - distribute
+  - escrow_invariant
+  - gas_limit
+  - graduateToken
+  - init_if_needed
+  - legitimate
+  - mint
+  - permissioned
+  - selfdestruct
+  - share_inflation
+  - swap
 ---
 
 ## References
@@ -70,6 +100,38 @@ version: ">=0.6.0"
 ### Overview
 
 Bonding curve protocols are systematically vulnerable to denial-of-service and griefing attacks that exploit deterministic address pre-funding, integer overflow in index variables, gas limit exhaustion via unbounded iterations, share price inflation by first depositors, zero-amount edge cases in withdrawal flows, and permissionless functions that can be front-run to prevent legitimate operations.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | bonding_curve_creation, pool_migration, share_distribution, liquidity_provision | bonding_curve_dos_griefing`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `bonding_curve_creation, pool_migration, share_distribution, liquidity_provision`
+- High-signal code keywords: `EnumerableMap`, `PDA_pre_funding`, `_findSlice`, `approve`, `block.timestamp`, `buy`, `buyShareCredFor`, `deposit`
+- Typical sink / impact: `dos`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -476,3 +538,24 @@ function graduateToken() internal {
 - Solana PDA Security Issues
 - Gas Griefing Attacks
 - Force-Sending Native Tokens
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`EnumerableMap`, `PDA`, `PDA_pre_funding`, `_findSlice`, `approve`, `block.timestamp`, `bonding_curve`, `bonding_curve_dos_griefing`, `buy`, `buyShareCredFor`, `defi`, `denial_of_service`, `deposit`, `deterministic_address`, `distribute`, `dos`, `escrow`, `escrow_invariant`, `first_depositor`, `gas_limit`, `graduateToken`, `griefing`, `init_if_needed`, `legitimate`, `mint`, `permissioned`, `pre_funding`, `selfdestruct`, `share_inflation`, `solana`, `swap`, `uint8_overflow`, `zero_amount`

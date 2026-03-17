@@ -29,7 +29,33 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | fee_collection | fee_accounting_bypass
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _beforeTokenTransfer
+  - _getPendingFees
+  - collectFees
+  - collecting
+  - mint
+  - minting
+  - stealReserves
+  - swap
+  - underflow
 ---
+
+## References & Source Reports
+
+| Label | Path | Severity | Auditor | Source ID / Link |
+|-------|------|----------|---------|------------------|
+| [Trader Joe V2] | reports/constantproduct/h-05-attacker-can-steal-entire-reserves-by-abusing-fee-calculation.md | HIGH | Code4rena | - |
+
 
 # Trader Joe V2 - Fee Debt Model Reserve Theft
 
@@ -43,6 +69,38 @@ version: all
 ## Overview
 
 Trader Joe V2 used a debt-based fee accounting model where `accTokenPerShare` grows over time and user debts track when they entered. The code exempted the LBToken address from updating debts in `_cacheFees`, allowing an attacker to mint LP tokens to the pair address itself, then collect fees as if they had been an LP since genesis - stealing the entire accumulated fee reserves.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | fee_collection | fee_accounting_bypass`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `fee_collection`
+- High-signal code keywords: `_beforeTokenTransfer`, `_getPendingFees`, `collectFees`, `collecting`, `mint`, `minting`, `stealReserves`, `swap`
+- Typical sink / impact: `reserve_theft`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `LBPair.function -> SecureLBPair.function -> TraderJoeExploit.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ## Why This Is Unique to Trader Joe
 
@@ -236,3 +294,24 @@ This is a variant of "debt model" accounting bugs seen in:
 ## Keywords
 
 `fee_debt_model`, `accTokenPerShare`, `debt_bypass`, `LBToken_exemption`, `reserve_theft`, `trader_joe_v2`, `concentrated_liquidity`, `fee_accounting`, `mint_to_self`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`LBToken_exemption`, `_beforeTokenTransfer`, `_getPendingFees`, `accToken_manipulation`, `amm`, `collectFees`, `collecting`, `fee_accounting_bypass`, `fee_debt_model`, `mint`, `minting`, `reserve_theft`, `stealReserves`, `swap`, `underflow`

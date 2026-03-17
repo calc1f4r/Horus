@@ -48,6 +48,36 @@ tags:
 
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | factory_contract | reorg_frontrun
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - CREATE
+  - CREATE2
+  - CREATE3
+  - addLiquidity
+  - block.number
+  - block.timestamp
+  - block_reorg
+  - createPool
+  - createPoolAndAddLiquidity
+  - createQuest
+  - deploy
+  - deployProxy
+  - deployment_frontrun
+  - deposit
+  - deterministic_address
+  - factory_pattern
+  - initialize_pattern
+  - liquidity_pool_deployment
+  - msg.sender
+  - msg_sender_address
 ---
 
 ## References & Source Reports
@@ -80,6 +110,38 @@ version: all
 Block reorganizations (reorgs) on Ethereum and L2 chains are short-lived events where a competing chain branch temporarily becomes canonical. During a reorg, transactions from the discarded branch are replayed in a different order. Factory contracts that deploy child contracts using `CREATE` (nonce-dependent address) or `CREATE2` (salt-dependent address) are vulnerable: attackers can predict the deployment address, front-run the initialization of the newly deployed contract, and steal funds deposited immediately after deployment.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | factory_contract | reorg_frontrun`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `factory_contract|create2_deployment|liquidity_pool|questFactory|deployment_addresses`
+- High-signal code keywords: `CREATE`, `CREATE2`, `CREATE3`, `addLiquidity`, `block.number`, `block.timestamp`, `block_reorg`, `createPool`
+- Typical sink / impact: `fund_theft|deployment_hijack|lp_theft|griefing`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `LiquidityFactory.function -> ProxyFactory.function -> QuestFactory.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -338,3 +400,24 @@ contract SafeFactory {
 ### Keywords for Search
 
 `reorg attack factory`, `block reorganization deployment`, `CREATE2 reorg front-run`, `factory nonce reorg`, `questFactory reorg`, `deployment address hijack`, `predictable contract address`, `liquidity pool reorg theft`, `ProxyFactory reorg`, `salt without msg.sender`, `create method reorg`, `fund theft L1 reorg`, `contract deployment replay`, `two-step deploy initialize reorg`, `address collision reorg`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`CREATE`, `CREATE2`, `CREATE3`, `Ethereum`, `addLiquidity`, `address_collision`, `block.number`, `block.timestamp`, `block_reorg`, `createPool`, `createPoolAndAddLiquidity`, `createQuest`, `deploy`, `deployProxy`, `deployment`, `deployment_frontrun`, `deposit`, `deterministic_address`, `factory`, `factory_pattern`, `frontrun`, `initialize_pattern`, `liquidity_pool`, `liquidity_pool_deployment`, `mainnet_reorg`, `msg.sender`, `msg_sender_address`, `nonce`, `nonce_dependency`, `proxyFactory`, `questFactory`, `reorg_attack`, `reorg_frontrun|factory_reorg|create_address_collision|lp_fund_theft|deployment_griefing`

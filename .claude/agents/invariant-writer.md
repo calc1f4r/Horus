@@ -1081,4 +1081,5 @@ Each sub-agent returns structured invariants in the output format.
 - **Invariant methodology**: [invariant-methodology.md](.claude/resources/invariant-methodology.md)
 - **Root cause analysis**: [root-cause-analysis.md](.claude/resources/root-cause-analysis.md)
 - **Crytic properties**: Reference for ERC20/ERC721/ERC4626 standard invariants (github.com/crytic/properties)
+- **Invariant writing guide**: [invariant-writing-guide.md](.claude/resources/invariant-writing-guide.md) — Fuzz Fest 2024 methodologies (Dacian's Matrix, shadow accounting, shortcut functions, lifecycle classification)
 - **Inter-agent data format**: [inter-agent-data-format.md](.claude/resources/inter-agent-data-format.md) — output schema when spawned by orchestrator

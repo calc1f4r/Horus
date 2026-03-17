@@ -44,6 +44,36 @@ tags:
 # Version Info
 language: solidity
 version: ">=0.6.0"
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | bonding_curve, pricing_formula, invariant_calculation, AMM_math | bonding_curve_math_error
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _calcVotePrice
+  - _findMaxFillableAmtForBuy
+  - balanceOf
+  - binary_search
+  - bonding_curve
+  - borrow
+  - burn
+  - calculateSpotPrice
+  - constant_product
+  - createToken
+  - delta
+  - deposit
+  - execute
+  - fallback
+  - geometric_mean
+  - getLPTokenValue
+  - getOutputPrice
+  - getPrice
+  - getUtilizationRate
+  - invariant
 ---
 
 ## References
@@ -76,6 +106,38 @@ version: ">=0.6.0"
 ### Overview
 
 Bonding curves, AMM pricing formulas, and related mathematical implementations are systematically vulnerable to logic errors, incorrect formula transcription, wrong parameter usage, missing edge case handling, and invariant violations. These bugs enable attackers to buy/sell at incorrect prices, drain protocol reserves, manipulate utilization metrics, or cause permanent protocol dysfunction.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | bonding_curve, pricing_formula, invariant_calculation, AMM_math | bonding_curve_math_error`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `bonding_curve, pricing_formula, invariant_calculation, AMM_math`
+- High-signal code keywords: `_calcVotePrice`, `_findMaxFillableAmtForBuy`, `balanceOf`, `binary_search`, `bonding_curve`, `borrow`, `burn`, `calculateSpotPrice`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `ContinuosBondingERC20Token.function -> and.function -> function.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -627,3 +689,24 @@ function getUtilizationRate(bool isBull) public view returns (uint256) {
 - Flash Loan Attacks on Bonding Curves
 - AMM Invariant Manipulation
 - Oracle Price vs Spot Price Discrepancy
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`AMM`, `_calcVotePrice`, `_findMaxFillableAmtForBuy`, `arbitrage`, `arithmetic`, `balanceOf`, `binary_search`, `bonding_curve`, `bonding_curve_math_error`, `borrow`, `burn`, `calculateSpotPrice`, `constant_product`, `createToken`, `curve_supply`, `defi`, `delta`, `deposit`, `execute`, `fallback`, `formula_bug`, `geometric_mean`, `getLPTokenValue`, `getOutputPrice`, `getPrice`, `getUtilizationRate`, `invariant`, `math_error`, `pricing`, `reserve_ratio`, `spot_price`, `time_decay`, `utilization_rate`

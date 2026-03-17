@@ -31,6 +31,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | staking_logic | stake_deposit_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - SyncStateDBWithAccount
+  - TotalUTokenSupply
+  - _addQueuedSlashableShares
+  - _checkOnERC721Received
+  - _safeMint
+  - _unstakeNFTs
+  - addValidator
+  - balance
+  - balanceOf
+  - balance_desync
+  - block.number
+  - burn
+  - calcAndCacheStakes
+  - claimRewards
+  - deposit
+  - deposit_amount_tracking
+  - deposit_frontrunning
+  - deposit_inflation
+  - deposit_queue
+  - deposit_validation
 ---
 
 ## References & Source Reports
@@ -160,6 +190,38 @@ version: all
 Protocol fails to correctly track staked amounts, leading to accounting mismatches between actual deposits and recorded balances. This pattern was found across 186 audit reports with severity distribution: HIGH: 76, MEDIUM: 110.
 
 > **Key Finding**: The bug report discusses an issue with the `_checkValidatorBehavior()` function in the OracleManager.sol file. This function is responsible for checking the reasonableness of changes in the slashed amount and rewards amount. The problem arises when tolerance levels, represented as percentages of the
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | staking_logic | stake_deposit_vulnerabilities`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `staking_logic`
+- High-signal code keywords: `SyncStateDBWithAccount`, `TotalUTokenSupply`, `_addQueuedSlashableShares`, `_checkOnERC721Received`, `_safeMint`, `_unstakeNFTs`, `addValidator`, `balance`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `allows.function -> balance.function -> directly.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1298,3 +1360,24 @@ grep -rn 'staking|invariant|broken' --include='*.go' --include='*.sol'
 ## Keywords
 
 `access`, `account`, `accounting`, `allowing`, `allows`, `amount`, `appchain`, `attack`, `attacked`, `avoid`, `balance`, `bank`, `beaconchainethstrategy`, `because`, `bloating`, `bond`, `bridge`, `broken`, `cache`, `calculation`, `calculations`, `cause`, `causes`, `check`, `constraint`, `control`, `cosmos`, `could`, `current`, `delayed`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`SyncStateDBWithAccount`, `TotalUTokenSupply`, `_addQueuedSlashableShares`, `_checkOnERC721Received`, `_safeMint`, `_unstakeNFTs`, `addValidator`, `appchain`, `balance`, `balanceOf`, `balance_desync`, `block.number`, `burn`, `calcAndCacheStakes`, `claimRewards`, `cosmos`, `defi`, `deposit`, `deposit_amount_tracking`, `deposit_frontrunning`, `deposit_inflation`, `deposit_queue`, `deposit_validation`, `incorrect_calculation`, `invariant_broken`, `stake_deposit_vulnerabilities`, `staking`

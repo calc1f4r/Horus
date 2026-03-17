@@ -40,6 +40,35 @@ version: all
 
 # Source
 source: DeFiHackLabs
+
+# Pattern Identity (Required)
+root_cause_family: missing_access_control
+pattern_key: missing_access_control | signature_validation | signature_verification
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - ECDSA
+  - EIP712
+  - approve
+  - block.timestamp
+  - claimReward
+  - claimWithSignature
+  - domain_separator
+  - ecrecover
+  - execute
+  - executeSwap
+  - executeWithSignature
+  - getMessageHash
+  - malleability
+  - mint
+  - missing_nonce
+  - permit
+  - signature_malleability
+  - signature_replay
+  - verifySignature
 ---
 
 # Signature Verification Vulnerabilities
@@ -51,6 +80,38 @@ Signature verification vulnerabilities occur when smart contracts improperly val
 **Total Historical Losses from Analyzed Exploits: >$50M USD**
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_access_control"
+- Pattern key: `missing_access_control | signature_validation | signature_verification`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `signature_validation`
+- High-signal code keywords: `ECDSA`, `EIP712`, `approve`, `block.timestamp`, `claimReward`, `claimWithSignature`, `domain_separator`, `ecrecover`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `address.function -> deployed.function -> funds.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State-changing function lacks `onlyOwner`/`onlyRole` modifier
+- Signal 2: External function accepts arbitrary address and calls interface methods without registry validation
+- Signal 3: Configuration setter is callable by non-owner accounts
+- Signal 4: Initialization or migration function is unprotected
+
+#### False Positive Guards
+
+- Not this bug when: Function is `internal`/`private` and only called from access-controlled paths
+- Safe if: Function is restricted via `onlyOwner`/`onlyRole`/`require(msg.sender == ...)`
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerability Categories
 
@@ -481,3 +542,24 @@ rules:
 - **TCH** (2024-05, $18K): `DeFiHackLabs/src/test/2024-05/TCH_exp.sol`
 - **MintoFinance** (2023-07, $9K): `DeFiHackLabs/src/test/2023-07/MintoFinance_exp.sol`
 - **BEGO** (2022-10, $12): `DeFiHackLabs/src/test/2022-10/BEGO_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`DeFiHackLabs`, `ECDSA`, `EIP712`, `access_control`, `approve`, `authentication`, `block.timestamp`, `claimReward`, `claimWithSignature`, `defi`, `domain_separator`, `ecrecover`, `execute`, `executeSwap`, `executeWithSignature`, `getMessageHash`, `malleability`, `mint`, `missing_nonce`, `permit`, `real_exploit`, `signature_malleability`, `signature_replay`, `signature_verification`, `verifySignature`

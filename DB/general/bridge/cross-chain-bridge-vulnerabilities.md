@@ -61,6 +61,36 @@ tags:
 language: solidity
 version: all
 source: DeFiHackLabs
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | bridge_relay | cross_chain_bridge_exploit
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _attack
+  - _executeSwaps
+  - _updateThreshold
+  - acceptableRoot
+  - access_control
+  - addAllowedTarget
+  - addSupportedToken
+  - addValidator
+  - allowance
+  - approve
+  - arbitrary_call
+  - balanceOf
+  - block.timestamp
+  - bridgeTokens
+  - burn
+  - calldata_validation
+  - cancelWithdraw
+  - chain_id
+  - computeMerkleRoot
+  - computeWithdrawHash
 ---
 
 ## References & Source Reports
@@ -126,6 +156,38 @@ source: DeFiHackLabs
 Bridge protocols use merkle proofs to verify that cross-chain messages were included in the source chain's state. Flaws in merkle root initialization or verification can allow attackers to forge valid proofs for fraudulent withdrawals.
 
 > **Real-World Impact**: Nomad Bridge lost ~$152M due to incorrect merkle root initialization that accepted zero proofs.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | bridge_relay | cross_chain_bridge_exploit`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `bridge_relay|merkle_verifier|signature_verifier|multisig|token_handler|message_processor`
+- High-signal code keywords: `_attack`, `_executeSwaps`, `_updateThreshold`, `acceptableRoot`, `access_control`, `addAllowedTarget`, `addSupportedToken`, `addValidator`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `AnyswapExploit.function -> CentralizedValidators.function -> CompleteMerkleVerification.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1530,3 +1592,24 @@ function invariant_noDoubleWithdrawal() public {
 - [Hyperlane Integration Issues](../../bridge/hyperlane/hyperlane-integration-vulnerabilities.md)
 - [Access Control Vulnerabilities](../access-control/access-control-vulnerabilities.md)
 - [Arbitrary External Call](../arbitrary-call/arbitrary-external-call-vulnerabilities.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_attack`, `_executeSwaps`, `_updateThreshold`, `acceptableRoot`, `access_control`, `addAllowedTarget`, `addSupportedToken`, `addValidator`, `allowance`, `approve`, `arbitrary_call`, `balanceOf`, `block.timestamp`, `bridge`, `bridgeTokens`, `burn`, `calldata_validation`, `cancelWithdraw`, `chain_id`, `computeMerkleRoot`, `computeWithdrawHash`, `cross_chain`, `cross_chain_bridge_exploit`, `cross_chain_message`, `defi`, `deposit`, `key_management`, `lock`, `merkle_proof`, `merkle_root`, `mint`, `multisig`, `nonce`, `process_message`, `real_exploit`, `replay_attack`, `replay_protection`, `safeTransferFrom`, `signature`, `signature_verification`, `threshold_signature`, `token_validation`, `unlock`, `verify_proof`, `withdraw`

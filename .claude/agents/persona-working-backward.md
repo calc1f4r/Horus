@@ -1,7 +1,7 @@
 ---
 name: persona-working-backward
 description: Working Backward auditing persona — traces from critical sinks to attacker-controllable sources. Language-agnostic — works with any smart contract language (Solidity, Rust, Go, Move, Cairo, Vyper). Spawned by multi-persona-orchestrator. Optimized for speedrun/bug-bounty style hunting.
-tools: [Bash, Edit, Glob, Grep, Read]
+tools: [Bash, Edit, Glob, Grep, Read, Write]
 maxTurns: 50
 ---
 

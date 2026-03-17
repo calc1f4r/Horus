@@ -47,6 +47,36 @@ tags:
 # Version Info
 language: solidity|rust|move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: callback_reentrancy
+pattern_key: callback_reentrancy | vault | yield_strategy_integration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - __activateTstore
+  - _afterTokenTransfer
+  - _beforeTokenTransfer
+  - _claimableAmount
+  - _convertToShares
+  - _decimalsOffset
+  - _getUserManagerState
+  - _offer
+  - _rewardPerToken
+  - _setTreasuryRewardCutRate
+  - _transfer
+  - _updateRewardsPerToken
+  - _useTstore
+  - _wasActiveAt
+  - approve
+  - balanceOf
+  - batchOffer
+  - block.number
+  - block.timestamp
+  - borrow
 ---
 
 ## References & Source Reports
@@ -184,6 +214,38 @@ The first depositor in a vault can manipulate share pricing by depositing a mini
 
 > **📚 Source Reports for Deep Dive:**
 > - `reports/yield_protocol_findings/m-03-first-depositor-inflation-attack-in-pendlepowerfarmtoken.md` (Wise Lending - Code4rena)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of callback_reentrancy"
+- Pattern key: `callback_reentrancy | vault | yield_strategy_integration`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `vault|staking|rewards|liquidity_pool|share_calculation`
+- High-signal code keywords: `__activateTstore`, `_afterTokenTransfer`, `_beforeTokenTransfer`, `_claimableAmount`, `_convertToShares`, `_decimalsOffset`, `_getUserManagerState`, `_offer`
+- Typical sink / impact: `fund_loss|theft_of_yield|dos|manipulation|price_manipulation`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `2.function -> StakedINTX.function -> as.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: External call (`.call`, `.transfer`, token transfer) occurs before state variable update
+- Signal 2: Token implements callback hooks (ERC-777, ERC-721) and protocol doesn't use `nonReentrant`
+- Signal 3: User-supplied token address passed to `transferFrom` without callback protection
+- Signal 4: Read-only function's return value consumed cross-contract during an active callback window
+
+#### False Positive Guards
+
+- Not this bug when: Contract uses `ReentrancyGuard` (`nonReentrant`) on all entry points
+- Safe if: All state updates complete before any external call (strict CEI)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -2236,3 +2298,24 @@ function rebalance(uint256 minSafEthOut, uint256 minVotiumOut) external onlyOwne
 ### Top PoC References
 
 - **Thena** (2023-03, $10K): `DeFiHackLabs/src/test/2023-03/Thena_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`__activateTstore`, `_afterTokenTransfer`, `_beforeTokenTransfer`, `_claimableAmount`, `_convertToShares`, `_decimalsOffset`, `_getUserManagerState`, `_offer`, `_rewardPerToken`, `_setTreasuryRewardCutRate`, `_transfer`, `_updateRewardsPerToken`, `_useTstore`, `_wasActiveAt`, `approve`, `balanceOf`, `batchOffer`, `block.number`, `block.timestamp`, `borrow`, `defi`, `deposit_withdrawal`, `erc4626`, `exchange_rate`, `fee_calculation`, `flash_loan`, `inflation_attack`, `liquidity_pool`, `liquidity_provision`, `reentrancy`, `reward_accrual`, `reward_distribution`, `rewards`, `share_price`, `slippage_protection`, `staking`, `staking_mechanism`, `total_assets`, `total_supply`, `vault`, `yield`, `yield_strategy_integration`

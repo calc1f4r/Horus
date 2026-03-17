@@ -2,6 +2,7 @@
 """Generate Excalidraw architecture diagram — ALL sections stacked vertically, zero overlap."""
 
 import json, random
+from pathlib import Path
 
 _id = 100000
 def uid():
@@ -442,7 +443,7 @@ diagram = {
     "files": {}
 }
 
-out = "/home/calc1f4r/Vulnerability-database/Architecture-Diagram.excalidraw"
+out = str(Path(__file__).resolve().parent.parent / "docs" / "architecture.excalidraw")
 with open(out, "w") as f:
     json.dump(diagram, f, indent=2)
 

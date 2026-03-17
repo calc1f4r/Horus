@@ -29,6 +29,27 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | ibc_logic | ibc_protocol_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - OnChanOpenInit
+  - UpdateEntry
+  - authentication
+  - channel_verification
+  - deposit
+  - execute
+  - middleware_bypass
+  - mint
+  - packet_handling
+  - timeout
+  - version_negotiation
 ---
 
 ## References & Source Reports
@@ -97,6 +118,38 @@ version: all
 Implementation flaw in ibc channel verification logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 2 audit reports with severity distribution: HIGH: 1, MEDIUM: 1.
 
 > **Key Finding**: The provided UpdateEntry function in a system managing entries in IBC lacks verification for the correctness and validity of Inter-Blockchain Communication (IBC) channel identifiers. This can potentially lead to unauthorized access or incorrect updates to the system. The recommended solution is for 
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | ibc_logic | ibc_protocol_vulnerabilities`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `ibc_logic`
+- High-signal code keywords: `OnChanOpenInit`, `UpdateEntry`, `authentication`, `channel_verification`, `deposit`, `execute`, `middleware_bypass`, `mint`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -636,3 +689,24 @@ grep -rn 'ibc|timeout' --include='*.go' --include='*.sol'
 ## Keywords
 
 `absence`, `abusing`, `account`, `appchain`, `authentication`, `before`, `between`, `bridge`, `bypass`, `chains`, `channel`, `close`, `code`, `connection`, `cosmos`, `different`, `does`, `execute`, `function`, `handling`, `hooks`, `ibc`, `inconsistencies`, `instruction`, `lack`, `limits`, `logic`, `messages`, `middleware`, `missing`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`OnChanOpenInit`, `UpdateEntry`, `appchain`, `authentication`, `channel_verification`, `cosmos`, `defi`, `deposit`, `execute`, `ibc`, `ibc_protocol_vulnerabilities`, `middleware_bypass`, `mint`, `packet_handling`, `staking`, `timeout`, `version_negotiation`

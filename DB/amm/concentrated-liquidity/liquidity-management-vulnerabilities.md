@@ -18,6 +18,36 @@ tags:
   - "flash-loan-attack"
   - "fee-theft"
 last_updated: "2025-01-15"
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | unknown | unknown
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _addAsset
+  - _advanceToNextDown
+  - _deposit
+  - _getTotalValue
+  - _transfer
+  - addLiquidity
+  - balanceOf
+  - burn
+  - collectAndCalcCompound
+  - createAndInitializePool
+  - deposit
+  - fee
+  - getPrice
+  - initialize
+  - legitimate
+  - mint
+  - msg.sender
+  - reallocate
+  - receive
+  - removeLiquidity
 ---
 
 # Liquidity Management Vulnerabilities in Concentrated Liquidity AMMs
@@ -32,6 +62,38 @@ Concentrated liquidity AMMs introduce complex liquidity management mechanisms th
 **Observed Frequency:** 40+ reports analyzed covering liquidity deposit/withdrawal issues, fee accounting errors, initialization attacks, and position state manipulation.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | unknown | unknown`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `unknown`
+- High-signal code keywords: `_addAsset`, `_advanceToNextDown`, `_deposit`, `_getTotalValue`, `_transfer`, `addLiquidity`, `balanceOf`, `burn`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `SecureLPToken.function -> SecureLiquidityManager.function -> SecureMultiPairManager.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerable Pattern Examples
 
@@ -645,3 +707,24 @@ rules:
 1. [Uniswap V3 Core Audit - TrailOfBits](https://github.com/trailofbits/publications/blob/master/reviews/UniswapV3Core.pdf)
 2. [Uniswap V3 Position Management](https://docs.uniswap.org/contracts/v3/guides/providing-liquidity/mint-a-position)
 3. [ERC777 Token Standard](https://eips.ethereum.org/EIPS/eip-777)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_addAsset`, `_advanceToNextDown`, `_deposit`, `_getTotalValue`, `_transfer`, `addLiquidity`, `balanceOf`, `burn`, `collectAndCalcCompound`, `createAndInitializePool`, `deposit`, `fee`, `fee-theft`, `flash-loan-attack`, `getPrice`, `initialize`, `legitimate`, `liquidity-accounting`, `liquidity-deposit`, `liquidity-withdrawal`, `mint`, `msg.sender`, `position-management`, `reallocate`, `receive`, `removeLiquidity`

@@ -49,6 +49,36 @@ tags:
 
 language: solidity|yul
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: arithmetic_error
+pattern_key: arithmetic_error | gas_tracking | gas_theft
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - L1_gas_price
+  - L2_gas_limit
+  - baseFeePerGas
+  - batch
+  - batch_fees_multiplier
+  - block.number
+  - bootloader_gas
+  - burn
+  - bytecode_compression
+  - calculateBatchFee
+  - commitScalar
+  - executeOp
+  - free_variables
+  - gas_per_pubdata_byte
+  - gasleft_tracking
+  - operator_gas_steal
+  - pubdata_cost
+  - publishCompressedBytecode
+  - requestL2Transaction
+  - spentOnPubdata
 ---
 
 ## References & Source Reports
@@ -85,6 +115,38 @@ version: all
 ZK rollup gas accounting involves multiple layers: L2 transaction gas, pubdata costs (cost of posting state diffs to L1), compression rebates, and sequencer fee reimbursement. Bugs in any layer allow operators to steal user gas, let users avoid paying pubdata costs, cause undercompensation of the sequencer for L1 data costs, or enable denial-of-service via resource exhaustion in gas tracking.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of arithmetic_error"
+- Pattern key: `arithmetic_error | gas_tracking | gas_theft`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `gas_tracking|pubdata_gas|l1_l2_gas|bootloader|fee_model|bytecode_compression|batch_fees|paymaster`
+- High-signal code keywords: `L1_gas_price`, `L2_gas_limit`, `baseFeePerGas`, `batch`, `batch_fees_multiplier`, `block.number`, `bootloader_gas`, `burn`
+- Typical sink / impact: `fund_theft|resource_dos|underpayment|fee_bypass`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `BatchFeeManager.function -> Bootloader.function -> Compressor.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Arithmetic operation on user-controlled input without overflow protection
+- Signal 2: Casting between different-width integer types without bounds check
+- Signal 3: Multiplication before division where intermediate product can exceed type max
+- Signal 4: Accumulator variable can wrap around causing incorrect accounting
+
+#### False Positive Guards
+
+- Not this bug when: Solidity >= 0.8.0 with default checked arithmetic
+- Safe if: SafeMath library used for all arithmetic on user-controlled values
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -362,3 +424,24 @@ interface ICompressor {
 ### Keywords for Search
 
 `pubdata gas accounting`, `spentOnPubdata refund`, `operator gas steal L1 L2`, `commitScalar underpayment`, `batch fee multiplier cap bypass`, `bytecode compression completeness bypass`, `bootloader gas theft`, `ZKSync gas accounting`, `L2 pubdata cost`, `gas per pubdata byte`, `unchecked gas variable`, `paymaster gas manipulation`, `sequencer underpaid`, `free variable gas circuit`, `sendCompressedBytecode gas burn`, `batch overhead constant`, `fee model attack`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`DoS`, `L1_gas_price`, `L2_gas_limit`, `baseFeePerGas`, `batch`, `batch_fees`, `batch_fees_multiplier`, `block.number`, `bootloader`, `bootloader_gas`, `burn`, `bytecode_compression`, `calculateBatchFee`, `commitScalar`, `executeOp`, `fee_manipulation`, `free_variables`, `gas_accounting`, `gas_per_pubdata_byte`, `gas_theft|fee_manipulation|gas_dos|incorrect_fee_calculation|underpriced_sequencer|gas_bypass`, `gasleft_tracking`, `l1_gas_cost`, `operator`, `operator_gas_steal`, `paymaster`, `pubdata`, `pubdata_cost`, `publishCompressedBytecode`, `requestL2Transaction`, `sequencer`, `spentOnPubdata`, `validateAndPayForPaymaster`, `zk_rollup_gas_accounting`, `zksync`

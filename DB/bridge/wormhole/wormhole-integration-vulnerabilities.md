@@ -48,6 +48,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | VAA | wormhole_integration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - NttManager
+  - TokenBridge
+  - TransceiverMessage
+  - VAA
+  - approve
+  - bridgeToUser
+  - bridgeTokens
+  - bridgeWithPayload
+  - completeTransfer
+  - consistencyLevel
+  - emitterAddress
+  - emitterChainId
+  - executeProposal
+  - guardianSet
+  - message
+  - msg.sender
+  - nonce
+  - parseAndVerifyVAA
+  - processMessage
+  - receiveMessage
 ---
 
 ## References & Source Reports
@@ -105,6 +135,38 @@ Verified Action Approvals (VAAs) are the core message format in Wormhole. VAAs m
 > **📚 Source Reports for Deep Dive:**
 > - `reports/bridge_crosschain_findings/wormhole-integ.md` (Sherlock)
 > - `reports/bridge_crosschain_findings/m-1-wrong-integration-of-wormhole-allows-arbitrary-callers-for-receivewithanycall.md` (Sherlock)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | VAA | wormhole_integration`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `VAA|Guardian|Relayer|TokenBridge|NttManager`
+- High-signal code keywords: `NttManager`, `TokenBridge`, `TransceiverMessage`, `VAA`, `approve`, `bridgeToUser`, `bridgeTokens`, `bridgeWithPayload`
+- Typical sink / impact: `fund_loss|double_spending|message_replay|governance_bypass`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `ConfigurableGasReceiver.function -> ImmutableGasReceiver.function -> SecureGovernance.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -586,3 +648,24 @@ contract ConfigurableGasReceiver {
 - [LayerZero Integration Issues](../layerzero/layerzero-integration-vulnerabilities.md)
 - [Cross-Chain Replay Attacks](../custom/cross-chain-replay-vulnerabilities.md)
 - [Bridge Access Control](../custom/bridge-access-control.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`NttManager`, `TokenBridge`, `TransceiverMessage`, `VAA`, `approve`, `bridge`, `bridgeToUser`, `bridgeTokens`, `bridgeWithPayload`, `completeTransfer`, `consistencyLevel`, `cross_chain`, `defi`, `emitterAddress`, `emitterChainId`, `executeProposal`, `guardian`, `guardianSet`, `message`, `msg.sender`, `multichain`, `nonce`, `parseAndVerifyVAA`, `processMessage`, `receiveMessage`, `sequence`, `vaa`, `verifyVM`, `wormhole`, `wormhole_integration`

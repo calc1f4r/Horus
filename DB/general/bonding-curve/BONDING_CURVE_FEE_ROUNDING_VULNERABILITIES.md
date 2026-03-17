@@ -44,6 +44,36 @@ tags:
 # Version Info
 language: solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | fee_calculation | fee_calculation_rounding
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - PRECISION
+  - _getQuoteAmount
+  - _validateBondingCurveBuy
+  - addFees
+  - balanceOf
+  - bonding_curve
+  - but
+  - buy
+  - computeEffectiveFee
+  - cumulativeFeePerToken
+  - deposit
+  - feeBps
+  - fee_calculation
+  - fee_on_transfer
+  - integer_division
+  - invariant
+  - mint
+  - msg.sender
+  - permanent
+  - precision_loss
 ---
 
 ## References & Source Reports
@@ -103,6 +133,38 @@ version: all
 When a buy order exceeds the remaining tokens on a bonding curve, the fee is initially calculated on the full `msg.value` but should be recalculated based on the actual ETH needed (`ethNeeded`). If the recalculation uses `ethNeeded` as the base but the fee formula expects the total *including* the fee, the fee is underestimated.
 
 > 📖 Reference: `reports/bonding_curve_findings/h-01-incorrect-fee-calculation-occurs-on-bonding-curve-buys.md`
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | fee_calculation | fee_calculation_rounding`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `fee_calculation|rounding|precision|swap_fee|reward_distribution`
+- High-signal code keywords: `PRECISION`, `_getQuoteAmount`, `_validateBondingCurveBuy`, `addFees`, `balanceOf`, `bonding_curve`, `but`, `buy`
+- Typical sink / impact: `fund_loss|value_leak|dos`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `balance.function -> forever.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -567,3 +629,24 @@ function buy(uint256 amount) external {
 ### Keywords for Search
 
 `fee calculation`, `rounding`, `precision`, `feeBps`, `cumulativeFeePerToken`, `integer division`, `truncation`, `roundUp`, `ceilDiv`, `dust`, `fee-on-transfer`, `swap fee`, `hook fee`, `curator fee`, `reserveRatio`, `invariant`, `rent`, `lamports`, `cubeRoot`, `expansion mint`, `underpriced quote`, `getQuoteAmount`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`PRECISION`, `_getQuoteAmount`, `_validateBondingCurveBuy`, `addFees`, `balanceOf`, `bonding_curve`, `but`, `buy`, `computeEffectiveFee`, `cumulativeFeePerToken`, `defi`, `deposit`, `dust`, `feeBps`, `fee_calculation`, `fee_calculation_rounding`, `fee_on_transfer`, `integer_division`, `invariant`, `mint`, `msg.sender`, `permanent`, `precision`, `precision_loss`, `reserveRatio`, `rounding`, `rounding_error`, `swap_fee`

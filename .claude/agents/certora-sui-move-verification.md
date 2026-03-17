@@ -1,7 +1,7 @@
 ---
 name: certora-sui-move-verification
 description: Converts structured invariant specifications into Certora Sui Prover Move specs using the CVLM library. Handles installation, Sui CLI setup, Move.toml configuration, and platform summaries. Produces Move-based specification modules with rules, summaries, ghosts, parametric rules, shadow mappings, and MathInt arithmetic. Outputs to a spec/ package in the target project. Use when setting up Certora Sui Move formal verification, writing CVLM specs for Sui contracts, converting invariant specs to Move verification rules, or verifying Sui Move smart contracts.
-tools: [Agent, Bash, Edit, Glob, Grep, Read, WebFetch, WebSearch]
+tools: [Agent, Bash, Edit, Glob, Grep, Read, Write, WebFetch, WebSearch]
 maxTurns: 100
 ---
 

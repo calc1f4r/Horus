@@ -33,6 +33,36 @@ tags:
   - defi
 language: move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: arithmetic_error
+pattern_key: arithmetic_error | storage, gas, entry_points, epoch_management, pool_creation | unbounded_growth, front_running_creation, object_limit, division_by_zero, hash_collision, overflow_abort
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - add_reward
+  - advance_epoch
+  - borrow
+  - burn
+  - calculate_available_dividends
+  - calculate_exchange_rate
+  - calculate_fee
+  - calculate_shards
+  - check_conversion
+  - claim_rewards
+  - claim_rewards_paginated
+  - convert_to_wal_amount
+  - create_pair
+  - create_position_index
+  - create_vesting
+  - deposit
+  - distribute_rewards
+  - emission
+  - event_emission
+  - force_withdraw
 ---
 
 ## References
@@ -59,6 +89,38 @@ version: all
 ### Overview
 
 DoS vulnerabilities appeared in 13/29 OtterSec Move audit reports (45%). Move's abort-on-error semantics (no try/catch) make DoS particularly impactful — a single failing assertion halts the entire transaction. Combined with Sui's object size limits and Aptos's gas metering, attackers can permanently block critical protocol operations at low cost.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of arithmetic_error"
+- Pattern key: `arithmetic_error | storage, gas, entry_points, epoch_management, pool_creation | unbounded_growth, front_running_creation, object_limit, division_by_zero, hash_collision, overflow_abort`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `storage, gas, entry_points, epoch_management, pool_creation`
+- High-signal code keywords: `add_reward`, `advance_epoch`, `borrow`, `burn`, `calculate_available_dividends`, `calculate_exchange_rate`, `calculate_fee`, `calculate_shards`
+- Typical sink / impact: `protocol_halt, fund_lockup, operational_disruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Arithmetic operation on user-controlled input without overflow protection
+- Signal 2: Casting between different-width integer types without bounds check
+- Signal 3: Multiplication before division where intermediate product can exceed type max
+- Signal 4: Accumulator variable can wrap around causing incorrect accounting
+
+#### False Positive Guards
+
+- Not this bug when: Solidity >= 0.8.0 with default checked arithmetic
+- Safe if: SafeMath library used for all arithmetic on user-controlled values
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -996,3 +1058,24 @@ public fun distribute_rewards(pool: &mut StakingPool, rewards: u64) {
 - [MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md](MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md) — Overflow/underflow patterns
 - [MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md](MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md) — Withdrawal abort patterns
 - [MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md](MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md) — Version check bypass
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`add_reward`, `advance_epoch`, `aptos`, `borrow`, `burn`, `calculate_available_dividends`, `calculate_exchange_rate`, `calculate_fee`, `calculate_shards`, `check_conversion`, `claim_rewards`, `claim_rewards_paginated`, `convert_to_wal_amount`, `create_pair`, `create_position_index`, `create_vesting`, `defi`, `denial_of_service`, `deposit`, `distribute_rewards`, `division_by_zero`, `dos`, `emission`, `event_emission`, `event_limit`, `force_withdraw`, `front_running`, `gas_exhaustion`, `griefing`, `move`, `object_limit`, `object_size`, `overflow`, `primary_store`, `resource_account`, `smart_table`, `sui`, `unbounded_growth`, `unbounded_growth, front_running_creation, object_limit, division_by_zero, hash_collision, overflow_abort`, `vector_growth`

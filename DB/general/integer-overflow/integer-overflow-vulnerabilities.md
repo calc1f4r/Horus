@@ -40,6 +40,34 @@ version: "<0.8.0 or unchecked blocks"
 
 # Source
 source: DeFiHackLabs
+
+# Pattern Identity (Required)
+root_cause_family: arithmetic_error
+pattern_key: arithmetic_error | numeric_operations | integer_overflow_underflow
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - SafeMath
+  - _transfer
+  - batchTransfer
+  - burn
+  - claimRewards
+  - int256
+  - msg.sender
+  - overflow
+  - processReward
+  - processWithdraw
+  - safeMul
+  - transfer
+  - transferProxy
+  - type_casting
+  - uint256
+  - unchecked
+  - underflow
+  - unsafe_cast
 ---
 
 # Integer Overflow/Underflow Vulnerabilities
@@ -51,6 +79,38 @@ Integer overflow and underflow vulnerabilities occur when arithmetic operations 
 **Total Historical Losses from Analyzed Exploits: >$150M USD (historically significant, declining with Solidity 0.8+)**
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of arithmetic_error"
+- Pattern key: `arithmetic_error | numeric_operations | integer_overflow_underflow`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `numeric_operations`
+- High-signal code keywords: `SafeMath`, `_transfer`, `batchTransfer`, `burn`, `claimRewards`, `int256`, `msg.sender`, `overflow`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `AlkimiyaVault.function -> BeautyChain.function -> LWStaking.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Arithmetic operation on user-controlled input without overflow protection
+- Signal 2: Casting between different-width integer types without bounds check
+- Signal 3: Multiplication before division where intermediate product can exceed type max
+- Signal 4: Accumulator variable can wrap around causing incorrect accounting
+
+#### False Positive Guards
+
+- Not this bug when: Solidity >= 0.8.0 with default checked arithmetic
+- Safe if: SafeMath library used for all arithmetic on user-controlled values
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerability Categories
 
@@ -467,3 +527,24 @@ rules:
 - **Pandora** (2024-02, $17K): `DeFiHackLabs/src/test/2024-02/PANDORA_exp.sol`
 - **LW** (2024-07, $7K): `DeFiHackLabs/src/test/2024-07/LW_exp.sol`
 - **SCROLL** (2024-05, $76): `DeFiHackLabs/src/test/2024-05/SCROLL_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`DeFiHackLabs`, `SafeMath`, `_transfer`, `arithmetic`, `batchTransfer`, `burn`, `claimRewards`, `defi`, `int256`, `integer_overflow_underflow`, `msg.sender`, `overflow`, `processReward`, `processWithdraw`, `real_exploit`, `safeMul`, `solidity`, `transfer`, `transferProxy`, `type_casting`, `uint256`, `unchecked`, `underflow`, `unsafe_cast`

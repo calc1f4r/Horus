@@ -33,6 +33,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | validation_logic | missing_validation
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - addValidator
+  - batchTransfer
+  - block.timestamp
+  - bounds_enforcement
+  - burn
+  - callExternal
+  - claimRewards
+  - createPair
+  - createVesting
+  - delegatecall
+  - distributeRewards
+  - duplicate
+  - event
+  - execute
+  - executeOnAdapter
+  - executeWithSignature
+  - getPrice
+  - initialize
+  - input_validation
+  - latestRoundData
 ---
 
 ## References
@@ -49,6 +79,38 @@ Missing validation vulnerabilities occur when smart contracts fail to properly v
 **Root Cause Statement**: This vulnerability exists because [UNTRUSTED INPUT/PARAMETER] in [COMPONENT] is not validated for [CONDITION] before [OPERATION], leading to [IMPACT].
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | validation_logic | missing_validation`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `validation_logic`
+- High-signal code keywords: `addValidator`, `batchTransfer`, `block.timestamp`, `bounds_enforcement`, `burn`, `callExternal`, `claimRewards`, `createPair`
+- Typical sink / impact: `varies`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `check.function -> code.function -> function.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ## VULNERABILITY PATTERN CATEGORIES
 
@@ -726,3 +788,24 @@ rules:
 **Code Patterns:** require, assert, revert, if check, validation, sanitize, verify, ensure
 
 **Function Locations:** constructor, initialize, setter, admin function, user function, batch operation, claim, withdraw, transfer
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`addValidator`, `batchTransfer`, `block.timestamp`, `bounds_enforcement`, `burn`, `callExternal`, `claimRewards`, `createPair`, `createVesting`, `delegatecall`, `distributeRewards`, `duplicate`, `event`, `execute`, `executeOnAdapter`, `executeWithSignature`, `getPrice`, `initialize`, `input_sanitization`, `input_validation`, `latestRoundData`, `missing_validation`, `parameter_bounds`, `parameter_checking`, `state_check`, `state_verification`, `zero_address`

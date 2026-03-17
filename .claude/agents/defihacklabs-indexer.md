@@ -1,7 +1,7 @@
 ---
 name: defihacklabs-indexer
 description: Analyzes executable DeFiHackLabs exploit PoCs and supporting exploit writeups to create or migrate attack-graph-aware DB entries and exploit-derived invariant reference files. Extracts multi-step, multi-path, callback, state-accumulation, and cross-protocol exploit structure from PoC code, not just natural-language summaries. Use when indexing DeFiHackLabs cases, turning exploit repositories into DB entries, or deriving invariants from real exploit flows.
-tools: [Agent, Bash, Edit, Glob, Grep, Read, WebFetch, WebSearch]
+tools: [Agent, Bash, Edit, Glob, Grep, Read, Write, WebFetch, WebSearch]
 maxTurns: 80
 ---
 

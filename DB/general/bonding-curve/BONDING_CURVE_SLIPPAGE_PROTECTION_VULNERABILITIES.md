@@ -46,6 +46,36 @@ tags:
 # Version Info
 language: solidity
 version: ">=0.6.0"
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | bonding_curves, buy_sell_functions, liquidity_operations, token_graduation | missing_slippage_protection
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _validateBondingCurveBuy
+  - addLiquidity
+  - approve
+  - block.timestamp
+  - bonding_curve_pricing
+  - burn
+  - buy
+  - deposit
+  - execute
+  - front_running
+  - getBuyPrice
+  - getSellPrice
+  - graduation_slippage
+  - liquidity_deposit_manipulation
+  - maxAmountIn
+  - mempool_monitoring
+  - minAmountOut
+  - mint
+  - receive
+  - safeTransferFrom
 ---
 
 ## References
@@ -67,6 +97,38 @@ version: ">=0.6.0"
 ### Overview
 
 Bonding curve protocols consistently fail to implement proper slippage protection on buy, sell, liquidity provision, and graduation operations. Because bonding curve prices are deterministically computed from current token supply, any change in supply between transaction submission and execution changes the price — making these functions inherently vulnerable to sandwich attacks, front-running, and unexpected price shifts. This pattern appears across EVM, Solana, and Rust-based protocols with 10 distinct variants documented below.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | bonding_curves, buy_sell_functions, liquidity_operations, token_graduation | missing_slippage_protection`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `bonding_curves, buy_sell_functions, liquidity_operations, token_graduation`
+- High-signal code keywords: `_validateBondingCurveBuy`, `addLiquidity`, `approve`, `block.timestamp`, `bonding_curve_pricing`, `burn`, `buy`, `deposit`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `4.function -> lack.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -667,3 +729,24 @@ pub fn deposit(ctx: Context<DepositPositionForLiquidity>,
 - Oracle manipulation / stale price vulnerabilities
 - Token graduation DoS attacks
 - Bonding curve parameter misconfiguration
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_validateBondingCurveBuy`, `addLiquidity`, `approve`, `block.timestamp`, `bonding_curve`, `bonding_curve_pricing`, `burn`, `buy`, `credit_tokens`, `defi`, `deposit`, `economic`, `execute`, `front_running`, `getBuyPrice`, `getSellPrice`, `graduation_slippage`, `launchpad`, `liquidity_deposit_manipulation`, `liquidity_locking`, `market_seat`, `maxAmountIn`, `mempool_monitoring`, `mev`, `minAmountOut`, `mint`, `missing_slippage_protection`, `price_manipulation`, `receive`, `safeTransferFrom`, `sandwich_attack`, `slippage`, `slippage_protection`, `token_launch`, `token_supply_dependent_pricing`

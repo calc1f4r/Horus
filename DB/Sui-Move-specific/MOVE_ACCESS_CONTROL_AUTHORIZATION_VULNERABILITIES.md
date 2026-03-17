@@ -28,6 +28,36 @@ tags:
   - defi
 language: move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_access_control
+pattern_key: missing_access_control | access_control, authorization_logic, capability_management | missing_authorization, signer_exposure, role_escalation, capability_misuse
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - access_control
+  - account
+  - add_group
+  - add_group_safe
+  - add_new_reserve
+  - add_wallet_by_investor
+  - allowance
+  - approve
+  - borrow
+  - capability_pattern
+  - claim
+  - claim_safe
+  - claim_with_signature
+  - claim_with_signature_safe
+  - deposit
+  - freeze_thapt_coin_stores
+  - generate_deposit_cap
+  - generate_proof_as_depositor
+  - get_distribution_signer
+  - initialize_airdrop
 ---
 
 ## References
@@ -54,6 +84,38 @@ version: all
 ### Overview
 
 Access control vulnerabilities are the second most impactful class in Move-based protocols, frequently rated Critical. Move's capability-based access model (Sui's object ownership, Aptos's signer/capability pattern) introduces unique attack surfaces absent in Solidity. Found in 13/29 OtterSec audit reports (45%).
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_access_control"
+- Pattern key: `missing_access_control | access_control, authorization_logic, capability_management | missing_authorization, signer_exposure, role_escalation, capability_misuse`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `access_control, authorization_logic, capability_management`
+- High-signal code keywords: `access_control`, `account`, `add_group`, `add_group_safe`, `add_new_reserve`, `add_wallet_by_investor`, `allowance`, `approve`
+- Typical sink / impact: `fund_loss, unauthorized_access, privilege_escalation`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State-changing function lacks `onlyOwner`/`onlyRole` modifier
+- Signal 2: External function accepts arbitrary address and calls interface methods without registry validation
+- Signal 3: Configuration setter is callable by non-owner accounts
+- Signal 4: Initialization or migration function is unprotected
+
+#### False Positive Guards
+
+- Not this bug when: Function is `internal`/`private` and only called from access-controlled paths
+- Safe if: Function is restricted via `onlyOwner`/`onlyRole`/`require(msg.sender == ...)`
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1011,3 +1073,24 @@ public entry fun unfreeze_thapt_coin_stores(manager: &signer, accounts: vector<a
 - [SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md](SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md) — Sui-specific access control from Solodit
 - [MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md](MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md) — Bridge-specific authorization issues
 - [MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md](MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md) — Verification bypass patterns
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`access_control`, `account`, `add_group`, `add_group_safe`, `add_new_reserve`, `add_wallet_by_investor`, `allowance`, `approve`, `aptos`, `authorization`, `borrow`, `capability`, `capability_pattern`, `claim`, `claim_safe`, `claim_with_signature`, `claim_with_signature_safe`, `defi`, `deposit`, `freeze_thapt_coin_stores`, `generate_deposit_cap`, `generate_proof_as_depositor`, `get_distribution_signer`, `initialize_airdrop`, `missing_authorization, signer_exposure, role_escalation, capability_misuse`, `move`, `movement`, `object_ownership`, `role_management`, `signer`, `signer_capability`, `sui`, `version_check`

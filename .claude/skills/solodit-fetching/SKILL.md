@@ -3,6 +3,7 @@ description: "Fetch vulnerability reports from the Solodit/Cyfrin API for a give
 context: fork
 agent: solodit-fetching
 argument-hint: <topic>
+disable-model-invocation: true
 ---
 
 Fetch vulnerability reports for topic `$ARGUMENTS`.
@@ -10,7 +11,7 @@ Fetch vulnerability reports for topic `$ARGUMENTS`.
 ## Workflow
 
 1. Activate virtual environment: `source .venv/bin/activate`
-2. Fetch primary topic: `python3 solodit_fetcher.py --keyword "$ARGUMENTS" --output ./reports/${ARGUMENTS}_findings`
+2. Fetch primary topic: `python3 scripts/solodit_fetcher.py --keyword "$ARGUMENTS" --output ./reports/${ARGUMENTS}_findings`
 3. Fetch related protocols (e.g., Chainlink → any protocol using Chainlink oracles)
 4. Deduplicate results
 5. Verify output in `reports/${ARGUMENTS}_findings/`

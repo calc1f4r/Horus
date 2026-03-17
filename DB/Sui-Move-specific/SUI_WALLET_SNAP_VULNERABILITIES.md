@@ -51,6 +51,36 @@ tags:
 # Version Info
 language: javascript|typescript
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | snap_rpc | injection
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - alert_dialog
+  - approve
+  - bip44_derivation
+  - confirmation_dialog
+  - control_characters
+  - dapp_origin
+  - deriveKeyPair
+  - ed25519
+  - getPublicKey
+  - markdown_rendering
+  - metamask_snap
+  - onRpcRequest
+  - rapid
+  - renderSignMessage
+  - renderSignTransaction
+  - sanitizeForDialog
+  - snap_dialog
+  - snap_rpc
+  - sui_signMessage
+  - sui_signTransaction
 ---
 
 ## References & Source Reports
@@ -117,6 +147,38 @@ MetaMask Snap dialog boxes render text using a subset of Markdown. When transact
 
 > **Validation strength**: Strong — 2 HIGH reports from ConsenSys Diligence on Solflare Sui Snap
 > **Frequency**: 2/69 reports (all from same audit, critical wallet vulnerability class)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | snap_rpc | injection`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `snap_rpc|transaction_rendering|key_derivation|dapp_origin|build_config`
+- High-signal code keywords: `alert_dialog`, `approve`, `bip44_derivation`, `confirmation_dialog`, `control_characters`, `dapp_origin`, `deriveKeyPair`, `ed25519`
+- Typical sink / impact: `fund_loss|unauthorized_signing|information_disclosure|phishing`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `build_config.function -> dapp_origin.function -> key_derivation.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -540,3 +602,24 @@ const ALLOWED_ORIGINS = process.env.NODE_ENV === 'production'
 ### Related Vulnerabilities
 - `DB/general/signatures/` — Signature validation patterns
 - `DB/general/access-control/` — Access control patterns
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`alert_dialog`, `approve`, `bip44_derivation`, `browser_extension`, `confirmation_dialog`, `control_characters`, `dapp`, `dapp_origin`, `deriveKeyPair`, `ed25519`, `getPublicKey`, `injection`, `injection|forced_signing|input_validation|information_disclosure|build_configuration`, `javascript`, `key_derivation`, `markdown_rendering`, `metamask`, `metamask_snap`, `onRpcRequest`, `rapid`, `renderSignMessage`, `renderSignTransaction`, `sanitizeForDialog`, `signing`, `snap`, `snap_dialog`, `snap_rpc`, `sui`, `sui_signMessage`, `sui_signTransaction`, `typescript`, `wallet`, `wallet_snap_security`, `xss`

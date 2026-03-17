@@ -32,6 +32,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: denial_of_service
+pattern_key: denial_of_service | accounting_logic | balance_tracking_errors
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - AddBTCDelegationInclusionProof
+  - SyncStateDBWithAccount
+  - a
+  - balance
+  - balanceOf
+  - balance_not_updated
+  - changeManagers
+  - cross_module
+  - double_counting
+  - fee_deduction
+  - for
+  - getTotalAssetTVL
+  - getTotalStake
+  - handleSlashing
+  - happens
+  - mint
+  - missing_deduction
+  - msg.sender
+  - negative_value
+  - of
 ---
 
 ## References & Source Reports
@@ -147,6 +177,38 @@ version: all
 Implementation flaw in accounting balance not updated logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 8 audit reports with severity distribution: HIGH: 6, MEDIUM: 2.
 
 > **Key Finding**: This bug report describes a problem where the value of `creditedNodeETH` is not being updated correctly when the `finishWithdraw()` function is called. This can lead to an incorrect balance for users and can also be exploited by malicious users to prevent balance updates. The report recommends updat
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of denial_of_service"
+- Pattern key: `denial_of_service | accounting_logic | balance_tracking_errors`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `accounting_logic`
+- High-signal code keywords: `AddBTCDelegationInclusionProof`, `SyncStateDBWithAccount`, `a`, `balance`, `balanceOf`, `balance_not_updated`, `changeManagers`, `cross_module`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `Safe.function -> address.function -> balance.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Unbounded loop over user-controlled array can exceed block gas limit
+- Signal 2: External call failure causes entire transaction to revert
+- Signal 3: Attacker can grief operations by manipulating state to cause reverts
+- Signal 4: Resource exhaustion through repeated operations without rate limiting
+
+#### False Positive Guards
+
+- Not this bug when: Loop iterations are bounded by a reasonable constant
+- Safe if: External call failures are handled gracefully (try/catch or pull pattern)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1070,3 +1132,24 @@ grep -rn 'accounting|fee|deduction' --include='*.go' --include='*.sol'
 ## Keywords
 
 `account`, `accounted`, `accounting`, `adversary`, `affect`, `allocation`, `allows`, `amount`, `amounts`, `appchain`, `arbitrarily`, `balance`, `bank`, `because`, `become`, `before`, `block`, `broken`, `bypass`, `calculations`, `cause`, `chain`, `changes`, `charged`, `check`, `committed`, `contract`, `corruption`, `cosmos`, `could`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`AddBTCDelegationInclusionProof`, `SyncStateDBWithAccount`, `a`, `accounting`, `appchain`, `balance`, `balanceOf`, `balance_not_updated`, `balance_tracking_errors`, `changeManagers`, `cosmos`, `cross_module`, `defi`, `double_counting`, `fee_deduction`, `for`, `getTotalAssetTVL`, `getTotalStake`, `handleSlashing`, `happens`, `mint`, `missing_deduction`, `msg.sender`, `negative_value`, `of`, `pending_tracking`, `staking`, `state_corruption`, `tvl_error`

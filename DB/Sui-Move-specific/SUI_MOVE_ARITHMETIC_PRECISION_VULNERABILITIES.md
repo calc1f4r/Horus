@@ -53,6 +53,36 @@ tags:
 # Version Info
 language: move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: arithmetic_error
+pattern_key: arithmetic_error | math_operations | overflow
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - MAX_U64
+  - calculate_epoch_reward
+  - calculate_rewards
+  - calculate_share
+  - ceil_div
+  - checked_shlw
+  - clmm_math
+  - convert_amount
+  - deposit
+  - exchange_rate
+  - execute
+  - execute_trade
+  - fill_order
+  - floor_div
+  - full_math
+  - get_delta_a
+  - get_delta_b
+  - get_price
+  - get_sui_for_shares
+  - get_sui_for_shares_round_up
 ---
 
 ## References & Source Reports
@@ -133,6 +163,38 @@ Concentrated Liquidity Market Maker (CLMM) protocols like Cetus compute token de
 
 > **Validation strength**: Strong — 2 reports from OtterSec on Cetus CLMM
 > **Frequency**: 2/69 reports
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of arithmetic_error"
+- Pattern key: `arithmetic_error | math_operations | overflow`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `math_operations|type_casting|reward_calculation|price_calculation|share_accounting`
+- High-signal code keywords: `MAX_U64`, `calculate_epoch_reward`, `calculate_rewards`, `calculate_share`, `ceil_div`, `checked_shlw`, `clmm_math`, `convert_amount`
+- Typical sink / impact: `fund_loss|protocol_insolvency|dos|incorrect_accounting`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `math_operations.function -> price_calculation.function -> reward_calculation.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Arithmetic operation on user-controlled input without overflow protection
+- Signal 2: Casting between different-width integer types without bounds check
+- Signal 3: Multiplication before division where intermediate product can exceed type max
+- Signal 4: Accumulator variable can wrap around causing incorrect accounting
+
+#### False Positive Guards
+
+- Not this bug when: Solidity >= 0.8.0 with default checked arithmetic
+- Safe if: SafeMath library used for all arithmetic on user-controlled values
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -871,3 +933,24 @@ public fun convert_amount(amount: u64, price: u64, decimals: u8): u64 {
 - `DB/general/arithmetic/` — Generic integer overflow patterns
 - `DB/amm/` — AMM-specific math vulnerabilities
 - `DB/tokens/erc4626/` — ERC4626 vault inflation patterns (EVM equivalent)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`MAX_U64`, `amm`, `arithmetic`, `arithmetic_precision`, `calculate_epoch_reward`, `calculate_rewards`, `calculate_share`, `ceil_div`, `checked_shlw`, `clmm`, `clmm_math`, `convert_amount`, `defi`, `deposit`, `exchange_rate`, `execute`, `execute_trade`, `fill_order`, `floor_div`, `full_math`, `get_delta_a`, `get_delta_b`, `get_price`, `get_sui_for_shares`, `get_sui_for_shares_round_up`, `liquidity`, `move`, `mul_div`, `overflow`, `overflow|precision_loss|rounding|faulty_constant`, `precision`, `redeem_rate`, `rewards`, `rounding`, `sqrt_price`, `staking`, `sui`, `tick_math`, `u128`, `u256`, `u64`, `vault`

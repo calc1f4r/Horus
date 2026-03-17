@@ -28,6 +28,25 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: denial_of_service
+pattern_key: denial_of_service | evm_logic | evm_gas_handling_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - AnteHandle
+  - balance
+  - gas_mismatch_call
+  - gas_not_consumed_error
+  - gas_refund_error
+  - intrinsic_gas_missing
+  - malicious
+  - mint
+  - precompile_gas_hardcode
 ---
 
 ## References & Source Reports
@@ -88,6 +107,38 @@ version: all
 Implementation flaw in evm intrinsic gas missing logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 1 audit reports with severity distribution: HIGH: 1.
 
 > **Key Finding**: The minievm, a program used for Ethereum Virtual Machine (EVM) transactions, fails to charge the proper amount of gas for certain operations, which can lead to a significant risk of denial of service (DoS) attacks. This is due to a lack of charging for intrinsic gas costs, which are considered neces
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of denial_of_service"
+- Pattern key: `denial_of_service | evm_logic | evm_gas_handling_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `evm_logic`
+- High-signal code keywords: `AnteHandle`, `balance`, `gas_mismatch_call`, `gas_not_consumed_error`, `gas_refund_error`, `intrinsic_gas_missing`, `malicious`, `mint`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Unbounded loop over user-controlled array can exceed block gas limit
+- Signal 2: External call failure causes entire transaction to revert
+- Signal 3: Attacker can grief operations by manipulating state to cause reverts
+- Signal 4: Resource exhaustion through repeated operations without rate limiting
+
+#### False Positive Guards
+
+- Not this bug when: Loop iterations are bounded by a reasonable constant
+- Safe if: External call failures are handled gracefully (try/catch or pull pattern)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -421,3 +472,24 @@ grep -rn 'evm|gas|mismatch|call' --include='*.go' --include='*.sol'
 ## Keywords
 
 `abuse`, `accesslist`, `allowing`, `allows`, `amounts`, `antehandler`, `appchain`, `being`, `block`, `call`, `calls`, `chain`, `charge`, `compensation`, `computational`, `consume`, `consumed`, `consumption`, `contract`, `cosmos`, `costs`, `deductions`, `dispatching`, `error`, `evm`, `exploited`, `failed`, `fails`, `from`, `gas`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`AnteHandle`, `appchain`, `balance`, `cosmos`, `defi`, `evm`, `evm_gas_handling_vulnerabilities`, `gas_mismatch_call`, `gas_not_consumed_error`, `gas_refund_error`, `intrinsic_gas_missing`, `malicious`, `mint`, `precompile_gas_hardcode`, `staking`

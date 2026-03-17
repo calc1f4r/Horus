@@ -47,6 +47,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | Bridge | cross_chain_general
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - approve
+  - balanceOf
+  - block.timestamp
+  - bridge
+  - bridgeAndSwap
+  - bridgeNFT
+  - bridgeTokens
+  - bridgeWithSignature
+  - burn
+  - chainId
+  - claim
+  - complete
+  - completeSwap
+  - createCrossChainAccount
+  - denormalizeAmount
+  - deposit
+  - emergencyWithdraw
+  - emergencyWithdrawL1
+  - execute
+  - front
 ---
 
 ## References & Source Reports
@@ -114,6 +144,38 @@ Cross-chain replay attacks occur when a valid message on one chain can be replay
 > - `reports/bridge_crosschain_findings/message-replays-are-possible-across-different-instances.md`
 > - `reports/bridge_crosschain_findings/signatures-can-be-replayed-cross-chain.md`
 > - `reports/bridge_crosschain_findings/h-1-replay-of-mpc-signed-messages.md`
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | Bridge | cross_chain_general`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `Bridge|Receiver|Sender|TokenHandler|MessageProcessor`
+- High-signal code keywords: `approve`, `balanceOf`, `block.timestamp`, `bridge`, `bridgeAndSwap`, `bridgeNFT`, `bridgeTokens`, `bridgeWithSignature`
+- Typical sink / impact: `fund_loss|double_spending|replay_attack|token_stuck`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `DecimalMismatch.function -> MalleableSignatures.function -> NoSlippageProtection.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -888,3 +950,24 @@ contract OrderIndependentBridge {
 - **Meter** (2022-02, $4.3M): `DeFiHackLabs/src/test/2022-02/Meter_exp.sol`
 - **Chainswap** (2021-07, $800K): `DeFiHackLabs/src/test/2021-07/Chainswap_exp1.sol`
 - **Li.Fi** (2022-03, $570K): `DeFiHackLabs/src/test/2022-03/LiFi_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`access_control`, `approve`, `balanceOf`, `block.timestamp`, `bridge`, `bridgeAndSwap`, `bridgeNFT`, `bridgeTokens`, `bridgeWithSignature`, `burn`, `chainId`, `claim`, `complete`, `completeSwap`, `createCrossChainAccount`, `cross_chain`, `cross_chain_general`, `defi`, `denormalizeAmount`, `deposit`, `emergencyWithdraw`, `emergencyWithdrawL1`, `execute`, `front`, `lock`, `mint`, `multichain`, `nonce`, `processMessage`, `receiveMessage`, `replay`, `sendMessage`, `sequencer`, `signature`, `unlock`

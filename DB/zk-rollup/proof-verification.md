@@ -46,6 +46,32 @@ tags:
 
 language: solidity|rust|circom|move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: weak_randomness
+pattern_key: weak_randomness | on_chain_verifier | missing_verification
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - challenge
+  - execute
+  - executeZkLogin
+  - fiat_shamir
+  - groth16_verifier
+  - logup
+  - on_chain_verification
+  - plonk_verifier
+  - randomness
+  - recursive_proof
+  - verification_key
+  - verify
+  - verifyWithTrustedVK
+  - vk_root
+  - witness_privacy
+  - zkLogin
 ---
 
 ## References & Source Reports
@@ -79,6 +105,38 @@ version: all
 ZK proof verification vulnerabilities occur when on-chain or off-chain verifiers fail to fully validate proofs. This includes completely skipping verification, using weak randomness in Fiat-Shamir transforms, accepting proofs with attacker-controlled verification keys, and leaking private witness data to the verifier. These bugs break the core security properties of ZK systems: soundness (false → unacceptable), zero-knowledge (privacy), and completeness.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of weak_randomness"
+- Pattern key: `weak_randomness | on_chain_verifier | missing_verification`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `on_chain_verifier|fiat_shamir_challenge|verification_key|randomness_generation`
+- High-signal code keywords: `challenge`, `execute`, `executeZkLogin`, `fiat_shamir`, `groth16_verifier`, `logup`, `on_chain_verification`, `plonk_verifier`
+- Typical sink / impact: `proof_forgery|fund_theft|privacy_violation|economic_exploit`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: On-chain randomness derived from block.timestamp, block.number, or blockhash
+- Signal 2: Randomness source observable by miners/validators before commitment
+- Signal 3: No commit-reveal or VRF scheme for random number generation
+- Signal 4: Seed is predictable or manipulable by transaction ordering
+
+#### False Positive Guards
+
+- Not this bug when: Chainlink VRF or similar verifiable randomness is used
+- Safe if: Commit-reveal scheme with sufficient delay prevents prediction
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -394,3 +452,24 @@ contract ZkVerifier {
 ### Keywords for Search
 
 `missing ZK proof verification`, `zkLogin bypass`, `Fiat-Shamir weakness`, `biased challenge`, `verification key root untrusted`, `recursion VK manipulation`, `Groth16 unsafe`, `Plonk verifier bypass`, `LogUp soundness`, `witness extraction`, `zero-knowledge broken`, `proof forgery`, `on-chain verification skipped`, `ZK authentication bypass`, `STARK verification DoS`, `unbounded public input`, `field prime overflow`, `Plonk trusted setup`, `recursive proof security`, `zk circuit soundness`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`challenge`, `execute`, `executeZkLogin`, `fiat_shamir`, `groth16`, `groth16_verifier`, `logup`, `missing_verification|fiat_shamir_weakness|vk_root_untrusted|randomness_bias|witness_leakage`, `on_chain_verification`, `on_chain_verifier`, `plonk`, `plonk_verifier`, `proof_system`, `randomness`, `recursion`, `recursive_proof`, `stark`, `sui_move`, `verification_key`, `verify`, `verifyWithTrustedVK`, `vk_root`, `witness_privacy`, `zkLogin`, `zk_proof_verification`, `zk_rollup`

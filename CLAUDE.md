@@ -101,7 +101,7 @@ Path-scoped rules in `.claude/rules/` auto-load when Claude works with matching 
 python3 generate_manifests.py
 
 # Fetch vulnerability reports from Solodit
-python3 solodit_fetcher.py <topic>
+python3 scripts/solodit_fetcher.py <topic>
 
 # Run DB quality checks
 python3 scripts/db_quality_check.py

@@ -28,6 +28,33 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: denial_of_service
+pattern_key: denial_of_service | accounting_logic | exchange_rate_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - GetNetAmountState
+  - LiquidStake
+  - _transferToSlashStore
+  - balanceOf
+  - borrow
+  - conversion_rounding
+  - deposit
+  - exchange_rate_error
+  - exchange_rate_manipulation
+  - exchange_rate_stale
+  - getPrice
+  - mint
+  - msg.sender
+  - queryExchangeRate
+  - receive
+  - share_price_inflation
+  - withdraw
 ---
 
 ## References & Source Reports
@@ -104,6 +131,38 @@ version: all
 Implementation flaw in accounting exchange rate manipulation logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 9 audit reports with severity distribution: HIGH: 4, MEDIUM: 5.
 
 > **Key Finding**: This bug report discusses a problem in the StakeRegistry contract where the `updateOperatorsStake()` function is not updating all operators' stakes immediately after a strategy is added or removed from a quorum. This can lead to unfair competition and manipulation by the ejector role. The suggested 
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of denial_of_service"
+- Pattern key: `denial_of_service | accounting_logic | exchange_rate_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `accounting_logic`
+- High-signal code keywords: `GetNetAmountState`, `LiquidStake`, `_transferToSlashStore`, `balanceOf`, `borrow`, `conversion_rounding`, `deposit`, `exchange_rate_error`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `has.function -> implements.function -> where.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Unbounded loop over user-controlled array can exceed block gas limit
+- Signal 2: External call failure causes entire transaction to revert
+- Signal 3: Attacker can grief operations by manipulating state to cause reverts
+- Signal 4: Resource exhaustion through repeated operations without rate limiting
+
+#### False Positive Guards
+
+- Not this bug when: Loop iterations are bounded by a reasonable constant
+- Safe if: External call failures are handled gracefully (try/catch or pull pattern)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -630,3 +689,24 @@ grep -rn 'accounting|conversion|rounding' --include='*.go' --include='*.sol'
 ## Keywords
 
 `accounting`, `accumulated`, `allow`, `amount`, `appchain`, `attack`, `bypass`, `calculation`, `calculations`, `cause`, `conversion`, `cooldown`, `cosmos`, `days`, `delegators`, `deviations`, `donation`, `ejector`, `enough`, `error`, `errors`, `exchange`, `fail`, `from`, `funding`, `have`, `implementation`, `incorrect`, `inflation`, `liquidations`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`GetNetAmountState`, `LiquidStake`, `_transferToSlashStore`, `accounting`, `appchain`, `balanceOf`, `borrow`, `conversion_rounding`, `cosmos`, `defi`, `deposit`, `exchange_rate_error`, `exchange_rate_manipulation`, `exchange_rate_stale`, `exchange_rate_vulnerabilities`, `getPrice`, `mint`, `msg.sender`, `queryExchangeRate`, `receive`, `share_price_inflation`, `staking`, `withdraw`

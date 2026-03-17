@@ -43,6 +43,36 @@ tags:
 
 language: solidity
 version: ">=0.8.0"
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | paymaster_gas_validation | gas_accounting_error
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - ERC-4337
+  - EntryPoint
+  - _executeUserOp
+  - _getRequiredPrefund
+  - _handlePostOp
+  - _validatePrepayment
+  - callGasLimit
+  - deposit
+  - execute
+  - handleOp
+  - paymaster
+  - postOp
+  - preVerificationGas
+  - prefund
+  - receive
+  - reputation
+  - stake
+  - validatePaymasterUserOp
+  - verificationGasLimit
+  - withdraw
 ---
 
 ## References
@@ -79,6 +109,38 @@ version: ">=0.8.0"
 ### Overview
 
 ERC-4337 paymaster and gas accounting logic is a rich source of bugs: inverted conditions, duplicate gas measurements, stake bypass tricks, and fee escape paths allow attackers to drain paymasters, execute transactions for free, exhaust bundler-paid gas, or permanently throttle honest paymasters. These findings span EIP-4337 core (OpenZeppelin audit) and dozens of production paymaster integrations.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | paymaster_gas_validation | gas_accounting_error`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `paymaster_gas_validation`
+- High-signal code keywords: `ERC-4337`, `EntryPoint`, `_executeUserOp`, `_getRequiredPrefund`, `_handlePostOp`, `_validatePrepayment`, `callGasLimit`, `deposit`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `applies.function -> where.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### AA Paymaster Gas Accounting — Prefund Errors, Duplicate Snapshots, Stake Bypass, and Fee Escape
 
@@ -379,3 +441,24 @@ function validatePaymasterUserOp(UserOperation calldata op, ...) {
 - `DB/general/calculation/` — general arithmetic and fee calculation bugs
 
 ---
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`ERC-4337`, `EntryPoint`, `_executeUserOp`, `_getRequiredPrefund`, `_handlePostOp`, `_validatePrepayment`, `account-abstraction`, `account_abstraction`, `bundler`, `callGasLimit`, `deposit`, `execute`, `fee-bypass`, `gas-accounting`, `gas_accounting_error`, `handleOp`, `paymaster`, `postOp`, `preVerificationGas`, `prefund`, `receive`, `reputation`, `smart-wallet`, `stake`, `validatePaymasterUserOp`, `verificationGasLimit`, `withdraw`

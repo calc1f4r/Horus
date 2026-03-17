@@ -40,11 +40,11 @@ The database ships with a **35-agent audit pipeline** that can take an unfamilia
 ## Architecture
 
 <div align="center">
-<img src="Architecture.png" alt="Vulnerability Database Architecture Diagram" width="100%">
+<img src="docs/architecture.png" alt="Vulnerability Database Architecture Diagram" width="100%">
 <br>
 <em>Full architecture: 4-tier search, 11-phase audit pipeline, 35 agents, parallel fan-out hunting</em>
 <br>
-<a href="Architecture-Diagram.excalidraw">Open in Excalidraw</a>
+<a href="docs/architecture.excalidraw">Open in Excalidraw</a>
 </div>
 
 ---
@@ -322,11 +322,13 @@ Vulnerability-database/
 │
 ├── TEMPLATE.md                       # Canonical DB entry structure
 ├── Example.md                        # Reference implementation of an entry
-├── DB-GUIDE.md                         # DB entry conventions & search workflows
-├── CodebaseStructure.md              # Detailed codebase structure reference
+├── docs/
+│   ├── architecture.png               #   Architecture diagram (PNG)
+│   ├── architecture.excalidraw        #   Architecture diagram (editable)
+│   ├── db-guide.md                    #   DB entry conventions & search workflows
+│   └── codebase-structure.md          #   Detailed codebase structure reference
 ├── CONTRIBUTING.md                   # Contribution guidelines
-├── generate_manifests.py             # Regenerates manifests + hunt cards
-└── solodit_fetcher.py                # Solodit/Cyfrin API fetcher
+└── generate_manifests.py             # Regenerates manifests + hunt cards
 ```
 
 ---
@@ -345,7 +347,7 @@ git clone -b reports/erc4626 --single-branch \
   https://github.com/calc1f4r/Vulnerability-database.git
 ```
 
-See [CodebaseStructure.md](CodebaseStructure.md) for the full branch-to-category mapping and report fetch methods.
+See [docs/codebase-structure.md](docs/codebase-structure.md) for the full branch-to-category mapping and report fetch methods.
 
 ---
 
@@ -487,7 +489,7 @@ claude --debug --plugin-dir ./Vulnerability-database
 
 ```bash
 # 1. Fetch raw findings from Solodit
-python3 solodit_fetcher.py --keyword "<topic>" --output ./reports/<topic>_findings/
+python3 scripts/solodit_fetcher.py --keyword "<topic>" --output ./reports/<topic>_findings/
 
 # 2. Use variant-template-writer agent to synthesize findings into DB entries
 @variant-template-writer <topic>

@@ -42,6 +42,36 @@ version: all
 
 # Source
 source: DeFiHackLabs
+
+# Pattern Identity (Required)
+root_cause_family: weak_randomness
+pattern_key: weak_randomness | random_number_generation | weak_randomness
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - Chainlink_VRF
+  - DPPFlashLoanCall
+  - block.difficulty
+  - block.number
+  - block.timestamp
+  - blockhash
+  - buyTicket
+  - check
+  - commit
+  - commit_reveal
+  - deposit
+  - exploit
+  - fallback
+  - flashLoan
+  - fulfillRandom
+  - fulfillRandomWords
+  - getRandomNumber
+  - keccak256
+  - mint
+  - msg.sender
 ---
 
 # Weak Randomness Vulnerabilities
@@ -53,6 +83,38 @@ Weak randomness vulnerabilities occur when smart contracts use predictable or ma
 **Total Historical Losses from Analyzed Exploits: >$30M USD**
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of weak_randomness"
+- Pattern key: `weak_randomness | random_number_generation | weak_randomness`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `random_number_generation`
+- High-signal code keywords: `Chainlink_VRF`, `DPPFlashLoanCall`, `block.difficulty`, `block.number`, `block.timestamp`, `blockhash`, `buyTicket`, `check`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `FlawedCommitReveal.function -> FutureBlockRandom.function -> LuckyTigerNFT.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: On-chain randomness derived from block.timestamp, block.number, or blockhash
+- Signal 2: Randomness source observable by miners/validators before commitment
+- Signal 3: No commit-reveal or VRF scheme for random number generation
+- Signal 4: Seed is predictable or manipulable by transaction ordering
+
+#### False Positive Guards
+
+- Not this bug when: Chainlink VRF or similar verifiable randomness is used
+- Safe if: Commit-reveal scheme with sufficient delay prevents prediction
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerability Categories
 
@@ -573,3 +635,24 @@ rules:
 - **RedKeysCoin** (2024-05, $12K): `DeFiHackLabs/src/test/2024-05/RedKeysCoin_exp.sol`
 - **RFB** (2022-12, $12): `DeFiHackLabs/src/test/2022-12/RFB_exp.sol`
 - **LuckyTiger NFT** (2022-08, N/A): `DeFiHackLabs/src/test/2022-08/LuckyTiger_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`Chainlink_VRF`, `DPPFlashLoanCall`, `DeFiHackLabs`, `block.difficulty`, `block.number`, `block.timestamp`, `blockhash`, `buyTicket`, `check`, `commit`, `commit_reveal`, `cryptography`, `defi`, `deposit`, `exploit`, `fallback`, `flashLoan`, `fulfillRandom`, `fulfillRandomWords`, `gaming`, `getRandomNumber`, `keccak256`, `lottery`, `mint`, `msg.sender`, `nft`, `prevrandao`, `randomness`, `real_exploit`, `weak_randomness`

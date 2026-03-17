@@ -46,6 +46,36 @@ tags:
 # Version Info
 language: solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | token_launch | token_launch_graduation
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - CREATE2
+  - _addLiquidity
+  - _assertValidRecipient
+  - _initUniV3PoolIfNecessary
+  - addLiquidity
+  - approve
+  - balanceOf
+  - block.number
+  - block.timestamp
+  - bonding_curve
+  - borrow
+  - buy
+  - claim
+  - contribute
+  - createPair
+  - createPool
+  - deposit
+  - dutch_auction
+  - execute
+  - executeLaunch
 ---
 
 ## References & Source Reports
@@ -110,6 +140,38 @@ version: all
 When a bonding curve guards its "launch to DEX" function with a two-step commit process, using a default value of 0 for the commit mapping means uninitialized entries pass the check, allowing tokens to be launched to the DEX at any time without meeting threshold criteria.
 
 > 📖 Reference: `reports/bonding_curve_findings/c-02-tokens-can-be-launched-to-uniswap-v3-anytime-allowing-to-drain-eth.md`
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | token_launch | token_launch_graduation`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `token_launch|graduation|pool_creation|pair_initialization|migration`
+- High-signal code keywords: `CREATE2`, `_addLiquidity`, `_assertValidRecipient`, `_initUniV3PoolIfNecessary`, `addLiquidity`, `approve`, `balanceOf`, `block.number`
+- Typical sink / impact: `fund_loss|manipulation|dos|unfair_launch`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `BondingCurve.function -> for.function -> or.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -698,3 +760,24 @@ function buy(uint256 tokenId, uint256 price) external {
 ### Keywords for Search
 
 `token launch`, `graduation`, `bonding curve`, `createPair`, `createPool`, `addLiquidity`, `fair launch`, `flash loan graduation`, `premature launch`, `pool creation griefing`, `CREATE2 mismatch`, `pairFor`, `presale`, `dutch auction`, `unwrapToken`, `migration`, `double stake`, `early pair creation`, `donation guard bypass`, `pre-seeding`, `bootstrap`, `maxGenesisPrice`, `gradThreshold`, `commitLaunch`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`CREATE2`, `_addLiquidity`, `_assertValidRecipient`, `_initUniV3PoolIfNecessary`, `addLiquidity`, `approve`, `balanceOf`, `block.number`, `block.timestamp`, `bonding_curve`, `borrow`, `buy`, `claim`, `contribute`, `createPair`, `createPool`, `defi`, `deposit`, `dutch_auction`, `execute`, `executeLaunch`, `fair_launch`, `flash_loan`, `graduation`, `launchpad`, `meme_coin`, `migration`, `pool_creation`, `presale`, `token_launch`, `token_launch_graduation`, `uniswap_v2_pair`, `uniswap_v3_pool`

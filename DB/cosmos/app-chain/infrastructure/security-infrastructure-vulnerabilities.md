@@ -32,6 +32,29 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: denial_of_service
+pattern_key: denial_of_service | infrastructure_logic | security_infrastructure_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - GetSigners
+  - accounting
+  - api_abuse
+  - config_exposure
+  - deposit
+  - deprecated_usage
+  - error_handling
+  - keyring
+  - logging_info_leak
+  - mint
+  - private_key
+  - ssrf
+  - tss
 ---
 
 ## References & Source Reports
@@ -101,6 +124,38 @@ version: all
 Implementation flaw in infra ssrf logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 2 audit reports with severity distribution: MEDIUM: 2.
 
 > **Key Finding**: This bug report is about the price-feeder module which sends HTTP requests to configured providers' APIs. If any of the HTTP responses is a redirect response, the module will automatically issue a new request to the address provided in the response's header. This could be exploited by an attacker to
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of denial_of_service"
+- Pattern key: `denial_of_service | infrastructure_logic | security_infrastructure_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `infrastructure_logic`
+- High-signal code keywords: `GetSigners`, `accounting`, `api_abuse`, `config_exposure`, `deposit`, `deprecated_usage`, `error_handling`, `keyring`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Unbounded loop over user-controlled array can exceed block gas limit
+- Signal 2: External call failure causes entire transaction to revert
+- Signal 3: Attacker can grief operations by manipulating state to cause reverts
+- Signal 4: Resource exhaustion through repeated operations without rate limiting
+
+#### False Positive Guards
+
+- Not this bug when: Loop iterations are bounded by a reasonable constant
+- Safe if: External call failures are handled gracefully (try/catch or pull pattern)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -514,3 +569,24 @@ grep -rn 'infra|deprecated|usage' --include='*.go' --include='*.sol'
 ## Keywords
 
 `abuse`, `accounting`, `after`, `allows`, `api`, `appchain`, `argument`, `attacker`, `attacks`, `backup`, `cause`, `clawback`, `config`, `cosmos`, `deposit`, `deprecated`, `elected`, `emergency`, `endblocker`, `endpoint`, `error`, `errors`, `ethereum`, `execution`, `exposure`, `failure`, `forgery`, `funds`, `getsigners`, `handle`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`GetSigners`, `accounting`, `api_abuse`, `appchain`, `config_exposure`, `cosmos`, `defi`, `deposit`, `deprecated_usage`, `error_handling`, `infrastructure`, `keyring`, `logging_info_leak`, `mint`, `private_key`, `security_infrastructure_vulnerabilities`, `ssrf`, `staking`, `tss`

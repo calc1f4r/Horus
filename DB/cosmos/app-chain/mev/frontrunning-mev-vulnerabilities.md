@@ -31,6 +31,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_frontrun_protection
+pattern_key: missing_frontrun_protection | mev_logic | frontrunning_mev_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _decodeAndReward
+  - addLiquidityOneETHKeepYt
+  - arbitrage
+  - balanceOf
+  - block.number
+  - block.timestamp
+  - block_stuffing
+  - checkpointProtection
+  - deposit
+  - getPrice
+  - jit_liquidity
+  - liquidate
+  - mint
+  - msg.sender
+  - price_update
+  - priority
+  - receive
+  - repay
+  - safeTransferFrom
+  - sandwich
 ---
 
 ## References & Source Reports
@@ -119,6 +149,38 @@ version: all
 Implementation flaw in mev staking frontrun logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 4 audit reports with severity distribution: MEDIUM: 4.
 
 > **Key Finding**: The report discusses a bug in the LiquidProxy.sol contract, which is part of the Ron staking contract. The bug allows users to earn rewards without actually staking their tokens for a long period of time. This is done by frontrunning the new rewards arrival and immediately withdrawing them. The repo
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_frontrun_protection"
+- Pattern key: `missing_frontrun_protection | mev_logic | frontrunning_mev_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `mev_logic`
+- High-signal code keywords: `_decodeAndReward`, `addLiquidityOneETHKeepYt`, `arbitrage`, `balanceOf`, `block.number`, `block.timestamp`, `block_stuffing`, `checkpointProtection`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `can.function -> if.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Transaction can be frontrun by MEV bots observing the mempool
+- Signal 2: No commit-reveal or private mempool protection for sensitive operations
+- Signal 3: Slippage tolerance set too high or user-controllable without minimum enforcement
+- Signal 4: Swap execution lacks deadline parameter or uses block.timestamp as deadline
+
+#### False Positive Guards
+
+- Not this bug when: Transaction uses private mempool (Flashbots) or commit-reveal scheme
+- Safe if: Slippage protection with reasonable bounds is enforced
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -802,3 +864,24 @@ grep -rn 'mev|jit|liquidity' --include='*.go' --include='*.sol'
 ## Keywords
 
 `accumulation`, `actually`, `after`, `against`, `allowing`, `allows`, `amount`, `appchain`, `arbitrage`, `attack`, `auction`, `balance`, `behavior`, `block`, `bypass`, `calculated`, `calculation`, `calls`, `canto`, `chainlink`, `change`, `changes`, `conditions`, `cosmos`, `days`, `delegating`, `discrepancy`, `drained`, `during`, `earn`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_decodeAndReward`, `addLiquidityOneETHKeepYt`, `appchain`, `arbitrage`, `balanceOf`, `block.number`, `block.timestamp`, `block_stuffing`, `checkpointProtection`, `cosmos`, `defi`, `deposit`, `frontrunning_mev_vulnerabilities`, `getPrice`, `jit_liquidity`, `liquidate`, `mev`, `mint`, `msg.sender`, `price_update`, `priority`, `receive`, `repay`, `safeTransferFrom`, `sandwich`, `slippage_exploit`, `staking`, `staking_frontrun`

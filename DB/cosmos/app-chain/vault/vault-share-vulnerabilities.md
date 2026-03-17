@@ -33,6 +33,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: denial_of_service
+pattern_key: denial_of_service | vault_logic | vault_share_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - GetNetAmountState
+  - LiquidStake
+  - _ethTOeEth
+  - _withdraw
+  - allowance
+  - balanceOf
+  - block.timestamp
+  - burn
+  - curator_exploit
+  - deposit
+  - deposit_theft
+  - getPendingLidoETHAmount
+  - griefing
+  - insolvency
+  - liens
+  - mint
+  - msg.sender
+  - multi_interaction
+  - safeTransferFrom
+  - share_calculation
 ---
 
 ## References & Source Reports
@@ -136,6 +166,38 @@ version: all
 Implementation flaw in vault share inflation logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 6 audit reports with severity distribution: HIGH: 4, MEDIUM: 2.
 
 > **Key Finding**: This bug report discusses a vulnerability in the `StakedToken` contract, which allows for manipulation of the `exchangeRate` used for share price calculation. This can be exploited by an attacker through direct donations of underlying tokens to the contract, resulting in a higher share price and all
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of denial_of_service"
+- Pattern key: `denial_of_service | vault_logic | vault_share_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `vault_logic`
+- High-signal code keywords: `GetNetAmountState`, `LiquidStake`, `_ethTOeEth`, `_withdraw`, `allowance`, `balanceOf`, `block.timestamp`, `burn`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `implements.function -> is.function -> that.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Unbounded loop over user-controlled array can exceed block gas limit
+- Signal 2: External call failure causes entire transaction to revert
+- Signal 3: Attacker can grief operations by manipulating state to cause reverts
+- Signal 4: Resource exhaustion through repeated operations without rate limiting
+
+#### False Positive Guards
+
+- Not this bug when: Loop iterations are bounded by a reasonable constant
+- Safe if: External call failures are handled gracefully (try/catch or pull pattern)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -975,3 +1037,24 @@ grep -rn 'vault|insolvency' --include='*.go' --include='*.sol'
 ## Keywords
 
 `accounting`, `active`, `allows`, `amounts`, `appchain`, `assets`, `attack`, `attacked`, `balance`, `being`, `break`, `broken`, `burns`, `calculated`, `calculation`, `calculations`, `cause`, `changing`, `cosmos`, `crashing`, `curator`, `denomination`, `deposit`, `depositing`, `depositor`, `depositors`, `deposits`, `depressing`, `depriving`, `distorts`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`GetNetAmountState`, `LiquidStake`, `_ethTOeEth`, `_withdraw`, `allowance`, `appchain`, `balanceOf`, `block.timestamp`, `burn`, `cosmos`, `curator_exploit`, `defi`, `deposit`, `deposit_theft`, `getPendingLidoETHAmount`, `griefing`, `insolvency`, `liens`, `mint`, `msg.sender`, `multi_interaction`, `safeTransferFrom`, `share_calculation`, `share_inflation`, `staking`, `strategy_loss`, `tvl_manipulation`, `vault`, `vault_share_vulnerabilities`, `withdrawal_error`

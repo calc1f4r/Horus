@@ -44,6 +44,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | reward_distributor | reward_distribution
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _claimRewardToken
+  - _ethTOeEth
+  - atomic
+  - balanceOf
+  - block.timestamp
+  - claimExternalRewards
+  - claimRewards
+  - completeReport
+  - compound
+  - deposit
+  - distributeRemainingBalance
+  - execution_layer_rewards
+  - front_running
+  - getPrice
+  - msg.sender
+  - msg_sender_confusion
+  - permissionless_claim
+  - reStake
+  - receive
+  - recoverUnstaking
 ---
 
 ## References & Source Reports
@@ -118,6 +148,38 @@ Permissionless reward claim functions that instantly increase TVL enable sandwic
 > - `reports/eigenlayer_findings/m-06-sandwiching-claimdelayedwithdrawals-to-steal-eth-rewards.md` (Rio Network - Sherlock)
 > - `reports/eigenlayer_findings/reward-distribution-enables-front-running-attacks-and-reward-siphoning.md` (CAP Labs - Trail of Bits)
 > - `reports/eigenlayer_findings/m-sandwich-attack-on-autopxgmx-compound.md` (Redacted Cartel - Code4rena)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | reward_distributor | reward_distribution`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `reward_distributor|staking_rewards|claim_function|accounting`
+- High-signal code keywords: `_claimRewardToken`, `_ethTOeEth`, `atomic`, `balanceOf`, `block.timestamp`, `claimExternalRewards`, `claimRewards`, `completeReport`
+- Typical sink / impact: `fund_loss|reward_theft|dos|locked_rewards`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -699,3 +761,24 @@ function recoverUnstaking(uint128 validatorId, uint128 unstakingId) external {
 - [Restaking Withdrawal Vulnerabilities](RESTAKING_WITHDRAWAL_VULNERABILITIES.md)
 - [LRT Share Accounting Errors](LRT_SHARE_ACCOUNTING_VULNERABILITIES.md)
 - [Restaking Slashing Mechanisms](RESTAKING_SLASHING_VULNERABILITIES.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_claimRewardToken`, `_ethTOeEth`, `accounting`, `atomic`, `balanceOf`, `block.timestamp`, `claimExternalRewards`, `claimRewards`, `completeReport`, `compound`, `defi`, `deposit`, `distributeRemainingBalance`, `eigenlayer`, `execution_layer_rewards`, `front-running`, `front_running`, `getPrice`, `msg.sender`, `msg_sender_confusion`, `permissionless_claim`, `reStake`, `receive`, `recoverUnstaking`, `reentrancy`, `restaking`, `reward_accounting`, `reward_distribution`, `reward_theft`, `rewards`, `sandwich`, `sandwich_attack`, `staking`, `staking_rewards`, `time_weighted`
