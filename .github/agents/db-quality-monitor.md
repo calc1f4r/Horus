@@ -840,5 +840,5 @@ Every reported issue gets one of:
 | `scripts/grep_prune.py` | Hunt card grep-pruning | 5 |
 | `scripts/partition_shards.py` | Shard partitioning | 5 |
 | `scripts/merge_shard_findings.py` | Finding deduplication | 5 |
-| `Agents.md` | Pipeline architecture reference | 4, 5 |
+| `DB-GUIDE.md` | Pipeline architecture reference | 4, 5 |
 | `DB/SEARCH_GUIDE.md` | Search workflow reference | 4, 6 |

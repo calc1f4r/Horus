@@ -47,6 +47,36 @@ version: all
 
 # Source
 source: DeFiHackLabs
+
+# Pattern Identity (Required)
+root_cause_family: callback_reentrancy
+pattern_key: callback_reentrancy | external_calls | multi_type
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - Balancer_pool_state
+  - Curve_remove_liquidity
+  - ERC1155_hooks
+  - ERC721_onReceived
+  - ERC777_hooks
+  - approve
+  - attack
+  - balanceOf
+  - balance_check
+  - batchHarvestMarketRewards
+  - block.timestamp
+  - borrow
+  - burn
+  - burnHook
+  - callback_function
+  - checkCurveReentrancy
+  - claimRewards
+  - deposit
+  - deposits
+  - exitMarket
 ---
 
 # DeFi Reentrancy Vulnerability Patterns
@@ -58,6 +88,38 @@ Reentrancy vulnerabilities occur when a contract makes an external call to an un
 **Total Historical Losses from Analyzed Exploits: >$300M USD**
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of callback_reentrancy"
+- Pattern key: `callback_reentrancy | external_calls | multi_type`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `external_calls`
+- High-signal code keywords: `Balancer_pool_state`, `Curve_remove_liquidity`, `ERC1155_hooks`, `ERC721_onReceived`, `ERC777_hooks`, `approve`, `attack`, `balanceOf`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `CloberAttacker.function -> DFXAttacker.function -> NFTReentrancyAttacker.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: External call (`.call`, `.transfer`, token transfer) occurs before state variable update
+- Signal 2: Token implements callback hooks (ERC-777, ERC-721) and protocol doesn't use `nonReentrant`
+- Signal 3: User-supplied token address passed to `transferFrom` without callback protection
+- Signal 4: Read-only function's return value consumed cross-contract during an active callback window
+
+#### False Positive Guards
+
+- Not this bug when: Contract uses `ReentrancyGuard` (`nonReentrant`) on all entry points
+- Safe if: All state updates complete before any external call (strict CEI)
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerability Categories
 
@@ -665,7 +727,7 @@ contract SecureFlashLoan {
 
 ## Related Vulnerabilities
 
-- [Flash Loan Attacks](../flash-loan-attacks/FLASH_LOAN_VULNERABILITIES.md)
+- [Flash Loan Attacks](../flash-loan/FLASH_LOAN_VULNERABILITIES.md)
 - [Price Oracle Manipulation](../../oracle/chainlink/CHAINLINK_PRICE_FEED_VULNERABILITIES.md)
 - [Vault Inflation Attack](../vault-inflation-attack/vault-inflation-attack.md)
 - [ERC4626 Vulnerabilities](../../tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md)
@@ -783,3 +845,24 @@ contract SecureFlashLoan {
 - **XSURGE** (2021-08, $5.0M): `DeFiHackLabs/src/test/2021-08/XSURGE_exp.sol`
 - **DeltaPrime** (2024-11, $4.8M): `DeFiHackLabs/src/test/2024-11/DeltaPrime_exp.sol`
 - **DFXFinance** (2022-11, $4.0M): `DeFiHackLabs/src/test/2022-11/DFX_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`Balancer_pool_state`, `Curve_remove_liquidity`, `DeFiHackLabs`, `ERC1155_hooks`, `ERC721_onReceived`, `ERC777_hooks`, `approve`, `attack`, `balanceOf`, `balance_check`, `batchHarvestMarketRewards`, `block.timestamp`, `borrow`, `burn`, `burnHook`, `callback_function`, `checkCurveReentrancy`, `claimRewards`, `defi`, `deposit`, `deposits`, `dex`, `exitMarket`, `external_call`, `fallback_function`, `flash_loan_callback`, `lending`, `multi_type`, `nft`, `real_exploit`, `receive_function`, `reentrancy`, `staking`, `state_update`, `vault`

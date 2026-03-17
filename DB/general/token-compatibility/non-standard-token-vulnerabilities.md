@@ -55,6 +55,36 @@ tags:
 language: solidity
 version: all
 source: DeFiHackLabs
+
+# Pattern Identity (Required)
+root_cause_family: missing_token_compatibility
+pattern_key: missing_token_compatibility | token_transfer | non_standard_token_behavior
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - DPPFlashLoanCall
+  - ERC667
+  - ERC777
+  - _attackLogic
+  - _burn
+  - _transfer
+  - _updateReserves
+  - approve
+  - approveToken
+  - attackLogic
+  - balanceOf
+  - balance_manipulation
+  - block.number
+  - block.timestamp
+  - boostLTVHack
+  - borrow
+  - borrowTokens
+  - borrowXdai
+  - burn
+  - calculateShares
 ---
 
 ## References & Source Reports
@@ -135,6 +165,38 @@ Non-standard ERC20 tokens implement custom transfer logic that breaks fundamenta
 **Total Documented Losses**: >$5M from analyzed DeFiHackLabs exploits
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_token_compatibility"
+- Pattern key: `missing_token_compatibility | token_transfer | non_standard_token_behavior`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `token_transfer|balance_tracking|amm_integration|lending_pool`
+- High-signal code keywords: `DPPFlashLoanCall`, `ERC667`, `ERC777`, `_attackLogic`, `_burn`, `_transfer`, `_updateReserves`, `approve`
+- Typical sink / impact: `fund_loss|pool_drain|reentrancy`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `FloorStaking.function -> LendingPool.function -> SecureAMMPair.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Protocol assumes all ERC20 tokens behave identically (no fees, no rebasing)
+- Signal 2: Token balance check uses cached amount instead of actual balanceOf() after transfer
+- Signal 3: Missing support for tokens with non-standard return values (USDT, BNB)
+- Signal 4: Rebasing or fee-on-transfer token breaks accounting assumptions
+
+#### False Positive Guards
+
+- Not this bug when: Protocol uses SafeERC20 for all token interactions
+- Safe if: Token whitelist restricts to known-safe implementations
+- Requires attacker control of: specific conditions per pattern
 
 ## 1. Reflection Token Vulnerabilities
 
@@ -1095,7 +1157,7 @@ contract SecureVault {
 
 - [Fee-on-Transfer Tokens](../fee-on-transfer-tokens/fee-on-transfer-tokens.md) - Basic FoT handling
 - [Reentrancy Patterns](../reentrancy/) - General reentrancy vulnerabilities
-- [Flash Loan Attacks](../flash-loan-attacks/) - Flash loan amplification
+- [Flash Loan Attacks](../flash-loan/) - Flash loan amplification
 - [Vault Inflation Attack](../vault-inflation-attack/) - Related accounting issues
 - [AMM Vulnerabilities](../../amm/) - DEX-specific attack patterns
 
@@ -1171,3 +1233,24 @@ contract SecureVault {
 - **BUNN** (2023-06, $52): `DeFiHackLabs/src/test/2023-06/BUNN_exp.sol`
 - **FloorDAO** (2023-09, $40): `DeFiHackLabs/src/test/2023-09/FloorDAO_exp.sol`
 - **OLIFE** (2023-04, $32): `DeFiHackLabs/src/test/2023-04/OLIFE_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`DPPFlashLoanCall`, `ERC667`, `ERC777`, `_attackLogic`, `_burn`, `_transfer`, `_updateReserves`, `amm`, `approve`, `approveToken`, `attackLogic`, `balanceOf`, `balance_manipulation`, `block.number`, `block.timestamp`, `boostLTVHack`, `borrow`, `borrowTokens`, `borrowXdai`, `burn`, `calculateShares`, `callback_token`, `defi`, `deflationary`, `deflationary_token`, `deliver`, `dex`, `erc777`, `fee_on_transfer`, `lending`, `non_standard_token_behavior`, `onTokenTransfer`, `pair`, `pair_reserves`, `real_exploit`, `rebasing`, `rebasing_token`, `reentrancy`, `reflection`, `reflection_token`, `self_transfer`, `skim`, `sync`, `token`, `token_compatibility`, `tokensReceived`, `tokensToSend`

@@ -590,5 +590,5 @@ Each finding MUST include the standard schema fields PLUS:
 - **Inter-agent data format**: [inter-agent-data-format.md](.claude/resources/inter-agent-data-format.md)
 - **Orchestration pipeline**: [orchestration-pipeline.md](.claude/resources/orchestration-pipeline.md)
 - **DB hunting workflow**: [db-hunting-workflow.md](.claude/resources/db-hunting-workflow.md)
-- **DB search guide**: [DB/SEARCH_GUIDE.md](DB/SEARCH_GUIDE.md)
-- **DB router**: [DB/index.json](DB/index.json)
+- **DB search guide**: [DB/SEARCH_GUIDE.md](../../DB/SEARCH_GUIDE.md)
+- **DB router**: [DB/index.json](../../DB/index.json)

@@ -37,6 +37,35 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | quorum_calculation | quorum_manipulation
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _isProposalSucceeded
+  - _isSucceeded
+  - _quorumReached
+  - adjustedTotalSupply
+  - balanceOf
+  - block.number
+  - block.timestamp
+  - delegation
+  - dynamic_quorum
+  - proposal_passing
+  - propose
+  - quorum
+  - quorumVotes
+  - state
+  - supply_based_quorum
+  - threshold
+  - totalSupply
+  - updateQuorum
+  - voting_power
 ---
 
 ## References & Source Reports
@@ -88,6 +117,38 @@ Dynamic quorum systems calculate quorum as a percentage of current total voting 
 > **📚 Source Reports for Deep Dive:**
 > - `reports/dao_governance_findings/m-8-adversary-can-abuse-delegating-to-lower-quorum.md` (Nouns DAO - Code4rena)
 > - `reports/dao_governance_findings/cordinated-group-of-attacker-can-artificially-lower-quorum-threshold-during-acti.md` (Reserve Protocol - Code4rena)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | quorum_calculation | quorum_manipulation`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `quorum_calculation|dynamic_quorum|voting_threshold`
+- High-signal code keywords: `_isProposalSucceeded`, `_isSucceeded`, `_quorumReached`, `adjustedTotalSupply`, `balanceOf`, `block.number`, `block.timestamp`, `delegation`
+- Typical sink / impact: `governance_bypass|proposal_manipulation`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `dynamic_quorum.function -> quorum_calculation.function -> voting_threshold.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -589,3 +650,24 @@ function state(uint256 proposalId) public view returns (ProposalState) {
 - [Voting Power Manipulation](./voting-power-manipulation.md)
 - [Timelock Bypass](./timelock-bypass.md)
 - [Proposal Lifecycle Manipulation](./proposal-lifecycle-manipulation.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_isProposalSucceeded`, `_isSucceeded`, `_quorumReached`, `adjustedTotalSupply`, `balanceOf`, `block.number`, `block.timestamp`, `dao`, `defi`, `delegation`, `dynamic_quorum`, `governance`, `proposal_passing`, `propose`, `quorum`, `quorumVotes`, `quorum_manipulation`, `state`, `supply_based_quorum`, `threshold`, `totalSupply`, `updateQuorum`, `voting_power`, `voting_threshold`

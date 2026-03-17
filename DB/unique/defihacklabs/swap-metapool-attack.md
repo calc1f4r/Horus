@@ -335,4 +335,4 @@ grep -rn "basePool\|baseLPToken\|baseSwap" --include="*.sol"
 
 - [AMM Concentrated Liquidity](../../amm/concentrated-liquidity/) — AMM pricing vulnerabilities
 - [Oracle Price Manipulation](../../oracle/) — Price feed manipulation patterns
-- [Flash Loan Attacks](../../general/flash-loan-attacks/) — Flash loan enabled exploits
+- [Flash Loan Attacks](../../general/flash-loan/) — Flash loan enabled exploits

@@ -590,5 +590,5 @@ contract SecureFNFT is ReentrancyGuard {
 
 - `DB/general/reentrancy/defihacklabs-reentrancy-patterns.md` — 2021 basic reentrancy patterns
 - `DB/general/reentrancy/defihacklabs-readonly-reentrancy-patterns.md` — Read-only reentrancy (Curve/Balancer)
-- `DB/general/flash-loan-attacks/` — Flash loan attack patterns
+- `DB/general/flash-loan/` — Flash loan attack patterns
 - `DB/general/business-logic/defihacklabs-solvency-business-logic-patterns.md` — Solvency check bypasses

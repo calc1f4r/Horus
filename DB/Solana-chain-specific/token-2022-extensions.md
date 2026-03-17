@@ -50,6 +50,36 @@ tags:
 # Version Info
 language: rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | mint | token_2022_extensions
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - borrow
+  - burn
+  - confidential_transfer
+  - cpi_guard
+  - default_account_state
+  - deposit
+  - freeze_authority
+  - group_member_pointer
+  - group_pointer
+  - immutable_owner
+  - interest_bearing
+  - malicious
+  - memo_transfer
+  - metadata_pointer
+  - mint
+  - mint_close_authority
+  - non_transferable
+  - permanent_delegate
+  - receive
+  - swap
 ---
 
 ## References & Source Reports
@@ -159,6 +189,38 @@ The `MintCloseAuthority` extension allows a designated authority to close a mint
 > **📚 Source Reports for Deep Dive:**
 > - `reports/token2022_findings/c-01-mint-decimal-manipulation-through-mintcloseauthority-leads-to-inflation-of-.md`
 > - `reports/token2022_findings/m-01-mint-decimal-manipulation.md`
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | mint | token_2022_extensions`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `mint|token_account|extensions`
+- High-signal code keywords: `borrow`, `burn`, `confidential_transfer`, `cpi_guard`, `default_account_state`, `deposit`, `freeze_authority`, `group_member_pointer`
+- Typical sink / impact: `fund_theft|dos|accounting_errors|token_manipulation`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `extensions.function -> mint.function -> token_account.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1687,3 +1749,24 @@ pub fn validate_token_account_extensions(
 
 - [Solana Program Security](./solana-program-security.md) - General Solana security patterns
 - [Fee-on-Transfer Tokens](../general/fee-on-transfer-tokens/) - EVM equivalent issues
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`borrow`, `burn`, `confidential_transfer`, `cpi_guard`, `default_account_state`, `defi`, `deposit`, `freeze_authority`, `group_member_pointer`, `group_pointer`, `immutable_owner`, `interest_bearing`, `malicious`, `memo_transfer`, `metadata_pointer`, `mint`, `mint_close_authority`, `non_transferable`, `permanent_delegate`, `receive`, `solana`, `spl_token`, `swap`, `token_2022`, `token_2022_extensions`, `token_account_extensions`, `token_extensions`, `token_security`, `transfer_fee`, `transfer_hook`

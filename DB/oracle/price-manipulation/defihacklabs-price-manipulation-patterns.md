@@ -524,4 +524,4 @@ grep -rn "function deposit\|function earn\|add_liquidity" --include="*.sol" | \
 
 - [Flash Loan Oracle Manipulation](../price-manipulation/flash-loan-oracle-manipulation.md)
 - [Vault Inflation Attack](../../general/vault-inflation-attack/vault-inflation-attack.md)
-- [Flash Loan Attack Patterns](../../general/flash-loan-attacks/FLASH_LOAN_VULNERABILITIES.md)
+- [Flash Loan Attack Patterns](../../general/flash-loan/FLASH_LOAN_VULNERABILITIES.md)

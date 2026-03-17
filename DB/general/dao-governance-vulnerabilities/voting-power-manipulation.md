@@ -39,6 +39,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | voting_system | voting_power_manipulation
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _delegate
+  - _initializeDistributionRecord
+  - again
+  - balanceOf
+  - block.number
+  - block.timestamp
+  - borrow
+  - castVote
+  - checkpoints
+  - countMemberVotes
+  - delegate
+  - delegation
+  - flash_loans
+  - getPriceUnsafe
+  - getVotes
+  - getVotingPower
+  - governance_token
+  - initializeDistributionRecord
+  - mint
+  - msg.sender
 ---
 
 ## References & Source Reports
@@ -94,6 +124,38 @@ Delegation systems allow users to transfer their voting power to another address
 > **📚 Source Reports for Deep Dive:**
 > - `reports/dao_governance_findings/double-voting-by-delegaters.md` (Tracer - SigmaPrime)
 > - `reports/dao_governance_findings/h-04-old-delegatee-not-deleted-when-delegating-to-new-tokenid.md` (Golom - Code4rena)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | voting_system | voting_power_manipulation`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `voting_system|delegation_logic|checkpoint_system`
+- High-signal code keywords: `_delegate`, `_initializeDistributionRecord`, `again`, `balanceOf`, `block.number`, `block.timestamp`, `borrow`, `castVote`
+- Typical sink / impact: `governance_hijacking|fund_loss|manipulation`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `AdvancedDistributor.function -> DAO.function -> VoteEscrowDelegation.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -605,3 +667,24 @@ function _delegate(address _delegator, address _delegatee) internal {
 - [Checkpoint Vulnerabilities](./checkpoint-vulnerabilities.md)
 - [Timelock Bypass](./timelock-bypass.md)
 - [Proposal Lifecycle Manipulation](./proposal-lifecycle-manipulation.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_delegate`, `_initializeDistributionRecord`, `again`, `balanceOf`, `block.number`, `block.timestamp`, `borrow`, `castVote`, `checkpoints`, `countMemberVotes`, `dao`, `defi`, `delegate`, `delegation`, `flash_loans`, `getPriceUnsafe`, `getVotes`, `getVotingPower`, `governance`, `governance_token`, `initializeDistributionRecord`, `mint`, `msg.sender`, `proposal`, `quorum`, `snapshot`, `time_dependent`, `vote_escrow`, `voting`, `voting_power`, `voting_power_manipulation`

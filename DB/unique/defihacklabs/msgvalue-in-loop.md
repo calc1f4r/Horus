@@ -434,4 +434,4 @@ grep -rn "require.*msg.value" --include="*.sol"
 ### Related Vulnerabilities
 
 - [Reentrancy Patterns](../../general/reentrancy/) — ETH handling vulnerabilities
-- [Flash Loan Attacks](../../general/flash-loan-attacks/) — Capital amplification patterns
+- [Flash Loan Attacks](../../general/flash-loan/) — Capital amplification patterns

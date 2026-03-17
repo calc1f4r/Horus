@@ -684,4 +684,4 @@ function _onSwapGivenOut(
 - `DB/general/vault-inflation-attack/defihacklabs-vault-inflation-patterns.md` — Earlier vault inflation patterns (2022-2023)
 - `DB/oracle/price-manipulation/defihacklabs-price-manipulation-patterns.md` — Price manipulation patterns
 - `DB/general/reentrancy/defihacklabs-reentrancy-patterns.md` — Reentrancy patterns
-- `DB/general/flash-loan-attacks/` — Flash loan attack patterns
+- `DB/general/flash-loan/` — Flash loan attack patterns

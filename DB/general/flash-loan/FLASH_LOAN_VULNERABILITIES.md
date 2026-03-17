@@ -40,6 +40,36 @@ tags:
 # Version Info (Optional)
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | flash_loan | flash_loan_abuse
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - allowance
+  - approve
+  - balanceOf
+  - block.number
+  - block.timestamp
+  - borrow
+  - burn
+  - callback
+  - deposit
+  - erc3156
+  - fee_calculation
+  - fillOrder
+  - flashFee
+  - flashLoan
+  - flashProof
+  - flash_loan
+  - getDebtWithAccruedInterest
+  - governance_vote
+  - liquidate
+  - liquidation
 ---
 
 ## Reference
@@ -62,6 +92,38 @@ Flash Loan Abuse via Missing Validation, Incorrect Fees, or Bypassed Safeguards
 ### Overview
 
 This vulnerability exists because flash loan flows skip critical validations (pool status, allowance, repayment deltas, or fee scaling), or allow alternative state transitions (like liquidation) to bypass protections, enabling fund loss, unauthorized borrowing, or manipulation in a single transaction or block.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | flash_loan | flash_loan_abuse`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `flash_loan|repayment_validation|fee_logic|state_transition`
+- High-signal code keywords: `allowance`, `approve`, `balanceOf`, `block.number`, `block.timestamp`, `borrow`, `burn`, `callback`
+- Typical sink / impact: `fund_loss|manipulation|dos`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `never.function -> uint256.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -323,3 +385,23 @@ require(receiver == msg.sender || allowance(receiver, msg.sender) >= amount + fe
 - Reentrancy (callbacks during flash loan)
 - Oracle manipulation (flash-loan-funded price changes)
 - Missing validations in special-case code paths
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`allowance`, `approve`, `balanceOf`, `block.number`, `block.timestamp`, `borrow`, `burn`, `callback`, `defi`, `deposit`, `economic`, `erc3156`, `fee_calculation`, `fillOrder`, `flashFee`, `flashLoan`, `flashProof`, `flash_loan`, `flash_loan_abuse`, `getDebtWithAccruedInterest`, `governance`, `governance_vote`, `lending`, `liquidate`, `liquidation`, `liquidity`, `oracle_price`, `pool_status`, `repayment_check`, `tx_origin`

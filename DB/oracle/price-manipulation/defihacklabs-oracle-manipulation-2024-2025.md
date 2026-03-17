@@ -559,4 +559,4 @@ function _updateOracleState(uint256 newPrice) internal {
 - `DB/oracle/price-manipulation/defihacklabs-price-manipulation-patterns.md` — Earlier price manipulation patterns (2021)
 - `DB/oracle/price-manipulation/defihacklabs-flashloan-oracle-2022-patterns.md` — Flash loan oracle patterns (2022)
 - `DB/general/precision/defihacklabs-precision-share-manipulation-2024-2025.md` — Precision loss patterns
-- `DB/general/flash-loan-attacks/` — Flash loan attack patterns
+- `DB/general/flash-loan/` — Flash loan attack patterns

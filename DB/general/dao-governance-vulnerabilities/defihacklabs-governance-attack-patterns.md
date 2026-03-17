@@ -537,4 +537,4 @@ contract SecureGovernance is Initializable {
 - `DB/general/initialization/defihacklabs-initialization-patterns.md` — Initialization vulnerabilities
 - `DB/general/proxy-vulnerabilities/` — Proxy upgrade vulnerabilities
 - `DB/oracle/price-manipulation/` — Oracle manipulation enabling governance+oracle combos
-- `DB/general/flash-loan-attacks/` — Flash loan attack patterns
+- `DB/general/flash-loan/` — Flash loan attack patterns

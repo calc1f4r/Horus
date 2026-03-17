@@ -48,6 +48,36 @@ tags:
 # Version Info
 language: rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_access_control
+pattern_key: missing_access_control | account_validation | solana_program_integration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - account_closure
+  - account_reallocation
+  - borrow
+  - bump_seed
+  - collisions
+  - cpi_accounts
+  - deposit
+  - emitted
+  - for
+  - init_if_needed
+  - lamports_transfer
+  - liquidate
+  - mint
+  - msg.sender
+  - overflows
+  - owner_check
+  - pda_validation
+  - receive
+  - remaining_accounts
+  - replay
 ---
 
 ## References & Source Reports
@@ -222,6 +252,38 @@ Solana programs must validate accounts passed to instructions. Unlike EVM where 
 > - [Neodyme Blog - Missing Signer Check](https://neodyme.io/en/blog/solana_common_pitfalls/#missing-signer-check)
 > - [Neodyme Blog - Missing Ownership Check](https://neodyme.io/en/blog/solana_common_pitfalls/#missing-ownership-check)
 > - [Solana Security Course](https://solana.com/developers/courses/program-security)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_access_control"
+- Pattern key: `missing_access_control | account_validation | solana_program_integration`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `account_validation|cpi|token_operations|state_management`
+- High-signal code keywords: `account_closure`, `account_reallocation`, `borrow`, `bump_seed`, `collisions`, `cpi_accounts`, `deposit`, `emitted`
+- Typical sink / impact: `fund_theft|unauthorized_access|dos|state_corruption|account_takeover`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State-changing function lacks `onlyOwner`/`onlyRole` modifier
+- Signal 2: External function accepts arbitrary address and calls interface methods without registry validation
+- Signal 3: Configuration setter is callable by non-owner accounts
+- Signal 4: Initialization or migration function is unprotected
+
+#### False Positive Guards
+
+- Not this bug when: Function is `internal`/`private` and only called from access-controlled paths
+- Safe if: Function is restricted via `onlyOwner`/`onlyRole`/`require(msg.sender == ...)`
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -2662,3 +2724,24 @@ pub struct CpiPolicy {
 - [Reentrancy](../general/reentrancy/) - CPI can enable reentrancy-like patterns
 - [Access Control](../general/access-control/) - Account validation is Solana's access control
 - [Fee-on-Transfer Tokens](../general/fee-on-transfer-tokens/) - Token-2022 specific handling
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`account_closure`, `account_reallocation`, `account_validation`, `anchor`, `borrow`, `bump_seed`, `collisions`, `cpi`, `cpi_accounts`, `deposit`, `emitted`, `for`, `init_if_needed`, `lamports_transfer`, `liquidate`, `mint`, `msg.sender`, `overflows`, `owner_check`, `pda`, `pda_validation`, `program_security`, `receive`, `remaining_accounts`, `replay`, `signer_check`, `solana`, `solana_program_integration`, `spl_token`, `system_program`, `token_2022`, `token_program`

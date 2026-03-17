@@ -12,7 +12,7 @@
       "id": "account-abstraction-aa-erc7579-module-system-enable-mode-erc-7579-module-system-registr-000",
       "title": "ERC-7579 Module System — Registry Bypass, moduleType Confusion, Hook PostCheck Skip, Fallback Flaws",
       "severity": "LOW",
-      "grep": "INexus.checkERC7739Support|checkNestingERC7739Support|_handleFallbackWithHook|_getEnableModeDataHash|MODULE_TYPE_VALIDATOR|emergencyUninstallHook",
+      "grep": "INexus.checkERC7739Support|checkNestingERC7739Support|_installFallbackHandler|_handleFallbackWithHook|_getEnableModeDataHash|MODULE_TYPE_VALIDATOR",
       "detect": "ERC-7579 module management has multiple independent failure modes:",
       "cat": [
         "account-abstraction",
@@ -24,8 +24,8 @@
       ],
       "ref": "DB/account-abstraction/aa-erc7579-module-system-enable-mode.md",
       "lines": [
-        83,
-        260
+        145,
+        322
       ],
       "check": [
         "VERIFY: ERC-7579 module management has multiple independent failure modes",
@@ -39,7 +39,7 @@
       "id": "account-abstraction-aa-paymaster-gas-accounting-vulnerabilit-aa-paymaster-gas-accounting-pr-000",
       "title": "AA Paymaster Gas Accounting — Prefund Errors, Duplicate Snapshots, Stake Bypass, and Fee Escape",
       "severity": "HIGH",
-      "grep": "feeRefundTokenGasPriceFactor|validatePaymasterUserOp|paymaster.addStake|_validatePrepayment|verificationGasLimit|paymasterAndData",
+      "grep": "feeRefundTokenGasPriceFactor|validatePaymasterUserOp|paymaster.addStake|_validatePrepayment|_getRequiredPrefund|verificationGasLimit",
       "detect": "Gas accounting in ERC-4337 is a multi-phase process (validation → execution → postOp) with several hand-off points...",
       "cat": [
         "account-abstraction",
@@ -51,8 +51,8 @@
       ],
       "ref": "DB/account-abstraction/aa-paymaster-gas-accounting-vulnerabilities.md",
       "lines": [
-        83,
-        238
+        145,
+        300
       ],
       "check": [
         "VERIFY: Gas accounting in ERC-4337 is a multi-phase process (validation → execution → postOp) with several hand-off points where gas values can be measured...",
@@ -66,7 +66,7 @@
       "id": "account-abstraction-aa-session-key-permission-abuse-session-key-abuse-spend-limit--000",
       "title": "Session Key Abuse — Spend Limit Bypass, Cross-Wallet Consumption, Permission Overwrite, PermissionId Frontrun",
       "severity": "CRITICAL",
-      "grep": "_validateSingleCall|userOp.signature|_validateBatchCall|CredibleAccountModule|updateKeyPermissions|ERC20.approve",
+      "grep": "_validateSingleCall|NativeTokenLimitModule|userOp.signature|_validateBatchCall|ResourceLockValidator|CredibleAccountModule",
       "detect": "Session key security depends on correct enforcement of four invariants:",
       "cat": [
         "account-abstraction",
@@ -78,8 +78,8 @@
       ],
       "ref": "DB/account-abstraction/aa-session-key-permission-abuse.md",
       "lines": [
-        71,
-        271
+        133,
+        333
       ],
       "neverPrune": true,
       "check": [
@@ -94,7 +94,7 @@
       "id": "account-abstraction-aa-signature-replay-attacks-aa-signature-replay-missing-bi-000",
       "title": "AA Signature Replay — Missing Binding Fields in UserOperation and Enable Mode Hashes",
       "severity": "HIGH",
-      "grep": "getPackedUserOperationHash|_getEnableModeDataHash|enableModeSignature|_hashExecution|validateUserOp|_enableMode",
+      "grep": "getPackedUserOperationHash|_getEnableModeDataHash|_buildDomainSeparator|enableModeSignature|_getCoSignerHash|enableModeDataHash",
       "detect": "This vulnerability exists because **inner EIP-712 hashes computed by the smart account omit one or more domain-binding...",
       "cat": [
         "account-abstraction",
@@ -106,8 +106,8 @@
       ],
       "ref": "DB/account-abstraction/aa-signature-replay-attacks.md",
       "lines": [
-        71,
-        248
+        133,
+        310
       ],
       "check": [
         "VERIFY: inner EIP-712 hashes computed by the smart account omit one or more domain-binding fields (entryPoint address, nonce, chainId,...",

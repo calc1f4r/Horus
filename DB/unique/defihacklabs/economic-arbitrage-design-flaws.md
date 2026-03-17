@@ -429,6 +429,6 @@ grep -rn "function.*deposit.*pool\|function.*route" --include="*.sol" | grep -v 
 
 ### Related Vulnerabilities
 
-- [Flash Loan Attacks](../../general/flash-loan-attacks/) — Capital amplification for arbitrage
+- [Flash Loan Attacks](../../general/flash-loan/) — Capital amplification for arbitrage
 - [Oracle Manipulation](../../oracle/) — Price feed manipulation patterns
 - [Slippage Vulnerabilities](../../general/validation/slippage-input-validation-vulnerabilities.md) — Swap routing issues

@@ -57,6 +57,36 @@ version: all
 
 # Source
 source: solodit + audit-reports
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | dex_based_price_oracle | dex_amm_oracle_price_manipulation
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _getReserves
+  - bin_movement
+  - borrow
+  - concentrated_liquidity
+  - execute
+  - fee_growth
+  - flash_loan_manipulation
+  - getLPTokenValue
+  - getPrice
+  - getReserves
+  - implied_volatility
+  - latestAnswer
+  - liquidate
+  - low_tvl_pool
+  - lp_reserve_price
+  - msg.sender
+  - reserve_ratio
+  - sandwich_attack
+  - spot_price
+  - swap
 ---
 
 ## Reference
@@ -85,6 +115,38 @@ Protocols that use DEX AMM prices (Uniswap V2/V3 TWAP, Curve pool reserves, conc
 **Cross-Auditor Validation**: STRONG — 5 independent auditors (Pashov, Code4rena, OpenZeppelin, Sherlock, Code4rena)
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | dex_based_price_oracle | dex_amm_oracle_price_manipulation`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `dex_based_price_oracle`
+- High-signal code keywords: `_getReserves`, `bin_movement`, `borrow`, `concentrated_liquidity`, `execute`, `fee_growth`, `flash_loan_manipulation`, `getLPTokenValue`
+- Typical sink / impact: `incorrect_pricing`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `MagicLpAggregator.function -> PriceOracle.function -> SecureLpAggregator.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerability Description
 
@@ -466,3 +528,24 @@ grep -rn "feeGrowthGlobal\|aggregatedFees\|feeGrowth" --include="*.sol" | grep -
 - [DB/oracle/](DB/oracle/) — Oracle vulnerability patterns
 - [DB/general/arbitrary-call/dex-aggregator-unvalidated-call-data.md](DB/general/arbitrary-call/dex-aggregator-unvalidated-call-data.md) — DEX aggregator call data exploitation
 - [DB/amm/](DB/amm/) — AMM-specific vulnerabilities
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_getReserves`, `amm`, `bin_movement`, `borrow`, `concentrated_liquidity`, `defi`, `dex`, `dex_amm_oracle_price_manipulation`, `execute`, `fee_growth`, `flash_loan_manipulation`, `getLPTokenValue`, `getPrice`, `getReserves`, `implied_volatility`, `latestAnswer`, `lending`, `liquidate`, `liquidation`, `low_tvl`, `low_tvl_pool`, `lp_reserve_price`, `lp_token`, `msg.sender`, `oracle`, `price_manipulation`, `reserve_ratio`, `sandwich_attack`, `spot_price`, `swap`, `totalSupply`, `twap`, `twap_oracle`, `uniswap`, `uniswap_v3_twap`

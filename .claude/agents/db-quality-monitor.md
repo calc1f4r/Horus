@@ -1,7 +1,7 @@
 ---
 name: db-quality-monitor
 description: 'Monitors, diagnoses, and fixes the full Vulnerability Database pipeline: 4-tier search architecture integrity, manifest generation correctness, hunt card ↔ manifest alignment, TEMPLATE.md compliance, legacy-entry migration, line-range accuracy, protocolContext routing, keyword index fidelity, script health (generate_manifests.py, grep_prune.py, partition_shards.py, merge_shard_findings.py), context delivery quality for downstream agents, and duplicate detection. Can auto-remediate issues by spawning sub-agents for entry fixes, entry migration, manifest regeneration, and frontmatter patching. Use for periodic DB health checks, CI validation after entry changes, pre-release quality gates, or diagnosing why an audit agent received wrong context.'
-tools: [Write, Agent, Bash, Edit, Glob, Grep, Read, WebFetch]
+tools: [Write, Agent, Bash, Edit, Glob, Grep, Read, WebFetch, WebSearch]
 maxTurns: 50
 ---
 
@@ -838,5 +838,5 @@ Every reported issue gets one of:
 | `scripts/grep_prune.py` | Hunt card grep-pruning | 5 |
 | `scripts/partition_shards.py` | Shard partitioning | 5 |
 | `scripts/merge_shard_findings.py` | Finding deduplication | 5 |
-| `Agents.md` | Pipeline architecture reference | 4, 5 |
+| `DB-GUIDE.md` | Pipeline architecture reference | 4, 5 |
 | `DB/SEARCH_GUIDE.md` | Search workflow reference | 4, 6 |
