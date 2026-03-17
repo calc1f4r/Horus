@@ -257,7 +257,7 @@ For the full search guide, see [DB/SEARCH_GUIDE.md](../DB/SEARCH_GUIDE.md).
 | `TEMPLATE.md` | Canonical structure for all vulnerability entries |
 | `Example.md` | Reference implementation showing a complete entry |
 | `docs/db-guide.md` | DB entry conventions, search workflows, audit mode |
-| `generate_manifests.py` | Regenerates all manifests and hunt cards from DB content |
+| `scripts/generate_manifests.py` | Regenerates all manifests and hunt cards from DB content |
 | `scripts/solodit_fetcher.py` | Fetches vulnerability reports from the Solodit/Cyfrin API |
 
 ---
@@ -415,7 +415,7 @@ See [TEMPLATE.md](TEMPLATE.md) for the full specification and [Example.md](Examp
 
 | Script | Purpose |
 |--------|---------|
-| `generate_manifests.py` | Regenerates all manifests and hunt cards from DB/ content |
+| `scripts/generate_manifests.py` | Regenerates all manifests and hunt cards from DB/ content |
 | `scripts/solodit_fetcher.py` | Fetches vulnerability reports from the Solodit/Cyfrin API |
 | `scripts/classify_and_group.py` | Classifies raw reports by vulnerability type |
 | `scripts/generate_entries.py` | Generates DB entries from classified reports |

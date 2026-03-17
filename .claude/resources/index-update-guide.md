@@ -40,7 +40,7 @@ Follow [TEMPLATE.md](../../../TEMPLATE.md) for structure. When touching a legacy
 Run the manifest generator from the repository root:
 
 ```bash
-python3 generate_manifests.py
+python3 scripts/generate_manifests.py
 ```
 
 This automatically:
@@ -125,7 +125,7 @@ Manifest Update:
 - [ ] Severity tags included in pattern sections
 - [ ] Code examples in fenced blocks with real function names
 - [ ] Root cause statements present
-- [ ] Ran `python3 generate_manifests.py`
+- [ ] Ran `python3 scripts/generate_manifests.py`
 - [ ] Verified entry appears in correct manifest
 - [ ] Verified keywords extracted
 ```

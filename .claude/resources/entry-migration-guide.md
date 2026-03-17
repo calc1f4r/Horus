@@ -51,7 +51,7 @@ Migrate an entry when any of the following is true:
    - If legacy content conflicts with the current pattern definition, rewrite the summary and clearly scope the examples.
 
 7. **Regenerate downstream artifacts**
-   - Run `python3 generate_manifests.py` after migration so manifests and hunt cards pick up the new structure.
+   - Run `python3 scripts/generate_manifests.py` after migration so manifests and hunt cards pick up the new structure.
 
 ## Migration Acceptance Checklist
 

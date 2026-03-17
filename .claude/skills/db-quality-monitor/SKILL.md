@@ -19,7 +19,7 @@ Run quality checks on the Vulnerability Database. $ARGUMENTS
 | **Keyword index** | `keywords.json` covers all codeKeywords from manifests |
 | **protocolContext routing** | Protocol types map to correct manifests |
 | **Duplicate detection** | No two entries have the same root cause |
-| **Script health** | `generate_manifests.py` runs without errors |
+| **Script health** | `scripts/generate_manifests.py` runs without errors |
 
 ## Auto-fix mode
 

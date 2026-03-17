@@ -245,7 +245,7 @@ Verification Gate:
 After any DB change, run:
 
 ```bash
-python3 generate_manifests.py
+python3 scripts/generate_manifests.py
 ```
 
 If new invariant files or categories were added, ensure `invariants/README.md` still describes the available categories accurately.

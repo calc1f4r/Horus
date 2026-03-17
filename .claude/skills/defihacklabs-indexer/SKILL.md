@@ -20,7 +20,7 @@ Analyze DeFiHackLabs exploit material from `$ARGUMENTS`.
 - `DB/**` or `DB/unique/defihacklabs/**` — created or migrated attack-pattern entries
 - `invariants/**` — exploit-derived invariant files or updates
 
-After DB changes, run `python3 generate_manifests.py` to refresh manifests and hunt cards.
+After DB changes, run `python3 scripts/generate_manifests.py` to refresh manifests and hunt cards.
 
 ## Related skills
 

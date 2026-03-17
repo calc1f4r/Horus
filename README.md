@@ -495,7 +495,7 @@ python3 scripts/solodit_fetcher.py --keyword "<topic>" --output ./reports/<topic
 @variant-template-writer <topic>
 
 # 3. Regenerate all manifests and hunt cards
-python3 generate_manifests.py
+python3 scripts/generate_manifests.py
 ```
 
 ### Running a Full Audit

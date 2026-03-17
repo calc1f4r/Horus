@@ -98,7 +98,7 @@ Path-scoped rules in `.claude/rules/` auto-load when Claude works with matching 
 
 ```bash
 # Regenerate manifests after DB changes
-python3 generate_manifests.py
+python3 scripts/generate_manifests.py
 
 # Fetch vulnerability reports from Solodit
 python3 scripts/solodit_fetcher.py <topic>

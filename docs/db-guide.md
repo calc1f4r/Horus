@@ -170,7 +170,7 @@ git clone -b reports/erc4626 --single-branch https://github.com/calc1f4r/Vulnera
 
 When vulnerability files are added or updated:
 ```bash
-python3 generate_manifests.py
+python3 scripts/generate_manifests.py
 ```
 
 ---
@@ -186,7 +186,7 @@ python3 generate_manifests.py
 | `DB/SEARCH_GUIDE.md` | Detailed search guide for agents |
 | `TEMPLATE.md` | Structure for new and migrated vulnerability entries |
 | `Example.md` | Reference implementation of an entry |
-| `generate_manifests.py` | Re-generates manifests after DB changes |
+| `scripts/generate_manifests.py` | Re-generates manifests after DB changes |
 
 ---
 

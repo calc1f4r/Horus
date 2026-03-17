@@ -24,7 +24,7 @@ Create DB entries from reports in `reports/$ARGUMENTS/`.
 
 - `DB/<category>/<subcategory>/<ENTRY_NAME>.md` — New vulnerability entries
 
-After creating entries, run `python3 generate_manifests.py` to update manifests and hunt cards.
+After creating entries, run `python3 scripts/generate_manifests.py` to update manifests and hunt cards.
 
 ## Related skills
 
