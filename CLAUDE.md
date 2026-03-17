@@ -81,6 +81,9 @@ Path-scoped rules in `.claude/rules/` auto-load when Claude works with matching 
 - `audit-output.md` — Pipeline output conventions (`audit-output/**`)
 - `resources.md` — Shared resource management (`.claude/resources/**`)
 - `chimera.md` — Chimera framework conventions (`test/recon/**`)
+- `rules.md` — Rules file conventions (`.claude/rules/*.md`)
+- `settings.md` — Settings and permissions conventions (`.claude/settings*.json`)
+- `claude-md.md` — CLAUDE.md editing conventions (`CLAUDE.md`)
 
 ## Common Commands
 
