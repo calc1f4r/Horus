@@ -37,6 +37,18 @@ The database ships with a **35-agent audit pipeline** that can take an unfamilia
 
 ---
 
+## Architecture
+
+<div align="center">
+<img src="Architecture.png" alt="Vulnerability Database Architecture Diagram" width="100%">
+<br>
+<em>Full architecture: 4-tier search, 11-phase audit pipeline, 35 agents, parallel fan-out hunting</em>
+<br>
+<a href="Architecture-Diagram.excalidraw">Open in Excalidraw</a>
+</div>
+
+---
+
 ## 4-Tier Search Architecture
 
 ```

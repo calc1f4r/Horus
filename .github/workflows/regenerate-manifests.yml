@@ -73,71 +73,8 @@ jobs:
 
   # ── Job 2: Sync curated subset → master ──────────────────────────────────
   sync-to-master:
-    name: Sync to master
-    runs-on: ubuntu-latest
-    needs: regenerate   # ensures manifests are committed before we snapshot
-
-    steps:
-      - name: Checkout hunt-cards (full history)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: hunt-cards
-
-      - name: Pull latest hunt-cards (picks up manifest commit if any)
-        run: git pull origin hunt-cards
-
-      - name: Configure git
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Fetch master
-        run: git fetch origin master
-
-      - name: Switch to master
-        run: git checkout master
-
-      - name: Replace curated files from hunt-cards
-        run: |
-          SRC=origin/hunt-cards
-
-          # Remove previously synced paths first so stale master-only files
-          # (for example legacy *-agent.md names) cannot survive the sync.
-          git rm -r --ignore-unmatch \
-            DB \
-            .github/agents \
-            .claude \
-            .claude-plugin \
-            DB-GUIDE.md \
-            README.md \
-            LICENSE \
-            TEMPLATE.md \
-            Example.md \
-            CodebaseStructure.md \
-            CONTRIBUTING.md \
-            Architecture.png
-
-          # Restore the exact curated snapshot from hunt-cards.
-          git checkout "$SRC" -- DB
-          git checkout "$SRC" -- .github/agents
-          git checkout "$SRC" -- .claude
-          git checkout "$SRC" -- .claude-plugin
-
-          git checkout "$SRC" -- \
-            DB-GUIDE.md \
-            README.md \
-            LICENSE \
-            TEMPLATE.md \
-            Example.md \
-            CodebaseStructure.md \
-            CONTRIBUTING.md \
-            Architecture.png
-
-      - name: Commit & push to master
-        run: |
-          git add -A
-          git commit \
-            -m "sync: hunt-cards → master ($(date -u '+%Y-%m-%d %H:%M UTC'))" \
-            --allow-empty
-          git push origin master --force
+    needs: regenerate
+    uses: ./.github/workflows/reusable-sync-to-master.yml
+    with:
+      source_branch: hunt-cards
+      commit_message_prefix: 'sync'

@@ -1,0 +1,102 @@
+name: Reusable — Sync to Master
+
+# Single source of truth for syncing curated files from a source branch to master.
+# Called by regenerate-manifests.yml, scheduled-regenerate.yml, and sync-main-to-master.yml.
+#
+# To add a new file to the public master branch:
+#   1. Add it to SYNCED_DIRS or SYNCED_FILES below
+#   2. That's it — all 3 callers pick it up automatically.
+
+on:
+  workflow_call:
+    inputs:
+      source_branch:
+        description: 'Branch to sync from'
+        required: true
+        type: string
+        default: 'hunt-cards'
+      commit_message_prefix:
+        description: 'Prefix for the commit message'
+        required: false
+        type: string
+        default: 'sync'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    name: Sync → master
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source branch (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.source_branch }}
+
+      - name: Pull latest source
+        run: git pull origin ${{ inputs.source_branch }}
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch master
+        run: git fetch origin master
+
+      - name: Switch to master
+        run: git checkout master
+
+      - name: Replace curated files from source
+        run: |
+          SRC="origin/${{ inputs.source_branch }}"
+
+          # ── Directories to sync (add new dirs here) ──────────────────────
+          SYNCED_DIRS=(
+            DB
+            .github/agents
+            .claude
+            .claude-plugin
+            scripts
+          )
+
+          # ── Individual files to sync (add new files here) ────────────────
+          SYNCED_FILES=(
+            DB-GUIDE.md
+            README.md
+            LICENSE
+            TEMPLATE.md
+            Example.md
+            CodebaseStructure.md
+            CONTRIBUTING.md
+            Architecture.png
+            Architecture-Diagram.excalidraw
+            generate_manifests.py
+            solodit_fetcher.py
+            requirements.txt
+            settings.json
+          )
+
+          # Remove previously synced paths so stale master-only files
+          # (e.g. legacy *-agent.md names) cannot survive the sync.
+          git rm -r --ignore-unmatch "${SYNCED_DIRS[@]}" "${SYNCED_FILES[@]}"
+
+          # Restore the exact curated snapshot from the source branch.
+          for dir in "${SYNCED_DIRS[@]}"; do
+            git checkout "$SRC" -- "$dir" 2>/dev/null || true
+          done
+
+          for file in "${SYNCED_FILES[@]}"; do
+            git checkout "$SRC" -- "$file" 2>/dev/null || true
+          done
+
+      - name: Commit & push to master
+        run: |
+          git add -A
+          git commit \
+            -m "${{ inputs.commit_message_prefix }}: ${{ inputs.source_branch }} → master ($(date -u '+%Y-%m-%d %H:%M UTC'))" \
+            --allow-empty
+          git push origin master --force

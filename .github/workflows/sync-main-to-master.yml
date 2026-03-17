@@ -18,67 +18,7 @@ permissions:
 
 jobs:
   emergency-sync:
-    name: Manual sync → master
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout source branch (full history)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.inputs.source_branch }}
-
-      - name: Configure git
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Fetch master
-        run: git fetch origin master
-
-      - name: Switch to master
-        run: git checkout master
-
-      - name: Replace curated files from source branch
-        run: |
-          SRC="origin/${{ github.event.inputs.source_branch }}"
-
-          # Remove previously synced paths first so stale master-only files
-          # (for example legacy *-agent.md names) cannot survive the sync.
-          git rm -r --ignore-unmatch \
-            DB \
-            .github/agents \
-            .claude \
-            .claude-plugin \
-            DB-GUIDE.md \
-            README.md \
-            LICENSE \
-            TEMPLATE.md \
-            Example.md \
-            CodebaseStructure.md \
-            CONTRIBUTING.md \
-            Architecture.png
-
-          # Restore the exact curated snapshot from the selected source.
-          git checkout "$SRC" -- DB
-          git checkout "$SRC" -- .github/agents
-          git checkout "$SRC" -- .claude
-          git checkout "$SRC" -- .claude-plugin
-
-          git checkout "$SRC" -- \
-            DB-GUIDE.md \
-            README.md \
-            LICENSE \
-            TEMPLATE.md \
-            Example.md \
-            CodebaseStructure.md \
-            CONTRIBUTING.md \
-            Architecture.png
-
-      - name: Commit & push to master
-        run: |
-          git add -A
-          git commit \
-            -m "sync(manual): ${{ github.event.inputs.source_branch }} → master ($(date -u '+%Y-%m-%d %H:%M UTC'))" \
-            --allow-empty
-          git push origin master --force
+    uses: ./.github/workflows/reusable-sync-to-master.yml
+    with:
+      source_branch: ${{ github.event.inputs.source_branch }}
+      commit_message_prefix: 'sync(manual)'
