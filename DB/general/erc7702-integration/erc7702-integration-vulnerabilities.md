@@ -54,6 +54,36 @@ tags:
 # Version Info
 language: solidity
 version: ">=0.8.0"
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | signature_verification | erc7702_integration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - ECDSA.recover
+  - ERC1271
+  - ERC4494
+  - _is7702DelegatedWallet
+  - _unwrapAndSendETH
+  - _validateNFTForRental
+  - _validateSingleCall
+  - allowance
+  - approve
+  - block.timestamp
+  - bridgeTokens
+  - checkTransaction
+  - claim
+  - completeMission
+  - create
+  - delegatecall
+  - deposit
+  - emergencyWithdraw
+  - execute
+  - executeWithCallback
 ---
 
 ## References & Source Reports
@@ -145,6 +175,38 @@ EIP-7702, introduced with the Ethereum Pectra upgrade, fundamentally changes the
 > **Root Cause Statement**: "EIP-7702 breaks the fundamental assumption that addresses with code are contracts and addresses without code are EOAs, causing signature verification, reentrancy guards, and callback implementations to fail or behave unexpectedly."
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | signature_verification | erc7702_integration`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `signature_verification|address_handling|callback_implementation|reentrancy_guard|session_key_management|permit_function`
+- High-signal code keywords: `ECDSA.recover`, `ERC1271`, `ERC4494`, `_is7702DelegatedWallet`, `_unwrapAndSendETH`, `_validateNFTForRental`, `_validateSingleCall`, `allowance`
+- Typical sink / impact: `signature_bypass|fund_loss|dos|reentrancy|address_mismatch|session_impersonation|token_theft`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `BrokenWalletImplementation.function -> DefaultAccountImplementation.function -> DisputeGame.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ## 1. isContract/extcodesize Logic Broken
 
@@ -1508,3 +1570,24 @@ This vulnerability is part of the **Account Abstraction Security** family:
 - Safe Multisig Security Patterns
 - Smart Wallet Signature Handling
 - Session Key Management Vulnerabilities
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`ECDSA.recover`, `ERC1271`, `ERC4494`, `_is7702DelegatedWallet`, `_unwrapAndSendETH`, `_validateNFTForRental`, `_validateSingleCall`, `account_abstraction`, `allowance`, `approve`, `block.timestamp`, `bridgeTokens`, `checkTransaction`, `claim`, `completeMission`, `create`, `cross_chain`, `defi`, `delegatecall`, `deposit`, `emergencyWithdraw`, `eoa_delegation`, `erc7702_integration`, `execute`, `executeWithCallback`, `extcodesize`, `fallback`, `isContract`, `isValidSignature`, `msg.sender`, `nft_permit`, `onERC1155Received`, `onERC721Received`, `pectra_upgrade`, `permit`, `receive`, `rental_protocol`, `sessionKey`, `session_keys`, `signature_verification`, `smart_wallet`, `tx.origin`, `validateUserOp`

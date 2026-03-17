@@ -41,6 +41,36 @@ version: all
 
 # Source
 source: DeFiHackLabs
+
+# Pattern Identity (Required)
+root_cause_family: missing_frontrun_protection
+pattern_key: missing_frontrun_protection | mev_bot | mev_bot_exploitation
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - approve
+  - approveForTrade
+  - arbitrage
+  - backrunning
+  - callback_validation
+  - emergencyExecute
+  - execute
+  - executeAndRevoke
+  - executeArbitrage
+  - executeOperation
+  - executeSwap
+  - flashbots
+  - frontrunning
+  - mempool
+  - msg.sender
+  - onlyOwner
+  - pancakeCall
+  - private_transaction
+  - revokeApproval
+  - sandwich_attack
 ---
 
 # MEV Bot Vulnerabilities
@@ -52,6 +82,38 @@ MEV (Maximal Extractable Value) bots are automated systems that extract value fr
 **Total Historical Losses from Analyzed Exploits: >$50M USD**
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_frontrun_protection"
+- Pattern key: `missing_frontrun_protection | mev_bot | mev_bot_exploitation`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `mev_bot`
+- High-signal code keywords: `approve`, `approveForTrade`, `arbitrage`, `backrunning`, `callback_validation`, `emergencyExecute`, `execute`, `executeAndRevoke`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `OmniDexBot.function -> SecureArbitrageBot.function -> SecureBot.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Transaction can be frontrun by MEV bots observing the mempool
+- Signal 2: No commit-reveal or private mempool protection for sensitive operations
+- Signal 3: Slippage tolerance set too high or user-controllable without minimum enforcement
+- Signal 4: Swap execution lacks deadline parameter or uses block.timestamp as deadline
+
+#### False Positive Guards
+
+- Not this bug when: Transaction uses private mempool (Flashbots) or commit-reveal scheme
+- Safe if: Slippage protection with reasonable bounds is enforced
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerability Categories
 
@@ -427,3 +489,24 @@ contract SecureBot is ReentrancyGuard {
 - **SQUID** (2024-04, $87K): `DeFiHackLabs/src/test/2024-04/SQUID_exp.sol`
 - **Sushi Badger Digg** (2021-01, $82): `DeFiHackLabs/src/test/2021-01/Sushi_Badger_Digg_exp.sol`
 - **Burner** (2024-05, $2): `DeFiHackLabs/src/test/2024-05/Burner_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`DeFiHackLabs`, `approve`, `approveForTrade`, `arbitrage`, `backrunning`, `bot`, `callback_validation`, `emergencyExecute`, `execute`, `executeAndRevoke`, `executeArbitrage`, `executeOperation`, `executeSwap`, `flashbots`, `frontrunning`, `mempool`, `mev`, `mev_bot_exploitation`, `msg.sender`, `onlyOwner`, `pancakeCall`, `private_transaction`, `real_exploit`, `revokeApproval`, `sandwich_attack`

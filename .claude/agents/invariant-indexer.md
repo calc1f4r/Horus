@@ -1,7 +1,7 @@
 ---
 name: invariant-indexer
 description: Indexes invariants from major DeFi protocol repositories, formal verification specs, fuzzing harnesses, and documented formal properties. Writes structured, language-agnostic, protocol-type-agnostic invariant reference files into invariants/<category>/. Produces canonical invariant libraries consumed by the invariant-writer agent as seed context. Can accept a protocol name or GitHub URL to index on demand. Use when building protocol-level invariant reference libraries, studying how top protocols specify formal properties, or bootstrapping invariant suites for a new audit.
-tools: [Agent, Bash, Edit, Glob, Grep, Read, WebFetch, WebSearch]
+tools: [Agent, Bash, Edit, Glob, Grep, Read, Write, WebFetch, WebSearch]
 maxTurns: 50
 ---
 

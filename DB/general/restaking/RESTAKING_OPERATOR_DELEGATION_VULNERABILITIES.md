@@ -45,6 +45,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | delegation_manager | operator_delegation_management
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _remove
+  - _verifyDelegated
+  - afterAllHook
+  - afterHook
+  - block.timestamp
+  - bypass
+  - censorship
+  - createMinipool
+  - delegation
+  - delegation_enforcer
+  - deposit
+  - depositToBeaconChain
+  - front_running
+  - getTVLForAsset
+  - heap_corruption
+  - hijack
+  - minipool
+  - msg.sender
+  - operator
+  - operator_registry
 ---
 
 ## References & Source Reports
@@ -119,6 +149,38 @@ Operators and delegation approvers can forcibly undelegate stakers, locking thei
 
 > **📚 Source Reports for Deep Dive:**
 > - `reports/eigenlayer_findings/eig-17-operator-or-delegation-approver-have-the-power-to-censor-delegated-stakers.md` (EigenLayer - Hexens)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | delegation_manager | operator_delegation_management`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `delegation_manager|operator_registry|minipool_state_machine|heap|enforcer`
+- High-signal code keywords: `_remove`, `_verifyDelegated`, `afterAllHook`, `afterHook`, `block.timestamp`, `bypass`, `censorship`, `createMinipool`
+- Typical sink / impact: `fund_loss|exchange_rate_manipulation|dos|censorship`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `address.function -> function.function -> has.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -638,3 +700,24 @@ function depositToBeaconChain(bytes pubkey, bytes withdrawal_credentials) extern
 - [Restaking Withdrawal Vulnerabilities](RESTAKING_WITHDRAWAL_VULNERABILITIES.md)
 - [Restaking Slashing Mechanisms](RESTAKING_SLASHING_VULNERABILITIES.md)
 - [LRT Share Accounting Errors](LRT_SHARE_ACCOUNTING_VULNERABILITIES.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_remove`, `_verifyDelegated`, `access-control`, `afterAllHook`, `afterHook`, `block.timestamp`, `bypass`, `censorship`, `createMinipool`, `defi`, `delegation`, `delegation_enforcer`, `deposit`, `depositToBeaconChain`, `eigenlayer`, `front_running`, `getTVLForAsset`, `governance`, `heap_corruption`, `hijack`, `minipool`, `msg.sender`, `operator`, `operator_delegation_management`, `operator_registry`, `restaking`, `staking`, `state_machine`, `undelegate`

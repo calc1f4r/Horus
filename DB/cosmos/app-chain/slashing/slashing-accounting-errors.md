@@ -32,6 +32,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | slashing_logic | slashing_accounting_errors
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - SlashRedelegation
+  - _addQueuedSlashableShares
+  - _registerAndStake
+  - amount_incorrect
+  - and
+  - balance_update_error
+  - block.number
+  - double_punishment
+  - due
+  - execute
+  - for
+  - generatePerformance
+  - happens
+  - msg.sender
+  - of
+  - penalty_system
+  - pending_operations
+  - principal_error
+  - receive
+  - reportRewardEvent
 ---
 
 ## References & Source Reports
@@ -140,6 +170,38 @@ version: all
 Implementation flaw in slashing amount incorrect logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 63 audit reports with severity distribution: HIGH: 21, MEDIUM: 42.
 
 > **Key Finding**: This bug report describes a problem in the code of a smart contract that could cause permanent corruption. The problem occurs when the oracle reports a decrease in the amount of rewards or penalties for a validator. This is not accounted for in the code, so the validator manager's accounting becomes
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | slashing_logic | slashing_accounting_errors`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `slashing_logic`
+- High-signal code keywords: `SlashRedelegation`, `_addQueuedSlashableShares`, `_registerAndStake`, `amount_incorrect`, `and`, `balance_update_error`, `block.number`, `double_punishment`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `has.function -> that.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1038,3 +1100,24 @@ grep -rn 'slashing|double|punishment' --include='*.go' --include='*.sol'
 ## Keywords
 
 `account`, `accounting`, `admin`, `after`, `amount`, `amounts`, `appchain`, `balance`, `balances`, `beacon`, `beaconchainethstrategy`, `being`, `benefit`, `bigger`, `bloating`, `broken`, `calculation`, `chain`, `claim`, `cosmos`, `current`, `decay`, `decrease`, `delay`, `denial`, `dilution`, `distorts`, `double`, `error`, `event`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`SlashRedelegation`, `_addQueuedSlashableShares`, `_registerAndStake`, `amount_incorrect`, `and`, `appchain`, `balance_update_error`, `block.number`, `cosmos`, `defi`, `double_punishment`, `due`, `execute`, `for`, `generatePerformance`, `happens`, `msg.sender`, `of`, `penalty_system`, `pending_operations`, `principal_error`, `receive`, `reportRewardEvent`, `reward_interaction`, `share_dilution`, `slashing`, `slashing_accounting_errors`, `staking`, `tombstone`

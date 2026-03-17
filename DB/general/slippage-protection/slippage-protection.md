@@ -29,8 +29,6 @@ manifestations:
   - No user-specified minimums
 
 # Reference Reports
-references:
-  - file: "reports/yield_protocol_findings/h-31-unused-slippage-params.md"
     protocol: "Vader Protocol"
     severity: "HIGH"
     auditor: "Code4rena"
@@ -58,7 +56,44 @@ references:
     protocol: "Particle Protocol"
     severity: "MEDIUM"
     auditor: "Code4rena"
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | unknown | unknown
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _removeLeverage
+  - addLiquidity
+  - block.timestamp
+  - borrow
+  - burn
+  - buyNSendToVoltTreasury
+  - deposit
+  - execute
+  - mint
+  - msg.sender
+  - receive
+  - removeLiquidity
+  - swap
+  - withdraw
 ---
+
+## References & Source Reports
+
+| Label | Path | Severity | Auditor | Source ID / Link |
+|-------|------|----------|---------|------------------|
+| [Vader Protocol] | reports/yield_protocol_findings/h-31-unused-slippage-params.md | HIGH | Code4rena | - |
+| [Sentiment V2] | reports/yield_protocol_findings/m-15-lack-of-slippage-protection-during-withdrawal-in-superpool-and-pool-contrac.md | MEDIUM | Sherlock | - |
+| [Hifi Finance] | reports/yield_protocol_findings/insufficient-slippage-protection-for-liquidity-operations.md | MEDIUM | Quantstamp | - |
+| [Kaizen] | reports/yield_protocol_findings/m-01-voltburnbuynsendtovolttreasury-function-is-subjected-to-a-sandwich-attack.md | MEDIUM | Shieldify | - |
+| [Peapods] | reports/yield_protocol_findings/h-06-no-slippage-checks-when-removing-leverage.md | HIGH | Pashov Audit Group | - |
+| [AdapterFinance] | reports/yield_protocol_findings/m-07-pendleadapter-provides-zero-slippage.md | MEDIUM | Pashov Audit Group | - |
+| [Particle Protocol] | reports/yield_protocol_findings/m-02-dangerous-use-of-deadline-parameter.md | MEDIUM | Code4rena | - |
+
 
 # Missing or Insufficient Slippage Protection
 
@@ -72,6 +107,38 @@ Missing or insufficient slippage protection occurs when DeFi protocols fail to i
 **Consensus Severity**: MEDIUM to HIGH
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | unknown | unknown`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `unknown`
+- High-signal code keywords: `_removeLeverage`, `addLiquidity`, `block.timestamp`, `borrow`, `burn`, `buyNSendToVoltTreasury`, `deposit`, `execute`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerable Code Patterns
 
@@ -521,3 +588,24 @@ rules:
 - **NewFi** (2023-07, $31K): `DeFiHackLabs/src/test/2023-07/NewFi_exp.sol`
 - **YVToken** (2025-04, $15K): `DeFiHackLabs/src/test/2025-04/YBToken_exp.sol`
 - **Pump** (2025-03, $6K): `DeFiHackLabs/src/test/2025-03/Pump_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`DeFi/Token Operations`, `_removeLeverage`, `addLiquidity`, `block.timestamp`, `borrow`, `burn`, `buyNSendToVoltTreasury`, `deposit`, `execute`, `mint`, `msg.sender`, `receive`, `removeLiquidity`, `swap`, `withdraw`

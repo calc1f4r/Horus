@@ -50,6 +50,32 @@ tags:
 
 language: rust|circom|plonk|PIL
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: arithmetic_error
+pattern_key: arithmetic_error | circuit_constraints | underconstrained_circuit
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - JALR
+  - PIL
+  - SHA256_AIR
+  - binary_state_machine
+  - borrow
+  - carry_bit
+  - comparison_circuit
+  - constraint_system
+  - div_opcode
+  - final_hash
+  - hash_state
+  - partial_sha256
+  - polynomial_identity_language
+  - range_check
+  - shr_opcode
+  - zkasm
 ---
 
 ## References & Source Reports
@@ -98,6 +124,38 @@ version: all
 ZK circuit vulnerabilities occur when constraint systems (PIL, AIR, Boojum, Plonky2, RISC-V circuits) fail to fully constrain intermediate or output values, allowing a malicious prover to generate valid proofs for false statements. These are some of the most critical bugs in ZK systems — they fundamentally break the soundness guarantee of the proof system, enabling state forgery, funds theft, and execution hijacking.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of arithmetic_error"
+- Pattern key: `arithmetic_error | circuit_constraints | underconstrained_circuit`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `circuit_constraints|pil_file|zkasm|air_constraints|binary_state_machine`
+- High-signal code keywords: `JALR`, `PIL`, `SHA256_AIR`, `binary_state_machine`, `borrow`, `carry_bit`, `comparison_circuit`, `constraint_system`
+- Typical sink / impact: `proof_forgery|fund_theft|state_corruption|execution_hijack`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `air_constraints.function -> binary_state_machine.function -> circuit_constraints.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Arithmetic operation on user-controlled input without overflow protection
+- Signal 2: Casting between different-width integer types without bounds check
+- Signal 3: Multiplication before division where intermediate product can exceed type max
+- Signal 4: Accumulator variable can wrap around causing incorrect accounting
+
+#### False Positive Guards
+
+- Not this bug when: Solidity >= 0.8.0 with default checked arithmetic
+- Safe if: SafeMath library used for all arithmetic on user-controlled values
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -440,3 +498,24 @@ grep -rn "div_mod\|divmod\|allocate_div_result" --include="*.rs" | grep -v "rang
 ### Keywords for Search
 
 `PIL constraint missing`, `underconstrained circuit`, `zkEVM circuit bug`, `soundness violation`, `proof forgery`, `range check missing`, `carry bit unconstrained`, `Boolean constraint`, `polynomial identity language`, `AIR constraint`, `arithmetic intermediate representation`, `zkasm vulnerability`, `div opcode remainder constraint`, `sha256 air unconstrained`, `RISC-V zkVM circuit`, `witness extraction`, `completeness vs soundness`, `circuit audit`, `boojum circuit`, `plonky2 underconstrained`, `circom underconstrained`, `JALR sign extension unconstrained`, `binary state machine PIL`, `hash gadget unconstrained column`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`JALR`, `PIL`, `SHA256_AIR`, `binary_state_machine`, `boojum`, `borrow`, `carry_bit`, `circuit_audit`, `comparison_circuit`, `constraint_system`, `div_opcode`, `final_hash`, `hash_state`, `missing_range_check`, `partial_sha256`, `plonky2`, `polygon_zkevm`, `polynomial_identity_language`, `range_check`, `scroll`, `shr_opcode`, `soundness`, `underconstrained`, `underconstrained_circuit|missing_constraint|arithmetic_overflow|hash_constraint`, `zkEVM`, `zkSync`, `zk_circuit`, `zk_rollup`, `zkasm`

@@ -41,6 +41,36 @@ version: all
 
 # Source
 source: DeFiHackLabs
+
+# Pattern Identity (Required)
+root_cause_family: missing_access_control
+pattern_key: missing_access_control | contract_initialization | initialization_flaw
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - __BaseVault_init
+  - _disableInitializers
+  - balanceOf
+  - constructor
+  - createVault
+  - delegatecall
+  - deposit
+  - emergencyWithdraw
+  - fallback
+  - implementation_takeover
+  - initialize
+  - initializeV2
+  - initializeV3
+  - initializer
+  - msg.sender
+  - onlyInitializing
+  - patterns
+  - proxy
+  - reinitialize
+  - transferFrom
 ---
 
 # Initialization Vulnerabilities
@@ -52,6 +82,38 @@ Initialization vulnerabilities occur when smart contracts fail to properly initi
 **Total Historical Losses from Analyzed Exploits: >$20M USD**
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_access_control"
+- Pattern key: `missing_access_control | contract_initialization | initialization_flaw`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `contract_initialization`
+- High-signal code keywords: `__BaseVault_init`, `_disableInitializers`, `balanceOf`, `constructor`, `createVault`, `delegatecall`, `deposit`, `emergencyWithdraw`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `BaseVault.function -> ChildVault.function -> ChildVaultSecure.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State-changing function lacks `onlyOwner`/`onlyRole` modifier
+- Signal 2: External function accepts arbitrary address and calls interface methods without registry validation
+- Signal 3: Configuration setter is callable by non-owner accounts
+- Signal 4: Initialization or migration function is unprotected
+
+#### False Positive Guards
+
+- Not this bug when: Function is `internal`/`private` and only called from access-controlled paths
+- Safe if: Function is restricted via `onlyOwner`/`onlyRole`/`require(msg.sender == ...)`
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerability Categories
 
@@ -515,3 +577,24 @@ rules:
 ### Top PoC References
 
 - **PikeFinance** (2024-04, $1.4M): `DeFiHackLabs/src/test/2024-04/PikeFinance_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`DeFiHackLabs`, `__BaseVault_init`, `_disableInitializers`, `access_control`, `balanceOf`, `constructor`, `createVault`, `defi`, `delegatecall`, `deposit`, `emergencyWithdraw`, `fallback`, `implementation_takeover`, `initialization`, `initialization_flaw`, `initialize`, `initializeV2`, `initializeV3`, `initializer`, `msg.sender`, `onlyInitializing`, `patterns`, `proxy`, `real_exploit`, `reinitialize`, `transferFrom`, `uninitialized`, `upgrade`

@@ -36,6 +36,36 @@ tags:
 
 total_exploits_analyzed: 75+
 total_losses: "$150M+"
+
+# Pattern Identity (Required)
+root_cause_family: missing_access_control
+pattern_key: missing_access_control | unknown | unknown
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _transferFeesSupportingTaxTokens
+  - arbitrary_external_call
+  - balanceOf
+  - block.timestamp
+  - burn
+  - claim
+  - deposit
+  - execute
+  - executeRootUpdate
+  - executeRoute
+  - incorrect_permission_checks
+  - init
+  - initialize
+  - mint
+  - mintWithRole
+  - missing_access_modifiers
+  - missing_msg_sender_validation
+  - msg.sender
+  - multicall_arbitrary_call
+  - onlyAdmin
 ---
 
 # Access Control Vulnerabilities
@@ -50,6 +80,38 @@ Access control vulnerabilities occur when smart contracts fail to properly restr
 **Consensus Severity**: MEDIUM to CRITICAL
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_access_control"
+- Pattern key: `missing_access_control | unknown | unknown`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `unknown`
+- High-signal code keywords: `_transferFeesSupportingTaxTokens`, `arbitrary_external_call`, `balanceOf`, `block.timestamp`, `burn`, `claim`, `deposit`, `execute`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `SecureRouter.function -> SecureStaking.function -> SecureToken.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State-changing function lacks `onlyOwner`/`onlyRole` modifier
+- Signal 2: External function accepts arbitrary address and calls interface methods without registry validation
+- Signal 3: Configuration setter is callable by non-owner accounts
+- Signal 4: Initialization or migration function is unprotected
+
+#### False Positive Guards
+
+- Not this bug when: Function is `internal`/`private` and only called from access-controlled paths
+- Safe if: Function is restricted via `onlyOwner`/`onlyRole`/`require(msg.sender == ...)`
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerability Categories
 
@@ -849,3 +911,24 @@ access control, authorization, permission, onlyOwner, onlyAdmin, onlyRole, Acces
 - **GYMNetwork** (2022-06, $2.1M): `DeFiHackLabs/src/test/2022-06/Gym_2_exp.sol`
 - **MEVbot** (2023-11, $2.0M): `DeFiHackLabs/src/test/2023-11/bot_exp.sol`
 - **Unverified_b5cb** (2025-06, $2.0M): `DeFiHackLabs/src/test/2025-06/unverified_b5cb_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`Access Control`, `_transferFeesSupportingTaxTokens`, `access_control`, `admin`, `arbitrary_call`, `arbitrary_external_call`, `authorization`, `balanceOf`, `block.timestamp`, `burn`, `claim`, `defi`, `deposit`, `execute`, `executeRootUpdate`, `executeRoute`, `incorrect_permission_checks`, `init`, `initialization`, `initialize`, `mint`, `mintWithRole`, `missing_access_modifiers`, `missing_msg_sender_validation`, `msg.sender`, `multicall_arbitrary_call`, `onlyAdmin`, `onlyOwner`, `permission`, `real_exploit`, `unprotected_initialization`, `unprotected_mint_burn`

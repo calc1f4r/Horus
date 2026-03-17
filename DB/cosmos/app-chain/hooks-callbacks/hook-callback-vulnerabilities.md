@@ -27,6 +27,24 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: denial_of_service
+pattern_key: denial_of_service | hooks_callbacks_logic | hook_callback_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - before_after
+  - deposit
+  - execute
+  - order_dependency
+  - processUser
+  - reentrancy_via_hook
+  - revert_propagation
+  - withdraw
 ---
 
 ## References & Source Reports
@@ -68,6 +86,38 @@ version: all
 Implementation flaw in hooks before after logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 3 audit reports with severity distribution: MEDIUM: 3.
 
 > **Key Finding**: The L1 deposit function allows a depositor to send a signed payload to be executed along with the deposited tokens. However, there is a bug in the code that can cause issues when executing Cosmos Messages. This is because a step that is usually executed by `BaseApp` is missing in the `msg` loop. Thi
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of denial_of_service"
+- Pattern key: `denial_of_service | hooks_callbacks_logic | hook_callback_vulnerabilities`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `hooks_callbacks_logic`
+- High-signal code keywords: `before_after`, `deposit`, `execute`, `order_dependency`, `processUser`, `reentrancy_via_hook`, `revert_propagation`, `withdraw`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `calls.function -> performs.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Unbounded loop over user-controlled array can exceed block gas limit
+- Signal 2: External call failure causes entire transaction to revert
+- Signal 3: Attacker can grief operations by manipulating state to cause reverts
+- Signal 4: Resource exhaustion through repeated operations without rate limiting
+
+#### False Positive Guards
+
+- Not this bug when: Loop iterations are bounded by a reasonable constant
+- Safe if: External call failures are handled gracefully (try/catch or pull pattern)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -254,3 +304,24 @@ grep -rn 'hooks|reentrancy|via|hook' --include='*.go' --include='*.sol'
 ## Keywords
 
 `after`, `appchain`, `before`, `bypass`, `callback`, `called`, `check`, `cosmos`, `could`, `dependency`, `execute`, `function`, `hook`, `hooks`, `hooks callbacks`, `into`, `messages`, `might`, `multiple`, `operations`, `order`, `pause`, `potential`, `propagation`, `provided`, `reentrancy`, `revert`, `staking`, `strategies`, `times`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`appchain`, `before_after`, `cosmos`, `defi`, `deposit`, `execute`, `hook_callback_vulnerabilities`, `hooks_callbacks`, `order_dependency`, `processUser`, `reentrancy_via_hook`, `revert_propagation`, `staking`, `withdraw`

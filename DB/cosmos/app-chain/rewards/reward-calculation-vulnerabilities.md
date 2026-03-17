@@ -31,6 +31,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: arithmetic_error
+pattern_key: arithmetic_error | rewards_logic | reward_calculation_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _unstakeNFTs
+  - accumulation_error
+  - addNode
+  - calculation_incorrect
+  - claimRewards
+  - decimal_mismatch
+  - delayed_balance
+  - detachStakingContract
+  - distributeRewards
+  - distribution
+  - execute
+  - getTotalStake
+  - historical_loss
+  - msg.sender
+  - per_share_error
+  - pool_share
+  - receive
+  - report
+  - safeTransferFrom
+  - test_yield_generation_POC
 ---
 
 ## References & Source Reports
@@ -123,6 +153,38 @@ version: all
 Implementation flaw in reward calculation incorrect logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 12 audit reports with severity distribution: HIGH: 7, MEDIUM: 5.
 
 > **Key Finding**: This bug report describes an issue with the accounting system in a software program. The program is incorrectly counting certain funds twice, which can lead to incorrect calculations and potentially give users more money than they should have. This issue has been fixed by the developers, but it is i
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of arithmetic_error"
+- Pattern key: `arithmetic_error | rewards_logic | reward_calculation_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `rewards_logic`
+- High-signal code keywords: `_unstakeNFTs`, `accumulation_error`, `addNode`, `calculation_incorrect`, `claimRewards`, `decimal_mismatch`, `delayed_balance`, `detachStakingContract`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `and.function -> has.function -> is.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Arithmetic operation on user-controlled input without overflow protection
+- Signal 2: Casting between different-width integer types without bounds check
+- Signal 3: Multiplication before division where intermediate product can exceed type max
+- Signal 4: Accumulator variable can wrap around causing incorrect accounting
+
+#### False Positive Guards
+
+- Not this bug when: Solidity >= 0.8.0 with default checked arithmetic
+- Safe if: SafeMath library used for all arithmetic on user-controlled values
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -861,3 +923,24 @@ grep -rn 'reward|pool|share' --include='*.go' --include='*.sol'
 ## Keywords
 
 `account`, `accounting`, `accumulation`, `activation`, `address`, `amount`, `appchain`, `attacker`, `avax`, `balance`, `being`, `calculates`, `calculation`, `checks`, `claim`, `compounded`, `cosmos`, `decimal`, `deflate`, `delayed`, `denial`, `distribution`, `error`, `exploited`, `fails`, `finalized`, `flawed`, `frequent`, `from`, `frontrun`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_unstakeNFTs`, `accumulation_error`, `addNode`, `appchain`, `calculation_incorrect`, `claimRewards`, `cosmos`, `decimal_mismatch`, `defi`, `delayed_balance`, `detachStakingContract`, `distributeRewards`, `distribution`, `execute`, `getTotalStake`, `historical_loss`, `msg.sender`, `per_share_error`, `pool_share`, `receive`, `report`, `reward_calculation_vulnerabilities`, `rewards`, `safeTransferFrom`, `staking`, `test_yield_generation_POC`, `weight_error`

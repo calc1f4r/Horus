@@ -49,6 +49,36 @@ tags:
 
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | dispute_game | dispute_game_manipulation
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - 5
+  - DiscrepancyDetected
+  - DisputeGameFactory
+  - FaultDisputeGame
+  - L2OutputOracle
+  - MIPS_VM
+  - OPFaultVerifier
+  - anchor_state
+  - assertion_protocol
+  - bisection_protocol
+  - block.timestamp
+  - bond_slashing
+  - challengeBatch
+  - challenge_period
+  - checkWithdrawal
+  - commitBatch
+  - commitment
+  - emission
+  - emitted
+  - execute
 ---
 
 ## References & Source Reports
@@ -87,6 +117,38 @@ version: all
 Optimistic rollups rely on fraud proof games to detect and penalize incorrect state transitions. Vulnerabilities in dispute game systems allow attackers to freeze chains (by posting fake state roots that cannot be challenged), steal honest challengers' bonds, make incorrectly resolved games acceptable to the L1 verifier, or prevent legitimate finalization of batches. These bugs undermine the core security model of optimistic rollups.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | dispute_game | dispute_game_manipulation`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `dispute_game|fault_game_factory|bisection_protocol|output_root|mips_vm|challenge_period|l2_output_oracle`
+- High-signal code keywords: `5`, `DiscrepancyDetected`, `DisputeGameFactory`, `FaultDisputeGame`, `L2OutputOracle`, `MIPS_VM`, `OPFaultVerifier`, `anchor_state`
+- Typical sink / impact: `chain_freeze|fund_theft|incorrect_resolution|unchallenged_invalid_output`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `ArbitrumBoldChallenge.function -> FraudDetector.function -> MIPSVM.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -384,3 +446,24 @@ contract Rollup {
 ### Keywords for Search
 
 `dispute game manipulation`, `fraud proof challenge bypass`, `output root manipulation`, `FaultDisputeGame`, `MIPS VM panic unchallengeable`, `bisection protocol attack`, `bond slashing correct assertion`, `opFaultVerifier wrong resolution`, `prevStateRoot fake`, `chain freeze fraud proof`, `challenge period bypass`, `inChallenge flag missing`, `Optimism fault proof`, `Arbitrum BOLD`, `assertion protocol`, `L2OutputOracle`, `challenger misses event`, `dispute game finalization bug`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`5`, `DiscrepancyDetected`, `DisputeGameFactory`, `FaultDisputeGame`, `L2OutputOracle`, `MIPS`, `MIPS_VM`, `OPFaultVerifier`, `anchor_state`, `arbitrum_bold`, `assertion_protocol`, `bisection`, `bisection_protocol`, `block.timestamp`, `bond`, `bond_slashing`, `challenge`, `challengeBatch`, `challenge_period`, `checkWithdrawal`, `commitBatch`, `commitment`, `dispute_game`, `dispute_game_manipulation|challenge_game_bypass|bond_slashing_error|output_root_attack|mips_vm_panic|bisection_attack`, `emission`, `emitted`, `execute`, `fault_game`, `finalize_blocks`, `fraud_proof`, `optimism`, `optimistic_rollup`, `output_root`, `prevStateRoot`, `state_root`, `taiko`, `zk_rollup_fraud_proof`

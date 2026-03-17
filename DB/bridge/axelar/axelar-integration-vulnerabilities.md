@@ -53,6 +53,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | Gateway | axelar_integration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - AxelarExecutable
+  - InterchainTokenService
+  - TokenManager
+  - _execute
+  - _executeWithToken
+  - block.timestamp
+  - burn
+  - callContract
+  - callContractWithToken
+  - commandId
+  - execute
+  - executeWithToken
+  - expressReceive
+  - flowLimit
+  - gateway
+  - mint
+  - msg.sender
+  - payNativeGasForContractCall
+  - recoverFailedTransfer
+  - sendMessage
 ---
 
 ## References & Source Reports
@@ -105,6 +135,38 @@ version: all
 ### Overview
 
 Axelar's `AxelarExecutable` requires calling `gateway.validateContractCall()` inside `_execute()` to confirm the message was approved by the Axelar network. Skipping this check allows anyone to invoke `execute()` with forged parameters.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | Gateway | axelar_integration`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `Gateway|GasService|ITS|AxelarExecutable|InterchainTokenService`
+- High-signal code keywords: `AxelarExecutable`, `InterchainTokenService`, `TokenManager`, `_execute`, `_executeWithToken`, `block.timestamp`, `burn`, `callContract`
+- Typical sink / impact: `fund_loss|token_stuck|unlimited_minting|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `CaseSensitiveValidation.function -> ExactChainNames.function -> HardcodedGasPayment.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -811,3 +873,24 @@ contract NamespacedCommands is AxelarExecutable {
 - [Wormhole Integration Issues](../wormhole/wormhole-integration-vulnerabilities.md)
 - [Cross-Chain General Vulnerabilities](../custom/cross-chain-general-vulnerabilities.md)
 - [LayerZero Integration Issues](../layerzero/layerzero-integration-vulnerabilities.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`AxelarExecutable`, `InterchainTokenService`, `TokenManager`, `_execute`, `_executeWithToken`, `axelar`, `axelar_integration`, `block.timestamp`, `bridge`, `burn`, `callContract`, `callContractWithToken`, `commandId`, `cross_chain`, `defi`, `execute`, `executeWithToken`, `expressReceive`, `flowLimit`, `gateway`, `gmp`, `its`, `mint`, `msg.sender`, `payNativeGasForContractCall`, `recoverFailedTransfer`, `sendMessage`, `sourceAddress`, `sourceChain`, `validateContractCall`, `validateContractCallAndMint`

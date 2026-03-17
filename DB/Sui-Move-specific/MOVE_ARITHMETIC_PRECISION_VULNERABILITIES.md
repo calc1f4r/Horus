@@ -28,6 +28,36 @@ tags:
   - defi
 language: move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: arithmetic_error
+pattern_key: arithmetic_error | calculation_logic, token_conversion, fee_computation | precision_loss, overflow, underflow, division_by_zero, rounding_error
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - borrow
+  - burn
+  - burn_shares
+  - calculate_available_dividends
+  - collect_fee
+  - convert_to_wal_amount
+  - deposit
+  - divide_and_round_up_safe
+  - divide_and_round_up_u128
+  - division_safety
+  - end_withdraw_session
+  - execute
+  - fee_computation
+  - fee_quantity
+  - fixed_point_arithmetic
+  - from_u256balance
+  - from_u256balance_safe
+  - fund
+  - get_fee
+  - get_fee_safe
 ---
 
 ## References
@@ -58,6 +88,38 @@ version: all
 ### Overview
 
 Arithmetic and precision errors are the most common vulnerability class in Move-based DeFi protocols. Move's type system prevents raw integer overflow (it aborts on overflow), but this creates new attack vectors: attackers can trigger aborts to cause DoS, and developers must handle rounding/precision carefully to prevent fund loss. Found in 18/29 OtterSec audit reports (62%).
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of arithmetic_error"
+- Pattern key: `arithmetic_error | calculation_logic, token_conversion, fee_computation | precision_loss, overflow, underflow, division_by_zero, rounding_error`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `calculation_logic, token_conversion, fee_computation`
+- High-signal code keywords: `borrow`, `burn`, `burn_shares`, `calculate_available_dividends`, `collect_fee`, `convert_to_wal_amount`, `deposit`, `divide_and_round_up_safe`
+- Typical sink / impact: `fund_loss, incorrect_pricing, protocol_insolvency`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Arithmetic operation on user-controlled input without overflow protection
+- Signal 2: Casting between different-width integer types without bounds check
+- Signal 3: Multiplication before division where intermediate product can exceed type max
+- Signal 4: Accumulator variable can wrap around causing incorrect accounting
+
+#### False Positive Guards
+
+- Not this bug when: Solidity >= 0.8.0 with default checked arithmetic
+- Safe if: SafeMath library used for all arithmetic on user-controlled values
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1251,3 +1313,24 @@ fun recall_safe(bank: &mut Bank, amount: u64) {
 - [SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md](SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md) — Sui-specific arithmetic patterns from Solodit
 - [MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md](MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md) — Inflation attacks exploiting rounding
 - [MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md](MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md) — Logic errors in DeFi calculations
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`aptos`, `arithmetic`, `borrow`, `burn`, `burn_shares`, `calculate_available_dividends`, `collect_fee`, `convert_to_wal_amount`, `defi`, `deposit`, `divide_and_round_up_safe`, `divide_and_round_up_u128`, `division_safety`, `end_withdraw_session`, `execute`, `fee_computation`, `fee_quantity`, `fixed_point_arithmetic`, `from_u256balance`, `from_u256balance_safe`, `fund`, `get_fee`, `get_fee_safe`, `move`, `overflow`, `overflow_protection`, `precision`, `precision_loss, overflow, underflow, division_by_zero, rounding_error`, `rounding`, `share_calculation`, `sui`, `token_conversion`

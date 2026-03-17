@@ -49,6 +49,36 @@ tags:
 
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: callback_reentrancy
+pattern_key: callback_reentrancy | token_bridge | bridge_reentrancy
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - ERC1155_selector
+  - Teleports
+  - USDC_adapter
+  - _domainSeparator
+  - _initiateERC20Deposit
+  - bridge_adapter
+  - bridge_suspension
+  - burn
+  - claimTo
+  - deposit
+  - domain_separator
+  - executeMessage
+  - fallback
+  - l1_bridge
+  - l2_bridge
+  - message_relay
+  - msg.sender
+  - nonReentrant
+  - processWithdrawals
+  - receive
 ---
 
 ## References & Source Reports
@@ -110,6 +140,38 @@ version: all
 Bridge vulnerabilities are among the most economically devastating in DeFi, with billions lost to exploits. ZK rollup bridges are particularly complex: they must maintain accurate token accounting across two chains, handle ETH/ERC20/ERC721/ERC1155 differently, implement replay protection for cross-chain messages, and provide uncensorable withdrawal paths. Common issues include accounting corruption via reentrancy, wrong token order in swap-based bridges, signature replay across chains, and withdrawal queue DoS via a single reverting transaction.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of callback_reentrancy"
+- Pattern key: `callback_reentrancy | token_bridge | bridge_reentrancy`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `token_bridge|l1_bridge|l2_bridge|message_channel|router|relayer|adapter`
+- High-signal code keywords: `ERC1155_selector`, `Teleports`, `USDC_adapter`, `_domainSeparator`, `_initiateERC20Deposit`, `bridge_adapter`, `bridge_suspension`, `burn`
+- Typical sink / impact: `fund_theft|accounting_corruption|bridge_dos|censorship|locked_funds`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `BridgeAdapter.function -> TokenBridge.function -> during.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: External call (`.call`, `.transfer`, token transfer) occurs before state variable update
+- Signal 2: Token implements callback hooks (ERC-777, ERC-721) and protocol doesn't use `nonReentrant`
+- Signal 3: User-supplied token address passed to `transferFrom` without callback protection
+- Signal 4: Read-only function's return value consumed cross-contract during an active callback window
+
+#### False Positive Guards
+
+- Not this bug when: Contract uses `ReentrancyGuard` (`nonReentrant`) on all entry points
+- Safe if: All state updates complete before any external call (strict CEI)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -450,3 +512,24 @@ function processWithdrawals() external {
 ### Keywords for Search
 
 `token bridge reentrancy`, `bridge accounting corruption`, `wrong token order bridge`, `L1BlastBridge token swap`, `signature replay bridge`, `domain separator missing bridge`, `ERC1155 wrong selector`, `USDC blacklist bridge locked`, `withdrawal queue DoS`, `single reverting withdrawal`, `bridge token mapping error`, `stale inflationary multiplier bridge`, `remote_token manipulation`, `cross-chain replay attack`, `bridge fund theft`, `bridge suspension DoS`, `rate limiter DoS bridge`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`ERC1155`, `ERC1155_selector`, `LayerZero`, `Optimism`, `Teleports`, `USDC`, `USDC_adapter`, `ZKSync`, `_domainSeparator`, `_initiateERC20Deposit`, `bridge`, `bridge_adapter`, `bridge_reentrancy|token_accounting|message_replay|wrong_token_order|censorship|owner_rug|selector_mismatch`, `bridge_suspension`, `burn`, `claimTo`, `deposit`, `domain_separator`, `executeMessage`, `fallback`, `fund_theft`, `l1_bridge`, `l2_bridge`, `message_relay`, `msg.sender`, `nonReentrant`, `processWithdrawals`, `receive`, `reentrancy`, `remote_token`, `signature_replay`, `starknet`, `starknet_bridge`, `token_bridge`, `token_order`, `withdrawal_helper`, `zk_rollup`, `zk_rollup_bridge`

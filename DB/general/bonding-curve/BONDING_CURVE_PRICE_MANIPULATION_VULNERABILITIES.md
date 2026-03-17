@@ -25,6 +25,31 @@ tags:
   - listing-fee
   - concentrated-liquidity
   - virtual-LP
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | unknown | Spot Price Manipulation, Reserve Manipulation, Callback Exploitation, Timing Attacks
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - AMM
+  - Bonding Curve
+  - DEX
+  - Price Discovery
+  - Uniswap V2/V3/V4
+  - _getQuoteAmount
+  - balanceOf
+  - deposit
+  - execute
+  - extraction
+  - mint
+  - msg.sender
+  - receive
+  - spotPriceOHM
+  - swap
 ---
 
 # Bonding Curve Price Manipulation Vulnerabilities
@@ -35,6 +60,38 @@ Bonding curve protocols derive token prices from on-chain state (pool reserves, 
 
 **Pattern Frequency:** Common — 13/131 bonding curve reports (10%)
 **Cross-Auditor Validation:** Strong — patterns confirmed by Sherlock, Code4rena, Cyfrin, Trail of Bits, Spearbit, ConsenSys, Shieldify, Pashov
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | unknown | Spot Price Manipulation, Reserve Manipulation, Callback Exploitation, Timing Attacks`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `unknown`
+- High-signal code keywords: `AMM`, `Bonding Curve`, `DEX`, `Price Discovery`, `Uniswap V2/V3/V4`, `_getQuoteAmount`, `balanceOf`, `deposit`
+- Typical sink / impact: `Fund Theft, Price Distortion, LP Losses, Reserve Draining`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ## Root Cause
 
@@ -366,3 +423,24 @@ bonding curve price manipulation, spot price manipulation, Uniswap V2 getReserve
 | 11 | GTE | Code4rena | MEDIUM | `reports/bonding_curve_findings/gte_c4rena_rounding_quote_calculations.md` |
 | 12 | Computable | Trail of Bits | HIGH | `reports/bonding_curve_findings/computable_tob_listing_fee_timeout.md` |
 | 13 | 1inch | ConsenSys | HIGH | `reports/bonding_curve_findings/1inch_consensys_malicious_maker_hooks.md` |
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`AMM`, `Bonding Curve`, `DEX`, `Price Discovery`, `Price Manipulation`, `Spot Price Manipulation, Reserve Manipulation, Callback Exploitation, Timing Attacks`, `Uniswap V2/V3/V4`, `_getQuoteAmount`, `balanceOf`, `bin-movement`, `bonding-curve`, `callback-exploitation`, `concentrated-liquidity`, `delta-accounting`, `deposit`, `dutch-auction`, `execute`, `extraction`, `flash-loan`, `listing-fee`, `maker-hooks`, `mint`, `msg.sender`, `price-manipulation`, `receive`, `reserve-manipulation`, `rounding-exploitation`, `sandwich-attack`, `spot-price`, `spotPriceOHM`, `swap`, `uniswap`, `virtual-LP`

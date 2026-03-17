@@ -36,6 +36,36 @@ tags:
   - manipulation
 language: move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | oracle, price_feed, tick_calculation, collateral_valuation, amm_pricing | stale_price, oracle_update_skip, sltp_clipping, undervalued_collateral, boundary_check, faulty_constant, unauthorized_feed
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - aggregate_price
+  - borrow
+  - chainlink
+  - clip_sltp_size
+  - collateral
+  - execute
+  - from_u256balance
+  - get_asset_price
+  - get_collateral_value
+  - get_lpt_collateral_value
+  - get_lpt_price
+  - get_validated_price
+  - least_significant_bit
+  - oracle
+  - price_feed
+  - pyth
+  - register_price_feed
+  - register_source
+  - set_custom_price
+  - sltp
 ---
 
 ## References
@@ -53,6 +83,38 @@ version: all
 ### Overview
 
 Oracle and pricing vulnerabilities appeared in 4/29 OtterSec Move audit reports (14%), with 1 CRITICAL, 5 HIGH, and 2 MEDIUM findings. These issues affect the fundamental price accuracy that lending, perpetuals, and AMM protocols depend on. Move-specific manifestations include incorrect fixed-point arithmetic with Move's strong typing, tick calculation errors from faulty constants, and Sui-specific oracle observation patterns.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | oracle, price_feed, tick_calculation, collateral_valuation, amm_pricing | stale_price, oracle_update_skip, sltp_clipping, undervalued_collateral, boundary_check, faulty_constant, unauthorized_feed`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `oracle, price_feed, tick_calculation, collateral_valuation, amm_pricing`
+- High-signal code keywords: `aggregate_price`, `borrow`, `chainlink`, `clip_sltp_size`, `collateral`, `execute`, `from_u256balance`, `get_asset_price`
+- Typical sink / impact: `fund_loss, incorrect_pricing, liquidation_exploit`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -697,3 +759,24 @@ public fun get_validated_price(pyth_price: &Price, clock: &Clock): u64 {
 - [MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md](MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md) — Fixed-point arithmetic errors
 - [MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md](MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md) — Liquidation and solvency bugs
 - [SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md](SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md) — Solodit-sourced pricing patterns
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`aggregate_price`, `amm`, `aptos`, `borrow`, `chainlink`, `clip_sltp_size`, `collateral`, `defi`, `execute`, `from_u256balance`, `get_asset_price`, `get_collateral_value`, `get_lpt_collateral_value`, `get_lpt_price`, `get_validated_price`, `least_significant_bit`, `manipulation`, `move`, `oracle`, `oracle_pricing`, `price_feed`, `pyth`, `register_price_feed`, `register_source`, `set_custom_price`, `sltp`, `sqrtprice`, `stale_price`, `stale_price, oracle_update_skip, sltp_clipping, undervalued_collateral, boundary_check, faulty_constant, unauthorized_feed`, `sui`, `tick`, `tick_index`

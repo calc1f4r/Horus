@@ -28,6 +28,34 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: rounding_error
+pattern_key: rounding_error | accounting_logic | integer_precision_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _earned
+  - _notifyReward
+  - _transferToSlashStore
+  - a
+  - balanceOf
+  - block.timestamp
+  - decimal_mismatch
+  - deposit
+  - distribution
+  - getOperatorStake
+  - integer_overflow
+  - integer_underflow
+  - mint
+  - mulDiv
+  - mulDivRoundingUp
+  - precision_loss
+  - this
+  - unsafe_casting
 ---
 
 ## References & Source Reports
@@ -98,6 +126,38 @@ Implementation flaw in accounting integer overflow logic allows exploitation thr
 > **Key Finding**: Issue: Potential integer overflow in the `AddExternalIncentive` function of the `keeper` package.
 
 Description: In the `AddExternalIncentive` function, there is a line of code that converts the difference between `msg.ToBlock` and `msg.FromBlock` to an `int64` value. If the result of this calculatio
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of rounding_error"
+- Pattern key: `rounding_error | accounting_logic | integer_precision_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `accounting_logic`
+- High-signal code keywords: `_earned`, `_notifyReward`, `_transferToSlashStore`, `a`, `balanceOf`, `block.timestamp`, `decimal_mismatch`, `deposit`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `owner.function -> that.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Division before multiplication truncates intermediate result
+- Signal 2: Reward/share calculation uses insufficient decimal precision
+- Signal 3: Rounding direction favors attacker during mint/redeem operations
+- Signal 4: Fee calculation rounds to zero for small amounts enabling free operations
+
+#### False Positive Guards
+
+- Not this bug when: Multiplication performed before division to preserve precision
+- Safe if: Scaling factor (1e18, 1e27) applied before division operations
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -594,3 +654,24 @@ grep -rn 'accounting|decimal|mismatch' --include='*.go' --include='*.sol'
 ## Keywords
 
 `accounting`, `across`, `addexternalincentive`, `addresses`, `allows`, `appchain`, `asset`, `attack`, `attacker`, `auctions`, `calculate`, `calculation`, `calculations`, `casting`, `classes`, `convert`, `correctly`, `cosmos`, `could`, `decimal`, `denial`, `desired`, `distribution`, `dust`, `ending`, `error`, `frequent`, `from`, `function`, `funds`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_earned`, `_notifyReward`, `_transferToSlashStore`, `a`, `accounting`, `appchain`, `balanceOf`, `block.timestamp`, `cosmos`, `decimal_mismatch`, `defi`, `deposit`, `distribution`, `getOperatorStake`, `integer_overflow`, `integer_precision_vulnerabilities`, `integer_underflow`, `mint`, `mulDiv`, `mulDivRoundingUp`, `precision_loss`, `staking`, `this`, `unsafe_casting`

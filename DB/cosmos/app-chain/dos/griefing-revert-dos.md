@@ -28,6 +28,30 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: denial_of_service
+pattern_key: denial_of_service | dos_logic | griefing_revert_dos
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _calculateChallengerEligibility
+  - deposit
+  - dust_grief
+  - external_call_revert
+  - frontrun_grief
+  - function_revert
+  - loop_revert
+  - mint
+  - msg.sender
+  - processUser
+  - register
+  - safeTransferFrom
+  - stake
+  - withdraw
 ---
 
 ## References & Source Reports
@@ -93,6 +117,38 @@ version: all
 Implementation flaw in dos function revert logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 29 audit reports with severity distribution: HIGH: 16, MEDIUM: 13.
 
 > **Key Finding**: The initializeDeposit function in the StakeManager contract allows validators and delegators to deposit resources for validating nodes. However, the function does not check if the validator is active before accepting the deposit, leading to locked stakes and the inability to withdraw them. This bug 
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of denial_of_service"
+- Pattern key: `denial_of_service | dos_logic | griefing_revert_dos`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `dos_logic`
+- High-signal code keywords: `_calculateChallengerEligibility`, `deposit`, `dust_grief`, `external_call_revert`, `frontrun_grief`, `function_revert`, `loop_revert`, `mint`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `address.function -> allows.function -> calls.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Unbounded loop over user-controlled array can exceed block gas limit
+- Signal 2: External call failure causes entire transaction to revert
+- Signal 3: Attacker can grief operations by manipulating state to cause reverts
+- Signal 4: Resource exhaustion through repeated operations without rate limiting
+
+#### False Positive Guards
+
+- Not this bug when: Loop iterations are bounded by a reasonable constant
+- Safe if: External call failures are handled gracefully (try/catch or pull pattern)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -506,3 +562,24 @@ grep -rn 'dos|loop|revert' --include='*.go' --include='*.sol'
 ## Keywords
 
 `accounting`, `address`, `adversary`, `allows`, `amount`, `appchain`, `array`, `attack`, `auction`, `block`, `blocked`, `break`, `call`, `cause`, `contract`, `cosmos`, `denial`, `deposited`, `dos`, `during`, `dust`, `earn`, `eigenlayer`, `execution`, `external`, `fees`, `fresh`, `from`, `frontrun`, `frontrunning`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_calculateChallengerEligibility`, `appchain`, `cosmos`, `defi`, `deposit`, `dos`, `dust_grief`, `external_call_revert`, `frontrun_grief`, `function_revert`, `griefing_revert_dos`, `loop_revert`, `mint`, `msg.sender`, `processUser`, `register`, `safeTransferFrom`, `stake`, `staking`, `withdraw`

@@ -31,6 +31,32 @@ tags:
   - claim
 language: move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | merkle_tree, proof_verification, airdrop_claim, token_distribution | proof_replay, verification_bypass, return_value_unchecked, missing_domain_separation
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - airdrop
+  - borrow
+  - calculate_fee
+  - claim
+  - combine_nodes
+  - compute_leaf
+  - domain_separation
+  - hash_verification
+  - is_claimed
+  - leaf_index
+  - merkle_proof
+  - replay
+  - set_claimed
+  - token_distribution
+  - verify_merkle_proof
+  - verify_proof
 ---
 
 ## References
@@ -46,6 +72,38 @@ version: all
 ### Overview
 
 Merkle verification vulnerabilities are among the most severe findings in OtterSec Move audits. All 4 findings are rated CRITICAL or HIGH, found across 2 independent protocols. The consequences are catastrophic — complete drainage of airdrop/distribution funds. Move lacks a standard OpenZeppelin-equivalent Merkle library, so teams build custom implementations that frequently contain fundamental logic errors.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | merkle_tree, proof_verification, airdrop_claim, token_distribution | proof_replay, verification_bypass, return_value_unchecked, missing_domain_separation`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `merkle_tree, proof_verification, airdrop_claim, token_distribution`
+- High-signal code keywords: `airdrop`, `borrow`, `calculate_fee`, `claim`, `combine_nodes`, `compute_leaf`, `domain_separation`, `hash_verification`
+- Typical sink / impact: `fund_loss, unlimited_claims`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `implementing.function -> proof.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -556,3 +614,24 @@ public fun set_claimed(bitmap: &mut ClaimBitmap, index: u64) {
 
 - [MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md](MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md) — Signer capability exposure in distributors
 - [MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md](MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md) — Excessive claims pattern
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`airdrop`, `aptos`, `borrow`, `calculate_fee`, `claim`, `combine_nodes`, `compute_leaf`, `domain_separation`, `hash`, `hash_verification`, `is_claimed`, `leaf_index`, `merkle`, `merkle_proof`, `merkle_verification`, `move`, `movement`, `proof`, `proof_replay, verification_bypass, return_value_unchecked, missing_domain_separation`, `replay`, `set_claimed`, `sui`, `token_distribution`, `verification`, `verify_merkle_proof`, `verify_proof`

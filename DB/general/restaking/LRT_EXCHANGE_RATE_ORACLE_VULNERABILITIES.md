@@ -47,6 +47,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | price_oracle | exchange_rate_oracle
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - arbitrage
+  - balanceOf
+  - block.timestamp
+  - borrow
+  - circuit_breaker
+  - claimWithdrawal
+  - deposit
+  - depositAsset
+  - exchange_rate
+  - free
+  - front_running
+  - gaming
+  - getAssetPrice
+  - getCollateralValue
+  - getMintRate
+  - getPriceInEth
+  - getRate
+  - getTokenBalanceFromStrategy
+  - lst_oracle
+  - mev
 ---
 
 ## References & Source Reports
@@ -108,6 +138,38 @@ LRT protocols query LST exchange rates (e.g., `swETH.swETHToETHRate()`) directly
 > **📚 Source Reports for Deep Dive:**
 > - `reports/eigenlayer_findings/no-checks-on-lst-price-oracles.md` (Kelp - SigmaPrime)
 > - `reports/eigenlayer_findings/m-5-malicious-or-compromised-admin-of-certain-lsts-could-manipulate-the-price.md` (Tokemak - Sherlock)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | price_oracle | exchange_rate_oracle`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `price_oracle|exchange_rate|rate_provider|lrt_pricing`
+- High-signal code keywords: `arbitrage`, `balanceOf`, `block.timestamp`, `borrow`, `circuit_breaker`, `claimWithdrawal`, `deposit`, `depositAsset`
+- Typical sink / impact: `fund_loss|arbitrage|oracle_manipulation|price_manipulation`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `before.function -> is.function -> uses.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -557,3 +619,24 @@ function settleEpoch() external {
 - [LRT Share Accounting Errors](LRT_SHARE_ACCOUNTING_VULNERABILITIES.md)
 - [Restaking Withdrawal Vulnerabilities](RESTAKING_WITHDRAWAL_VULNERABILITIES.md)
 - [Restaking Reward Distribution](RESTAKING_REWARD_DISTRIBUTION_VULNERABILITIES.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`arbitrage`, `balanceOf`, `block.timestamp`, `borrow`, `circuit_breaker`, `claimWithdrawal`, `defi`, `deposit`, `depositAsset`, `eigenlayer`, `exchange_rate`, `exchange_rate_oracle`, `free`, `front-running`, `front_running`, `gaming`, `getAssetPrice`, `getCollateralValue`, `getMintRate`, `getPriceInEth`, `getRate`, `getTokenBalanceFromStrategy`, `lrt`, `lst`, `lst_oracle`, `mev`, `oracle`, `oracle_manipulation`, `price-manipulation`, `price_oracle`, `rate_provider`, `restaking`, `sandwich`, `slippage`, `stale_price`, `upgradeable_proxy`

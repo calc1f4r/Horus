@@ -31,6 +31,36 @@ tags:
   - parameter_validation
 language: move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: callback_reentrancy
+pattern_key: callback_reentrancy | events, configuration, initialization, upgrades, module_safety | event_emission, configuration_error, initialization_flaw, upgrade_safety, reentrancy, cooldown_bypass
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - accept_ownership
+  - approve
+  - approve_operator
+  - batch
+  - borrow
+  - calculate_fee
+  - capability_pattern
+  - cooldown
+  - custom_withdraw
+  - deposit
+  - emission
+  - event_emit
+  - flash_loan
+  - for
+  - get_fee_amount
+  - initialize
+  - migrate
+  - module_init
+  - on
+  - package_upgrade
 ---
 
 ## References
@@ -60,6 +90,38 @@ version: all
 Event, configuration, and upgrade safety bugs in Move are distinct from logic errors — they affect observability, parameter integrity, and upgrade correctness. Missing or incorrect events break off-chain monitoring; misconfigured parameters create exploitable protocol states; and unsafe upgrades or initializations can permanently corrupt the system. These patterns span 15/29 OtterSec audit reports.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of callback_reentrancy"
+- Pattern key: `callback_reentrancy | events, configuration, initialization, upgrades, module_safety | event_emission, configuration_error, initialization_flaw, upgrade_safety, reentrancy, cooldown_bypass`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `events, configuration, initialization, upgrades, module_safety`
+- High-signal code keywords: `accept_ownership`, `approve`, `approve_operator`, `batch`, `borrow`, `calculate_fee`, `capability_pattern`, `cooldown`
+- Typical sink / impact: `monitoring_failure, configuration_corruption, operational_disruption, fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: External call (`.call`, `.transfer`, token transfer) occurs before state variable update
+- Signal 2: Token implements callback hooks (ERC-777, ERC-721) and protocol doesn't use `nonReentrant`
+- Signal 3: User-supplied token address passed to `transferFrom` without callback protection
+- Signal 4: Read-only function's return value consumed cross-contract during an active callback window
+
+#### False Positive Guards
+
+- Not this bug when: Contract uses `ReentrancyGuard` (`nonReentrant`) on all entry points
+- Safe if: All state updates complete before any external call (strict CEI)
+- Requires attacker control of: specific conditions per pattern
 
 ## Pattern 1: Missing Events for Critical State Changes — move-evtcfg-001
 
@@ -765,3 +827,24 @@ public fun initialize(admin: &signer, params: vector<u8>) {
 - [MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md](MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md) — Authorization-related config
 - [MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md](MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md) — DoS from misconfiguration
 - [MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md](MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md) — Version check patterns
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`accept_ownership`, `approve`, `approve_operator`, `aptos`, `batch`, `borrow`, `calculate_fee`, `capability_pattern`, `configuration`, `cooldown`, `custom_withdraw`, `deposit`, `emission`, `emit`, `event_configuration`, `event_emission, configuration_error, initialization_flaw, upgrade_safety, reentrancy, cooldown_bypass`, `event_emit`, `events`, `flash_loan`, `for`, `get_fee_amount`, `initialization`, `initialize`, `migrate`, `module_init`, `monitoring`, `move`, `on`, `package_upgrade`, `parameter_validation`, `reentrancy`, `reentrancy_guard`, `sui`, `upgrade`

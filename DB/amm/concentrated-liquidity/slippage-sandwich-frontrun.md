@@ -47,6 +47,32 @@ tags:
 # Version Info
 language: solidity
 version: ">=0.8.0"
+
+# Pattern Identity (Required)
+root_cause_family: missing_frontrun_protection
+pattern_key: missing_frontrun_protection | swap_execution | slippage_protection
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _swap
+  - amountOutMinimum
+  - block.timestamp
+  - burn
+  - deadline
+  - deposit
+  - getMinAmountOut
+  - mint
+  - msg.sender
+  - slippage_tolerance
+  - spot_price
+  - sqrtPriceLimitX96
+  - swap
+  - twap_oracle
+  - validateMinOut
+  - withdraw
 ---
 
 ## References
@@ -69,6 +95,38 @@ version: ">=0.8.0"
 ### Overview
 
 Protocols integrating with Uniswap V3/V4 or similar concentrated liquidity AMMs frequently fail to implement adequate slippage protection mechanisms when performing swaps, adding/removing liquidity, or settling vault positions. This allows MEV bots to sandwich attack transactions or exploit stale slippage parameters from pending transactions, resulting in significant fund extraction from users.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_frontrun_protection"
+- Pattern key: `missing_frontrun_protection | swap_execution | slippage_protection`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `swap_execution`
+- High-signal code keywords: `_swap`, `amountOutMinimum`, `block.timestamp`, `burn`, `deadline`, `deposit`, `getMinAmountOut`, `mint`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Transaction can be frontrun by MEV bots observing the mempool
+- Signal 2: No commit-reveal or private mempool protection for sensitive operations
+- Signal 3: Slippage tolerance set too high or user-controllable without minimum enforcement
+- Signal 4: Swap execution lacks deadline parameter or uses block.timestamp as deadline
+
+#### False Positive Guards
+
+- Not this bug when: Transaction uses private mempool (Flashbots) or commit-reveal scheme
+- Safe if: Slippage protection with reasonable bounds is enforced
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -308,3 +366,24 @@ slippage, sandwich_attack, frontrunning, MEV, amountOutMinimum, deadline, sqrtPr
 
 - **Price Oracle Manipulation** - Stale/manipulated oracles compound slippage issues
 - **Vault Inflation Attack** - First depositor attacks on vault shares
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_swap`, `amountOutMinimum`, `block.timestamp`, `burn`, `concentrated_liquidity`, `deadline`, `deposit`, `dex`, `economic`, `frontrunning`, `getMinAmountOut`, `mev`, `mint`, `msg.sender`, `sandwich`, `slippage`, `slippage_protection`, `slippage_tolerance`, `spot_price`, `sqrtPriceLimitX96`, `swap`, `twap_oracle`, `uniswap_v3`, `uniswap_v4`, `validateMinOut`, `withdraw`

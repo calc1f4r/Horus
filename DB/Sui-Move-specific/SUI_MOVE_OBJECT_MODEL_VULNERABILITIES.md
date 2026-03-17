@@ -46,6 +46,36 @@ tags:
 # Version Info
 language: move|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | object_model | sui_move_object_security
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - Duplicate
+  - bigvector
+  - borrow
+  - build_bar_from_foo
+  - claim_closed_vault_funds
+  - compute_digest_for_modules_and_deps
+  - core
+  - cross
+  - deposit
+  - dynamic_field
+  - get_name_record_all_fields
+  - hash_type_and_key
+  - id_leak_verifier
+  - key_ability
+  - kiosk
+  - max_slice_size
+  - move_package
+  - new
+  - object_id
+  - register
 ---
 
 ## References & Source Reports
@@ -131,6 +161,38 @@ The `id_leak_verifier` in Sui's Move verifier ensures that a UID for a Sui Objec
 
 > **Validation strength**: Moderate — 2 reports from OtterSec across Mysten Labs Sui core
 > **Frequency**: 2/69 reports (Sui-specific, L1-level severity)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | object_model | sui_move_object_security`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `object_model|uid|dynamic_fields|kiosk|bigvector|digest|verifier`
+- High-signal code keywords: `Duplicate`, `bigvector`, `borrow`, `build_bar_from_foo`, `claim_closed_vault_funds`, `compute_digest_for_modules_and_deps`, `core`, `cross`
+- Typical sink / impact: `fund_loss|dos|state_corruption|security_bypass`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `bigvector.function -> digest.function -> dynamic_fields.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -671,5 +733,26 @@ Sui enforces a strict limit of 1,000 dynamic field accesses per transaction. Fun
 
 ### Related Vulnerabilities
 
-- `DB/Solona-chain-specific/` — Solana program account validation patterns (similar object model issues)
+- `DB/Solana-chain-specific/` — Solana program account validation patterns (similar object model issues)
 - `DB/general/access-control/` — Generic access control patterns
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`Duplicate`, `bigvector`, `blockchain_core`, `borrow`, `build_bar_from_foo`, `claim_closed_vault_funds`, `compute_digest_for_modules_and_deps`, `core`, `cross`, `deposit`, `domain_names`, `dynamic_field`, `get_name_record_all_fields`, `hash_type_and_key`, `id_leak_verifier`, `key_ability`, `kiosk`, `l1_security`, `max_slice_size`, `move`, `move_package`, `new`, `nft`, `object_id`, `object_model`, `register`, `set_allow_extensions`, `store_ability`, `sui`, `sui_move_object_security`, `sui_object`, `sui_object_model`, `uid`, `uid_mut`

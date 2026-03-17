@@ -31,6 +31,36 @@ tags:
   - depegging
 language: move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: first_depositor_attack
+pattern_key: first_depositor_attack | token_supply, staking_shares, exchange_rate, mint_logic, freeze_logic | inflation_attack, double_minting, supply_manipulation, permanent_freeze, mint_limit_bypass
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - accrue_user_pool_reward
+  - borrow
+  - burn
+  - burn_from_thapt
+  - check_mint_limit
+  - deposit
+  - deposit_liquidity
+  - deposits
+  - economic
+  - freeze_coin_store
+  - freeze_thapt_coin_stores
+  - freeze_unfreeze
+  - inflation_attack
+  - join
+  - minimum_liquidity
+  - mint
+  - mint_burn
+  - mint_kapt
+  - receive
+  - reconcile
 ---
 
 ## References
@@ -52,6 +82,38 @@ version: all
 ### Overview
 
 Token supply vulnerabilities appeared in 8/29 OtterSec Move audit reports (28%). These are among the highest-severity findings — 3 rated CRITICAL. Move's linear resource model prevents double-spending but does NOT prevent economic attacks like exchange rate manipulation, double minting through fee misaccounting, or one-way freeze operations that permanently lock user funds.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of first_depositor_attack"
+- Pattern key: `first_depositor_attack | token_supply, staking_shares, exchange_rate, mint_logic, freeze_logic | inflation_attack, double_minting, supply_manipulation, permanent_freeze, mint_limit_bypass`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `token_supply, staking_shares, exchange_rate, mint_logic, freeze_logic`
+- High-signal code keywords: `accrue_user_pool_reward`, `borrow`, `burn`, `burn_from_thapt`, `check_mint_limit`, `deposit`, `deposit_liquidity`, `deposits`
+- Typical sink / impact: `fund_loss, token_depeg, permanent_lockup`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: First deposit to vault with zero total supply has manipulable share calculation
+- Signal 2: Direct asset transfer (donation) changes exchange rate before victim's deposit
+- Signal 3: No minimum initial deposit or dead shares mechanism
+- Signal 4: Share price can be inflated atomically in a single transaction
+
+#### False Positive Guards
+
+- Not this bug when: Vault uses virtual offset (ERC4626 `_decimalsOffset()`) to prevent inflation
+- Safe if: Dead shares mechanism: minimum initial deposit burned to address(dead)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -734,3 +796,24 @@ public fun stake_with_provider(
 - [MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md](MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md) — Rounding in share conversions
 - [MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md](MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md) — Solvency/withdrawal bugs
 - [SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md](SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md) — Solodit-sourced DeFi patterns
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`accrue_user_pool_reward`, `aptos`, `borrow`, `burn`, `burn_from_thapt`, `check_mint_limit`, `defi`, `depegging`, `deposit`, `deposit_liquidity`, `deposits`, `economic`, `exchange_rate`, `freeze`, `freeze_coin_store`, `freeze_thapt_coin_stores`, `freeze_unfreeze`, `inflation`, `inflation_attack`, `inflation_attack, double_minting, supply_manipulation, permanent_freeze, mint_limit_bypass`, `join`, `minimum_liquidity`, `mint`, `mint_burn`, `mint_kapt`, `minting`, `move`, `receive`, `reconcile`, `share_exchange_rate`, `share_manipulation`, `staking`, `sui`, `supply_peg`, `token_supply`

@@ -49,6 +49,36 @@ tags:
 
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | l1_l2_bridge | l1_l2_message_failure
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - CrossDomainMessenger
+  - L1ToL2Transaction
+  - MessagePasser
+  - MsgValueSimulator
+  - OutputRoot
+  - SpentOnPubdata
+  - _refundUser
+  - address_aliasing
+  - applyL1ToL2Alias
+  - bootloader
+  - deposit
+  - exhaustion
+  - forced_inclusion
+  - forwardedEther
+  - initiateWithdrawal
+  - l2ToL1Log
+  - message_ordering
+  - msg.sender
+  - onL1Deposit
+  - paymaster
 ---
 
 ## References & Source Reports
@@ -103,6 +133,38 @@ version: all
 L1→L2 and L2→L1 messaging is the critical infrastructure of rollup systems. Vulnerabilities here range from losing funds when L2 transactions fail during bootloader execution, to operators stealing gas, to ETH being permanently locked via address aliasing. L2→L1 withdrawals can be blocked by filling Merkle trees, stuck when output roots are reproposed, or made unprovable due to multi-layer architecture quirks.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | l1_l2_bridge | l1_l2_message_failure`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `l1_l2_bridge|mailbox|bootloader|l2_to_l1_message_passer|messenger|value_simulator`
+- High-signal code keywords: `CrossDomainMessenger`, `L1ToL2Transaction`, `MessagePasser`, `MsgValueSimulator`, `OutputRoot`, `SpentOnPubdata`, `_refundUser`, `address_aliasing`
+- Typical sink / impact: `fund_loss|dos|gas_theft|eth_locked`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `CrossDomainMessenger.function -> L2BridgeReceiver.function -> L2ToL1MessagePasser.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -398,3 +460,24 @@ function applyL1ToL2Alias(address l1Address) internal pure returns (address l2Ad
 ### Keywords for Search
 
 `L1 to L2 message failure`, `bootloader execution failed`, `address aliasing ZKSync`, `address alias offset`, `L2ToL1MessagePasser full`, `withdrawal blocked Merkle tree`, `paymaster pubdata refund`, `spentOnPubdata refund bug`, `MsgValueSimulator wrong target`, `requestL2Transaction`, `CrossDomainMessenger replayability`, `L2 bridge ETH locked`, `failed L2 message unreplayable`, `output root reproposed withdrawal stuck`, `l2 to l1 withdrawal proof`, `forced inclusion`, `message ordering L2`, `ETH locked through aliasing`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`CrossDomainMessenger`, `L1ToL2Transaction`, `MessagePasser`, `MsgValueSimulator`, `OutputRoot`, `SpentOnPubdata`, `_refundUser`, `address_aliasing`, `applyL1ToL2Alias`, `arbitrum`, `bootloader`, `deposit`, `eth_locked`, `exhaustion`, `forced_inclusion`, `forwardedEther`, `initiateWithdrawal`, `l1_l2_bridge`, `l1_l2_message_failure|l2_l1_withdrawal_block|gas_theft|address_aliasing|message_ordering|eth_locked`, `l2ToL1Log`, `message_ordering`, `message_passer`, `messaging`, `msg.sender`, `onL1Deposit`, `optimism`, `paymaster`, `requestL2Transaction`, `withdrawal`, `zk_rollup`, `zk_rollup_messaging`, `zksync`

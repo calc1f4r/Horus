@@ -33,6 +33,34 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: denial_of_service
+pattern_key: denial_of_service | dos_logic | chain_halt_consensus_dos
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - TestAllocateRewards_RewardsPlanFlood
+  - TestAllocateRewards_TokenFlood
+  - TestTerminateEndedRewardsPlan_TokenFlood
+  - _calculateChallengerEligibility
+  - balance
+  - block_production_halt
+  - consensus_halt
+  - deposit
+  - deposit_spam
+  - message_flooding
+  - panic_crash
+  - proposal_spam
+  - state_machine
+  - such
+  - unbounded_array
+  - unbounded_beginblock
+  - unbounded_endblock
+  - verifyDoubleSigning
 ---
 
 ## References & Source Reports
@@ -132,6 +160,38 @@ version: all
 Implementation flaw in dos block production halt logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 13 audit reports with severity distribution: HIGH: 10, MEDIUM: 3.
 
 > **Key Finding**: The report describes a bug in the Beacon Kit, which is used to compute the hash tree root when proposing a block in order to set the Eth1Data field in the Beacon block. The bug is that deposits in the Beacon Kit are never pruned, which means that when proposing a block, it will always retrieve all t
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of denial_of_service"
+- Pattern key: `denial_of_service | dos_logic | chain_halt_consensus_dos`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `dos_logic`
+- High-signal code keywords: `TestAllocateRewards_RewardsPlanFlood`, `TestAllocateRewards_TokenFlood`, `TestTerminateEndedRewardsPlan_TokenFlood`, `_calculateChallengerEligibility`, `balance`, `block_production_halt`, `consensus_halt`, `deposit`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Unbounded loop over user-controlled array can exceed block gas limit
+- Signal 2: External call failure causes entire transaction to revert
+- Signal 3: Attacker can grief operations by manipulating state to cause reverts
+- Signal 4: Resource exhaustion through repeated operations without rate limiting
+
+#### False Positive Guards
+
+- Not this bug when: Loop iterations are bounded by a reasonable constant
+- Safe if: External call failures are handled gracefully (try/catch or pull pattern)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1074,3 +1134,24 @@ grep -rn 'dos|deposit|spam' --include='*.go' --include='*.sol'
 ## Keywords
 
 `abci`, `allow`, `allows`, `amount`, `appchain`, `array`, `attacks`, `balances`, `ballot`, `been`, `beginblock`, `blob`, `block`, `blocks`, `blocksync`, `cause`, `causes`, `censorship`, `chain`, `consensus`, `cosmos`, `crash`, `creation`, `crisis`, `denial`, `deposit`, `deposits`, `dos`, `during`, `economic`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`TestAllocateRewards_RewardsPlanFlood`, `TestAllocateRewards_TokenFlood`, `TestTerminateEndedRewardsPlan_TokenFlood`, `_calculateChallengerEligibility`, `appchain`, `balance`, `block_production_halt`, `chain_halt_consensus_dos`, `consensus_halt`, `cosmos`, `defi`, `deposit`, `deposit_spam`, `dos`, `message_flooding`, `panic_crash`, `proposal_spam`, `staking`, `state_machine`, `such`, `unbounded_array`, `unbounded_beginblock`, `unbounded_endblock`, `verifyDoubleSigning`

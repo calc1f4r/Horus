@@ -46,6 +46,36 @@ tags:
 
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | sequencer | sequencer_downtime_dos
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - batch_submission
+  - block.number
+  - block.timestamp
+  - block_proposer
+  - buy
+  - calculateL2Fee
+  - censorship_resistance
+  - commit_scalar
+  - deposit
+  - emergencyRepay
+  - executeDutchAuction
+  - fallback
+  - finalizeBlocks
+  - finalize_blocks
+  - forceWithdraw
+  - forced_inclusion
+  - forced_transaction_queue
+  - getCurrentPrice
+  - grace_period
+  - isSequencerUp
 ---
 
 ## References & Source Reports
@@ -92,6 +122,38 @@ version: all
 L2 sequencers are the central operators that order transactions and submit batches to L1. Their downtime or malicious behavior causes cascading failures: DeFi protocols relying on time-sensitive operations (liquidations, options expiry, epoch transitions, Dutch auctions) malfunction; access-controlled functions become unreachable; and economic incentives are misaligned when fee calculations are incorrect. These vulnerabilities are distinct from—and broader than—oracle staleness issues.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | sequencer | sequencer_downtime_dos`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `sequencer|l2_block_proposer|forced_inclusion|batch_submission|forced_transactions`
+- High-signal code keywords: `batch_submission`, `block.number`, `block.timestamp`, `block_proposer`, `buy`, `calculateL2Fee`, `censorship_resistance`, `commit_scalar`
+- Typical sink / impact: `dos|censorship|fund_loss|unfair_liquidation|economic_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `DutchAuction.function -> FeeCalculator.function -> L1MessageService.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -403,3 +465,24 @@ contract SequencerAwareProtocol {
 ### Keywords for Search
 
 `L2 sequencer downtime`, `Arbitrum sequencer offline`, `Optimism sequencer down`, `sequencer uptime feed`, `grace period sequencer`, `unfair liquidation after restart`, `Dutch auction sequencer`, `options expire sequencer`, `epoch transition blocked`, `sequencer censorship`, `L2 forced inclusion`, `sequencer underpaid`, `commitScalar incorrect`, `finalize blocks front-run`, `block timestamp L2`, `sequencer blacklist`, `sequencer denylist`, `forced transaction queue`, `L2 liveness`, `sequencer centralization risk`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`arbitrum`, `batch_submission`, `block.number`, `block.timestamp`, `block_proposer`, `buy`, `calculateL2Fee`, `censorship`, `censorship_resistance`, `commit_scalar`, `deposit`, `emergencyRepay`, `executeDutchAuction`, `fallback`, `finalizeBlocks`, `finalize_blocks`, `forceWithdraw`, `forced_inclusion`, `forced_transaction_queue`, `getCurrentPrice`, `grace_period`, `isSequencerUp`, `l1_fee`, `l2`, `l2_block_timestamp`, `optimism`, `optimistic_rollup`, `sequencer`, `sequencer_downtime`, `sequencer_downtime_dos|sequencer_censorship|sequencer_centralization|l2_timestamp_manipulation|sequencer_underpayment`, `sequencer_uptime_feed`, `taiko`, `zk_rollup`, `zk_rollup_sequencer`, `zksync`

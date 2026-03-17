@@ -35,6 +35,36 @@ tags:
 # Version Info
 language: solidity
 version: ">=0.8.0"
+
+# Pattern Identity (Required)
+root_cause_family: denial_of_service
+pattern_key: denial_of_service | ERC4626_vault | deposit_blocking
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _convertToShares
+  - _decimalsOffset
+  - _exchangeRate
+  - _freeFunds
+  - _totalAssets
+  - balanceOf
+  - balanceOf_dependency
+  - burn
+  - convertToShares
+  - convertToShares_manipulation
+  - deposit
+  - deposit_dos
+  - donation_attack
+  - empty
+  - first
+  - mint
+  - msg.sender
+  - receive
+  - safeTransferFrom
+  - totalSupply
 ---
 
 ## Reference
@@ -54,6 +84,38 @@ This is distinct from the classic inflation attack because:
 - The goal is **denial of service**, not fund theft
 - Can be executed **after** the vault has legitimate deposits
 - Affects the `deposit()` function while `mint()` may still work
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of denial_of_service"
+- Pattern key: `denial_of_service | ERC4626_vault | deposit_blocking`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `ERC4626_vault`
+- High-signal code keywords: `_convertToShares`, `_decimalsOffset`, `_exchangeRate`, `_freeFunds`, `_totalAssets`, `balanceOf`, `balanceOf_dependency`, `burn`
+- Typical sink / impact: `denial_of_service`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Unbounded loop over user-controlled array can exceed block gas limit
+- Signal 2: External call failure causes entire transaction to revert
+- Signal 3: Attacker can grief operations by manipulating state to cause reverts
+- Signal 4: Resource exhaustion through repeated operations without rate limiting
+
+#### False Positive Guards
+
+- Not this bug when: Loop iterations are bounded by a reasonable constant
+- Safe if: External call failures are handled gracefully (try/catch or pull pattern)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -428,3 +490,24 @@ This highlights that `deposit()` and `mint()` can have different vulnerability p
 - [ERC4626 First Depositor Attack](../ERC4626_VAULT_VULNERABILITIES.md#first-depositor-attack)
 - [Exchange Rate Manipulation via Direct Transfers](../ERC4626_VAULT_VULNERABILITIES.md#exchange-rate-manipulation)
 - [Flash Loan Vault Deflation](./FLASH_LOAN_VAULT_DEFLATION_ATTACK.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_convertToShares`, `_decimalsOffset`, `_exchangeRate`, `_freeFunds`, `_totalAssets`, `balanceOf`, `balanceOf_dependency`, `burn`, `convertToShares`, `convertToShares_manipulation`, `denial_of_service`, `deposit`, `deposit_blocking`, `deposit_dos`, `donation_attack`, `dos`, `empty`, `erc4626`, `first`, `griefing`, `mint`, `msg.sender`, `receive`, `safeTransferFrom`, `share_manipulation`, `totalSupply`, `zero_share_minting`

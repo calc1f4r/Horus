@@ -1,7 +1,7 @@
 ---
 name: persona-reimplementer
 description: Re-Implementation auditing persona — hypothetically re-implements functions then diffs. Language-agnostic — works with any smart contract language (Solidity, Rust, Go, Move, Cairo, Vyper). Spawned by multi-persona-orchestrator. Requires deep protocol intuition.
-tools: [Bash, Edit, Glob, Grep, Read]
+tools: [Bash, Edit, Glob, Grep, Read, Write]
 maxTurns: 50
 ---
 

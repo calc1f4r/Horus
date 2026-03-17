@@ -54,6 +54,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | Router | ccip_integration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - Client.Any2EVMMessage
+  - Client.EVM2AnyMessage
+  - EVMExtraArgsV1
+  - EVMExtraArgsV2
+  - MessageFailed
+  - MessageRecovered
+  - OffRamp
+  - OnRamp
+  - RateLimiter
+  - Router
+  - TokenPool
+  - _buildMessage
+  - _ccipReceive
+  - _estimateGas
+  - allowlistEnabled
+  - approve
+  - burn
+  - ccipReceive
+  - ccipSend
+  - getFee
 ---
 
 ## References & Source Reports
@@ -114,6 +144,38 @@ version: all
 ### Overview
 
 CCIP receivers implement `ccipReceive()` which is called by the CCIP Router. Failing to validate that only the Router can call this function allows arbitrary message injection. This is the most fundamental CCIP security requirement — the `ccipReceive` function MUST verify `msg.sender == i_router`.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | Router | ccip_integration`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `Router|OnRamp|OffRamp|TokenPool|RateLimiter|Client`
+- High-signal code keywords: `Client.Any2EVMMessage`, `Client.EVM2AnyMessage`, `EVMExtraArgsV1`, `EVMExtraArgsV2`, `MessageFailed`, `MessageRecovered`, `OffRamp`, `OnRamp`
+- Typical sink / impact: `fund_loss|message_replay|dos|token_stuck|fee_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `BadReceiverConfig.function -> BoundedPayload.function -> GlobalRateLimitPool.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1004,3 +1066,24 @@ contract UnlimitedBurnMintPool {
 - [Wormhole Integration Issues](../wormhole/wormhole-integration-vulnerabilities.md)
 - [Cross-Chain General Vulnerabilities](../custom/cross-chain-general-vulnerabilities.md)
 - [Axelar Integration Issues](../axelar/axelar-integration-vulnerabilities.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`Client.Any2EVMMessage`, `Client.EVM2AnyMessage`, `EVMExtraArgsV1`, `EVMExtraArgsV2`, `MessageFailed`, `MessageRecovered`, `OffRamp`, `OnRamp`, `RateLimiter`, `Router`, `TokenPool`, `_buildMessage`, `_ccipReceive`, `_estimateGas`, `allowlistEnabled`, `approve`, `bridge`, `burn`, `ccip`, `ccipReceive`, `ccipSend`, `ccip_integration`, `chainlink`, `cross_chain`, `defi`, `getFee`, `getRouter`, `i_router`, `manuallyExecute`, `messageId`, `rate_limiter`, `sourceChainSelector`, `tokenAmounts`, `token_pool`

@@ -50,6 +50,36 @@ tags:
 
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | create_opcode | create2_incompatibility
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - CREATE
+  - CREATE2
+  - CREATE3
+  - EIP161
+  - EXTCODEHASH
+  - _computeCreate2Address
+  - accruedInterest
+  - address_derivation
+  - block.number
+  - block.timestamp
+  - borrow
+  - bypassPrecompile
+  - bytecode_compression
+  - computePoolAddress
+  - delegatecall
+  - deployment_nonce
+  - ecrecover
+  - keccak256_of_initcode
+  - max_precompile_address
+  - msg.sender
 ---
 
 ## References & Source Reports
@@ -115,6 +145,38 @@ version: all
 ZK rollups (primarily ZKSync Era, Scroll, Taiko) aim for EVM equivalence/compatibility but differ from standard Ethereum in subtle ways. These differences silently break protocols: `CREATE2` derives addresses from different parameters, `ecrecover` behaves differently in `delegatecall` contexts, `EXTCODEHASH` returns 0 for certain accounts, nonces don't increment on reverted child deployments, and `msg.sender` is preserved in system contract calls when it shouldn't be. Protocols ported from Ethereum often fail silently rather than reverting.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | create_opcode | create2_incompatibility`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `create_opcode|create2_opcode|ecrecover_precompile|extcodehash|nonce_tracker|bytecode_compressor|msg_sender`
+- High-signal code keywords: `CREATE`, `CREATE2`, `CREATE3`, `EIP161`, `EXTCODEHASH`, `_computeCreate2Address`, `accruedInterest`, `address_derivation`
+- Typical sink / impact: `deployment_failure|authentication_bypass|silent_wrong_behavior|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `A.function -> B.function -> ChainAwareFactory.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -386,3 +448,24 @@ abstract contract ChainAwareFactory {
 ### Keywords for Search
 
 `ZKSync CREATE2 incompatibility`, `computePoolAddress ZKSync`, `CREATE2 bytecode hash different`, `CREATE3 not available ZKSync`, `ecrecover delegatecall ZKSync`, `EXTCODEHASH ZKSync`, `nonce increment reverted deployment`, `block.number Arbitrum L1`, `block.number L2 incorrect`, `ZKSync EVM equivalence`, `precompile address ZKSync`, `system contract authorization bypass`, `bytecode compression ZKSync`, `ZKSync Era opcode difference`, `Scroll EVM compatibility`, `address derivation ZKSync`, `EIP-161 nonce discrepancy`, `msg.sender preservation system call`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`CREATE`, `CREATE2`, `CREATE3`, `EIP161`, `EXTCODEHASH`, `_computeCreate2Address`, `accruedInterest`, `address_derivation`, `block.number`, `block.timestamp`, `borrow`, `bypassPrecompile`, `bytecode`, `bytecode_compression`, `computePoolAddress`, `create2_incompatibility|opcode_divergence|precompile_difference|nonce_handling|address_derivation|msg_sender_preservation|bytecode_compression`, `delegatecall`, `deployment_nonce`, `ecrecover`, `evm_incompatibility`, `keccak256_of_initcode`, `max_precompile_address`, `msg.sender`, `msg_sender`, `nonce`, `opcode_difference`, `precompile`, `precompile_addresses`, `scroll`, `zk_rollup`, `zk_rollup_evm_compat`, `zksync_era`

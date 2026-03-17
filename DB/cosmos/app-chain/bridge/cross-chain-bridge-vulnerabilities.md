@@ -30,6 +30,28 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | bridge_logic | cross_chain_bridge_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - denom_handling
+  - deposit
+  - executeJob
+  - freeze_halt
+  - message_validation
+  - mint
+  - msg.sender
+  - observer_exploit
+  - relayer_exploit
+  - replay_attack
+  - token_accounting
+  - withdraw
 ---
 
 ## References & Source Reports
@@ -106,6 +128,38 @@ version: all
 Implementation flaw in bridge replay attack logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 3 audit reports with severity distribution: HIGH: 1, MEDIUM: 2.
 
 > **Key Finding**: The bug report discusses a potential issue with the NttManager.sol code, specifically in the function "completeInboundQueuedTransfer". During a hard fork, if there are still pending transactions in the InboundQueued, they can be replayed on another chain. This is due to the lack of a checkFork(evmCh
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | bridge_logic | cross_chain_bridge_vulnerabilities`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `bridge_logic`
+- High-signal code keywords: `denom_handling`, `deposit`, `executeJob`, `freeze_halt`, `message_validation`, `mint`, `msg.sender`, `observer_exploit`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -637,3 +691,24 @@ grep -rn 'bridge|denom|handling' --include='*.go' --include='*.sol'
 ## Keywords
 
 `account`, `accounting`, `active`, `adding`, `amount`, `another`, `appchain`, `assumes`, `attack`, `avoid`, `blocks`, `bond`, `bridge`, `chain`, `channel`, `circulation`, `collision`, `compensation`, `cosmos`, `deadlocks`, `denom`, `deposit`, `drain`, `evidence`, `exploit`, `failed`, `fork`, `freeze`, `from`, `getting`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`appchain`, `bridge`, `cosmos`, `cross_chain_bridge_vulnerabilities`, `defi`, `denom_handling`, `deposit`, `executeJob`, `freeze_halt`, `message_validation`, `mint`, `msg.sender`, `observer_exploit`, `relayer_exploit`, `replay_attack`, `staking`, `token_accounting`, `withdraw`

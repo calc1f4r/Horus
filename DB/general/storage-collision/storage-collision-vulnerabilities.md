@@ -42,6 +42,31 @@ version: all
 
 # Source
 source: DeFiHackLabs
+
+# Pattern Identity (Required)
+root_cause_family: storage_layout_error
+pattern_key: storage_layout_error | proxy_storage | storage_collision
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - EIP1967
+  - UUPS
+  - _setImplementation
+  - delegatecall
+  - diamond
+  - fallback
+  - implementation_address
+  - initialize
+  - initializer
+  - proxy_pattern
+  - setManager
+  - storage_slot
+  - totalSupply
+  - transparent_proxy
+  - validateStorageLayout
 ---
 
 # Storage Collision Vulnerabilities
@@ -53,6 +78,38 @@ Storage collision vulnerabilities occur when proxy contracts and their implement
 **Total Historical Losses from Analyzed Exploits: >$12M USD**
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of storage_layout_error"
+- Pattern key: `storage_layout_error | proxy_storage | storage_collision`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `proxy_storage`
+- High-signal code keywords: `EIP1967`, `UUPS`, `_setImplementation`, `delegatecall`, `diamond`, `fallback`, `implementation_address`, `initialize`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `BrokenProxy.function -> EFVaultImpl.function -> EFVaultProxy.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Storage slot collision between proxy and implementation contracts
+- Signal 2: Upgrade changes storage layout order, corrupting existing state
+- Signal 3: Diamond proxy selector collision between facets
+- Signal 4: Inherited contract storage layout breaks upgrade compatibility
+
+#### False Positive Guards
+
+- Not this bug when: Storage gaps used in all upgradeable base contracts
+- Safe if: Upgrade tested with storage layout comparison tooling
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerability Categories
 
@@ -406,3 +463,24 @@ rules:
 - **EFVault** (2023-02, $5.1M): `DeFiHackLabs/src/test/2023-02/EFVault_exp.sol`
 - **LeverageSIR** (2025-03, $354K): `DeFiHackLabs/src/test/2025-03/LeverageSIR_exp.sol`
 - **Audius** (2022-07, $704): `DeFiHackLabs/src/test/2022-07/Audius_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`DeFiHackLabs`, `EIP1967`, `UUPS`, `_setImplementation`, `defi`, `delegatecall`, `diamond`, `fallback`, `implementation_address`, `initialize`, `initializer`, `proxy`, `proxy_pattern`, `real_exploit`, `setManager`, `storage`, `storage_collision`, `storage_slot`, `totalSupply`, `transparent_proxy`, `upgrade`, `validateStorageLayout`

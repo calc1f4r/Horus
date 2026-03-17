@@ -32,6 +32,35 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: denial_of_service
+pattern_key: denial_of_service | timing_logic | epoch_timing_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - AddBTCDelegationInclusionProof
+  - BTCUndelegate
+  - Indexers
+  - _initializeValidatorStakeUpdate
+  - _wasActiveAt
+  - block.timestamp
+  - block_time
+  - calcAndCacheStakes
+  - cooldown_bypass
+  - epoch_duration_break
+  - epoch_snapshot
+  - epoch_transition
+  - expiration_bypass
+  - handlers
+  - msg.sender
+  - race_condition
+  - that
+  - timestamp_boundary
+  - unbonding_change
 ---
 
 ## References & Source Reports
@@ -126,6 +155,38 @@ version: all
 Implementation flaw in timing epoch snapshot logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 4 audit reports with severity distribution: HIGH: 2, MEDIUM: 2.
 
 > **Key Finding**: The `AvalancheL1Middleware::calcAndCacheStakes` function in the Suzaku network has a bug where it does not check if the epoch provided is in the future. This allows attackers to manipulate reward calculations by locking in current stake values for future epochs. This can lead to inflated reward shar
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of denial_of_service"
+- Pattern key: `denial_of_service | timing_logic | epoch_timing_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `timing_logic`
+- High-signal code keywords: `AddBTCDelegationInclusionProof`, `BTCUndelegate`, `Indexers`, `_initializeValidatorStakeUpdate`, `_wasActiveAt`, `block.timestamp`, `block_time`, `calcAndCacheStakes`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `allows.function -> did.function -> is.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Unbounded loop over user-controlled array can exceed block gas limit
+- Signal 2: External call failure causes entire transaction to revert
+- Signal 3: Attacker can grief operations by manipulating state to cause reverts
+- Signal 4: Resource exhaustion through repeated operations without rate limiting
+
+#### False Positive Guards
+
+- Not this bug when: Loop iterations are bounded by a reasonable constant
+- Safe if: External call failures are handled gracefully (try/catch or pull pattern)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -867,3 +928,24 @@ grep -rn 'timing|race|condition' --include='*.go' --include='*.sol'
 ## Keywords
 
 `abusing`, `accounted`, `active`, `adding`, `affect`, `allows`, `appchain`, `availability`, `balance`, `between`, `blobsidecars`, `block`, `blocks`, `boundary`, `break`, `btcstaking`, `bypass`, `bypassed`, `bypassing`, `cache`, `causes`, `chains`, `change`, `changes`, `changing`, `channel`, `check`, `close`, `coinbase`, `completely`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`AddBTCDelegationInclusionProof`, `BTCUndelegate`, `Indexers`, `_initializeValidatorStakeUpdate`, `_wasActiveAt`, `appchain`, `block.timestamp`, `block_time`, `calcAndCacheStakes`, `cooldown_bypass`, `cosmos`, `defi`, `epoch_duration_break`, `epoch_snapshot`, `epoch_timing_vulnerabilities`, `epoch_transition`, `expiration_bypass`, `handlers`, `msg.sender`, `race_condition`, `staking`, `that`, `timestamp_boundary`, `timing`, `unbonding_change`

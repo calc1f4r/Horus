@@ -34,6 +34,36 @@ tags:
   - vesting
 language: move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: arithmetic_error
+pattern_key: arithmetic_error | rewards, vaults, lending, staking, fee_logic, liquidation | reward_miscalculation, solvency_failure, withdrawal_logic, claim_exploit, liquidation_flaw, fee_manipulation
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - add_reward_program
+  - boundary
+  - burn
+  - calculate_fee
+  - cancel_schedule_interval
+  - cancel_schedule_interval_safe
+  - cancel_vesting
+  - claim_mechanism
+  - claim_reward
+  - claim_tokens
+  - create_obligation
+  - create_pool
+  - create_pool_safe
+  - deposit
+  - distribute_rewards
+  - end_withdraw_session
+  - execute
+  - fee_calculation
+  - flashloan_repay
+  - force_withdraw
 ---
 
 ## References
@@ -62,6 +92,38 @@ version: all
 ### Overview
 
 DeFi protocol logic vulnerabilities are the most common class found in OtterSec Move audits, appearing in 15/29 reports (52%). These bugs arise from incorrect reward accounting, missing solvency constraints, conversion rounding issues, and flawed claim/withdrawal flows. Because Move's resource model enforces linear asset semantics, logic bugs manifest as fund lockups or incorrect minting rather than reentrancy-style theft.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of arithmetic_error"
+- Pattern key: `arithmetic_error | rewards, vaults, lending, staking, fee_logic, liquidation | reward_miscalculation, solvency_failure, withdrawal_logic, claim_exploit, liquidation_flaw, fee_manipulation`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `rewards, vaults, lending, staking, fee_logic, liquidation`
+- High-signal code keywords: `add_reward_program`, `boundary`, `burn`, `calculate_fee`, `cancel_schedule_interval`, `cancel_schedule_interval_safe`, `cancel_vesting`, `claim_mechanism`
+- Typical sink / impact: `fund_loss, protocol_insolvency, incorrect_accounting`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Arithmetic operation on user-controlled input without overflow protection
+- Signal 2: Casting between different-width integer types without bounds check
+- Signal 3: Multiplication before division where intermediate product can exceed type max
+- Signal 4: Accumulator variable can wrap around causing incorrect accounting
+
+#### False Positive Guards
+
+- Not this bug when: Solidity >= 0.8.0 with default checked arithmetic
+- Safe if: SafeMath library used for all arithmetic on user-controlled values
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1226,3 +1288,24 @@ public entry fun cancel_schedule_interval_safe(admin: &signer, schedule: Object<
 - [MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md](MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md) — Precision/rounding patterns
 - [MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md](MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md) — Inflation/supply manipulation
 - [SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md](SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md) — Sui-specific DeFi patterns from Solodit
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`add_reward_program`, `aptos`, `boundary`, `burn`, `calculate_fee`, `cancel_schedule_interval`, `cancel_schedule_interval_safe`, `cancel_vesting`, `claim`, `claim_mechanism`, `claim_reward`, `claim_tokens`, `create_obligation`, `create_pool`, `create_pool_safe`, `defi`, `defi_logic`, `deposit`, `distribute_rewards`, `end_withdraw_session`, `execute`, `fee`, `fee_calculation`, `flashloan_repay`, `force_withdraw`, `lending`, `liquidation`, `liquidation_flow`, `lp_token`, `move`, `reward_distribution`, `reward_miscalculation, solvency_failure, withdrawal_logic, claim_exploit, liquidation_flaw, fee_manipulation`, `rewards`, `solvency`, `solvency_check`, `staking`, `sui`, `vesting`, `withdrawal`, `withdrawal_logic`

@@ -44,6 +44,36 @@ tags:
 # Version Info
 language: solidity|rust|move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | withdrawal_queue | withdrawal_unstaking_logic
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _finalizeCooldown
+  - _getValueOfWithdrawRequest
+  - _processClaim
+  - _processFullWithdrawal
+  - _processWithdrawal
+  - _triggerCooldown
+  - balanceOf
+  - block.timestamp
+  - burn
+  - claim
+  - claimCompletedWithdrawals
+  - claimWithdrawal
+  - completequeuedwithdrawal
+  - contract
+  - cooldown_period
+  - deposit
+  - eigenlayer_settlement
+  - epoch_management
+  - execute
+  - executeBatchWithdrawals
 ---
 
 ## References & Source Reports
@@ -140,6 +170,38 @@ Withdrawal queue state (epoch counters, pending amounts, queue ordering) can be 
 > - `reports/eigenlayer_findings/h-1-creating-new-withdrawal-requests-in-conjunction-with-settleepochfromeigenlay.md` (Rio Network - Sherlock)
 > - `reports/eigenlayer_findings/_pendingwithdrawalamount-can-be-arbitrarily-reset.md` (Tagus V2 - Halborn)
 > - `reports/eigenlayer_findings/h-2-setting-the-strategy-cap-to-0-does-not-update-the-total-shares-held-or-the-w.md` (Rio Network - Sherlock)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | withdrawal_queue | withdrawal_unstaking_logic`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `withdrawal_queue|share_calculation|fund_transfer|delay_mechanism`
+- High-signal code keywords: `_finalizeCooldown`, `_getValueOfWithdrawRequest`, `_processClaim`, `_processFullWithdrawal`, `_processWithdrawal`, `_triggerCooldown`, `balanceOf`, `block.timestamp`
+- Typical sink / impact: `fund_loss|permanent_lockup|dos|accounting_error`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `DelegationManager.function -> LidoStrategy.function -> WithdrawQueue.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1074,3 +1136,24 @@ contract WithdrawQueue is PausableUpgradeable, ReentrancyGuard {
 - [LRT Share Accounting Errors](LRT_SHARE_ACCOUNTING_VULNERABILITIES.md)
 - [LRT Exchange Rate and Oracle](LRT_EXCHANGE_RATE_ORACLE_VULNERABILITIES.md)
 - [Restaking Operator and Delegation](RESTAKING_OPERATOR_DELEGATION_VULNERABILITIES.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_finalizeCooldown`, `_getValueOfWithdrawRequest`, `_processClaim`, `_processFullWithdrawal`, `_processWithdrawal`, `_triggerCooldown`, `balanceOf`, `block.timestamp`, `burn`, `claim`, `claimCompletedWithdrawals`, `claimWithdrawal`, `completequeuedwithdrawal`, `contract`, `cooldown_period`, `defi`, `deposit`, `eigenlayer`, `eigenlayer_settlement`, `epoch_management`, `execute`, `executeBatchWithdrawals`, `fund_lockup`, `liquid_restaking`, `lrt`, `partial_failure_handling`, `pending_withdrawal_amount`, `queued_withdrawal`, `restaking`, `share_to_asset_conversion`, `slippage_protection`, `unstaking`, `withdrawal`, `withdrawal_delay`, `withdrawal_queue`, `withdrawal_unstaking_logic`

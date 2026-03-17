@@ -32,6 +32,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | consensus_logic | consensus_finality_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - AnteHandle
+  - FinalizeBlock
+  - GetSigners
+  - argmaxBlockByStake
+  - block_sync
+  - burn
+  - create
+  - deposit
+  - equivocation
+  - execute
+  - finality_bypass
+  - handlers
+  - isNextProposer
+  - liveness
+  - malicious
+  - mint
+  - msg.sender
+  - non_determinism
+  - proposer_dos
+  - proposer_selection
 ---
 
 ## References & Source Reports
@@ -132,6 +162,38 @@ version: all
 Implementation flaw in consensus proposer dos logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 10 audit reports with severity distribution: HIGH: 7, MEDIUM: 3.
 
 > **Key Finding**: The Cosmos AnteHandlers are used to check the validity of transactions and prevent malicious transactions from being executed. However, some of the validators are skipped when not in CheckTx mode, allowing attackers to insert malformed transactions into block proposals. This can lead to incorrect ex
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | consensus_logic | consensus_finality_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `consensus_logic`
+- High-signal code keywords: `AnteHandle`, `FinalizeBlock`, `GetSigners`, `argmaxBlockByStake`, `block_sync`, `burn`, `create`, `deposit`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `that.function -> to.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -994,3 +1056,24 @@ grep -rn 'consensus|liveness' --include='*.go' --include='*.sol'
 ## Keywords
 
 `algorithm`, `allows`, `antehandler`, `appchain`, `application`, `argmaxblockbystake`, `attacker`, `attacks`, `availability`, `because`, `between`, `bitcoin`, `bloat`, `blobsidecars`, `block`, `blocks`, `blocksync`, `bricked`, `btcstaking`, `bypass`, `call`, `case`, `cause`, `censorship`, `chain`, `coinbase`, `cometbft`, `condition`, `configurationdepth`, `consensus`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`AnteHandle`, `FinalizeBlock`, `GetSigners`, `appchain`, `argmaxBlockByStake`, `block_sync`, `burn`, `consensus`, `consensus_finality_vulnerabilities`, `cosmos`, `create`, `defi`, `deposit`, `equivocation`, `execute`, `finality_bypass`, `handlers`, `isNextProposer`, `liveness`, `malicious`, `mint`, `msg.sender`, `non_determinism`, `proposer_dos`, `proposer_selection`, `reorg`, `staking`, `vote_extension`

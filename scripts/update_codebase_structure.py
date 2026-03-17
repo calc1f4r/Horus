@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Regenerates the 'Report Branches Reference' section in CodebaseStructure.md.
+Regenerates the 'Report Branches Reference' section in docs/codebase-structure.md.
 
 Scans reports/ for subdirectories, counts .md files, computes the branch name
 (mirrors the logic in split-reports.yml), and replaces the block between
@@ -14,7 +14,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 REPORTS_DIR = REPO_ROOT / "reports"
-STRUCTURE_FILE = REPO_ROOT / "CodebaseStructure.md"
+STRUCTURE_FILE = REPO_ROOT / "docs" / "codebase-structure.md"
 REPO_OWNER = "calc1f4r"
 REPO_NAME = "Vulnerability-database"
 REPO_REF = "hunt-cards"
@@ -81,7 +81,7 @@ def main():
     begin_idx = content.find(BEGIN_MARKER)
     end_idx = content.find(END_MARKER)
     if begin_idx == -1 or end_idx == -1:
-        print("ERROR: Could not find BEGIN/END REPORT_BRANCHES markers in CodebaseStructure.md", file=sys.stderr)
+        print("ERROR: Could not find BEGIN/END REPORT_BRANCHES markers in docs/codebase-structure.md", file=sys.stderr)
         sys.exit(1)
 
     entries = collect_branches()
@@ -95,9 +95,9 @@ def main():
 
     if new_content != content:
         STRUCTURE_FILE.write_text(new_content)
-        print(f"Updated CodebaseStructure.md — {len(entries)} branches, {sum(c for _, _, c in entries):,} reports")
+        print(f"Updated docs/codebase-structure.md — {len(entries)} branches, {sum(c for _, _, c in entries):,} reports")
     else:
-        print("CodebaseStructure.md is already up to date")
+        print("docs/codebase-structure.md is already up to date")
 
 
 if __name__ == "__main__":

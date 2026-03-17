@@ -4,8 +4,6 @@ title: "Rounding and Precision Loss Vulnerabilities"
 category: Mathematical Operations
 severity_range: "LOW to HIGH"
 
-references:
-  - file: "reports/yield_protocol_findings/m-26-imprecise-calculations-in-launchfor-lead-to-less-liquidity-be-added-to-the-.md"
     protocol: "Virtuals Protocol"
     severity: "MEDIUM"
     auditor: "Code4rena"
@@ -17,7 +15,37 @@ references:
     protocol: "ERC4626 Vault"
     severity: "MEDIUM"
     auditor: "Various"
+
+# Pattern Identity (Required)
+root_cause_family: rounding_error
+pattern_key: rounding_error | unknown | unknown
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _convertToShares
+  - calculateLiquidity
+  - convertToAssets
+  - convertToShares
+  - deposit
+  - launchFor
+  - previewMint
+  - receive
+  - rounding
+  - slash
+  - totalSupply
 ---
+
+## References & Source Reports
+
+| Label | Path | Severity | Auditor | Source ID / Link |
+|-------|------|----------|---------|------------------|
+| [Virtuals Protocol] | reports/yield_protocol_findings/m-26-imprecise-calculations-in-launchfor-lead-to-less-liquidity-be-added-to-the-.md | MEDIUM | Code4rena | - |
+| [Subscription Token - Fabric] | reports/yield_protocol_findings/funds-allocated-for-rewards-can-be-locked-in-the-contract.md | HIGH | Quantstamp | - |
+| [ERC4626 Vault] | reports/yield_protocol_findings/m-13-first-erc4626-deposit-can-break-share-calculation.md | MEDIUM | Various | - |
+
 
 # Rounding and Precision Loss Vulnerabilities
 
@@ -31,6 +59,38 @@ Rounding and precision loss vulnerabilities occur when integer arithmetic in Sol
 **Consensus Severity**: LOW to HIGH (depending on exploitability and fund impact)
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of rounding_error"
+- Pattern key: `rounding_error | unknown | unknown`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `unknown`
+- High-signal code keywords: `_convertToShares`, `calculateLiquidity`, `convertToAssets`, `convertToShares`, `deposit`, `launchFor`, `previewMint`, `receive`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Division before multiplication truncates intermediate result
+- Signal 2: Reward/share calculation uses insufficient decimal precision
+- Signal 3: Rounding direction favors attacker during mint/redeem operations
+- Signal 4: Fee calculation rounds to zero for small amounts enabling free operations
+
+#### False Positive Guards
+
+- Not this bug when: Multiplication performed before division to preserve precision
+- Safe if: Scaling factor (1e18, 1e27) applied before division operations
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerable Code Patterns
 
@@ -191,3 +251,24 @@ Rounding and precision loss vulnerabilities occur when integer arithmetic in Sol
 ## Keywords
 
 rounding, precision loss, division, truncation, mulDivDown, mulDivUp, integer division, share calculation, dust, locked funds, PRBMath, fixed-point
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`Mathematical Operations`, `_convertToShares`, `calculateLiquidity`, `convertToAssets`, `convertToShares`, `deposit`, `launchFor`, `previewMint`, `receive`, `rounding`, `slash`, `totalSupply`

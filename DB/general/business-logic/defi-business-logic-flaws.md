@@ -43,6 +43,36 @@ language: solidity
 version: ">=0.6.0"
 
 source: DeFiHackLabs
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | state_transitions | business_logic_flaw
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _beforeTokenTransfer
+  - _burn
+  - _getReflectionRate
+  - _totalAssets
+  - _transfer
+  - acceptableRoot
+  - balanceOf
+  - borrow
+  - borrowAgainstNFT
+  - burn
+  - burn_mechanism
+  - calculation_logic
+  - claimReward
+  - claimTokens
+  - deposit
+  - donateToReserves
+  - exchange_rate
+  - health_factor
+  - inflation
+  - isHealthy
 ---
 
 ## DeFi Business Logic Flaw Vulnerabilities
@@ -57,6 +87,38 @@ Business logic flaws are the most prevalent vulnerability class in DeFi, encompa
 - **Major incidents:** Euler Finance ($200M), Nomad Bridge ($152M), HedgeyFinance ($48M), Level Finance ($1M)
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | state_transitions | business_logic_flaw`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `state_transitions`
+- High-signal code keywords: `_beforeTokenTransfer`, `_burn`, `_getReflectionRate`, `_totalAssets`, `_transfer`, `acceptableRoot`, `balanceOf`, `borrow`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1165,3 +1227,24 @@ function updatePosition(uint256 positionId, int256 sizeDelta) external {
 - **Popsicle** (2021-08, $20.0M): `DeFiHackLabs/src/test/2021-08/Popsicle_exp.sol`
 - **FloorProtocol** (2023-12, $16.0M): `DeFiHackLabs/src/test/2023-12/FloorProtocol_exp.sol`
 - **yearnFinance** (2023-04, $11.6M): `DeFiHackLabs/src/test/2023-04/YearnFinance_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_beforeTokenTransfer`, `_burn`, `_getReflectionRate`, `_totalAssets`, `_transfer`, `acceptableRoot`, `balanceOf`, `borrow`, `borrowAgainstNFT`, `burn`, `burn_mechanism`, `business_logic`, `business_logic_flaw`, `calculation_logic`, `claimReward`, `claimTokens`, `defi`, `deposit`, `dex`, `donateToReserves`, `exchange_rate`, `health_factor`, `inflation`, `isHealthy`, `lending`, `logic`, `mint_mechanism`, `real_exploit`, `reward_distribution`, `share_calculation`, `staking`, `state_machine`, `token_accounting`, `validation_logic`, `yield`

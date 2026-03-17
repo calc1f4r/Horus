@@ -32,6 +32,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: denial_of_service
+pattern_key: denial_of_service | node_operator_logic | minipool_node_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - any
+  - block.number
+  - block.timestamp
+  - cancelMinipool
+  - cancel_error
+  - createMinipool
+  - deposit
+  - deposit_theft
+  - deregistration
+  - disableOperator
+  - finalization
+  - key_fundable
+  - msg.sender
+  - refund
+  - registration_frontrun
+  - removeOperator
+  - replay
+  - requestUnstake
+  - reward_leak
+  - slash_avoidance
 ---
 
 ## References & Source Reports
@@ -125,6 +155,38 @@ Implementation flaw in minipool deposit theft logic allows exploitation through 
 > **Key Finding**: A bug has been found in the GoGoPool smart contract, which allows anyone to hijack a minipool of any node operator that finished the validation period or had an error. This could lead to the node operator losing their staked funds, as well as the hacker gaining rewards without hosting a node.
 
 The p
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of denial_of_service"
+- Pattern key: `denial_of_service | node_operator_logic | minipool_node_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `node_operator_logic`
+- High-signal code keywords: `any`, `block.number`, `block.timestamp`, `cancelMinipool`, `cancel_error`, `createMinipool`, `deposit`, `deposit_theft`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `at.function -> of.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Unbounded loop over user-controlled array can exceed block gas limit
+- Signal 2: External call failure causes entire transaction to revert
+- Signal 3: Attacker can grief operations by manipulating state to cause reverts
+- Signal 4: Resource exhaustion through repeated operations without rate limiting
+
+#### False Positive Guards
+
+- Not this bug when: Loop iterations are bounded by a reasonable constant
+- Safe if: External call failures are handled gracefully (try/catch or pull pattern)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -830,3 +892,24 @@ grep -rn 'operator|deregistration' --include='*.go' --include='*.sol'
 ## Keywords
 
 `accounting`, `alluvial`, `anoperator`, `appchain`, `avoid`, `avoidance`, `before`, `being`, `call`, `calls`, `cancel`, `cancellation`, `cancelled`, `causes`, `checking`, `consider`, `cosmos`, `delay`, `denial`, `deposit`, `deregistration`, `destroyed`, `effects`, `endpoint`, `error`, `excess`, `finalization`, `fixed`, `force`, `forced`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`any`, `appchain`, `block.number`, `block.timestamp`, `cancelMinipool`, `cancel_error`, `cosmos`, `createMinipool`, `defi`, `deposit`, `deposit_theft`, `deregistration`, `disableOperator`, `finalization`, `key_fundable`, `minipool_node_vulnerabilities`, `msg.sender`, `node_operator`, `refund`, `registration_frontrun`, `removeOperator`, `replay`, `requestUnstake`, `reward_leak`, `slash_avoidance`, `staking`

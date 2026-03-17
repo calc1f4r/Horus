@@ -37,6 +37,36 @@ tags:
 # Version Info
 language: solidity
 version: ">=0.8.0"
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | PrincipalToken | flash_loan_vault_deflation
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _convertToAssets
+  - approve
+  - balanceOf
+  - borrow
+  - borrowing
+  - complete
+  - deposit
+  - erc4626_share_price
+  - flashLoan
+  - flash_loan
+  - ibt_vault
+  - maxFlashLoan
+  - mint
+  - msg.sender
+  - onFlashLoan
+  - receive
+  - safeTransferFrom
+  - share_price_reset
+  - totalSupply
+  - transferFrom
 ---
 
 ## Reference
@@ -55,6 +85,38 @@ This attack is unique because:
 2. Flash loans provide the capital needed to drain an entire vault
 3. The attack is profitable when accumulated yield exceeds the flash loan fee
 4. It leaves legitimate users with permanent losses
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | PrincipalToken | flash_loan_vault_deflation`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `PrincipalToken`
+- High-signal code keywords: `_convertToAssets`, `approve`, `balanceOf`, `borrow`, `borrowing`, `complete`, `deposit`, `erc4626_share_price`
+- Typical sink / impact: `yield_theft`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `SecureIBTVault.function -> VaultDeflationExploit.function -> demonstrating.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -424,3 +486,24 @@ where:
 - [ERC4626 First Depositor Attack](../ERC4626_VAULT_VULNERABILITIES.md#first-depositor-attack)
 - [Exchange Rate Manipulation via Direct Transfers](../ERC4626_VAULT_VULNERABILITIES.md#exchange-rate-manipulation)
 - [Flash Loan Economic Attacks](../../economic/FLASH_LOAN_ATTACKS.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_convertToAssets`, `approve`, `balanceOf`, `borrow`, `borrowing`, `complete`, `deposit`, `economic`, `erc4626`, `erc4626_share_price`, `flashLoan`, `flash_loan`, `flash_loan_vault_deflation`, `ibt`, `ibt_vault`, `maxFlashLoan`, `mint`, `msg.sender`, `onFlashLoan`, `principal_token`, `receive`, `safeTransferFrom`, `share_price_manipulation`, `share_price_reset`, `totalSupply`, `transferFrom`, `vault_deflation`, `yield_extraction`, `yield_theft`

@@ -30,6 +30,36 @@ tags:
   - struct_mutation
 language: move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: arithmetic_error
+pattern_key: arithmetic_error | global_storage, local_variables, resource_state, accounting, object_fields | state_inconsistency, variable_shadowing, storage_desync, local_copy_mutation, resource_cleanup, attribute_tracking
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - accrue_interest
+  - borrow
+  - borrow_global_mut
+  - burn
+  - check_group_limit
+  - claim_rewards
+  - collect_fees
+  - copy_semantics
+  - create_group
+  - delete_group
+  - deposit
+  - deposit_and_stake
+  - dynamic_field
+  - execute
+  - field
+  - get_dividend
+  - initialize
+  - mint
+  - mix
+  - move_to
 ---
 
 ## References
@@ -58,6 +88,38 @@ State management bugs in Move arise from the language's ownership and copy seman
 These patterns span 12/29 OtterSec audit reports across Sui, Aptos, and Movement ecosystems.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of arithmetic_error"
+- Pattern key: `arithmetic_error | global_storage, local_variables, resource_state, accounting, object_fields | state_inconsistency, variable_shadowing, storage_desync, local_copy_mutation, resource_cleanup, attribute_tracking`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `global_storage, local_variables, resource_state, accounting, object_fields`
+- High-signal code keywords: `accrue_interest`, `borrow`, `borrow_global_mut`, `burn`, `check_group_limit`, `claim_rewards`, `collect_fees`, `copy_semantics`
+- Typical sink / impact: `fund_loss, accounting_error, state_corruption, operational_disruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Arithmetic operation on user-controlled input without overflow protection
+- Signal 2: Casting between different-width integer types without bounds check
+- Signal 3: Multiplication before division where intermediate product can exceed type max
+- Signal 4: Accumulator variable can wrap around causing incorrect accounting
+
+#### False Positive Guards
+
+- Not this bug when: Solidity >= 0.8.0 with default checked arithmetic
+- Safe if: SafeMath library used for all arithmetic on user-controlled values
+- Requires attacker control of: specific conditions per pattern
 
 ## Pattern 1: Local Copy Mutation Without Write-Back — move-state-001
 
@@ -613,3 +675,24 @@ public fun initialize(admin: &signer) {
 - [MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md](MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md) — Rounding errors in rate calculations
 - [MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md](MOVE_TOKEN_SUPPLY_INFLATION_VULNERABILITIES.md) — Supply corruption from state bugs
 - [MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md](MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md) — Protocol logic interacting with state
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`accounting`, `accrue_interest`, `aptos`, `borrow`, `borrow_global_mut`, `burn`, `check_group_limit`, `claim_rewards`, `collect_fees`, `copy_semantics`, `create_group`, `delete_group`, `deposit`, `deposit_and_stake`, `desync`, `dynamic_field`, `execute`, `field`, `get_dividend`, `initialize`, `local_copy`, `mint`, `mix`, `move`, `move_to`, `object_state`, `resource_cleanup`, `state_inconsistency, variable_shadowing, storage_desync, local_copy_mutation, resource_cleanup, attribute_tracking`, `state_management`, `storage`, `struct_fields`, `struct_mutation`, `sui`, `variable_shadowing`

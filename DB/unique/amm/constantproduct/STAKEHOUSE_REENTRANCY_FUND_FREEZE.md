@@ -29,7 +29,32 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | staking_lifecycle | reentrancy_fund_freeze
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - attack
+  - deposit
+  - msg.sender
+  - receive
+  - stake
+  - transition
+  - withdraw
+  - withdrawETHForKnot
 ---
+
+## References & Source Reports
+
+| Label | Path | Severity | Auditor | Source ID / Link |
+|-------|------|----------|---------|------------------|
+| [Stakehouse Protocol] | reports/constantproduct/h-11-protocol-insolvent-permanent-freeze-of-funds.md | HIGH | Code4rena | - |
+
 
 # Stakehouse Protocol - Reentrancy Lifecycle State Attack
 
@@ -43,6 +68,38 @@ version: all
 ## Overview
 
 Stakehouse Protocol's staking lifecycle had a reentrancy vulnerability in `withdrawETHForKnot` that allowed a node runner to reenter during ETH withdrawal and call `stake()`. This changed the BLS key's lifecycle status to `DEPOSIT_COMPLETE` while user funds were still in the vault, causing the key to be banned and permanently freezing user deposits.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | staking_lifecycle | reentrancy_fund_freeze`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `staking_lifecycle`
+- High-signal code keywords: `attack`, `deposit`, `msg.sender`, `receive`, `stake`, `transition`, `withdraw`, `withdrawETHForKnot`
+- Typical sink / impact: `permanent_fund_freeze`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `LiquidStakingManager.function -> SecureLiquidStakingManager.function -> StakehouseAttacker.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ## Why This Is Unique
 
@@ -267,3 +324,24 @@ function transition() {
 ## Keywords
 
 `reentrancy`, `fund_freeze`, `lifecycle_state`, `protocol_insolvency`, `stakehouse`, `state_machine_corruption`, `BLS_key`, `CEI_pattern`, `nonReentrant`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`amm`, `attack`, `deposit`, `fund_freeze`, `lifecycle_state`, `msg.sender`, `protocol_insolvency`, `receive`, `reentrancy`, `reentrancy_fund_freeze`, `stake`, `transition`, `withdraw`, `withdrawETHForKnot`

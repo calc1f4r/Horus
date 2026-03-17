@@ -31,6 +31,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | module_accounting_logic | cosmos_module_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - MintCoins
+  - SlashRedelegation
+  - SyncStateDBWithAccount
+  - TotalUTokenSupply
+  - auth_error
+  - balance
+  - bank_error
+  - block.number
+  - burn
+  - calling
+  - capability
+  - checkpointProtection
+  - cliff
+  - crisis
+  - deposit
+  - distribution
+  - evidence
+  - execute
+  - if
+  - mint
 ---
 
 ## References & Source Reports
@@ -135,6 +165,38 @@ version: all
 Implementation flaw in module bank error logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 6 audit reports with severity distribution: HIGH: 5, MEDIUM: 1.
 
 > **Key Finding**: The `NibiruBankKeeper.SyncStateDBWithAccount` function in `bank_extension.go` is responsible for keeping the EVM state database (`StateDB`) in sync with bank account balances. However, this function is not being called by all operations that modify bank balances. This means that the EVM state databa
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | module_accounting_logic | cosmos_module_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `module_accounting_logic`
+- High-signal code keywords: `MintCoins`, `SlashRedelegation`, `SyncStateDBWithAccount`, `TotalUTokenSupply`, `auth_error`, `balance`, `bank_error`, `block.number`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `only.function -> that.function -> to.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -990,3 +1052,24 @@ grep -rn 'module|capability' --include='*.go' --include='*.sol'
 ## Keywords
 
 `addexternalincentive`, `allowing`, `allows`, `another`, `appchain`, `attacker`, `auth`, `avoid`, `balance`, `bank`, `because`, `block`, `bond`, `boost`, `bypass`, `calls`, `capability`, `causes`, `check`, `concurrent`, `cosmos`, `could`, `crisis`, `curve`, `cvgt`, `delegated`, `denial`, `denoms`, `deposit`, `desynchronize`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`MintCoins`, `SlashRedelegation`, `SyncStateDBWithAccount`, `TotalUTokenSupply`, `appchain`, `auth_error`, `balance`, `bank_error`, `block.number`, `burn`, `calling`, `capability`, `checkpointProtection`, `cliff`, `cosmos`, `cosmos_module_vulnerabilities`, `crisis`, `defi`, `deposit`, `distribution`, `evidence`, `execute`, `if`, `mint`, `module_accounting`, `slashing_specific`, `staking`, `staking_specific`

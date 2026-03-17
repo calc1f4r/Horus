@@ -43,6 +43,33 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | keepers | chainlink_automation_integration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - Automation
+  - AutomationCompatible
+  - DON
+  - Functions
+  - Keepers
+  - block.timestamp
+  - checkLog
+  - checkUpkeep
+  - execute
+  - exposure
+  - fulfillRequest
+  - performUpkeep
+  - sendRequest
+  - subscription
+  - swap
+  - updateSecretsConfig
+  - uploadSecrets
 ---
 
 ## References & Source Reports
@@ -98,6 +125,38 @@ Chainlink Automation requires `checkUpkeep` to return `performData` that `perfor
 
 > **📚 Source Reports for Deep Dive:**
 > - `reports/chainlink_findings/chainlink-automation-upkeep-can-not-function-because-of-improper-integration.md`
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | keepers | chainlink_automation_integration`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `keepers|automation|functions`
+- High-signal code keywords: `Automation`, `AutomationCompatible`, `DON`, `Functions`, `Keepers`, `block.timestamp`, `checkLog`, `checkUpkeep`
+- Typical sink / impact: `dos|fund_loss|functionality_failure`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -632,3 +691,24 @@ contract FunctionsConsumer is FunctionsClient {
 - [Chainlink Price Feed Vulnerabilities](./CHAINLINK_PRICE_FEED_VULNERABILITIES.md)
 - [Chainlink VRF Vulnerabilities](./CHAINLINK_VRF_VULNERABILITIES.md)
 - [Chainlink CCIP Vulnerabilities](./CHAINLINK_CCIP_VULNERABILITIES.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`Automation`, `AutomationCompatible`, `DON`, `Functions`, `Keepers`, `automation`, `block.timestamp`, `chainlink_automation_integration`, `checkLog`, `checkUpkeep`, `defi`, `execute`, `exposure`, `fulfillRequest`, `keepers`, `off_chain_compute`, `performUpkeep`, `sendRequest`, `serverless`, `subscription`, `swap`, `updateSecretsConfig`, `uploadSecrets`

@@ -32,6 +32,33 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: denial_of_service
+pattern_key: denial_of_service | evm_logic | precompile_state_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - FinalizeBlock
+  - MintCoins
+  - RequiredGas
+  - SyncStateDBWithAccount
+  - address_conversion
+  - balance
+  - bank_balance_sync
+  - delegatecall
+  - delegatecall_precompile
+  - detachStakingContract
+  - dirty_state_precompile
+  - mint
+  - nonce_manipulation
+  - precompile_outdated
+  - precompile_panic
+  - state_revert
+  - tx_disguise
 ---
 
 ## References & Source Reports
@@ -119,6 +146,38 @@ version: all
 Implementation flaw in evm dirty state precompile logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 1 audit reports with severity distribution: HIGH: 1.
 
 > **Key Finding**: The bug report discusses an issue with the ZetaChain platform where changes made to the Ethereum Virtual Machine (EVM) state before a precompile call are not properly reflected in the Cosmos SDK state. This can lead to double-spending of native ZETA tokens and loss of staking rewards. The root cause
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of denial_of_service"
+- Pattern key: `denial_of_service | evm_logic | precompile_state_vulnerabilities`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `evm_logic`
+- High-signal code keywords: `FinalizeBlock`, `MintCoins`, `RequiredGas`, `SyncStateDBWithAccount`, `address_conversion`, `balance`, `bank_balance_sync`, `delegatecall`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `address.function -> calling.function -> crea.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Unbounded loop over user-controlled array can exceed block gas limit
+- Signal 2: External call failure causes entire transaction to revert
+- Signal 3: Attacker can grief operations by manipulating state to cause reverts
+- Signal 4: Resource exhaustion through repeated operations without rate limiting
+
+#### False Positive Guards
+
+- Not this bug when: Loop iterations are bounded by a reasonable constant
+- Safe if: External call failures are handled gracefully (try/catch or pull pattern)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -743,3 +802,24 @@ grep -rn 'evm|address|conversion' --include='*.go' --include='*.sol'
 ## Keywords
 
 `abuse`, `accesslist`, `address`, `addresses`, `allowing`, `allows`, `appchain`, `balance`, `bank`, `because`, `before`, `being`, `block`, `bypasses`, `calls`, `cause`, `causing`, `cctxs`, `chain`, `changes`, `charge`, `checks`, `committed`, `compensation`, `computational`, `consume`, `contract`, `conversion`, `convert`, `cosmos`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`FinalizeBlock`, `MintCoins`, `RequiredGas`, `SyncStateDBWithAccount`, `address_conversion`, `appchain`, `balance`, `bank_balance_sync`, `cosmos`, `defi`, `delegatecall`, `delegatecall_precompile`, `detachStakingContract`, `dirty_state_precompile`, `evm`, `mint`, `nonce_manipulation`, `precompile_outdated`, `precompile_panic`, `precompile_state_vulnerabilities`, `staking`, `state_revert`, `tx_disguise`

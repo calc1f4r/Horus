@@ -47,6 +47,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | share_calculation | share_accounting
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _depositFor
+  - balanceOf
+  - burn
+  - claimWithdrawalFromEigenLayer
+  - deposit
+  - depositAsset
+  - depositIntoStrategy
+  - donation_attack
+  - double_counting
+  - erc4626
+  - exchange_rate
+  - first
+  - first_depositor
+  - fulfillWithdrawal
+  - getRSETHPrice
+  - getRsETHAmountToMint
+  - getTokenBalanceFromStrategy
+  - getTotalAssetTVL
+  - handleSlashedWithdrawal
+  - inflation
 ---
 
 ## References & Source Reports
@@ -131,6 +161,38 @@ First depositors can inflate the share price by depositing a minimal amount, the
 > - `reports/eigenlayer_findings/h-4-victims-fund-can-be-stolen-due-to-rounding-error-and-exchange-rate-manipulati.md` (Napier - Sherlock)
 > - `reports/eigenlayer_findings/vaults-are-vulnerable-to-a-donation-attack.md` (Tagus v2 - Halborn)
 > - `reports/eigenlayer_findings/attacker-can-downscale-all-protocol-shares-by-18-decimals.md` (RestakeFi - OpenZeppelin)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | share_calculation | share_accounting`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `share_calculation|tvl_calculation|vault_accounting|supply_tracking`
+- High-signal code keywords: `_depositFor`, `balanceOf`, `burn`, `claimWithdrawalFromEigenLayer`, `deposit`, `depositAsset`, `depositIntoStrategy`, `donation_attack`
+- Typical sink / impact: `fund_loss|inflation|dos|incorrect_pricing`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `before.function -> to.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -706,3 +768,24 @@ function depositIntoStrategy(uint256 amount) internal {
 - [Restaking Withdrawal Vulnerabilities](RESTAKING_WITHDRAWAL_VULNERABILITIES.md)
 - [Restaking Slashing Mechanisms](RESTAKING_SLASHING_VULNERABILITIES.md)
 - [Restaking Reward Distribution](RESTAKING_REWARD_DISTRIBUTION_VULNERABILITIES.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_depositFor`, `accounting`, `balanceOf`, `burn`, `claimWithdrawalFromEigenLayer`, `defi`, `deposit`, `depositAsset`, `depositIntoStrategy`, `donation`, `donation_attack`, `double_counting`, `eigenlayer`, `erc4626`, `exchange_rate`, `first`, `first_depositor`, `fulfillWithdrawal`, `getRSETHPrice`, `getRsETHAmountToMint`, `getTokenBalanceFromStrategy`, `getTotalAssetTVL`, `handleSlashedWithdrawal`, `inflation`, `lrt`, `queued_withdrawal`, `restaking`, `rounding`, `share`, `share_accounting`, `share_inflation`, `shares_not_burned`, `strategy_allocation`, `supply_desynchronization`, `tvl`, `tvl_calculation`, `vault`

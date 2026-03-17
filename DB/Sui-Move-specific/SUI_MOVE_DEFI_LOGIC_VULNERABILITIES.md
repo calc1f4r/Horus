@@ -53,6 +53,36 @@ tags:
 # Version Info
 language: move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: arithmetic_error
+pattern_key: arithmetic_error | reward_system | state_management
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - calculate_rewards
+  - claim_surplus
+  - collateral
+  - deposit
+  - epoch_reward
+  - exchange_rate
+  - flow_limiter
+  - function_call
+  - get_lp_price
+  - get_total_sui
+  - get_total_sui_with_pending
+  - handle_receive
+  - order_fill
+  - pending_coins
+  - process_inbound_transfer
+  - process_liquidation
+  - process_outbound_transfer
+  - receive
+  - record_name
+  - redistribution
 ---
 
 ## References & Source Reports
@@ -137,6 +167,38 @@ Stability pool (tank) systems track each user's "stake" — their proportional c
 
 > **Validation strength**: Moderate — 1 report from OtterSec on Bucket Protocol
 > **Frequency**: 1/69 reports
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of arithmetic_error"
+- Pattern key: `arithmetic_error | reward_system | state_management`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `reward_system|staking|unstaking|vault|tank|order_book|flow_tracking|stake_update`
+- High-signal code keywords: `calculate_rewards`, `claim_surplus`, `collateral`, `deposit`, `epoch_reward`, `exchange_rate`, `flow_limiter`, `function_call`
+- Typical sink / impact: `fund_loss|incorrect_accounting|protocol_insolvency|reward_theft`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `flow_tracking.function -> order_book.function -> reward_system.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Arithmetic operation on user-controlled input without overflow protection
+- Signal 2: Casting between different-width integer types without bounds check
+- Signal 3: Multiplication before division where intermediate product can exceed type max
+- Signal 4: Accumulator variable can wrap around causing incorrect accounting
+
+#### False Positive Guards
+
+- Not this bug when: Solidity >= 0.8.0 with default checked arithmetic
+- Safe if: SafeMath library used for all arithmetic on user-controlled values
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -690,3 +752,24 @@ When a liquid staking or vault protocol has very low TVL, the exchange rate is s
 - `DB/general/defi/precision-loss/` — Precision patterns
 - `DB/amm/` — AMM-specific logic bugs
 - `DB/tokens/erc4626/` — ERC4626 vault patterns (EVM equivalent)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`calculate_rewards`, `claim_surplus`, `collateral`, `defi`, `defi_logic`, `deposit`, `epoch`, `epoch_reward`, `exchange_rate`, `flow_limiter`, `flow_tracking`, `function_call`, `get_lp_price`, `get_total_sui`, `get_total_sui_with_pending`, `handle_receive`, `liquid_staking`, `move`, `order_book`, `order_fill`, `pending_coins`, `process_inbound_transfer`, `process_liquidation`, `process_outbound_transfer`, `receive`, `record_name`, `redistribution`, `reward_accumulator`, `rewards`, `stake_update`, `staking`, `state_management`, `state_management|reward_accounting|staking_logic|order_book|tank_accounting`, `sui`, `surplus`, `surplus_claim`, `tank`, `tank_deposit`, `total_staked`, `unbonding`, `vault`, `vault_redeem`

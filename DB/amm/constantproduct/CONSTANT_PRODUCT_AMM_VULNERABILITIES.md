@@ -53,6 +53,36 @@ tags:
 # Version Info
 language: solidity|rust|move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | liquidity_pool | constant_product_amm_integration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - LP_tokens
+  - TWAP
+  - _addLiquidity
+  - _deployToken
+  - _executeTrade
+  - _existsPairPool
+  - _findSlice
+  - _getSwapAmt
+  - _getTimeWeightedPrimaryBalance
+  - _graduate
+  - _tokenToPodLp
+  - _transfer
+  - _unstakeAndExitPool
+  - addDividend
+  - addLiquidity
+  - addQuote
+  - addTradeFee
+  - approve
+  - balanceOf
+  - block.timestamp
 ---
 
 ## References & Source Reports
@@ -309,6 +339,38 @@ Constant product AMMs (x*y=k) calculate LP token amounts based on the ratio of d
 > - `reports/constantproduct/h-03-first-depositor-can-break-minting-of-shares.md` (Caviar - Code4rena)
 > - `reports/constantproduct/initial-mint-front-run-inflation-attack.md` (NUTS Finance - MixBytes)
 > - `reports/constantproduct/c-03-blocking-the-initial-liquidity-seed-with-a-1-wei-donation.md` (Moarcandy - Pashov)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | liquidity_pool | constant_product_amm_integration`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `liquidity_pool|swap_router|price_feed|reserves`
+- High-signal code keywords: `LP_tokens`, `TWAP`, `_addLiquidity`, `_deployToken`, `_executeTrade`, `_existsPairPool`, `_findSlice`, `_getSwapAmt`
+- Typical sink / impact: `fund_loss|price_manipulation|dos|unfair_exchange`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `CCFrax1to1AMM.function -> JettonFactory.function -> Pool.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -2617,3 +2679,24 @@ pub struct WithdrawV2<'info> {
 
 - **Swapos V2** (2023-04, $468K): `DeFiHackLabs/src/test/2023-04/Swapos_exp.sol`
 - **LinkDAO** (2023-11, $30K): `DeFiHackLabs/src/test/2023-11/LinkDao_exp.sol`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`LP_tokens`, `TWAP`, `_addLiquidity`, `_deployToken`, `_executeTrade`, `_existsPairPool`, `_findSlice`, `_getSwapAmt`, `_getTimeWeightedPrimaryBalance`, `_graduate`, `_tokenToPodLp`, `_transfer`, `_unstakeAndExitPool`, `addDividend`, `addLiquidity`, `addQuote`, `addTradeFee`, `amm`, `approve`, `balanceOf`, `block.timestamp`, `constant_product`, `constant_product_amm_integration`, `deadline_check`, `defi`, `dex`, `front_running`, `getReserves`, `k_invariant`, `liquidity`, `liquidity_provision`, `mev`, `minimum_liquidity`, `price_calculation`, `reserves`, `sandwich_attack`, `slippage_protection`, `slot0`, `spot_price`, `sqrtPriceX96`, `swap`, `swap_execution`, `uniswap`

@@ -27,6 +27,25 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: callback_reentrancy
+pattern_key: callback_reentrancy | reentrancy_logic | reentrancy_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _checkOnERC721Received
+  - _safeMint
+  - callback
+  - classic
+  - cross_contract
+  - mint
+  - onERC721Received
+  - read_only
+  - withdraw
 ---
 
 ## References & Source Reports
@@ -67,6 +86,38 @@ version: all
 Implementation flaw in reentrancy classic logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 2 audit reports with severity distribution: HIGH: 2.
 
 > **Key Finding**: This bug report is about a reentrancy vulnerability in the _safeMint function of the XDEFIDistribution.sol contract. This function is called by the lock function which changes the totalDepositedXDEFI variable. Since the updateDistribution function does not have the noReenter modifier, an attacker ca
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of callback_reentrancy"
+- Pattern key: `callback_reentrancy | reentrancy_logic | reentrancy_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `reentrancy_logic`
+- High-signal code keywords: `_checkOnERC721Received`, `_safeMint`, `callback`, `classic`, `cross_contract`, `mint`, `onERC721Received`, `read_only`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: External call (`.call`, `.transfer`, token transfer) occurs before state variable update
+- Signal 2: Token implements callback hooks (ERC-777, ERC-721) and protocol doesn't use `nonReentrant`
+- Signal 3: User-supplied token address passed to `transferFrom` without callback protection
+- Signal 4: Read-only function's return value consumed cross-contract during an active callback window
+
+#### False Positive Guards
+
+- Not this bug when: Contract uses `ReentrancyGuard` (`nonReentrant`) on all entry points
+- Safe if: All state updates complete before any external call (strict CEI)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -256,3 +307,24 @@ grep -rn 'reentrancy|callback' --include='*.go' --include='*.sol'
 ## Keywords
 
 `allow`, `appchain`, `attacker`, `attacks`, `callback`, `called`, `classic`, `contract`, `cosmos`, `could`, `cross`, `function`, `into`, `multiple`, `only`, `possibly`, `potential`, `read`, `reentrancy`, `rewards`, `steal`, `strategies`, `times`, `vulnerability`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_checkOnERC721Received`, `_safeMint`, `appchain`, `callback`, `classic`, `cosmos`, `cross_contract`, `defi`, `mint`, `onERC721Received`, `read_only`, `reentrancy`, `reentrancy_vulnerabilities`, `staking`, `withdraw`

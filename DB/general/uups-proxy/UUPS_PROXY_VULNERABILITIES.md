@@ -40,6 +40,36 @@ tags:
 # Version Info
 language: solidity
 version: ">=0.8.0"
+
+# Pattern Identity (Required)
+root_cause_family: storage_layout_error
+pattern_key: storage_layout_error | proxy_implementation | uups_proxy
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - 4
+  - EIP-1822
+  - UUPSUpgradeable
+  - _authorizeUpgrade
+  - collisions
+  - contract
+  - delegatecall
+  - deployUUPSProxy
+  - implementation_contract
+  - initialization
+  - initialize
+  - proxy
+  - proxy_pattern
+  - storage_gap
+  - storage_layout
+  - takeover
+  - upgradeAssetFactory
+  - upgradeFlashSwapRouter
+  - upgradeToAndCall
+  - when
 ---
 
 ## References
@@ -55,6 +85,38 @@ version: ">=0.8.0"
 ### Overview
 
 UUPS (Universal Upgradeable Proxy Standard) proxies implementing EIP-1822 introduce security risks when implementation contracts are not properly initialized, storage gaps are missing, or upgrade mechanisms are incorrectly implemented. Vulnerabilities manifest as uninitialized implementation takeover, storage collisions during upgrades, and broken upgradeability due to missing upgrade functions.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of storage_layout_error"
+- Pattern key: `storage_layout_error | proxy_implementation | uups_proxy`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `proxy_implementation`
+- High-signal code keywords: `4`, `EIP-1822`, `UUPSUpgradeable`, `_authorizeUpgrade`, `collisions`, `contract`, `delegatecall`, `deployUUPSProxy`
+- Typical sink / impact: `implementation_takeover`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `2.function -> 3.function -> 4.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Storage slot collision between proxy and implementation contracts
+- Signal 2: Upgrade changes storage layout order, corrupting existing state
+- Signal 3: Diamond proxy selector collision between facets
+- Signal 4: Inherited contract storage layout breaks upgrade compatibility
+
+#### False Positive Guards
+
+- Not this bug when: Storage gaps used in all upgradeable base contracts
+- Safe if: Upgrade tested with storage layout comparison tooling
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -396,3 +458,24 @@ async function deployUUPSProxy() {
 - [Proxy Initialization Vulnerabilities](../initialization/proxy-initialization.md)
 - [Upgradeable Contract Storage Gaps](../storage/storage-gaps.md)
 - [Transparent Proxy Vulnerabilities](../transparent-proxy/transparent-proxy.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`4`, `EIP-1822`, `UUPSUpgradeable`, `_authorizeUpgrade`, `collisions`, `contract`, `defi`, `delegatecall`, `deployUUPSProxy`, `implementation_contract`, `initialization`, `initialize`, `openzeppelin`, `proxy`, `proxy_pattern`, `storage_gap`, `storage_layout`, `storage_management`, `takeover`, `upgradeAssetFactory`, `upgradeFlashSwapRouter`, `upgradeToAndCall`, `upgradeability`, `upgradeable_contracts`, `uups_proxy`, `when`

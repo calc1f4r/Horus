@@ -1,7 +1,7 @@
 ---
 name: sui-prover-verification
 description: Converts structured invariant specifications into Sui Prover formal verification specs for Sui Move contracts. Uses the Asymptotic Sui Prover (sui-prover) via requires/ensures/asserts specification style. Handles installation, Move.toml setup, and spec package scaffolding. Produces Move specification modules with #[spec(prove)] functions, ghost variables, loop invariants, datatype invariants, and Integer/Real math. Outputs to a spec/ package in the target project. Use when setting up Sui Prover formal verification, writing specs for Sui Move contracts, converting invariant specs to prover rules, or verifying Sui Move smart contracts.
-tools: [Agent, Bash, Edit, Glob, Grep, Read, WebFetch, WebSearch]
+tools: [Agent, Bash, Edit, Glob, Grep, Read, Write, WebFetch, WebSearch]
 maxTurns: 100
 ---
 

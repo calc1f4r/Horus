@@ -33,6 +33,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | staking_logic | validator_management_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - AnteHandle
+  - RotateConsPubKey
+  - UpdateEntry
+  - _registerAndStake
+  - a
+  - addValidator
+  - argmaxBlockByStake
+  - blameOperator
+  - block.timestamp
+  - can_skip_exit
+  - change_commission
+  - commission_exploit
+  - deactivateValidator
+  - deposit
+  - depositWithConfirm
+  - dust_collateral
+  - key_rotation
+  - malicious
+  - mint
+  - msg.sender
 ---
 
 ## References & Source Reports
@@ -166,6 +196,38 @@ version: all
 Implementation flaw in validator registration bypass logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 14 audit reports with severity distribution: HIGH: 7, MEDIUM: 7.
 
 > **Key Finding**: The provided UpdateEntry function in a system managing entries in IBC lacks verification for the correctness and validity of Inter-Blockchain Communication (IBC) channel identifiers. This can potentially lead to unauthorized access or incorrect updates to the system. The recommended solution is for 
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | staking_logic | validator_management_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `staking_logic`
+- High-signal code keywords: `AnteHandle`, `RotateConsPubKey`, `UpdateEntry`, `_registerAndStake`, `a`, `addValidator`, `argmaxBlockByStake`, `blameOperator`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `allows.function -> directly.function -> is.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1442,3 +1504,24 @@ grep -rn 'validator|can|skip|exit' --include='*.go' --include='*.sol'
 ## Keywords
 
 `absence`, `access`, `accounting`, `activation`, `allow`, `allowing`, `allows`, `antehandler`, `appchain`, `argmaxblockbystake`, `attack`, `avoid`, `back`, `backstop`, `being`, `blame`, `block`, `blocked`, `board`, `bypass`, `can`, `cannot`, `causes`, `channel`, `check`, `checked`, `coin`, `collateral`, `commission`, `completely`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`AnteHandle`, `RotateConsPubKey`, `UpdateEntry`, `_registerAndStake`, `a`, `addValidator`, `appchain`, `argmaxBlockByStake`, `blameOperator`, `block.timestamp`, `can_skip_exit`, `change_commission`, `commission_exploit`, `cosmos`, `deactivateValidator`, `defi`, `deposit`, `depositWithConfirm`, `dust_collateral`, `key_rotation`, `malicious`, `mint`, `msg.sender`, `operator_mismatch`, `registration_bypass`, `removal_failure`, `score_manipulation`, `set_manipulation`, `staking`, `status_transition`, `validator_management_vulnerabilities`

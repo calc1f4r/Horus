@@ -46,6 +46,36 @@ tags:
 # Version Info
 language: solidity|rust|move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | price_feed | pyth_oracle_integration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - EMA_price
+  - _entropyCallback
+  - _getPythPrice
+  - abs
+  - assetExchangeRate
+  - atomicSwapAndProvide
+  - block.number
+  - block.timestamp
+  - borrow
+  - burn
+  - checkFreshness
+  - checkInRange
+  - commit
+  - confidence_interval
+  - createMarket
+  - deposit
+  - ensurePriceUpdate
+  - execute
+  - executeVault
+  - executeWithOracle
 ---
 
 ## References & Source Reports
@@ -142,6 +172,38 @@ Pyth Network is a pull-based oracle where consumers must provide signed price up
 > - `reports/pyth_findings/m-1-missing-staleness-check-in-pythoracle-can-lead-to-forced-liquidations-and-th.md` (Mach Finance - Sherlock)
 > - `reports/pyth_findings/m-07-using-stale-price-in-pyth-network.md` (Astrolab - Pashov)
 > - `reports/pyth_findings/m-2-incorrect-freshness-logic-validation-in-pythoracle-breaking-the-entire-mecha.md` (Oku - Sherlock)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | price_feed | pyth_oracle_integration`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `price_feed|validation_logic|state_transition`
+- High-signal code keywords: `EMA_price`, `_entropyCallback`, `_getPythPrice`, `abs`, `assetExchangeRate`, `atomicSwapAndProvide`, `block.number`, `block.timestamp`
+- Typical sink / impact: `incorrect_pricing|fund_loss|dos|manipulation|liquidation`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `DEX.function -> LPPool.function -> LendingProtocol.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1484,3 +1546,24 @@ function createMarket(
 - [TWAP Oracle Manipulation](../twap/TWAP_VULNERABILITIES.md)
 - [Flash Loan Attacks](../../economic/FLASH_LOAN_ATTACKS.md)
 - [Liquidation Vulnerabilities](../../logic/LIQUIDATION_VULNERABILITIES.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`EMA_price`, `_entropyCallback`, `_getPythPrice`, `abs`, `assetExchangeRate`, `atomicSwapAndProvide`, `block.number`, `block.timestamp`, `borrow`, `burn`, `checkFreshness`, `checkInRange`, `commit`, `confidence_interval`, `createMarket`, `defi`, `deposit`, `dex`, `ensurePriceUpdate`, `execute`, `executeVault`, `executeWithOracle`, `exponent`, `external_dependency`, `getPriceNoOlderThan`, `getPriceUnsafe`, `lending`, `max_age`, `oracle`, `perpetuals`, `price_feed`, `publish_time`, `pull_based_oracle`, `pull_oracle`, `pyth_oracle_integration`, `time_dependent`, `timestamp`, `updatePriceFeeds`

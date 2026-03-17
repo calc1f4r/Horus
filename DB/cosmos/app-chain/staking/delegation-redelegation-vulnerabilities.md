@@ -31,6 +31,34 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | staking_logic | delegation_redelegation_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - UnstakeEntry
+  - _initValidatorScore
+  - balanceOf
+  - closeRebalanceRequests
+  - deposit
+  - dos_revert
+  - frontrunning
+  - redelegation_error
+  - reward_manipulation
+  - safeTransferFrom
+  - self_manipulation
+  - service
+  - state_inconsistency
+  - their
+  - to_inactive
+  - unbonding_exploit
+  - users
+  - withdraw
 ---
 
 ## References & Source Reports
@@ -138,6 +166,38 @@ version: all
 Implementation flaw in delegation self manipulation logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 7 audit reports with severity distribution: HIGH: 2, MEDIUM: 5.
 
 > **Key Finding**: A bug was discovered in the `_transfer()` function of the Operator contract in the Streamr Network Contracts repository. The bug allowed the operator owner to transfer their shares to other delegators, in anticipation of slashing, to avoid slashing. This is because the `onDelegate()` function was ca
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | staking_logic | delegation_redelegation_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `staking_logic`
+- High-signal code keywords: `UnstakeEntry`, `_initValidatorScore`, `balanceOf`, `closeRebalanceRequests`, `deposit`, `dos_revert`, `frontrunning`, `redelegation_error`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `in.function -> only.function -> where.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1031,3 +1091,24 @@ grep -rn 'delegation|unbonding|exploit' --include='*.go' --include='*.sol'
 ## Keywords
 
 `accounted`, `accounting`, `accumulation`, `actually`, `address`, `adversary`, `after`, `allora`, `allow`, `allows`, `amount`, `appchain`, `array`, `assertion`, `balance`, `balances`, `block`, `blocking`, `boost`, `called`, `cannot`, `changes`, `check`, `checks`, `corruption`, `cosmos`, `decreased`, `delegated`, `delegatee`, `delegating`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`UnstakeEntry`, `_initValidatorScore`, `appchain`, `balanceOf`, `closeRebalanceRequests`, `cosmos`, `defi`, `delegation_redelegation_vulnerabilities`, `deposit`, `dos_revert`, `frontrunning`, `redelegation_error`, `reward_manipulation`, `safeTransferFrom`, `self_manipulation`, `service`, `staking`, `state_inconsistency`, `their`, `to_inactive`, `unbonding_exploit`, `users`, `withdraw`

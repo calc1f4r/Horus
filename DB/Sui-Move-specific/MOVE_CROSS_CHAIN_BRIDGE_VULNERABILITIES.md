@@ -34,6 +34,36 @@ tags:
   - defi
 language: move
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | cross_chain_messaging, bridge, validator_set, payload_processing, cross_chain_claim | payload_frontrunning, validator_set_integrity, signature_replay, message_validation_bypass, fund_loss_to_object
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - assert_and_configure_validator_set
+  - block.timestamp
+  - borrow
+  - burn
+  - burn_and_bridge
+  - claim_on_behalf
+  - complete_swap
+  - cross_chain_bridge
+  - cross_chain_messaging
+  - decode_message
+  - deposit
+  - execute_transfer
+  - fulfill_order
+  - layerzero
+  - lz_receive
+  - mint
+  - payload_validation
+  - process_incoming_asset
+  - receive
+  - receive_message
 ---
 
 ## References
@@ -50,6 +80,38 @@ version: all
 ### Overview
 
 Cross-chain vulnerabilities appeared in 3/29 OtterSec Move audit reports (10%), but carry disproportionately high severity — 1 CRITICAL, 5 HIGH. Bridge protocols on Move chains face unique challenges: Sui's object-based addressing can cause fund loss when gas is sent to object IDs instead of user addresses, and Move's abort-on-error means payload front-running permanently blocks legitimate operations.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | cross_chain_messaging, bridge, validator_set, payload_processing, cross_chain_claim | payload_frontrunning, validator_set_integrity, signature_replay, message_validation_bypass, fund_loss_to_object`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `cross_chain_messaging, bridge, validator_set, payload_processing, cross_chain_claim`
+- High-signal code keywords: `assert_and_configure_validator_set`, `block.timestamp`, `borrow`, `burn`, `burn_and_bridge`, `claim_on_behalf`, `complete_swap`, `cross_chain_bridge`
+- Typical sink / impact: `fund_loss, message_spoofing, denial_of_service`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -765,3 +827,24 @@ public fun execute_transfer(state: &mut State, payload: vector<u8>, attestation:
 - [MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md](MOVE_ACCESS_CONTROL_AUTHORIZATION_VULNERABILITIES.md) — Authorization patterns
 - [MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md](MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md) — Verification bypass patterns
 - [SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md](SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md) — Solodit-sourced bridge patterns
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`aptos`, `assert_and_configure_validator_set`, `block.timestamp`, `borrow`, `bridge`, `bridge_crosschain`, `burn`, `burn_and_bridge`, `claim_on_behalf`, `complete_swap`, `cross_chain`, `cross_chain_bridge`, `cross_chain_messaging`, `decode_message`, `defi`, `deposit`, `execute_transfer`, `front_running`, `fulfill_order`, `layerzero`, `lz_receive`, `messaging`, `mint`, `move`, `payload`, `payload_frontrunning, validator_set_integrity, signature_replay, message_validation_bypass, fund_loss_to_object`, `payload_validation`, `process_incoming_asset`, `receive`, `receive_message`, `replay`, `signature`, `signature_verification`, `sui`, `validator`, `validator_set`, `wormhole`

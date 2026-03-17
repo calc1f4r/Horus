@@ -33,6 +33,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_access_control
+pattern_key: missing_access_control | access_control_logic | authorization_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - AnteHandle
+  - Indexers
+  - Register
+  - RegisterConcrete
+  - addValidator
+  - allowlist_bypass
+  - amino_signing
+  - antehandler_bypass
+  - balanceOf
+  - burnERC20
+  - calling
+  - closeRebalanceRequests
+  - cosmwasm_bypass
+  - deposit
+  - execute
+  - getPriceInEth
+  - malicious
+  - mint
+  - missing_control
+  - module_authority
 ---
 
 ## References & Source Reports
@@ -136,6 +166,38 @@ version: all
 Implementation flaw in access missing control logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 17 audit reports with severity distribution: HIGH: 10, MEDIUM: 7.
 
 > **Key Finding**: The `redeem` function in `Escrow.sol` allows Indexers to receive query rewards by submitting a signed Receipt Aggregate Voucher (RAV) and `allocationIDProof`. However, anyone with knowledge of a valid `signedRAV` and `allocationIDProof` can call `redeem` and receive the rewards, regardless of whethe
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_access_control"
+- Pattern key: `missing_access_control | access_control_logic | authorization_vulnerabilities`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `access_control_logic`
+- High-signal code keywords: `AnteHandle`, `Indexers`, `Register`, `RegisterConcrete`, `addValidator`, `allowlist_bypass`, `amino_signing`, `antehandler_bypass`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `called.function -> from.function -> has.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State-changing function lacks `onlyOwner`/`onlyRole` modifier
+- Signal 2: External function accepts arbitrary address and calls interface methods without registry validation
+- Signal 3: Configuration setter is callable by non-owner accounts
+- Signal 4: Initialization or migration function is unprotected
+
+#### False Positive Guards
+
+- Not this bug when: Function is `internal`/`private` and only called from access-controlled paths
+- Safe if: Function is restricted via `onlyOwner`/`onlyRole`/`require(msg.sender == ...)`
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -938,3 +1000,24 @@ grep -rn 'access|module|authority' --include='*.go' --include='*.sol'
 ## Keywords
 
 `access`, `access control`, `account`, `accounting`, `adding`, `allocations`, `allowlist`, `amino`, `antehandler`, `appchain`, `arbitrary`, `assignment`, `attackers`, `authority`, `balance`, `because`, `before`, `block`, `break`, `bridge`, `bridged`, `broken`, `bypass`, `calling`, `calls`, `causes`, `centralization`, `check`, `contract`, `control`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`AnteHandle`, `Indexers`, `Register`, `RegisterConcrete`, `access_control`, `addValidator`, `allowlist_bypass`, `amino_signing`, `antehandler_bypass`, `appchain`, `authorization_vulnerabilities`, `balanceOf`, `burnERC20`, `calling`, `closeRebalanceRequests`, `cosmos`, `cosmwasm_bypass`, `defi`, `deposit`, `execute`, `getPriceInEth`, `malicious`, `mint`, `missing_control`, `module_authority`, `msg_sender_validation`, `owner_privilege`, `predecessor_misuse`, `role_assignment`, `staking`

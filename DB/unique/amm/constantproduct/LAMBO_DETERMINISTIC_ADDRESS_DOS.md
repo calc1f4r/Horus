@@ -29,7 +29,27 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | pool_factory | deterministic_address_dos
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - createPair
+  - frontRunFactory
+  - predictNextAddress
 ---
+
+## References & Source Reports
+
+| Label | Path | Severity | Auditor | Source ID / Link |
+|-------|------|----------|---------|------------------|
+| [Lambo Finance] | reports/constantproduct/h-02-lambofactory-can-be-permanently-dos-ed-due-to-createpair-call-reversal.md | HIGH | Code4rena | - |
+
 
 # Lambo Finance - Deterministic Address Factory DoS
 
@@ -43,6 +63,38 @@ version: all
 ## Overview
 
 Lambo Factory uses the `CREATE` opcode to deploy pools, which generates deterministic addresses based on `sender + nonce`. An attacker who deploys a contract at the same address before the factory can PERMANENTLY brick the factory, as the nonce increment is irreversible.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | pool_factory | deterministic_address_dos`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `pool_factory`
+- High-signal code keywords: `createPair`, `frontRunFactory`, `predictNextAddress`
+- Typical sink / impact: `permanent_dos`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `DefensiveFactory.function -> LamboFactory.function -> SecureFactory.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ## Why This Is Unique
 
@@ -198,3 +250,24 @@ pair = address(new Pair{salt: salt}());  // Uses CREATE2
 ## Keywords
 
 `CREATE_opcode`, `deterministic_address`, `factory_dos`, `nonce_manipulation`, `front_running`, `CREATE2`, `permanent_dos`, `lambo_factory`, `pool_creation_attack`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`CREATE_opcode`, `amm`, `createPair`, `deterministic_address`, `deterministic_address_dos`, `factory_dos`, `frontRunFactory`, `front_running`, `predictNextAddress`

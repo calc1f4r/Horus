@@ -1,7 +1,7 @@
 ---
 name: persona-bfs
 description: Breadth-First Search auditing persona — maps entry points then progressively deepens. Language-agnostic — works with any smart contract language (Solidity, Rust, Go, Move, Cairo, Vyper). Spawned by multi-persona-orchestrator. Applies Feynman questioning at every depth layer.
-tools: [Bash, Edit, Glob, Grep, Read]
+tools: [Bash, Edit, Glob, Grep, Read, Write]
 maxTurns: 50
 ---
 

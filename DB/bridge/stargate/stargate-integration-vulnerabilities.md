@@ -53,6 +53,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | Router | stargate_integration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - IStargateRouter
+  - OFTComposeMsgCodec
+  - Pool
+  - Router
+  - StargateV2
+  - _convertToLocalDecimals
+  - _convertToSharedDecimals
+  - addLiquidity
+  - amountLD
+  - amountSD
+  - bridge
+  - bridgeTokens
+  - bridgeViaStargate
+  - bridgeWithCallback
+  - bridgeWithSlippage
+  - deltaCredit
+  - deposit
+  - dstGasForCall
+  - dstPoolId
+  - estimateAndBridge
 ---
 
 ## References & Source Reports
@@ -108,6 +138,38 @@ version: all
 > **📚 Source Reports for Deep Dive:**
 > - `reports/bridge_crosschain_findings/sgreceive-could-run-out-of-gas.md` (SigmaPrime)
 > - `reports/bridge_crosschain_findings/h-02-stargatelbphelpersgreceive-could-encounter-permanent-error-that-causes-rece.md` (Pashov)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | Router | stargate_integration`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `Router|Pool|sgReceive|lzCompose|StargateAdapter`
+- High-signal code keywords: `IStargateRouter`, `OFTComposeMsgCodec`, `Pool`, `Router`, `StargateV2`, `_convertToLocalDecimals`, `_convertToSharedDecimals`, `addLiquidity`
+- Typical sink / impact: `fund_loss|token_stuck|dos|slippage_exploitation`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `ExchangeStargateV2Adapter.function -> IERC20.function -> StargateLbpHelper.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerable Pattern Examples
 
@@ -649,3 +711,24 @@ function _convertToLocalDecimals(uint256 amountSD) internal view returns (uint25
 - [LayerZero Integration Issues](../layerzero/layerzero-integration-vulnerabilities.md)
 - [Cross-Chain General Vulnerabilities](../custom/cross-chain-general-vulnerabilities.md)
 - [CCIP Integration Issues](../ccip/ccip-integration-vulnerabilities.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`IStargateRouter`, `OFTComposeMsgCodec`, `Pool`, `Router`, `StargateV2`, `_convertToLocalDecimals`, `_convertToSharedDecimals`, `addLiquidity`, `amountLD`, `amountSD`, `bridge`, `bridgeTokens`, `bridgeViaStargate`, `bridgeWithCallback`, `bridgeWithSlippage`, `cross_chain`, `defi`, `deltaCredit`, `deposit`, `dstGasForCall`, `dstPoolId`, `estimateAndBridge`, `instantRedeemLocal`, `layerzero`, `liquidity_pool`, `lzCompose`, `lzTxObj`, `minAmountOut`, `router`, `sgReceive`, `srcPoolId`, `stargate`, `stargate_integration`, `swap`

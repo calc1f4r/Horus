@@ -33,6 +33,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | governance_logic | governance_voting_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - AnteHandle
+  - _initValidatorScore
+  - any
+  - argmaxBlockByStake
+  - ballot_spam
+  - block.number
+  - block.timestamp
+  - bribe_manipulation
+  - burn
+  - deposit
+  - dismissSlashProposal
+  - execute
+  - mint
+  - msg.sender
+  - new
+  - offboard
+  - offboard_exploit
+  - parameter_change
+  - proposal_exploit
+  - quorum_manipulation
 ---
 
 ## References & Source Reports
@@ -160,6 +190,38 @@ version: all
 Implementation flaw in governance voting power manipulation logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 4 audit reports with severity distribution: HIGH: 2, MEDIUM: 2.
 
 > **Key Finding**: The bug report is about a function called ValidateVoteExtensions that relies on data injected by the proposer, which can be manipulated to misrepresent the voting power of validators. This can lead to incorrect consensus decisions and compromised voting process. The report recommends applying a patc
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | governance_logic | governance_voting_vulnerabilities`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `governance_logic`
+- High-signal code keywords: `AnteHandle`, `_initValidatorScore`, `any`, `argmaxBlockByStake`, `ballot_spam`, `block.number`, `block.timestamp`, `bribe_manipulation`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `allows.function -> receives.function -> where.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1290,3 +1352,24 @@ grep -rn 'governance|timelock|bypass' --include='*.go' --include='*.sol'
 ## Keywords
 
 `abuse`, `account`, `adversary`, `affect`, `allow`, `already`, `antehandler`, `appchain`, `arbitrary`, `argmaxblockbystake`, `attack`, `attacker`, `attackers`, `ballot`, `before`, `block`, `bribe`, `bridged`, `bypass`, `calculations`, `change`, `checked`, `contain`, `cosmos`, `could`, `creation`, `data`, `ddos`, `delegating`, `delegators`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`AnteHandle`, `_initValidatorScore`, `any`, `appchain`, `argmaxBlockByStake`, `ballot_spam`, `block.number`, `block.timestamp`, `bribe_manipulation`, `burn`, `cosmos`, `defi`, `deposit`, `dismissSlashProposal`, `execute`, `governance`, `governance_voting_vulnerabilities`, `mint`, `msg.sender`, `new`, `offboard`, `offboard_exploit`, `parameter_change`, `proposal_exploit`, `quorum_manipulation`, `staking`, `timelock_bypass`, `voting_lock`, `voting_power_manipulation`, `voting_zero_weight`

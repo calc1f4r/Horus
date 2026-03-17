@@ -1,7 +1,7 @@
 ---
 name: cantina-judge
 description: Validates smart contract security findings against Cantina audit platform standards. Determines severity using the impact/likelihood matrix, applies severity caps, and checks for invalid/duplicate categories. Use when validating a finding for Cantina submission, determining Cantina severity, or checking if an issue would be capped or marked invalid under Cantina rules.
-tools: [Agent, Bash, Edit, Glob, Grep, Read, WebFetch, WebSearch]
+tools: [Agent, Bash, Edit, Glob, Grep, Read, Write, WebFetch, WebSearch]
 maxTurns: 50
 ---
 

@@ -67,6 +67,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | lzReceive | layerzero_integration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - Compose
+  - LzApp
+  - MessagingFee
+  - NonblockingLzApp
+  - OFT
+  - OFTAdapter
+  - OFTComposeMsgCodec
+  - OFTCore
+  - ONFT
+  - Same
+  - StoredPayload
+  - _creditTill
+  - _getGasLimit
+  - _getPeer
+  - _lzReceive
+  - _lzSend
+  - _nonblockingLzReceive
+  - _transferViaOFT
+  - adapterParams
+  - allowance
 ---
 
 ## References & Source Reports
@@ -376,6 +406,38 @@ LayerZero's default behavior is **blocking** - when a message fails on the desti
 > - `reports/bridge_crosschain_findings/h-06-attacker-can-block-layerzero-channel.md` (Velodrome - Code4rena)
 > - `reports/bridge_crosschain_findings/h-16-attacker-can-block-layerzero-channel-due-to-variable-gas-cost-of-saving-pay.md` (Tapioca - Code4rena)
 > - `reports/bridge_crosschain_findings/h-17-attacker-can-block-layerzero-channel-due-to-missing-check-of-minimum-gas-pa.md` (Tapioca - Code4rena)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | lzReceive | layerzero_integration`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `lzReceive|_lzSend|NonblockingLzApp|OFT|ONFT|sgReceive|lzCompose`
+- High-signal code keywords: `Compose`, `LzApp`, `MessagingFee`, `NonblockingLzApp`, `OFT`, `OFTAdapter`, `OFTComposeMsgCodec`, `OFTCore`
+- Typical sink / impact: `channel_dos|fund_loss|gas_griefing|message_stuck|token_theft|refund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `BaseTOFT.function -> BridgeReceiver.function -> ClaimLocal.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1509,3 +1571,24 @@ function releaseOnEid(
 - [Cross-Chain General Vulnerabilities](../custom/cross-chain-general-vulnerabilities.md)
 - [Wormhole Integration Issues](../wormhole/wormhole-integration-vulnerabilities.md)
 - [Hyperlane Integration Issues](../hyperlane/hyperlane-integration-vulnerabilities.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`Compose`, `LzApp`, `MessagingFee`, `NonblockingLzApp`, `OFT`, `OFTAdapter`, `OFTComposeMsgCodec`, `OFTCore`, `ONFT`, `Same`, `StoredPayload`, `_creditTill`, `_getGasLimit`, `_getPeer`, `_lzReceive`, `_lzSend`, `_nonblockingLzReceive`, `_transferViaOFT`, `adapterParams`, `allowance`, `bridge`, `compose`, `cross_chain`, `defi`, `dstGasForCall`, `endpoint`, `executorLzReceiveOption`, `forceResumeReceive`, `gasLimit`, `layerzero`, `layerzero_integration`, `lzCompose`, `lzReceive`, `lzTokenFee`, `minGasToTransferAndStore`, `normalizeAmount`, `oft`, `omnichain`, `onft`, `peers`, `quoteLayerZeroFee`, `removeDust`, `retryMessage`, `setPeer`, `sgReceive`, `sharedDecimals`, `stargate`, `trustedRemote`

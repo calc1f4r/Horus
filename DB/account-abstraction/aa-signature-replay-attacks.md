@@ -42,6 +42,36 @@ tags:
 
 language: solidity
 version: ">=0.8.0"
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | signature_validation | replay_attack
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - EIP-712
+  - ERC-4337
+  - ERC-7579
+  - _buildDomainSeparator
+  - _enableMode
+  - _getCoSignerHash
+  - _getEnableModeDataHash
+  - _hashExecution
+  - bundler
+  - chainId
+  - enableModeDataHash
+  - entryPoint
+  - execute
+  - getPackedUserOperationHash
+  - msg.sender
+  - nonce
+  - swap
+  - type
+  - userOpHash
+  - validateUserOp
 ---
 
 ## References
@@ -67,6 +97,38 @@ version: ">=0.8.0"
 ### Overview
 
 Account abstraction wallets (ERC-4337 / ERC-7579) that compute their own `userOp` signature hash instead of reusing the hash passed by the EntryPoint, or that produce inner hashes (e.g., `enableModeDataHash`) without binding them to the current nonce / `userOpHash` / `chainId`, are vulnerable to cross-EntryPoint replay, cross-chain replay, and cross-module-install replay attacks.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | signature_validation | replay_attack`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `signature_validation`
+- High-signal code keywords: `EIP-712`, `ERC-4337`, `ERC-7579`, `_buildDomainSeparator`, `_enableMode`, `_getCoSignerHash`, `_getEnableModeDataHash`, `_hashExecution`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `calls.function -> is.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### AA Signature Replay — Missing Binding Fields in UserOperation and Enable Mode Hashes
 
@@ -398,3 +460,24 @@ function _hashExecution(
 - `DB/account-abstraction/aa-session-key-permission-abuse.md` — session key cross-wallet replay
 
 ---
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`EIP-712`, `ERC-4337`, `ERC-7579`, `_buildDomainSeparator`, `_enableMode`, `_getCoSignerHash`, `_getEnableModeDataHash`, `_hashExecution`, `account-abstraction`, `bundler`, `chainId`, `cross-chain`, `enable-mode`, `enableModeDataHash`, `entryPoint`, `execute`, `getPackedUserOperationHash`, `msg.sender`, `nonce`, `replay`, `replay_attack`, `signature`, `smart-wallet`, `swap`, `type`, `userOpHash`, `validateUserOp`

@@ -20,6 +20,36 @@ tags:
   - "reentrancy"
   - "first-depositor"
 last_updated: "2025-01-15"
+
+# Pattern Identity (Required)
+root_cause_family: missing_initialization_guard
+pattern_key: missing_initialization_guard | unknown | unknown
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - add
+  - and
+  - block.timestamp
+  - buyShares
+  - calculateOwedFees
+  - computeSwap
+  - createPool
+  - deposit
+  - emptyRebalance
+  - getBuyInfo
+  - getOwedFee
+  - getSellInfo
+  - griefing
+  - inflation
+  - initialize
+  - initializer
+  - mint
+  - msg.sender
+  - mulDiv
+  - processWithdrawals
 ---
 
 # DoS, Arithmetic, and Initialization Vulnerabilities in Concentrated Liquidity AMMs
@@ -34,6 +64,38 @@ Concentrated liquidity AMMs involve complex mathematical operations for price ca
 **Observed Frequency:** 60+ reports analyzed covering arithmetic errors, DoS vectors, initialization attacks, and first depositor exploits.
 
 ---
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_initialization_guard"
+- Pattern key: `missing_initialization_guard | unknown | unknown`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `unknown`
+- High-signal code keywords: `add`, `and`, `block.timestamp`, `buyShares`, `calculateOwedFees`, `computeSwap`, `createPool`, `deposit`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `Counter.function -> SecureInitializable.function -> SecurePool.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Initializer function callable more than once (missing initializer modifier)
+- Signal 2: Proxy implementation has unprotected initialize() callable by anyone
+- Signal 3: Constructor logic not replicated in initializer for upgradeable contract
+- Signal 4: Implementation contract left uninitialized, allowing attacker takeover
+
+#### False Positive Guards
+
+- Not this bug when: OpenZeppelin `initializer` modifier prevents re-initialization
+- Safe if: Proxy implementation initialize() called in same transaction as deployment
+- Requires attacker control of: specific conditions per pattern
 
 ## Vulnerable Pattern Examples
 
@@ -676,3 +738,24 @@ rules:
 2. [OpenZeppelin ERC4626 Inflation Attack Defense](https://blog.openzeppelin.com/a-novel-defense-against-erc4626-inflation-attacks)
 3. [Trail of Bits Yearn Audit TOB-YEARN-003](https://github.com/trailofbits/publications)
 4. [Solidity 0.8 Breaking Changes](https://docs.soliditylang.org/en/v0.8.0/080-breaking-changes.html)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`add`, `and`, `arithmetic`, `block.timestamp`, `buyShares`, `calculateOwedFees`, `computeSwap`, `createPool`, `denial-of-service`, `deposit`, `emptyRebalance`, `first-depositor`, `getBuyInfo`, `getOwedFee`, `getSellInfo`, `griefing`, `inflation`, `initialization`, `initialize`, `initializer`, `mint`, `msg.sender`, `mulDiv`, `overflow`, `processWithdrawals`, `reentrancy`, `rounding`, `underflow`

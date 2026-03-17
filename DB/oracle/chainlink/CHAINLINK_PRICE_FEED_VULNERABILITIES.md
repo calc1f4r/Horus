@@ -50,6 +50,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | price_feed | chainlink_oracle_integration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - AggregatorV3Interface
+  - _compareMinMax
+  - answeredInRound
+  - block.timestamp
+  - decimals
+  - fallback
+  - front
+  - getHistoricalPrice
+  - getLatestPrice
+  - getPrice
+  - heartbeat
+  - latestRoundData
+  - maxAnswer
+  - minAnswer
+  - phaseId
+  - priceFeed
+  - roundId
+  - sequencer_uptime_feed
+  - setFeedHeartbeat
+  - staleness_check
 ---
 
 ## References & Source Reports
@@ -140,6 +170,38 @@ Chainlink price feeds update prices based on deviation thresholds and heartbeat 
 > - `reports/chainlink_findings/chainlinks-latestrounddata-might-return-stale-or-incorrect-results.md`
 > - `reports/chainlink_findings/lack-of-chainlinks-stale-price-checks.md`
 > - `reports/chainlink_findings/m-03-fixed-hearbeat-used-for-price-validation-is-too-stale-for-some-tokens.md`
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | price_feed | chainlink_oracle_integration`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `price_feed|validation_logic|state_transition`
+- High-signal code keywords: `AggregatorV3Interface`, `_compareMinMax`, `answeredInRound`, `block.timestamp`, `decimals`, `fallback`, `front`, `getHistoricalPrice`
+- Typical sink / impact: `incorrect_pricing|fund_loss|dos|manipulation|liquidation`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `price_feed.function -> state_transition.function -> validation_logic.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -869,3 +931,24 @@ function getPrice(address feed) external view returns (uint256) {
 - [Chainlink VRF Vulnerabilities](./CHAINLINK_VRF_VULNERABILITIES.md)
 - [Chainlink CCIP Vulnerabilities](./CHAINLINK_CCIP_VULNERABILITIES.md)
 - [Chainlink Automation Vulnerabilities](./CHAINLINK_AUTOMATION_VULNERABILITIES.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`AggregatorV3Interface`, `_compareMinMax`, `answeredInRound`, `block.timestamp`, `chainlink_oracle_integration`, `decimals`, `defi`, `dex`, `external_dependency`, `fallback`, `front`, `getHistoricalPrice`, `getLatestPrice`, `getPrice`, `heartbeat`, `l2_networks`, `latestRoundData`, `lending`, `maxAnswer`, `minAnswer`, `oracle`, `perpetuals`, `phaseId`, `priceFeed`, `push_based_oracle`, `roundId`, `sequencer_uptime_feed`, `setFeedHeartbeat`, `staleness_check`, `startedAt`, `try_catch`, `updatedAt`

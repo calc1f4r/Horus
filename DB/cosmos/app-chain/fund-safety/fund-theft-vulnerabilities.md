@@ -32,6 +32,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: denial_of_service
+pattern_key: denial_of_service | fund_safety_logic | fund_theft_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _checkOnERC721Received
+  - _safeMint
+  - allowance
+  - balanceOf
+  - blameOperator
+  - block.timestamp
+  - cliff
+  - delegatecall
+  - deposit
+  - execute
+  - mint
+  - missing_slippage
+  - msg.sender
+  - onERC721Received
+  - race_condition
+  - receive
+  - swap
+  - test__deploy_malicious_staking_contract
+  - theft_auth_bypass
+  - theft_delegatecall
 ---
 
 ## References & Source Reports
@@ -132,6 +162,38 @@ version: all
 Implementation flaw in funds theft auth bypass logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 14 audit reports with severity distribution: HIGH: 8, MEDIUM: 6.
 
 > **Key Finding**: This bug report is about a problem with the StakeModuleLib.sol code in the Portal contracts. The code allows anyone to blame an operator who does not withdraw in time, but there is an additional scenario where the operator should be blamed. When a validator is in the PROPOSED state, the operator can
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of denial_of_service"
+- Pattern key: `denial_of_service | fund_safety_logic | fund_theft_vulnerabilities`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `fund_safety_logic`
+- High-signal code keywords: `_checkOnERC721Received`, `_safeMint`, `allowance`, `balanceOf`, `blameOperator`, `block.timestamp`, `cliff`, `delegatecall`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `MultiRewardStaking.function -> Safe.function -> allows.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Unbounded loop over user-controlled array can exceed block gas limit
+- Signal 2: External call failure causes entire transaction to revert
+- Signal 3: Attacker can grief operations by manipulating state to cause reverts
+- Signal 4: Resource exhaustion through repeated operations without rate limiting
+
+#### False Positive Guards
+
+- Not this bug when: Loop iterations are bounded by a reasonable constant
+- Safe if: External call failures are handled gracefully (try/catch or pull pattern)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -965,3 +1027,24 @@ grep -rn 'funds|missing|slippage' --include='*.go' --include='*.sol'
 ## Keywords
 
 `adversary`, `allow`, `allows`, `anyone`, `appchain`, `attack`, `attacker`, `attacks`, `auth`, `balance`, `between`, `blame`, `bounty`, `bringunusedethbackintogiantpool`, `bypass`, `called`, `cannot`, `causing`, `changes`, `claims`, `condition`, `contract`, `cosmos`, `cvgt`, `delegatecall`, `deploy`, `deposits`, `direct`, `enabling`, `excess`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_checkOnERC721Received`, `_safeMint`, `allowance`, `appchain`, `balanceOf`, `blameOperator`, `block.timestamp`, `cliff`, `cosmos`, `defi`, `delegatecall`, `deposit`, `execute`, `fund_safety`, `fund_theft_vulnerabilities`, `mint`, `missing_slippage`, `msg.sender`, `onERC721Received`, `race_condition`, `receive`, `staking`, `swap`, `test__deploy_malicious_staking_contract`, `theft_auth_bypass`, `theft_delegatecall`, `theft_frontrunning`, `theft_manipulation`, `theft_reentrancy`, `theft_replay`, `theft_surplus`

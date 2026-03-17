@@ -31,6 +31,34 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | oracle_logic | oracle_price_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - borrow
+  - burn
+  - chainlink_specific
+  - deposit
+  - deviation_exploit
+  - dos
+  - frontrunning
+  - getPrice
+  - mint
+  - missing_stake
+  - msg.sender
+  - price
+  - price_manipulation
+  - queryExchangeRate
+  - stale_price
+  - update
+  - withdraw
+  - wrong_price_usage
 ---
 
 ## References & Source Reports
@@ -120,6 +148,38 @@ version: all
 Implementation flaw in oracle stale price logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 5 audit reports with severity distribution: HIGH: 1, MEDIUM: 4.
 
 > **Key Finding**: This bug report discusses a vulnerability in the Renzo protocol that allows for exploitation of the system by manipulating asset prices. This can result in value being lost to malicious actors and causing losses for ezETH holders. The report outlines three possible scenarios in which this vulnerabil
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | oracle_logic | oracle_price_vulnerabilities`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `oracle_logic`
+- High-signal code keywords: `borrow`, `burn`, `chainlink_specific`, `deposit`, `deviation_exploit`, `dos`, `frontrunning`, `getPrice`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `implements.function -> on.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -746,3 +806,24 @@ grep -rn 'oracle|wrong|price|usage' --include='*.go' --include='*.sol'
 ## Keywords
 
 `able`, `aggregator`, `allows`, `appchain`, `arbitrage`, `asset`, `assets`, `avoid`, `borrow`, `bridge`, `captokendecimals`, `causes`, `chainlink`, `chainlinkadapteroracle`, `changes`, `check`, `cosmos`, `decrease`, `deviation`, `discrepancy`, `dos`, `dosing`, `enforce`, `exploit`, `exploits`, `failure`, `freeze`, `from`, `frontrun`, `frontrunning`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`appchain`, `borrow`, `burn`, `chainlink_specific`, `cosmos`, `defi`, `deposit`, `deviation_exploit`, `dos`, `frontrunning`, `getPrice`, `mint`, `missing_stake`, `msg.sender`, `oracle`, `oracle_price_vulnerabilities`, `price`, `price_manipulation`, `queryExchangeRate`, `staking`, `stale_price`, `update`, `withdraw`, `wrong_price_usage`

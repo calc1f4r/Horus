@@ -45,6 +45,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | ccip_router | chainlink_ccip_integration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - CCIP
+  - Client.EVM2AnyMessage
+  - EVMExtraArgsV2
+  - _ccipReceive
+  - allowOutOfOrderExecution
+  - ccipReceive
+  - ccipSend
+  - chainSelector
+  - decodeBridgeSendPayload
+  - extraArgs
+  - gasLimit
+  - getRouter
+  - mint
+  - msg.sender
+  - processMessage
+  - receive
+  - receiveMessage
+  - router
+  - sendMessage
+  - sender
 ---
 
 ## References & Source Reports
@@ -108,6 +138,38 @@ CCIP messages carry encoded payloads that must be decoded correctly. Mismatches 
 
 > **📚 Source Reports for Deep Dive:**
 > - `reports/chainlink_findings/all-ccip-messages-reverts-when-decoded.md`
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | ccip_router | chainlink_ccip_integration`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `ccip_router|message_handling|token_transfer`
+- High-signal code keywords: `CCIP`, `Client.EVM2AnyMessage`, `EVMExtraArgsV2`, `_ccipReceive`, `allowOutOfOrderExecution`, `ccipReceive`, `ccipSend`, `chainSelector`
+- Typical sink / impact: `fund_loss|dos|message_failure`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `MyCCIPReceiver.function -> attempts.function -> function.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -598,3 +660,24 @@ function sendMessage(address receiver, bytes memory data) external {
 - [Chainlink Price Feed Vulnerabilities](./CHAINLINK_PRICE_FEED_VULNERABILITIES.md)
 - [Chainlink VRF Vulnerabilities](./CHAINLINK_VRF_VULNERABILITIES.md)
 - [Chainlink Automation Vulnerabilities](./CHAINLINK_AUTOMATION_VULNERABILITIES.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`CCIP`, `Client.EVM2AnyMessage`, `EVMExtraArgsV2`, `_ccipReceive`, `allowOutOfOrderExecution`, `bridge`, `ccipReceive`, `ccipSend`, `chainSelector`, `chainlink_ccip_integration`, `cross_chain`, `decodeBridgeSendPayload`, `defi`, `extraArgs`, `gasLimit`, `getRouter`, `messaging`, `mint`, `msg.sender`, `processMessage`, `receive`, `receiveMessage`, `router`, `sendMessage`, `sender`, `sourceChain`, `token_transfer`

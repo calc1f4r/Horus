@@ -47,6 +47,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | Mailbox | hyperlane_integration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - ISM
+  - Mailbox
+  - TokenRouter
+  - WarpRoute
+  - _estimateGas
+  - _handle
+  - deploy
+  - dispatch
+  - enrollRemoteRouter
+  - enrollRemoteRouters
+  - handle
+  - interchainSecurityModule
+  - mint
+  - moduleType
+  - msg.sender
+  - payForGas
+  - process
+  - quoteGasPayment
+  - receive
+  - retryFailedMessage
 ---
 
 ## References & Source Reports
@@ -94,6 +124,38 @@ Hyperlane's Interchain Security Module (ISM) is the core security primitive. Eac
 
 > **📚 Source Reports for Deep Dive:**
 > - `reports/bridge_crosschain_findings/m-02-missing-ism-validation.md` (OtterSec)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | Mailbox | hyperlane_integration`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `Mailbox|ISM|Router|Warp`
+- High-signal code keywords: `ISM`, `Mailbox`, `TokenRouter`, `WarpRoute`, `_estimateGas`, `_handle`, `deploy`, `dispatch`
+- Typical sink / impact: `unlimited_minting|fund_loss|message_replay|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `AlwaysTrueISM.function -> DeploySecureReceiver.function -> HardcodedGas.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -673,3 +735,24 @@ contract SecureGasPayment is Router {
 - [LayerZero Integration Issues](../layerzero/layerzero-integration-vulnerabilities.md)
 - [Wormhole Integration Issues](../wormhole/wormhole-integration-vulnerabilities.md)
 - [Cross-Chain Replay Attacks](../custom/cross-chain-replay-vulnerabilities.md)
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`ISM`, `Mailbox`, `TokenRouter`, `WarpRoute`, `_estimateGas`, `_handle`, `bridge`, `cross_chain`, `defi`, `deploy`, `dispatch`, `enrollRemoteRouter`, `enrollRemoteRouters`, `handle`, `hyperlane`, `hyperlane_integration`, `interchain`, `interchainSecurityModule`, `ism`, `mailbox`, `mint`, `moduleType`, `msg.sender`, `payForGas`, `process`, `quoteGasPayment`, `receive`, `retryFailedMessage`, `routers`

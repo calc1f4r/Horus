@@ -53,6 +53,35 @@ tags:
 # Version Info
 language: go|move|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | bridge_committee | bridge_security
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - ObserveInTx
+  - axelar_gateway
+  - blocklist
+  - bridge_message
+  - burn
+  - cctx
+  - coin_type
+  - committee
+  - deposit
+  - epoch
+  - flow_limiter
+  - gas_price
+  - inbound_tx
+  - nonce
+  - outbound_tx
+  - receiver_module
+  - sui_bridge
+  - tss_signer
+  - zetaclient
 ---
 
 ## References & Source Reports
@@ -118,6 +147,38 @@ When ZetaChain processes a cross-chain call from EVM → Sui, the EVM state chan
 
 > **Validation strength**: Strong — 1 HIGH report from Sherlock on ZetaChain
 > **Frequency**: 1/69 reports
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | bridge_committee | bridge_security`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `bridge_committee|cctx|gas_price|coin_type|receiver_validation|nonce|evm_state|flow_limiter`
+- High-signal code keywords: `ObserveInTx`, `axelar_gateway`, `blocklist`, `bridge_message`, `burn`, `cctx`, `coin_type`, `committee`
+- Typical sink / impact: `fund_loss|dos|state_corruption|chain_halt`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `bridge_committee.function -> cctx.function -> coin_type.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -589,3 +650,24 @@ See [DeFi Logic Entry, Section 5](SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md#5-wrong
 - `DB/bridge/` — Generic bridge vulnerability patterns
 - `DB/bridge/layerzero/` — LayerZero-specific patterns
 - `DB/bridge/wormhole/` — Wormhole-specific patterns
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`ObserveInTx`, `axelar`, `axelar_gateway`, `blocklist`, `bridge`, `bridge_message`, `bridge_security|cross_chain_messaging|state_sync|inbound_validation`, `burn`, `cctx`, `coin_type`, `committee`, `cross_chain`, `cross_chain_bridge`, `deposit`, `epoch`, `evm`, `flow_limiter`, `gas_price`, `go`, `inbound_tx`, `nonce`, `outbound_tx`, `receiver_module`, `rust`, `sui`, `sui_bridge`, `tss`, `tss_signer`, `zetachain`, `zetaclient`

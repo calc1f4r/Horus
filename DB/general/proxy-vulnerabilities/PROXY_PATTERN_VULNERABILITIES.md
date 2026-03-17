@@ -45,6 +45,36 @@ tags:
 
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: storage_layout_error
+pattern_key: storage_layout_error | proxy_contract_system | proxy_implementation
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - UUPS_proxy
+  - _authorizeUpgrade
+  - _getImplementation
+  - access_control
+  - addToWhitelist
+  - address
+  - admin
+  - approve
+  - batch
+  - beacon_proxy
+  - clone_factory
+  - createGauge
+  - delegatecall
+  - deployCounterfactualWallet
+  - deployFor
+  - diamond_proxy
+  - emergencyWithdraw
+  - execute
+  - executeAction
+  - executeOnWhitelisted
 ---
 
 ## Reference
@@ -57,6 +87,38 @@ version: all
 ### Overview
 
 Proxy patterns enable contract upgradeability in Ethereum smart contracts, but introduce complex security challenges spanning initialization vulnerabilities, storage collisions, access control bypasses, implementation destruction, selector clashing, clone validation flaws, and metamorphic contract risks. These vulnerabilities can lead to complete protocol compromise, fund loss, or contract bricking across transparent proxies, UUPS (Universal Upgradeable Proxy Standard), beacon proxies, diamond patterns (EIP-2535), and minimal proxy clones.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of storage_layout_error"
+- Pattern key: `storage_layout_error | proxy_contract_system | proxy_implementation`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `proxy_contract_system`
+- High-signal code keywords: `UUPS_proxy`, `_authorizeUpgrade`, `_getImplementation`, `access_control`, `addToWhitelist`, `address`, `admin`, `approve`
+- Typical sink / impact: `contract_takeover`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `BeaconDS.function -> CLGaugeFactory.function -> CustomProxy.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Storage slot collision between proxy and implementation contracts
+- Signal 2: Upgrade changes storage layout order, corrupting existing state
+- Signal 3: Diamond proxy selector collision between facets
+- Signal 4: Inherited contract storage layout breaks upgrade compatibility
+
+#### False Positive Guards
+
+- Not this bug when: Storage gaps used in all upgradeable base contracts
+- Safe if: Upgrade tested with storage layout comparison tooling
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1701,3 +1763,24 @@ contract SecureSwapImpl is Initializable {
 **Code Patterns:** constructor_disable_initializers, storage_gap_declaration, upgradeable_library_import, EIP1967_storage_slot, authorize_upgrade, proxy_fallback, delegatecall_forwarding, clone_verification, batch_delegatecall, ownership_transfer_reset, create2_salt_composition, entrypoint_in_salt, code_length_check, codehash_verification, variable_declaration_initialization
 
 **Impact Keywords:** contract_bricked, funds_locked, storage_overwrite, upgrade_failure, initialization_exploit, implementation_compromised, proxy_admin_capture, total_value_locked, permanent_dos, token_drainage, permission_abuse, allowance_exploit, address_hijack, broken_accounts, stuck_tokens, registry_block
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`EIP1967`, `OpenZeppelin`, `UUPS_proxy`, `_authorizeUpgrade`, `_getImplementation`, `access_control`, `addToWhitelist`, `address`, `admin`, `approve`, `batch`, `beacon_proxy`, `clone_factory`, `clone_validation`, `createGauge`, `delegatecall`, `delegatecall_pattern`, `deployCounterfactualWallet`, `deployFor`, `diamond_proxy`, `emergencyWithdraw`, `execute`, `executeAction`, `executeOnWhitelisted`, `implementation_contract`, `implementation_security`, `initialization`, `initialization_vulnerability`, `metamorphic_contracts`, `minimal_proxy`, `proxy_implementation`, `proxy_pattern`, `storage_collision`, `storage_layout`, `transparent_proxy`, `upgradeable_contracts`, `upgradeable_proxy`

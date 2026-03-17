@@ -43,6 +43,36 @@ tags:
 # Version Info
 language: solidity
 version: ">=0.6.0"
+
+# Pattern Identity (Required)
+root_cause_family: missing_frontrun_protection
+pattern_key: missing_frontrun_protection | swap_functions, bonding_curves, reward_distribution, liquidity_management | sandwich_attack_mev
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _setTicks
+  - _swap
+  - addLiquidity
+  - amountOutMin
+  - approve
+  - atomic
+  - back_running
+  - balanceOf
+  - block.timestamp
+  - borrow
+  - burn
+  - buyPrincipalToken
+  - buyUnderlying
+  - deposit
+  - flash_loan
+  - front
+  - front_running
+  - function
+  - getPrice
+  - harvest
 ---
 
 ## References
@@ -69,6 +99,38 @@ version: ">=0.6.0"
 ### Overview
 
 Bonding curves, on-chain swaps, and reward distribution mechanisms are systematically exploitable through sandwich attacks, MEV extraction, and front-running when they lack proper slippage protection, use dynamically-computed minimums on-chain, rely on spot prices from AMMs, or have predictable state-changing admin operations. These vulnerabilities allow attackers to manipulate prices before/after victim transactions and extract value from protocols and users.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_frontrun_protection"
+- Pattern key: `missing_frontrun_protection | swap_functions, bonding_curves, reward_distribution, liquidity_management | sandwich_attack_mev`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `swap_functions, bonding_curves, reward_distribution, liquidity_management`
+- High-signal code keywords: `_setTicks`, `_swap`, `addLiquidity`, `amountOutMin`, `approve`, `atomic`, `back_running`, `balanceOf`
+- Typical sink / impact: `fund_loss`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `SponsorVault.function -> sells.function -> strategy.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Transaction can be frontrun by MEV bots observing the mempool
+- Signal 2: No commit-reveal or private mempool protection for sensitive operations
+- Signal 3: Slippage tolerance set too high or user-controllable without minimum enforcement
+- Signal 4: Swap execution lacks deadline parameter or uses block.timestamp as deadline
+
+#### False Positive Guards
+
+- Not this bug when: Transaction uses private mempool (Flashbots) or commit-reveal scheme
+- Safe if: Slippage protection with reasonable bounds is enforced
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -898,3 +960,24 @@ function harvest(
 - ERC4626 vault inflation attacks (similar front-running vector)
 - Governance proposal front-running
 - Liquidity pool share manipulation
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_setTicks`, `_swap`, `addLiquidity`, `amm`, `amountOutMin`, `approve`, `atomic`, `back_running`, `balanceOf`, `block.timestamp`, `bonding_curve`, `borrow`, `burn`, `buyPrincipalToken`, `buyUnderlying`, `defi`, `deposit`, `dex`, `economic`, `flash_loan`, `front`, `front_running`, `function`, `getPrice`, `harvest`, `liquidity_manipulation`, `mempool_monitoring`, `mev`, `oracle_price`, `price_manipulation`, `sandwich_attack`, `sandwich_attack_mev`, `slippage`, `slippage_protection`, `spot_price`, `uniswap`

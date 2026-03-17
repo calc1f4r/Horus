@@ -37,6 +37,29 @@ tags:
 # Version Info (Optional)
 language: solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | pricing_logic | stablecoin_pricing_assumptions
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - block.timestamp
+  - collateral_valuation
+  - decimal_normalization
+  - depeg_tolerance
+  - getPrice
+  - mint
+  - mint_redeem
+  - msg.sender
+  - oracle_price_feed
+  - receive
+  - safeTransferFrom
+  - stableToUsd
+  - stablecoin_peg
 ---
 
 ## References & Source Reports
@@ -62,6 +85,38 @@ Stablecoin Pricing Assumptions and Depeg Handling Failures
 ### Overview
 
 This vulnerability exists because missing validation or hardcoded pricing assumptions in stablecoin valuation, mint/redeem, or collateral logic allow depegged assets or mismatched decimals to be treated as $1, leading to incorrect pricing, unfair minting/redemptions, and potential fund loss.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | pricing_logic | stablecoin_pricing_assumptions`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `pricing_logic`
+- High-signal code keywords: `block.timestamp`, `collateral_valuation`, `decimal_normalization`, `depeg_tolerance`, `getPrice`, `mint`, `mint_redeem`, `msg.sender`
+- Typical sink / impact: `incorrect_pricing`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -230,3 +285,23 @@ function mint(address to, uint256 amount) external {
 - [DB/general/missing-validations](DB/general/missing-validations)
 - [DB/general/rounding-precision-loss](DB/general/rounding-precision-loss)
 - [DB/general/slippage-protection](DB/general/slippage-protection)
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`block.timestamp`, `collateral`, `collateral_valuation`, `decimal_normalization`, `defi`, `depeg`, `depeg_tolerance`, `getPrice`, `logic`, `mint`, `mint_redeem`, `minting`, `msg.sender`, `oracle`, `oracle_price_feed`, `pricing`, `receive`, `safeTransferFrom`, `stableToUsd`, `stablecoin`, `stablecoin_peg`, `stablecoin_pricing_assumptions`

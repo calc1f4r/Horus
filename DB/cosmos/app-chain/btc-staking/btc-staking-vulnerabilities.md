@@ -31,6 +31,31 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | btc_staking_logic | btc_staking_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - AddBTCDelegationInclusionProof
+  - HandleConfirmedBlock
+  - change_output
+  - covenant_signature
+  - delegation_finality
+  - deposit
+  - getSpentUnbondingTx
+  - if
+  - ms
+  - slashable_stake
+  - staking_indexer
+  - staking_tx_validation
+  - that
+  - timestamp_verification
+  - unbonding_handling
 ---
 
 ## References & Source Reports
@@ -114,6 +139,38 @@ version: all
 Implementation flaw in btc staking tx validation logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 2 audit reports with severity distribution: MEDIUM: 2.
 
 > **Key Finding**: This bug report discusses issues with the validation of properties in the Babylon deposit MFA request in the code for the Lombard platform. Specifically, it points out that certain properties are not being properly validated, which could lead to potential loss of funds or liquidity issues for Lombar
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | btc_staking_logic | btc_staking_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `btc_staking_logic`
+- High-signal code keywords: `AddBTCDelegationInclusionProof`, `HandleConfirmedBlock`, `change_output`, `covenant_signature`, `delegation_finality`, `deposit`, `getSpentUnbondingTx`, `if`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `N/A`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -779,3 +836,24 @@ grep -rn 'btc|timestamp|verification' --include='*.go' --include='*.sol'
 ## Keywords
 
 `action`, `allows`, `appchain`, `babylon`, `back`, `before`, `bitcoin`, `blocks`, `bricked`, `btc`, `btc staking`, `btcstaking`, `case`, `change`, `coinbase`, `configurationdepth`, `consensus`, `cosmos`, `covenant`, `delegation`, `deposit`, `dismissing`, `does`, `ensures`, `entropy`, `even`, `events`, `expired`, `finality`, `fork`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`AddBTCDelegationInclusionProof`, `HandleConfirmedBlock`, `appchain`, `btc_staking`, `btc_staking_vulnerabilities`, `change_output`, `cosmos`, `covenant_signature`, `defi`, `delegation_finality`, `deposit`, `getSpentUnbondingTx`, `if`, `ms`, `slashable_stake`, `staking`, `staking_indexer`, `staking_tx_validation`, `that`, `timestamp_verification`, `unbonding_handling`

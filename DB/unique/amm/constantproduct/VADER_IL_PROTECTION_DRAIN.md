@@ -29,7 +29,39 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | reserve_drain | impermanent_loss_manipulation
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - addLiquidity
+  - attack
+  - block.timestamp
+  - borrow
+  - burn
+  - calculateIL
+  - claimILProtection
+  - createPool
+  - deposit
+  - flashLoan
+  - getPrice
+  - mint
+  - msg.sender
+  - repay
+  - swap
 ---
+
+## References & Source Reports
+
+| Label | Path | Severity | Auditor | Source ID / Link |
+|-------|------|----------|---------|------------------|
+| [Vader Protocol] | reports/constantproduct/h-06-lps-of-vaderpoolv2-can-manipulate-pool-reserves-to-extract-funds-from-the-r.md | HIGH | Code4rena | - |
+
 
 # Vader Protocol - Impermanent Loss Protection Reserve Drain
 
@@ -45,6 +77,38 @@ version: all
 ## Overview
 
 Vader Protocol implemented Impermanent Loss (IL) protection that compensated LPs from a reserve when they withdrew liquidity at a loss. The IL calculation used spot prices at withdrawal time, allowing attackers to artificially engineer massive IL through flash loans, then collect compensation from the reserve in VADER tokens.
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | reserve_drain | impermanent_loss_manipulation`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `reserve_drain`
+- High-signal code keywords: `addLiquidity`, `attack`, `block.timestamp`, `borrow`, `burn`, `calculateIL`, `claimILProtection`, `createPool`
+- Typical sink / impact: `reserve_drainage`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `MaliciousTokenAttack.function -> SecureILProtection.function -> VaderDrainer.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ## Why This Is Unique to Vader
 
@@ -218,3 +282,24 @@ contract SecureILProtection {
 ## Keywords
 
 `impermanent_loss`, `IL_protection`, `reserve_drain`, `flash_loan_attack`, `spot_price_manipulation`, `vader`, `pool_manipulation`, `permissionless_pairs`, `TWAP`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`addLiquidity`, `amm`, `attack`, `block.timestamp`, `borrow`, `burn`, `calculateIL`, `claimILProtection`, `createPool`, `deposit`, `flashLoan`, `flash_loan`, `getPrice`, `impermanent_loss`, `impermanent_loss_manipulation`, `mint`, `msg.sender`, `pool_manipulation`, `repay`, `reserve_drain`, `swap`

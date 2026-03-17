@@ -33,6 +33,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: missing_validation
+pattern_key: missing_validation | validation_logic | input_validation_vulnerabilities
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: single_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - AnteHandle
+  - MintCoins
+  - UnbondDelegation
+  - _checkOnERC721Received
+  - _depositETHForStaking
+  - _initValidatorScore
+  - _safeMint
+  - addValidator
+  - address_normalization
+  - block.timestamp
+  - bounds_missing
+  - burn
+  - closeRebalanceRequests
+  - config_bypass
+  - deposit
+  - detachStakingContract
+  - duplicate_missing
+  - execute
+  - getTotalStake
+  - incorrect_check
 ---
 
 ## References & Source Reports
@@ -171,6 +201,38 @@ version: all
 Implementation flaw in validation zero check missing logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 8 audit reports with severity distribution: HIGH: 4, MEDIUM: 4.
 
 > **Key Finding**: The bug report is about a calculation issue related to the bounty of each validator in the Skale Network. The main change is related to how bounties are calculated for each validator. The problem is that the amount a validator should get is being divided among all nodes, rather than the validator re
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of missing_validation"
+- Pattern key: `missing_validation | validation_logic | input_validation_vulnerabilities`
+- Interaction scope: `single_contract`
+- Primary affected component(s): `validation_logic`
+- High-signal code keywords: `AnteHandle`, `MintCoins`, `UnbondDelegation`, `_checkOnERC721Received`, `_depositETHForStaking`, `_initValidatorScore`, `_safeMint`, `addValidator`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `does.function -> is.function -> parameters.function`
+- Trust boundary crossed: `internal`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: Critical input parameter not validated against expected range or format
+- Signal 2: Oracle data consumed without staleness check or sanity bounds
+- Signal 3: User-supplied address or calldata forwarded without validation
+- Signal 4: Missing check allows operation under invalid or stale state
+
+#### False Positive Guards
+
+- Not this bug when: Validation exists but is in an upstream function caller
+- Safe if: Parameter range is inherently bounded by the type or protocol invariant
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1457,3 +1519,24 @@ grep -rn 'validation|logic|error' --include='*.go' --include='*.sol'
 ## Keywords
 
 `able`, `access`, `accounting`, `address`, `addresses`, `allow`, `allows`, `antehandler`, `appchain`, `attack`, `attacker`, `avoid`, `back`, `bloating`, `bounds`, `bounty`, `bypass`, `bypasses`, `causes`, `change`, `changes`, `check`, `checked`, `checks`, `claim`, `coin`, `config`, `control`, `convert`, `cosmos`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`AnteHandle`, `MintCoins`, `UnbondDelegation`, `_checkOnERC721Received`, `_depositETHForStaking`, `_initValidatorScore`, `_safeMint`, `addValidator`, `address_normalization`, `appchain`, `block.timestamp`, `bounds_missing`, `burn`, `closeRebalanceRequests`, `config_bypass`, `cosmos`, `defi`, `deposit`, `detachStakingContract`, `duplicate_missing`, `execute`, `getTotalStake`, `incorrect_check`, `input_general`, `input_validation_vulnerabilities`, `logic_error`, `percentage_overflow`, `staking`, `state_check_missing`, `validation`, `zero_check_missing`

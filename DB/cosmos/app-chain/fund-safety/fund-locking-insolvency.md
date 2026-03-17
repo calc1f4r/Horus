@@ -31,6 +31,36 @@ tags:
 
 language: go|solidity|rust
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: logic_error
+pattern_key: logic_error | fund_safety_logic | fund_locking_insolvency
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _lock
+  - a
+  - approve
+  - bad_debt
+  - balanceOf
+  - before
+  - blameOperator
+  - block.timestamp
+  - calcAndCacheStakes
+  - deposit
+  - getRewards
+  - getTotalAssetTVL
+  - insolvency_protocol
+  - insolvency_rebase
+  - insolvency_slash
+  - lock_conditional
+  - lock_permanent
+  - locking
+  - mint
+  - of
 ---
 
 ## References & Source Reports
@@ -151,6 +181,38 @@ version: all
 Implementation flaw in funds lock permanent logic allows exploitation through missing validation, incorrect state handling, or improper access controls. This pattern was found across 17 audit reports with severity distribution: HIGH: 7, MEDIUM: 10.
 
 > **Key Finding**: The `AvalancheL1Middleware::calcAndCacheStakes` function in the Suzaku network has a bug where it does not check if the epoch provided is in the future. This allows attackers to manipulate reward calculations by locking in current stake values for future epochs. This can lead to inflated reward shar
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of logic_error"
+- Pattern key: `logic_error | fund_safety_logic | fund_locking_insolvency`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `fund_safety_logic`
+- High-signal code keywords: `_lock`, `a`, `approve`, `bad_debt`, `balanceOf`, `before`, `blameOperator`, `block.timestamp`
+- Typical sink / impact: `fund_loss|dos|state_corruption`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `H6.function -> bytecode.function -> can.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: State variable updated after external interaction instead of before (CEI violation)
+- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
+- Signal 3: Reward accrual continues during paused/emergency state
+- Signal 4: Edge case in state machine transition allows invalid state
+
+#### False Positive Guards
+
+- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
+- Safe if: Protocol behavior matches documented specification
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -1064,3 +1126,24 @@ grep -rn 'funds|unsafe|casting|loss' --include='*.go' --include='*.sol'
 ## Keywords
 
 `account`, `affect`, `allocation`, `allows`, `appchain`, `attack`, `auctions`, `avoid`, `bad`, `blame`, `blocked`, `bond`, `cache`, `calculations`, `cannot`, `casting`, `change`, `check`, `conditional`, `conditions`, `contract`, `cosmos`, `curve`, `debt`, `deployment`, `distribution`, `during`, `dust`, `dutch`, `emergency`
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_lock`, `a`, `appchain`, `approve`, `bad_debt`, `balanceOf`, `before`, `blameOperator`, `block.timestamp`, `calcAndCacheStakes`, `cosmos`, `defi`, `deposit`, `fund_locking_insolvency`, `fund_safety`, `getRewards`, `getTotalAssetTVL`, `insolvency_protocol`, `insolvency_rebase`, `insolvency_slash`, `lock_conditional`, `lock_permanent`, `locking`, `mint`, `of`, `staking`, `unsafe_casting_loss`, `withdrawal_blocked`

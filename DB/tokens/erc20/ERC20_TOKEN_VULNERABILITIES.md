@@ -47,6 +47,36 @@ tags:
 # Version Info
 language: solidity
 version: all
+
+# Pattern Identity (Required)
+root_cause_family: callback_reentrancy
+pattern_key: callback_reentrancy | token_transfer | erc20_token_integration
+
+# Interaction Scope (Required for multi-contract or multi-path issues)
+interaction_scope: multi_contract
+
+# Grep / Hunt-Card Seeds (Required)
+code_keywords:
+  - _convertToAssets
+  - _convertToShares
+  - addLiquidity
+  - addSupportedToken
+  - adminRecoverStuckFunds
+  - allowance
+  - approve
+  - approveMax
+  - balanceOf
+  - block.timestamp
+  - borrow
+  - burn
+  - burnFrom
+  - buy
+  - buyNFT
+  - calculateCollateralValue
+  - calculateReward
+  - calculateRewardSecure
+  - calculateValue
+  - cancelBlacklistedOrder
 ---
 
 ## References & Source Reports
@@ -137,6 +167,38 @@ ERC20 token transfer operations are the most fundamental yet frequently vulnerab
 > - `reports/erc20_token_findings/h-01-unchecked-erc20-transfers-can-cause-lock-up.md` (Reality Cards - Code4rena)
 > - `reports/erc20_token_findings/m-07-erc20-return-values-not-checked.md` (Amun - Code4rena)
 > - `reports/erc20_token_findings/m-14-solmate-safetransfer-and-safetransferfrom-does-not-check-the-code-size-of-t.md` (Bond Protocol - Sherlock)
+
+
+
+#### Agent Quick View
+
+- Root cause statement: "This vulnerability exists because of callback_reentrancy"
+- Pattern key: `callback_reentrancy | token_transfer | erc20_token_integration`
+- Interaction scope: `multi_contract`
+- Primary affected component(s): `token_transfer|approval|balance|mint_burn|decimals`
+- High-signal code keywords: `_convertToAssets`, `_convertToShares`, `addLiquidity`, `addSupportedToken`, `adminRecoverStuckFunds`, `allowance`, `approve`, `approveMax`
+- Typical sink / impact: `fund_loss|dos|manipulation|accounting_error|locked_funds`
+- Validation strength: `moderate`
+
+#### Contract / Boundary Map
+
+- Entry surface(s): See pattern-specific attack scenarios below
+- Contract hop(s): `CappedToken.function -> Escrow.function -> LendingPool.function`
+- Trust boundary crossed: `callback / external call`
+- Shared state or sync assumption: `state consistency across operations`
+
+#### Valid Bug Signals
+
+- Signal 1: External call (`.call`, `.transfer`, token transfer) occurs before state variable update
+- Signal 2: Token implements callback hooks (ERC-777, ERC-721) and protocol doesn't use `nonReentrant`
+- Signal 3: User-supplied token address passed to `transferFrom` without callback protection
+- Signal 4: Read-only function's return value consumed cross-contract during an active callback window
+
+#### False Positive Guards
+
+- Not this bug when: Contract uses `ReentrancyGuard` (`nonReentrant`) on all entry points
+- Safe if: All state updates complete before any external call (strict CEI)
+- Requires attacker control of: specific conditions per pattern
 
 ### Vulnerability Description
 
@@ -2280,3 +2342,24 @@ This template compounds with:
 ---
 
 *Template generated from analysis of 761+ vulnerability reports from Sherlock, Code4rena, Spearbit, Pashov, and other audit platforms.*
+
+### Detection Patterns
+
+#### Code Patterns to Look For
+```
+- See vulnerable pattern examples above for specific code smells
+- Check for missing validation on critical state-changing operations
+- Look for assumptions about external component behavior
+```
+
+#### Audit Checklist
+- [ ] Verify all state-changing functions have appropriate access controls
+- [ ] Check for CEI pattern compliance on external calls
+- [ ] Validate arithmetic operations for overflow/underflow/precision loss
+- [ ] Confirm oracle data freshness and sanity checks
+
+### Keywords for Search
+
+> These keywords enhance vector search retrieval:
+
+`_convertToAssets`, `_convertToShares`, `addLiquidity`, `addSupportedToken`, `adminRecoverStuckFunds`, `allowance`, `approve`, `approveMax`, `balanceOf`, `block.timestamp`, `borrow`, `bridge`, `burn`, `burnFrom`, `buy`, `buyNFT`, `calculateCollateralValue`, `calculateReward`, `calculateRewardSecure`, `calculateValue`, `cancelBlacklistedOrder`, `decimals`, `defi`, `dex`, `erc20_token_integration`, `external_dependency`, `lending`, `mint`, `safeApprove`, `safeTransfer`, `safeTransferFrom`, `staking`, `token`, `totalSupply`, `transfer`, `transferFrom`, `vault`
