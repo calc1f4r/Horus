@@ -328,7 +328,7 @@ function alternativeSecureImplementation() public {
 6. If there are multiple exploit routes, enumerate them explicitly as `Path A`, `Path B`, `Path C` and give each a `path_key`
 7. Distinguish the family-level `pattern_key` from the path-level keys: keep one `pattern_key` for the vulnerability class, then use `path_keys` for entry-surface / hop-specific variants
 8. Include multiple code examples showing variations
-9. Run `python3 generate_manifests.py` after adding or substantially changing DB content
+9. Run `python3 scripts/generate_manifests.py` after adding or substantially changing DB content
 
 ### 1A. Migrating An Existing Vulnerability Entry
 

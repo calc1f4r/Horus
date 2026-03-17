@@ -652,7 +652,7 @@ def main():
 
     if not HUNTCARDS_DIR.exists():
         print(f"❌ Hunt cards directory not found: {HUNTCARDS_DIR}")
-        print("   Run `python3 generate_manifests.py` first to generate hunt cards.")
+        print("   Run `python3 scripts/generate_manifests.py` first to generate hunt cards.")
         sys.exit(1)
 
     all_cards_path = HUNTCARDS_DIR / "all-huntcards.json"

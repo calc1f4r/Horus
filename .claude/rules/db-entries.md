@@ -18,5 +18,5 @@ When editing or creating vulnerability entries in `DB/`:
 - Include concrete `grep`-able code keywords in frontmatter for hunt card generation
 - Split materially different exploit routes into explicit path variants instead of blending them into one attack story
 - Do not collapse issues that share a root cause but cross different contract boundaries or hop sets into one undifferentiated pattern
-- After creating or modifying entries, regenerate manifests: `python3 generate_manifests.py`
+- After creating or modifying entries, regenerate manifests: `python3 scripts/generate_manifests.py`
 - Never read entire vulnerability files when searching — use `DB/index.json` → manifests → line ranges

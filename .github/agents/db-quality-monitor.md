@@ -6,7 +6,7 @@ tools: [vscode, execute, read, agent, browser, edit, search, todo]
 
 # DB Quality Monitor
 
-Monitors, diagnoses, and **fixes** every layer of the Vulnerability Database and the full agent pipeline that depends on it. Validates that `generate_manifests.py` produces correct output, that manifests deliver accurate context to downstream agents, that hunt cards align with their parent patterns, and that the entire 4-tier search architecture is internally consistent. When issues are found, spawns sub-agents to auto-remediate: patching frontmatter, fixing entries, regenerating manifests, and resolving broken references.
+Monitors, diagnoses, and **fixes** every layer of the Vulnerability Database and the full agent pipeline that depends on it. Validates that `scripts/generate_manifests.py` produces correct output, that manifests deliver accurate context to downstream agents, that hunt cards align with their parent patterns, and that the entire 4-tier search architecture is internally consistent. When issues are found, spawns sub-agents to auto-remediate: patching frontmatter, fixing entries, regenerating manifests, and resolving broken references.
 
 **Do NOT use for** creating new entries from scratch (use `variant-template-writer` / `defihacklabs-indexer`), auditing codebases (use `audit-orchestrator`), or bulk report fetching (use `solodit-fetching`).
 
@@ -160,7 +160,7 @@ Compute aggregate stats:
 
 ## Skill 2: Manifest Integrity
 
-Verifies that `generate_manifests.py` produces correct, current output.
+Verifies that `scripts/generate_manifests.py` produces correct, current output.
 
 ### 2A: Staleness Detection
 
@@ -171,7 +171,7 @@ cp -r DB/manifests /tmp/db-quality-check/manifests-snapshot
 cp DB/index.json /tmp/db-quality-check/index-snapshot.json
 
 # Regenerate fresh
-python3 generate_manifests.py
+python3 scripts/generate_manifests.py
 
 # Diff committed vs fresh
 diff -rq DB/manifests /tmp/db-quality-check/manifests-snapshot
@@ -187,10 +187,10 @@ If ANY diff exists → manifests are stale. Report which files changed and what 
 
 ### 2B: Generator Script Health
 
-Verify `generate_manifests.py` runs without errors:
+Verify `scripts/generate_manifests.py` runs without errors:
 
 ```bash
-python3 generate_manifests.py 2>&1 | tail -20
+python3 scripts/generate_manifests.py 2>&1 | tail -20
 echo "Exit code: $?"
 ```
 
@@ -202,7 +202,7 @@ Check:
 
 ### 2C: CATEGORY_MAP Completeness
 
-Read `generate_manifests.py` and extract the `CATEGORY_MAP` dict. Verify:
+Read `scripts/generate_manifests.py` and extract the `CATEGORY_MAP` dict. Verify:
 
 1. Every top-level directory under `DB/` (excluding `manifests/`) has a mapping in `CATEGORY_MAP`.
 2. Every folder listed in `CATEGORY_MAP` values actually exists on disk.
@@ -232,7 +232,7 @@ For each `DB/manifests/<name>.json`, verify:
 
 ### 2E: Manifest Split Logic (general → general-*)
 
-The `general/` folder splits into 4 manifests: `general-security`, `general-defi`, `general-infrastructure`, `general-governance`. Verify the split rules in `generate_manifests.py`:
+The `general/` folder splits into 4 manifests: `general-security`, `general-defi`, `general-infrastructure`, `general-governance`. Verify the split rules in `scripts/generate_manifests.py`:
 
 1. Read the split logic (`GENERAL_SUBCAT_MAP` or equivalent).
 2. Verify every file under `DB/general/*/` is assigned to exactly one of the 4 sub-manifests.
@@ -393,7 +393,7 @@ Already tested in Skill 2B. Additionally check:
 
 ```bash
 # Verify output file creation
-python3 generate_manifests.py
+python3 scripts/generate_manifests.py
 ls -la DB/manifests/*.json | wc -l          # Expected: N manifests + keywords.json
 ls -la DB/manifests/huntcards/*.json | wc -l # Expected: N per-manifest + all-huntcards.json
 ```
@@ -680,11 +680,11 @@ Switch to **diagnose-and-fix mode**. After each skill completes, immediately rem
 
 | Issue Type | Auto-Fix? | How | Sub-Agent? |
 |------------|-----------|-----|------------|
-| Stale manifests | ✅ YES | Run `python3 generate_manifests.py` | No — run directly in terminal |
+| Stale manifests | ✅ YES | Run `python3 scripts/generate_manifests.py` | No — run directly in terminal |
 | Missing frontmatter fields | ✅ YES | Patch YAML frontmatter in each file | Self — edit file directly |
 | Invalid frontmatter values | ✅ YES | Correct enum values (`MID` → `MEDIUM`, etc.) | Self — edit file directly |
 | Orphaned .md files not in manifests | ✅ YES | Regenerate manifests to pick them up, or fix CATEGORY_MAP | Self — terminal + edit |
-| Broken hunt card `ref` paths | ✅ YES | Regenerate manifests (hunt cards are auto-generated) | No — run `python3 generate_manifests.py` |
+| Broken hunt card `ref` paths | ✅ YES | Regenerate manifests (hunt cards are auto-generated) | No — run `python3 scripts/generate_manifests.py` |
 | Missing Keywords section | ✅ YES | Spawn `Explore` sub-agent to read entry, then add keywords | Yes — `Explore` for context |
 | Legacy entry missing new low-context sections | ⚠️ CONFIRM | Spawn `variant-template-writer` to migrate to current template | Yes — needs user confirmation |
 | Stub entries (< 50 lines) | ⚠️ CONFIRM | Spawn `variant-template-writer` to expand from reports | Yes — needs user confirmation |
@@ -692,8 +692,8 @@ Switch to **diagnose-and-fix mode**. After each skill completes, immediately rem
 | Broken internal links | ✅ YES | Update link targets or remove dead links | Self — edit file directly |
 | Duplicate patterns across manifests | ⚠️ CONFIRM | Present dedup plan, ask user before merging | No — report only unless confirmed |
 | Script bugs / import errors | 🔴 NO | Report with exact traceback — requires human fix | No — report only |
-| protocolContext missing manifests | ✅ YES | Edit `generate_manifests.py` `add_protocol_context()` | Self — edit file directly |
-| Empty grep patterns in hunt cards | ✅ YES | Regenerate manifests (grep patterns are auto-generated) | No — run `python3 generate_manifests.py` |
+| protocolContext missing manifests | ✅ YES | Edit `scripts/generate_manifests.py` `add_protocol_context()` | Self — edit file directly |
+| Empty grep patterns in hunt cards | ✅ YES | Regenerate manifests (grep patterns are auto-generated) | No — run `python3 scripts/generate_manifests.py` |
 | Severity inconsistency (FM vs body) | ✅ YES | Update frontmatter to match body consensus | Self — edit file directly |
 
 ### Sub-Agent Spawning Patterns
@@ -746,7 +746,7 @@ When many entries are missing the same frontmatter field, fix them in batches:
 The most common fix — resolves stale manifests, broken hunt cards, count mismatches:
 
 ```bash
-python3 generate_manifests.py
+python3 scripts/generate_manifests.py
 ```
 
 After regeneration, re-run Skills 2-4 as a **post-regeneration verification** to confirm the fix worked.
@@ -796,7 +796,7 @@ Run Skills 4-6 only. Use when an audit agent reported wrong context or missing p
 Pipeline Diagnosis + fix broken references, regenerate manifests, verify context delivery.
 
 ### Post-Regeneration Verification
-Run Skills 2-4. Use immediately after running `python3 generate_manifests.py` to verify the output.
+Run Skills 2-4. Use immediately after running `python3 scripts/generate_manifests.py` to verify the output.
 
 Infer the mode from the user's request. Use keywords like "fix", "repair", "clean up", "remediate" to activate fix mode. Default to diagnose-only full audit if unspecified.
 
@@ -836,7 +836,7 @@ Every reported issue gets one of:
 | `DB/manifests/huntcards/*.json` | Tier 1.5 hunt cards | 3, 6 |
 | `DB/manifests/keywords.json` | Keyword routing | 4, 6 |
 | `TEMPLATE.md` | Entry structure reference | 1 |
-| `generate_manifests.py` | Manifest generation logic | 2 |
+| `scripts/generate_manifests.py` | Manifest generation logic | 2 |
 | `scripts/grep_prune.py` | Hunt card grep-pruning | 5 |
 | `scripts/partition_shards.py` | Shard partitioning | 5 |
 | `scripts/merge_shard_findings.py` | Finding deduplication | 5 |

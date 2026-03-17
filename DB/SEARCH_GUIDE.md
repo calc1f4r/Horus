@@ -365,7 +365,7 @@ This approach lets an agent hold ALL vulnerability detection patterns AND verifi
 When vulnerability files are added or updated, re-run:
 
 ```bash
-python3 generate_manifests.py
+python3 scripts/generate_manifests.py
 ```
 
 This will:

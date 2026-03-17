@@ -21,7 +21,7 @@ Thank you for contributing to the Vulnerability Database. This guide covers how 
 
 4. **Regenerate manifests**:
    ```bash
-   python3 generate_manifests.py
+   python3 scripts/generate_manifests.py
    ```
 
 5. **Verify** the new entry appears correctly in `DB/manifests/*.json` and `DB/index.json`.

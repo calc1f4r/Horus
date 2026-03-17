@@ -188,7 +188,7 @@ Verification Gate:
 After creating the entry, regenerate the search manifests:
 
 ```bash
-python3 generate_manifests.py
+python3 scripts/generate_manifests.py
 ```
 
 This auto-updates `DB/index.json` and all `DB/manifests/*.json` files. See the [manifest update guide](../resources/index-update-guide.md) for verification steps and tips for better indexing.
@@ -251,13 +251,13 @@ Before finalizing, systematically expand coverage:
 
 Each analysis produces:
 1. **Database entry** → new file OR migrated existing file under `DB/**`
-2. **Manifest regeneration** → Run `python3 generate_manifests.py` to update all manifests
+2. **Manifest regeneration** → Run `python3 scripts/generate_manifests.py` to update all manifests
 
 ---
 
 ## Critical Rules
 
-**MUST**: Analyze 5+ reports per pattern. Verify all file paths exist. Label every example with source + severity. Document pattern frequency. Use the lowest severity when reports disagree. Apply falsification protocol. Migrate touched legacy entries to the current template. Run `python3 generate_manifests.py` after creating or migrating entries.
+**MUST**: Analyze 5+ reports per pattern. Verify all file paths exist. Label every example with source + severity. Document pattern frequency. Use the lowest severity when reports disagree. Apply falsification protocol. Migrate touched legacy entries to the current template. Run `python3 scripts/generate_manifests.py` after creating or migrating entries.
 
 **NEVER**: Overstate severity. Hallucinate references. Create unlabeled synthetic examples. Base entries on single reports. Use vague descriptions. Skip frequency documentation. Assume severity. Create a duplicate DB entry when an existing file can be migrated.
 
