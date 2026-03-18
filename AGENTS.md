@@ -11,8 +11,11 @@ Use this file as the Codex entry point. For the full system map, read `docs/code
 - `TEMPLATE.md`: required structure for new or migrated DB entries.
 - `scripts/db_quality_check.py`: structural verification for the DB and search artifacts.
 - `DB/index.json`: runtime router for search, but generated from DB content plus generator logic.
+- `.claude/skills`, `.claude/agents`, `.claude/resources`, `.claude/rules`: source of truth for the portable audit playbooks.
+- `codex/`: generated Codex/GPT compatibility mirror of the `.claude/` playbooks.
 
 Do not hand-edit generated manifest or hunt-card JSON unless the user explicitly asks for that. Change the source Markdown or the generator instead.
+Do not hand-edit generated files under `codex/`. Change the source `.claude/` files or the sync script, then regenerate the mirror.
 
 ## Repo Mental Model
 
@@ -34,6 +37,7 @@ Do not hand-edit generated manifest or hunt-card JSON unless the user explicitly
 4. Audit workflow layer
    - `scripts/grep_prune.py`, `scripts/partition_shards.py`, and `scripts/merge_shard_findings.py` implement the DB-powered hunting loop.
    - `.claude/` and `.github/agents/` contain agent playbooks for the larger multi-phase audit pipeline.
+   - `codex/` mirrors the `.claude/` playbooks in a Codex/GPT-friendly layout.
 
 ## Start Here By Task
 
@@ -69,7 +73,10 @@ python3 scripts/db_quality_check.py
 
 ### Work on the audit pipeline
 
-- Read `.github/agents/audit-orchestrator.md` or `.claude/agents/audit-orchestrator.md` for the high-level flow.
+- For Codex/GPT use, start with `codex/README.md`, `codex/CATALOG.md`, or `codex/FLOWS.md`.
+- Read `codex/skills/<name>/SKILL.md` first, then `codex/agents/<name>.md`.
+- If you are changing the source playbooks, edit `.claude/` and rerun `python3 scripts/sync_codex_compat.py`.
+- Read `.github/agents/audit-orchestrator.md` or `.claude/agents/audit-orchestrator.md` when you need to compare the source trees directly.
 - Read `invariants/README.md` for the invariant library role.
 - Read `scripts/grep_prune.py`, `scripts/partition_shards.py`, and `scripts/merge_shard_findings.py` for the concrete sharded hunt-card loop.
 
@@ -77,7 +84,9 @@ python3 scripts/db_quality_check.py
 
 - Do not read all of `reports/` or all DB Markdown files when the router/manifests/hunt cards can narrow the search first.
 - Do not hand-edit generated manifest or hunt-card files during normal maintenance.
+- Do not hand-edit generated files under `codex/`; regenerate them from `.claude/` with `python3 scripts/sync_codex_compat.py`.
 - If you modify a DB entry, assume manifest regeneration is required.
+- If you modify Claude playbooks, regenerate `codex/` and verify it with `python3 scripts/sync_codex_compat.py --check`.
 - If you modify agent docs, inspect both `.claude/` and `.github/` copies before deciding what to change.
 - Prefer `python3` directly unless the virtualenv has been repaired locally.
 
@@ -87,6 +96,7 @@ python3 scripts/db_quality_check.py
 - The real generator is `scripts/generate_manifests.py`, but several docs and workflows still reference a missing root `generate_manifests.py`.
 - `.claude/agents` and `.github/agents` are duplicated but not byte-identical.
 - `.claude/resources` and `.github/agents/resources` are also not perfectly synchronized.
+- `codex/` is intentionally generated from `.claude/`, not from `.github/agents/`.
 - `scripts/db_quality_check.py` currently checks for a missing root `generate_manifests.py`, so part of its current "BROKEN" summary is repository drift rather than a Codex incompatibility issue.
 
 ## Useful Commands
@@ -94,6 +104,8 @@ python3 scripts/db_quality_check.py
 ```bash
 python3 scripts/generate_manifests.py
 python3 scripts/db_quality_check.py
+python3 scripts/sync_codex_compat.py
+python3 scripts/sync_codex_compat.py --check
 python3 scripts/grep_prune.py <target_path> DB/manifests/huntcards/all-huntcards.json
 python3 scripts/partition_shards.py audit-output/hunt-card-hits.json
 python3 scripts/merge_shard_findings.py audit-output
@@ -103,3 +115,4 @@ python3 scripts/update_codebase_structure.py
 ## Deep Reference
 
 - `docs/codex-architecture.md`: Codex-oriented architecture document for this repository.
+- `codex/README.md`: generated Codex/GPT compatibility layer entry point.
