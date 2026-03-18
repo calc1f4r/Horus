@@ -1,0 +1,105 @@
+# Codex Working Guide
+
+This repository is not a conventional application. It is a security knowledge base plus the automation and agent playbooks that turn that knowledge base into an audit workflow.
+
+Use this file as the Codex entry point. For the full system map, read `docs/codex-architecture.md`.
+
+## What Is Canonical
+
+- `DB/**/*.md`: primary vulnerability content.
+- `scripts/generate_manifests.py`: canonical generator for `DB/index.json`, `DB/manifests/*.json`, and `DB/manifests/huntcards/*.json`.
+- `TEMPLATE.md`: required structure for new or migrated DB entries.
+- `scripts/db_quality_check.py`: structural verification for the DB and search artifacts.
+- `DB/index.json`: runtime router for search, but generated from DB content plus generator logic.
+
+Do not hand-edit generated manifest or hunt-card JSON unless the user explicitly asks for that. Change the source Markdown or the generator instead.
+
+## Repo Mental Model
+
+1. Sources
+   - `reports/`: raw audit findings corpus.
+   - `DeFiHackLabs/`: exploit PoC submodule.
+   - `DB/**/*.md`: curated vulnerability patterns.
+   - `invariants/`: canonical invariant library used by the audit pipeline.
+
+2. Indexing layer
+   - `scripts/generate_manifests.py` parses `DB/**/*.md`.
+   - It emits `DB/index.json`, `DB/manifests/*.json`, `DB/manifests/huntcards/*.json`, and keyword routing.
+
+3. Consumption layer
+   - Agents and tooling start from `DB/index.json`.
+   - They then load per-manifest hunt cards or manifests.
+   - They read targeted line ranges from DB Markdown only after narrowing scope.
+
+4. Audit workflow layer
+   - `scripts/grep_prune.py`, `scripts/partition_shards.py`, and `scripts/merge_shard_findings.py` implement the DB-powered hunting loop.
+   - `.claude/` and `.github/agents/` contain agent playbooks for the larger multi-phase audit pipeline.
+
+## Start Here By Task
+
+### Search or variant analysis
+
+- Read `DB/index.json` first.
+- Prefer `DB/manifests/huntcards/<manifest>-huntcards.json` over reading large Markdown files directly.
+- Use `DB/manifests/*.json` for exact `lineStart` and `lineEnd`.
+- Read only the relevant lines from the target DB entry.
+
+### Add or edit a vulnerability entry
+
+- Read `TEMPLATE.md` and `Example.md`.
+- Follow `docs/db-guide.md` for the tiered search and authoring workflow.
+- If you touch `DB/**/*.md`, run:
+
+```bash
+python3 scripts/generate_manifests.py
+python3 scripts/db_quality_check.py
+```
+
+### Change routing, manifests, or hunt-card behavior
+
+- Edit `scripts/generate_manifests.py`.
+- Regenerate outputs.
+- Verify the resulting router, manifests, and hunt cards with `scripts/db_quality_check.py`.
+
+### Work on raw reports or report artifacts
+
+- Treat `reports/` as a large corpus, not as normal always-loaded context.
+- `scripts/rebuild_report_artifacts.py` rebuilds downloadable artifacts for one fetched report directory.
+- `.github/workflows/split-reports.yml` and `scripts/update_codebase_structure.py` maintain the per-category branch strategy and docs table.
+
+### Work on the audit pipeline
+
+- Read `.github/agents/audit-orchestrator.md` or `.claude/agents/audit-orchestrator.md` for the high-level flow.
+- Read `invariants/README.md` for the invariant library role.
+- Read `scripts/grep_prune.py`, `scripts/partition_shards.py`, and `scripts/merge_shard_findings.py` for the concrete sharded hunt-card loop.
+
+## Rules Codex Should Follow Here
+
+- Do not read all of `reports/` or all DB Markdown files when the router/manifests/hunt cards can narrow the search first.
+- Do not hand-edit generated manifest or hunt-card files during normal maintenance.
+- If you modify a DB entry, assume manifest regeneration is required.
+- If you modify agent docs, inspect both `.claude/` and `.github/` copies before deciding what to change.
+- Prefer `python3` directly unless the virtualenv has been repaired locally.
+
+## Known Inconsistencies
+
+- `.venv` exists, but its Python symlink points to a missing Homebrew Python 3.13 install on this machine. Use system `python3` unless you recreate the venv.
+- The real generator is `scripts/generate_manifests.py`, but several docs and workflows still reference a missing root `generate_manifests.py`.
+- `.claude/agents` and `.github/agents` are duplicated but not byte-identical.
+- `.claude/resources` and `.github/agents/resources` are also not perfectly synchronized.
+- `scripts/db_quality_check.py` currently checks for a missing root `generate_manifests.py`, so part of its current "BROKEN" summary is repository drift rather than a Codex incompatibility issue.
+
+## Useful Commands
+
+```bash
+python3 scripts/generate_manifests.py
+python3 scripts/db_quality_check.py
+python3 scripts/grep_prune.py <target_path> DB/manifests/huntcards/all-huntcards.json
+python3 scripts/partition_shards.py audit-output/hunt-card-hits.json
+python3 scripts/merge_shard_findings.py audit-output
+python3 scripts/update_codebase_structure.py
+```
+
+## Deep Reference
+
+- `docs/codex-architecture.md`: Codex-oriented architecture document for this repository.
