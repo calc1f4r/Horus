@@ -9,14 +9,13 @@ Codex/GPT usage notes and rewriting `.claude/...` links to `codex/...`.
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import re
 import shutil
 from pathlib import Path
 from urllib.parse import unquote
-
-import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -96,15 +95,60 @@ def sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def parse_frontmatter_value(value: str):
+    value = value.strip()
+    if value == "":
+        return ""
+
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return value[1:-1]
+
+    if value.startswith("[") and value.endswith("]"):
+        inner = value[1:-1].strip()
+        if not inner:
+            return []
+        return [item.strip().strip("'\"") for item in inner.split(",") if item.strip()]
+
+    lowered = value.lower()
+    if lowered == "true":
+        return True
+    if lowered == "false":
+        return False
+    if lowered in {"null", "none"}:
+        return None
+
+    if re.fullmatch(r"-?\d+", value):
+        return int(value)
+    if re.fullmatch(r"-?\d+\.\d+", value):
+        return float(value)
+
+    try:
+        return ast.literal_eval(value)
+    except (SyntaxError, ValueError):
+        return value
+
+
+def load_frontmatter_mapping(raw: str) -> dict:
+    parsed: dict[str, object] = {}
+    for line in raw.splitlines():
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        if line[:1].isspace():
+            continue
+        match = re.match(r"^([A-Za-z0-9_-]+):\s*(.*)$", line)
+        if not match:
+            continue
+        key, value = match.groups()
+        parsed[key] = parse_frontmatter_value(value)
+    return parsed
+
+
 def split_frontmatter(text: str) -> tuple[dict, str, str, str]:
     match = re.match(r"^---\s*\n(.*?)\n---(?:\s*\n|$)", text, re.DOTALL)
     if match:
         raw = match.group(1)
         body = text[match.end() :]
-        try:
-            data = yaml.safe_load(raw) or {}
-        except yaml.YAMLError:
-            data = {}
+        data = load_frontmatter_mapping(raw)
         if not isinstance(data, dict):
             data = {}
         return data, raw, body, "fenced"
@@ -113,10 +157,7 @@ def split_frontmatter(text: str) -> tuple[dict, str, str, str]:
     if simple_match:
         raw = simple_match.group(1).rstrip("\n")
         body = text[simple_match.end() :]
-        try:
-            data = yaml.safe_load(raw) or {}
-        except yaml.YAMLError:
-            data = {}
+        data = load_frontmatter_mapping(raw)
         if not isinstance(data, dict):
             data = {}
         return data, raw, body, "simple"
