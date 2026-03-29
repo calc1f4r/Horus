@@ -127,7 +127,7 @@ GitHub-facing agents live in [`.github/agents/`](../.github/agents). They are a 
 
 ### Gemini CLI
 
-Gemini uses [`GEMINI.md`](../GEMINI.md) as the workspace-local instruction surface.
+Gemini uses [`GEMINI.md`](../GEMINI.md) as the workspace-local instruction surface, and dynamically loads generated workflows via the `activate_skill` tool from `.agents/skills/`.
 
 ### Cursor And VS Code
 

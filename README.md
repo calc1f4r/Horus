@@ -60,7 +60,7 @@ The compatibility model is deliberate. Some runtimes have native surfaces here; 
 | Claude Code | Native source runtime | [`CLAUDE.md`](CLAUDE.md), [`.claude/agents/`](.claude/agents), [`.claude/skills/`](.claude/skills), [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) |
 | Codex CLI | Native generated runtime | [`AGENTS.md`](AGENTS.md), [`.agents/skills/`](.agents/skills), [`.codex/agents/`](.codex/agents), [`.codex/config.toml`](.codex/config.toml) |
 | GitHub-facing agent docs | Repo-native docs surface | [`.github/agents/`](.github/agents) |
-| Gemini CLI | Native workspace instructions | [`GEMINI.md`](GEMINI.md) |
+| Gemini CLI | Native workspace instructions & skills | [`GEMINI.md`](GEMINI.md), [`.agents/skills/`](.agents/skills) |
 | Cursor | Portable workspace consumption | [`AGENTS.md`](AGENTS.md), [`CLAUDE.md`](CLAUDE.md), [`.claude/agents/`](.claude/agents) |
 | VS Code | Portable workspace consumption | [`AGENTS.md`](AGENTS.md), [`CLAUDE.md`](CLAUDE.md), [`GEMINI.md`](GEMINI.md), [`.claude/agents/`](.claude/agents) |
 
@@ -257,7 +257,7 @@ Start with [`.github/agents/`](.github/agents).
 
 ### Gemini CLI
 
-Start with [`GEMINI.md`](GEMINI.md).
+Start with [`GEMINI.md`](GEMINI.md). Gemini uses these instructions along with the `activate_skill` tool to dynamically load workflows from `.agents/skills/`.
 
 ### Cursor / VS Code
 
