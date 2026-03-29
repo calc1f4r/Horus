@@ -58,6 +58,7 @@ Orchestration Progress:
 - [ ] Step 1: Load memory context
 - [ ] Step 2: Parse finding and target platforms
 - [ ] Step 2.5: Apply intentional/by-design pre-gate
+- [ ] Step 2.6: Apply evidence sufficiency pre-screen
 - [ ] Step 3: Spawn judges in parallel
 - [ ] Step 4: Collect verdicts
 - [ ] Step 5: Identify divergences
@@ -110,20 +111,51 @@ Extract from the input:
 
 ---
 
-## Step 2.5: Intentional / By-Design Pre-Gate
+## Step 2.5: Intentional / By-Design Pre-Screen (Advisory Only)
 
-Before fan-out, inspect the finding for evidence that behavior is intentional/expected:
+Before fan-out, scan for intentionality signals. This pre-screen is **ADVISORY ONLY** — it informs judges; it does not constrain their verdicts or pre-determine outcomes.
 
-- README/spec language marking the behavior as intentional, expected, accepted trade-off, or wontfix
-- Inline comments describing the branch/path as intentional guardrail behavior
-- Revert/error messages explicitly signaling intentional blocking behavior
+**Pre-screen trigger (README/spec evidence only):**
+- README or spec language explicitly marking the behavior as intentional, wontfix, or accepted trade-off
 
-If this gate is triggered and no distinct unintended impact is demonstrated, instruct downstream judges that the finding cannot be promoted to Medium/High.
+**What does NOT trigger the pre-screen:**
+- Inline code comments — developer notes, not specifications
+- Revert/error messages — error handling, not design documentation
 
-Platform outcomes for gate-triggered findings (without separate unintended impact):
-- Sherlock: INVALID
-- Cantina: INFO or INVALID
-- Code4rena: QA or INVALID/OOS
+**If pre-screen triggers on README/spec evidence:**
+Pass the following note to each judge in their brief (NOT as an instruction to invalidate):
+> "Advisory pre-screen: The README/spec appears to document this behavior as [quote the relevant text].
+> Apply your platform's intentional/by-design gate independently. Do not treat this as a
+> pre-determination — if the intentional behavior enables a distinct unintended consequence,
+> or if the intentional design is itself the vulnerability, it remains valid on your platform."
+
+Judges receive this as context. They independently apply their own gates and may still find the behavior valid if it causes harm the README does not endorse.
+
+**If pre-screen does NOT trigger:**
+Pass finding to judges with no intentionality note. Individual judges apply their own gates from scratch.
+
+**Pre-screen failure modes to avoid:**
+- Never pre-suppress a finding based on code comments or revert messages alone
+- Never instruct judges that a finding "cannot be Medium/High" before they have independently analyzed it
+- When in doubt, do NOT trigger the pre-screen — err toward judge independence
+- A false negative (missing a real bug) is as harmful as a false positive
+
+**Anti-suppression check after collecting verdicts:**
+If two or more judges return INVALID and their reasoning chains cite only code comments or revert messages (not README/spec), flag to human review:
+> "⚠️ Warning: INVALID verdicts appear to rely on non-specification evidence (code comments/error strings only). Manual review recommended before finalizing."
+
+---
+
+## Step 2.6: Evidence Sufficiency Pre-Screen
+
+Before fan-out, evaluate whether the finding has enough evidence for severity judgment:
+
+- Reachability proof: clear attacker path from controllable input to impact.
+- Causality proof: each major step in the exploit chain is technically justified.
+- Constraint realism: assumptions are explicit and plausible.
+- Impact proof: concrete unintended consequence tied to the root cause.
+
+If evidence is weak/speculative, mark pre-screen as `weak` and instruct judges to avoid Medium/High unless they can independently supply missing proof.
 
 ---
 
@@ -135,7 +167,10 @@ Spawn all target platform judges **simultaneously** as sub-agents. Pass each jud
 3. Any relevant memory context about similar findings (from Step 1)
 4. Instruction to return a **structured verdict** in their standard format
 5. Instruction to explicitly state their **key reasoning chain** — not just conclusion — so other judges can challenge it
-6. Instruction to apply the intentional/by-design gate before severity scoring; do not output Medium/High for intentional behavior unless a separate unintended impact is proven
+6. Instruction to apply the intentional/by-design gate independently — gate triggers ONLY on README/spec evidence; code comments and revert/error messages are NOT gate triggers
+7. Instruction to include `evidence_confidence`, `speculation_flag`, `speculative_chain_depth` (count of independent conditions required), and `invalidation_basis`
+8. Instruction to avoid severity escalation on speculative chains (3+ independent conditions = speculative; cannot be High/Medium without strong justification)
+9. Instruction: if marking INVALID, state `invalidation_basis` explicitly — if it is "code comment only" or "revert message only", do NOT mark INVALID; re-evaluate with fresh eyes
 
 Sub-agents to spawn:
 - `sherlock-judging` — returns: VALID/INVALID, HIGH/MEDIUM/INVALID severity
@@ -176,8 +211,12 @@ Verdict Schema:
   likelihood:     [judge's likelihood description — N/A for Sherlock]
   cap_applied:    [cap name if any, else null]
   intentionality_gate: [triggered | not_triggered]
+  evidence_confidence: [high | medium | low]
+  speculation_flag: [yes | no]
+  speculative_chain_depth: [N independent conditions required]
   key_factors:    [list of rules that determined outcome]
   inflation_flag: [overclaimed | under-judged | accurate]
+  invalidation_basis: [readme_spec | speculative_chain | missing_attack_path | code_comment_only | revert_only | other]
   raw_verdict:    [judge's full original output]
 ```
 
@@ -190,6 +229,7 @@ Compare normalized verdicts across platforms. Flag a **divergence** when:
 1. **Validity divergence** — one platform marks valid, another invalid/OOS
 2. **Severity tier divergence** — severity differs by ≥1 tier across platforms
 3. **Direction divergence** — one platform upgrades (under-judged) while another downgrades (overclaimed)
+4. **Evidence-quality divergence** — severity differs because one verdict is speculative/low-confidence
 
 **Known divergence patterns** (from platform rule differences):
 
@@ -292,6 +332,14 @@ If the divergence persists through arbitration and the finding has HIGH/CRITICAL
 - Surface all reasoning chains clearly in the output
 - Do NOT force a consensus that overrides legitimate platform-specific disagreement
 
+### 6e: Overestimation Guardrail
+
+Before consensus, run this calibration check:
+
+- If any HIGH/MEDIUM verdict has `evidence_confidence=low` or `speculation_flag=yes`, mark it as `provisional_overclaim`.
+- A provisional overclaim cannot drive final consensus severity upward by itself.
+- If all non-invalid verdicts are provisional overclaims, resolve as `needs-evidence` and do not output HIGH/MEDIUM.
+
 ---
 
 ## Step 7: Synthesize Consensus
@@ -300,6 +348,8 @@ Build the final consensus verdict:
 
 ```
 Consensus Algorithm:
+  IF majority verdicts are speculative or low-confidence:
+    → NEEDS-EVIDENCE — severity must not exceed INFO/QA/INVALID until proof improves
   IF intentionality_gate triggered across platforms AND no distinct unintended impact:
     → NON-EXPLOIT CONSENSUS — severity must stay INVALID/INFO/QA (never MEDIUM/HIGH)
   IF all platforms agree on validity AND severity tier:
@@ -314,8 +364,8 @@ Consensus Algorithm:
 
 **Best-platform recommendation:**
 Based on severity outcomes, if `--primary` is not set, recommend:
-- The platform where the finding scores **highest valid severity**
-- With rationale: which platform rules are most favorable to this vulnerability class
+- The platform where the finding has the **highest defensible severity** with non-speculative evidence
+- With rationale: evidence confidence, cap risk, and platform-rule fit for this vulnerability class
 
 ---
 
@@ -379,6 +429,8 @@ SHERLOCK
   Valid: [YES / NO]
   Severity: [HIGH / MEDIUM / INVALID]
   Intentionality gate: [triggered / not triggered]
+  Evidence confidence: [high / medium / low]
+  Speculation flag: [yes / no]
   Key factor: [determining rule]
   Inflation check: [overclaimed / under-judged / accurate]
 
@@ -386,6 +438,8 @@ CANTINA
   Valid: [YES / NO]
   Severity: [HIGH / MEDIUM / LOW / INFO / INVALID]
   Intentionality gate: [triggered / not triggered]
+  Evidence confidence: [high / medium / low]
+  Speculation flag: [yes / no]
   Matrix: [Impact] × [Likelihood] = [result]
   Cap: [if any]
   Inflation check: [overclaimed / under-judged / accurate]
@@ -394,6 +448,8 @@ CODE4RENA
   Valid: [YES / NO / OOS]
   Severity: [HIGH / MEDIUM / QA / INVALID]
   Intentionality gate: [triggered / not triggered]
+  Evidence confidence: [high / medium / low]
+  Speculation flag: [yes / no]
   Quality: [sufficient / insufficient]
   Cap: [if any]
   Inflation check: [overclaimed / under-judged / accurate]
@@ -436,6 +492,35 @@ This orchestrator does **not** override individual judge verdicts. It synthesize
 - **Technical facts govern** — not which verdict is most favorable to the submitter
 - **Divergences are features, not bugs** — platforms have legitimately different standards
 - **Memory informs but does not bind** — prior verdicts are context, not precedent
+- **Never optimize for highest severity** — optimize for the most evidence-backed defensible verdict
+
+### Anti-Suppression Rules
+
+The orchestrator must never produce consensus output that invalidates a finding for the following reasons alone:
+- All three judges were pre-briefed with the same intentionality note (circular reasoning — the pre-screen caused the outcome)
+- Sponsor or warden stated a preference
+- The finding is embarrassing or high-profile
+- Judges relied on code comments or revert messages (not README) to trigger their intentionality gates
+
+If INVALID consensus is reached and the reasoning of all judges cites only code comments or error strings (not README/spec), output:
+> "⚠️ Suppression risk: All INVALID verdicts appear based on non-specification evidence. Manual review recommended."
+
+Do not finalize INVALID in this case without human confirmation.
+
+---
+
+## Competitive Judge Mindset
+
+The orchestrator coordinates judges who must balance two failure modes:
+
+1. **Inflation failure** — rewarding speculative or invalid findings drains prize pools and wastes protocol money
+2. **Suppression failure** — dismissing real vulnerabilities leaves protocols exploitable
+
+Both failures undermine the audit's value. The orchestrator must ensure both failure modes are checked:
+- Verify judges are applying speculative chain detection (count independent conditions)
+- Verify judges are not defaulting to INVALID on code comments or error messages
+- Verify under-judged findings are upgraded when maximum impact is higher than claimed
+- Verify inflated findings are downgraded to the tier their evidence actually supports
 
 ---
 
