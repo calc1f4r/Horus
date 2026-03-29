@@ -44,15 +44,15 @@ gh repo clone calc1f4r/Horus reports/<CATEGORY> \
 
 ---
 
-## 3. Emulating the Agent System
+## 3. Emulating the Agent System & Skills
 
-The codebase contains 35 specialized Claude personas in `.claude/agents/` (e.g., `audit-orchestrator`, `protocol-reasoning`, `invariant-writer`).
+Horus contains 35 specialized audit workflows and tools. When running an audit phase or performing targeted discovery, you must leverage Gemini's skill system and sub-agents:
 
-When tasked with a specific audit phase or vulnerability discovery:
-1. Treat the markdown files in `.claude/agents/` as **expert procedural guidance**.
-2. If asked to perform a task (e.g., "Write an invariant for this protocol"), load `.claude/agents/invariant-writer.md` and follow its exact multi-step instructions and reasoning frameworks.
-3. Reference shared agent knowledge bases located in `.claude/resources/` (e.g., `vulnerability-taxonomy.md`, `certora-reference.md`).
-4. Read `.claude/rules/` when modifying files, as these dictate path-scoped formatting constraints (e.g., `db-entries.md` for DB modifications).
+1. **Activate Skills:** Use the `activate_skill` tool to dynamically load expert procedural guidance. For example, if asked to run an audit phase or generate formal verification, call `activate_skill` with the appropriate name (e.g., `invariant-writer`, `protocol-reasoning`, `audit-orchestrator`). These skills are mapped from the repository's `.agents/skills/` directory.
+2. **Sub-Agents:** 
+   - When faced with highly complex architectural questions or initial reconnaissance that requires reading many files, delegate to the `codebase_investigator` sub-agent.
+   - For repetitive batch tasks (like formatting multiple entries) or high-volume output commands, delegate to the `generalist` sub-agent to keep your main context lean.
+3. **Reference Materials:** Rely on shared knowledge bases in `.claude/resources/` (e.g., `vulnerability-taxonomy.md`) when you need foundational protocol intuition.
 
 ---
 
@@ -84,5 +84,6 @@ All utility scripts are in `scripts/`. Always use `python3` and activate the vir
 
 ## 6. Execution Mindset
 
-- **Parallel Search:** Exploit Gemini's ability to run parallel tool calls when executing bulk hunt cards via `grep_search`.
+- **Parallel Search:** Exploit Gemini's ability to run parallel tool calls. When executing bulk hunt cards, issue multiple `grep_search` calls concurrently. If you need to read multiple vulnerability entries, fire multiple `read_file` calls (with targeted `start_line` and `end_line`) in a single turn.
+- **Combine Tools:** To save conversational turns, combine your searches. For instance, you can run a `grep_search` to find a pattern's file and simultaneously invoke a `read_file` on `DB/index.json` or `manifests.json` if you also need to route the next step.
 - **Surgical Precision:** Your most important goal in this codebase is to minimize the amount of data you ingest. Rely on indexes (`DB/index.json` and `keywords.json`) and specific line reads to maintain speed and high intelligence.
