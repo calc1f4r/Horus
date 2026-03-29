@@ -185,7 +185,7 @@ version: all
 ### External Links
 - [EIP-4626 Specification](https://eips.ethereum.org/EIPS/eip-4626)
 - [OpenZeppelin ERC4626 Implementation](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC4626.sol)
-- [Solodit Vulnerability Database](https://solodit.cyfrin.io/)
+- [Solodit Horus](https://solodit.cyfrin.io/)
 
 ---
 

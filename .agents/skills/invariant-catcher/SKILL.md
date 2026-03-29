@@ -1,6 +1,6 @@
 ---
 name: "invariant-catcher"
-description: "Hunt for known vulnerability patterns in smart contract codebases using the Vulnerability Database (DB/). Language-agnostic. Searches by vulnerability class, extracts detection patterns from DB entries, runs grep/ripgrep against target code, and generates structured findings. Use when performing variant analysis, systematically searching for known vulnerability classes, or doing DB-powered hunting during an audit."
+description: "Hunt for known vulnerability patterns in smart contract codebases using Horus (`DB/`). Language-agnostic. Searches by vulnerability class, extracts detection patterns from DB entries, runs grep/ripgrep against target code, and generates structured findings. Use when performing variant analysis, systematically searching for known vulnerability classes, or doing DB-powered hunting during an audit."
 ---
 Use the [invariant-catcher subagent](../../../.codex/agents/invariant-catcher.toml) when you want delegated execution.
 That subagent is configured for live web search and may delegate to narrower repo subagents when the workflow splits cleanly.

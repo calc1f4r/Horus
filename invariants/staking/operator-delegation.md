@@ -3,7 +3,7 @@
 > Canonical invariants for operator management, delegation correctness, and minipool
 > security in staking and restaking protocols. Mined from production protocols
 > (EigenLayer, GoGoPool, Rio Network, Karak, Casimir), audit reports, and the
-> Vulnerability Database. Language-agnostic and protocol-agnostic.
+> Horus. Language-agnostic and protocol-agnostic.
 > Consumed by `invariant-writer` as seed context.
 
 ## Metadata

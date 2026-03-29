@@ -2,7 +2,7 @@
 
 > Canonical invariants for beacon chain proof verification, attestation validation,
 > EigenPod accounting, and validator state management. Mined from EigenLayer,
-> beacon chain specifications, and the Vulnerability Database. Language-agnostic
+> beacon chain specifications, and Horus. Language-agnostic
 > and protocol-agnostic.
 > Consumed by `invariant-writer` as seed context.
 

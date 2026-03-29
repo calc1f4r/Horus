@@ -1,4 +1,4 @@
-# Bridge & Cross-Chain Vulnerability Database
+# Bridge & Cross-Chain Horus
 
 This directory contains comprehensive vulnerability patterns for cross-chain bridge integrations. Each subdirectory covers a specific bridge protocol with detailed vulnerability patterns, code examples, and secure implementations.
 
@@ -133,7 +133,7 @@ bridge/
 
 ### For Auditors
 1. Identify which bridge protocol(s) the target uses
-2. Review corresponding vulnerability database entry
+2. Review the corresponding Horus entry
 3. Use the **Detection Patterns** section for code review
 4. Follow the **Audit Checklist** for comprehensive coverage
 

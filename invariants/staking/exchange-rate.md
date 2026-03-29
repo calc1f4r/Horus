@@ -2,7 +2,7 @@
 
 > Canonical invariants for LST/LRT exchange rate correctness and oracle integrity.
 > Mined from production protocols (EigenLayer, Lido, Kelp, Renzo, Tokemak, Napier, Puffer),
-> EIP-4626 spec, Certora CVL rules, Echidna/Medusa property suites, and the Vulnerability Database.
+> EIP-4626 spec, Certora CVL rules, Echidna/Medusa property suites, and Horus.
 > Language-agnostic and protocol-agnostic.
 > Consumed by `invariant-writer` as seed context.
 

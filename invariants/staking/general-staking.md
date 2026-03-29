@@ -3,7 +3,7 @@
 > Universal staking properties that apply across all staking protocol types (PoS,
 > liquid staking, restaking, delegated staking). These are protocol-agnostic safety
 > properties capturing fundamental staking correctness guarantees. Mined from
-> production protocols, EIP specs, Cosmos SDK, and the Vulnerability Database.
+> production protocols, EIP specs, Cosmos SDK, and Horus.
 > Consumed by `invariant-writer` as seed context.
 
 ## Metadata

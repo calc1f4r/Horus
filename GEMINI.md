@@ -1,6 +1,6 @@
-# Vulnerability Database — Gemini CLI Instructions
+# Horus — Gemini CLI Instructions
 
-This repository is a **curated vulnerability database** for smart contract security audits, natively optimized for AI-agent-driven bulk scanning, pattern matching, and comprehensive 11-phase audits across EVM, Solana, Cosmos, Sui Move, and ZK Rollup ecosystems.
+This repository is **Horus**, a curated vulnerability database for smart contract security audits, natively optimized for AI-agent-driven bulk scanning, pattern matching, and comprehensive 11-phase audits across EVM, Solana, Cosmos, Sui Move, and ZK Rollup ecosystems.
 
 As the Gemini CLI agent, you act as the orchestrator and executer. This guide defines how you must navigate the architecture, fetch context, and execute workflows.
 
@@ -31,13 +31,13 @@ When you need to read raw reports for reference or to build new DB entries, fetc
 **Fetch a single file (Preferred):**
 ```bash
 mkdir -p reports/<CATEGORY>
-gh api "repos/calc1f4r/Vulnerability-database/contents/reports/<CATEGORY>/<FILE>?ref=hunt-cards" \
+gh api "repos/calc1f4r/Horus/contents/reports/<CATEGORY>/<FILE>?ref=hunt-cards" \
   --jq '.content' | base64 -d > reports/<CATEGORY>/<FILE>
 ```
 
 **Clone a specific category branch:**
 ```bash
-gh repo clone calc1f4r/Vulnerability-database reports/<CATEGORY> \
+gh repo clone calc1f4r/Horus reports/<CATEGORY> \
   -- --branch reports/<BRANCH> --single-branch --depth 1
 ```
 *(Refer to `docs/codebase-structure.md` for the exact mapping of `CATEGORY` to `BRANCH`)*

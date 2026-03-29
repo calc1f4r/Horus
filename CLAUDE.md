@@ -1,6 +1,6 @@
-# Vulnerability Database — Claude Code Instructions
+# Horus — Claude Code Instructions
 
-This repository is a **curated vulnerability database** for smart contract security audits, optimized for AI-agent-driven bulk scanning and pattern matching across blockchain ecosystems.
+This repository is **Horus**, a curated vulnerability database for smart contract security audits, optimized for AI-agent-driven bulk scanning and pattern matching across blockchain ecosystems.
 
 ## Quick Reference
 

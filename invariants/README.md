@@ -2,7 +2,7 @@
 
 > Protocol-type-agnostic, language-agnostic invariant reference library.
 > Mined from production DeFi protocols, standard specifications, formal verification specs,
-> fuzzing property suites, and the Vulnerability Database.
+> fuzzing property suites, and Horus.
 >
 > **Consumer**: `invariant-writer` agent uses these files as canonical seed context
 > during Phase 0 (Protocol Research & Classification).
@@ -50,7 +50,7 @@ When auditing a protocol of type X, load the relevant category files:
 3. **Stateful fuzz tests** — stateful fuzz-tested properties (Foundry invariant tests, etc.)
 4. **Standard specifications** — mandatory standard behaviors (EIP, CW, SPL, etc.)
 5. **Protocol documentation** — design-level constraints
-6. **Vulnerability Database** — inverted root causes of known exploits
+6. **Horus** — inverted root causes of known exploits
 7. **Web research** — academic papers, audit reports, blog posts
 
 ## Invariant Format

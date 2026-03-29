@@ -360,7 +360,7 @@ Match output against the detection tables in [protocol-detection.md](.claude/res
 
 ### Step 4: Load the Router
 
-Read `DB/index.json` (~330 lines). This is the entry point to the entire vulnerability database. It includes:
+Read `DB/index.json` (~330 lines). This is the entry point to Horus. It includes:
 - `protocolContext` — maps protocol types to relevant manifests
 - `manifests` — lists all 11 manifest files
 - `huntcards` — paths to compressed detection cards (Tier 1.5) for bulk scanning

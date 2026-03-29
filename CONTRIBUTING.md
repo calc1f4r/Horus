@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for contributing to the Vulnerability Database. This guide covers how to add entries, improve agents, and maintain quality.
+Thank you for contributing to Horus. This guide covers how to add entries, improve agents, and maintain quality.
 
 ## Adding Vulnerability Entries
 

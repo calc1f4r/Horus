@@ -1,7 +1,7 @@
-# Vulnerability Database Search Guide
+# Horus Search Guide
 
 > **Audience**: AI agents performing variant analysis, security audits, and vulnerability research.  
-> **Goal**: Get precise, targeted results from the vulnerability database with minimal context window usage.
+> **Goal**: Get precise, targeted results from Horus with minimal context window usage.
 
 ---
 

@@ -1,13 +1,13 @@
 ---
 name: "db-quality-monitor"
-description: "Monitor and fix the Vulnerability Database pipeline: 4-tier architecture integrity, manifest generation, hunt card alignment, TEMPLATE.md compliance, line-range accuracy, protocolContext routing, keyword index fidelity, and duplicate detection. Use for periodic DB health checks, CI validation after entry changes, or diagnosing why an audit agent received wrong context."
+description: "Monitor and fix the Horus pipeline: 4-tier architecture integrity, manifest generation, hunt card alignment, TEMPLATE.md compliance, line-range accuracy, protocolContext routing, keyword index fidelity, and duplicate detection. Use for periodic DB health checks, CI validation after entry changes, or diagnosing why an audit agent received wrong context."
 ---
 Use the [db-quality-monitor subagent](../../../.codex/agents/db-quality-monitor.toml) when you want delegated execution.
 That subagent is configured for live web search and may delegate to narrower repo subagents when the workflow splits cleanly.
 
 Input: `[--fix] [--check=manifests|huntcards|entries|all]`.
 
-Run quality checks on the Vulnerability Database. <arguments>
+Run quality checks on Horus. <arguments>
 
 ## What this checks
 

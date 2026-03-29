@@ -1,4 +1,4 @@
-# Vulnerability Database — Codebase Structure
+# Horus — Codebase Structure
 
 > Comprehensive reference for repository layout, data flow, and conventions. For search workflows, see [DB/SEARCH_GUIDE.md](../DB/SEARCH_GUIDE.md). For agent guidance, see [db-guide.md](db-guide.md).
 
@@ -7,9 +7,9 @@
 ## Directory Layout
 
 ```
-Vulnerability-database/
+Horus/
 │
-├── DB/                                    # Core vulnerability database
+├── DB/                                    # Core Horus knowledge base
 │   ├── index.json                         #   Master router (Tier 1) — START HERE
 │   ├── SEARCH_GUIDE.md                    #   Agent search workflows
 │   │
@@ -281,19 +281,19 @@ Reports are not included when cloning the main branch. Agents fetch them on dema
 **Method 1 — Single file (preferred):**
 ```bash
 mkdir -p reports/<CATEGORY>
-gh api "repos/calc1f4r/Vulnerability-database/contents/reports/<CATEGORY>/<FILE>?ref=hunt-cards" \
+gh api "repos/calc1f4r/Horus/contents/reports/<CATEGORY>/<FILE>?ref=hunt-cards" \
   --jq '.content' | base64 -d > reports/<CATEGORY>/<FILE>
 ```
 
 **Method 2 — List files in a category:**
 ```bash
-gh api "repos/calc1f4r/Vulnerability-database/contents/reports/<CATEGORY>?ref=hunt-cards" \
+gh api "repos/calc1f4r/Horus/contents/reports/<CATEGORY>?ref=hunt-cards" \
   --jq '.[].name'
 ```
 
 **Method 3 — Clone an entire category branch:**
 ```bash
-gh repo clone calc1f4r/Vulnerability-database reports/<CATEGORY> \
+gh repo clone calc1f4r/Horus reports/<CATEGORY> \
   -- --branch reports/<BRANCH> --single-branch --depth 1
 ```
 
@@ -319,12 +319,12 @@ Each branch below contains **only** the reports for that category.
 **Fetch a single file** (replace `<CATEGORY>` and `<FILE>`):
 ```bash
 mkdir -p reports/<CATEGORY>
-gh api "repos/calc1f4r/Vulnerability-database/contents/reports/<CATEGORY>/<FILE>?ref=hunt-cards" --jq '.content' | base64 -d > reports/<CATEGORY>/<FILE>
+gh api "repos/calc1f4r/Horus/contents/reports/<CATEGORY>/<FILE>?ref=hunt-cards" --jq '.content' | base64 -d > reports/<CATEGORY>/<FILE>
 ```
 
 **Clone entire category** into `reports/`:
 ```bash
-gh repo clone calc1f4r/Vulnerability-database reports/<CATEGORY> -- --branch reports/<BRANCH> --single-branch --depth 1
+gh repo clone calc1f4r/Horus reports/<CATEGORY> -- --branch reports/<BRANCH> --single-branch --depth 1
 ```
 
 | Branch | Source Directory (CATEGORY) | Reports |

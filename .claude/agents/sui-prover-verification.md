@@ -556,7 +556,7 @@ Before delivering specs, verify:
 
 ---
 
-## Using the Vulnerability Database for Spec Prioritization
+## Using Horus for Spec Prioritization
 
 When converting invariants to specs, consult `DB/index.json` to identify known vulnerability patterns that inform which specs deserve highest priority.
 

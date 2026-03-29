@@ -143,7 +143,7 @@ For each detected protocol type, research the **absolute invariants** that every
 3. **Property suites** — search for published property/invariant suites for the relevant token standards
 4. **Security research** — published invariant guidelines and property testing methodologies
 5. **Published formal specs** — published formal verification specs for major protocols
-6. **The Vulnerability Database** — `DB/index.json` → load relevant manifests → extract `rootCause` fields → derive the invariant that prevents each known bug
+6. **The Horus** — `DB/index.json` → load relevant manifests → extract `rootCause` fields → derive the invariant that prevents each known bug
 
 ### Step 3: Build Canonical Invariant Seed List
 
@@ -985,7 +985,7 @@ Each invariant must satisfy ALL of:
 
 ---
 
-## Using the Vulnerability Database for Inspiration
+## Using Horus for Inspiration
 
 When writing invariants, consult `DB/index.json` to find known vulnerability patterns that inform which invariants to prioritize.
 

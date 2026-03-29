@@ -453,7 +453,7 @@ Before finalizing, ensure every invariant passes:
 
 ---
 
-## Using the Vulnerability Database
+## Using Horus
 
 Consult the DB to find known attack patterns that should inform invariant strength:
 

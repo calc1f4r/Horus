@@ -3,7 +3,7 @@
 > Canonical invariants for share/TVL accounting correctness in staking and liquid
 > restaking protocols. Mined from production protocols (EigenLayer, Kelp, Renzo,
 > RestakeFi, Napier, Puffer, Cabal), EIP-4626 spec, Crytic/Properties, and the
-> Vulnerability Database. Language-agnostic and protocol-agnostic.
+> Horus. Language-agnostic and protocol-agnostic.
 > Consumed by `invariant-writer` as seed context.
 
 ## Metadata

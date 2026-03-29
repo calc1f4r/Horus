@@ -2,7 +2,7 @@
 
 > Canonical invariants for staking reward distribution correctness, frontrunning resistance,
 > and accounting integrity. Mined from production protocols (EigenLayer, Lido, Rio Network,
-> Renzo, GMX, Synthetix), audit reports, and the Vulnerability Database.
+> Renzo, GMX, Synthetix), audit reports, and Horus.
 > Language-agnostic and protocol-agnostic.
 > Consumed by `invariant-writer` as seed context.
 

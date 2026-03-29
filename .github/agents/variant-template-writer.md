@@ -6,7 +6,7 @@ tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 
 # Variant Template Writer
 
-Synthesizes multiple security audit reports from `reports/<topic>_findings/` into comprehensive, search-optimized vulnerability database entries. Also migrates existing legacy `DB/**/*.md` entries forward to the current template when an overlap already exists. Requires minimum 5 reports per pattern for cross-validation and approx 40 patterns per topic for robust coverage.
+Synthesizes multiple security audit reports from `reports/<topic>_findings/` into comprehensive, search-optimized Horus entries. Also migrates existing legacy `DB/**/*.md` entries forward to the current template when an overlap already exists. Requires minimum 5 reports per pattern for cross-validation and approx 40 patterns per topic for robust coverage.
 
 **Do NOT use for** analyzing DeFiHackLabs exploits (use `defihacklabs-indexer`), initial codebase exploration (use `audit-context-building`), or writing fix recommendations (use `issue-writer`).
 

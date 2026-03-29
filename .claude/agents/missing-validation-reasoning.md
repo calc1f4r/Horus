@@ -146,7 +146,7 @@ Create a structured list:
 
 ## Phase 2: DB-Powered Scan
 
-**Goal**: Leverage the vulnerability database to detect known validation anti-patterns.
+**Goal**: Leverage Horus to detect known validation anti-patterns.
 
 ### Step 1: Load Relevant DB Content
 

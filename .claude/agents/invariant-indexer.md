@@ -322,7 +322,7 @@ Invariant Indexing Progress:
 - [ ] Phase 1: Discover invariant sources in target repos
 - [ ] Phase 2: Extract invariants from code artifacts
 - [ ] Phase 3: Extract invariants from specifications and documentation
-- [ ] Phase 4: Extract invariants from the Vulnerability Database
+- [ ] Phase 4: Extract invariants from Horus
 - [ ] Phase 5: Normalize, deduplicate, and classify
 - [ ] Phase 6: Write output files
 - [ ] Phase 7: Write/update README index
@@ -540,7 +540,7 @@ Search for formally verified properties and published invariant suites:
 
 ---
 
-## Phase 4: Extract Invariants from the Vulnerability Database
+## Phase 4: Extract Invariants from Horus
 
 The DB contains known vulnerabilities — each one implies an invariant that **should have held but didn't**.
 
@@ -653,7 +653,7 @@ Create or update `invariants/README.md`:
 
 > Protocol-type-agnostic, language-agnostic invariant reference library.
 > Mined from production DeFi protocols, standard specifications, formal verification specs,
-> fuzzing property suites, and the Vulnerability Database.
+> fuzzing property suites, and Horus.
 >
 > **Consumer**: `invariant-writer` agent uses these files as canonical seed context
 > during Phase 0 (Protocol Research & Classification).
@@ -686,7 +686,7 @@ When auditing a protocol of type X, load the relevant category files:
 3. **Stateful fuzz tests** — stateful fuzz-tested properties (Foundry invariant tests, etc.)
 4. **Standard specifications** — mandatory standard behaviors (EIP, CW, SPL, etc.)
 5. **Protocol documentation** — design-level constraints
-6. **Vulnerability Database** — inverted root causes of known exploits
+6. **Horus** — inverted root causes of known exploits
 7. **Web research** — academic papers, audit reports, blog posts
 ```
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Manifest Generator for Vulnerability Database
+Manifest Generator for Horus
 ==============================================
 Parses all .md files in DB/ to extract vulnerability patterns at the section level
 and generates per-category manifest files with line ranges for surgical agent access.
@@ -23,7 +23,7 @@ from pathlib import Path
 
 import yaml
 
-DB_DIR = Path(__file__).parent / "DB"
+DB_DIR = Path(__file__).resolve().parent.parent / "DB"
 MANIFEST_DIR = DB_DIR / "manifests"
 
 # Category mapping: which top-level folder owns which manifest
@@ -496,7 +496,7 @@ def build_lean_router(manifests):
     """Build the lean router index.json that points to manifests."""
     router = {
         "meta": {
-            "description": "Vulnerability Database Router - lightweight entry point for agents",
+            "description": "Horus Router - lightweight entry point for agents",
             "version": "3.0.0",
             "generated": "2026-02-13",
             "architecture": "Tiered search: router (this file) → manifests (DB/manifests/*.json) → vulnerability files (DB/**/*.md)",
@@ -1447,7 +1447,7 @@ def main():
     manifests = {}
 
     print("=" * 60)
-    print("Vulnerability Database Manifest Generator")
+    print("Horus Manifest Generator")
     print("=" * 60)
 
     for category, folders in CATEGORY_MAP.items():

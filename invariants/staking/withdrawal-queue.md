@@ -2,7 +2,7 @@
 
 > Canonical invariants for staking withdrawal queue correctness, fund accessibility,
 > and slippage protection. Mined from production protocols (EigenLayer, Lido, Renzo,
-> Rio Network, Puffer, Kelp, Karak), audit reports, and the Vulnerability Database.
+> Rio Network, Puffer, Kelp, Karak), audit reports, and Horus.
 > Language-agnostic and protocol-agnostic.
 > Consumed by `invariant-writer` as seed context.
 

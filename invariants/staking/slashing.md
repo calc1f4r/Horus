@@ -2,7 +2,7 @@
 
 > Canonical invariants for slashing correctness, penalty distribution, and protocol
 > solvency under slashing. Mined from production protocols (EigenLayer, Karak, Lido,
-> Puffer, Renzo), audit reports, and the Vulnerability Database.
+> Puffer, Renzo), audit reports, and Horus.
 > Language-agnostic and protocol-agnostic.
 > Consumed by `invariant-writer` as seed context.
 
