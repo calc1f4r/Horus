@@ -1,7 +1,7 @@
 ---
 name: persona-dfs
 description: 'Depth-First Search auditing persona — verifies leaf functions then works upward. Language-agnostic — works with any smart contract language (Solidity, Rust, Go, Move, Cairo, Vyper). Spawned by multi-persona-orchestrator. Applies Feynman questioning at every stack depth.'
-tools: [vscode, execute, read, edit, search, todo]
+tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 ---
 
 # Persona: Depth-First Search (DFS) Auditor

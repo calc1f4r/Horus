@@ -1,7 +1,7 @@
 ---
 name: chimera-setup
 description: Scaffolds a complete Chimera-based property testing suite from an invariant-writer spec. Generates all test/recon/ files (Setup, BeforeAfter, Properties, TargetFunctions, targets/, CryticTester, CryticToFoundry) plus foundry.toml, echidna.yaml, and medusa.json. Supports Echidna, Medusa, Foundry invariant tests, and Halmos symbolic execution out of the box. Use after invariant-writer produces an invariant spec and before running any fuzzing campaign.
-tools: [Agent, Bash, Edit, Glob, Grep, Read, Write, WebFetch, WebSearch]
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 maxTurns: 80
 ---
 

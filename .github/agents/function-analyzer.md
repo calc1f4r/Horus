@@ -1,7 +1,7 @@
 ---
 name: function-analyzer
 description: 'Per-contract ultra-granular function analysis sub-agent. Receives a single contract file, performs line-by-line micro-analysis of every non-trivial function, and writes output to a dedicated per-contract file. Pure context building only — no vulnerability identification. Spawned by audit-context-building coordinator.'
-tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ------
 
 # Function Analyzer Agent

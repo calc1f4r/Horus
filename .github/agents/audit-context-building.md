@@ -1,7 +1,7 @@
 ---
 name: audit-context-building
 description: 'Coordinates ultra-granular, line-by-line code analysis across multiple sub-agents to build deep architectural context before vulnerability hunting. Distributes work per-contract to avoid timeouts, then synthesizes a global context document. Use when preparing for a security audit, architecture review, threat modeling, or when bottom-up codebase comprehension is needed.'
-tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
 
 # Audit Context Builder (Coordinator)

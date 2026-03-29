@@ -1,7 +1,7 @@
 ---
 name: system-synthesizer
 description: 'Reads all per-contract context analysis files from audit-output/context/ and synthesizes a compact global context document (01-context.md) with system-wide invariants, cross-contract flows, trust boundaries, and actor models. Spawned by audit-context-building coordinator after all function-analyzer sub-agents complete.'
-tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent','todo']
+tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 ---
 
 # System Synthesizer Agent

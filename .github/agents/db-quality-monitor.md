@@ -1,7 +1,7 @@
 ---
 name: db-quality-monitor
 description: 'Monitors, diagnoses, and fixes the full Vulnerability Database pipeline: 4-tier search architecture integrity, manifest generation correctness, hunt card ↔ manifest alignment, TEMPLATE.md compliance, legacy-entry migration, line-range accuracy, protocolContext routing, keyword index fidelity, script health (generate_manifests.py, grep_prune.py, partition_shards.py, merge_shard_findings.py), context delivery quality for downstream agents, and duplicate detection. Can auto-remediate issues by spawning sub-agents for entry fixes, entry migration, manifest regeneration, and frontmatter patching. Use for periodic DB health checks, CI validation after entry changes, pre-release quality gates, or diagnosing why an audit agent received wrong context.'
-tools: [vscode, execute, read, agent, browser, edit, search, todo]
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
 
 # DB Quality Monitor

@@ -1,7 +1,7 @@
 ---
 name: poc-writing
 description: 'Writes honest, minimal, compilable exploit tests that prove smart contract vulnerabilities by reproducing exact on-chain conditions. Adapts to the target codebase’s language and test framework. Use when a specific vulnerability has been identified and needs a compilable PoC to prove impact, validate an audit finding, or demonstrate to a protocol team.'
-tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent','todo']
+tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 ---
 # PoC Writer Agent
 

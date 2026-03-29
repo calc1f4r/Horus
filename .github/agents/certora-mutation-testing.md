@@ -1,7 +1,7 @@
 ---
 name: certora-mutation-testing
 description: Takes a Certora configuration and invariant suite, generates mutation campaigns correctly with certoraMutate and Gambit, validates baseline and mutation config, executes runs, and triages survivors into equivalent, setup, or true spec-gap classes. Use after certora-verification when baseline specs exist and mutation coverage assessment is needed.
-tools: [Write, Agent, Bash, Edit, Glob, Grep, Read, WebFetch, WebSearch]
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 maxTurns: 100
 ---
 

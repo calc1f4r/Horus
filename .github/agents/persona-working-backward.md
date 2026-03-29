@@ -1,7 +1,7 @@
 ---
 name: persona-working-backward
 description: 'Working Backward auditing persona — traces from critical sinks to attacker-controllable sources. Language-agnostic — works with any smart contract language (Solidity, Rust, Go, Move, Cairo, Vyper). Spawned by multi-persona-orchestrator. Optimized for speedrun/bug-bounty style hunting.'
-tools: [vscode, execute, read, edit, search, todo]
+tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 ---
 
 # Persona: Working Backward Auditor
