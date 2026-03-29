@@ -1,4 +1,4 @@
-# Bridge & Cross-Chain Vulnerability Database
+# Bridge & Cross-Chain Horus
 
 ## Overview
 
@@ -110,7 +110,7 @@ python3 check_duplicates.py
 ```
 
 ### generate_summary.py
-Generates comprehensive statistics about the vulnerability database.
+Generates comprehensive statistics about Horus.
 
 ```bash
 python3 generate_summary.py
@@ -130,8 +130,8 @@ This database was created on January 17, 2026, using the Solodit API. For update
 ## Related Resources
 
 - [Solodit API Documentation](https://cyfrin.notion.site/Cyfrin-Solodit-Findings-API-Specification-299f46a1865c80bcaaf0d8672fece2d6)
-- Main vulnerability database: `/home/calc1f4r/vuln-database/DB/`
-- Fetcher script: `/home/calc1f4r/vuln-database/solodit_fetcher.py`
+- Main Horus database: `/home/calc1f4r/Horus/DB/`
+- Fetcher script: `/home/calc1f4r/Horus/solodit_fetcher.py`
 
 ---
 
