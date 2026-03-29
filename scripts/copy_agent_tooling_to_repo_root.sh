@@ -9,6 +9,11 @@ Usage:
 
 Copies the repo-local agent tooling into another project root.
 
+This script is Codex-runtime-first:
+- `.agents/` and `.codex/` are the active Codex surfaces
+- legacy repo-root `codex/` mirrors are removed from the target if present
+- generated runtime directories are replaced, not merged, so stale files do not survive
+
 Default target_root:
   The parent directory of this repository. This matches the workflow where
   this repo is cloned inside the codebase you want to audit.
@@ -88,6 +93,22 @@ if [[ "${TARGET_ROOT}" == "${SOURCE_ROOT}" ]]; then
   exit 1
 fi
 
+remove_path() {
+  local dest_rel="$1"
+  local dest="${TARGET_ROOT}/${dest_rel}"
+
+  if [[ ! -e "${dest}" ]]; then
+    return 0
+  fi
+
+  echo "Removing stale ${dest_rel}"
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    return 0
+  fi
+
+  rm -rf "${dest}"
+}
+
 copy_dir() {
   local src_rel="$1"
   local dest_rel="$2"
@@ -110,6 +131,28 @@ copy_dir() {
     return 0
   fi
 
+  mkdir -p "${dest}"
+  cp -a "${src}/." "${dest}/"
+}
+
+replace_dir() {
+  local src_rel="$1"
+  local dest_rel="$2"
+
+  local src="${SOURCE_ROOT}/${src_rel}"
+  local dest="${TARGET_ROOT}/${dest_rel}"
+
+  if [[ ! -d "${src}" ]]; then
+    echo "Missing required source directory: ${src}" >&2
+    return 1
+  fi
+
+  echo "Replacing ${dest_rel} from ${src_rel}"
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    return 0
+  fi
+
+  rm -rf "${dest}"
   mkdir -p "${dest}"
   cp -a "${src}/." "${dest}/"
 }
@@ -146,11 +189,12 @@ if [[ "${DRY_RUN}" == "1" ]]; then
   echo "Mode: dry-run"
 fi
 
+remove_path "codex"
 copy_dir ".github/agents" ".github/agents"
 copy_dir ".claude" ".claude"
 copy_dir ".claude-plugins" ".claude-plugins" 1
-copy_dir ".agents" ".agents"
-copy_dir ".codex" ".codex"
+replace_dir ".agents" ".agents"
+replace_dir ".codex" ".codex"
 
 if [[ "${INCLUDE_AGENTS_MD}" == "1" ]]; then
   copy_file "AGENTS.md" "AGENTS.md"
