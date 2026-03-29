@@ -12,10 +12,14 @@ Use this file as the Codex entry point. For the full system map, read `docs/code
 - `scripts/db_quality_check.py`: structural verification for the DB and search artifacts.
 - `DB/index.json`: runtime router for search, but generated from DB content plus generator logic.
 - `.claude/skills`, `.claude/agents`, `.claude/resources`, `.claude/rules`: source of truth for the portable audit playbooks.
-- `codex/`: generated Codex/GPT compatibility mirror of the `.claude/` playbooks.
+- `.agents/skills/`: generated repo-local Codex skills derived from `.claude/skills/`.
+- `.codex/agents/`: generated repo-local Codex custom agents derived from `.claude/agents/`.
+- `.codex/resources/`: generated shared Codex references derived from `.claude/resources/`.
+- `.codex/rules/`: generated shared Codex rules derived from `.claude/rules/`.
+- `.codex/config.toml`: generated repo-local Codex runtime defaults for live web search and nested subagent delegation.
 
 Do not hand-edit generated manifest or hunt-card JSON unless the user explicitly asks for that. Change the source Markdown or the generator instead.
-Do not hand-edit generated files under `codex/`. Change the source `.claude/` files or the sync script, then regenerate the mirror.
+Do not hand-edit generated files under `.agents/skills/` or `.codex/`. Change the source `.claude/` files or the sync script, then regenerate.
 
 ## Repo Mental Model
 
@@ -37,7 +41,7 @@ Do not hand-edit generated files under `codex/`. Change the source `.claude/` fi
 4. Audit workflow layer
    - `scripts/grep_prune.py`, `scripts/partition_shards.py`, and `scripts/merge_shard_findings.py` implement the DB-powered hunting loop.
    - `.claude/` and `.github/agents/` contain agent playbooks for the larger multi-phase audit pipeline.
-   - `codex/` mirrors the `.claude/` playbooks in a Codex/GPT-friendly layout.
+   - `.agents/skills/`, `.codex/agents/`, `.codex/resources/`, `.codex/rules/`, and `.codex/config.toml` are the generated Codex runtime surfaces.
 
 ## Start Here By Task
 
@@ -73,8 +77,8 @@ python3 scripts/db_quality_check.py
 
 ### Work on the audit pipeline
 
-- For Codex/GPT use, start with `codex/README.md`, `codex/CATALOG.md`, or `codex/FLOWS.md`.
-- Read `codex/skills/<name>/SKILL.md` first, then `codex/agents/<name>.md`.
+- For Codex CLI runtime use, start with `.agents/skills/<name>/SKILL.md`, `.codex/agents/<name>.toml`, and `.codex/config.toml`.
+- Read `.codex/resources/*` and `.codex/rules/*` only when the selected skill or agent references them.
 - If you are changing the source playbooks, edit `.claude/` and rerun `python3 scripts/sync_codex_compat.py`.
 - Read `.github/agents/audit-orchestrator.md` or `.claude/agents/audit-orchestrator.md` when you need to compare the source trees directly.
 - Read `invariants/README.md` for the invariant library role.
@@ -84,9 +88,9 @@ python3 scripts/db_quality_check.py
 
 - Do not read all of `reports/` or all DB Markdown files when the router/manifests/hunt cards can narrow the search first.
 - Do not hand-edit generated manifest or hunt-card files during normal maintenance.
-- Do not hand-edit generated files under `codex/`; regenerate them from `.claude/` with `python3 scripts/sync_codex_compat.py`.
+- Do not hand-edit generated files under `.agents/skills/` or `.codex/`; regenerate them from `.claude/` with `python3 scripts/sync_codex_compat.py`.
 - If you modify a DB entry, assume manifest regeneration is required.
-- If you modify Claude playbooks, regenerate `codex/` and verify it with `python3 scripts/sync_codex_compat.py --check`.
+- If you modify Claude playbooks, regenerate the Codex-facing outputs and verify them with `python3 scripts/sync_codex_compat.py --check`.
 - If you modify agent docs, inspect both `.claude/` and `.github/` copies before deciding what to change.
 - Prefer `python3` directly unless the virtualenv has been repaired locally.
 
@@ -96,7 +100,7 @@ python3 scripts/db_quality_check.py
 - The real generator is `scripts/generate_manifests.py`, but several docs and workflows still reference a missing root `generate_manifests.py`.
 - `.claude/agents` and `.github/agents` are duplicated but not byte-identical.
 - `.claude/resources` and `.github/agents/resources` are also not perfectly synchronized.
-- `codex/` is intentionally generated from `.claude/`, not from `.github/agents/`.
+- `.agents/skills/` and `.codex/` are intentionally generated from `.claude/`, not from `.github/agents/`.
 - `scripts/db_quality_check.py` currently checks for a missing root `generate_manifests.py`, so part of its current "BROKEN" summary is repository drift rather than a Codex incompatibility issue.
 
 ## Useful Commands
@@ -115,4 +119,8 @@ python3 scripts/update_codebase_structure.py
 ## Deep Reference
 
 - `docs/codex-architecture.md`: Codex-oriented architecture document for this repository.
-- `codex/README.md`: generated Codex/GPT compatibility layer entry point.
+- `.codex/config.toml`: generated Codex runtime defaults for live web search and nested delegation.
+- `.agents/skills/`: generated repo-local Codex skills.
+- `.codex/agents/`: generated repo-local Codex custom agents.
+- `.codex/resources/`: generated shared Codex references.
+- `.codex/rules/`: generated shared Codex rules.
