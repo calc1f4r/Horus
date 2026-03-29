@@ -2,9 +2,11 @@
 
 This document describes the repository as Codex should reason about it: what is source data, what is generated, which files are operationally important, and where the current repo has drift that affects maintenance.
 
+For a runtime-neutral system overview, see [`agentic-workflow.md`](./agentic-workflow.md). This file is specifically about how Codex should interpret the repo.
+
 ## 1. System Summary
 
-This repository combines five distinct layers:
+This repository combines six distinct layers:
 
 1. Horus, the curated vulnerability database in `DB/`.
 2. A large raw finding corpus in `reports/`.
