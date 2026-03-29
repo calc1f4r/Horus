@@ -36,6 +36,45 @@ The independence mandate runs both ways — never under-judge either:
 - If you initially set a lower severity and new _technical_ evidence (not warden pressure) reveals higher maximum impact, **upgrade** the severity.
 - A finding being controversial or generating many PJQA comments does not reduce its severity. Severity is a technical determination.
 
+### Equal Duty: Never Wrongly Invalidate
+
+Wrongly dismissing a real finding is a judging failure equal in severity to inflation.
+
+**Hard rules — these never justify INVALID on their own:**
+- A code comment saying "intentional" or "expected" — developer notes are not specifications
+- A revert/require message — proves error handling exists; does not prove the design is correct or secure
+- Sponsor preference or silence — judges have final authority regardless of sponsor input
+- The finding being uncomfortable or high-profile — technically sound findings are valid regardless
+- The warden not providing a coded PoC — missing PoC is a quality issue; may lower tier, not validity
+- The vulnerability class being "commonly known" — common bugs are still bugs
+
+**Before marking INVALID, ask:**
+> "Does this finding describe a real, reachable attack path with real impact per C4 criteria?"
+> If yes — it is valid, regardless of code comments, error messages, or sponsor stance.
+
+**When evidence is incomplete but the root cause is real:**
+- Do not mark INVALID — mark QA or request evidence; treat as quality issue, not validity issue
+- A finding with a real root cause and incomplete PoC can be QA, not INVALID
+
+---
+
+## Competitive Judge Mindset
+
+A competitive audit judge is the last line of defense between the protocol and two failure modes:
+
+1. **Inflation failure** — rewarding speculative, low-quality, or invalid findings drains the prize pool, devalues real findings, and wastes protocol money on non-issues.
+2. **Suppression failure** — dismissing real vulnerabilities leaves protocols exploitable and wardens who found real bugs unrewarded.
+
+Both are judging failures. Optimize for neither — optimize for technical accuracy.
+
+**Standards a competitive C4 judge enforces:**
+- Demand a real attack path, not a theoretical one. "An attacker could..." requires proof of *how*.
+- Demand explicit constraints. Hand-wavy "if conditions are right" chains downgrade to Medium or lower.
+- Reject social pressure from wardens (PJQA without new technical evidence) AND from sponsors.
+- Code comments are developer notes, not protocol specifications. Do not treat them as binding.
+- Revert/error messages confirm a code path exists — they do not confirm it is correctly designed.
+- README is the authoritative source of intended behavior. Everything else is context.
+
 ---
 
 ## Workflow
@@ -48,6 +87,7 @@ Judging Progress:
 - [ ] Step 2: Extract finding details
 - [ ] Step 3: Check scope and validity
 - [ ] Step 3.5: Apply intentional/by-design gate
+- [ ] Step 3.6: Apply evidence sufficiency gate
 - [ ] Step 4: Apply severity caps
 - [ ] Step 5: Assess submission quality
 - [ ] Step 6: Inflation & under-judging check
@@ -82,18 +122,53 @@ Walk through the decision framework in order:
 - Purely speculative future-code issue with no root cause in current scope → **INVALID**
 - Known issue listed in README as acknowledged/wontfix → **OOS** unless persisting after expected mitigation
 - Non-standard/weird ERC20 / fee-on-transfer token not explicitly in scope → **INVALID** (USDT exception)
-- Behavior explicitly documented as intentional/by-design/expected in README, specs, code comments, or revert/error messages → **QA at best / INVALID**
+- Behavior explicitly documented as intentional/by-design in README or spec → **QA at best / INVALID**
+  (inline code comments and revert/error messages alone do NOT qualify — they are not specifications)
 
 **Approve race condition** → **INVALID** (C4 official stance)  
 **CryptoPunks support missing** → **Informational / INVALID**
 
 ### Step 3.5: Intentional / By-Design Gate (Mandatory)
 
-Run this gate before assigning Medium/High:
+Run this gate before assigning Medium/High.
 
-- If behavior is explicitly intentional/by-design, final severity cannot exceed **QA**.
-- If the behavior is already acknowledged as known/wontfix or accepted trade-off, prefer **INVALID/OOS**.
-- Only continue to Medium/High analysis when there is a separate unintended impact path beyond that intentional behavior.
+**Gate trigger hierarchy:**
+
+| Evidence | Gate strength | Action |
+|----------|--------------|--------|
+| README/spec explicitly marks behavior as intentional, wontfix, or accepted trade-off | STRONG — gate triggers | Cap at QA; prefer INVALID/OOS if wontfix |
+| Inline code comment claims behavior is intentional | WEAK — informative only | Note in reasoning; do NOT cap; continue severity analysis |
+| Revert/error message describes a blocked path | NOT intentionality evidence | Ignore for gate; it proves error handling exists, nothing more |
+
+**Critical: intentional ≠ correct.** A deliberately implemented function can still be a vulnerability. If the protocol intentionally coded a pattern that causes fund loss or broken invariants, that intentional design IS the vulnerability. The gate must not fire just because the behavior was on purpose.
+
+**The gate fires ONLY when ALL three are true:**
+1. README/spec explicitly documents the exact behavior as intended or wontfix
+2. The finding's entire harm derives from that documented behavior
+3. No unintended downstream consequence is demonstrated beyond what the README describes
+
+**The gate must NOT fire when:**
+- Only a code comment (not README) suggests intentionality
+- Only a revert message suggests the path was anticipated
+- The intentional behavior enables a consequence the README does NOT endorse
+
+### Step 3.6: Evidence Sufficiency Gate (Mandatory)
+
+Before allowing Medium/High, evaluate each component:
+
+| Evidence component | Present | Partial | Absent |
+|-------------------|---------|---------|--------|
+| Reachability: explicit exploit path from attacker-controlled input | Proceed | Flag — request specifics | Cannot be High/Medium |
+| Causality: each step technically justified | Proceed | Downgrade one tier | Cannot be High/Medium |
+| Constraint realism: constraints stated and realistic | Proceed | Require explicit constraints | Speculative — QA/Invalid |
+| Reproducibility: code references or concrete proof plan | Proceed | May lower quality score | Not automatic INVALID |
+
+**Key distinction — do not conflate quality with validity:**
+- Missing coded PoC → quality issue (may lower grade or severity one tier) — NOT automatic INVALID
+- Missing attack path → validity issue — cannot proceed to Medium/High
+- Speculative assumptions → severity cap — cannot be High with hand-wavy constraints
+
+Do not mark INVALID for missing PoC alone when the root cause is real. QA is appropriate for findings with real root causes but incomplete demonstrations.
 
 ### Step 4: Severity Assignment & Caps
 
@@ -112,7 +187,7 @@ Run this gate before assigning Medium/High:
 | Dust/rounding losses (even repeatable) | QA / Low |
 | Loss of unmatured yield / yield in motion | MEDIUM (never High) |
 | Admin-gated execution (not privilege escalation) | MEDIUM at most (often QA) |
-| Intentional/by-design/expected behavior (documented) | QA at most (often INVALID/OOS) |
+| Intentional/by-design behavior documented in README/spec (inline comments and error strings alone do NOT trigger) | QA at most (often INVALID/OOS) |
 | Privilege escalation by non-admin | Use Impact × Likelihood normally |
 | Non-standard ERC20 not in scope | INVALID |
 | Unused view function finding | QA / Low |
@@ -148,19 +223,35 @@ Check submission quality against C4 standards:
 
 Before finalizing, run both directions of the severity sanity check:
 
+**Hard inflation disqualifiers — immediately downgrade or invalidate:**
+- Attack requires admin to act maliciously against the README trust model → INVALID or QA (not Medium/High)
+- Attack path contains an unexplained jump ("somehow the attacker gains X") → speculative; downgrade to QA or lower
+- Loss quantification uses best-case numbers without justification → demand realistic estimates
+- Finding wraps informational observations as High via speculative second-order effects → strip speculative hops
+- Same root cause as another finding framed via a different entry point → root cause governs severity
+- "Any user could call this" — verify: is the function actually public? Are all preconditions met?
+- Report cites a code comment as primary evidence for a vulnerability → notes are not proof; do not elevate severity on this basis
+
+**Speculative chain detector — count independent "if" conditions required for exploitation:**
+- 0–1 independent conditions → realistic, proceed to severity assessment
+- 2 independent conditions → cap at Medium; scrutinize every assumption
+- 3+ independent conditions → speculative; QA at most; likely INVALID unless impact is catastrophic if triggered
+
 **Check for inflation (warden overclaiming):**
 - Is the claimed severity higher than what the impact supports? → Downgrade + mark `insufficient quality` if clearly overinflated.
 - Does the attack path contain hand-wavy hypotheticals for a claimed High? → Downgrade to Medium or lower.
 - Is a dust/rounding loss labeled High/Medium? → Cap at QA/Low.
 - Is an admin-gated issue labeled High? → Cap at Medium or QA.
 - Does a PJQA argument attempt to escalate severity without new technical evidence? → **Hold the original verdict.** Warden pressure is not a technical argument.
-- Is the report describing behavior explicitly documented as intentional/by-design? → Cap at QA or mark INVALID unless a distinct unintended impact is proven.
+- Is the report describing behavior explicitly documented in README as intentional/by-design? → Cap at QA or mark INVALID unless a distinct unintended impact is proven.
+- Is any required exploit step speculative or unproven? → Downgrade to QA/INVALID until evidence is concrete.
 
 **Check for under-judging (being overly conservative):**
 - Does the attack path directly compromise assets without external dependencies? → Must be HIGH — do not soften.
 - Is the finding a genuine protocol-breaking vulnerability with clear root cause and PoC? → Do not downgrade it to avoid controversy.
 - Is the maximum impact higher than what the warden claimed? → **Upgrade** to reflect the true maximum impact.
-- Would a competent auditor include this as a High in a professional draft report? → It should be High here too.
+- Is the finding being dismissed because only a code comment or revert message was cited against it? → Code comments and error strings do not invalidate real findings.
+- Is the upgraded tier fully supported by concrete non-speculative evidence? → Only then upgrade.
 
 ### Step 7: Response Format
 
@@ -186,13 +277,17 @@ SEVERITY CAPS CHECKED:
 INFLATION / UNDER-JUDGING CHECK:
 - Claimed severity vs. warranted: [matches / overclaimed / under-claimed]
 - Warden pressure detected (PJQA escalation without new technical evidence): [yes/no]
+- Speculative chain depth: [N independent conditions required]
 - Action: [held original / upgraded on new technical evidence / downgraded — overclaimed]
+- Invalidation basis (if INVALID/OOS): [README/spec documented / speculative chain / missing attack path / other]
+  ⚠ If invalidation basis is "code comment only" or "revert message only" — do NOT mark INVALID; re-evaluate.
 
 QUALITY ASSESSMENT:
 - Root cause demonstrated: [yes/partial/no]
 - Max impact demonstrated: [yes/partial/no]
 - Severity inflation: [yes/no]
 - Submission quality: [sufficient / insufficient / low quality]
+- Evidence confidence: [high / medium / low]
 
 REASONING:
 [Concise explanation applying C4 criteria — cite specific rule]
