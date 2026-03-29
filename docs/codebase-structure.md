@@ -1,6 +1,6 @@
 # Horus — Codebase Structure
 
-> Comprehensive reference for repository layout, data flow, and conventions. For search workflows, see [DB/SEARCH_GUIDE.md](../DB/SEARCH_GUIDE.md). For agent guidance, see [db-guide.md](db-guide.md).
+> Comprehensive reference for repository layout, data flow, and conventions. For search workflows, see [DB/SEARCH_GUIDE.md](../DB/SEARCH_GUIDE.md). For the broader system, see [agentic-workflow.md](agentic-workflow.md).
 
 ---
 
@@ -192,12 +192,12 @@ Horus/
 │       ├── code4rena-judging-criteria.md  #   Code4rena judging rules
 │       └── ...                            #   (21 more reference files)
 │
-├── generate_manifests.py                  # Regenerates all manifests + hunt cards
 ├── TEMPLATE.md                            # Canonical vulnerability entry structure
 ├── Example.md                             # Reference implementation of an entry
 ├── docs/
 │   ├── architecture.png                   #   Architecture diagram (PNG)
 │   ├── architecture.excalidraw            #   Architecture diagram (editable)
+│   ├── agentic-workflow.md                #   End-to-end system and workflow overview
 │   ├── db-guide.md                        #   DB entry conventions & search workflows
 │   └── codebase-structure.md              #   This file
 ├── CONTRIBUTING.md                        # Contribution guidelines
@@ -407,7 +407,7 @@ Every `.md` entry contains:
 | **Detection Patterns** | Search queries and grep patterns for audit use |
 | **Keywords** | 10+ terms optimized for vector retrieval |
 
-See [TEMPLATE.md](TEMPLATE.md) for the full specification and [Example.md](Example.md) for a reference implementation.
+See [TEMPLATE.md](../TEMPLATE.md) for the full specification and [Example.md](../Example.md) for a reference implementation.
 
 ---
 
@@ -439,10 +439,11 @@ See [TEMPLATE.md](TEMPLATE.md) for the full specification and [Example.md](Examp
 
 | Document | Purpose |
 |----------|---------|
-| [DB/index.json](DB/index.json) | Master router — agents start here |
+| [README.md](../README.md) | Project overview, runtime surfaces, and quick start |
+| [agentic-workflow.md](agentic-workflow.md) | End-to-end architecture and workflow overview |
+| [DB/index.json](../DB/index.json) | Master router — agents start here |
 | [DB/SEARCH_GUIDE.md](../DB/SEARCH_GUIDE.md) | Detailed search workflows for agents |
-| [TEMPLATE.md](TEMPLATE.md) | Canonical entry structure specification |
-| [Example.md](Example.md) | Reference implementation of a complete entry |
+| [TEMPLATE.md](../TEMPLATE.md) | Canonical entry structure specification |
+| [Example.md](../Example.md) | Reference implementation of a complete entry |
 | [docs/db-guide.md](db-guide.md) | DB entry conventions, search workflows, audit mode |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines and quality checklist |
-| [README.md](README.md) | Project overview, quick start, and coverage tables |
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | Contribution guidelines and quality checklist |

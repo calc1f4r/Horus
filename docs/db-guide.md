@@ -1,6 +1,6 @@
 # DB Guide
 
-> **This file covers DB-entry conventions and search workflows.** For the full agent system, audit pipeline, and all available agents, see [`CLAUDE.md`](./CLAUDE.md).
+> This file covers DB-entry conventions, retrieval behavior, and search workflows. For the broader system and runtime surfaces, see [`README.md`](../README.md) and [`docs/agentic-workflow.md`](./agentic-workflow.md).
 
 This document gives agent models practical guidance for making safe, correct, and minimal changes to **Horus entries** in `DB/`. It covers the 4-tier search architecture, entry format, and how to run and extend DB scripts.
 
@@ -55,17 +55,20 @@ Each card has a `grep` field for searching target code, triage fields (`validWhe
 
 | Manifest | Patterns | Focus |
 |----------|----------|-------|
-| `oracle` | 39 | Chainlink, Pyth, price manipulation |
-| `amm` | 65 | Concentrated liquidity, constant product |
-| `bridge` | 32 | LayerZero, Wormhole, Hyperlane |
-| `tokens` | 33 | ERC20, ERC4626, ERC721 |
-| `cosmos` | 26 | Cosmos SDK, IBC, staking |
-| `solana` | 38 | Solana programs, Token-2022 |
-| `general-security` | 31 | Access control, signatures, validation |
-| `general-defi` | 115 | Flash loans, vaults, precision, calculations |
-| `general-infrastructure` | 41 | Proxies, reentrancy, storage |
-| `general-governance` | 56 | Governance, stablecoins, rug pulls, MEV |
-| `unique` | 59 | Protocol-specific unique exploits |
+| `general-defi` | 438 | Flash loans, vaults, slippage, precision, calculations, yield |
+| `cosmos` | 416 | Cosmos SDK, IBC, staking, CometBFT, app-chain invariants |
+| `sui-move` | 304 | Sui Move object model, access control, DeFi logic, bridges |
+| `general-security` | 153 | Access control, signatures, input validation, initialization |
+| `amm` | 148 | Concentrated liquidity, constant product, sandwich attacks |
+| `general-infrastructure` | 142 | Proxies, reentrancy, storage collision, upgrades |
+| `unique` | 121 | Protocol-specific exploits from real-world incidents |
+| `general-governance` | 118 | DAOs, stablecoins, MEV, randomness, malicious patterns |
+| `oracle` | 107 | Chainlink, Pyth, price manipulation, staleness |
+| `zk-rollup` | 100 | Circuit constraints, fraud proofs, sequencer, L1-L2 messaging |
+| `bridge` | 92 | LayerZero, Wormhole, Hyperlane, CCIP, Axelar, Stargate |
+| `solana` | 68 | Solana programs, Anchor, Token-2022, SPL |
+| `tokens` | 47 | ERC20, ERC4626, ERC721, token compatibility |
+| `account-abstraction` | 4 | ERC-4337, ERC-7579, paymasters, session keys |
 
 ### Step 3: Find Specific Patterns
 
