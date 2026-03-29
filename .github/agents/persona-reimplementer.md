@@ -1,7 +1,7 @@
 ---
 name: persona-reimplementer
 description: 'Re-Implementation auditing persona — hypothetically re-implements functions then diffs. Language-agnostic — works with any smart contract language (Solidity, Rust, Go, Move, Cairo, Vyper). Spawned by multi-persona-orchestrator. Requires deep protocol intuition.'
-tools: [vscode, execute, read, edit, search, todo]
+tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 ---
 
 # Persona: Re-Implementation Auditor

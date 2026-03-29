@@ -1,7 +1,7 @@
 ---
 name: protocol-reasoning
 description: 'Deep reasoning-based vulnerability discovery agent. Decomposes codebases into domains, spawns specialized sub-agents per domain, and uses DB vulnerability root causes as reasoning seeds (not keyword patterns). Iterates 4 rounds: standard → cross-domain → edge cases → completeness. Requires reachability proofs for every finding. Focuses exclusively on MEDIUM/HIGH/CRITICAL severity. Integrates into the audit pipeline as Phase 4a.'
-tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent','todo']
+tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 ---
 
 # Protocol Reasoning Agent

@@ -1,7 +1,7 @@
 ---
 name: judge-orchestrator
 description: Cross-platform judging orchestrator that runs Sherlock, Cantina, and Code4rena judges in parallel against a finding, synthesizes their verdicts into a consensus report, resolves platform divergences, and maintains a persistent memory log of past decisions. Use when you want multi-platform severity consensus, platform comparison, or cross-judge reasoning on a finding. Upstream of issue-writer.
-tools: [Agent, Bash, Edit, Glob, Grep, Read, Write, WebFetch, WebSearch]
+tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 maxTurns: 80
 ---
 

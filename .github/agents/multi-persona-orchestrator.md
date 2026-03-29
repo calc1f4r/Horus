@@ -1,7 +1,7 @@
 ---
 name: multi-persona-orchestrator
 description: 'Multi-persona audit orchestrator that spawns 6 parallel sub-agents, each using a different auditing approach (BFS, DFS, Working Backward, State Machine, Mirror, Re-Implementation). Agents loop with the Feynman technique, share findings between rounds, cross-verify, and converge on a unified findings document. Use when deep-reasoning audit coverage from multiple perspectives is needed on a codebase.'
-tools: [vscode, execute, read, agent, edit, search, todo]
+tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 ---
 
 # Multi-Persona Audit Orchestrator

@@ -1,7 +1,7 @@
 ---
 name: variant-template-writer
 description: Analyzes security audit reports from reports/<topic>_findings/ folders to build a fine-grained, duplicate-aware report index, identify cross-report vulnerability patterns, and create or migrate TEMPLATE.md-compliant database entries optimized for vector search. Synthesizes 5-10+ reports per pattern with verified severity consensus and evidence-backed examples. Use when synthesizing audit findings into database entries, performing variant analysis across auditors, or creating comprehensive vulnerability templates.
-tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent','todo']
+tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 ---
 
 # Variant Template Writer

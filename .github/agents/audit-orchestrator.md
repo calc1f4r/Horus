@@ -1,7 +1,7 @@
 ---
 name: audit-orchestrator
 description: 'End-to-end smart contract audit orchestrator with configurable modes. Takes a codebase path, optional protocol hint, and flags: --static-only (skip PoC/FV), --judge=<name> (single judge loop), --discovery-rounds=N (iterative cross-pollination). Runs 11-phase pipeline with iterative parallel discovery, a judging self-loop (pre-judge → polish → deep-review), and optional dynamic testing. Produces CONFIRMED-REPORT.md with only judge-verified findings. Language-agnostic. Long-running project agent.'
-tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
 
 # Audit Orchestrator
