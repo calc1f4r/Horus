@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Generate a Codex/GPT compatibility mirror from the Claude playbook tree.
+"""Generate Codex-facing runtime artifacts from the Claude playbook tree.
 
-The Claude files remain the source of truth. This script creates a repo-local
-`codex/` mirror that keeps the original instructions intact while adding thin
-Codex/GPT usage notes and rewriting `.claude/...` links to `codex/...`.
+The Claude files remain the source of truth. This script generates:
+
+- `.agents/skills/` as Codex-native repo-local skills
+- `.codex/agents/` as Codex-native custom subagents
+- `.codex/config.toml`, `.codex/resources/`, and `.codex/rules/`
 """
 
 from __future__ import annotations
@@ -12,6 +14,7 @@ import argparse
 import ast
 import hashlib
 import json
+import os
 import re
 import shutil
 from pathlib import Path
@@ -21,11 +24,22 @@ from urllib.parse import unquote
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CLAUDE_ROOT = REPO_ROOT / ".claude"
 CODEX_ROOT = REPO_ROOT / "codex"
+AGENTS_ROOT = REPO_ROOT / ".agents"
+NATIVE_SKILLS_ROOT = AGENTS_ROOT / "skills"
+REPO_CODEX_ROOT = REPO_ROOT / ".codex"
+NATIVE_AGENTS_ROOT = REPO_CODEX_ROOT / "agents"
+
+NATIVE_WEB_SEARCH_MODE = "live"
+NATIVE_WEB_SEARCH_CONTEXT_SIZE = "medium"
+NATIVE_AGENT_MAX_THREADS = 12
+NATIVE_AGENT_MAX_DEPTH = 2
 
 MIRROR_DIRS = ("agents", "skills", "resources", "rules")
+MANAGED_SCAN_ROOTS = (CODEX_ROOT, AGENTS_ROOT, REPO_CODEX_ROOT)
+MANAGED_STANDALONE_FILES: tuple[Path, ...] = ()
 
 TOOL_MAP = [
-    ("Agent", "spawn a Codex sub-agent when available, otherwise execute the same workflow directly"),
+    ("Agent", "delegate to the matching Codex custom agent when available, otherwise execute the same workflow directly"),
     ("Bash", "run the equivalent shell command"),
     ("Read", "read the referenced file or exact line range"),
     ("Write", "create the required file or artifact"),
@@ -165,29 +179,58 @@ def split_frontmatter(text: str) -> tuple[dict, str, str, str]:
     return {}, "", text, "none"
 
 
-def map_claude_path_to_codex(path: Path) -> Path:
-    rel = path.relative_to(CLAUDE_ROOT)
-    return CODEX_ROOT / rel
+def render_frontmatter(raw_frontmatter: str, style: str) -> str:
+    if not raw_frontmatter:
+        return ""
+    if style == "fenced":
+        return f"---\n{raw_frontmatter}\n---\n\n"
+    if style == "simple":
+        return f"{raw_frontmatter}\n---\n\n"
+    return raw_frontmatter + "\n\n"
+
+
+def render_native_skill_frontmatter(name: str, description: str) -> str:
+    return "\n".join(
+        [
+            "---",
+            f"name: {json.dumps(name, ensure_ascii=False)}",
+            f"description: {json.dumps(description, ensure_ascii=False)}",
+            "---",
+            "",
+        ]
+    )
+
+
+def extract_primary_placeholder(argument_hint: str) -> str:
+    match = re.search(r"<[^>]+>", argument_hint)
+    if match:
+        return match.group(0)
+    if argument_hint.strip():
+        return "<arguments>"
+    return "<input>"
+
+
+def load_matching_skill_argument_hint(name: str) -> str:
+    skill_path = CLAUDE_ROOT / "skills" / name / "SKILL.md"
+    if not skill_path.exists():
+        return ""
+    meta, _, _, _ = split_frontmatter(skill_path.read_text(encoding="utf-8", errors="replace"))
+    return str(meta.get("argument-hint", "")).strip()
 
 
 def infer_repo_target_from_basename(basename: str, label: str = "") -> Path | None:
     basename = unquote(basename)
     label_lower = label.lower()
-    root_file = REPO_ROOT / basename
-    if root_file.exists():
-        return root_file
 
-    agent = CLAUDE_ROOT / "agents" / basename
-    if agent.exists():
-        return agent
-
-    resource = CLAUDE_ROOT / "resources" / basename
-    if resource.exists():
-        return resource
-
-    rule = CLAUDE_ROOT / "rules" / basename
-    if rule.exists():
-        return rule
+    for candidate in (
+        REPO_ROOT / basename,
+        CLAUDE_ROOT / "agents" / basename,
+        CLAUDE_ROOT / "resources" / basename,
+        CLAUDE_ROOT / "rules" / basename,
+        CODEX_ROOT / basename,
+    ):
+        if candidate.exists():
+            return candidate
 
     candidates = []
     for skill in (CLAUDE_ROOT / "skills").glob("*/SKILL.md"):
@@ -201,7 +244,21 @@ def infer_repo_target_from_basename(basename: str, label: str = "") -> Path | No
     return None
 
 
-def rewrite_markdown_links(text: str, src_path: Path, dest_path: Path) -> str:
+def map_generated_path(path: Path, mode: str) -> Path:
+    if path.is_relative_to(CLAUDE_ROOT):
+        rel = path.relative_to(CLAUDE_ROOT)
+        if rel.parts[0] == "skills":
+            return NATIVE_SKILLS_ROOT / Path(*rel.parts[1:])
+        if rel.parts[0] == "agents":
+            return NATIVE_AGENTS_ROOT / f"{path.stem}.toml"
+        if rel.parts[0] == "resources":
+            return REPO_CODEX_ROOT / "resources" / Path(*rel.parts[1:])
+        if rel.parts[0] == "rules":
+            return REPO_CODEX_ROOT / "rules" / Path(*rel.parts[1:])
+    return path
+
+
+def rewrite_markdown_links(text: str, src_path: Path, dest_path: Path, mode: str) -> str:
     pattern = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 
     def _replace(match: re.Match[str]) -> str:
@@ -218,14 +275,8 @@ def rewrite_markdown_links(text: str, src_path: Path, dest_path: Path) -> str:
             anchor = "#" + anchor
 
         resolved_target: Path | None = None
-        if path_part.startswith(".claude/"):
-            candidate = REPO_ROOT / path_part
-            if candidate.exists():
-                resolved_target = candidate
-        elif path_part.startswith(("codex/", "DB/")):
-            candidate = REPO_ROOT / path_part
-            if candidate.exists():
-                resolved_target = candidate
+        if path_part.startswith((".claude/", ".agents/", ".codex/", "DB/")):
+            resolved_target = REPO_ROOT / path_part
         else:
             candidate = (src_path.parent / path_part).resolve()
             if candidate.exists():
@@ -238,26 +289,27 @@ def rewrite_markdown_links(text: str, src_path: Path, dest_path: Path) -> str:
         if resolved_target is None:
             return match.group(0)
 
-        if resolved_target.is_relative_to(CLAUDE_ROOT):
-            resolved_target = map_claude_path_to_codex(resolved_target)
-
-        rewritten = Path(__import__("os").path.relpath(resolved_target, dest_path.parent.resolve())).as_posix()
+        resolved_target = map_generated_path(resolved_target, mode)
+        rewritten = Path(os.path.relpath(resolved_target, dest_path.parent.resolve())).as_posix()
         return f"[{label}]({rewritten}{anchor})"
 
     return pattern.sub(_replace, text)
 
 
-def replace_claude_paths(text: str) -> str:
-    replacements = {
-        ".claude/resources/": "codex/resources/",
-        ".claude/agents/": "codex/agents/",
-        ".claude/skills/": "codex/skills/",
-        ".claude/rules/": "codex/rules/",
-        "`/.claude/": "`/codex/",
-        "(/.claude/": "(/codex/",
-    }
-    for old, new in replacements.items():
-        text = text.replace(old, new)
+def rewrite_explicit_paths(text: str, mode: str) -> str:
+    text = re.sub(r"\.claude/agents/([A-Za-z0-9_.-]+)\.md", r".codex/agents/\1.toml", text)
+    text = text.replace(".claude/agents/*.md", ".codex/agents/*.toml")
+    text = text.replace(".claude/agents/<name>.md", ".codex/agents/<name>.toml")
+    text = text.replace(".claude/agents/[persona-agent-file].md", ".codex/agents/[persona-agent-file].toml")
+    text = text.replace(".claude/agents/", ".codex/agents/")
+    text = re.sub(r"(\.codex/agents/[A-Za-z0-9_./*\[\]-]+)\.md\b", r"\1.toml", text)
+    text = text.replace(".codex/agents/*.md", ".codex/agents/*.toml")
+    text = text.replace(".codex/agents/<name>.md", ".codex/agents/<name>.toml")
+    text = text.replace(".codex/agents/[persona-agent-file].md", ".codex/agents/[persona-agent-file].toml")
+    text = re.sub(r"\.claude/skills/([A-Za-z0-9_.-]+)/SKILL\.md", r".agents/skills/\1/SKILL.md", text)
+    text = text.replace(".claude/resources/", ".codex/resources/")
+    text = text.replace(".claude/rules/", ".codex/rules/")
+    text = text.replace(".claude/skills/", ".agents/skills/")
     return text
 
 
@@ -273,77 +325,139 @@ def format_source_note(src_rel: str, source_hash: str, lines: list[str]) -> str:
     return "\n".join(note_lines) + "\n"
 
 
-def render_frontmatter(raw_frontmatter: str, style: str) -> str:
-    if not raw_frontmatter:
-        return ""
-    if style == "fenced":
-        return f"---\n{raw_frontmatter}\n---\n\n"
-    if style == "simple":
-        return f"{raw_frontmatter}\n---\n\n"
-    return raw_frontmatter + "\n\n"
+def normalize_agent_body(body: str) -> str:
+    body = re.sub(
+        r"(?m)^> \*\*Claude Code Agent Conventions\*\*:\n(?:>[^\n]*\n)+\n?",
+        "",
+        body,
+        count=1,
+    )
+    return body.lstrip("\n")
 
 
-def build_agent_content(src_rel: str, dest_rel: str, text: str) -> tuple[str, dict]:
-    meta, raw_frontmatter, body, style = split_frontmatter(text)
-    source_hash = sha256_text(text)
-    mapped_tools = [
-        f"`{tool}` -> {meaning}" for tool, meaning in TOOL_MAP if tool in str(meta.get("tools", ""))
+def strip_agent_invocation_sections(body: str) -> str:
+    return re.sub(r"(?ms)^## Invocation\n.*?(?=^## |\Z)", "", body)
+
+
+def toml_multiline_string(text: str) -> str:
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+    if "'''" not in normalized:
+        if not normalized.endswith("\n"):
+            normalized += "\n"
+        return "'''\n" + normalized + "'''"
+    return json.dumps(normalized, ensure_ascii=False)
+
+
+def build_native_codex_config() -> str:
+    return "\n".join(
+        [
+            "# Generated by scripts/sync_codex_compat.py.",
+            "# Enables live web search for repo-local Codex sessions.",
+            "# Allows spawned subagents to delegate one level deeper.",
+            "",
+            f'web_search = "{NATIVE_WEB_SEARCH_MODE}"',
+            f'tools.web_search = {{ context_size = "{NATIVE_WEB_SEARCH_CONTEXT_SIZE}" }}',
+            "",
+            "[agents]",
+            f"max_threads = {NATIVE_AGENT_MAX_THREADS}",
+            f"max_depth = {NATIVE_AGENT_MAX_DEPTH}",
+            "",
+        ]
+    )
+
+
+def build_native_skill_content(src_rel: str, dest_rel: str, text: str) -> tuple[str, dict]:
+    meta, _, body, _ = split_frontmatter(text)
+    agent_name = str(meta.get("agent", "")).strip()
+    argument_hint = str(meta.get("argument-hint", "")).strip()
+    name = str(meta.get("name", Path(src_rel).parent.name))
+    description = str(meta.get("description", "")).replace("\n", " ").strip()
+    primary_placeholder = extract_primary_placeholder(argument_hint)
+    src_path = REPO_ROOT / src_rel
+    dest_path = REPO_ROOT / dest_rel
+    transformed = rewrite_markdown_links(body, src_path, dest_path, mode="native-skill")
+    transformed = rewrite_explicit_paths(transformed, mode="native-skill")
+    transformed = re.sub(r"\[/([^\]]+)\]\(", r"[\1](", transformed)
+    transformed = transformed.replace("${ARGUMENTS}", primary_placeholder)
+    transformed = transformed.replace("$ARGUMENTS", primary_placeholder)
+
+    intro_lines = [
     ]
-    note = format_source_note(
-        src_rel,
-        source_hash,
-        [
-            "The original agent metadata below is preserved verbatim.",
-            "Interpret Claude-specific tool names as workflow intent rather than required syntax.",
-            *mapped_tools,
-            "If a Claude-only runtime feature is unavailable, follow the same procedure directly and produce the same on-disk artifacts.",
-            "All `.claude/...` references in the mirrored body are rewritten to `codex/...`.",
-        ],
-    )
-    src_path = REPO_ROOT / src_rel
-    dest_path = REPO_ROOT / dest_rel
-    transformed = rewrite_markdown_links(body, src_path, dest_path)
-    transformed = replace_claude_paths(transformed)
-    content = render_frontmatter(raw_frontmatter, style) + note + transformed.lstrip("\n")
+    if agent_name:
+        agent_rel = Path(os.path.relpath(NATIVE_AGENTS_ROOT / f"{agent_name}.toml", dest_path.parent)).as_posix()
+        intro_lines.extend(
+            [
+                f"Use the [{agent_name} subagent]({agent_rel}) when you want delegated execution.",
+                "That subagent is configured for live web search and may delegate to narrower repo subagents when the workflow splits cleanly.",
+                "",
+            ]
+        )
+    if argument_hint:
+        intro_lines.extend(
+            [
+                f"Input: `{argument_hint}`.",
+                "",
+            ]
+        )
+
+    intro = "\n".join(intro_lines)
+    if intro:
+        intro += "\n"
+    content = render_native_skill_frontmatter(name, description) + intro + transformed.lstrip("\n")
     return content, meta
 
 
-def build_skill_content(src_rel: str, dest_rel: str, text: str) -> tuple[str, dict]:
-    meta, raw_frontmatter, body, style = split_frontmatter(text)
-    source_hash = sha256_text(text)
-    agent_name = meta.get("agent", "unknown")
-    note = format_source_note(
-        src_rel,
-        source_hash,
-        [
-            "The original skill metadata below is preserved verbatim.",
-            f"For Codex/GPT use, load `codex/agents/{agent_name}.md` as the implementation playbook.",
-            "Follow any linked `codex/resources/*` references from that agent file.",
-            "Relative skill links remain mirrored under `codex/skills/*`.",
-        ],
-    )
+def build_native_reference_content(src_rel: str, dest_rel: str, text: str) -> str:
     src_path = REPO_ROOT / src_rel
     dest_path = REPO_ROOT / dest_rel
-    transformed = rewrite_markdown_links(body, src_path, dest_path)
-    transformed = replace_claude_paths(transformed)
-    content = render_frontmatter(raw_frontmatter, style) + note + transformed.lstrip("\n")
-    return content, meta
+    transformed = rewrite_markdown_links(text, src_path, dest_path, mode="native-agent")
+    transformed = rewrite_explicit_paths(transformed, mode="native-agent")
+    return transformed
 
 
-def build_markdown_mirror(src_rel: str, dest_rel: str, text: str, heading: str) -> str:
-    source_hash = sha256_text(text)
-    note = format_source_note(
-        src_rel,
-        source_hash,
-        [
-            f"This mirrored {heading} preserves the original content with `.claude/...` links rewritten to `codex/...` where needed.",
-        ],
+def build_native_agent_toml(src_rel: str, text: str) -> tuple[str, dict]:
+    meta, _, body, _ = split_frontmatter(text)
+    body = normalize_agent_body(body)
+    body = strip_agent_invocation_sections(body)
+    name = str(meta.get("name", Path(src_rel).stem))
+    description = str(meta.get("description", "")).replace("\n", " ").strip()
+    argument_hint = load_matching_skill_argument_hint(name)
+    primary_placeholder = extract_primary_placeholder(argument_hint)
+    body = re.sub(rf"@{re.escape(name)}\b", name, body)
+    body = rewrite_explicit_paths(body, mode="native-agent")
+    body = rewrite_markdown_links(
+        body,
+        REPO_ROOT / src_rel,
+        NATIVE_AGENTS_ROOT / f"{Path(src_rel).stem}.toml",
+        mode="native-agent",
     )
-    src_path = REPO_ROOT / src_rel
-    dest_path = REPO_ROOT / dest_rel
-    transformed = rewrite_markdown_links(text, src_path, dest_path)
-    transformed = replace_claude_paths(transformed)
-    return note + transformed
+    body = body.replace("${ARGUMENTS}", primary_placeholder)
+    body = body.replace("$ARGUMENTS", primary_placeholder)
+    preface_lines = [
+        f"You are the `{name}` custom agent for this repository.",
+        f"Purpose: {description}",
+        "Follow the workflow below exactly when it applies.",
+        "Use generated `.codex/resources/*` and `.codex/rules/*` paths when referenced.",
+        "Use live web search when external facts, protocol docs, standards, prior incidents, vendor references, or contest criteria would improve accuracy.",
+        "Delegate to narrower repo custom agents when the work decomposes cleanly and doing so improves coverage or verification.",
+        "",
+    ]
+
+    developer_instructions = "\n".join(preface_lines) + body
+
+    lines = [
+        f'name = "{name}"',
+        f'description = {json.dumps(description, ensure_ascii=False)}',
+        f'web_search = "{NATIVE_WEB_SEARCH_MODE}"',
+        f'tools.web_search = {{ context_size = "{NATIVE_WEB_SEARCH_CONTEXT_SIZE}" }}',
+        f"developer_instructions = {toml_multiline_string(developer_instructions)}",
+        "",
+        "[agents]",
+        f"max_threads = {NATIVE_AGENT_MAX_THREADS}",
+        f"max_depth = {NATIVE_AGENT_MAX_DEPTH}",
+        "",
+    ]
+    return "\n".join(lines), meta
 
 
 def build_catalog(title: str, intro: str, rows: list[tuple[str, ...]], headers: tuple[str, ...]) -> str:
@@ -366,74 +480,29 @@ def discover_files() -> dict[str, list[Path]]:
     return files
 
 
-def build_root_readme(skill_count: int, agent_count: int, resource_count: int, rule_count: int) -> str:
-    return "\n".join(
-        [
-            "# Codex Compatibility Layer",
-            "",
-            "This directory is a generated Codex/GPT-facing mirror of the Claude playbook tree in `.claude/`.",
-            "",
-            "It exists so the repository can preserve the original Claude skills, agents, resources, and rules unchanged while also giving Codex/GPT a portable, repo-local instruction surface.",
-            "",
-            "## What Is Mirrored",
-            "",
-            f"- `skills/`: {skill_count} mirrored skill wrappers",
-            f"- `agents/`: {agent_count} mirrored agent playbooks",
-            f"- `resources/`: {resource_count} mirrored reference files",
-            f"- `rules/`: {rule_count} mirrored rule files",
-            "",
-            "## How To Use",
-            "",
-            "1. Start with `CATALOG.md` or `FLOWS.md` to pick the right skill/flow.",
-            "2. Open the relevant file under `skills/`.",
-            "3. Follow the linked implementation playbook under `agents/`.",
-            "4. Load any referenced files from `resources/` or `rules/` as needed.",
-            "",
-            "## Sync",
-            "",
-            "Regenerate this layer after changing `.claude/` content:",
-            "",
-            "```bash",
-            "python3 scripts/sync_codex_compat.py",
-            "```",
-            "",
-            "Validate that the committed mirror is up to date:",
-            "",
-            "```bash",
-            "python3 scripts/sync_codex_compat.py --check",
-            "```",
-            "",
-        ]
-    )
-
-
-def build_flows(skill_meta: list[dict[str, str]]) -> str:
-    skill_by_name = {item["name"]: item for item in skill_meta}
-    lines = [
-        "# Codex Flows",
-        "",
-        "These are task-level entry points for Codex/GPT. Each flow maps to one or more mirrored skills and agents under `codex/`.",
-        "",
-    ]
-    for group_name, skill_names in FLOW_GROUPS.items():
-        lines.append(f"## {group_name}")
-        lines.append("")
-        for skill_name in skill_names:
-            item = skill_by_name.get(skill_name)
-            if not item:
-                continue
-            lines.append(
-                f"- `{skill_name}`: {item['description']} "
-                f"See `codex/skills/{skill_name}/SKILL.md`."
+def gather_actual_paths() -> set[str]:
+    actual_paths: set[str] = set()
+    for root in MANAGED_SCAN_ROOTS:
+        if root.exists():
+            actual_paths.update(
+                path.relative_to(REPO_ROOT).as_posix()
+                for path in root.rglob("*")
+                if path.is_file()
             )
-        lines.append("")
-    return "\n".join(lines)
+    for path in MANAGED_STANDALONE_FILES:
+        if path.exists():
+            actual_paths.add(path.relative_to(REPO_ROOT).as_posix())
+    return actual_paths
 
 
 def generate() -> tuple[dict[str, str], dict[str, list[dict[str, str]]]]:
     outputs: dict[str, str] = {}
-    manifest_entries: list[dict[str, str]] = []
+    native_skill_entries: list[dict[str, str]] = []
+    native_agent_entries: list[dict[str, str]] = []
+
     discovered = discover_files()
+
+    outputs[".codex/config.toml"] = build_native_codex_config()
 
     skill_meta_rows: list[dict[str, str]] = []
     agent_meta_rows: list[dict[str, str]] = []
@@ -442,189 +511,128 @@ def generate() -> tuple[dict[str, str], dict[str, list[dict[str, str]]]]:
 
     for src_path in discovered["agents"]:
         src_rel = src_path.relative_to(REPO_ROOT).as_posix()
-        dst_rel = src_path.relative_to(CLAUDE_ROOT).as_posix()
-        dst_rel = f"codex/{dst_rel}"
+        native_rel = f".codex/agents/{src_path.stem}.toml"
+
         text = src_path.read_text(encoding="utf-8", errors="replace")
-        content, meta = build_agent_content(src_rel, dst_rel, text)
-        outputs[dst_rel] = content
-        manifest_entries.append(
+
+        native_content, meta = build_native_agent_toml(src_rel, text)
+        outputs[native_rel] = native_content
+        native_agent_entries.append(
             {
                 "source": src_rel,
-                "dest": dst_rel,
+                "dest": native_rel,
                 "source_sha256": sha256_text(text),
-                "dest_sha256": sha256_text(content),
+                "dest_sha256": sha256_text(native_content),
             }
         )
+
         agent_meta_rows.append(
             {
                 "name": str(meta.get("name", src_path.stem)),
                 "description": str(meta.get("description", "")).replace("\n", " ").strip(),
                 "source": src_rel,
-                "dest": dst_rel,
+                "native_dest": native_rel,
             }
         )
 
     for src_path in discovered["skills"]:
         src_rel = src_path.relative_to(REPO_ROOT).as_posix()
-        dst_rel = src_path.relative_to(CLAUDE_ROOT).as_posix()
-        dst_rel = f"codex/{dst_rel}"
         if src_path.name == "SKILL.md":
+            native_rel = f".agents/skills/{src_path.parent.name}/SKILL.md"
             text = src_path.read_text(encoding="utf-8", errors="replace")
-            content, meta = build_skill_content(src_rel, dst_rel, text)
-            outputs[dst_rel] = content
-            manifest_entries.append(
+
+            native_content, meta = build_native_skill_content(src_rel, native_rel, text)
+            outputs[native_rel] = native_content
+            native_skill_entries.append(
                 {
                     "source": src_rel,
-                    "dest": dst_rel,
+                    "dest": native_rel,
                     "source_sha256": sha256_text(text),
-                    "dest_sha256": sha256_text(content),
+                    "dest_sha256": sha256_text(native_content),
                 }
             )
+
             skill_meta_rows.append(
                 {
                     "name": str(meta.get("name", src_path.parent.name)),
                     "description": str(meta.get("description", "")).replace("\n", " ").strip(),
                     "agent": str(meta.get("agent", "")),
                     "source": src_rel,
-                    "dest": dst_rel,
+                    "native_dest": native_rel,
                 }
             )
         else:
+            rel_under_skill = src_path.relative_to(CLAUDE_ROOT / "skills").as_posix()
+            native_rel = f".agents/skills/{rel_under_skill}"
             data = src_path.read_bytes()
-            outputs[dst_rel] = data.decode("utf-8", errors="replace")
-            manifest_entries.append(
+            content = data.decode("utf-8", errors="replace")
+
+            outputs[native_rel] = content
+            native_skill_entries.append(
                 {
                     "source": src_rel,
-                    "dest": dst_rel,
+                    "dest": native_rel,
                     "source_sha256": sha256_bytes(data),
-                    "dest_sha256": sha256_text(outputs[dst_rel]),
+                    "dest_sha256": sha256_text(content),
                 }
             )
 
     for src_path in discovered["resources"]:
         src_rel = src_path.relative_to(REPO_ROOT).as_posix()
-        dst_rel = src_path.relative_to(CLAUDE_ROOT).as_posix()
-        dst_rel = f"codex/{dst_rel}"
+        native_rel = f".codex/{src_path.relative_to(CLAUDE_ROOT).as_posix()}"
         if src_path.suffix == ".md":
             text = src_path.read_text(encoding="utf-8", errors="replace")
-            content = build_markdown_mirror(src_rel, dst_rel, text, "resource")
-            outputs[dst_rel] = content
-            manifest_entries.append(
-                {
-                    "source": src_rel,
-                    "dest": dst_rel,
-                    "source_sha256": sha256_text(text),
-                    "dest_sha256": sha256_text(content),
-                }
-            )
+            content = build_native_reference_content(src_rel, native_rel, text)
+            outputs[native_rel] = content
         else:
             data = src_path.read_bytes()
-            outputs[dst_rel] = data.decode("utf-8", errors="replace")
-            manifest_entries.append(
-                {
-                    "source": src_rel,
-                    "dest": dst_rel,
-                    "source_sha256": sha256_bytes(data),
-                    "dest_sha256": sha256_text(outputs[dst_rel]),
-                }
-            )
+            content = data.decode("utf-8", errors="replace")
+            outputs[native_rel] = content
+        native_agent_entries.append(
+            {
+                "source": src_rel,
+                "dest": native_rel,
+                "source_sha256": sha256_bytes(src_path.read_bytes()) if src_path.suffix != ".md" else sha256_text(text),
+                "dest_sha256": sha256_text(content),
+            }
+        )
         resource_rows.append((src_path.relative_to(CLAUDE_ROOT / "resources").as_posix(), src_rel))
 
     for src_path in discovered["rules"]:
         src_rel = src_path.relative_to(REPO_ROOT).as_posix()
-        dst_rel = src_path.relative_to(CLAUDE_ROOT).as_posix()
-        dst_rel = f"codex/{dst_rel}"
+        native_rel = f".codex/{src_path.relative_to(CLAUDE_ROOT).as_posix()}"
         text = src_path.read_text(encoding="utf-8", errors="replace")
-        content = build_markdown_mirror(src_rel, dst_rel, text, "rule")
-        outputs[dst_rel] = content
-        manifest_entries.append(
+        content = build_native_reference_content(src_rel, native_rel, text)
+        outputs[native_rel] = content
+        native_agent_entries.append(
             {
                 "source": src_rel,
-                "dest": dst_rel,
+                "dest": native_rel,
                 "source_sha256": sha256_text(text),
                 "dest_sha256": sha256_text(content),
             }
         )
         rule_rows.append((src_path.relative_to(CLAUDE_ROOT / "rules").as_posix(), src_rel))
-
-    skill_rows = [
-        (
-            item["name"],
-            item["agent"],
-            item["description"],
-            f"`{item['source']}`",
-        )
-        for item in sorted(skill_meta_rows, key=lambda item: item["name"])
-    ]
-    agent_rows = [
-        (
-            item["name"],
-            item["description"],
-            f"`{item['source']}`",
-        )
-        for item in sorted(agent_meta_rows, key=lambda item: item["name"])
-    ]
-    resource_catalog_rows = [
-        (f"`{name}`", f"`{source}`") for name, source in sorted(resource_rows)
-    ]
-    rule_catalog_rows = [
-        (f"`{name}`", f"`{source}`") for name, source in sorted(rule_rows)
-    ]
-
-    outputs["codex/README.md"] = build_root_readme(
-        skill_count=len(skill_meta_rows),
-        agent_count=len(agent_meta_rows),
-        resource_count=len(resource_rows),
-        rule_count=len(rule_rows),
-    )
-    outputs["codex/CATALOG.md"] = "\n".join(
-        [
-            "# Codex Catalog",
-            "",
-            "Entry points for the generated Codex/GPT compatibility layer:",
-            "",
-            "- `README.md` — how to use the mirror",
-            "- `FLOWS.md` — task-oriented entry points",
-            "- `skills/CATALOG.md` — mirrored skills",
-            "- `agents/CATALOG.md` — mirrored agent playbooks",
-            "- `resources/CATALOG.md` — mirrored references",
-            "- `rules/CATALOG.md` — mirrored rule files",
-            "- `source-map.json` — source-to-mirror mapping with hashes",
-            "",
-        ]
-    )
-    outputs["codex/FLOWS.md"] = build_flows(skill_meta_rows)
-    outputs["codex/skills/CATALOG.md"] = build_catalog(
-        "Codex Skills Catalog",
-        "Mirrored skill wrappers generated from `.claude/skills/*/SKILL.md`.",
-        skill_rows,
-        ("Skill", "Agent", "Description", "Source"),
-    )
-    outputs["codex/agents/CATALOG.md"] = build_catalog(
-        "Codex Agents Catalog",
-        "Mirrored agent playbooks generated from `.claude/agents/*.md`.",
-        agent_rows,
-        ("Agent", "Description", "Source"),
-    )
-    outputs["codex/resources/CATALOG.md"] = build_catalog(
-        "Codex Resources Catalog",
-        "Mirrored resources generated from `.claude/resources/**`.",
-        resource_catalog_rows,
-        ("Resource", "Source"),
-    )
-    outputs["codex/rules/CATALOG.md"] = build_catalog(
-        "Codex Rules Catalog",
-        "Mirrored rule files generated from `.claude/rules/*.md`.",
-        rule_catalog_rows,
-        ("Rule", "Source"),
-    )
-    outputs["codex/source-map.json"] = json.dumps(
+    native_skill_entries.extend(
         {
-            "generatedFrom": ".claude",
-            "entries": sorted(manifest_entries, key=lambda item: item["dest"]),
-        },
-        indent=2,
-    ) + "\n"
+            "source": "generated",
+            "dest": rel_path,
+            "source_sha256": "",
+            "dest_sha256": sha256_text(content),
+        }
+        for rel_path, content in outputs.items()
+        if rel_path.startswith(".agents/")
+    )
+    native_agent_entries.extend(
+        {
+            "source": "generated",
+            "dest": rel_path,
+            "source_sha256": "",
+            "dest_sha256": sha256_text(content),
+        }
+        for rel_path, content in outputs.items()
+        if rel_path.startswith(".codex/")
+    )
 
     meta = {
         "skills": skill_meta_rows,
@@ -636,9 +644,6 @@ def generate() -> tuple[dict[str, str], dict[str, list[dict[str, str]]]]:
 
 
 def write_outputs(outputs: dict[str, str]) -> None:
-    if CODEX_ROOT.exists():
-        shutil.rmtree(CODEX_ROOT)
-    CODEX_ROOT.mkdir(parents=True, exist_ok=True)
     for rel_path, content in sorted(outputs.items()):
         path = REPO_ROOT / rel_path
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -647,12 +652,8 @@ def write_outputs(outputs: dict[str, str]) -> None:
 
 def check_outputs(outputs: dict[str, str]) -> int:
     mismatches: list[str] = []
-    expected_paths = {path for path in outputs}
-    actual_paths = {
-        path.relative_to(REPO_ROOT).as_posix()
-        for path in CODEX_ROOT.rglob("*")
-        if path.is_file()
-    } if CODEX_ROOT.exists() else set()
+    expected_paths = set(outputs)
+    actual_paths = gather_actual_paths()
 
     missing = sorted(expected_paths - actual_paths)
     unexpected = sorted(actual_paths - expected_paths)
@@ -678,16 +679,28 @@ def check_outputs(outputs: dict[str, str]) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Sync the Codex compatibility mirror from .claude/")
-    parser.add_argument("--check", action="store_true", help="Verify the committed codex/ mirror is up to date")
+    parser = argparse.ArgumentParser(
+        description="Sync Codex-facing runtime skills, agents, and shared references from .claude/"
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Verify the committed generated Codex-facing artifacts are up to date",
+    )
     args = parser.parse_args()
 
     outputs, _ = generate()
     if args.check:
         return check_outputs(outputs)
 
+    if CODEX_ROOT.exists():
+        shutil.rmtree(CODEX_ROOT)
     write_outputs(outputs)
-    print(f"Wrote {len(outputs)} files under {CODEX_ROOT}")
+    print(
+        "Wrote "
+        f"{sum(1 for path in outputs if path.startswith('.agents/'))} native skill files and "
+        f"{sum(1 for path in outputs if path.startswith('.codex/'))} native Codex runtime files."
+    )
     return 0
 
 

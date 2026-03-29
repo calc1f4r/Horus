@@ -17,10 +17,11 @@ Copied paths:
   .github/agents   -> <target_root>/.github/agents
   .claude          -> <target_root>/.claude
   .claude-plugins  -> <target_root>/.claude-plugins (if present here)
-  codex            -> <target_root>/codex
-                      This is the full Codex tree, not only `codex/agents`.
-                      It includes root files plus `agents/`, `skills/`,
-                      `resources/`, and `rules/`.
+  .agents          -> <target_root>/.agents
+  .codex           -> <target_root>/.codex
+                      This is the generated Codex runtime surface, including
+                      repo-local skills, custom agents, shared references,
+                      shared rules, and repo config.
 
 Options:
   --dry-run            Print planned copy operations without writing files.
@@ -148,7 +149,8 @@ fi
 copy_dir ".github/agents" ".github/agents"
 copy_dir ".claude" ".claude"
 copy_dir ".claude-plugins" ".claude-plugins" 1
-copy_dir "codex" "codex"
+copy_dir ".agents" ".agents"
+copy_dir ".codex" ".codex"
 
 if [[ "${INCLUDE_AGENTS_MD}" == "1" ]]; then
   copy_file "AGENTS.md" "AGENTS.md"
