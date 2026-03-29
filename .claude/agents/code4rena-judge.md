@@ -47,6 +47,7 @@ Judging Progress:
 - [ ] Step 1: Load Code4rena judging criteria
 - [ ] Step 2: Extract finding details
 - [ ] Step 3: Check scope and validity
+- [ ] Step 3.5: Apply intentional/by-design gate
 - [ ] Step 4: Apply severity caps
 - [ ] Step 5: Assess submission quality
 - [ ] Step 6: Inflation & under-judging check
@@ -81,9 +82,18 @@ Walk through the decision framework in order:
 - Purely speculative future-code issue with no root cause in current scope → **INVALID**
 - Known issue listed in README as acknowledged/wontfix → **OOS** unless persisting after expected mitigation
 - Non-standard/weird ERC20 / fee-on-transfer token not explicitly in scope → **INVALID** (USDT exception)
+- Behavior explicitly documented as intentional/by-design/expected in README, specs, code comments, or revert/error messages → **QA at best / INVALID**
 
 **Approve race condition** → **INVALID** (C4 official stance)  
 **CryptoPunks support missing** → **Informational / INVALID**
+
+### Step 3.5: Intentional / By-Design Gate (Mandatory)
+
+Run this gate before assigning Medium/High:
+
+- If behavior is explicitly intentional/by-design, final severity cannot exceed **QA**.
+- If the behavior is already acknowledged as known/wontfix or accepted trade-off, prefer **INVALID/OOS**.
+- Only continue to Medium/High analysis when there is a separate unintended impact path beyond that intentional behavior.
 
 ### Step 4: Severity Assignment & Caps
 
@@ -102,6 +112,7 @@ Walk through the decision framework in order:
 | Dust/rounding losses (even repeatable) | QA / Low |
 | Loss of unmatured yield / yield in motion | MEDIUM (never High) |
 | Admin-gated execution (not privilege escalation) | MEDIUM at most (often QA) |
+| Intentional/by-design/expected behavior (documented) | QA at most (often INVALID/OOS) |
 | Privilege escalation by non-admin | Use Impact × Likelihood normally |
 | Non-standard ERC20 not in scope | INVALID |
 | Unused view function finding | QA / Low |
@@ -143,6 +154,7 @@ Before finalizing, run both directions of the severity sanity check:
 - Is a dust/rounding loss labeled High/Medium? → Cap at QA/Low.
 - Is an admin-gated issue labeled High? → Cap at Medium or QA.
 - Does a PJQA argument attempt to escalate severity without new technical evidence? → **Hold the original verdict.** Warden pressure is not a technical argument.
+- Is the report describing behavior explicitly documented as intentional/by-design? → Cap at QA or mark INVALID unless a distinct unintended impact is proven.
 
 **Check for under-judging (being overly conservative):**
 - Does the attack path directly compromise assets without external dependencies? → Must be HIGH — do not soften.
@@ -160,6 +172,7 @@ SCOPE CHECK:
 - Root cause location: [in-scope / OOS / in-scope misuse of OOS]
 - Admin/user-error dependency: [yes/no — detail]
 - Speculative: [yes/no — detail]
+- Intentionality gate: [triggered — QA/INVALID cap / not triggered]
 
 IMPACT ANALYSIS:
 - Assets directly at risk: [yes/no]

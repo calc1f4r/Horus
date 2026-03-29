@@ -53,6 +53,7 @@ Runs all three platform judges in parallel, synthesizes verdicts, resolves diver
 Orchestration Progress:
 - [ ] Step 1: Load memory context
 - [ ] Step 2: Parse finding and target platforms
+- [ ] Step 2.5: Apply intentional/by-design pre-gate
 - [ ] Step 3: Spawn judges in parallel
 - [ ] Step 4: Collect verdicts
 - [ ] Step 5: Identify divergences
@@ -105,6 +106,23 @@ Extract from the input:
 
 ---
 
+## Step 2.5: Intentional / By-Design Pre-Gate
+
+Before fan-out, inspect the finding for evidence that behavior is intentional/expected:
+
+- README/spec language marking the behavior as intentional, expected, accepted trade-off, or wontfix
+- Inline comments describing the branch/path as intentional guardrail behavior
+- Revert/error messages explicitly signaling intentional blocking behavior
+
+If this gate is triggered and no distinct unintended impact is demonstrated, instruct downstream judges that the finding cannot be promoted to Medium/High.
+
+Platform outcomes for gate-triggered findings (without separate unintended impact):
+- Sherlock: INVALID
+- Cantina: INFO or INVALID
+- Code4rena: QA or INVALID/OOS
+
+---
+
 ## Step 3: Spawn Judges in Parallel (Round 1 — Independent Verdicts)
 
 Spawn all target platform judges **simultaneously** as sub-agents. Pass each judge:
@@ -113,6 +131,7 @@ Spawn all target platform judges **simultaneously** as sub-agents. Pass each jud
 3. Any relevant memory context about similar findings (from Step 1)
 4. Instruction to return a **structured verdict** in their standard format
 5. Instruction to explicitly state their **key reasoning chain** — not just conclusion — so other judges can challenge it
+6. Instruction to apply the intentional/by-design gate before severity scoring; do not output Medium/High for intentional behavior unless a separate unintended impact is proven
 
 Sub-agents to spawn:
 - `sherlock-judging` — returns: VALID/INVALID, HIGH/MEDIUM/INVALID severity
@@ -152,6 +171,7 @@ Verdict Schema:
   impact:         [judge's impact description]
   likelihood:     [judge's likelihood description — N/A for Sherlock]
   cap_applied:    [cap name if any, else null]
+  intentionality_gate: [triggered | not_triggered]
   key_factors:    [list of rules that determined outcome]
   inflation_flag: [overclaimed | under-judged | accurate]
   raw_verdict:    [judge's full original output]
@@ -177,6 +197,7 @@ Compare normalized verdicts across platforms. Flag a **divergence** when:
 | Non-standard ERC20 | Generally invalid | Capped LOW | INVALID unless scoped | C4 stricter |
 | Unmatured yield loss | Full impact | Full matrix | Capped MEDIUM | C4 lowest |
 | DoS < 7 days | Likely invalid | Matrix-based | QA/MEDIUM | Sherlock strictest |
+| Intentional/by-design behavior | INVALID | INFO/INVALID | QA/INVALID/OOS | Platform labels differ, all should avoid Med/High |
 
 For each divergence, record:
 - Which platforms diverge
@@ -275,6 +296,8 @@ Build the final consensus verdict:
 
 ```
 Consensus Algorithm:
+  IF intentionality_gate triggered across platforms AND no distinct unintended impact:
+    → NON-EXPLOIT CONSENSUS — severity must stay INVALID/INFO/QA (never MEDIUM/HIGH)
   IF all platforms agree on validity AND severity tier:
     → FULL CONSENSUS — use agreed verdict
   ELIF majority (2/3) agree:
@@ -351,12 +374,14 @@ TIMESTAMP: [ISO timestamp]
 SHERLOCK
   Valid: [YES / NO]
   Severity: [HIGH / MEDIUM / INVALID]
+  Intentionality gate: [triggered / not triggered]
   Key factor: [determining rule]
   Inflation check: [overclaimed / under-judged / accurate]
 
 CANTINA
   Valid: [YES / NO]
   Severity: [HIGH / MEDIUM / LOW / INFO / INVALID]
+  Intentionality gate: [triggered / not triggered]
   Matrix: [Impact] × [Likelihood] = [result]
   Cap: [if any]
   Inflation check: [overclaimed / under-judged / accurate]
@@ -364,6 +389,7 @@ CANTINA
 CODE4RENA
   Valid: [YES / NO / OOS]
   Severity: [HIGH / MEDIUM / QA / INVALID]
+  Intentionality gate: [triggered / not triggered]
   Quality: [sufficient / insufficient]
   Cap: [if any]
   Inflation check: [overclaimed / under-judged / accurate]
