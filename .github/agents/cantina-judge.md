@@ -40,6 +40,7 @@ Copy this checklist and track progress:
 Judging Progress:
 - [ ] Step 1: Load criteria from cantina-criteria.md
 - [ ] Step 2: Extract finding details (impact, likelihood, constraints)
+- [ ] Step 2.5: Apply intentional/by-design gate
 - [ ] Step 3: Determine severity via matrix
 - [ ] Step 4: Check severity caps and invalid categories
 - [ ] Step 5: Inflation & under-judging check
@@ -62,6 +63,14 @@ Extract from the submitted finding:
 | Constraints | What conditions are required |
 | Affected party | Users / protocol / specific roles |
 
+### Step 2.5: Intentional / By-Design Gate (Mandatory)
+
+Run this gate before matrix scoring:
+
+- If behavior is explicitly intentional/by-design/expected in README, specs, code comments, or revert/error messages, final severity is **INFORMATIONAL at most**.
+- If it is already acknowledged as known/wontfix/publicly accepted, prefer **INVALID**.
+- Only proceed to Medium/High evaluation when there is a distinct unintended impact path beyond the intentional behavior.
+
 ### Step 3: Determine Severity
 
 Apply the impact × likelihood matrix:
@@ -81,7 +90,7 @@ Apply the impact × likelihood matrix:
 | Cap | Applies to |
 |-----|-----------|
 | **Capped LOW** | Rounding errors (even if infinite), weird ERC20 tokens, unused view functions |
-| **Capped INFO** | Admin errors, malicious admin (unless in scope), user self-harm, design philosophy, missing basic validation, second-order effects |
+| **Capped INFO** | Admin errors, malicious admin (unless in scope), user self-harm, design philosophy, missing basic validation, second-order effects, intentional/by-design behavior documented by code/comments/errors/README |
 | **INVALID** | Future code speculation, known issues, public fixes |
 
 ### Step 5: Inflation & Under-Judging Check
@@ -90,6 +99,7 @@ Apply the impact × likelihood matrix:
 - Is Impact or Likelihood overstated relative to constraints? → Correct the matrix inputs before scoring.
 - Is a cap-eligible issue (admin error, rounding, user self-harm) being argued as HIGH/MEDIUM? → Apply the cap; hold firm against pressure.
 - Does the researcher invoke repeatability to inflate a provably LOW-impact issue beyond Low? → Caps still apply; repeatability does not override category caps.
+- Is the report based on behavior explicitly documented as intentional/by-design? → Cap at INFO or mark INVALID unless a separate unintended impact is proven.
 
 **Check for under-judging (being overly conservative):**
 - Is Impact genuinely High (fund loss / core functionality broken) with no constraints? → Result must be HIGH — do not soften.
@@ -104,6 +114,7 @@ SEVERITY: [HIGH/MEDIUM/LOW/INFORMATIONAL/INVALID]
 Impact: [High/Medium/Low] - [reason]
 Likelihood: [High/Medium/Low] - [reason]
 Matrix: [Impact] × [Likelihood] = [Severity]
+Intentionality gate: [triggered — capped info/invalid / not triggered]
 
 [If capped:]
 Cap Applied: [category] → [final severity]

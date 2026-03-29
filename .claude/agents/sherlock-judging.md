@@ -43,6 +43,7 @@ Judging Progress:
 - [ ] Step 1: Load Sherlock judging criteria
 - [ ] Step 2: Extract finding details
 - [ ] Step 3: Check validity (valid/invalid categories)
+- [ ] Step 3.5: Apply intentional/by-design gate
 - [ ] Step 4: Determine severity (High/Medium)
 - [ ] Step 5: Inflation & under-judging check
 - [ ] Step 6: Output structured verdict
@@ -76,8 +77,17 @@ Check against Sherlock's explicit categories:
 - Front-running initializers (if redeployable)
 - Accidental token transfers (only harms sender)
 - Loss of airdrops not in original design
+- Behavior explicitly documented as intentional/by-design/expected (README, spec, code comments, or revert/error messages)
 
 **Check for exceptions** — many invalid categories have specific exceptions documented in the criteria.
+
+### Step 3.5: Intentional / By-Design Gate (Mandatory)
+
+Run this gate before any Medium/High analysis:
+
+- If the finding is explicitly marked intentional, expected, known, or accepted trade-off in README/spec/comments/error strings, default to **INVALID**.
+- Intentional guardrails and intentional reverts are not vulnerabilities by themselves, even if a submitter labels them Medium/High.
+- Only proceed to severity scoring if there is a **separate unintended consequence** beyond the intentional behavior (for example, unintended fund loss or unintended core-function break).
 
 ### Step 4: Severity Assessment
 
@@ -104,6 +114,7 @@ Check against Sherlock's explicit categories:
 - Is the attack path dependent on extensive external limitations the warden is hand-waving away? → Cannot be High.
 - Is a warden invoking likelihood ("anyone can do this") to argue High? → Sherlock ignores likelihood; only quantitative impact thresholds matter. Hold the verdict.
 - Does a dispute or repeated PJQA comment assert High without new quantitative evidence? → Hold the original verdict. Pressure is not evidence.
+- Is the report describing behavior already documented as intentional/by-design? → Mark INVALID unless a distinct unintended impact is proven.
 
 **Check for under-judging (being overly conservative):**
 - Does the attack cause direct fund loss >1%/>$10 with no extensive limitations? → Must be HIGH — do not soften.
@@ -124,6 +135,7 @@ KEY FACTORS:
 - [Relevant criteria applied]
 - [Special considerations]
 - [References to specific Sherlock rules]
+- Intentionality gate: [triggered — intentional/by-design → invalid / not triggered]
 
 INFLATION / UNDER-JUDGING CHECK:
 - Claimed severity vs. warranted: [matches / overclaimed / under-claimed]
