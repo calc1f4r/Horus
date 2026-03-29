@@ -136,7 +136,7 @@ code_keywords:
 - [Chainlink Data Feeds Documentation](https://docs.chain.link/data-feeds)
 - [Chainlink L2 Sequencer Uptime Feeds](https://docs.chain.link/data-feeds/l2-sequencer-feeds)
 - [Chainlink Best Practices](https://docs.chain.link/data-feeds#best-practices)
-- [Solodit Vulnerability Database](https://solodit.cyfrin.io/)
+- [Solodit Horus](https://solodit.cyfrin.io/)
 
 ---
 

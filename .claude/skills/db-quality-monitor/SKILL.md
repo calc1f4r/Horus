@@ -1,12 +1,12 @@
 name: db-quality-monitor
-description: "Monitor and fix the Vulnerability Database pipeline: 4-tier architecture integrity, manifest generation, hunt card alignment, TEMPLATE.md compliance, line-range accuracy, protocolContext routing, keyword index fidelity, and duplicate detection. Use for periodic DB health checks, CI validation after entry changes, or diagnosing why an audit agent received wrong context."
+description: "Monitor and fix the Horus pipeline: 4-tier architecture integrity, manifest generation, hunt card alignment, TEMPLATE.md compliance, line-range accuracy, protocolContext routing, keyword index fidelity, and duplicate detection. Use for periodic DB health checks, CI validation after entry changes, or diagnosing why an audit agent received wrong context."
 context: fork
 agent: db-quality-monitor
 argument-hint: "[--fix] [--check=manifests|huntcards|entries|all]"
 disable-model-invocation: true
 ---
 
-Run quality checks on the Vulnerability Database. $ARGUMENTS
+Run quality checks on Horus. $ARGUMENTS
 
 ## What this checks
 

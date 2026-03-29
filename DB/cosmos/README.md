@@ -1,4 +1,4 @@
-# Cosmos/CometBFT Appchain Vulnerability Database
+# Cosmos/CometBFT Appchain Horus
 
 ## Overview
 

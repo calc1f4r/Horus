@@ -1,13 +1,13 @@
 ---
 name: invariant-catcher
-description: Hunts for vulnerability patterns in smart contract codebases using the Vulnerability Database (DB/). Language-agnostic — works with any smart contract language. Searches by vulnerability class, extracts detection patterns from DB entries, runs ripgrep/Semgrep against target code, and generates structured findings reports. Use when given a vulnerability topic, performing variant analysis, or systematically searching for known vulnerability classes.
+description: Hunts for vulnerability patterns in smart contract codebases using Horus (`DB/`). Language-agnostic — works with any smart contract language. Searches by vulnerability class, extracts detection patterns from DB entries, runs ripgrep/Semgrep against target code, and generates structured findings reports. Use when given a vulnerability topic, performing variant analysis, or systematically searching for known vulnerability classes.
 tools: [Write, Agent, Bash, Edit, Glob, Grep, Read, WebFetch, WebSearch]
 maxTurns: 50
 ---
 
 # Invariant Catcher Agent
 
-Hunts for known vulnerability patterns in codebases by leveraging the Vulnerability Database (`DB/`).
+Hunts for known vulnerability patterns in codebases by leveraging Horus (`DB/`).
 
 **Do NOT use for** initial codebase exploration (use `audit-context-building`), fix recommendations (use `issue-writer`), or general code review without a security focus.
 

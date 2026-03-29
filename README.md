@@ -1,6 +1,6 @@
 <div align="center">
 
-# Vulnerability Database
+# Horus
 
 **A production-grade, agent-optimized vulnerability pattern database for smart contract security auditing.**
 
@@ -19,7 +19,7 @@
 
 ## Overview
 
-The Vulnerability Database is a curated knowledge base purpose-built for AI-assisted smart contract auditing. Rather than storing flat lists of findings, it uses a **4-tier precision architecture** that lets agents load only the context they need — reducing token usage by 60–80% compared to naive full-file reads.
+Horus is a curated knowledge base purpose-built for AI-assisted smart contract auditing. Rather than storing flat lists of findings, it uses a **4-tier precision architecture** that lets agents load only the context they need — reducing token usage by 60–80% compared to naive full-file reads.
 
 The database ships with a **35-agent audit pipeline** that can take an unfamiliar codebase from zero to a triaged report with PoCs, fuzzing harnesses, formal verification specs, and multi-platform severity validation — all powered by the patterns stored here.
 
@@ -40,7 +40,7 @@ The database ships with a **35-agent audit pipeline** that can take an unfamilia
 ## Architecture
 
 <div align="center">
-<img src="docs/architecture.png" alt="Vulnerability Database Architecture Diagram" width="100%">
+<img src="docs/architecture.png" alt="Horus Architecture Diagram" width="100%">
 <br>
 <em>Full architecture: 4-tier search, 11-phase audit pipeline, 35 agents, parallel fan-out hunting</em>
 <br>
@@ -291,7 +291,7 @@ Phase 7  Downstream Generation → medusa-fuzzing, certora-verification, halmos-
 ## Repository Structure
 
 ```
-Vulnerability-database/
+Horus/
 ├── DB/                               # Vulnerability database (218 files, 2,258 patterns)
 │   ├── index.json                    #   Master router — START HERE
 │   ├── SEARCH_GUIDE.md               #   Detailed agent search guide
@@ -340,11 +340,11 @@ Raw reports are split into per-category Git branches by a GitHub Actions workflo
 ```bash
 # Clone a single report category
 git clone -b reports/<topic> --single-branch \
-  https://github.com/calc1f4r/Vulnerability-database.git
+  https://github.com/calc1f4r/Horus.git
 
 # Example: ERC4626 vault reports only
 git clone -b reports/erc4626 --single-branch \
-  https://github.com/calc1f4r/Vulnerability-database.git
+  https://github.com/calc1f4r/Horus.git
 ```
 
 See [docs/codebase-structure.md](docs/codebase-structure.md) for the full branch-to-category mapping and report fetch methods.
@@ -364,10 +364,10 @@ This repository is a native [Claude Code plugin](https://code.claude.com/docs/en
 
 ```bash
 # Clone the repository
-git clone https://github.com/calc1f4r/Vulnerability-database.git
+git clone https://github.com/calc1f4r/Horus.git
 
 # Launch Claude Code with the plugin loaded
-claude --plugin-dir ./Vulnerability-database
+claude --plugin-dir ./Horus
 ```
 
 ### Option 2: Load from an Existing Claude Code Session
@@ -375,7 +375,7 @@ claude --plugin-dir ./Vulnerability-database
 If you already have the repo cloned, load it on-the-fly:
 
 ```
-/plugin install /path/to/Vulnerability-database
+/plugin install /path/to/Horus
 ```
 
 ### Using Skills
@@ -449,7 +449,7 @@ Agents are available in `/agents` and Claude can invoke them automatically:
 ### Plugin Structure
 
 ```
-Vulnerability-database/              ← Plugin root
+Horus/              ← Plugin root
 ├── .claude-plugin/
 │   └── plugin.json                  ← Plugin manifest (name, version, description)
 ├── .claude/
@@ -465,20 +465,20 @@ Vulnerability-database/              ← Plugin root
 ### Updating
 
 ```bash
-cd /path/to/Vulnerability-database && git pull
+cd /path/to/Horus && git pull
 ```
 
 ### Developing / Testing Locally
 
 ```bash
 # Load your local clone during development
-claude --plugin-dir ./Vulnerability-database
+claude --plugin-dir ./Horus
 
 # Reload after making changes (inside Claude Code)
 /reload-plugins
 
 # Debug plugin loading
-claude --debug --plugin-dir ./Vulnerability-database
+claude --debug --plugin-dir ./Horus
 ```
 
 ---

@@ -6,7 +6,7 @@ This document describes the repository as Codex should reason about it: what is 
 
 This repository combines five distinct layers:
 
-1. A curated vulnerability database in `DB/`.
+1. Horus, the curated vulnerability database in `DB/`.
 2. A large raw finding corpus in `reports/`.
 3. A supporting exploit corpus in `DeFiHackLabs/`.
 4. Python automation in `scripts/` that turns DB Markdown into searchable indexes and hunt cards.

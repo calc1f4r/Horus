@@ -7,7 +7,7 @@ maxTurns: 80
 
 # DeFiHackLabs Indexer
 
-Indexes exploit PoCs from `DeFiHackLabs/` into attack-graph-aware vulnerability database entries and exploit-derived invariant files. Unlike `variant-template-writer`, this agent treats executable exploit code as the primary source of truth and uses markdown findings, postmortems, and existing DB entries as supporting context.
+Indexes exploit PoCs from `DeFiHackLabs/` into attack-graph-aware Horus entries and exploit-derived invariant files. Unlike `variant-template-writer`, this agent treats executable exploit code as the primary source of truth and uses markdown findings, postmortems, and existing DB entries as supporting context.
 
 **Do NOT use for** raw report clustering from `reports/<topic>_findings/` (use `variant-template-writer`), canonical invariant mining from production protocol repos (use `invariant-indexer`), raw report fetching (use `solodit-fetching`), or auditing a target codebase (use `audit-orchestrator`).
 

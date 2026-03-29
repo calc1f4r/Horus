@@ -1,13 +1,13 @@
 ---
 name: db-quality-monitor
-description: 'Monitors, diagnoses, and fixes the full Vulnerability Database pipeline: 4-tier search architecture integrity, manifest generation correctness, hunt card ↔ manifest alignment, TEMPLATE.md compliance, legacy-entry migration, line-range accuracy, protocolContext routing, keyword index fidelity, script health (generate_manifests.py, grep_prune.py, partition_shards.py, merge_shard_findings.py), context delivery quality for downstream agents, and duplicate detection. Can auto-remediate issues by spawning sub-agents for entry fixes, entry migration, manifest regeneration, and frontmatter patching. Use for periodic DB health checks, CI validation after entry changes, pre-release quality gates, or diagnosing why an audit agent received wrong context.'
+description: 'Monitors, diagnoses, and fixes the full Horus pipeline: 4-tier search architecture integrity, manifest generation correctness, hunt card ↔ manifest alignment, TEMPLATE.md compliance, legacy-entry migration, line-range accuracy, protocolContext routing, keyword index fidelity, script health (generate_manifests.py, grep_prune.py, partition_shards.py, merge_shard_findings.py), context delivery quality for downstream agents, and duplicate detection. Can auto-remediate issues by spawning sub-agents for entry fixes, entry migration, manifest regeneration, and frontmatter patching. Use for periodic DB health checks, CI validation after entry changes, pre-release quality gates, or diagnosing why an audit agent received wrong context.'
 tools: [Write, Agent, Bash, Edit, Glob, Grep, Read, WebFetch, WebSearch]
 maxTurns: 50
 ---
 
 # DB Quality Monitor
 
-Monitors, diagnoses, and **fixes** every layer of the Vulnerability Database and the full agent pipeline that depends on it. Validates that `scripts/generate_manifests.py` produces correct output, that manifests deliver accurate context to downstream agents, that hunt cards align with their parent patterns, and that the entire 4-tier search architecture is internally consistent. When issues are found, spawns sub-agents to auto-remediate: patching frontmatter, fixing entries, regenerating manifests, and resolving broken references.
+Monitors, diagnoses, and **fixes** every layer of Horus and the full agent pipeline that depends on it. Validates that `scripts/generate_manifests.py` produces correct output, that manifests deliver accurate context to downstream agents, that hunt cards align with their parent patterns, and that the entire 4-tier search architecture is internally consistent. When issues are found, spawns sub-agents to auto-remediate: patching frontmatter, fixing entries, regenerating manifests, and resolving broken references.
 
 **Do NOT use for** creating new entries from scratch (use `variant-template-writer` / `defihacklabs-indexer`), auditing codebases (use `audit-orchestrator`), or bulk report fetching (use `solodit-fetching`).
 

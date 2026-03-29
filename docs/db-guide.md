@@ -2,7 +2,7 @@
 
 > **This file covers DB-entry conventions and search workflows.** For the full agent system, audit pipeline, and all available agents, see [`CLAUDE.md`](./CLAUDE.md).
 
-This document gives agent models practical guidance for making safe, correct, and minimal changes to **vulnerability database entries** in `DB/`. It covers the 4-tier search architecture, entry format, and how to run and extend DB scripts.
+This document gives agent models practical guidance for making safe, correct, and minimal changes to **Horus entries** in `DB/`. It covers the 4-tier search architecture, entry format, and how to run and extend DB scripts.
 
 ## Scope & Goals
 
@@ -134,7 +134,7 @@ Load manifest → filter patterns where severity includes "HIGH" or "CRITICAL"
 When fetching reference files or raw audits, agents should be mindful of token limits. A GitHub Action automatically creates isolated branches for every category in the `reports/` directory. Rather than loading the entire `reports` context, agents or workflows can fetch and mount specific vulnerabilities:
 ```bash
 # Example: Fetching only ERC4626 vault reports
-git clone -b reports/erc4626 --single-branch https://github.com/calc1f4r/Vulnerability-database.git
+git clone -b reports/erc4626 --single-branch https://github.com/calc1f4r/Horus.git
 ```
 
 ---
@@ -357,4 +357,3 @@ Post-triage:
 | `persona-state-machine` | `.claude/agents/persona-state-machine.md` | State Machine persona — maps all protocol states and transitions to find illegal paths to bad states (spawned by multi-persona-orchestrator) |
 | `persona-mirror` | `.claude/agents/persona-mirror.md` | Mirror persona — analyzes paired/opposite functions for asymmetries (spawned by multi-persona-orchestrator) |
 | `persona-reimplementer` | `.claude/agents/persona-reimplementer.md` | Re-Implementation persona — hypothetically re-implements functions then diffs (spawned by multi-persona-orchestrator) |
-

@@ -136,7 +136,7 @@ code_keywords:
 ### External Links
 - [Pyth Network Documentation](https://docs.pyth.network/)
 - [Pyth SDK Solidity](https://github.com/pyth-network/pyth-sdk-solidity)
-- [Solodit Vulnerability Database](https://solodit.cyfrin.io/)
+- [Solodit Horus](https://solodit.cyfrin.io/)
 
 ---
 

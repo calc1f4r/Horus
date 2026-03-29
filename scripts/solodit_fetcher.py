@@ -3,7 +3,7 @@
 Solodit Vulnerability Fetcher Tool
 ==================================
 Fetches security findings from Cyfrin Solodit API and saves them as markdown files
-following the vulnerability database template format.
+following the Horus template format.
 
 Usage:
     python solodit_fetcher.py --keywords "pyth oracle" --output ./oracle

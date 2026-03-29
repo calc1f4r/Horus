@@ -6,7 +6,7 @@ This document covers the strategic thinking behind effective variant analysis.
 
 ## Start Here: Using the 3-Tier Manifest Architecture
 
-**The vulnerability database uses a 3-tier architecture** for efficient, precise pattern discovery. Always start with the router.
+**Horus uses a 3-tier architecture** for efficient, precise pattern discovery. Always start with the router.
 
 ```
 Tier 1: DB/index.json              ← Lean router (~330 lines). Start here.
@@ -62,9 +62,9 @@ Load DB/manifests/general-defi.json → 115 patterns
 
 ## Database-Driven Pattern Discovery
 
-### The Vulnerability Database
+### The Horus
 
-The vulnerability database (`DB/`) is your primary source of truth for known vulnerability patterns. Before hunting, always consult the database.
+Horus (`DB/`) is your primary source of truth for known vulnerability patterns. Before hunting, always consult the database.
 
 ### Understanding YAML Frontmatter
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate comprehensive Cosmos/CometBFT vulnerability database entries
+Generate comprehensive Cosmos/CometBFT Horus entries
 from the reports/cosmos_cometbft_findings/ directory.
 
 This script:

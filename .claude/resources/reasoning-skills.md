@@ -7,7 +7,7 @@
 
 ## Core Philosophy
 
-This framework operates on **deep reasoning from root causes**, NOT pattern matching. The vulnerability database provides reasoning seeds — root cause descriptions that explain *why* a vulnerability class exists — which the agent uses to reason about whether the target code can reach vulnerable states.
+This framework operates on **deep reasoning from root causes**, NOT pattern matching. Horus provides reasoning seeds — root cause descriptions that explain *why* a vulnerability class exists — which the agent uses to reason about whether the target code can reach vulnerable states.
 
 The key distinction:
 

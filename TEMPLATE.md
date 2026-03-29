@@ -377,7 +377,7 @@ vulnerability_type: [flash_loan|sandwich|mev|arbitrage|liquidity_manipulation]
 ### 3. Folder Structure
 
 ```
-Vulnerability-database/
+Horus/
 ├── TEMPLATE.md
 ├── DB/
 │   ├── oracle/
@@ -393,7 +393,7 @@ Vulnerability-database/
 
 ### 4. Using with Cursor/Vector Database
 
-When the vulnerability database is indexed:
+When Horus is indexed:
 - **Contextual Retrieval**: Asking "show oracle vulnerabilities" will retrieve oracle category files
 - **Semantic Matching**: Code patterns will match similar vulnerable code during audits
 - **Multi-field Filtering**: Combine category + severity + protocol for precise results
