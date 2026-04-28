@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "horus-graphify-blockchain"
+version = "0.1.0"
+description = "Tree-sitter blockchain DSL extractor producing graphify-compatible AST graphs"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+dependencies = [
+    "tree-sitter>=0.21",
+]
+
+[project.optional-dependencies]
+solidity = ["tree-sitter-solidity>=0.1"]
+cairo   = ["tree-sitter-cairo>=0.1"]
+move    = ["tree-sitter-move>=0.1"]
+all     = [
+    "tree-sitter-solidity>=0.1",
+    "tree-sitter-cairo>=0.1",
+]
+
+[project.scripts]
+horus-graphify-blockchain = "horus_graphify_blockchain.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["horus_graphify_blockchain*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -6,6 +6,7 @@ from collections import Counter
 DB_ROOT = "DB/"
 MANIFESTS_DIR = "DB/manifests/"
 HUNTCARDS_DIR = "DB/manifests/huntcards/"
+IGNORED_ENTRY_DIRS = {"manifests", "graphify-out", "_drafts", "_telemetry"}
 
 REQUIRED_FM_FIELDS = ['protocol', 'category', 'vulnerability_type', 'attack_type', 'affected_component', 'severity', 'impact']
 VALID_SEVERITY = ['critical', 'high', 'medium', 'low']
@@ -13,8 +14,7 @@ VALID_SEVERITY = ['critical', 'high', 'medium', 'low']
 def find_entries():
     result = []
     for root, dirs, fnames in os.walk(DB_ROOT):
-        if 'manifests' in root:
-            continue
+        dirs[:] = [d for d in dirs if d not in IGNORED_ENTRY_DIRS]
         for fn in fnames:
             if fn.endswith('.md') and fn not in ('README.md', 'SEARCH_GUIDE.md', 'ARTIFACT_INDEX.md'):
                 result.append(os.path.join(root, fn))

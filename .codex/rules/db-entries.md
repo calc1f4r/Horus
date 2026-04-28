@@ -20,3 +20,6 @@ When editing or creating vulnerability entries in `DB/`:
 - Do not collapse issues that share a root cause but cross different contract boundaries or hop sets into one undifferentiated pattern
 - After creating or modifying entries, regenerate manifests: `python3 scripts/generate_manifests.py`
 - Never read entire vulnerability files when searching — use `DB/index.json` → manifests → line ranges
+- `DB/_drafts/` is for unpromoted gap-analysis drafts only; drafts must include `status: draft` and are never indexed
+- `DB/_telemetry/` is for hunt-card usage sidecars only; do not treat telemetry JSON as vulnerability content
+- To promote a draft, move it into the right production category, remove `status: draft`, then regenerate and run quality checks

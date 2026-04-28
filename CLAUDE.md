@@ -52,6 +52,7 @@ All agents live in `.claude/agents/`. The entry point for a full audit is `audit
 | `certora-sui-move-verification` / `sui-prover-verification` | Sui Move formal verification |
 | `db-quality-monitor` | Monitors 4-tier architecture integrity and auto-remediates |
 | `solodit-fetching` | Fetches raw findings from Solodit/Cyfrin API |
+| `attack-graph-synthesizer` | BFS + hyperedge multi-step attack chain enumeration against invariant suite |
 
 ### Invoking the Audit Pipeline
 
@@ -93,6 +94,9 @@ Path-scoped rules in `.claude/rules/` auto-load when Claude works with matching 
 - `rules.md` — Rules file conventions (`.claude/rules/*.md`)
 - `settings.md` — Settings and permissions conventions (`.claude/settings*.json`)
 - `claude-md.md` — CLAUDE.md editing conventions (`CLAUDE.md`)
+- `graph-artifacts.md` — Conventions for `audit-output/graph/` and attack-candidates (`audit-output/graph/**`)
+- `lessons-db.md` — Conventions for `~/.horus/lessons.db` cross-audit memory (`scripts/lessons_db.py`)
+- `draft-hunt-cards.md` — Conventions for `DB/_drafts/` and `DB/_telemetry/` (`DB/_drafts/**`, `DB/_telemetry/**`)
 
 ## Common Commands
 
@@ -108,6 +112,15 @@ python3 scripts/db_quality_check.py
 
 # Generate entries from reports
 python3 scripts/generate_entries.py
+
+# Build/refresh DB knowledge graph (run from repo root)
+cd DB && /graphify . --mode deep --directed --wiki
+
+# Query cross-audit lessons
+python3 scripts/lessons_db.py query --ecosystem evm --topic "price manipulation"
+
+# Extract blockchain AST for a codebase (Solidity/Move/Cairo)
+horus-graphify-blockchain extract <path> --out audit-output/graph/blockchain-ast.json
 ```
 
 ## Conventions

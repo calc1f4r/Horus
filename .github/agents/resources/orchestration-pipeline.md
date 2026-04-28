@@ -1,6 +1,6 @@
 # Orchestration Pipeline
 
-> **Purpose**: Master reference for the 11-phase configurable audit pipeline with iterative parallel discovery, optional PoC/FV execution, and a judging self-loop (pre-judge → polish → deep-review). Defines phase transitions, data handoffs, sub-agent contracts, error handling, and context budgets.
+> **Purpose**: Master reference for the graph-aware 11-phase configurable audit pipeline with Phase 0 graph foundation, iterative parallel discovery, optional PoC/FV execution, and a judging self-loop (pre-judge → polish → deep-review). Defines phase transitions, data handoffs, sub-agent contracts, error handling, and context budgets.
 > **Consumer**: `audit-orchestrator` agent.
 
 ---
@@ -22,9 +22,16 @@ User Input: @audit-orchestrator <path> [hint] [--static-only] [--judge=X] [--dis
     │
     ▼
 ═══════════════════════════════════════════════════════
- SEQUENTIAL FOUNDATION (Phases 1-3)
+ GRAPH + SEQUENTIAL FOUNDATION (Phase 0, then Phases 1-3)
 ═══════════════════════════════════════════════════════
     │
+┌─────────────────────────────────────┐
+│ Phase 0: GRAPH FOUNDATION           │  Self (soft gate)
+│ graphify codebase, blockchain AST,  │  Output: graph/graph.json,
+│ MCP server, coverage, memory recall │          graph/coverage.jsonl
+└──────────────┬──────────────────────┘
+               │ graphAvailable, mcpEndpoint, memoryRecall
+               ▼
 ┌─────────────────────────────────────┐
 │ Phase 1: RECONNAISSANCE             │  Self (no sub-agent)
 │ Protocol detection, scope, manifests│  Output: 00-scope.md, pipeline-state.md
@@ -54,9 +61,17 @@ User Input: @audit-orchestrator <path> [hint] [--static-only] [--judge=X] [--dis
     ▼          ▼          ▼           ▼
 ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
 │ 4A: DB │ │ 4B:    │ │ 4C:    │ │ 4D:    │
-│ Hunt   │ │Reason  │ │Persona │ │Valid.  │
+│ Hunt + │ │Reason  │ │Persona │ │Valid.  │
+│ Graph  │ │        │ │        │ │        │
 └───┬────┘ └───┬────┘ └───┬────┘ └───┬────┘
-    └──────────┴──────────┴───────────┘
+    │          │          │           │
+    └──────────┴────┬─────┴───────────┘
+                    ▼
+              ┌────────┐
+              │ 4E:    │
+              │Attack  │
+              │Graph   │
+              └───┬────┘
                │ Round 1 findings
                ▼
     orchestrator → discovery-state-round-1.md
@@ -152,10 +167,11 @@ All agents communicate through the **pipeline bus** — a shared file system und
 
 | Phase | Produces | Consumes |
 |-------|----------|----------|
+| 0 | `graph/graph.json`, `graph/mcp.pid`, `graph/mcp.endpoint`, `graph/coverage.jsonl`, optional `memory-recall.md` | Codebase path, graphify, optional `horus-graphify-blockchain`, optional `~/.horus/lessons.db` |
 | 1 | `00-scope.md`, `pipeline-state.md`, `memory-state.md` (init) | Codebase path, DB/index.json |
 | 2 | `01-context.md`, `context/*.md` | `00-scope.md`, `memory-state.md` |
 | 3 | `02-invariants-reviewed.md` | `01-context.md`, DB manifests, `memory-state.md` |
-| 4 (per round) | `*-RN.md` outputs per stream, `discovery-state-round-N.md` | Hunt cards, invariants, context, previous round state, `memory-state.md` |
+| 4 (per round) | `*-RN.md` outputs per stream, `attack-candidates.*`, `discovery-state-round-N.md` | Hunt cards, `DB/graphify-out/graph.json`, `graph/graph.json`, invariants, context, previous round state, `memory-state.md` |
 | 5 | `05-findings-triaged.md` | All Phase 4 outputs from all rounds, `memory-state.md` |
 | 6 [CONDITIONAL] | `pocs/F-NNN-poc.*`, `06-poc-results.md` | `05-findings-triaged.md`, codebase, `memory-state.md` |
 | 7 [CONDITIONAL] | `fuzzing/`, `certora/`, `halmos/`, `07-fv-results.md` | `02-invariants-reviewed.md`, codebase, `memory-state.md` |
@@ -168,6 +184,31 @@ All agents communicate through the **pipeline bus** — a shared file system und
 
 ## Phase Details
 
+### Phase 0: Graph Foundation
+
+| Attribute | Value |
+|-----------|-------|
+| **Agent** | Self (orchestrator) |
+| **Input** | Codebase path + optional memory flag |
+| **Output** | `audit-output/graph/graph.json`, `mcp.pid`, `mcp.endpoint`, `coverage.jsonl`, optional `memory-recall.md` |
+| **Sub-agents** | None |
+| **Estimated context** | Small; graph construction is file/tool driven |
+
+**Steps**:
+1. Create `audit-output/graph/`.
+2. Run graphify on the target codebase.
+3. If `horus-graphify-blockchain` is installed and blockchain DSL files exist, emit `blockchain-ast.json`.
+4. Merge graphify output and blockchain AST into `audit-output/graph/graph.json`.
+5. Start graphify MCP with `python3 -m graphify.serve audit-output/graph/graph.json` when available.
+6. Write `coverage.jsonl` for later blind-spot tracking.
+7. If memory is enabled, query `scripts/lessons_db.py` and write `memory-recall.md`.
+
+**Phase gate**: Soft gate. If graph construction or MCP startup fails, log the failure and continue to Phase 1 without graph features.
+
+**Transition**: Pass graph artifact paths and memory recall path to all downstream agents.
+
+---
+
 ### Phase 1: Reconnaissance
 
 | Attribute | Value |
@@ -179,7 +220,7 @@ All agents communicate through the **pipeline bus** — a shared file system und
 | **Estimated context** | ~500 lines (index.json + directory scan) |
 
 **Steps**:
-1. Create `audit-output/` directory with subdirectories: `pocs`, `fuzzing`, `certora`, `halmos`, `issues`, `context`, `personas`
+1. Create `audit-output/` directory with subdirectories: `pocs`, `fuzzing`, `certora`, `halmos`, `issues`, `context`, `personas`, `graph`, `attack-proofs`, `plan-execution`
 2. Scan codebase for source files (all supported languages)
 3. Detect language/framework using [protocol-detection.md](protocol-detection.md) signals
 4. If user provided protocol hint → map directly to `protocolContext.mappings`

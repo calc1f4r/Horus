@@ -13,7 +13,7 @@ This document gives agent models practical guidance for making safe, correct, an
 
 ---
 
-## Architecture: 4-Tier Search
+## Architecture: 4-Tier Search + Graph Expansion
 
 The database uses a **tiered architecture** for precision. Never read entire vulnerability files — use hunt cards or manifests to find exact line ranges.
 
@@ -25,11 +25,21 @@ Tier 1.5: DB/manifests/huntcards/*-huntcards.json ← Compressed detection cards
 Tier 2:   DB/manifests/<name>.json                ← Full pattern-level indexes with line ranges
    ↓  
 Tier 3:   DB/**/*.md                              ← Vulnerability content. Read ONLY targeted line ranges.
+Graph:    DB/graphify-out/graph.json             ← Additive concept/hunt-card expansion
 ```
 
 **Hunt Cards (Tier 1.5)**: Enriched detection cards with `grep` patterns, one-line detection rules, **micro-directives** (`check` steps, `antipattern`, `securePattern`), triage context (`validWhen`, `invalidWhen`, `impact`), category tags, and `neverPrune` flags for CRITICAL patterns. Load `DB/manifests/huntcards/all-huntcards.json` only when the context budget allows it; otherwise prefer per-manifest hunt cards or protocol bundles/shards. For each card: grep target code → on hit, execute `card.check` steps directly against the target code, use `validWhen` / `invalidWhen` to separate valid bugs from code smells, and only read full .md entry (`card.ref` + `card.lines`) for confirmed true/likely positives.
 
 For the full search guide, see `DB/SEARCH_GUIDE.md`.
+
+**Graph Expansion**: Use the DB graph after resolving an initial topic or
+protocol type. It helps pull in related hunt cards that keyword grep might miss.
+It must not replace the router/manifests/hunt-card path.
+
+```bash
+graphify query "oracle staleness" --graph DB/graphify-out/graph.json --budget 2000
+graphify path "oracle" "flash-loan" --graph DB/graphify-out/graph.json
+```
 
 ---
 
@@ -156,15 +166,16 @@ git clone -b reports/erc4626 --single-branch https://github.com/calc1f4r/Horus.g
 ### Bulk Hunt (Audit Mode — Recommended for Full Audits)
 ```
 1. Identify protocol type → Read index.json protocolContext
-2. Load enriched hunt cards for resolved manifests (or all-huntcards.json)
-3. For each card, grep target code: `grep -rn "card.grep" <target_path>`
-4. Cards with `neverPrune: true` always survive (CRITICAL safety net)
-5. Prune cards with zero grep hits (removes ~60-80% of patterns)
-6. PARTITION surviving cards into shards of 50-80 cards (grouped by cat tag)
+2. Optionally query DB/graphify-out/graph.json to expand neighboring hunt cards
+3. Load enriched hunt cards for resolved manifests plus graph-expanded cards
+4. For each card, grep target code: `grep -rn "card.grep" <target_path>`
+5. Cards with `neverPrune: true` always survive (CRITICAL safety net)
+6. Prune cards with zero grep hits (removes ~60-80% of patterns)
+7. PARTITION surviving cards into shards of 50-80 cards (grouped by cat tag)
    - neverPrune cards are duplicated into every shard
-7. SPAWN one sub-agent per shard (parallel) — each gets shard cards + full target code
-8. Per-shard: PASS 1 (micro-directives) + PASS 2 (evidence lookup for true/likely positives)
-9. MERGE all shard findings → deduplicate by root cause → 03-findings-raw.md
+8. SPAWN one sub-agent per shard (parallel) — each gets shard cards + full target code
+9. Per-shard: PASS 1 (micro-directives) + PASS 2 (evidence lookup for true/likely positives)
+10. MERGE all shard findings → deduplicate by root cause → 03-findings-raw.md
 ```
 
 ---
@@ -174,6 +185,7 @@ git clone -b reports/erc4626 --single-branch https://github.com/calc1f4r/Horus.g
 When vulnerability files are added or updated:
 ```bash
 python3 scripts/generate_manifests.py
+python3 scripts/build_db_graph.py
 ```
 
 ---
@@ -190,6 +202,9 @@ python3 scripts/generate_manifests.py
 | `TEMPLATE.md` | Structure for new and migrated vulnerability entries |
 | `Example.md` | Reference implementation of an entry |
 | `scripts/generate_manifests.py` | Re-generates manifests after DB changes |
+| `scripts/build_db_graph.py` | Rebuilds `DB/graphify-out/` graph artifacts after hunt-card/manifest changes |
+| `DB/graphify-out/graph.json` | Graphify DB graph for graph-augmented hunt-card expansion |
+| `DB/graphify-out/wiki/index.md` | Agent-crawlable graph community index |
 
 ---
 
@@ -211,14 +226,16 @@ The `audit-orchestrator` agent (`.claude/agents/audit-orchestrator.md`) is the *
 ### Pipeline
 
 ```
+Phase 0:  Graph Foundation     → graphify target codebase, merge blockchain AST, start MCP, coverage log
 Phase 1:  Reconnaissance      → Protocol detection, scope, manifest resolution
 Phase 2:  Context Building     → Sub-agent: audit-context-building
 Phase 3:  Invariant Extraction → Sub-agent: invariant-writer (3A) → invariant-reviewer (3B)
 Phase 4:  Iterative Discovery  → N rounds of 4-way parallel fan-out:
-  4A: DB-powered Hunting  → Self (grep-prune + partition) + N × Sub-agent: invariant-catcher
+  4A: DB-powered Hunting  → graph expansion + grep-prune + partition + invariant-catcher shards
   4B: Reasoning Discovery → Sub-agent: protocol-reasoning
   4C: Multi-Persona Audit → Sub-agent: multi-persona-orchestrator (6 personas)
   4D: Validation Gaps     → Sub-agent: missing-validation-reasoning
+  4E: Attack Graph        → Sub-agent: attack-graph-synthesizer, when graph + invariants exist
   Between rounds: orchestrator writes discovery-state-round-N.md (cross-pollination bus)
 Phase 5:  Merge & Triage      → Self (cross-source correlation, dedup, falsification, severity)
 Phase 6:  PoC Gen + EXECUTION → [CONDITIONAL] Sub-agent: poc-writing × N → compile → run

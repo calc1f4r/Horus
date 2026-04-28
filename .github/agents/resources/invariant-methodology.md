@@ -4,16 +4,20 @@ This document covers the strategic thinking behind effective variant analysis.
 
 ---
 
-## Start Here: Using the 3-Tier Manifest Architecture
+## Start Here: Using the 4-Tier Manifest Architecture + Graph Expansion
 
-**Horus uses a 3-tier architecture** for efficient, precise pattern discovery. Always start with the router.
+**Horus uses a 4-tier architecture plus graph expansion** for efficient, precise pattern discovery. Always start with the router.
 
 ```
 Tier 1: DB/index.json              ← Lean router (~330 lines). Start here.
    ↓
-Tier 2: DB/manifests/<name>.json   ← Pattern-level index with line ranges (11 manifests)
+Tier 1.5: DB/manifests/huntcards/* ← Compressed grep + triage cards
+   ↓
+Tier 2: DB/manifests/<name>.json   ← Pattern-level index with line ranges
    ↓
 Tier 3: DB/**/*.md                 ← Vulnerability content. Read ONLY targeted line ranges.
+
+Graph: DB/graphify-out/graph.json ← Additive related-card expansion
 ```
 
 ### Quick Reference
@@ -32,6 +36,7 @@ cat DB/index.json | jq 'keys'
 | `manifests` | Lists all 11 manifests with descriptions + pattern counts | Pick the right manifest to load |
 | `auditChecklist` | Quick check items per type | Rapid validation during audits |
 | `keywordIndex` | Points to `DB/manifests/keywords.json` | Keyword → manifest lookup |
+| `huntcards` | Points to enriched hunt-card files | Bulk audit detection and grep-prune |
 
 ### Example Lookups
 
@@ -513,7 +518,7 @@ if order.owner_id == current_user.id:
 
 ## Summary: The Expert Mindset
 
-1. **Start with index.json → manifests**: Always consult the 3-tier architecture first
+1. **Start with index.json → hunt cards/manifests**: Always consult the 4-tier architecture first
 2. **Understand before searching**: Root cause analysis is non-negotiable
 3. **Start specific**: Your first pattern should match exactly one thing
 4. **Climb the ladder**: Generalize one step at a time

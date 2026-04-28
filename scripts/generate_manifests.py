@@ -42,6 +42,7 @@ CATEGORY_MAP = {
 }
 
 IGNORED_MARKDOWN_FILES = {"README.md", "ARTIFACT_INDEX.md"}
+IGNORED_DIRS = {"_drafts", "_telemetry", "graphify-out", "manifests", ".git", "__pycache__"}
 
 STRUCTURAL_H2_TITLES = {
     "table of contents", "references", "references & source reports",
@@ -463,6 +464,8 @@ def collect_files_for_category(category, folders):
         if folder.exists():
             for md_file in sorted(folder.rglob("*.md")):
                 if md_file.name in IGNORED_MARKDOWN_FILES:
+                    continue
+                if any(part in IGNORED_DIRS for part in md_file.parts):
                     continue
                 files.append(md_file)
     return files
@@ -1422,7 +1425,9 @@ def build_general_sub_manifests():
             folder = general_dir / subfolder
             if folder.exists():
                 for md_file in sorted(folder.rglob("*.md")):
-                    if md_file.name == "README.md":
+                    if md_file.name in IGNORED_MARKDOWN_FILES:
+                        continue
+                    if any(part in IGNORED_DIRS for part in md_file.parts):
                         continue
                     entry = build_file_manifest(md_file, sub_name)
                     if entry:

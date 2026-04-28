@@ -65,8 +65,76 @@ DB Quality Monitor Progress:
 - [ ] Skill 5: Pipeline script health — verify grep_prune.py, partition_shards.py, merge_shard_findings.py
 - [ ] Skill 6: Context delivery quality — simulate agent reads, verify line ranges deliver useful content
 - [ ] Skill 7: Coverage & overlap analysis — duplicates, orphans, protocolContext completeness
+- [ ] Optional: Gap analysis mode — confirmed findings → hunt-card gaps, drafts, telemetry
 - [ ] Final: Generate comprehensive health report
 ```
+
+---
+
+## Optional Mode: Gap Analysis (`--gap-analysis <audit-output-dir>`)
+
+Use this mode after an audit has a judge-verified `CONFIRMED-REPORT.md`. It is
+additive and must not rewrite production DB entries or manifests.
+
+### Inputs
+
+- `<audit-output-dir>/CONFIRMED-REPORT.md`
+- `<audit-output-dir>/00-scope.md` if present
+- `DB/graphify-out/graph.json`
+- `DB/manifests/huntcards/all-huntcards.json`
+- `TEMPLATE.md`
+
+### Outputs
+
+- `audit-output/<id>/db-gap-analysis.md`
+- Draft entries under `DB/_drafts/<draft-id>.md`
+- Telemetry sidecars under `DB/_telemetry/<hunt-card-id>.json`
+
+### Algorithm
+
+For each confirmed finding:
+
+1. Extract `finding_id`, title, severity, root-cause sentence, category hints,
+   code references, and identifier-like keywords.
+2. Query `DB/graphify-out/graph.json` for the nearest relevant hunt-card nodes:
+   use `graphify query "<category or root cause>" --graph DB/graphify-out/graph.json`
+   and, where two concrete nodes are known, `graphify path "<term>" "<hunt card title>" --graph ...`.
+3. Classify as a DB gap if no relevant hunt card is found or the shortest
+   category-to-card path is more than 3 hops.
+4. For each gap, write a `TEMPLATE.md`-compliant draft to `DB/_drafts/`.
+   Draft frontmatter must include `status: draft` and must not be referenced by
+   `DB/index.json` or any manifest.
+5. For each existing card that matched, update or create
+   `DB/_telemetry/<hunt-card-id>.json` with hit/miss counts, false positives if
+   known, `last_hit`, `last_audit`, and `suggested_changes`.
+6. Write `db-gap-analysis.md` with:
+   - confirmed findings analyzed
+   - nearest hunt cards and graph evidence
+   - drafts created
+   - telemetry files touched
+   - cards flagged for refinement
+
+### Draft ID Format
+
+Use:
+
+```
+draft-<category>-<slugified-finding-title>-<audit-id>.md
+```
+
+Keep the filename deterministic and lowercase. If a file already exists, update
+the existing draft rather than creating duplicates.
+
+### Safety Rules
+
+- Never write drafts outside `DB/_drafts/`.
+- Never edit `DB/manifests/**`, `DB/index.json`, or production `DB/**/*.md` in
+  gap-analysis mode.
+- Never promote a draft automatically.
+- If `DB/graphify-out/graph.json` is missing, write a report explaining that D1
+  has not run and stop this mode.
+- If parsing `CONFIRMED-REPORT.md` is ambiguous, include the ambiguity in
+  `db-gap-analysis.md`; do not invent finding facts.
 
 ---
 

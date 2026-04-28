@@ -216,6 +216,7 @@ This file is created in Phase 1 and updated after EVERY phase. It is the single 
 ## Phase Status
 | Phase | Status | Agent(s) | Output File(s) | Verified |
 |-------|--------|----------|-----------------|----------|
+| 0 | COMPLETE | self | graph/graph.json, graph/mcp.pid, memory-recall.md | YES |
 | 1 | COMPLETE | self | 00-scope.md | YES |
 | 2 | COMPLETE | audit-context-building | 01-context.md | YES |
 | 3 | COMPLETE | invariant-writer → invariant-reviewer | 02-invariants-reviewed.md | YES |
@@ -280,6 +281,7 @@ Copy this checklist and track progress:
 
 ```
 Audit Progress:
+- [ ] Phase 0:    Graph Foundation (graphify codebase + blockchain AST + MCP server + memory recall)
 - [ ] Phase 1:    Reconnaissance & protocol detection
 - [ ] Phase 2:    Deep context building (audit-context-building)
 - [ ] Phase 3:    Invariant extraction + review (invariant-writer → invariant-reviewer)
@@ -305,6 +307,131 @@ For the complete pipeline reference with data flows, error handling, and context
 
 ---
 
+## Phase 0: Graph Foundation
+
+**Agent**: Self
+**Output**: `audit-output/graph/graph.json`, `audit-output/graph/mcp.pid`, `audit-output/graph/mcp.endpoint`, `audit-output/graph/coverage.jsonl`, `audit-output/memory-recall.md` (if --memory)
+**Gate**: Soft gate — if Phase 0 fails, pipeline continues without graph features. Log failure to `pipeline-state.md`.
+
+Builds a knowledge graph of the target codebase and starts the graphify MCP server for live agent queries.
+
+### Step P0-1: Quick language scan
+
+```bash
+CODEBASE="<path>"
+mkdir -p audit-output/graph
+
+echo "Blockchain DSLs detected:"
+for ext in sol vy move cairo sw tact fc; do
+  count=$(find "$CODEBASE" -name "*.$ext" 2>/dev/null | wc -l)
+  [ "$count" -gt 0 ] && echo "  $ext: $count files"
+done
+```
+
+Save detected ecosystem (e.g., `evm`, `sui`, `cosmos`) as `$ECOSYSTEM` for later steps.
+
+### Step P0-2: Run graphify on the codebase
+
+Use the graphify skill: `/graphify <path> --mode deep --directed --no-viz`
+
+If codebase has >200 files, also pass `--update` if a prior run exists (uses SHA256 cache).
+Graphify writes to `<path>/graphify-out/`. Wait for completion.
+
+### Step P0-3: Run blockchain AST extractor (if installed)
+
+```bash
+if command -v horus-graphify-blockchain &>/dev/null; then
+  horus-graphify-blockchain extract "$CODEBASE" \
+    --out audit-output/graph/blockchain-ast.json && echo "Blockchain AST extracted"
+fi
+```
+
+### Step P0-4: Merge and finalize graph.json
+
+```bash
+python3 - <<'PYEOF'
+import json, shutil
+from pathlib import Path
+
+CODEBASE = "<path>"   # substitute actual codebase path
+graphify_extract = Path(CODEBASE) / "graphify-out" / ".graphify_extract.json"
+graphify_graph   = Path(CODEBASE) / "graphify-out" / "graph.json"
+blockchain_ast   = Path("audit-output/graph/blockchain-ast.json")
+out              = Path("audit-output/graph/graph.json")
+
+# Prefer .graphify_extract.json (richer, pre-build) for merge; fall back to graph.json
+base_file = graphify_extract if graphify_extract.exists() else graphify_graph
+if not base_file.exists():
+    print("WARNING: graphify output not found. Phase 0 incomplete.")
+    raise SystemExit(0)
+
+g = json.loads(base_file.read_text())
+
+if blockchain_ast.exists():
+    b = json.loads(blockchain_ast.read_text())
+    seen = {n["id"] for n in g.get("nodes", [])}
+    for n in b.get("nodes", []):
+        if n["id"] not in seen:
+            g.setdefault("nodes", []).append(n)
+            seen.add(n["id"])
+    g.setdefault("edges", []).extend(b.get("edges", []))
+    g.setdefault("hyperedges", []).extend(b.get("hyperedges", []))
+    print(f"Merged: {len(g['nodes'])} nodes, {len(g['edges'])} edges, {len(g['hyperedges'])} hyperedges")
+else:
+    print(f"Graph (graphify-only): {len(g.get('nodes',[]))} nodes, {len(g.get('edges',[]))} edges")
+
+out.write_text(json.dumps(g, indent=2))
+print(f"Written: {out}")
+PYEOF
+```
+
+### Step P0-5: Start MCP server in background
+
+```bash
+if [ -f audit-output/graph/graph.json ]; then
+  python3 -m graphify.serve audit-output/graph/graph.json &
+  MCP_PID=$!
+  echo "$MCP_PID" > audit-output/graph/mcp.pid
+  echo "stdio://graphify-local" > audit-output/graph/mcp.endpoint
+  sleep 2
+  kill -0 "$MCP_PID" 2>/dev/null && echo "MCP server running (PID $MCP_PID)" || echo "WARNING: MCP server failed to start"
+fi
+```
+
+### Step P0-6: Initialize coverage tracker
+
+```bash
+echo "" > audit-output/graph/coverage.jsonl
+# Coverage log format (append only):
+# {"agent":"persona-bfs","node_id":"erc20_transfer","phase":"4C","ts":"2026-04-27T10:00:00Z"}
+```
+
+### Step P0-7: Memory recall (only if --memory flag passed)
+
+```bash
+if [ "${HORUS_MEMORY:-}" = "1" ] && [ -f ~/.horus/lessons.db ]; then
+  python3 scripts/lessons_db.py query \
+    --ecosystem "$ECOSYSTEM" \
+    --limit 10 \
+    > audit-output/memory-recall.md 2>/dev/null \
+    && echo "Memory recall written to audit-output/memory-recall.md"
+fi
+```
+
+**Pass to all sub-agents**: Include in every spawned sub-agent prompt:
+```
+Graph artifacts:
+- graph.json: audit-output/graph/graph.json
+- coverage log: audit-output/graph/coverage.jsonl (append your visited node IDs here)
+- memory recall: audit-output/memory-recall.md (if exists — read before starting)
+```
+
+### Phase 0 failure handling
+
+If graphify is not installed or fails: log `Phase 0: SKIPPED (graphify unavailable)` to `pipeline-state.md` and continue to Phase 1 without graph features. Do NOT abort the audit.
+
+---
+
 ## Phase 1: Reconnaissance & Protocol Detection
 
 **Agent**: Self (no sub-agent needed)
@@ -314,7 +441,7 @@ For the complete pipeline reference with data flows, error handling, and context
 ### Step 1: Create Output Directory
 
 ```bash
-mkdir -p audit-output/{pocs,fuzzing,certora,halmos,issues,context,personas}
+mkdir -p audit-output/{pocs,fuzzing,certora,halmos,issues,context,personas,graph,attack-proofs,plan-execution}
 ```
 
 ### Step 2: Scan the Codebase
