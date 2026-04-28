@@ -10,6 +10,7 @@ Horus is a portable audit workflow that combines:
 
 - a curated vulnerability database
 - a retrieval layer that minimizes unnecessary context
+- a graph layer that connects DB patterns and live code paths
 - a reusable multi-agent audit pipeline
 - runtime-specific delivery surfaces for different agent environments
 
@@ -36,6 +37,29 @@ The main generator is [`scripts/generate_manifests.py`](../scripts/generate_mani
 - `DB/manifests/keywords.json`
 
 This layer exists so agents can navigate the DB without loading the full corpus.
+
+### Layer 2.5: Graph Foundation
+
+Horus now maintains graph artifacts for both the vulnerability DB and each live
+audit.
+
+DB graph:
+
+- built by `python3 scripts/build_db_graph.py`
+- stored at `DB/graphify-out/graph.json`
+- summarized in `DB/graphify-out/GRAPH_REPORT.md`
+- browsable by agents through `DB/graphify-out/wiki/index.md`
+
+Per-audit graph:
+
+- built during `audit-orchestrator` Phase 0
+- stored at `audit-output/graph/graph.json`
+- optionally enriched by `horus-graphify-blockchain`
+- served through graphify MCP when available
+- tracked by `audit-output/graph/coverage.jsonl`
+
+The graph layer is additive. It expands candidate patterns and attack paths, but
+the router/manifests/hunt cards remain the baseline retrieval path.
 
 ### Layer 3: Canonical Workflow Playbooks
 
@@ -95,6 +119,7 @@ These make the workflow operational rather than purely descriptive.
 - `.codex/resources/`
 - `.codex/rules/`
 - `.codex/config.toml`
+- `DB/graphify-out/**`
 
 Operational rule: change the source, then regenerate the generated surfaces.
 
@@ -135,13 +160,14 @@ These editor-based agents consume the repo through the instruction files and sou
 
 ## 5. Retrieval Architecture
 
-The retrieval stack has four tiers:
+The retrieval stack has four tiers plus graph expansion:
 
 ```text
 Tier 1    DB/index.json
 Tier 1.5  DB/manifests/huntcards/*.json
 Tier 2    DB/manifests/*.json
 Tier 3    DB/**/*.md
+Graph     DB/graphify-out/graph.json
 ```
 
 ### Tier 1: Router
@@ -174,9 +200,33 @@ Manifests bridge semantic lookup and exact DB reads. They contain exact line ran
 
 Long-form DB entries are the richest source of vulnerability knowledge, but they should only be read after narrowing through the earlier tiers.
 
+### Graph Expansion
+
+The DB graph is queried after a topic, protocol type, or likely vulnerability
+class is known:
+
+```bash
+graphify query "<topic>" --graph DB/graphify-out/graph.json --budget 2000
+graphify path "<topic>" "<candidate>" --graph DB/graphify-out/graph.json
+```
+
+Agents use it to pull neighboring hunt cards and related concepts into the
+working set. They must log expansions and continue without graph features if the
+graph is unavailable.
+
 ## 6. The Full Audit Pipeline
 
 The full pipeline is orchestrated by the `audit-orchestrator` family of playbooks.
+
+### Phase 0: Graph Foundation
+
+Build `audit-output/graph/graph.json` before the classic audit phases. The
+orchestrator runs graphify on the target codebase, merges optional blockchain DSL
+AST extraction, starts graphify MCP when possible, initializes coverage logging,
+and optionally writes `audit-output/memory-recall.md`.
+
+This is a soft gate: if graphify or MCP fails, the audit continues through the
+existing retrieval and discovery pipeline.
 
 ### Phase 1: Reconnaissance
 
@@ -203,10 +253,11 @@ Write and review system properties before deeper hunting. This improves later tr
 
 Run multiple discovery streams:
 
-- DB-powered hunting
+- DB-powered hunting with optional graph expansion
 - reasoning-based discovery
 - multi-persona analysis
 - validation-gap hunting
+- attack-graph synthesis when Phase 0 graph and reviewed invariants exist
 
 ### Phase 5: Merge And Triage
 
@@ -271,6 +322,7 @@ python3 scripts/db_quality_check.py
 Edit:
 
 - `scripts/generate_manifests.py`
+- `scripts/build_db_graph.py` if graph relationships need to change
 
 Then regenerate and validate.
 
@@ -289,6 +341,22 @@ Then run:
 python3 scripts/sync_codex_compat.py
 python3 scripts/sync_codex_compat.py --check
 ```
+
+If GitHub-facing agent docs should match the same behavior, also update the
+corresponding `.github/agents/**` and `.github/agents/resources/**` files.
+
+### If you are updating graph artifacts
+
+Run:
+
+```bash
+python3 scripts/generate_manifests.py
+python3 scripts/build_db_graph.py
+python3 scripts/db_quality_check.py
+```
+
+Commit `DB/graphify-out/graph.json`, `GRAPH_REPORT.md`, and `wiki/` only when
+the generated graph should be shared with other agents from the repository.
 
 ### If you are doing report-corpus maintenance
 

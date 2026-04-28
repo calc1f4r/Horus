@@ -4,11 +4,41 @@ Single source of truth for hunt card operations. Used by `audit-orchestrator` (P
 
 ## Contents
 - [Hunt Card Format](#hunt-card-format)
+- [Step 0: Graph-Augmented Hunting](#step-0-graph-augmented-hunting)
 - [Step 1: Grep-Prune](#step-1-grep-prune)
 - [Step 2: Partition into Shards](#step-2-partition-into-shards)
 - [Step 3: Micro-Directive Execution](#step-3-micro-directive-execution)
 - [Step 4: Merge Shard Findings](#step-4-merge-shard-findings)
 - [Finding Schema](#finding-schema)
+
+---
+
+## Step 0: Graph-Augmented Hunting
+
+Before grep-prune, expand the candidate hunt-card set through the DB knowledge
+graph when `DB/graphify-out/graph.json` exists.
+
+```bash
+graphify query "<protocol type or vulnerability topic>" --graph DB/graphify-out/graph.json --budget 2000
+graphify path "<topic>" "<candidate hunt card title>" --graph DB/graphify-out/graph.json
+```
+
+Use the query output to add related hunt cards within roughly 2 hops of the
+seed topic. This is an enrichment step only: never remove cards that the
+manifest/router path would normally include.
+
+Write an expansion log:
+
+```markdown
+# Graph Expansion Log
+Seed topics: <list>
+Expanded cards: <count added>
+New card IDs: <list>
+DB graph source: DB/graphify-out/graph.json
+```
+
+If `DB/graphify-out/graph.json` is missing, write
+`Graph expansion skipped: DB graph not found.` and continue with Step 1.
 
 ---
 
@@ -24,16 +54,11 @@ Each card is a compressed detection rule (~200 tokens) with micro-directives:
   "grep": "totalSupply|convertToShares|totalAssets",
   "detect": "Share value inflatable when totalSupply approaches zero",
   "check": [
-    "VERIFY: share conversion remains safe when totalSupply approaches zero",
-    "PROVE: attacker can mint or donate into a near-empty vault before victim deposits",
-    "FALSIFY: virtual shares/assets, dead shares, or minimum-share guards prevent inflation",
-    "IMPACT: later depositors can receive 0 shares and lose assets"
+    "VERIFY: deposit function handles totalSupply == 0 case",
+    "VERIFY: virtual shares/assets or dead shares used"
   ],
   "antipattern": "convertToShares returns totalSupply == 0 ? shares : ...",
   "securePattern": "Virtual offset in share calculation OR dead shares in constructor",
-  "validWhen": "Share pricing becomes user-manipulable when supply is near zero or totalAssets can be donation-inflated.",
-  "invalidWhen": "Virtual offsets, dead shares, or explicit zero-share / minimum-liquidity guards block the attack path.",
-  "impact": "Victims can deposit assets and receive 0 or severely underpriced shares.",
   "cat": ["token", "erc4626"],
   "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
   "lines": [151, 393],
@@ -44,12 +69,9 @@ Each card is a compressed detection rule (~200 tokens) with micro-directives:
 | Field | Purpose |
 |-------|---------|
 | `grep` | Pipe-delimited keywords for initial pruning |
-| `check` | Ordered verification steps — `VERIFY`, `PROVE`, `FALSIFY`, and `IMPACT` directives executed against target code |
+| `check` | Ordered verification steps — execute against target code |
 | `antipattern` | Vulnerable code shape — if matched → likely positive |
 | `securePattern` | Safe code shape — if matched → false positive |
-| `validWhen` | Compact reportability rule — when a grep hit is a real bug |
-| `invalidWhen` | False-positive filter — what mitigation invalidates the finding |
-| `impact` | One-line consequence used to prioritize likely positives |
 | `neverPrune` | Card survives grep-prune even with zero hits |
 | `ref` + `lines` | Full DB entry for evidence lookup |
 
@@ -106,12 +128,10 @@ Each shard sub-agent runs a 2-pass analysis:
 
 For each card in the shard at grep hit locations:
 1. Read TARGET CODE at the grep hit location
-2. Use `validWhen` to decide whether the grep hit is actually reportable
-3. Execute each `check` step against the target code
-4. If `antipattern` matches → **likely positive** (fast path)
-5. If `invalidWhen` or `securePattern` matches → **false positive** (prune immediately)
-6. Use `impact` to rank which likely positives should be evidence-checked first
-7. If neither side is decisive → **uncertain** (proceed to Pass 2)
+2. Execute each `check` step against the target code
+3. If `antipattern` matches → **likely positive** (fast path)
+4. If `securePattern` matches → **false positive** (prune immediately)
+5. If neither → **uncertain** (proceed to Pass 2)
 
 ### Pass 2: Evidence Lookup (only for true/likely positives)
 

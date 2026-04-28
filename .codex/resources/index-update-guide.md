@@ -1,20 +1,24 @@
 # Manifest Update Guide
 
-Every new or modified vulnerability entry MUST have its manifests regenerated so the 3-tier search architecture stays current.
+Every new or modified vulnerability entry MUST have manifests regenerated so the 4-tier search architecture and graph expansion layer stay current.
 
 ## Architecture Overview
 
-The database uses a **3-tier search architecture**:
+The database uses a **4-tier search architecture plus graph expansion**:
 
 ```
 Tier 1: DB/index.json              ← Lean router (~330 lines). Agents start here.
    ↓
-Tier 2: DB/manifests/<name>.json   ← Pattern-level indexes with line ranges (11 manifests)
+Tier 1.5: DB/manifests/huntcards/* ← Compressed grep + triage cards
+   ↓
+Tier 2: DB/manifests/<name>.json   ← Pattern-level indexes with line ranges
    ↓
 Tier 3: DB/**/*.md                 ← Vulnerability content. Read ONLY targeted line ranges.
+
+Graph: DB/graphify-out/graph.json ← Additive related-card expansion
 ```
 
-Manifests are **auto-generated** from the MD files. You do NOT manually edit `DB/index.json` or `DB/manifests/*.json`.
+Manifests and graph artifacts are **auto-generated**. You do NOT manually edit `DB/index.json`, `DB/manifests/*.json`, `DB/manifests/huntcards/*.json`, or `DB/graphify-out/**`.
 
 ## How to Update After Creating/Modifying an Entry
 
@@ -41,6 +45,7 @@ Run the manifest generator from the repository root:
 
 ```bash
 python3 scripts/generate_manifests.py
+python3 scripts/build_db_graph.py
 ```
 
 This automatically:
@@ -50,6 +55,8 @@ This automatically:
 - Updates `DB/index.json` (lean router)
 - Updates all 11 `DB/manifests/*.json` files
 - Rebuilds `DB/manifests/keywords.json`
+- Rebuilds `DB/manifests/huntcards/*.json`
+- Rebuilds `DB/graphify-out/**` when `build_db_graph.py` is run
 
 ### Step 3: Verify the Update
 

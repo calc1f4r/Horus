@@ -4,11 +4,41 @@ Single source of truth for hunt card operations. Used by `audit-orchestrator` (P
 
 ## Contents
 - [Hunt Card Format](#hunt-card-format)
+- [Step 0: Graph-Augmented Hunting](#step-0-graph-augmented-hunting)
 - [Step 1: Grep-Prune](#step-1-grep-prune)
 - [Step 2: Partition into Shards](#step-2-partition-into-shards)
 - [Step 3: Micro-Directive Execution](#step-3-micro-directive-execution)
 - [Step 4: Merge Shard Findings](#step-4-merge-shard-findings)
 - [Finding Schema](#finding-schema)
+
+---
+
+## Step 0: Graph-Augmented Hunting
+
+Before grep-prune, expand the candidate hunt-card set through the DB knowledge
+graph when `DB/graphify-out/graph.json` exists.
+
+```bash
+graphify query "<protocol type or vulnerability topic>" --graph DB/graphify-out/graph.json --budget 2000
+graphify path "<topic>" "<candidate hunt card title>" --graph DB/graphify-out/graph.json
+```
+
+Use the query output to add related hunt cards within roughly 2 hops of the
+seed topic. This is an enrichment step only: never remove cards that the
+manifest/router path would normally include.
+
+Write an expansion log:
+
+```markdown
+# Graph Expansion Log
+Seed topics: <list>
+Expanded cards: <count added>
+New card IDs: <list>
+DB graph source: DB/graphify-out/graph.json
+```
+
+If `DB/graphify-out/graph.json` is missing, write
+`Graph expansion skipped: DB graph not found.` and continue with Step 1.
 
 ---
 

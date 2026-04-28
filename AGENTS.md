@@ -8,9 +8,11 @@ Use this file as the Codex entry point. For the full system map, read `docs/code
 
 - `DB/**/*.md`: primary vulnerability content.
 - `scripts/generate_manifests.py`: canonical generator for `DB/index.json`, `DB/manifests/*.json`, and `DB/manifests/huntcards/*.json`.
+- `scripts/build_db_graph.py`: canonical generator for `DB/graphify-out/graph.json`, `GRAPH_REPORT.md`, and graph wiki artifacts.
 - `TEMPLATE.md`: required structure for new or migrated DB entries.
 - `scripts/db_quality_check.py`: structural verification for the DB and search artifacts.
 - `DB/index.json`: runtime router for search, but generated from DB content plus generator logic.
+- `DB/graphify-out/graph.json`: generated DB knowledge graph used for graph-augmented hunt-card expansion.
 - `.claude/skills`, `.claude/agents`, `.claude/resources`, `.claude/rules`: source of truth for the portable audit playbooks.
 - `.agents/skills/`: generated repo-local Codex skills derived from `.claude/skills/`.
 - `.codex/agents/`: generated repo-local Codex custom agents derived from `.claude/agents/`.
@@ -32,10 +34,12 @@ Do not hand-edit generated files under `.agents/skills/` or `.codex/`. Change th
 2. Indexing layer
    - `scripts/generate_manifests.py` parses `DB/**/*.md`.
    - It emits `DB/index.json`, `DB/manifests/*.json`, `DB/manifests/huntcards/*.json`, and keyword routing.
+   - `scripts/build_db_graph.py` turns generated hunt cards/manifests into `DB/graphify-out/**` graph artifacts.
 
 3. Consumption layer
    - Agents and tooling start from `DB/index.json`.
    - They then load per-manifest hunt cards or manifests.
+   - They may query `DB/graphify-out/graph.json` to expand related hunt cards before grep-pruning.
    - They read targeted line ranges from DB Markdown only after narrowing scope.
 
 4. Audit workflow layer
@@ -51,6 +55,7 @@ Do not hand-edit generated files under `.agents/skills/` or `.codex/`. Change th
 - Prefer `DB/manifests/huntcards/<manifest>-huntcards.json` over reading large Markdown files directly.
 - Use `DB/manifests/*.json` for exact `lineStart` and `lineEnd`.
 - Read only the relevant lines from the target DB entry.
+- If `DB/graphify-out/graph.json` exists, use `graphify query "<topic>" --graph DB/graphify-out/graph.json` to add neighboring hunt cards; do not use graph results to remove baseline cards.
 
 ### Add or edit a vulnerability entry
 
@@ -67,6 +72,12 @@ python3 scripts/db_quality_check.py
 
 - Edit `scripts/generate_manifests.py`.
 - Regenerate outputs.
+- Rebuild the DB graph if hunt-card relationships should change:
+
+```bash
+python3 scripts/build_db_graph.py
+```
+
 - Verify the resulting router, manifests, and hunt cards with `scripts/db_quality_check.py`.
 
 ### Work on raw reports or report artifacts
@@ -83,6 +94,7 @@ python3 scripts/db_quality_check.py
 - Read `.github/agents/audit-orchestrator.md` or `.claude/agents/audit-orchestrator.md` when you need to compare the source trees directly.
 - Read `invariants/README.md` for the invariant library role.
 - Read `scripts/grep_prune.py`, `scripts/partition_shards.py`, and `scripts/merge_shard_findings.py` for the concrete sharded hunt-card loop.
+- Read `docs/audit-orchestrator-flow.mmd` for the graph-aware Phase 0 + discovery flow.
 
 ## Rules Codex Should Follow Here
 
@@ -91,6 +103,7 @@ python3 scripts/db_quality_check.py
 - Do not hand-edit generated files under `.agents/skills/` or `.codex/`; regenerate them from `.claude/` with `python3 scripts/sync_codex_compat.py`.
 - If you modify a DB entry, assume manifest regeneration is required.
 - If you modify Claude playbooks, regenerate the Codex-facing outputs and verify them with `python3 scripts/sync_codex_compat.py --check`.
+- If the GitHub-facing agent docs should match the Claude playbooks, update the corresponding `.github/agents/**` files explicitly; the Codex sync script does not generate `.github/agents`.
 - If you modify agent docs, inspect both `.claude/` and `.github/` copies before deciding what to change.
 - Prefer `python3` directly unless the virtualenv has been repaired locally.
 
@@ -107,6 +120,7 @@ python3 scripts/db_quality_check.py
 
 ```bash
 python3 scripts/generate_manifests.py
+python3 scripts/build_db_graph.py
 python3 scripts/db_quality_check.py
 python3 scripts/sync_codex_compat.py
 python3 scripts/sync_codex_compat.py --check

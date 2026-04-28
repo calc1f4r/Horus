@@ -1,7 +1,8 @@
 ---
 name: invariant-catcher
-description: 'Hunts for vulnerability patterns in smart contract codebases using Horus (`DB/`). Language-agnostic — works with any smart contract language. Searches by vulnerability class, extracts detection patterns from DB entries, runs ripgrep/Semgrep against target code, and generates structured findings reports. Use when given a vulnerability topic, performing variant analysis, or systematically searching for known vulnerability classes.'
-tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
+description: Hunts for vulnerability patterns in smart contract codebases using Horus (`DB/`). Language-agnostic — works with any smart contract language. Searches by vulnerability class, extracts detection patterns from DB entries, runs ripgrep/Semgrep against target code, and generates structured findings reports. Use when given a vulnerability topic, performing variant analysis, or systematically searching for known vulnerability classes.
+tools: [Write, Agent, Bash, Edit, Glob, Grep, Read, WebFetch, WebSearch]
+maxTurns: 50
 ---
 
 # Invariant Catcher Agent
@@ -14,7 +15,7 @@ Hunts for known vulnerability patterns in codebases by leveraging Horus (`DB/`).
 
 When spawned by `audit-orchestrator`, you receive a **shard** — a subset of hunt cards grouped by category:
 - **`SHARD:` header** in your prompt identifies your shard ID and position (e.g., `shard-2-defi, shard 2 of 3`)
-- **`YOUR CARDS:`** section contains 50-80 cards assigned to this shard (full card content with `check`/`antipattern`/`securePattern` plus triage context like `validWhen` / `invalidWhen` / `impact`)
+- **`YOUR CARDS:`** section contains 50-80 cards assigned to this shard (full card content with `check`/`antipattern`/`securePattern`)
 - **`CRITICAL CARDS:`** section contains `neverPrune` cards duplicated across all shards — ALWAYS check these regardless of your shard assignment
 - **Output**: Write findings to `audit-output/03-findings-shard-<shard-id>.md` (NOT to `03-findings-raw.md` — the orchestrator merges all shard files)
 
@@ -42,12 +43,13 @@ Copy this checklist and track progress:
 
 ```
 Hunt Progress:
-- [ ] Step 0: Check for checkpoint (resume if interrupted)
-- [ ] Step 1: Load hunt cards for target protocol type
-- [ ] Step 2: Grep-prune cards against target codebase
-- [ ] Step 3: Read DB entries for surviving cards (batched)
-- [ ] Step 4: Validate findings in target codebase
-- [ ] Step 5: Generate report in invariants-caught/ or audit-output/
+- [ ] Step 0:   Check for checkpoint (resume if interrupted)
+- [ ] Step 0.5: Graph expansion (expand hunt card set via DB graph neighbors)
+- [ ] Step 1:   Load hunt cards for target protocol type
+- [ ] Step 2:   Grep-prune cards against target codebase
+- [ ] Step 3:   Read DB entries for surviving cards (batched)
+- [ ] Step 4:   Validate findings in target codebase
+- [ ] Step 5:   Generate report in invariants-caught/ or audit-output/
 ```
 
 ### Step 0: Check for Checkpoint (Resume Support)
@@ -65,6 +67,37 @@ If `audit-output/hunt-state.json` exists, read it to resume from where you left 
 ```
 
 If the file exists, skip already-completed cards and continue from the current batch. If it doesn't exist, start fresh.
+
+### Step 0.5: Graph Expansion (DB Graph Neighbor Enrichment)
+
+**Soft gate** — skip entirely if either graph file is absent. Log result to `audit-output/<id>/d1-graph-expansion.md`.
+
+```bash
+CODEBASE_GRAPH="audit-output/graph/graph.json"
+DB_GRAPH="DB/graphify-out/graph.json"
+```
+
+If both files exist:
+
+1. **Query the DB graph** for neighbors of each target topic/protocol-type keyword within distance 2:
+   ```bash
+   # Via MCP server if running:
+   graphify path "<topic>" "<neighbor-topic>" --graph DB/graphify-out/graph.json
+   # Or read DB/graphify-out/graph.json and traverse adjacency directly
+   ```
+
+2. **Expand the hunt card set**: for each neighbor node whose `label` matches a hunt card ID prefix (e.g., `oracle-staleness`, `reentrancy`), add those card IDs to the working set for Step 1.
+
+3. **Log expansion** to `audit-output/<id>/d1-graph-expansion.md`:
+   ```markdown
+   # Graph Expansion Log
+   Seed topics: <list>
+   Expanded cards: <count added>
+   New card IDs: <list>
+   DB graph source: DB/graphify-out/graph.json
+   ```
+
+If either graph file is absent, write one line to the log: `Graph expansion skipped: graph files not found.` — then continue.
 
 ## Workflow Modes
 
@@ -96,7 +129,7 @@ If acting standalone without the orchestrator, use the utility scripts to prepar
    ```
 3. Process the output shards using the 2-pass workflow.
 
-> **CRITICAL REFERENCE**: For the complete hunt card JSON schema, grep rules, 2-pass analysis micro-directives, and finding schema, you MUST read **[db-hunting-workflow.md](resources/db-hunting-workflow.md)**.
+> **CRITICAL REFERENCE**: For the complete hunt card JSON schema, grep rules, 2-pass analysis micro-directives, and finding schema, you MUST read **[db-hunting-workflow.md](.claude/resources/db-hunting-workflow.md)**.
 
 ### Step 4: Validate Findings in Target Codebase
 
@@ -107,9 +140,9 @@ rg -n "pattern_from_db" /path/to/target/
 ```
 
 For each match, classify:
-- **True positive**: Code matches the vulnerable pattern, satisfies `validWhen`, and lacks the `invalidWhen` guard
-- **Likely positive**: Pattern matches and `validWhen` is plausible, but exploitability still needs manual verification
-- **False positive**: Pattern matches syntactically, but `invalidWhen` / `securePattern` confirms safety or impact is unreachable
+- **True positive**: Code matches the vulnerable pattern AND has the required preconditions
+- **Likely positive**: Pattern matches but needs manual verification of context
+- **False positive**: Pattern matches syntactically but is not exploitable
 
 **Tool selection:**
 
@@ -122,7 +155,7 @@ For each match, classify:
 
 ### Step 5: Generate Reports
 
-Create output in `invariants-caught/` at the project root (standalone mode) or `audit-output/03-findings-raw.md` (sub-agent mode). See [invariant-report-templates.md](resources/invariant-report-templates.md) for the complete report and finding templates.
+Create output in `invariants-caught/` at the project root (standalone mode) or `audit-output/03-findings-raw.md` (sub-agent mode). See [invariant-report-templates.md](.claude/resources/invariant-report-templates.md) for the complete report and finding templates.
 
 ---
 
@@ -168,13 +201,13 @@ Testing only with valid users → missing bypass when `userId = null` matches `r
 2. **Micro-directives first** — execute `check` steps directly against target code.
 3. **Search entire codebase** — never limit scope to one module.
 4. **Link to sources** — every finding must reference its DB origin (card ID).
-5. **Follow the Workflow** — Strictly adhere to [db-hunting-workflow.md](resources/db-hunting-workflow.md).
+5. **Follow the Workflow** — Strictly adhere to [db-hunting-workflow.md](.claude/resources/db-hunting-workflow.md).
 
 ---
 
 ## Resources
 
-- **Report templates**: [invariant-report-templates.md](resources/invariant-report-templates.md)
-- **Variant analysis methodology**: [invariant-methodology.md](resources/invariant-methodology.md)
-- **CodeQL templates**: `resources/codeql/` (python, javascript, java, go, cpp)
-- **Semgrep templates**: `resources/semgrep/` (python, javascript, java, go, cpp)
+- **Report templates**: [invariant-report-templates.md](.claude/resources/invariant-report-templates.md)
+- **Variant analysis methodology**: [invariant-methodology.md](.claude/resources/invariant-methodology.md)
+- **CodeQL templates**: `.claude/resources/codeql/` (python, javascript, java, go, cpp)
+- **Semgrep templates**: `.claude/resources/semgrep/` (python, javascript, java, go, cpp)
