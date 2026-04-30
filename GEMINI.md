@@ -75,10 +75,18 @@ When adding or updating vulnerabilities in `DB/`:
 
 All utility scripts are in `scripts/`. Always use `python3` and activate the virtual environment (`source .venv/bin/activate`) before running.
 
-- **`generate_manifests.py`**: Crucial. Rebuilds the search index. Run after any DB edit.
-- **`solodit_fetcher.py`**: Use to fetch raw audit reports into the `reports/` structure.
-- **`db_quality_check.py`**: Validates the structural integrity and line ranges of DB entries. Run this to verify your DB edits.
-- **`generate_entries.py`**: Assists in generating DB entries from fetched reports.
+If `.venv` is missing or broken, recreate it with:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt -r requirements-dev.txt
+```
+
+- **`scripts/generate_manifests.py`**: Crucial. Rebuilds the search index. Run after any DB edit.
+- **`scripts/solodit_fetcher.py`**: Use to fetch raw audit reports into the `reports/` structure.
+- **`scripts/db_quality_check.py`**: Validates the structural integrity and line ranges of DB entries. Run this to verify your DB edits.
+- **`scripts/generate_entries.py`**: Assists in generating DB entries from fetched reports.
 
 ---
 

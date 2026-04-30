@@ -1,35 +1,35 @@
 # protocol-specific
 
-> 78 nodes · cohesion 0.06
+> 231 nodes · cohesion 0.11
 
 ## Key Concepts
 
-- **safeTransferFrom** (34 connections) — `DB/bridge/custom/defihacklabs-bridge-2022-patterns.md`
-- **protocol-specific** (31 connections) — `DB/index.json`
-- **unique** (31 connections) — `DB/index.json`
-- **_calculateChallengerEligibility** (17 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **1. Dos Block Production Halt** (10 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **2. Dos Consensus Halt** (10 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **3. Dos State Machine** (10 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **4. Dos Unbounded Beginblock** (10 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **6. Dos Panic Crash** (10 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **7. Dos Message Flooding** (10 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **8. Dos Deposit Spam** (10 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **Severity: Medium Risk** (10 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md** (10 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **block_production_halt** (10 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **TestAllocateRewards_RewardsPlanFlood** (10 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **TestAllocateRewards_TokenFlood** (10 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **TestTerminateEndedRewardsPlan_TokenFlood** (10 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **5. Dos Unbounded Array** (9 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **Keywords** (9 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **unbounded_beginblock** (8 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- **DB/cosmos/app-chain/dos/griefing-revert-dos.md** (7 connections) — `DB/cosmos/app-chain/dos/griefing-revert-dos.md`
-- **DB/unique/defihacklabs/defihacklabs-novel-attack-patterns-2025-2026.md** (7 connections) — `DB/unique/defihacklabs/defihacklabs-novel-attack-patterns-2025-2026.md`
-- **1. Dos Function Revert** (6 connections) — `DB/cosmos/app-chain/dos/griefing-revert-dos.md`
-- **2. Dos Frontrun Grief** (6 connections) — `DB/cosmos/app-chain/dos/griefing-revert-dos.md`
-- **3. Dos Dust Grief** (6 connections) — `DB/cosmos/app-chain/dos/griefing-revert-dos.md`
-- *... and 53 more nodes in this community*
+- **data_manipulation** (292 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **reentrancy** (232 connections) — `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
+- **callback_reentrancy** (206 connections) — `DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md`
+- **staking** (144 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **liquidity_pool** (140 connections) — `DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md`
+- **share_calculation** (122 connections) — `DB/general/vault-inflation-attack/vault-inflation-attack.md`
+- **_convertToShares** (120 connections) — `DB/general/vault-inflation-attack/defihacklabs-vault-inflation-patterns.md`
+- **rewards** (116 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **fund_extraction** (100 connections) — `DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md`
+- **vault** (98 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **_beforeTokenTransfer** (96 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **_afterTokenTransfer** (92 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **distribute_rewards** (78 connections) — `DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md`
+- **_getUserManagerState** (70 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **_setTreasuryRewardCutRate** (70 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **_updateRewardsPerToken** (70 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **1. First Depositor / Inflation Attack** (67 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **9. Reward Multiplication via Merge Operations** (61 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **8. Partial Withdrawal Token Freeze** (59 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **Move DeFi Protocol Logic Vulnerabilities** (57 connections) — `DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md`
+- **1. Transfer & TransferFrom Vulnerabilities** (57 connections) — `DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md`
+- **10. Comprehensive Keyword Index** (57 connections) — `DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md`
+- **10. State Machine Hijacking** (55 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **8. Inflation & First Depositor Attack Vulnerabilities** (55 connections) — `DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md`
+- **token_transfer** (54 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- *... and 206 more nodes in this community*
 
 ## Relationships
 
@@ -37,31 +37,30 @@
 
 ## Source Files
 
-- `DB/bridge/custom/defihacklabs-bridge-2022-patterns.md`
-- `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- `DB/cosmos/app-chain/dos/griefing-revert-dos.md`
-- `DB/index.json`
-- `DB/unique/amm/constantproduct/BURVE_UNRESTRICTED_CALLBACK.md`
-- `DB/unique/amm/constantproduct/LAMBO_DETERMINISTIC_ADDRESS_DOS.md`
-- `DB/unique/amm/constantproduct/SENTIMENT_CURVE_READONLY_REENTRANCY.md`
-- `DB/unique/amm/constantproduct/SPARTAN_DIVIDEND_GAMING.md`
-- `DB/unique/amm/constantproduct/SPARTAN_LP_BURN_HIJACK.md`
+- `DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md`
+- `DB/amm/concentrated-liquidity/fee-collection-distribution.md`
+- `DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md`
+- `DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md`
+- `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
+- `DB/cosmos/app-chain/fund-safety/fund-theft-vulnerabilities.md`
+- `DB/cosmos/app-chain/reentrancy/reentrancy-vulnerabilities.md`
+- `DB/general/flash-loan/FLASH_LOAN_VULNERABILITIES.md`
+- `DB/general/reentrancy/defi-reentrancy-patterns.md`
+- `DB/general/reentrancy/defihacklabs-reentrancy-2024-patterns.md`
+- `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- `DB/general/vault-inflation-attack/defihacklabs-vault-inflation-patterns.md`
+- `DB/general/vault-inflation-attack/vault-inflation-attack.md`
+- `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- `DB/oracle/chainlink/CHAINLINK_CCIP_VULNERABILITIES.md`
+- `DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md`
 - `DB/unique/amm/constantproduct/STAKEHOUSE_REENTRANCY_FUND_FREEZE.md`
-- `DB/unique/amm/constantproduct/TRADERJOE_FEE_DEBT_THEFT.md`
-- `DB/unique/amm/constantproduct/VADER_IL_PROTECTION_DRAIN.md`
-- `DB/unique/defihacklabs/defihacklabs-novel-attack-patterns-2025-2026.md`
-- `DB/unique/defihacklabs/economic-arbitrage-design-flaws.md`
-- `DB/unique/defihacklabs/fee-mechanism-exploitation.md`
-- `DB/unique/defihacklabs/liquidity-migration-exploit.md`
-- `DB/unique/defihacklabs/msgvalue-in-loop.md`
-- `DB/unique/defihacklabs/nft-specific-exploit-patterns.md`
-- `DB/unique/defihacklabs/skim-balance-attack.md`
-- `DB/unique/defihacklabs/stale-cached-state-exploits.md`
+- `DB/unique/defihacklabs/compiler-level-vulnerabilities.md`
+- `DB/unique/erc4626/CROSS_CONTRACT_REENTRANCY_YIELD_TOKEN_THEFT.md`
 
 ## Audit Trail
 
-- EXTRACTED: 158 (63%)
-- INFERRED: 91 (37%)
+- EXTRACTED: 1753 (51%)
+- INFERRED: 1688 (49%)
 - AMBIGUOUS: 0 (0%)
 
 ---

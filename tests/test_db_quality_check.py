@@ -55,6 +55,35 @@ key: [unclosed bracket
 Bad yaml above.
 """
 
+SCHEMA_STRUCTURED_ENTRY = """---
+protocol: generic
+category: oracle
+vulnerability_type: price_manipulation
+attack_type: economic_exploit
+affected_component: oracle_logic
+severity: high
+impact: fund_loss
+code_keywords:
+  - slot0
+  - observe
+---
+# Price Oracle Manipulation
+
+**Root Cause Statement:** The protocol trusts a manipulable spot price for accounting.
+
+#### False Positive Guards
+
+- Safe if: price is only used for UI hints.
+- Not this bug when: a long-window TWAP and independent sanity bound protect the sink.
+
+## Vulnerable Pattern Examples
+
+```solidity
+// VULNERABLE: Direct spot price drives collateral valuation.
+uint256 price = pool.slot0Price();
+```
+"""
+
 
 def _write_tmp(content: str) -> str:
     """Write content to a temp .md file and return its path."""
@@ -160,6 +189,53 @@ class TestParseFrontmatter(unittest.TestCase):
         try:
             r = qc.parse_frontmatter(path)
             self.assertTrue(r['has_detection'])
+        finally:
+            os.unlink(path)
+
+    def test_detects_structured_schema_without_emoji_markers(self):
+        path = _write_tmp(SCHEMA_STRUCTURED_ENTRY)
+        try:
+            r = qc.parse_frontmatter(path)
+            self.assertTrue(r['has_root_cause'])
+            self.assertTrue(r['has_vuln_ex'])
+            self.assertTrue(r['has_secure'])
+            self.assertTrue(r['has_keywords'])
+        finally:
+            os.unlink(path)
+
+    def test_detects_bullet_root_cause_statement(self):
+        content = VALID_FRONTMATTER.replace(
+            "## Root Cause\nPrice is stale.",
+            "- Root cause statement: Price is stale.",
+        )
+        path = _write_tmp(content)
+        try:
+            r = qc.parse_frontmatter(path)
+            self.assertTrue(r['has_root_cause'])
+        finally:
+            os.unlink(path)
+
+    def test_detects_root_cause_categories_heading(self):
+        content = VALID_FRONTMATTER.replace(
+            "## Root Cause\nPrice is stale.",
+            "#### Root Cause Categories\n1. Missing validation.",
+        )
+        path = _write_tmp(content)
+        try:
+            r = qc.parse_frontmatter(path)
+            self.assertTrue(r['has_root_cause'])
+        finally:
+            os.unlink(path)
+
+    def test_detects_vulnerable_code_patterns_heading(self):
+        content = VALID_FRONTMATTER.replace(
+            "```solidity\n// ❌ Vulnerable\nuint price = oracle.getPrice();",
+            "## Vulnerable Code Patterns\n\n```solidity\nuint price = oracle.getPrice();",
+        ).replace("❌", "VULNERABLE")
+        path = _write_tmp(content)
+        try:
+            r = qc.parse_frontmatter(path)
+            self.assertTrue(r['has_vuln_ex'])
         finally:
             os.unlink(path)
 

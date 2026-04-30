@@ -1,9 +1,8 @@
 ---
 name: missing-validation-reasoning
-description: 'Specialized reasoning-based auditor for input validation and hygiene vulnerabilities. Scans for zero-address checks, stale oracle data, array length mismatches, numeric bounds, arbitrary calldata forwarding, unvalidated token/callback addresses, and access control gaps in constructors, setters, and external data parsers. Use when reviewing constructors, initialize functions, admin setters, oracle integrations, or batch operations for missing validation checks.'
-tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
+description: "Specialized reasoning-based auditor for input validation and hygiene vulnerabilities. Scans for zero-address checks, stale oracle data, array length mismatches, numeric bounds, arbitrary calldata forwarding, unvalidated token/callback addresses, and access control gaps in constructors, setters, and external data parsers. Use when reviewing constructors, initialize functions, admin setters, oracle integrations, or batch operations for missing validation checks."
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
-
 # Missing Validation Reasoning Agent
 
 Specialized reasoning-based auditor for input validation and hygiene. Focuses on constructors, setters, external data parsers, and calldata handlers — the "gatekeepers" where missing checks can permanently brick a protocol or enable direct fund theft.
@@ -384,7 +383,7 @@ If multiple functions share the **same root cause** (e.g., 5 setters all missing
 
 ## Resources
 
-- **DB index**: [../../DB/index.json](../../DB/index.json)
+- **DB index**: [DB/index.json](../../DB/index.json)
 - **Primary DB patterns**: `DB/general/missing-validations/MISSING_VALIDATION_TEMPLATE.md`
 - **Real exploit patterns**: `DB/general/missing-validations/defihacklabs-input-validation-patterns.md`
 - **Quick reference**: [missing-validation-knowledge.md](resources/missing-validation-knowledge.md)

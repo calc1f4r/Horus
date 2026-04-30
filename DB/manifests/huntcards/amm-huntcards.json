@@ -2,285 +2,14 @@
   "meta": {
     "manifest": "amm",
     "description": "Compressed hunt cards for amm — one-line detection rules for bulk scanning",
-    "totalCards": 104,
-    "skipped": 44,
-    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 104
+    "totalCards": 45,
+    "skipped": 42,
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, use optional preconditions/proofShape/falsePositiveSignals/reportEvidence when present, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "enriched": 45
   },
   "cards": [
     {
-      "id": "amm-dos-arithmetic-initialization-pattern-1-unchecked-overflow-i-001",
-      "title": "Pattern 1: Unchecked Overflow in FullMath Migration (HIGH)",
-      "severity": "HIGH",
-      "grep": "calculateOwedFees|block.timestamp|emptyRebalance|getSellInfo|computeSwap|getOwedFee",
-      "detect": "Migrating Uniswap V3's FullMath from pre-0.8 Solidity to 0.8+ without `unchecked` blocks breaks intentional overflow...",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md",
-      "lines": [
-        102,
-        141
-      ],
-      "check": [
-        "VERIFY: Migrating Uniswap V3's FullMath from pre-0.8 Solidity to 0.8+ without unchecked blocks breaks intentional overflow...",
-        "PROVE: Solidity 0.8 reverts on intentional overflow",
-        "FALSIFY: Wrap in unchecked block for 0.8+"
-      ],
-      "antipattern": "Solidity 0.8 reverts on intentional overflow",
-      "securePattern": "Wrap in unchecked block for 0.8+",
-      "validWhen": "Migrating Uniswap V3's FullMath from pre-0.8 Solidity to 0.8+ without unchecked blocks breaks intentional overflow...",
-      "invalidWhen": "Wrap in unchecked block for 0.8+"
-    },
-    {
-      "id": "amm-dos-arithmetic-initialization-pattern-2-fee-growth-underflow-002",
-      "title": "Pattern 2: Fee Growth Underflow Not Handled (HIGH)",
-      "severity": "HIGH",
-      "grep": "processWithdrawals|calculateOwedFees|block.timestamp|emptyRebalance|getSellInfo|computeSwap",
-      "detect": "Uniswap V3's intentional underflow in fee growth calculations isn't properly handled in wrapper protocols.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md",
-      "lines": [
-        142,
-        189
-      ],
-      "check": [
-        "VERIFY: Uniswap V3's intentional underflow in fee growth calculations isn't properly handled in wrapper protocols.",
-        "PROVE: Comparison instead of subtraction",
-        "FALSIFY: Use unchecked subtraction like Uniswap V3"
-      ],
-      "antipattern": "Comparison instead of subtraction",
-      "securePattern": "Use unchecked subtraction like Uniswap V3",
-      "validWhen": "Uniswap V3's intentional underflow in fee growth calculations isn't properly handled in wrapper protocols.",
-      "invalidWhen": "Use unchecked subtraction like Uniswap V3"
-    },
-    {
-      "id": "amm-dos-arithmetic-initialization-pattern-3-rounding-error-ampli-003",
-      "title": "Pattern 3: Rounding Error Amplification Breaking Pool Invariants (HIGH)",
-      "severity": "HIGH",
-      "grep": "processWithdrawals|calculateOwedFees|block.timestamp|emptyRebalance|getSellInfo|computeSwap",
-      "detect": "Rounding errors in initial LP minting can be amplified to break pool pricing invariants.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md",
-      "lines": [
-        190,
-        229
-      ],
-      "check": [
-        "VERIFY: Rounding errors in initial LP minting can be amplified to break pool pricing invariants.",
-        "PROVE: Wrong rounding direction enables invariant manipulation",
-        "FALSIFY: Use ceiling rounding to ensure enough quote balance"
-      ],
-      "antipattern": "Wrong rounding direction enables invariant manipulation",
-      "securePattern": "Use ceiling rounding to ensure enough quote balance",
-      "validWhen": "Rounding errors in initial LP minting can be amplified to break pool pricing invariants.",
-      "invalidWhen": "Use ceiling rounding to ensure enough quote balance"
-    },
-    {
-      "id": "amm-dos-arithmetic-initialization-pattern-4-first-depositor-infl-004",
-      "title": "Pattern 4: First Depositor / Inflation Attack (HIGH)",
-      "severity": "HIGH",
-      "grep": "processWithdrawals|calculateOwedFees|block.timestamp|emptyRebalance|getSellInfo|computeSwap",
-      "detect": "First depositor can inflate share price to steal from subsequent depositors.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md",
-      "lines": [
-        230,
-        271
-      ],
-      "check": [
-        "VERIFY: First depositor can inflate share price to steal from subsequent depositors.",
-        "PROVE: No protection against share inflation",
-        "FALSIFY: Virtual shares and minimum liquidity lock"
-      ],
-      "antipattern": "No protection against share inflation",
-      "securePattern": "Virtual shares and minimum liquidity lock",
-      "validWhen": "First depositor can inflate share price to steal from subsequent depositors.",
-      "invalidWhen": "Virtual shares and minimum liquidity lock"
-    },
-    {
-      "id": "amm-dos-arithmetic-initialization-pattern-5-counter-overflow-dos-005",
-      "title": "Pattern 5: Counter Overflow DoS (MEDIUM)",
-      "severity": "MEDIUM",
-      "grep": "setPositionParams|calculateOwedFees|block.timestamp|emptyRebalance|getSellInfo|computeSwap",
-      "detect": "Shared counter contracts can be overflowed by attackers to DoS legitimate operations.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md",
-      "lines": [
-        272,
-        307
-      ],
-      "check": [
-        "VERIFY: Shared counter contracts can be overflowed by attackers to DoS legitimate operations.",
-        "PROVE: Shared counter can be overflowed by anyone",
-        "FALSIFY: Validate counter addresses, or use per-position counters"
-      ],
-      "antipattern": "Shared counter can be overflowed by anyone",
-      "securePattern": "Validate counter addresses, or use per-position counters",
-      "validWhen": "Shared counter contracts can be overflowed by attackers to DoS legitimate operations.",
-      "invalidWhen": "Validate counter addresses, or use per-position counters"
-    },
-    {
-      "id": "amm-dos-arithmetic-initialization-pattern-6-withdrawal-queue-gri-006",
-      "title": "Pattern 6: Withdrawal Queue Griefing DoS (HIGH)",
-      "severity": "HIGH",
-      "grep": "processWithdrawals|calculateOwedFees|block.timestamp|requestWithdraw|emptyRebalance|getSellInfo",
-      "detect": "Unlimited withdrawal requests enable queue flooding attacks.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md",
-      "lines": [
-        308,
-        346
-      ],
-      "check": [
-        "VERIFY: Unlimited withdrawal requests enable queue flooding attacks.",
-        "PROVE: No limit on withdrawal requests",
-        "FALSIFY: Aggregate requests per user, minimum amount"
-      ],
-      "antipattern": "No limit on withdrawal requests",
-      "securePattern": "Aggregate requests per user, minimum amount",
-      "validWhen": "Unlimited withdrawal requests enable queue flooding attacks.",
-      "invalidWhen": "Aggregate requests per user, minimum amount"
-    },
-    {
-      "id": "amm-dos-arithmetic-initialization-pattern-7-re-initialization-vu-007",
-      "title": "Pattern 7: Re-initialization Vulnerability (CRITICAL)",
-      "severity": "CRITICAL",
-      "grep": "processWithdrawals|calculateOwedFees|block.timestamp|emptyRebalance|getSellInfo|computeSwap",
-      "detect": "Missing access control on `initialize()` allows attackers to reconfigure critical parameters.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md",
-      "lines": [
-        347,
-        387
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Missing access control on initialize() allows attackers to reconfigure critical parameters.",
-        "PROVE: No access control, no initialization guard",
-        "FALSIFY: Use initializer modifier and access control"
-      ],
-      "antipattern": "No access control, no initialization guard",
-      "securePattern": "Use initializer modifier and access control",
-      "validWhen": "Missing access control on initialize() allows attackers to reconfigure critical parameters.",
-      "invalidWhen": "Use initializer modifier and access control"
-    },
-    {
-      "id": "amm-dos-arithmetic-initialization-pattern-8-inconsistent-roundin-008",
-      "title": "Pattern 8: Inconsistent Rounding Directions (MEDIUM)",
-      "severity": "MEDIUM",
-      "grep": "processWithdrawals|calculateOwedFees|block.timestamp|emptyRebalance|getSellInfo|computeSwap",
-      "detect": "Using same rounding for buy and sell operations leads to value leakage.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md",
-      "lines": [
-        388,
-        421
-      ],
-      "check": [
-        "VERIFY: Using same rounding for buy and sell operations leads to value leakage.",
-        "PROVE: Same rounding direction for both buy and sell",
-        "FALSIFY: Round against user (in favor of protocol)"
-      ],
-      "antipattern": "Same rounding direction for both buy and sell",
-      "securePattern": "Round against user (in favor of protocol)",
-      "validWhen": "Using same rounding for buy and sell operations leads to value leakage.",
-      "invalidWhen": "Round against user (in favor of protocol)"
-    },
-    {
-      "id": "amm-dos-arithmetic-initialization-pattern-9-broken-multi-token-p-009",
-      "title": "Pattern 9: Broken Multi-Token Pool Invariants (HIGH)",
-      "severity": "HIGH",
-      "grep": "processWithdrawals|calculateOwedFees|block.timestamp|emptyRebalance|getSellInfo|computeSwap",
-      "detect": "Applying 2-token AMM formulas to multi-token pools breaks invariants.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md",
-      "lines": [
-        422,
-        464
-      ],
-      "check": [
-        "VERIFY: Applying 2-token AMM formulas to multi-token pools breaks invariants.",
-        "PROVE: 2-token formula used for 3-token pool",
-        "FALSIFY: Enforce 2-token limit for CPMM"
-      ],
-      "antipattern": "2-token formula used for 3-token pool",
-      "securePattern": "Enforce 2-token limit for CPMM",
-      "validWhen": "Applying 2-token AMM formulas to multi-token pools breaks invariants.",
-      "invalidWhen": "Enforce 2-token limit for CPMM"
-    },
-    {
-      "id": "amm-dos-arithmetic-initialization-pattern-10-initial-lp-token-ca-010",
-      "title": "Pattern 10: Initial LP Token Calculation Ignoring Relative Values (HIGH)",
-      "severity": "HIGH",
-      "grep": "provideInitialLiquidity|calculateOwedFees|block.timestamp|emptyRebalance|getSellInfo|computeSwap",
-      "detect": "Calculating initial LP tokens by adding token amounts ignores relative values.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md",
-      "lines": [
-        465,
-        498
-      ],
-      "check": [
-        "VERIFY: Calculating initial LP tokens by adding token amounts ignores relative values.",
-        "PROVE: Adding token amounts regardless of value",
-        "FALSIFY: Use geometric mean for initial liquidity"
-      ],
-      "antipattern": "Adding token amounts regardless of value",
-      "securePattern": "Use geometric mean for initial liquidity",
-      "validWhen": "Calculating initial LP tokens by adding token amounts ignores relative values.",
-      "invalidWhen": "Use geometric mean for initial liquidity"
-    },
-    {
-      "id": "amm-dos-arithmetic-initialization-secure-pattern-2-consistent-un-012",
+      "id": "amm-dos-arithmetic-initialization-secure-pattern-2-consistent-un-002",
       "title": "Secure Pattern 2: Consistent Underflow Handling",
       "severity": "LOW",
       "grep": "processWithdrawals|calculateOwedFees|block.timestamp|emptyRebalance|getSellInfo|computeSwap",
@@ -293,9 +22,34 @@
       ],
       "ref": "DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md",
       "lines": [
-        529,
-        550
+        551,
+        572
       ],
+      "reportEvidence": {
+        "count": 10,
+        "sampleReports": [
+          "reports/constant_liquidity_amm/fullmath-requires-overflow-behavior.md",
+          "reports/constant_liquidity_amm/getowedfee-can-incorrectly-return-zero-because-of-fee-growth-underﬂow.md",
+          "reports/constant_liquidity_amm/h-02-attacker-can-amplify-a-rounding-error-in-magiclp-to-break-the-i-invariant-a.md",
+          "reports/constant_liquidity_amm/h-01-univ3tokenizedlp-can-be-attacked-by-an-initial-donation.md",
+          "reports/constant_liquidity_amm/denial-of-service-attack-on-lpwrapper-s-deposit-and-withdraw-functions.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "inflation",
+          "missing initialization guard",
+          "denial of service",
+          "arithmetic error",
+          "initialization manipulation"
+        ],
+        "commonlyComposesWith": [
+          "pool initialization",
+          "liquidity math",
+          "share accounting"
+        ]
+      },
       "check": [
         "VERIFY: // SECURE: Handle Uniswap V3 style underflow correctly",
         "FALSIFY: Handle Uniswap V3 style underflow correctly"
@@ -305,7 +59,7 @@
       "invalidWhen": "Handle Uniswap V3 style underflow correctly"
     },
     {
-      "id": "amm-dos-arithmetic-initialization-secure-pattern-3-first-deposit-013",
+      "id": "amm-dos-arithmetic-initialization-secure-pattern-3-first-deposit-003",
       "title": "Secure Pattern 3: First Depositor Protection",
       "severity": "LOW",
       "grep": "processWithdrawals|calculateOwedFees|block.timestamp|emptyRebalance|getSellInfo|computeSwap",
@@ -318,9 +72,34 @@
       ],
       "ref": "DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md",
       "lines": [
-        551,
-        579
+        573,
+        601
       ],
+      "reportEvidence": {
+        "count": 10,
+        "sampleReports": [
+          "reports/constant_liquidity_amm/fullmath-requires-overflow-behavior.md",
+          "reports/constant_liquidity_amm/getowedfee-can-incorrectly-return-zero-because-of-fee-growth-underﬂow.md",
+          "reports/constant_liquidity_amm/h-02-attacker-can-amplify-a-rounding-error-in-magiclp-to-break-the-i-invariant-a.md",
+          "reports/constant_liquidity_amm/h-01-univ3tokenizedlp-can-be-attacked-by-an-initial-donation.md",
+          "reports/constant_liquidity_amm/denial-of-service-attack-on-lpwrapper-s-deposit-and-withdraw-functions.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "inflation",
+          "missing initialization guard",
+          "denial of service",
+          "arithmetic error",
+          "initialization manipulation"
+        ],
+        "commonlyComposesWith": [
+          "pool initialization",
+          "liquidity math",
+          "share accounting"
+        ]
+      },
       "check": [
         "VERIFY: // SECURE: Virtual shares and minimum liquidity",
         "FALSIFY: Virtual shares and minimum liquidity"
@@ -330,7 +109,7 @@
       "invalidWhen": "Virtual shares and minimum liquidity"
     },
     {
-      "id": "amm-dos-arithmetic-initialization-secure-pattern-4-bounded-queue-014",
+      "id": "amm-dos-arithmetic-initialization-secure-pattern-4-bounded-queue-004",
       "title": "Secure Pattern 4: Bounded Queue with Rate Limiting",
       "severity": "LOW",
       "grep": "calculateOwedFees|block.timestamp|requestWithdraw|emptyRebalance|getSellInfo|computeSwap",
@@ -343,9 +122,34 @@
       ],
       "ref": "DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md",
       "lines": [
-        580,
-        604
+        602,
+        626
       ],
+      "reportEvidence": {
+        "count": 10,
+        "sampleReports": [
+          "reports/constant_liquidity_amm/fullmath-requires-overflow-behavior.md",
+          "reports/constant_liquidity_amm/getowedfee-can-incorrectly-return-zero-because-of-fee-growth-underﬂow.md",
+          "reports/constant_liquidity_amm/h-02-attacker-can-amplify-a-rounding-error-in-magiclp-to-break-the-i-invariant-a.md",
+          "reports/constant_liquidity_amm/h-01-univ3tokenizedlp-can-be-attacked-by-an-initial-donation.md",
+          "reports/constant_liquidity_amm/denial-of-service-attack-on-lpwrapper-s-deposit-and-withdraw-functions.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "inflation",
+          "missing initialization guard",
+          "denial of service",
+          "arithmetic error",
+          "initialization manipulation"
+        ],
+        "commonlyComposesWith": [
+          "pool initialization",
+          "liquidity math",
+          "share accounting"
+        ]
+      },
       "check": [
         "VERIFY: // SECURE: Rate-limited withdrawal queue",
         "FALSIFY: Rate-limited withdrawal queue"
@@ -355,251 +159,10 @@
       "invalidWhen": "Rate-limited withdrawal queue"
     },
     {
-      "id": "amm-fee-collection-distribution-pattern-1-fee-theft-via-spot-p-001",
-      "title": "Pattern 1: Fee Theft via Spot Price Manipulation",
-      "severity": "HIGH",
-      "grep": "executeIncreasePositionSizeMarket|_distributeFilledOrderFees|getEquivalentLiquidity|addMakerLiquidity|withdrawNative|withdrawFees",
-      "detect": "Severity:** HIGH | **Sources:** Ammplify (Sherlock)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/fee-collection-distribution.md",
-      "lines": [
-        117,
-        150
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Sources: Ammplify (Sherlock)"
-      ]
-    },
-    {
-      "id": "amm-fee-collection-distribution-pattern-2-permissionless-fee-w-002",
-      "title": "Pattern 2: Permissionless Fee Withdrawal",
-      "severity": "HIGH",
-      "grep": "executeIncreasePositionSizeMarket|withdrawFees(address(pair|_distributeFilledOrderFees|getEquivalentLiquidity|addMakerLiquidity|withdrawNative",
-      "detect": "Severity:** HIGH | **Sources:** Goat Trading (Sherlock)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/fee-collection-distribution.md",
-      "lines": [
-        151,
-        180
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Sources: Goat Trading (Sherlock)"
-      ]
-    },
-    {
-      "id": "amm-fee-collection-distribution-pattern-3-jit-fee-theft-on-lim-003",
-      "title": "Pattern 3: JIT Fee Theft on Limit Orders",
-      "severity": "HIGH",
-      "grep": "executeIncreasePositionSizeMarket|_distributeFilledOrderFees|getEquivalentLiquidity|addMakerLiquidity|withdrawNative|withdrawFees",
-      "detect": "Severity:** HIGH | **Sources:** OpenZeppelin Uniswap Hooks",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/fee-collection-distribution.md",
-      "lines": [
-        181,
-        206
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Sources: OpenZeppelin Uniswap Hooks"
-      ]
-    },
-    {
-      "id": "amm-fee-collection-distribution-pattern-4-fee-flash-loan-attac-004",
-      "title": "Pattern 4: Fee Flash Loan Attack",
-      "severity": "HIGH",
-      "grep": "executeIncreasePositionSizeMarket|_distributeFilledOrderFees|getEquivalentLiquidity|addMakerLiquidity|withdrawNative|withdrawFees",
-      "detect": "Severity:** HIGH | **Sources:** Good Entry (Code4rena)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/fee-collection-distribution.md",
-      "lines": [
-        207,
-        238
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Sources: Good Entry (Code4rena)"
-      ]
-    },
-    {
-      "id": "amm-fee-collection-distribution-pattern-5-parameter-ordering-i-005",
-      "title": "Pattern 5: Parameter Ordering in Fee Collection",
-      "severity": "HIGH",
-      "grep": "executeIncreasePositionSizeMarket|_distributeFilledOrderFees|getEquivalentLiquidity|addMakerLiquidity|withdrawNative|withdrawFees",
-      "detect": "Severity:** HIGH | **Sources:** Superposition (Code4rena)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/fee-collection-distribution.md",
-      "lines": [
-        239,
-        261
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Sources: Superposition (Code4rena)",
-        "IMPACT: Complete failure of protocol fee collection, funds locked permanently."
-      ],
-      "impact": "Complete failure of protocol fee collection, funds locked permanently."
-    },
-    {
-      "id": "amm-fee-collection-distribution-pattern-6-collect-all-fees-on--006",
-      "title": "Pattern 6: Collect All Fees on First Claim",
-      "severity": "HIGH",
-      "grep": "executeIncreasePositionSizeMarket|_distributeFilledOrderFees|getEquivalentLiquidity|addMakerLiquidity|withdrawNative|withdrawFees",
-      "detect": "Severity:** HIGH | **Sources:** Vultisig (Code4rena)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/fee-collection-distribution.md",
-      "lines": [
-        262,
-        291
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Sources: Vultisig (Code4rena)",
-        "IMPACT: Subsequent claimers find no fees remaining, transactions revert."
-      ],
-      "impact": "Subsequent claimers find no fees remaining, transactions revert."
-    },
-    {
-      "id": "amm-fee-collection-distribution-pattern-7-fee-growth-underflow-007",
-      "title": "Pattern 7: Fee Growth Underflow Returns Zero",
-      "severity": "HIGH",
-      "grep": "executeIncreasePositionSizeMarket|_distributeFilledOrderFees|getEquivalentLiquidity|addMakerLiquidity|withdrawNative|withdrawFees",
-      "detect": "Severity:** HIGH | **Sources:** Particle Protocol (Cantina)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/fee-collection-distribution.md",
-      "lines": [
-        292,
-        323
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Sources: Particle Protocol (Cantina)"
-      ]
-    },
-    {
-      "id": "amm-fee-collection-distribution-pattern-8-fee-tier-spoofing-008",
-      "title": "Pattern 8: Fee Tier Spoofing",
-      "severity": "MEDIUM",
-      "grep": "executeIncreasePositionSizeMarket|_distributeFilledOrderFees|getEquivalentLiquidity|addMakerLiquidity|withdrawNative|withdrawFees",
-      "detect": "Severity:** MEDIUM | **Sources:** Serum v4 (OtterSec)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/fee-collection-distribution.md",
-      "lines": [
-        324,
-        346
-      ],
-      "check": [
-        "VERIFY: Severity: MEDIUM | Sources: Serum v4 (OtterSec)"
-      ]
-    },
-    {
-      "id": "amm-fee-collection-distribution-pattern-9-fees-not-segregated--009",
-      "title": "Pattern 9: Fees Not Segregated from Principal",
-      "severity": "HIGH",
-      "grep": "executeIncreasePositionSizeMarket|_distributeFilledOrderFees|getEquivalentLiquidity|addMakerLiquidity|withdrawNative|withdrawFees",
-      "detect": "Severity:** HIGH | **Sources:** GFX Labs (Sherlock)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/fee-collection-distribution.md",
-      "lines": [
-        347,
-        370
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Sources: GFX Labs (Sherlock)",
-        "IMPACT: User's swapped WETH sent to owner, unrecoverable."
-      ],
-      "impact": "User's swapped WETH sent to owner, unrecoverable."
-    },
-    {
-      "id": "amm-fee-collection-distribution-pattern-10-double-fee-points-u-010",
-      "title": "Pattern 10: Double Fee Points Update",
-      "severity": "HIGH",
-      "grep": "executeIncreasePositionSizeMarket|_distributeFilledOrderFees|getEquivalentLiquidity|addMakerLiquidity|withdrawNative|withdrawFees",
-      "detect": "Severity:** HIGH | **Sources:** Gainsnetwork (Pashov)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/fee-collection-distribution.md",
-      "lines": [
-        371,
-        397
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Sources: Gainsnetwork (Pashov)",
-        "IMPACT: Users get fee discounts twice as fast, protocol loses fee revenue."
-      ],
-      "impact": "Users get fee discounts twice as fast, protocol loses fee revenue."
-    },
-    {
-      "id": "amm-fee-collection-distribution-pattern-11-subtree-borrow-not--011",
-      "title": "Pattern 11: Subtree Borrow Not Propagated (Fee Underpayment)",
-      "severity": "HIGH",
-      "grep": "executeIncreasePositionSizeMarket|_distributeFilledOrderFees|getEquivalentLiquidity|addMakerLiquidity|withdrawNative|withdrawFees",
-      "detect": "Severity:** HIGH | **Sources:** Ammplify (Sherlock)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/fee-collection-distribution.md",
-      "lines": [
-        398,
-        418
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Sources: Ammplify (Sherlock)",
-        "IMPACT: Takers pay up to 99% less fees, makers lose expected revenue."
-      ],
-      "impact": "Takers pay up to 99% less fees, makers lose expected revenue."
-    },
-    {
-      "id": "amm-fee-collection-distribution-secure-pattern-3-proportional--014",
+      "id": "amm-fee-collection-distribution-secure-pattern-3-proportional--003",
       "title": "Secure Pattern 3: Proportional Fee Collection",
       "severity": "LOW",
-      "grep": "executeIncreasePositionSizeMarket|_distributeFilledOrderFees|getEquivalentLiquidity|addMakerLiquidity|withdrawNative|withdrawFees",
+      "grep": "executeIncreasePositionSizeMarket|_distributeFilledOrderFees|getEquivalentLiquidity|addMakerLiquidity|withdrawNative|fee_collection",
       "detect": "function claim(uint256 tokenId) external returns (uint256 amount0, uint256 amount1) {",
       "cat": [
         "amm",
@@ -609,9 +172,33 @@
       ],
       "ref": "DB/amm/concentrated-liquidity/fee-collection-distribution.md",
       "lines": [
-        451,
-        471
+        473,
+        493
       ],
+      "reportEvidence": {
+        "count": 11,
+        "sampleReports": [
+          "reports/constant_liquidity_amm/h-1-accrued-maker-fees-not-yet-compounded-can-be-stolen-by-manipulating-uniswap-.md",
+          "reports/constant_liquidity_amm/h-1-liquidity-provider-fees-can-be-stolen-from-any-pair.md",
+          "reports/constant_liquidity_amm/accrued-limit-order-fees-can-be-stolen.md",
+          "reports/constant_liquidity_amm/h-04-tokenisableranges-incorrect-accounting-of-non-reinvested-fees-in-deposit-ex.md",
+          "reports/constant_liquidity_amm/h-05-parameter-misordering-in-fee-collection-function-causes-denial-of-service-a.md"
+        ]
+      },
+      "graphHints": {
+        "variants": [
+          "manipulation",
+          "logic error",
+          "fee theft",
+          "accounting manipulation",
+          "denial of service"
+        ],
+        "commonlyComposesWith": [
+          "fee accounting",
+          "fee collection",
+          "fee distribution"
+        ]
+      },
       "check": [
         "VERIFY: function claim(uint256 tokenId) external returns (uint256 amount0, uint256 amount1) {",
         "FALSIFY: Secure Pattern 3: Proportional Fee Collection"
@@ -620,10 +207,10 @@
       "invalidWhen": "Secure Pattern 3: Proportional Fee Collection"
     },
     {
-      "id": "amm-fee-collection-distribution-keywords-019",
+      "id": "amm-fee-collection-distribution-keywords-008",
       "title": "Keywords",
       "severity": "CRITICAL",
-      "grep": "executeIncreasePositionSizeMarket|_distributeFilledOrderFees|getEquivalentLiquidity|addMakerLiquidity|withdrawNative|withdrawFees",
+      "grep": "executeIncreasePositionSizeMarket|_distributeFilledOrderFees|getEquivalentLiquidity|addMakerLiquidity|withdrawNative|fee_collection",
       "detect": "Primary:** fee theft, fee manipulation, LP fees, protocol fees, fee collection, fee distribution, trading fees, swap...",
       "cat": [
         "amm",
@@ -633,9 +220,28 @@
       ],
       "ref": "DB/amm/concentrated-liquidity/fee-collection-distribution.md",
       "lines": [
-        541,
-        570
+        563,
+        592
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "manipulation",
+          "logic error",
+          "fee theft",
+          "accounting manipulation",
+          "denial of service"
+        ],
+        "commonlyComposesWith": [
+          "fee accounting",
+          "fee collection",
+          "fee distribution"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Primary: fee theft, fee manipulation, LP fees, protocol fees, fee collection, fee distribution, trading fees, swap...",
@@ -645,250 +251,11 @@
         "LOOK FOR: See vulnerable pattern examples above for specific code smells"
       ],
       "antipattern": "> These keywords enhance vector search retrieval:",
-      "validWhen": "Primary: fee theft, fee manipulation, LP fees, protocol fees, fee collection, fee distribution, trading fees, swap..."
+      "validWhen": "Primary: fee theft, fee manipulation, LP fees, protocol fees, fee collection, fee distribution, trading fees, swap...",
+      "proofShape": "> These keywords enhance vector search retrieval"
     },
     {
-      "id": "amm-liquidity-management-vulnerabilities-pattern-1-overestimation-of-av-001",
-      "title": "Pattern 1: Overestimation of Available Liquidity in Compound/Rebalance (HIGH)",
-      "severity": "HIGH",
-      "grep": "createAndInitializePool|collectAndCalcCompound|_advanceToNextDown|_getTotalValue|removeLiquidity|addLiquidity",
-      "detect": "Calculating theoretical liquidity amounts that exceed actual available liquidity causes transaction reverts and DoS.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/liquidity-management-vulnerabilities.md",
-      "lines": [
-        100,
-        128
-      ],
-      "check": [
-        "VERIFY: Calculating theoretical liquidity amounts that exceed actual available liquidity causes transaction reverts and DoS.",
-        "PROVE: Overestimating liquidity from multiple ranges"
-      ],
-      "antipattern": "Overestimating liquidity from multiple ranges",
-      "validWhen": "Calculating theoretical liquidity amounts that exceed actual available liquidity causes transaction reverts and DoS."
-    },
-    {
-      "id": "amm-liquidity-management-vulnerabilities-pattern-2-wrong-inequality-at--002",
-      "title": "Pattern 2: Wrong Inequality at Price Range Boundary (HIGH)",
-      "severity": "HIGH",
-      "grep": "createAndInitializePool|collectAndCalcCompound|_advanceToNextDown|_getTotalValue|removeLiquidity|addLiquidity",
-      "detect": "Using strict inequality `<` instead of `<=` when checking if current price is at position boundary causes incorrect...",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/liquidity-management-vulnerabilities.md",
-      "lines": [
-        129,
-        165
-      ],
-      "check": [
-        "VERIFY: Using strict inequality < instead of <= when checking if current price is at position boundary causes incorrect...",
-        "PROVE: Strict inequality excludes boundary condition",
-        "FALSIFY: Include boundary with <="
-      ],
-      "antipattern": "Strict inequality excludes boundary condition",
-      "securePattern": "Include boundary with <=",
-      "validWhen": "Using strict inequality < instead of <= when checking if current price is at position boundary causes incorrect...",
-      "invalidWhen": "Include boundary with <="
-    },
-    {
-      "id": "amm-liquidity-management-vulnerabilities-pattern-3-incorrect-active-liq-003",
-      "title": "Pattern 3: Incorrect Active Liquidity at Tick Boundaries (HIGH)",
-      "severity": "HIGH",
-      "grep": "createAndInitializePool|collectAndCalcCompound|_advanceToNextDown|_getTotalValue|removeLiquidity|addLiquidity",
-      "detect": "Skipping liquidity delta when current tick is exactly at range boundary causes underflow or incorrect reward...",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/liquidity-management-vulnerabilities.md",
-      "lines": [
-        166,
-        205
-      ],
-      "check": [
-        "VERIFY: Skipping liquidity delta when current tick is exactly at range boundary causes underflow or incorrect reward...",
-        "PROVE: Tick iteration skips boundary tick",
-        "FALSIFY: Perform net liquidity decrement before iteration"
-      ],
-      "antipattern": "Tick iteration skips boundary tick",
-      "securePattern": "Perform net liquidity decrement before iteration",
-      "validWhen": "Skipping liquidity delta when current tick is exactly at range boundary causes underflow or incorrect reward...",
-      "invalidWhen": "Perform net liquidity decrement before iteration"
-    },
-    {
-      "id": "amm-liquidity-management-vulnerabilities-pattern-4-pool-initialization--004",
-      "title": "Pattern 4: Pool Initialization Front-Running (MEDIUM)",
-      "severity": "MEDIUM",
-      "grep": "createAndInitializePool|collectAndCalcCompound|_advanceToNextDown|_getTotalValue|removeLiquidity|addLiquidity",
-      "detect": "Permissionless `initialize()` function allows attackers to set unfair initial price before legitimate deployer.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/liquidity-management-vulnerabilities.md",
-      "lines": [
-        206,
-        239
-      ],
-      "check": [
-        "VERIFY: Permissionless initialize() function allows attackers to set unfair initial price before legitimate deployer.",
-        "PROVE: No access control on initialize",
-        "FALSIFY: Add access control or move to constructor"
-      ],
-      "antipattern": "No access control on initialize",
-      "securePattern": "Add access control or move to constructor",
-      "validWhen": "Permissionless initialize() function allows attackers to set unfair initial price before legitimate deployer.",
-      "invalidWhen": "Add access control or move to constructor"
-    },
-    {
-      "id": "amm-liquidity-management-vulnerabilities-pattern-5-fee-theft-via-flash--005",
-      "title": "Pattern 5: Fee Theft via Flash Loan Deposit/Withdraw (HIGH)",
-      "severity": "HIGH",
-      "grep": "createAndInitializePool|collectAndCalcCompound|_advanceToNextDown|_getTotalValue|removeLiquidity|addLiquidity",
-      "detect": "Non-reinvested fees can be stolen via flash loan attack when fee accounting doesn't properly scale LP token minting.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/liquidity-management-vulnerabilities.md",
-      "lines": [
-        240,
-        289
-      ],
-      "check": [
-        "VERIFY: Non-reinvested fees can be stolen via flash loan attack when fee accounting doesn't properly scale LP token minting.",
-        "PROVE: Fee accounting can be bypassed",
-        "FALSIFY: Always factor in fee value"
-      ],
-      "antipattern": "Fee accounting can be bypassed",
-      "securePattern": "Always factor in fee value",
-      "validWhen": "Non-reinvested fees can be stolen via flash loan attack when fee accounting doesn't properly scale LP token minting.",
-      "invalidWhen": "Always factor in fee value"
-    },
-    {
-      "id": "amm-liquidity-management-vulnerabilities-pattern-6-shared-pool-liquidit-006",
-      "title": "Pattern 6: Shared Pool Liquidity Theft Between Pairs (HIGH)",
-      "severity": "HIGH",
-      "grep": "createAndInitializePool|collectAndCalcCompound|_advanceToNextDown|_getTotalValue|removeLiquidity|addLiquidity",
-      "detect": "Multiple pairs using same Uniswap pool with overlapping tick ranges can steal each other's liquidity.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/liquidity-management-vulnerabilities.md",
-      "lines": [
-        290,
-        333
-      ],
-      "check": [
-        "VERIFY: Multiple pairs using same Uniswap pool with overlapping tick ranges can steal each other's liquidity.",
-        "PROVE: No internal liquidity tracking per pair",
-        "FALSIFY: Track liquidity per pair internally"
-      ],
-      "antipattern": "No internal liquidity tracking per pair",
-      "securePattern": "Track liquidity per pair internally",
-      "validWhen": "Multiple pairs using same Uniswap pool with overlapping tick ranges can steal each other's liquidity.",
-      "invalidWhen": "Track liquidity per pair internally"
-    },
-    {
-      "id": "amm-liquidity-management-vulnerabilities-pattern-7-permissionless-fee-w-007",
-      "title": "Pattern 7: Permissionless Fee Withdrawal on Behalf of Pool (HIGH)",
-      "severity": "HIGH",
-      "grep": "createAndInitializePool|collectAndCalcCompound|_advanceToNextDown|_getTotalValue|withdrawFees|addLiquidity",
-      "detect": "Allowing anyone to call `withdrawFees()` for any address including the pool itself enables fee theft.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/liquidity-management-vulnerabilities.md",
-      "lines": [
-        334,
-        378
-      ],
-      "check": [
-        "VERIFY: Allowing anyone to call withdrawFees() for any address including the pool itself enables fee theft.",
-        "PROVE: Permissionless fee withdrawal for any address",
-        "FALSIFY: Prevent fee withdrawal for pool address"
-      ],
-      "antipattern": "Permissionless fee withdrawal for any address",
-      "securePattern": "Prevent fee withdrawal for pool address",
-      "validWhen": "Allowing anyone to call withdrawFees() for any address including the pool itself enables fee theft.",
-      "invalidWhen": "Prevent fee withdrawal for pool address"
-    },
-    {
-      "id": "amm-liquidity-management-vulnerabilities-pattern-8-cached-liquidity-all-008",
-      "title": "Pattern 8: Cached Liquidity Allows Undercollateralized Positions (HIGH)",
-      "severity": "HIGH",
-      "grep": "createAndInitializePool|collectAndCalcCompound|_advanceToNextDown|_getTotalValue|removeLiquidity|addLiquidity",
-      "detect": "Caching Uniswap position liquidity at deposit time allows manipulation via ERC777 hooks.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/liquidity-management-vulnerabilities.md",
-      "lines": [
-        379,
-        435
-      ],
-      "check": [
-        "VERIFY: Caching Uniswap position liquidity at deposit time allows manipulation via ERC777 hooks.",
-        "PROVE: Liquidity cached before transfer completes",
-        "FALSIFY: Check liquidity AFTER transfer"
-      ],
-      "antipattern": "Liquidity cached before transfer completes",
-      "securePattern": "Check liquidity AFTER transfer",
-      "validWhen": "Caching Uniswap position liquidity at deposit time allows manipulation via ERC777 hooks.",
-      "invalidWhen": "Check liquidity AFTER transfer"
-    },
-    {
-      "id": "amm-liquidity-management-vulnerabilities-pattern-9-recovery-mode-blocki-009",
-      "title": "Pattern 9: Recovery Mode Blocking Liquidity Withdrawal (HIGH)",
-      "severity": "HIGH",
-      "grep": "createAndInitializePool|removeLiquidityForUser|collectAndCalcCompound|_advanceToNextDown|_getTotalValue|removeLiquidity",
-      "detect": "Whitelisting mechanisms that block token transfers prevent legitimate users from withdrawing liquidity.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/liquidity-management-vulnerabilities.md",
-      "lines": [
-        436,
-        476
-      ],
-      "check": [
-        "VERIFY: Whitelisting mechanisms that block token transfers prevent legitimate users from withdrawing liquidity.",
-        "PROVE: Transfer verification blocks withdrawal",
-        "FALSIFY: Two-step withdrawal to whitelisted intermediary"
-      ],
-      "antipattern": "Transfer verification blocks withdrawal",
-      "securePattern": "Two-step withdrawal to whitelisted intermediary",
-      "validWhen": "Whitelisting mechanisms that block token transfers prevent legitimate users from withdrawing liquidity.",
-      "invalidWhen": "Two-step withdrawal to whitelisted intermediary"
-    },
-    {
-      "id": "amm-liquidity-management-vulnerabilities-secure-pattern-2-per-position--011",
+      "id": "amm-liquidity-management-vulnerabilities-secure-pattern-2-per-position--002",
       "title": "Secure Pattern 2: Per-Position Liquidity Accounting",
       "severity": "LOW",
       "grep": "createAndInitializePool|collectAndCalcCompound|_advanceToNextDown|_getTotalValue|removeLiquidity|addLiquidity",
@@ -901,9 +268,34 @@
       ],
       "ref": "DB/amm/concentrated-liquidity/liquidity-management-vulnerabilities.md",
       "lines": [
-        503,
-        531
+        525,
+        553
       ],
+      "reportEvidence": {
+        "count": 9,
+        "sampleReports": [
+          "reports/constant_liquidity_amm/h-01-dos-on-mint-and-burn-due-to-overestimation-of-available-liquidity.md",
+          "reports/constant_liquidity_amm/h-08-wrong-inequality-when-addingremoving-liquidity-in-current-price-range.md",
+          "reports/constant_liquidity_amm/all-rewards-can-be-stolen-due-to-incorrect-active-liquidity-calculations-when-th.md",
+          "reports/constant_liquidity_amm/front-running-pools-initialization-can-lead-to-draining-of-liquidity-providers-i.md",
+          "reports/constant_liquidity_amm/h-04-tokenisableranges-incorrect-accounting-of-non-reinvested-fees-in-deposit-ex.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "accounting manipulation",
+          "flash loan",
+          "fee theft",
+          "unknown"
+        ],
+        "commonlyComposesWith": [
+          "liquidity positions",
+          "position accounting",
+          "liquidity manager"
+        ]
+      },
       "check": [
         "VERIFY: // SECURE: Track liquidity per logical position/pair",
         "FALSIFY: Track liquidity per logical position/pair"
@@ -913,253 +305,7 @@
       "invalidWhen": "Track liquidity per logical position/pair"
     },
     {
-      "id": "amm-price-oracle-manipulation-pattern-1-direct-slot0-usage-f-001",
-      "title": "Pattern 1: Direct slot0 Usage for Price-Sensitive Operations (HIGH - 12+ reports)",
-      "severity": "HIGH",
-      "grep": "_calculatePriceFromLiquidity|_getReferencePoolPriceX96|slot0.sqrtPriceX96|_getOracleData|setPositionTicks|getPriceUnsafe",
-      "detect": "Using `slot0.sqrtPriceX96` directly for swap calculations, liquidity allocations, or collateral valuations exposes...",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/price-oracle-manipulation.md",
-      "lines": [
-        101,
-        141
-      ],
-      "check": [
-        "VERIFY: Using slot0.sqrtPriceX96 directly for swap calculations, liquidity allocations, or collateral valuations exposes...",
-        "PROVE: Direct slot0 usage in price calculation"
-      ],
-      "antipattern": "Direct slot0 usage in price calculation",
-      "validWhen": "Using slot0.sqrtPriceX96 directly for swap calculations, liquidity allocations, or collateral valuations exposes..."
-    },
-    {
-      "id": "amm-price-oracle-manipulation-pattern-2-slot0-based-realloca-002",
-      "title": "Pattern 2: slot0-Based Reallocation/Rebalancing (HIGH - 9+ reports)",
-      "severity": "HIGH",
-      "grep": "_calculatePriceFromLiquidity|_getReferencePoolPriceX96|validateAndGetPrice|_getOracleData|setPositionTicks|getPriceUnsafe",
-      "detect": "Using spot prices to trigger position reallocation or rebalancing allows attackers to force unfavorable reallocations.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/price-oracle-manipulation.md",
-      "lines": [
-        142,
-        173
-      ],
-      "check": [
-        "VERIFY: Using spot prices to trigger position reallocation or rebalancing allows attackers to force unfavorable reallocations.",
-        "PROVE: Permissionless reallocation based on spot price"
-      ],
-      "antipattern": "Permissionless reallocation based on spot price",
-      "validWhen": "Using spot prices to trigger position reallocation or rebalancing allows attackers to force unfavorable reallocations."
-    },
-    {
-      "id": "amm-price-oracle-manipulation-pattern-3-slot0-tick-for-posit-003",
-      "title": "Pattern 3: slot0 Tick for Position Tick Setting (HIGH)",
-      "severity": "HIGH",
-      "grep": "_calculatePriceFromLiquidity|_getReferencePoolPriceX96|validateAndGetPrice|_getOracleData|setPositionTicks|getPriceUnsafe",
-      "detect": "Using the tick from slot0 rather than deriving tick from sqrtPriceX96 causes asymmetric positions at tick boundaries.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/price-oracle-manipulation.md",
-      "lines": [
-        174,
-        196
-      ],
-      "check": [
-        "VERIFY: Using the tick from slot0 rather than deriving tick from sqrtPriceX96 causes asymmetric positions at tick boundaries.",
-        "PROVE: Using slot0 tick directly"
-      ],
-      "antipattern": "Using slot0 tick directly",
-      "validWhen": "Using the tick from slot0 rather than deriving tick from sqrtPriceX96 causes asymmetric positions at tick boundaries."
-    },
-    {
-      "id": "amm-price-oracle-manipulation-pattern-4-twap-observation-car-004",
-      "title": "Pattern 4: TWAP Observation Cardinality Manipulation (HIGH)",
-      "severity": "HIGH",
-      "grep": "_calculatePriceFromLiquidity|_getReferencePoolPriceX96|validateAndGetPrice|_getOracleData|setPositionTicks|getPriceUnsafe",
-      "detect": "Exploiting uninitialized observations in the Uniswap V3 observation array to corrupt TWAP calculations.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/price-oracle-manipulation.md",
-      "lines": [
-        197,
-        226
-      ],
-      "check": [
-        "VERIFY: Exploiting uninitialized observations in the Uniswap V3 observation array to corrupt TWAP calculations.",
-        "PROVE: Not checking if observations are initialized",
-        "FALSIFY: Check initialized field"
-      ],
-      "antipattern": "Not checking if observations are initialized",
-      "securePattern": "Check initialized field",
-      "validWhen": "Exploiting uninitialized observations in the Uniswap V3 observation array to corrupt TWAP calculations.",
-      "invalidWhen": "Check initialized field"
-    },
-    {
-      "id": "amm-price-oracle-manipulation-pattern-5-negative-tick-delta--005",
-      "title": "Pattern 5: Negative Tick Delta Rounding Error (HIGH - 19+ reports)",
-      "severity": "HIGH",
-      "grep": "_calculatePriceFromLiquidity|_getReferencePoolPriceX96|validateAndGetPrice|_getOracleData|setPositionTicks|getPriceUnsafe",
-      "detect": "Failing to round down for negative tick deltas when calculating TWAP causes incorrect price.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/price-oracle-manipulation.md",
-      "lines": [
-        227,
-        261
-      ],
-      "check": [
-        "VERIFY: Failing to round down for negative tick deltas when calculating TWAP causes incorrect price.",
-        "PROVE: No rounding for negative tick deltas",
-        "FALSIFY: Round down for negative deltas (Uniswap OracleLibrary pattern)"
-      ],
-      "antipattern": "No rounding for negative tick deltas",
-      "securePattern": "Round down for negative deltas (Uniswap OracleLibrary pattern)",
-      "validWhen": "Failing to round down for negative tick deltas when calculating TWAP causes incorrect price.",
-      "invalidWhen": "Round down for negative deltas (Uniswap OracleLibrary pattern)"
-    },
-    {
-      "id": "amm-price-oracle-manipulation-pattern-6-insufficient-twap-du-006",
-      "title": "Pattern 6: Insufficient TWAP Duration (MEDIUM)",
-      "severity": "MEDIUM",
-      "grep": "_calculatePriceFromLiquidity|_getReferencePoolPriceX96|validateAndGetPrice|_getOracleData|setPositionTicks|getPriceUnsafe",
-      "detect": "Using TWAP windows that are too short (< 30 minutes) makes manipulation economically viable.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/price-oracle-manipulation.md",
-      "lines": [
-        262,
-        296
-      ],
-      "check": [
-        "VERIFY: Using TWAP windows that are too short (< 30 minutes) makes manipulation economically viable.",
-        "PROVE: 36-second short TWAP, 5-minute long TWAP"
-      ],
-      "antipattern": "36-second short TWAP, 5-minute long TWAP",
-      "validWhen": "Using TWAP windows that are too short (< 30 minutes) makes manipulation economically viable."
-    },
-    {
-      "id": "amm-price-oracle-manipulation-pattern-7-reserve-based-oracle-007",
-      "title": "Pattern 7: Reserve-Based Oracle Pricing (HIGH)",
-      "severity": "HIGH",
-      "grep": "_calculatePriceFromLiquidity|_getReferencePoolPriceX96|validateAndGetPrice|_getOracleData|setPositionTicks|getPriceUnsafe",
-      "detect": "Using pool reserves directly for LP token pricing instead of manipulation-resistant sources.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/price-oracle-manipulation.md",
-      "lines": [
-        297,
-        320
-      ],
-      "check": [
-        "VERIFY: Using pool reserves directly for LP token pricing instead of manipulation-resistant sources.",
-        "PROVE: Using manipulable reserves for pricing"
-      ],
-      "antipattern": "Using manipulable reserves for pricing",
-      "validWhen": "Using pool reserves directly for LP token pricing instead of manipulation-resistant sources."
-    },
-    {
-      "id": "amm-price-oracle-manipulation-pattern-8-decimal-mismatch-in--008",
-      "title": "Pattern 8: Decimal Mismatch in sqrtPriceX96 Calculation (HIGH)",
-      "severity": "HIGH",
-      "grep": "_calculatePriceFromLiquidity|_getReferencePoolPriceX96|validateAndGetPrice|_getOracleData|setPositionTicks|getPriceUnsafe",
-      "detect": "Hardcoding decimal divisors instead of dynamically calculating based on token decimals.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/price-oracle-manipulation.md",
-      "lines": [
-        321,
-        345
-      ],
-      "check": [
-        "VERIFY: Hardcoding decimal divisors instead of dynamically calculating based on token decimals.",
-        "PROVE: Hardcoded 1e9 divisor ignores decimal differences"
-      ],
-      "antipattern": "Hardcoded 1e9 divisor ignores decimal differences",
-      "validWhen": "Hardcoding decimal divisors instead of dynamically calculating based on token decimals."
-    },
-    {
-      "id": "amm-price-oracle-manipulation-pattern-9-spot-price-in-factor-009",
-      "title": "Pattern 9: Spot Price in Factory/Deployment (MEDIUM)",
-      "severity": "MEDIUM",
-      "grep": "_calculatePriceFromLiquidity|_getReferencePoolPriceX96|validateAndGetPrice|_getOracleData|setPositionTicks|getPriceUnsafe",
-      "detect": "Using spot prices during pool deployment for initial liquidity calculations.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/price-oracle-manipulation.md",
-      "lines": [
-        346,
-        368
-      ],
-      "check": [
-        "VERIFY: Using spot prices during pool deployment for initial liquidity calculations.",
-        "PROVE: Spot price for deployment liquidity calculation"
-      ],
-      "antipattern": "Spot price for deployment liquidity calculation",
-      "validWhen": "Using spot prices during pool deployment for initial liquidity calculations."
-    },
-    {
-      "id": "amm-price-oracle-manipulation-pattern-10-hook-callback-price-010",
-      "title": "Pattern 10: Hook/Callback Price Manipulation (HIGH)",
-      "severity": "HIGH",
-      "grep": "_calculatePriceFromLiquidity|_getReferencePoolPriceX96|validateAndGetPrice|_getOracleData|setPositionTicks|getPriceUnsafe",
-      "detect": "Using current prices in swap hooks/callbacks for fee distribution or other calculations.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/price-oracle-manipulation.md",
-      "lines": [
-        369,
-        397
-      ],
-      "check": [
-        "VERIFY: Using current prices in swap hooks/callbacks for fee distribution or other calculations.",
-        "PROVE: Hook uses current price for fee swap"
-      ],
-      "antipattern": "Hook uses current price for fee swap",
-      "validWhen": "Using current prices in swap hooks/callbacks for fee distribution or other calculations."
-    },
-    {
-      "id": "amm-price-oracle-manipulation-secure-pattern-1-twap-oracle-w-011",
+      "id": "amm-price-oracle-manipulation-secure-pattern-1-twap-oracle-w-001",
       "title": "Secure Pattern 1: TWAP Oracle with Proper Configuration",
       "severity": "CRITICAL",
       "grep": "_calculatePriceFromLiquidity|_getReferencePoolPriceX96|validateAndGetPrice|_getOracleData|setPositionTicks|getPriceUnsafe",
@@ -1172,9 +318,30 @@
       ],
       "ref": "DB/amm/concentrated-liquidity/price-oracle-manipulation.md",
       "lines": [
-        400,
-        428
+        423,
+        451
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "oracle manipulation",
+          "flash loan",
+          "sandwich attack",
+          "unknown"
+        ],
+        "commonlyComposesWith": [
+          "oracle",
+          "twap oracle proper configuration",
+          "twap oracle",
+          "oracle proper",
+          "_getoracledata"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: // SECURE: Use TWAP with adequate duration and validation",
@@ -1185,7 +352,7 @@
       "invalidWhen": "Use TWAP with adequate duration and validation"
     },
     {
-      "id": "amm-price-oracle-manipulation-secure-pattern-2-dual-price-va-012",
+      "id": "amm-price-oracle-manipulation-secure-pattern-2-dual-price-va-002",
       "title": "Secure Pattern 2: Dual Price Validation",
       "severity": "HIGH",
       "grep": "_calculatePriceFromLiquidity|_getReferencePoolPriceX96|validateAndGetPrice|_getOracleData|setPositionTicks|getPriceUnsafe",
@@ -1198,9 +365,30 @@
       ],
       "ref": "DB/amm/concentrated-liquidity/price-oracle-manipulation.md",
       "lines": [
-        429,
-        458
+        452,
+        481
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "oracle manipulation",
+          "flash loan",
+          "sandwich attack",
+          "unknown"
+        ],
+        "commonlyComposesWith": [
+          "_getoracledata",
+          "get oracle data",
+          "price oracle",
+          "twap oracle",
+          "slot0 price feed"
+        ]
+      },
       "check": [
         "VERIFY: // SECURE: Compare spot vs TWAP with deviation check",
         "FALSIFY: Compare spot vs TWAP with deviation check"
@@ -1210,7 +398,7 @@
       "invalidWhen": "Compare spot vs TWAP with deviation check"
     },
     {
-      "id": "amm-price-oracle-manipulation-secure-pattern-3-sqrtprice-bas-013",
+      "id": "amm-price-oracle-manipulation-secure-pattern-3-sqrtprice-bas-003",
       "title": "Secure Pattern 3: sqrtPrice-Based Tick Derivation",
       "severity": "LOW",
       "grep": "_calculatePriceFromLiquidity|_getReferencePoolPriceX96|validateAndGetPrice|_getOracleData|setPositionTicks|getPriceUnsafe",
@@ -1223,9 +411,36 @@
       ],
       "ref": "DB/amm/concentrated-liquidity/price-oracle-manipulation.md",
       "lines": [
-        459,
-        477
+        482,
+        500
       ],
+      "reportEvidence": {
+        "count": 13,
+        "sampleReports": [
+          "reports/constant_liquidity_amm/h-01-usage-of-slot0-to-get-sqrtpricelimitx96-is-extremely-prone-to-manipulation.md",
+          "reports/constant_liquidity_amm/h-02-use-of-slot0-to-get-sqrtpricelimitx96-can-lead-to-price-manipulation.md",
+          "reports/constant_liquidity_amm/h-01-reallocation-depends-on-the-slot0-price-which-can-be-manipulated.md",
+          "reports/constant_liquidity_amm/h-2-strategy-main-ticks-are-set-according-to-the-tick-in-slot0-leading-to-incorr.md",
+          "reports/constant_liquidity_amm/h-2-oraclesol-manipulation-via-increasing-uniswap-v3-pool-observationcardinality.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "oracle manipulation",
+          "flash loan",
+          "sandwich attack",
+          "unknown"
+        ],
+        "commonlyComposesWith": [
+          "_getoracledata",
+          "get oracle data",
+          "price oracle",
+          "twap oracle",
+          "slot0 price feed"
+        ]
+      },
       "check": [
         "VERIFY: // SECURE: Derive tick from sqrtPriceX96 for accurate positioning",
         "FALSIFY: Derive tick from sqrtPriceX96 for accurate positioning"
@@ -1235,10 +450,10 @@
       "invalidWhen": "Derive tick from sqrtPriceX96 for accurate positioning"
     },
     {
-      "id": "amm-slippage-sandwich-frontrun-vulnerability-description-000",
-      "title": "Vulnerability Description",
+      "id": "amm-slippage-sandwich-frontrun-vulnerability-title-000",
+      "title": "Vulnerability Title",
       "severity": "HIGH",
-      "grep": "slippage_tolerance|sqrtPriceLimitX96|block.timestamp|amountOutMinimum|getMinAmountOut|validateMinOut",
+      "grep": "slippage_tolerance|sqrtPriceLimitX96|block.timestamp|amountOutMinimum|single_contract|getMinAmountOut",
       "detect": "This vulnerability exists because **swap operations set amountOutMinimum to 0 or use ineffective slippage...",
       "cat": [
         "amm",
@@ -1248,234 +463,61 @@
       ],
       "ref": "DB/amm/concentrated-liquidity/slippage-sandwich-frontrun.md",
       "lines": [
-        131,
-        248
+        91,
+        405
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "missing frontrun protection",
+          "mev extraction",
+          "swap execution",
+          "slippage protection",
+          "title"
+        ],
+        "commonlyComposesWith": [
+          "slippage_tolerance",
+          "slippage tolerance",
+          "twap_oracle",
+          "twap oracle",
+          "slippage_protection"
+        ]
+      },
       "check": [
-        "VERIFY: swap operations set amountOutMinimum to 0 or use ineffective slippage calculations when calling Uniswap V3/V4 functions, allowing 100%...",
+        "VERIFY: Signal 1: Transaction can be frontrun by MEV bots observing the mempool; Signal 2: No commit-reveal or private mempool protection for sensitive...",
         "PROVE: *Scenario 1: Classic Sandwich Attack (Most Common - 43/43 reports); Alice submits a swap transaction with inadequate slippage protection (amountOutMinimum: 0)",
-        "ANTIPATTERN: deadline set to max uint256 effectively disables protection"
+        "FALSIFY: Not this bug when: Transaction uses private mempool (Flashbots) or commit-reveal scheme; Safe if: Slippage protection with reasonable bounds is enforced",
+        "IMPACT: Fund Extraction: MEV bots extract value from every unprotected swap (15/43 reports)",
+        "All swap operations have non-zero amountOutMinimum or equivalent",
+        "All deadline parameters use user-specified values, not block.timestamp"
       ],
       "antipattern": "deadline set to max uint256 effectively disables protection",
-      "validWhen": "This vulnerability exists because swap operations set amountOutMinimum to 0 or use ineffective slippage calculations when calling Uniswap V3/V4 functions, allowing 100%..."
-    },
-    {
-      "id": "amm-tick-range-position-vulnerabilities-pattern-1-missing-lower-upper--001",
-      "title": "Pattern 1: Missing Lower < Upper Tick Validation",
-      "severity": "HIGH",
-      "grep": "getFeeGrowthInside|block.timestamp|mintPosition|getTwapTick|crossTicks|allowance",
-      "detect": "Severity:** HIGH | **Source:** Superposition (Code4rena)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
+      "securePattern": "Use TWAP oracle for slippage bounds (not spot price)",
+      "validWhen": "Signal 1: Transaction can be frontrun by MEV bots observing the mempool; Signal 2: No commit-reveal or private mempool protection for sensitive operations",
+      "invalidWhen": "Not this bug when: Transaction uses private mempool (Flashbots) or commit-reveal scheme; Safe if: Slippage protection with reasonable bounds is enforced",
+      "impact": "Fund Extraction: MEV bots extract value from every unprotected swap (15/43 reports)",
+      "preconditions": [
+        "attacker control of: specific conditions per pattern",
+        "Attacker detects incoming swap transaction",
+        "Attacker adds concentrated liquidity at the target tick, capturing ~99% of active liquidity",
+        "Attacker receives majority of penalty fee, withdraws liquidity for profit"
       ],
-      "ref": "DB/amm/concentrated-liquidity/tick-range-position-vulnerabilities.md",
-      "lines": [
-        107,
-        124
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Source: Superposition (Code4rena)",
-        "IMPACT: An attacker could open positions with arbitrary liquidity assigned to them."
-      ],
-      "impact": "An attacker could open positions with arbitrary liquidity assigned to them."
-    },
-    {
-      "id": "amm-tick-range-position-vulnerabilities-pattern-2-fee-growth-underflow-002",
-      "title": "Pattern 2: Fee Growth Underflow Without unchecked{}",
-      "severity": "HIGH",
-      "grep": "getFeeGrowthInside|block.timestamp|mintPosition|getTwapTick|crossTicks|allowance",
-      "detect": "Severity:** HIGH | **Sources:** Superposition (Code4rena), Particle Protocol, Maia DAO",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/tick-range-position-vulnerabilities.md",
-      "lines": [
-        125,
-        150
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Sources: Superposition (Code4rena), Particle Protocol, Maia DAO"
+      "proofShape": "*Scenario 1: Classic Sandwich Attack (Most Common - 43/43 reports) -> Alice submits a swap transaction with inadequate slippage protection (amountOutMinimum: 0) -> MEV bot detects pending transaction in mempool",
+      "falsePositiveSignals": [
+        "Not this bug when: Transaction uses private mempool (Flashbots) or commit-reveal scheme",
+        "Safe if: Slippage protection with reasonable bounds is enforced",
+        "Requires attacker control of: specific conditions per pattern"
       ]
     },
     {
-      "id": "amm-tick-range-position-vulnerabilities-pattern-3-wrong-inequality-at--003",
-      "title": "Pattern 3: Wrong Inequality at Tick Boundaries",
-      "severity": "HIGH",
-      "grep": "getFeeGrowthInside|block.timestamp|mintPosition|getTwapTick|crossTicks|allowance",
-      "detect": "Severity:** HIGH | **Sources:** Sushi (Sherlock), Sorella Angstrom (Cyfrin)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/tick-range-position-vulnerabilities.md",
-      "lines": [
-        151,
-        167
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Sources: Sushi (Sherlock), Sorella Angstrom (Cyfrin)"
-      ]
-    },
-    {
-      "id": "amm-tick-range-position-vulnerabilities-pattern-4-tick-tracking-array--004",
-      "title": "Pattern 4: Tick Tracking Array DoS",
-      "severity": "HIGH",
-      "grep": "getFeeGrowthInside|block.timestamp|mintPosition|getTwapTick|crossTicks|allowance",
-      "detect": "Severity:** HIGH | **Source:** Canto (Code4rena)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/tick-range-position-vulnerabilities.md",
-      "lines": [
-        168,
-        185
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Source: Canto (Code4rena)"
-      ]
-    },
-    {
-      "id": "amm-tick-range-position-vulnerabilities-pattern-5-tick-iteration-infin-005",
-      "title": "Pattern 5: Tick Iteration Infinite Loop",
-      "severity": "HIGH",
-      "grep": "getFeeGrowthInside|block.timestamp|mintPosition|getTwapTick|crossTicks|allowance",
-      "detect": "Severity:** HIGH | **Source:** OpenZeppelin (Cantina)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/tick-range-position-vulnerabilities.md",
-      "lines": [
-        186,
-        198
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Source: OpenZeppelin (Cantina)"
-      ]
-    },
-    {
-      "id": "amm-tick-range-position-vulnerabilities-pattern-6-negative-twap-tick-r-006",
-      "title": "Pattern 6: Negative TWAP Tick Rounding Error",
-      "severity": "HIGH",
-      "grep": "getFeeGrowthInside|block.timestamp|mintPosition|getTwapTick|crossTicks|allowance",
-      "detect": "Severity:** HIGH | **Source:** Revert Lend (Code4rena)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/tick-range-position-vulnerabilities.md",
-      "lines": [
-        199,
-        215
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Source: Revert Lend (Code4rena)"
-      ]
-    },
-    {
-      "id": "amm-tick-range-position-vulnerabilities-pattern-7-position-debt-calcul-007",
-      "title": "Pattern 7: Position Debt Calculation Sign Error",
-      "severity": "HIGH",
-      "grep": "getFeeGrowthInside|block.timestamp|mintPosition|getTwapTick|crossTicks|allowance",
-      "detect": "Severity:** HIGH | **Source:** Ramses V3 (ConsenSys)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/tick-range-position-vulnerabilities.md",
-      "lines": [
-        216,
-        228
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Source: Ramses V3 (ConsenSys)"
-      ]
-    },
-    {
-      "id": "amm-tick-range-position-vulnerabilities-pattern-8-position-state-desyn-008",
-      "title": "Pattern 8: Position State Desync Between Contracts",
-      "severity": "HIGH",
-      "grep": "getFeeGrowthInside|block.timestamp|mintPosition|getTwapTick|crossTicks|allowance",
-      "detect": "Severity:** HIGH | **Sources:** Ajna (Code4rena), Vii Finance (Cyfrin)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/tick-range-position-vulnerabilities.md",
-      "lines": [
-        229,
-        244
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Sources: Ajna (Code4rena), Vii Finance (Cyfrin)"
-      ]
-    },
-    {
-      "id": "amm-tick-range-position-vulnerabilities-pattern-9-hardcoded-fee-tier-009",
-      "title": "Pattern 9: Hardcoded Fee Tier",
-      "severity": "HIGH",
-      "grep": "getFeeGrowthInside|block.timestamp|mintPosition|getTwapTick|crossTicks|allowance",
-      "detect": "Severity:** HIGH | **Source:** RealWagmi (Sherlock)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/tick-range-position-vulnerabilities.md",
-      "lines": [
-        245,
-        257
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Source: RealWagmi (Sherlock)"
-      ]
-    },
-    {
-      "id": "amm-tick-range-position-vulnerabilities-pattern-10-price-movement-duri-010",
-      "title": "Pattern 10: Price Movement During Range Operations",
-      "severity": "HIGH",
-      "grep": "getFeeGrowthInside|block.timestamp|mintPosition|getTwapTick|crossTicks|allowance",
-      "detect": "Severity:** HIGH | **Source:** Good Entry (Code4rena)",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/tick-range-position-vulnerabilities.md",
-      "lines": [
-        258,
-        271
-      ],
-      "check": [
-        "VERIFY: Severity: HIGH | Source: Good Entry (Code4rena)"
-      ]
-    },
-    {
-      "id": "amm-tick-range-position-vulnerabilities-secure-pattern-1-proper-tick-v-011",
+      "id": "amm-tick-range-position-vulnerabilities-secure-pattern-1-proper-tick-v-001",
       "title": "Secure Pattern 1: Proper Tick Validation",
       "severity": "HIGH",
-      "grep": "getFeeGrowthInside|block.timestamp|mintPosition|getTwapTick|crossTicks|allowance",
+      "grep": "position_accounting|getFeeGrowthInside|block.timestamp|range_validation|mintPosition|getTwapTick",
       "detect": "function mintPosition(int24 tickLower, int24 tickUpper, uint128 amount) external {",
       "cat": [
         "amm",
@@ -1485,9 +527,28 @@
       ],
       "ref": "DB/amm/concentrated-liquidity/tick-range-position-vulnerabilities.md",
       "lines": [
-        274,
-        285
+        296,
+        307
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "tick_boundary_manipulation",
+          "tick boundary manipulation",
+          "logic error",
+          "accounting error",
+          "denial of service"
+        ],
+        "commonlyComposesWith": [
+          "tick math",
+          "position accounting",
+          "range validation"
+        ]
+      },
       "check": [
         "VERIFY: function mintPosition(int24 tickLower, int24 tickUpper, uint128 amount) external {",
         "FALSIFY: Secure Pattern 1: Proper Tick Validation"
@@ -1496,10 +557,10 @@
       "invalidWhen": "Secure Pattern 1: Proper Tick Validation"
     },
     {
-      "id": "amm-tick-range-position-vulnerabilities-secure-pattern-2-fee-growth-wi-012",
+      "id": "amm-tick-range-position-vulnerabilities-secure-pattern-2-fee-growth-wi-002",
       "title": "Secure Pattern 2: Fee Growth with unchecked{}",
       "severity": "LOW",
-      "grep": "getFeeGrowthInside|block.timestamp|mintPosition|getTwapTick|crossTicks|allowance",
+      "grep": "position_accounting|getFeeGrowthInside|block.timestamp|range_validation|mintPosition|getTwapTick",
       "detect": "function getFeeGrowthInside() internal view returns (uint256, uint256) {",
       "cat": [
         "amm",
@@ -1509,9 +570,33 @@
       ],
       "ref": "DB/amm/concentrated-liquidity/tick-range-position-vulnerabilities.md",
       "lines": [
-        286,
-        296
+        308,
+        318
       ],
+      "reportEvidence": {
+        "count": 12,
+        "sampleReports": [
+          "reports/constant_liquidity_amm/h-03-missing-lowerupper-check-in-mint_position.md",
+          "reports/constant_liquidity_amm/h-06-get_fee_growth_inside-in-tickrs-should-allow-for-underflowoverflow-but-does.md",
+          "reports/constant_liquidity_amm/h-04-underflow-could-happened-when-calculating-uniswap-v3-positions-fee-growth-a.md",
+          "reports/constant_liquidity_amm/h-08-wrong-inequality-when-addingremoving-liquidity-in-current-price-range.md",
+          "reports/constant_liquidity_amm/all-rewards-can-be-stolen-due-to-incorrect-active-liquidity-calculations-when-th.md"
+        ]
+      },
+      "graphHints": {
+        "variants": [
+          "tick_boundary_manipulation",
+          "tick boundary manipulation",
+          "logic error",
+          "accounting error",
+          "denial of service"
+        ],
+        "commonlyComposesWith": [
+          "tick math",
+          "position accounting",
+          "range validation"
+        ]
+      },
       "check": [
         "VERIFY: function getFeeGrowthInside() internal view returns (uint256, uint256) {",
         "FALSIFY: Secure Pattern 2: Fee Growth with unchecked{}"
@@ -1520,10 +605,10 @@
       "invalidWhen": "Secure Pattern 2: Fee Growth with unchecked{}"
     },
     {
-      "id": "amm-tick-range-position-vulnerabilities-keywords-018",
+      "id": "amm-tick-range-position-vulnerabilities-keywords-008",
       "title": "Keywords",
       "severity": "CRITICAL",
-      "grep": "getFeeGrowthInside|block.timestamp|mintPosition|getTwapTick|crossTicks|allowance",
+      "grep": "position_accounting|getFeeGrowthInside|block.timestamp|range_validation|mintPosition|getTwapTick",
       "detect": "Primary:** tick validation, tickLower, tickUpper, tick boundary, tick spacing, fee growth, position range, concentrated...",
       "cat": [
         "amm",
@@ -1533,9 +618,28 @@
       ],
       "ref": "DB/amm/concentrated-liquidity/tick-range-position-vulnerabilities.md",
       "lines": [
-        371,
-        400
+        393,
+        422
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "tick_boundary_manipulation",
+          "tick boundary manipulation",
+          "logic error",
+          "accounting error",
+          "denial of service"
+        ],
+        "commonlyComposesWith": [
+          "tick math",
+          "position accounting",
+          "range validation"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Primary: tick validation, tickLower, tickUpper, tick boundary, tick spacing, fee growth, position range, concentrated...",
@@ -1545,282 +649,11 @@
         "LOOK FOR: See vulnerable pattern examples above for specific code smells"
       ],
       "antipattern": "> These keywords enhance vector search retrieval:",
-      "validWhen": "Primary: tick validation, tickLower, tickUpper, tick boundary, tick spacing, fee growth, position range, concentrated..."
+      "validWhen": "Primary: tick validation, tickLower, tickUpper, tick boundary, tick spacing, fee growth, position range, concentrated...",
+      "proofShape": "> These keywords enhance vector search retrieval"
     },
     {
-      "id": "amm-v4-hook-token-compatibility-pattern-1-malicious-hook-bypas-001",
-      "title": "Pattern 1: Malicious Hook Bypassing Reentrancy Guards (CRITICAL)",
-      "severity": "CRITICAL",
-      "grep": "_warmPositionStorage|_rebalancePostHook|_rebalancePreHook|unlockForRebalance|notifyUnsubscribe|block.timestamp",
-      "detect": "Hooks with malicious implementations can call `unlockForRebalance()` to bypass global reentrancy protection and drain...",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md",
-      "lines": [
-        103,
-        145
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Hooks with malicious implementations can call unlockForRebalance() to bypass global reentrancy protection and drain...",
-        "PROVE: Hook not constrained to canonical implementation",
-        "FALSIFY: Whitelist valid hooks or use per-pool reentrancy guards"
-      ],
-      "antipattern": "Hook not constrained to canonical implementation",
-      "securePattern": "Whitelist valid hooks or use per-pool reentrancy guards",
-      "validWhen": "Hooks with malicious implementations can call unlockForRebalance() to bypass global reentrancy protection and drain...",
-      "invalidWhen": "Whitelist valid hooks or use per-pool reentrancy guards"
-    },
-    {
-      "id": "amm-v4-hook-token-compatibility-pattern-2-gas-limit-underestim-002",
-      "title": "Pattern 2: Gas Limit Underestimation in Hook Callbacks (HIGH)",
-      "severity": "HIGH",
-      "grep": "_warmPositionStorage|_rebalancePostHook|_rebalancePreHook|notifyUnsubscribe|block.timestamp|nonReentrantPool",
-      "detect": "Uniswap V4's `notifyUnsubscribe` has gas limits to protect against malicious subscribers, but underestimation allows...",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md",
-      "lines": [
-        146,
-        191
-      ],
-      "check": [
-        "VERIFY: Uniswap V4's notifyUnsubscribe has gas limits to protect against malicious subscribers, but underestimation allows...",
-        "PROVE: Subscriber callback exceeds gas limit",
-        "FALSIFY: Optimize gas or increase unsubscribeGasLimit"
-      ],
-      "antipattern": "Subscriber callback exceeds gas limit",
-      "securePattern": "Optimize gas or increase unsubscribeGasLimit",
-      "validWhen": "Uniswap V4's notifyUnsubscribe has gas limits to protect against malicious subscribers, but underestimation allows...",
-      "invalidWhen": "Optimize gas or increase unsubscribeGasLimit"
-    },
-    {
-      "id": "amm-v4-hook-token-compatibility-pattern-3-hook-callback-fee-fa-003",
-      "title": "Pattern 3: Hook Callback Fee Farming via Self-Triggered Backrun (HIGH)",
-      "severity": "HIGH",
-      "grep": "_warmPositionStorage|_rebalancePostHook|_rebalancePreHook|notifyUnsubscribe|block.timestamp|nonReentrantPool",
-      "detect": "Hook callbacks that auto-execute trades based on price thresholds can be exploited by LPs to farm fees.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md",
-      "lines": [
-        192,
-        240
-      ],
-      "check": [
-        "VERIFY: Hook callbacks that auto-execute trades based on price thresholds can be exploited by LPs to farm fees.",
-        "PROVE: Auto back-run when price hits threshold",
-        "FALSIFY: Add rate limiting or require external trigger"
-      ],
-      "antipattern": "Auto back-run when price hits threshold",
-      "securePattern": "Add rate limiting or require external trigger",
-      "validWhen": "Hook callbacks that auto-execute trades based on price thresholds can be exploited by LPs to farm fees.",
-      "invalidWhen": "Add rate limiting or require external trigger"
-    },
-    {
-      "id": "amm-v4-hook-token-compatibility-pattern-4-fee-on-transfer-toke-004",
-      "title": "Pattern 4: Fee-on-Transfer Token Incompatibility (MEDIUM)",
-      "severity": "MEDIUM",
-      "grep": "_warmPositionStorage|_rebalancePostHook|_rebalancePreHook|notifyUnsubscribe|block.timestamp|nonReentrantPool",
-      "detect": "AMMs that assume `balanceAfter - balanceBefore == transferAmount` break with fee-on-transfer tokens.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md",
-      "lines": [
-        241,
-        284
-      ],
-      "check": [
-        "VERIFY: AMMs that assume balanceAfter - balanceBefore == transferAmount break with fee-on-transfer tokens.",
-        "PROVE: Assumes transfer amount equals received amount",
-        "FALSIFY: Use actual received amount"
-      ],
-      "antipattern": "Assumes transfer amount equals received amount",
-      "securePattern": "Use actual received amount",
-      "validWhen": "AMMs that assume balanceAfter - balanceBefore == transferAmount break with fee-on-transfer tokens.",
-      "invalidWhen": "Use actual received amount"
-    },
-    {
-      "id": "amm-v4-hook-token-compatibility-pattern-5-non-standard-erc20-r-005",
-      "title": "Pattern 5: Non-Standard ERC20 Return Value Handling (MEDIUM)",
-      "severity": "MEDIUM",
-      "grep": "_warmPositionStorage|_rebalancePostHook|_rebalancePreHook|block.timestamp|lockForRebalance|initiateWithdraw",
-      "detect": "Tokens like USDT and BNB don't return `bool` on transfer, causing reverts with standard interfaces.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md",
-      "lines": [
-        285,
-        327
-      ],
-      "check": [
-        "VERIFY: Tokens like USDT and BNB don't return bool on transfer, causing reverts with standard interfaces.",
-        "PROVE: Expects bool return value",
-        "FALSIFY: Use SafeERC20 or TransferHelper"
-      ],
-      "antipattern": "Expects bool return value",
-      "securePattern": "Use SafeERC20 or TransferHelper",
-      "validWhen": "Tokens like USDT and BNB don't return bool on transfer, causing reverts with standard interfaces.",
-      "invalidWhen": "Use SafeERC20 or TransferHelper"
-    },
-    {
-      "id": "amm-v4-hook-token-compatibility-pattern-6-hook-collision-in-to-006",
-      "title": "Pattern 6: Hook Collision in Token Accounting (MEDIUM)",
-      "severity": "MEDIUM",
-      "grep": "_warmPositionStorage|_rebalancePostHook|_rebalancePreHook|notifyUnsubscribe|block.timestamp|nonReentrantPool",
-      "detect": "When Bunni pools use Bunni tokens as underlying assets, hook callbacks can corrupt accounting due to balance collisions.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md",
-      "lines": [
-        328,
-        374
-      ],
-      "check": [
-        "VERIFY: When Bunni pools use Bunni tokens as underlying assets, hook callbacks can corrupt accounting due to balance collisions.",
-        "PROVE: Balance check doesn't account for am-AMM bid during callback",
-        "FALSIFY: Track am-AMM separately or exclude Bunni token pools"
-      ],
-      "antipattern": "Balance check doesn't account for am-AMM bid during callback",
-      "securePattern": "Track am-AMM separately or exclude Bunni token pools",
-      "validWhen": "When Bunni pools use Bunni tokens as underlying assets, hook callbacks can corrupt accounting due to balance collisions.",
-      "invalidWhen": "Track am-AMM separately or exclude Bunni token pools"
-    },
-    {
-      "id": "amm-v4-hook-token-compatibility-pattern-7-uniswap-v4-wrapper-p-007",
-      "title": "Pattern 7: Uniswap V4 Wrapper Position Fee Theft (HIGH)",
-      "severity": "HIGH",
-      "grep": "_warmPositionStorage|_rebalancePostHook|_rebalancePreHook|notifyUnsubscribe|block.timestamp|nonReentrantPool",
-      "detect": "Partial unwrap of V4 positions doesn't decrement `tokensOwed` state, enabling repeated fee theft.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md",
-      "lines": [
-        375,
-        427
-      ],
-      "check": [
-        "VERIFY: Partial unwrap of V4 positions doesn't decrement tokensOwed state, enabling repeated fee theft.",
-        "PROVE: tokensOwed never decremented after partial unwrap",
-        "FALSIFY: Decrement tokensOwed after distribution"
-      ],
-      "antipattern": "tokensOwed never decremented after partial unwrap",
-      "securePattern": "Decrement tokensOwed after distribution",
-      "validWhen": "Partial unwrap of V4 positions doesn't decrement tokensOwed state, enabling repeated fee theft.",
-      "invalidWhen": "Decrement tokensOwed after distribution"
-    },
-    {
-      "id": "amm-v4-hook-token-compatibility-pattern-8-reentrancy-via-yield-008",
-      "title": "Pattern 8: Reentrancy via Yield Strategy Trade Path (CRITICAL)",
-      "severity": "CRITICAL",
-      "grep": "_warmPositionStorage|_rebalancePostHook|_rebalancePreHook|notifyUnsubscribe|block.timestamp|nonReentrantPool",
-      "detect": "External swap paths in yield strategies allow reentrancy through malicious tokens.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md",
-      "lines": [
-        428,
-        471
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: External swap paths in yield strategies allow reentrancy through malicious tokens.",
-        "PROVE: External swap during redemption allows reentrancy",
-        "FALSIFY: Add reentrancy guard to all entry points"
-      ],
-      "antipattern": "External swap during redemption allows reentrancy",
-      "securePattern": "Add reentrancy guard to all entry points",
-      "validWhen": "External swap paths in yield strategies allow reentrancy through malicious tokens.",
-      "invalidWhen": "Add reentrancy guard to all entry points"
-    },
-    {
-      "id": "amm-v4-hook-token-compatibility-pattern-9-dynamic-ldf-tick-bou-009",
-      "title": "Pattern 9: Dynamic LDF Tick Bound Overflow (MEDIUM)",
-      "severity": "MEDIUM",
-      "grep": "_warmPositionStorage|_rebalancePostHook|_rebalancePreHook|notifyUnsubscribe|block.timestamp|nonReentrantPool",
-      "detect": "Dynamic Liquidity Distribution Functions (LDFs) can have tick bounds overflow after shift operations.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md",
-      "lines": [
-        472,
-        520
-      ],
-      "check": [
-        "VERIFY: Dynamic Liquidity Distribution Functions (LDFs) can have tick bounds overflow after shift operations.",
-        "PROVE: tickUpper not validated after shift",
-        "FALSIFY: Cap tickUpper after shift"
-      ],
-      "antipattern": "tickUpper not validated after shift",
-      "securePattern": "Cap tickUpper after shift",
-      "validWhen": "Dynamic Liquidity Distribution Functions (LDFs) can have tick bounds overflow after shift operations.",
-      "invalidWhen": "Cap tickUpper after shift"
-    },
-    {
-      "id": "amm-v4-hook-token-compatibility-pattern-10-am-amm-manager-veri-010",
-      "title": "Pattern 10: am-AMM Manager Verification Bypass (MEDIUM)",
-      "severity": "MEDIUM",
-      "grep": "_warmPositionStorage|_rebalancePostHook|_rebalancePreHook|notifyUnsubscribe|block.timestamp|nonReentrantPool",
-      "detect": "Not checking if am-AMM is disabled allows stale managers to fulfill orders.",
-      "cat": [
-        "amm",
-        "dex",
-        "liquidity",
-        "swap"
-      ],
-      "ref": "DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md",
-      "lines": [
-        521,
-        566
-      ],
-      "check": [
-        "VERIFY: Not checking if am-AMM is disabled allows stale managers to fulfill orders.",
-        "PROVE: Doesn't check if am-AMM is disabled",
-        "FALSIFY: Check am-AMM enabled status"
-      ],
-      "antipattern": "Doesn't check if am-AMM is disabled",
-      "securePattern": "Check am-AMM enabled status",
-      "validWhen": "Not checking if am-AMM is disabled allows stale managers to fulfill orders.",
-      "invalidWhen": "Check am-AMM enabled status"
-    },
-    {
-      "id": "amm-v4-hook-token-compatibility-secure-pattern-2-robust-token--012",
+      "id": "amm-v4-hook-token-compatibility-secure-pattern-2-robust-token--002",
       "title": "Secure Pattern 2: Robust Token Transfer Handling",
       "severity": "LOW",
       "grep": "safeTransferWithFeeCheck|_warmPositionStorage|_rebalancePostHook|_rebalancePreHook|notifyUnsubscribe|block.timestamp",
@@ -1833,9 +666,28 @@
       ],
       "ref": "DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md",
       "lines": [
-        595,
-        621
+        617,
+        643
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "LOW"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "token compatibility",
+          "gas griefing",
+          "unknown",
+          "hook token compatibility"
+        ],
+        "commonlyComposesWith": [
+          "hook callbacks",
+          "token transfers",
+          "pool accounting"
+        ]
+      },
       "check": [
         "VERIFY: // SECURE: Handle all ERC20 edge cases",
         "FALSIFY: Handle all ERC20 edge cases"
@@ -1845,7 +697,7 @@
       "invalidWhen": "Handle all ERC20 edge cases"
     },
     {
-      "id": "amm-v4-hook-token-compatibility-secure-pattern-3-gas-optimized-013",
+      "id": "amm-v4-hook-token-compatibility-secure-pattern-3-gas-optimized-003",
       "title": "Secure Pattern 3: Gas-Optimized Hook Callbacks",
       "severity": "CRITICAL",
       "grep": "_warmPositionStorage|_rebalancePostHook|_rebalancePreHook|notifyUnsubscribe|block.timestamp|nonReentrantPool",
@@ -1858,9 +710,30 @@
       ],
       "ref": "DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md",
       "lines": [
-        622,
-        652
+        644,
+        674
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "token compatibility",
+          "gas griefing",
+          "unknown",
+          "hook token compatibility"
+        ],
+        "commonlyComposesWith": [
+          "callbacks",
+          "gas optimized hook callbacks",
+          "hook callbacks",
+          "token transfers",
+          "pool accounting"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: // SECURE: Minimize gas in critical callbacks",
@@ -1887,6 +760,33 @@
         332,
         540
       ],
+      "reportEvidence": {
+        "count": 5,
+        "sampleReports": [
+          "reports/constantproduct/h-03-first-depositor-can-break-minting-of-shares.md",
+          "reports/constantproduct/initial-mint-front-run-inflation-attack.md",
+          "reports/constantproduct/c-03-blocking-the-initial-liquidity-seed-with-a-1-wei-donation.md",
+          "reports/constantproduct/m-08-zeroswapuniswapv2pairsol-token-reserves-per-lp-token-can-be-manipulated-due.md",
+          "reports/constantproduct/h-10-hijack-token-pool-by-burning-liquidity-token.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "inflation",
+          "first depositor inflation",
+          "depositor inflation",
+          "logic error",
+          "economic exploit"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: Signal 1: State variable updated after external interaction instead of before (CEI violation); Signal 2: Withdrawal path produces different...",
         "PROVE: Attacker creates pool and deposits minimal amount (1 wei of each token); Attacker receives 1 wei of LP tokens: sqrt(1 * 1) = 1",
@@ -1897,10 +797,78 @@
       "securePattern": "Enforce minimum initial deposit",
       "validWhen": "Signal 1: State variable updated after external interaction instead of before (CEI violation); Signal 2: Withdrawal path produces different accounting than deposit path...",
       "invalidWhen": "Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place; Safe if: Protocol behavior matches documented...",
-      "impact": "Complete loss of deposited funds for victims"
+      "impact": "Complete loss of deposited funds for victims",
+      "preconditions": [
+        "attacker control of: specific conditions per pattern",
+        "totalSupply is very small (e.g., 1 wei) and reserves are artificially inflated, the calculation rounds down to zero for normal...",
+        "Attacker creates pool and deposits minimal amount (1 wei of each token)",
+        "Attacker receives 1 wei of LP tokens: sqrt(1 * 1) = 1",
+        "Attacker transfers large amounts directly to pool (donation): e.g., 1e18 of each token"
+      ],
+      "proofShape": "Attacker creates pool and deposits minimal amount (1 wei of each token) -> Attacker receives 1 wei of LP tokens: sqrt(1 * 1) = 1 -> Attacker transfers large amounts directly to pool (donation): e.g., 1e18 of each token",
+      "falsePositiveSignals": [
+        "Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place",
+        "Safe if: Protocol behavior matches documented specification",
+        "Requires attacker control of: specific conditions per pattern"
+      ]
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-3-sandwich-mev-attacks-003",
+      "id": "amm-constant-product-amm-vulnerabilities-2-slippage-protection-vulnerab-001",
+      "title": "2. Slippage Protection Vulnerabilities",
+      "severity": "HIGH",
+      "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade|_addLiquidity",
+      "detect": "Functions that swap tokens or add/remove liquidity don't validate that the received amount meets user expectations.",
+      "cat": [
+        "amm",
+        "dex",
+        "liquidity",
+        "swap"
+      ],
+      "ref": "DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md",
+      "lines": [
+        541,
+        656
+      ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/constantproduct/missing-slippage-checks.md",
+          "reports/constantproduct/no-slippage-protection.md",
+          "reports/constantproduct/exploiting-zero-amountoutmin-in-dexwrappers-for-mev-attacks.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "slippage",
+          "slippage protection",
+          "constant product",
+          "liquidity provision",
+          "swap execution"
+        ]
+      },
+      "check": [
+        "VERIFY: Functions that swap tokens or add/remove liquidity don't validate that the received amount meets user expectations.",
+        "PROVE: User submits swap: 100 ETH → USDC, expects ~$200,000; MEV bot sees pending transaction",
+        "FALSIFY: Compare against oracle price",
+        "IMPACT: Users receive significantly less tokens than expected"
+      ],
+      "antipattern": "Slippage parameter ignored in execution",
+      "securePattern": "Compare against oracle price",
+      "validWhen": "Functions that swap tokens or add/remove liquidity don't validate that the received amount meets user expectations.",
+      "invalidWhen": "Compare against oracle price",
+      "impact": "Users receive significantly less tokens than expected",
+      "proofShape": "User submits swap: 100 ETH → USDC, expects ~$200,000 -> MEV bot sees pending transaction -> Bot front-runs: buys USDC, pushing price up"
+    },
+    {
+      "id": "amm-constant-product-amm-vulnerabilities-3-sandwich-mev-attacks-002",
       "title": "3. Sandwich & MEV Attacks",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade|_addLiquidity",
@@ -1916,6 +884,31 @@
         657,
         704
       ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/constantproduct/sandwich-attack-on-user-withdrawal.md",
+          "reports/constantproduct/m-08-relpcontractrelp-is-susceptible-to-sandwich-attack-due-to-user-control-over.md",
+          "reports/constantproduct/sandwich-attacks-and-price-manipulation.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: Withdrawal swaps without protection",
         "PROVE: Users can set exploitable parameters",
@@ -1924,10 +917,11 @@
       "antipattern": "Users can set exploitable parameters",
       "securePattern": "Use private transaction submission",
       "validWhen": "Withdrawal swaps without protection",
-      "invalidWhen": "Use private transaction submission"
+      "invalidWhen": "Use private transaction submission",
+      "proofShape": "Users can set exploitable parameters"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-4-spot-price-manipulation-slot-004",
+      "id": "amm-constant-product-amm-vulnerabilities-4-spot-price-manipulation-slot-003",
       "title": "4. Spot Price Manipulation (slot0)",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade|_addLiquidity",
@@ -1943,6 +937,31 @@
         705,
         793
       ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/constantproduct/h-3-usage-of-slot0-is-extremely-easy-to-manipulate.md",
+          "reports/constantproduct/h-1-attacker-can-profit-by-manipulating-uniswap-liquidity.md",
+          "reports/constantproduct/intra-transaction-oracle-tampering-possible-with-lp-pricing-using-flashloans.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "manipulation",
+          "spot price manipulation",
+          "price manipulation",
+          "logic error",
+          "economic exploit"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: slot0 returns the current tick and sqrtPriceX96 which reflect the most recent swap.",
         "PROVE: Using slot0 for price calculation",
@@ -1951,10 +970,11 @@
       "antipattern": "Using slot0 for price calculation",
       "securePattern": "Time-weighted average price",
       "validWhen": "slot0 returns the current tick and sqrtPriceX96 which reflect the most recent swap.",
-      "invalidWhen": "Time-weighted average price"
+      "invalidWhen": "Time-weighted average price",
+      "proofShape": "Using slot0 for price calculation"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-5-deadline-vulnerabilities-005",
+      "id": "amm-constant-product-amm-vulnerabilities-5-deadline-vulnerabilities-004",
       "title": "5. Deadline Vulnerabilities",
       "severity": "MEDIUM",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade|_addLiquidity",
@@ -1970,6 +990,29 @@
         794,
         845
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/constantproduct/m-01-missing-deadline-checks-allow-pending-transactions-to-be-maliciously-execut.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: No deadline - transaction can execute anytime",
         "FALSIFY: User controls execution deadline"
@@ -1980,7 +1023,7 @@
       "invalidWhen": "User controls execution deadline"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-6-reserve-manipulation-attacks-006",
+      "id": "amm-constant-product-amm-vulnerabilities-6-reserve-manipulation-attacks-005",
       "title": "6. Reserve Manipulation Attacks",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|calculateImpermanentLoss|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade",
@@ -1996,6 +1039,30 @@
         846,
         883
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/constantproduct/h-06-lps-of-vaderpoolv2-can-manipulate-pool-reserves-to-extract-funds-from-the-r.md",
+          "reports/constantproduct/m-05-pair-price-may-be-manipulated-by-direct-transfers.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "manipulation",
+          "reserve manipulation",
+          "logic error",
+          "economic exploit",
+          "price manipulation"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: IL calculation uses manipulatable reserves",
         "FALSIFY: Time-weighted reserves"
@@ -2006,7 +1073,7 @@
       "invalidWhen": "Time-weighted reserves"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-7-lp-token-calculation-issues-007",
+      "id": "amm-constant-product-amm-vulnerabilities-7-lp-token-calculation-issues-006",
       "title": "7. LP Token Calculation Issues",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade|_addLiquidity",
@@ -2022,6 +1089,30 @@
         884,
         926
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/constantproduct/flawed-calculation-of-lp-tokens-in-liquidity-swap-pbc.md",
+          "reports/constantproduct/h-5-univ2lporacle-will-malfunction-if-token0-or-token1s-decimals-18.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: Assumes 18 decimals for all tokens",
         "FALSIFY: Fix: Handle Variable Decimals"
@@ -2032,7 +1123,7 @@
       "invalidWhen": "Fix: Handle Variable Decimals"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-8-callback-reentrancy-attacks-008",
+      "id": "amm-constant-product-amm-vulnerabilities-8-callback-reentrancy-attacks-007",
       "title": "8. Callback & Reentrancy Attacks",
       "severity": "CRITICAL",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|uniswapV3SwapCallback|uniswapV3MintCallback|_existsPairPool|initiateWithdraw",
@@ -2048,6 +1139,31 @@
         927,
         1043
       ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/constantproduct/c-04-draining-approved-tokens-by-unrestricted-uniswapv3mintcallback.md",
+          "reports/constantproduct/redeemnative-reentrancy-enables-permanent-fund-freeze-systemic-misaccounting-and.md",
+          "reports/constantproduct/m-04-berachain-users-cannot-use-flashloans-from-uni-v2-wberaberabottoken-pool.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "callback",
+          "reentrancy",
+          "callback reentrancy",
+          "constant product",
+          "liquidity provision"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Uniswap V3 callbacks (uniswapV3MintCallback, uniswapV3SwapCallback) are called by the pool during operations.",
@@ -2059,10 +1175,14 @@
       "securePattern": "Only allow whitelisted tokens in path",
       "validWhen": "Uniswap V3 callbacks (uniswapV3MintCallback, uniswapV3SwapCallback) are called by the pool during operations.",
       "invalidWhen": "Only allow whitelisted tokens in path",
-      "impact": "Fund Drainage: Unrestricted callbacks allow draining approved tokens"
+      "impact": "Fund Drainage: Unrestricted callbacks allow draining approved tokens",
+      "preconditions": [
+        "swapping through DEXes, tokens with callbacks (ERC-777, malicious ERC-20s) can reenter the protocol mid-swap, corrupting state..."
+      ],
+      "proofShape": "Swap through untrusted token path"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-9-factory-pool-creation-attack-009",
+      "id": "amm-constant-product-amm-vulnerabilities-9-factory-pool-creation-attack-008",
       "title": "9. Factory & Pool Creation Attacks",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|getOrCreatePoolAndAddLiquidity|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade",
@@ -2078,6 +1198,33 @@
         1044,
         1197
       ],
+      "reportEvidence": {
+        "count": 6,
+        "sampleReports": [
+          "reports/constantproduct/h-02-lambofactory-can-be-permanently-dos-ed-due-to-createpair-call-reversal.md",
+          "reports/constantproduct/m-05-griefing-attack-on-genesispoolmanagersoldepositnativetoken-leading-to-denia.md",
+          "reports/constantproduct/m-04-wrong-init-code-hash.md",
+          "reports/constantproduct/m-8-false-pool-exists-detection-via-balanceof-leads-to-broken-swap-paths.md",
+          "reports/constantproduct/risk-of-incorrect-pool-initialization.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: When using CREATE opcode, new contract addresses are predictable.",
         "PROVE: Hardcoded hash doesn't match actual factory",
@@ -2088,10 +1235,14 @@
       "securePattern": "Unpredictable address with user-controlled salt",
       "validWhen": "When using CREATE opcode, new contract addresses are predictable.",
       "invalidWhen": "Unpredictable address with user-controlled salt",
-      "impact": "Permanent DoS: Factory permanently blocked from creating pairs"
+      "impact": "Permanent DoS: Factory permanently blocked from creating pairs",
+      "preconditions": [
+        "using CREATE opcode, new contract addresses are predictable."
+      ],
+      "proofShape": "Hardcoded hash doesn't match actual factory"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-10-decimal-math-calculation-is-010",
+      "id": "amm-constant-product-amm-vulnerabilities-10-decimal-math-calculation-is-009",
       "title": "10. Decimal & Math Calculation Issues",
       "severity": "CRITICAL",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade|_addLiquidity",
@@ -2107,6 +1258,31 @@
         1198,
         1284
       ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/constantproduct/h-6-curve-vault-will-undervalue-or-overvalue-the-lp-pool-tokens-if-it-comprises-.md",
+          "reports/constantproduct/h-3-ctokenoraclesolgetcerc20price-contains-critical-math-error.md",
+          "reports/constantproduct/h-02-incorrect-output-amount-calculation-for-trader-joe-v1-pools.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Assumes both tokens have same decimals",
@@ -2118,7 +1294,7 @@
       "invalidWhen": "Normalize decimals before calculation"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-11-liquidity-migration-protoco-011",
+      "id": "amm-constant-product-amm-vulnerabilities-11-liquidity-migration-protoco-010",
       "title": "11. Liquidity Migration & Protocol Upgrade Attacks",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|receiveFromBootstrap|_existsPairPool|_tokenToPodLp|_executeTrade",
@@ -2134,6 +1310,30 @@
         1285,
         1370
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/constantproduct/m-02-attacker-can-dos-liquidity-migration-in-liquiditymanagersol.md",
+          "reports/constantproduct/h-09-relpcontract-wrongfully-assumes-protocol-owns-all-of-the-liquidity-in-the-u.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: Uses raw balanceOf for calculations",
         "PROVE: Assumes protocol owns all pool reserves",
@@ -2142,10 +1342,11 @@
       "antipattern": "Assumes protocol owns all pool reserves",
       "securePattern": "Calculate based on actual LP ownership",
       "validWhen": "Uses raw balanceOf for calculations",
-      "invalidWhen": "Calculate based on actual LP ownership"
+      "invalidWhen": "Calculate based on actual LP ownership",
+      "proofShape": "Assumes protocol owns all pool reserves"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-12-flash-loan-based-graduation-012",
+      "id": "amm-constant-product-amm-vulnerabilities-12-flash-loan-based-graduation-011",
       "title": "12. Flash Loan-Based Graduation/Threshold Manipulation",
       "severity": "MEDIUM",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade|_addLiquidity",
@@ -2161,6 +1362,30 @@
         1371,
         1434
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/constantproduct/m-04-launched-tokens-are-vulnerable-to-flashloan-attacks-forcing-premature-gradu.md",
+          "reports/constantproduct/h-05-flash-loan-price-manipulation-in-purchasepyroflan.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "manipulation",
+          "flash loan based graduation threshold manipulation",
+          "threshold manipulation",
+          "logic error",
+          "economic exploit"
+        ],
+        "commonlyComposesWith": [
+          "flash loan based graduation threshold manipulation",
+          "flash loan",
+          "constant product",
+          "liquidity provision",
+          "swap execution"
+        ]
+      },
       "check": [
         "VERIFY: Atomic unwrap allows flash loan closure",
         "FALSIFY: Enforce delay after graduation"
@@ -2171,7 +1396,7 @@
       "invalidWhen": "Enforce delay after graduation"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-13-detection-patterns-audit-ch-013",
+      "id": "amm-constant-product-amm-vulnerabilities-13-detection-patterns-audit-ch-012",
       "title": "13. Detection Patterns & Audit Checklist",
       "severity": "CRITICAL",
       "grep": "balanceOf(address(this|impermanent_loss|constant_product|_executeTrade|_addLiquidity|first_depositor",
@@ -2187,6 +1412,27 @@
         1435,
         1474
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Pattern 1: slot0() or getReserves() used for pricing without TWAP",
@@ -2194,10 +1440,11 @@
         "Slippage: Is amountOutMin enforced and non-zero?",
         "LOOK FOR: Pattern 1: `slot0()` or `getReserves()` used for pricing without TWAP"
       ],
-      "validWhen": "Pattern 1: slot0() or getReserves() used for pricing without TWAP"
+      "validWhen": "Pattern 1: slot0() or getReserves() used for pricing without TWAP",
+      "proofShape": "Pattern 1: slot0() or getReserves() used for pricing without TWAP"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-13-imbalanced-liquidity-additi-014",
+      "id": "amm-constant-product-amm-vulnerabilities-13-imbalanced-liquidity-additi-013",
       "title": "13. Imbalanced Liquidity Addition Exploitation",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|initializeExternals|_existsPairPool|_tokenToPodLp|_executeTrade",
@@ -2213,6 +1460,31 @@
         1475,
         1547
       ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/constant_product/overpayment-of-one-side-of-lp-pair-onjoinpool-due-to-sandwich-or-user-error.md",
+          "reports/constant_product/h-02-liquidity-providers-may-lose-funds-when-adding-liquidity.md",
+          "reports/constant_product/m-5-uniswap-pool-price-can-be-manipulated-so-stnxm-adds-liquidity-to-a-super-imb.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: LP token calculation uses the minimum of two ratios",
         "PROVE: No slippage checks on liquidity initialization",
@@ -2221,10 +1493,14 @@
       "antipattern": "No slippage checks on liquidity initialization",
       "securePattern": "Calculate optimal amounts first",
       "validWhen": "LP token calculation uses the minimum of two ratios",
-      "invalidWhen": "Calculate optimal amounts first"
+      "invalidWhen": "Calculate optimal amounts first",
+      "preconditions": [
+        "adding liquidity to a constant product pool, LP tokens are minted based on the minimum ratio of the two tokens provided."
+      ],
+      "proofShape": "No slippage checks on liquidity initialization"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-14-rebasing-token-integration--015",
+      "id": "amm-constant-product-amm-vulnerabilities-14-rebasing-token-integration--014",
       "title": "14. Rebasing Token Integration Issues",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|getTokensForShares|_existsPairPool|_tokenToPodLp|_executeTrade",
@@ -2240,6 +1516,29 @@
         1548,
         1610
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/constant_product/h-05-aaves-share-tokens-are-rebasing-breaking-current-strategy-code.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: When depositing rebasing tokens, the initial balance equals the deposit amount.",
         "PROVE: Caching rebasing token shares",
@@ -2248,10 +1547,14 @@
       "antipattern": "Caching rebasing token shares",
       "securePattern": "Use wrapper token or track scaled balances",
       "validWhen": "When depositing rebasing tokens, the initial balance equals the deposit amount.",
-      "invalidWhen": "Use wrapper token or track scaled balances"
+      "invalidWhen": "Use wrapper token or track scaled balances",
+      "preconditions": [
+        "depositing rebasing tokens, the initial balance equals the deposit amount."
+      ],
+      "proofShape": "Caching rebasing token shares"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-15-impermanent-loss-protection-016",
+      "id": "amm-constant-product-amm-vulnerabilities-15-impermanent-loss-protection-015",
       "title": "15. Impermanent Loss Protection Abuse",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade|_addLiquidity",
@@ -2267,6 +1570,29 @@
         1611,
         1666
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/constant_product/h-06-paying-il-protection-for-all-vaderpool-pairs-allows-the-reserve-to-be-drain.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: IL protection calculates losses by comparing initial deposit ratios to withdrawal ratios.",
         "PROVE: IL protection for ALL pairs",
@@ -2275,10 +1601,11 @@
       "antipattern": "IL protection for ALL pairs",
       "securePattern": "Whitelist tokens eligible for IL protection",
       "validWhen": "IL protection calculates losses by comparing initial deposit ratios to withdrawal ratios.",
-      "invalidWhen": "Whitelist tokens eligible for IL protection"
+      "invalidWhen": "Whitelist tokens eligible for IL protection",
+      "proofShape": "IL protection for ALL pairs"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-16-protocol-invariant-breaking-017",
+      "id": "amm-constant-product-amm-vulnerabilities-16-protocol-invariant-breaking-016",
       "title": "16. Protocol Invariant Breaking",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|test_invariantBroken|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade",
@@ -2294,6 +1621,30 @@
         1667,
         1708
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/constant_product/protocols-invariants-can-be-broken.md",
+          "reports/constant_product/ignoring-the-well-function-logic-for-a-ratio-of-reserves-calculation.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "invariant",
+          "protocol invariant breaking",
+          "protocol invariant",
+          "invariant breaking",
+          "logic error"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: Rounding errors accumulate to break invariant",
         "FALSIFY: Add invariant check after operations"
@@ -2304,7 +1655,7 @@
       "invalidWhen": "Add invariant check after operations"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-17-dex-swap-slippage-accountin-018",
+      "id": "amm-constant-product-amm-vulnerabilities-17-dex-swap-slippage-accountin-017",
       "title": "17. DEX Swap Slippage Accounting Discrepancies",
       "severity": "MEDIUM",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|rebalanceVaultsAssets|_existsPairPool|_tokenToPodLp|_executeTrade",
@@ -2320,6 +1671,30 @@
         1709,
         1755
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/constant_product/rebalancevaultsassets-incorrectly-accounts-vaults-depositedusdc.md",
+          "reports/constant_product/incorrect-swap-amount-in-creditdelegationbranchsettlevaultsdebt-improperly-infla.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "slippage",
+          "dex swap slippage accounting discrepancies",
+          "swap slippage",
+          "slippage accounting",
+          "constant product"
+        ]
+      },
       "check": [
         "VERIFY: Uses expected amount, not actual received",
         "FALSIFY: Track actual swap output"
@@ -2327,10 +1702,13 @@
       "antipattern": "Uses expected amount, not actual received",
       "securePattern": "Track actual swap output",
       "validWhen": "Uses expected amount, not actual received",
-      "invalidWhen": "Track actual swap output"
+      "invalidWhen": "Track actual swap output",
+      "preconditions": [
+        "protocols perform internal rebalancing between vaults via DEX swaps, the actual output may differ from expected due to slippage."
+      ]
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-18-leftover-token-accumulation-019",
+      "id": "amm-constant-product-amm-vulnerabilities-18-leftover-token-accumulation-018",
       "title": "18. Leftover Token Accumulation in Autocompounding",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|block.timestamp|_tokenToPodLp|_executeTrade",
@@ -2346,6 +1724,30 @@
         1756,
         1803
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/constant_product/h-4-autocompoundingpodlp-_pairedlptokentopodlp-does-not-correctly-handle-leftove.md",
+          "reports/constant_product/m-16-inaccurate-swap-amount-calculation-in-relp-leads-to-stuck-tokens-and-lost-l.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: Doesn't consider existing balance before swap",
         "FALSIFY: Account for existing balances"
@@ -2356,7 +1758,7 @@
       "invalidWhen": "Account for existing balances"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-19-weth-eth-pool-asset-mismatc-020",
+      "id": "amm-constant-product-amm-vulnerabilities-19-weth-eth-pool-asset-mismatc-019",
       "title": "19. WETH/ETH Pool Asset Mismatch",
       "severity": "MEDIUM",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|block.timestamp|_tokenToPodLp|_executeTrade",
@@ -2372,6 +1774,29 @@
         1804,
         1845
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/constant_product/m-22-setup-with-asset-weth-and-a-curve-pool-that-contains-native-eth-will-lead-t.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: Pool uses ETH but vault holds WETH",
         "FALSIFY: Handle WETH/ETH conversion"
@@ -2379,10 +1804,13 @@
       "antipattern": "Pool uses ETH but vault holds WETH",
       "securePattern": "Handle WETH/ETH conversion",
       "validWhen": "Pool uses ETH but vault holds WETH",
-      "invalidWhen": "Handle WETH/ETH conversion"
+      "invalidWhen": "Handle WETH/ETH conversion",
+      "preconditions": [
+        "vaults interact with pools that use native ETH (like some Curve pools) but the vault's asset is WETH, unwrap/wrap operations can..."
+      ]
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-20-single-sided-vs-proportiona-021",
+      "id": "amm-constant-product-amm-vulnerabilities-20-single-sided-vs-proportiona-020",
       "title": "20. Single-Sided vs Proportional Exit Confusion",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade|_addLiquidity",
@@ -2398,6 +1826,30 @@
         1846,
         1891
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/constant_product/h-9-single-sided-instead-of-proportional-exit-is-performed-during-emergency-exit.md",
+          "reports/constant_product/h-7-tokens-received-from-curves-remove_liquidity-should-be-added-to-the-assets-l.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: Uses single-sided exit during emergency",
         "FALSIFY: Use proportional exit for emergencies"
@@ -2408,7 +1860,7 @@
       "invalidWhen": "Use proportional exit for emergencies"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-21-type-casting-integer-overfl-022",
+      "id": "amm-constant-product-amm-vulnerabilities-21-type-casting-integer-overfl-021",
       "title": "21. Type Casting & Integer Overflow Issues",
       "severity": "CRITICAL",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade|_addLiquidity",
@@ -2424,6 +1876,30 @@
         1892,
         1993
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/constant_product/unchecked-type-casting.md",
+          "reports/constant_product/denial-of-service-conditions-caused-by-the-use-of-more-than-256-slices.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: When casting from larger integer types to smaller ones without validation",
@@ -2433,10 +1909,14 @@
       "antipattern": "uint8 can only go up to 255",
       "securePattern": "Use try_from with error handling",
       "validWhen": "When casting from larger integer types to smaller ones without validation",
-      "invalidWhen": "Use try_from with error handling"
+      "invalidWhen": "Use try_from with error handling",
+      "preconditions": [
+        "casting from larger integer types to smaller ones without validation"
+      ],
+      "proofShape": "uint8 can only go up to 255"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-22-spot-price-abuse-in-protoco-023",
+      "id": "amm-constant-product-amm-vulnerabilities-22-spot-price-abuse-in-protoco-022",
       "title": "22. Spot Price Abuse in Protocol Swaps",
       "severity": "CRITICAL",
       "grep": "_getTimeWeightedPrimaryBalance|reimburseLiquidityFees|_unstakeAndExitPool|getInGivenExpectedOut|_existsPairPool|_tokenToPodLp",
@@ -2452,6 +1932,30 @@
         1994,
         2080
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/constant_product/use-of-spot-price-in-sponsorvault-leads-to-sandwich-attack.md",
+          "reports/constant_product/use-of-spot-dex-price-when-repay-portal-debt-leads-to-sandwich-attacks.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Protocol contracts that",
@@ -2461,10 +1965,14 @@
       "antipattern": "Uses spot price for swap amount calculation",
       "securePattern": "Validate spot price against oracle",
       "validWhen": "Protocol contracts that",
-      "invalidWhen": "Validate spot price against oracle"
+      "invalidWhen": "Validate spot price against oracle",
+      "preconditions": [
+        "protocols perform internal swaps using DEX spot prices without oracle validation, attackers can manipulate the spot price via..."
+      ],
+      "proofShape": "Uses spot price for swap amount calculation"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-23-lp-token-burn-hijack-attack-024",
+      "id": "amm-constant-product-amm-vulnerabilities-23-lp-token-burn-hijack-attack-023",
       "title": "23. LP Token Burn/Hijack Attacks",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade|_addLiquidity",
@@ -2480,6 +1988,30 @@
         2081,
         2166
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/constant_product/h-10-hijack-token-pool-by-burning-liquidity-token.md",
+          "reports/constant_product/the-lp-tokens-are-never-burned-by-the-stream-pool-contract.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: Public burn() function without withdrawal logic",
         "PROVE: Unrestricted burn allows totalSupply manipulation",
@@ -2488,10 +2020,14 @@
       "antipattern": "Unrestricted burn allows totalSupply manipulation",
       "securePattern": "Burn only through withdrawal with minimum enforced",
       "validWhen": "Public burn() function without withdrawal logic",
-      "invalidWhen": "Burn only through withdrawal with minimum enforced"
+      "invalidWhen": "Burn only through withdrawal with minimum enforced",
+      "preconditions": [
+        "LP token burn() functions are unrestricted or LP tokens are sent to the wrong contract during redemption, attackers can..."
+      ],
+      "proofShape": "Unrestricted burn allows totalSupply manipulation"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-24-constant-sum-amm-arbitrage-025",
+      "id": "amm-constant-product-amm-vulnerabilities-24-constant-sum-amm-arbitrage-024",
       "title": "24. Constant Sum AMM Arbitrage",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade|_addLiquidity",
@@ -2507,6 +2043,29 @@
         2167,
         2236
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/constant_product/unlimited-arbitrage-in-ccfrax1to1amm.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: Constant sum invariant: k = a + b",
         "PROVE: Constant sum AMM with 1:1 rate",
@@ -2515,10 +2074,11 @@
       "antipattern": "Constant sum AMM with 1:1 rate",
       "securePattern": "Use constant product or stableswap invariant",
       "validWhen": "Constant sum invariant: k = a + b",
-      "invalidWhen": "Use constant product or stableswap invariant"
+      "invalidWhen": "Use constant product or stableswap invariant",
+      "proofShape": "Constant sum AMM with 1:1 rate"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-25-state-accounting-discrepanc-026",
+      "id": "amm-constant-product-amm-vulnerabilities-25-state-accounting-discrepanc-025",
       "title": "25. State Accounting Discrepancies",
       "severity": "MEDIUM",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade|_addLiquidity",
@@ -2534,6 +2094,30 @@
         2237,
         2321
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/constant_product/m-8-singlesidedliquidityvaultwithdraw-will-decreases-ohmminted-which-will-make-t.md",
+          "reports/constant_product/h-05-parameter-misordering-in-fee-collection-function-causes-denial-of-service-a.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: State variables are updated incorrectly",
         "PROVE: Decreases ohmMinted instead of increasing ohmRemoved",
@@ -2542,10 +2126,11 @@
       "antipattern": "Decreases ohmMinted instead of increasing ohmRemoved",
       "securePattern": "Clear separation of minted vs removed tracking",
       "validWhen": "State variables are updated incorrectly",
-      "invalidWhen": "Clear separation of minted vs removed tracking"
+      "invalidWhen": "Clear separation of minted vs removed tracking",
+      "proofShape": "Decreases ohmMinted instead of increasing ohmRemoved"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-26-incorrect-liquidity-ownersh-027",
+      "id": "amm-constant-product-amm-vulnerabilities-26-incorrect-liquidity-ownersh-026",
       "title": "26. Incorrect Liquidity Ownership Assumptions",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade|_addLiquidity",
@@ -2561,6 +2146,29 @@
         2322,
         2404
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/constant_product/h-09-relpcontract-wrongfully-assumes-protocol-owns-all-of-the-liquidity-in-the-u.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: lpToRemove = (tokenToRemove * totalLpSupply) / totalReserve",
         "PROVE: Uses total pool reserves, not owned portion",
@@ -2569,10 +2177,11 @@
       "antipattern": "Uses total pool reserves, not owned portion",
       "securePattern": "Base calculations on protocol's actual LP holdings",
       "validWhen": "lpToRemove = (tokenToRemove * totalLpSupply) / totalReserve",
-      "invalidWhen": "Base calculations on protocol's actual LP holdings"
+      "invalidWhen": "Base calculations on protocol's actual LP holdings",
+      "proofShape": "Uses total pool reserves, not owned portion"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-27-dividend-reward-gaming-028",
+      "id": "amm-constant-product-amm-vulnerabilities-27-dividend-reward-gaming-027",
       "title": "27. Dividend/Reward Gaming",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|_tokenToPodLp|_executeTrade|_addLiquidity",
@@ -2588,6 +2197,29 @@
         2405,
         2489
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/constant_product/h-08-dividend-reward-can-be-gamed.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: Dividend calculation uses short-term fee averages",
         "PROVE: normalAverageFee based on last 20 trades only",
@@ -2596,10 +2228,11 @@
       "antipattern": "normalAverageFee based on last 20 trades only",
       "securePattern": "Use time-weighted volume, not individual trade count",
       "validWhen": "Dividend calculation uses short-term fee averages",
-      "invalidWhen": "Use time-weighted volume, not individual trade count"
+      "invalidWhen": "Use time-weighted volume, not individual trade count",
+      "proofShape": "normalAverageFee based on last 20 trades only"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-28-missing-account-validation--029",
+      "id": "amm-constant-product-amm-vulnerabilities-28-missing-account-validation--028",
       "title": "28. Missing Account Validation (Solana-Specific)",
       "severity": "HIGH",
       "grep": "_getTimeWeightedPrimaryBalance|_unstakeAndExitPool|_existsPairPool|block.timestamp|_tokenToPodLp|_executeTrade",
@@ -2615,6 +2248,29 @@
         2490,
         2576
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/constant_product/missing-tokenaccount-checks.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "check": [
         "VERIFY: Solana accounts are passed as parameters; the program must verify",
         "PROVE: No validation on vault_reward_token_b_info",
@@ -2623,10 +2279,11 @@
       "antipattern": "No validation on vault_reward_token_b_info",
       "securePattern": "Validate all accounts against expected PDAs",
       "validWhen": "Solana accounts are passed as parameters; the program must verify",
-      "invalidWhen": "Validate all accounts against expected PDAs"
+      "invalidWhen": "Validate all accounts against expected PDAs",
+      "proofShape": "No validation on vault_reward_token_b_info"
     },
     {
-      "id": "amm-constant-product-amm-vulnerabilities-29-detection-patterns-audit-ch-030",
+      "id": "amm-constant-product-amm-vulnerabilities-29-detection-patterns-audit-ch-029",
       "title": "29. Detection Patterns & Audit Checklist",
       "severity": "CRITICAL",
       "grep": "balanceOf(address(this|constant_product|_executeTrade|_addLiquidity|dividend_gaming|_deployToken",
@@ -2642,6 +2299,27 @@
         2577,
         2651
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "price manipulation",
+          "liquidity attack",
+          "dos"
+        ],
+        "commonlyComposesWith": [
+          "constant product",
+          "liquidity provision",
+          "swap execution",
+          "price calculation",
+          "reserves"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Pattern 1: slot0() or getReserves() used for pricing without TWAP",
@@ -2649,7 +2327,8 @@
         "Slippage: Is amountOutMin enforced and non-zero?",
         "LOOK FOR: Pattern 1: `slot0()` or `getReserves()` used for pricing without TWAP"
       ],
-      "validWhen": "Pattern 1: slot0() or getReserves() used for pricing without TWAP"
+      "validWhen": "Pattern 1: slot0() or getReserves() used for pricing without TWAP",
+      "proofShape": "Pattern 1: slot0() or getReserves() used for pricing without TWAP"
     }
   ]
 }

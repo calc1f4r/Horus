@@ -1,11 +1,30 @@
 # Hunt Card Telemetry
 
-This directory stores per-hunt-card telemetry sidecars produced by
-`db-quality-monitor --gap-analysis`.
+This directory is for sidecar performance notes about generated hunt cards.
 
-Telemetry is advisory only. It tracks hits, misses, false positives, last audit,
-and suggested refinements so humans can improve hunt cards without automatically
-changing canonical DB entries.
+Use it for:
 
-These files are not part of runtime search and must not be indexed into
-manifests.
+- cards that repeatedly produce false positives
+- cards that missed confirmed findings
+- cards that correctly caught findings and should be kept strong
+- suggested grep, triage, or source Markdown improvements
+
+Rules:
+
+- Telemetry files do not change runtime behavior by themselves.
+- Telemetry must not be loaded into manifests, hunt cards, or graph artifacts.
+- Any actual hunt-card improvement must be made in canonical `DB/**/*.md` source content or generator logic, then regenerated.
+
+The generator currently ignores `DB/_telemetry/`.
+
+The current durable enrichment inventory lives under:
+
+```text
+DB/_telemetry/huntcard-enrichment/
+```
+
+The cross-DB checklist lives at:
+
+```text
+DB/_telemetry/huntcard-enrichment/CHECKLIST.md
+```

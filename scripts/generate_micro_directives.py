@@ -191,8 +191,61 @@ def _extract_attack_steps(section_lines: list[str]) -> list[str]:
     return steps
 
 
-def _extract_guidance_signal(section_lines: list[str], heading_terms: tuple[str, ...]) -> str:
-    """Extract one concise bullet or sentence under a guidance heading.
+def _extract_preconditions(section_lines: list[str]) -> list[str]:
+    """Extract compact attacker/state preconditions from setup-style sections."""
+    preconditions = []
+    in_precondition_section = False
+    heading_terms = (
+        "preconditions",
+        "initial conditions",
+        "setup",
+        "attack scenario",
+        "attack scenario / path variants",
+    )
+    heading_regex = "|".join(re.escape(term) for term in heading_terms)
+
+    for line in section_lines:
+        stripped = line.strip()
+        cleaned = _clean_text(stripped)
+        lower = cleaned.lower()
+
+        if re.match(rf"^#{{1,6}}\s+.*(?:{heading_regex})", stripped, re.IGNORECASE):
+            in_precondition_section = True
+            continue
+
+        explicit_prefix = re.match(
+            r"^(?:requires|attacker can|attacker must|only if|when)\b[:\s-]*(.+)$",
+            cleaned,
+            re.IGNORECASE,
+        )
+        if explicit_prefix:
+            candidate = _shorten(explicit_prefix.group(1), max_len=130)
+            if _is_informative_summary(candidate):
+                preconditions.append(candidate)
+
+        if in_precondition_section:
+            if stripped.startswith("#") or stripped.startswith("---"):
+                break
+            if not stripped or stripped.startswith("```"):
+                continue
+            match = re.match(r"^(?:\d+[\.)]|[-*])\s*(.+)$", stripped)
+            if match:
+                candidate = _shorten(match.group(1), max_len=130)
+                candidate_lower = _clean_text(candidate).lower()
+                if (
+                    _is_informative_summary(candidate)
+                    and any(term in candidate_lower for term in ("attacker", "vault", "supply", "deposit", "donat", "admin", "owner", "first"))
+                ):
+                    preconditions.append(candidate)
+
+        if len(preconditions) >= 5:
+            break
+
+    return _dedupe_keep_order(preconditions)[:5]
+
+
+def _extract_guidance_signals(section_lines: list[str], heading_terms: tuple[str, ...], limit: int = 3) -> list[str]:
+    """Extract concise bullets or sentences under a guidance heading.
 
     Used for sections like "Valid Bug Signals" and "False Positive Guards"
     that are optimized for low-context agent triage.
@@ -216,9 +269,15 @@ def _extract_guidance_signal(section_lines: list[str], heading_terms: tuple[str,
             candidate = _shorten(candidate, max_len=170)
             if _is_informative_summary(candidate):
                 collected.append(candidate)
-            if len(collected) >= 2:
+            if len(collected) >= limit:
                 break
 
+    return _dedupe_keep_order(collected)[:limit]
+
+
+def _extract_guidance_signal(section_lines: list[str], heading_terms: tuple[str, ...]) -> str:
+    """Extract one compact string under a guidance heading."""
+    collected = _extract_guidance_signals(section_lines, heading_terms, limit=2)
     if not collected:
         return ""
     return _shorten("; ".join(collected), max_len=170)
@@ -445,6 +504,50 @@ def _build_proof_hint(
     return ""
 
 
+def _build_proof_shape(attack_steps: list[str], root_cause: str, impact: str, proof_hint: str) -> str:
+    """Build a one-line causal exploit shape for report-backed cards."""
+    if len(attack_steps) >= 2:
+        candidate = _shorten(" -> ".join(attack_steps[:3]), max_len=220)
+        if _is_informative_summary(candidate):
+            return candidate
+    if _is_informative_summary(proof_hint):
+        return _shorten(proof_hint, max_len=220)
+    if _is_informative_summary(root_cause) and _is_informative_summary(impact):
+        return _shorten(f"{root_cause} Impact: {impact}", max_len=220)
+    return ""
+
+
+def _extract_report_evidence(section_lines: list[str]) -> dict:
+    """Extract compact report paths and severity consensus from a DB section."""
+    paths = []
+    severities = []
+
+    for line in section_lines:
+        for path in re.findall(r"`?(reports/[^`\s|)]+\.md)`?", line):
+            paths.append(path)
+        for severity in re.findall(r"\b(CRITICAL|HIGH|MEDIUM|LOW|MID)\b", line, re.IGNORECASE):
+            sev = severity.upper()
+            severities.append("MEDIUM" if sev == "MID" else sev)
+
+    paths = _dedupe_keep_order(paths)
+    severities = _dedupe_keep_order(severities)
+    if not paths and not severities:
+        return {}
+
+    severity_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
+    consensus = ""
+    if severities:
+        consensus = sorted(severities, key=lambda s: severity_order.get(s, 99))[0]
+
+    evidence = {
+        "count": len(paths),
+        "sampleReports": paths[:5],
+    }
+    if consensus:
+        evidence["severityConsensus"] = consensus
+    return evidence
+
+
 def _build_check_from_checklist_and_patterns(
     checklist: list[str],
     code_patterns: list[str],
@@ -526,18 +629,21 @@ def enrich_card(card: dict) -> dict:
     code_patterns = _extract_code_patterns(section_lines)
     root_cause = _extract_root_cause(section_lines) or card.get("detect", "")
     attack_steps = _extract_attack_steps(section_lines)
+    preconditions = _extract_preconditions(section_lines)
     explicit_valid_when = _extract_guidance_signal(
         section_lines,
         ("valid bug signals", "valid when", "reportable when"),
     )
-    explicit_invalid_when = _extract_guidance_signal(
+    false_positive_signals = _extract_guidance_signals(
         section_lines,
         ("false positive guards", "invalid when", "not this bug when", "safe if"),
     )
+    explicit_invalid_when = _shorten("; ".join(false_positive_signals[:2]), max_len=170) if false_positive_signals else ""
     impact = _extract_impact_summary(section_lines)
     antipattern = _extract_antipattern(section_lines)
     secure_pattern = _extract_secure_pattern(section_lines)
     fix_signal = _extract_fix_signal(section_lines)
+    report_evidence = _extract_report_evidence(section_lines)
 
     # If no explicit antipattern found, try to extract from code shape
     if not antipattern:
@@ -546,6 +652,7 @@ def enrich_card(card: dict) -> dict:
     valid_when = explicit_valid_when or _build_valid_when(root_cause, attack_steps, antipattern)
     invalid_when = explicit_invalid_when or _build_invalid_when(secure_pattern, fix_signal)
     proof_hint = _build_proof_hint(attack_steps, antipattern, code_patterns, valid_when)
+    proof_shape = _build_proof_shape(attack_steps, root_cause, impact, proof_hint)
 
     # Build check array
     checks = _build_check_from_checklist_and_patterns(
@@ -572,6 +679,14 @@ def enrich_card(card: dict) -> dict:
         enriched["invalidWhen"] = invalid_when
     if impact:
         enriched["impact"] = impact
+    if preconditions:
+        enriched["preconditions"] = preconditions
+    if proof_shape:
+        enriched["proofShape"] = proof_shape
+    if false_positive_signals:
+        enriched["falsePositiveSignals"] = false_positive_signals
+    if report_evidence:
+        enriched["reportEvidence"] = report_evidence
 
     return enriched
 
@@ -592,6 +707,10 @@ def enrich_huntcard_file(input_path: Path, output_path: Path = None) -> dict:
         "with_valid": 0,
         "with_invalid": 0,
         "with_impact": 0,
+        "with_preconditions": 0,
+        "with_proof_shape": 0,
+        "with_false_positive_signals": 0,
+        "with_report_evidence": 0,
     }
 
     for card in cards:
@@ -617,6 +736,18 @@ def enrich_huntcard_file(input_path: Path, output_path: Path = None) -> dict:
         if "impact" in enriched and enriched["impact"]:
             stats["with_impact"] += 1
             has_new = True
+        if "preconditions" in enriched and enriched["preconditions"]:
+            stats["with_preconditions"] += 1
+            has_new = True
+        if "proofShape" in enriched and enriched["proofShape"]:
+            stats["with_proof_shape"] += 1
+            has_new = True
+        if "falsePositiveSignals" in enriched and enriched["falsePositiveSignals"]:
+            stats["with_false_positive_signals"] += 1
+            has_new = True
+        if "reportEvidence" in enriched and enriched["reportEvidence"]:
+            stats["with_report_evidence"] += 1
+            has_new = True
         if has_new:
             stats["enriched"] += 1
 
@@ -628,6 +759,7 @@ def enrich_huntcard_file(input_path: Path, output_path: Path = None) -> dict:
     data["meta"]["usage"] = (
         "Load cards into context. For each card, grep target code for card.grep. "
         "On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, "
+        "use optional preconditions/proofShape/falsePositiveSignals/reportEvidence when present, "
         "and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives."
     )
 

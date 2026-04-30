@@ -1,7 +1,13 @@
 ---
 title: "Uniswap V4 Hook Security and Token Compatibility Vulnerabilities"
+protocol: generic
+category: amm/concentrated-liquidity
 vulnerability_class: "Hook Security / Token Compatibility"
+vulnerability_type: hook_token_compatibility
+attack_type: callback_reentrancy|token_compatibility|gas_griefing
+affected_component: hook_callbacks|token_transfers|pool_accounting
 severity: critical
+impact: fund_loss|denial_of_service|accounting_corruption
 chain: "Multi-chain"
 affected_protocols:
   - "Uniswap V4"
@@ -97,6 +103,22 @@ Uniswap V4 introduces a powerful hook system that allows custom logic execution 
 - Not this bug when: Contract uses `ReentrancyGuard` (`nonReentrant`) on all entry points
 - Safe if: All state updates complete before any external call (strict CEI)
 - Requires attacker control of: specific conditions per pattern
+
+#### Code Patterns to Look For
+
+```solidity
+deployPool(key, hooks); // hook address not constrained to canonical implementation
+hooks.afterSwap(key, params, delta, data); // hook can reenter pool/manager state
+lockForRebalance(key); // authorization only checks msg.sender == key.hooks
+token.transferFrom(user, address(this), amount); // no balance-delta handling for FoT/rebasing tokens
+query(pool); // state-changing hook path reachable through quote/query simulation
+```
+
+#### False Positive Detail
+
+- Hook reentrancy requires a callback path into shared pool, vault, rebalance, or accounting state; harmless notification-only hooks are lower signal.
+- Canonical-hook validation is strong only if the checked address, hook permissions, and hook parameters are all bound to the deployed pool key.
+- Token compatibility issues should be tied to accepted assets or deployable pools; unsupported malicious tokens are less relevant unless pool creation is permissionless.
 
 ## Vulnerable Pattern Examples
 

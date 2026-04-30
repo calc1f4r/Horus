@@ -203,16 +203,26 @@ Sui Move's visibility modifiers (`public`, `public(friend)`, `public(package)`, 
 
 #### Valid Bug Signals
 
-- Signal 1: State-changing function lacks `onlyOwner`/`onlyRole` modifier
-- Signal 2: External function accepts arbitrary address and calls interface methods without registry validation
-- Signal 3: Configuration setter is callable by non-owner accounts
-- Signal 4: Initialization or migration function is unprotected
+- Signal 1: A state-changing `public` or `entry` function mutates protocol objects without requiring an `AdminCap`, owner object, signer-derived address, or package-only visibility.
+- Signal 2: Object identity checks compare only type or shape, not the expected `UID`, parent object, owner, pool ID, market ID, or epoch-scoped authority.
+- Signal 3: Proof, receipt, or capability objects can be reused, forged across contexts, or consumed without binding to caller, amount, market, nonce, or action.
+- Signal 4: Role removal, security-level changes, blocklist updates, snapshot changes, or mint-limit state can be changed into an unsafe state by a non-governance caller.
 
 #### False Positive Guards
 
-- Not this bug when: Function is `internal`/`private` and only called from access-controlled paths
-- Safe if: Function is restricted via `onlyOwner`/`onlyRole`/`require(msg.sender == ...)`
-- Requires attacker control of: specific conditions per pattern
+- Not this bug when: The callable function only operates on caller-owned objects and cannot mutate shared protocol state or mint/burn/withdraw assets.
+- Safe if: Authority is enforced by unforgeable capability objects, `tx_context::sender(ctx)` checks, `public(package)` visibility, and exact object ID/owner validation at the mutation site.
+- Requires attacker control of: a transaction that can pass arbitrary shared objects, receipts, proofs, role targets, or user-owned objects into the vulnerable entry function.
+
+#### Code Patterns to Look For
+
+```text
+- public/entry functions mutating Pool, Vault, Market, Role, Blocklist, Snapshot, Treasury, or Config objects without capability arguments
+- assert!(object::id(obj) == expected_id) missing before using shared or dynamic-field objects
+- proof/receipt structs lacking consumed flags, nonce binding, or caller/market/amount fields
+- role removal paths that allow removing the last admin, bypassing timelocks, or downgrading security levels
+- limits, TTLs, tick steps, mint caps, or gas bounds accepted without explicit range checks
+```
 
 ### Vulnerability Description
 

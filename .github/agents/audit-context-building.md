@@ -1,8 +1,13 @@
 ---
 name: audit-context-building
-description: 'Coordinates ultra-granular, line-by-line code analysis across multiple sub-agents to build deep architectural context before vulnerability hunting. Distributes work per-contract to avoid timeouts, then synthesizes a global context document. Use when preparing for a security audit, architecture review, threat modeling, or when bottom-up codebase comprehension is needed.'
+description: "Coordinates ultra-granular, line-by-line code analysis across multiple sub-agents to build deep architectural context before vulnerability hunting. Distributes work per-contract to avoid timeouts, then synthesizes a global context document. Use when preparing for a security audit, architecture review, threat modeling, or when bottom-up codebase comprehension is needed."
 tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
+> **Claude Code Agent Conventions**:
+> - Spawn sub-agents: `Agent("function-analyzer", "...")` and `Agent("system-synthesizer", "...")`
+> - Write output files with `Write` tool to `audit-output/context/` and `audit-output/01-context.md`
+> - Resource files at `resources/` relative to repo root
+> - Sub-agents are stateless — include ALL context in their prompt
 
 # Audit Context Builder (Coordinator)
 
@@ -369,6 +374,7 @@ After writing `00-orientation.md`, append to `audit-output/memory-state.md`:
 ```
 
 ---
+
 ---
 
 ### Phase 2: Per-Contract Function Analysis (Fan-Out)

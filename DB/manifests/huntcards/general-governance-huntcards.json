@@ -2,10 +2,10 @@
   "meta": {
     "manifest": "general-governance",
     "description": "Compressed hunt cards for general-governance — one-line detection rules for bulk scanning",
-    "totalCards": 63,
-    "skipped": 55,
-    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 63
+    "totalCards": 53,
+    "skipped": 46,
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, use optional preconditions/proofShape/falsePositiveSignals/reportEvidence when present, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "enriched": 53
   },
   "cards": [
     {
@@ -26,6 +26,22 @@
         108,
         162
       ],
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "governance manipulation",
+          "governance voting",
+          "fund loss"
+        ],
+        "commonlyComposesWith": [
+          "flash loan governance takeover",
+          "flash loan",
+          "flash loan governance",
+          "emergency commit",
+          "quorum bypass"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: When governance voting power is determined by token balances at the time of vote (snapshot-less) or uses LP tokens that can be acquired via flash...",
@@ -33,7 +49,18 @@
         "ANTIPATTERN: emergencyCommit allows same-tx proposal execution"
       ],
       "antipattern": "emergencyCommit allows same-tx proposal execution",
-      "validWhen": "When governance voting power is determined by token balances at the time of vote (snapshot-less) or uses LP tokens that can be acquired via flash loans, an attacker..."
+      "validWhen": "When governance voting power is determined by token balances at the time of vote (snapshot-less) or uses LP tokens that can be acquired via flash loans, an attacker...",
+      "preconditions": [
+        "governance voting power is determined by token balances at the time of vote (snapshot-less) or uses LP tokens that can be...",
+        "Deposit LP tokens into governance silo for voting power",
+        "Malicious proposal executes: sweeps treasury to attacker"
+      ],
+      "proofShape": "Pre-stage: submit a malicious proposal with an innocent-looking description -> Wait for minimum proposal delay (e.g., 1 day for Beanstalk) -> Take massive flash loans (stablecoins, ETH)",
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      }
     },
     {
       "id": "general-governance-defihacklabs-governance-attack-patterns-2-low-quorum-governance-exploi-002",
@@ -53,13 +80,38 @@
         163,
         212
       ],
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "governance manipulation",
+          "governance voting",
+          "fund loss"
+        ],
+        "commonlyComposesWith": [
+          "flash loan governance",
+          "emergency commit",
+          "quorum bypass",
+          "proxy reinitialize",
+          "malicious proposal"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: When governance quorum requirements are set too low (or vote delegation concentrates power), an attacker with a relatively small token holding can...",
         "PROVE: Low quorum allows malicious proposal to pass"
       ],
       "antipattern": "Low quorum allows malicious proposal to pass",
-      "validWhen": "When governance quorum requirements are set too low (or vote delegation concentrates power), an attacker with a relatively small token holding can pass proposals that..."
+      "validWhen": "When governance quorum requirements are set too low (or vote delegation concentrates power), an attacker with a relatively small token holding can pass proposals that...",
+      "preconditions": [
+        "governance quorum requirements are set too low (or vote delegation concentrates power), an attacker with a relatively small token..."
+      ],
+      "proofShape": "Low quorum allows malicious proposal to pass",
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      }
     },
     {
       "id": "general-governance-defihacklabs-governance-attack-patterns-3-proxy-re-initialization-atta-003",
@@ -79,13 +131,38 @@
         213,
         266
       ],
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "governance manipulation",
+          "governance voting",
+          "fund loss"
+        ],
+        "commonlyComposesWith": [
+          "flash loan governance",
+          "emergency commit",
+          "quorum bypass",
+          "proxy reinitialize",
+          "malicious proposal"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: When governance, staking, and delegate manager contracts are deployed behind proxies (UUPS or Transparent), the initialize() function must be called...",
         "PROVE: governance proxy initialize() can be called again"
       ],
       "antipattern": "governance proxy initialize() can be called again",
-      "validWhen": "When governance, staking, and delegate manager contracts are deployed behind proxies (UUPS or Transparent), the initialize() function must be called exactly once and..."
+      "validWhen": "When governance, staking, and delegate manager contracts are deployed behind proxies (UUPS or Transparent), the initialize() function must be called exactly once and...",
+      "preconditions": [
+        "governance, staking, and delegate manager contracts are deployed behind proxies (UUPS or Transparent), the initialize() function..."
+      ],
+      "proofShape": "governance proxy initialize() can be called again",
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      }
     },
     {
       "id": "general-governance-defihacklabs-governance-attack-patterns-4-dao-module-oracle-self-answe-004",
@@ -105,13 +182,38 @@
         267,
         321
       ],
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "governance manipulation",
+          "governance voting",
+          "fund loss"
+        ],
+        "commonlyComposesWith": [
+          "oracle",
+          "dao module oracle self answer",
+          "module oracle",
+          "oracle self",
+          "flash loan governance"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: When a DAO uses Gnosis Safe Modules with Reality.io oracle for proposal validation, the security depends on the oracle bond economics.",
         "PROVE: SafeSnap DAO Module allows anyone to add proposals"
       ],
       "antipattern": "SafeSnap DAO Module allows anyone to add proposals",
-      "validWhen": "When a DAO uses Gnosis Safe Modules with Reality.io oracle for proposal validation, the security depends on the oracle bond economics."
+      "validWhen": "When a DAO uses Gnosis Safe Modules with Reality.io oracle for proposal validation, the security depends on the oracle bond economics.",
+      "preconditions": [
+        "a DAO uses Gnosis Safe Modules with Reality.io oracle for proposal validation, the security depends on the oracle bond economics."
+      ],
+      "proofShape": "SafeSnap DAO Module allows anyone to add proposals",
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      }
     },
     {
       "id": "general-governance-defihacklabs-governance-attack-patterns-5-governance-treasury-drain-vi-005",
@@ -131,13 +233,38 @@
         322,
         372
       ],
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "governance manipulation",
+          "governance voting",
+          "fund loss"
+        ],
+        "commonlyComposesWith": [
+          "flash loan governance",
+          "emergency commit",
+          "quorum bypass",
+          "proxy reinitialize",
+          "malicious proposal"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: When governance token supply is small or concentrated, and the governance system has no minimum quorum percentage relative to total supply, an...",
         "PROVE: No meaningful quorum — single holder can pass proposals"
       ],
       "antipattern": "No meaningful quorum — single holder can pass proposals",
-      "validWhen": "When governance token supply is small or concentrated, and the governance system has no minimum quorum percentage relative to total supply, an attacker can acquire..."
+      "validWhen": "When governance token supply is small or concentrated, and the governance system has no minimum quorum percentage relative to total supply, an attacker can acquire...",
+      "preconditions": [
+        "governance token supply is small or concentrated, and the governance system has no minimum quorum percentage relative to total..."
+      ],
+      "proofShape": "No meaningful quorum — single holder can pass proposals",
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      }
     },
     {
       "id": "general-governance-governance-takeover-1-51-attack-via-arbitrary-exec-000",
@@ -157,6 +284,30 @@
         114,
         292
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/dao_governance_findings/h-01-the-51-majority-can-hijack-the-partys-precious-tokens-through-an-arbitrary-.md",
+          "reports/dao_governance_findings/m-12-governance-attack-on-extraordinary-proposals.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "51% attack",
+          "centralization",
+          "access control",
+          "governance control"
+        ],
+        "commonlyComposesWith": [
+          "51 percent attack",
+          "veto",
+          "centralization",
+          "admin",
+          "governance control"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Signal 1: Critical input parameter not validated against expected range or format; Signal 2: Oracle data consumed without staleness check or sanity...",
@@ -168,7 +319,20 @@
       "securePattern": "Verify precious assets still owned after execution",
       "validWhen": "Signal 1: Critical input parameter not validated against expected range or format; Signal 2: Oracle data consumed without staleness check or sanity bounds",
       "invalidWhen": "Not this bug when: Validation exists but is in an upstream function caller; Safe if: Parameter range is inherently bounded by the type or protocol invariant",
-      "impact": "Complete bypass of asset protection mechanisms"
+      "impact": "Complete bypass of asset protection mechanisms",
+      "preconditions": [
+        "governance allows arbitrary proposal execution (arbitrary target addresses and calldata), a 51% majority can execute any...",
+        "attacker control of: specific conditions per pattern",
+        "Attacker acquires 51% voting power temporarily",
+        "Attacker creates proposal: target=preciousNFT, calldata=transfer(attacker, tokenId)",
+        "Attacker now owns the NFTs AND 51% of voting power"
+      ],
+      "proofShape": "DAO owns 100 ETH worth of \"precious\" NFTs (voting power NFTs) -> Governance is designed to protect these from being transferred -> Attacker acquires 51% voting power temporarily",
+      "falsePositiveSignals": [
+        "Not this bug when: Validation exists but is in an upstream function caller",
+        "Safe if: Parameter range is inherently bounded by the type or protocol invariant",
+        "Requires attacker control of: specific conditions per pattern"
+      ]
     },
     {
       "id": "general-governance-governance-takeover-2-loss-of-veto-power-enabling--001",
@@ -188,6 +352,29 @@
         293,
         391
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/m-11-loss-of-veto-power-can-lead-to-51-attack.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "51% attack",
+          "centralization",
+          "access control",
+          "governance control"
+        ],
+        "commonlyComposesWith": [
+          "51 percent attack",
+          "veto",
+          "centralization",
+          "admin",
+          "governance control"
+        ]
+      },
       "check": [
         "VERIFY: Veto power transfer or renunciation is not adequately protected",
         "PROVE: DAO has guardian with veto power to block malicious proposals; 51% attackers create proposal to set guardian = address(0)",
@@ -197,7 +384,12 @@
       "antipattern": "Guardian can be removed through governance",
       "securePattern": "Guardian changes require timelock AND guardian approval",
       "validWhen": "Veto power transfer or renunciation is not adequately protected",
-      "invalidWhen": "Guardian changes require timelock AND guardian approval"
+      "invalidWhen": "Guardian changes require timelock AND guardian approval",
+      "preconditions": [
+        "51% attackers create proposal to set guardian = address(0)",
+        "Attackers now have unrestricted 51% control"
+      ],
+      "proofShape": "DAO has guardian with veto power to block malicious proposals -> 51% attackers create proposal to set guardian = address(0) -> Guardian cannot veto their own removal (would need to veto everything)"
     },
     {
       "id": "general-governance-governance-takeover-3-centralized-governance-contr-002",
@@ -217,6 +409,29 @@
         392,
         521
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/governance-control-is-centralized-through-a-single-gov-address.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "51% attack",
+          "centralization",
+          "access control",
+          "governance control"
+        ],
+        "commonlyComposesWith": [
+          "51 percent attack",
+          "veto",
+          "centralization",
+          "admin",
+          "governance control"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Protocol design concentrates too much power in single addresses",
@@ -228,7 +443,11 @@
       "securePattern": "Critical functions require multi-sig + timelock",
       "validWhen": "Protocol design concentrates too much power in single addresses",
       "invalidWhen": "Critical functions require multi-sig + timelock",
-      "impact": "Single key compromise = total protocol compromise"
+      "impact": "Single key compromise = total protocol compromise",
+      "preconditions": [
+        "Attacker mints unlimited tokens, drains treasury"
+      ],
+      "proofShape": "Protocol has single gov address with unlimited power -> Gov address private key is compromised -> Attacker mints unlimited tokens, drains treasury"
     },
     {
       "id": "general-governance-governance-takeover-4-emergency-function-abuse-003",
@@ -248,6 +467,29 @@
         522,
         620
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/emergency-withdraw-in-veraactoken-breaks-governance-security.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "51% attack",
+          "centralization",
+          "access control",
+          "governance control"
+        ],
+        "commonlyComposesWith": [
+          "51 percent attack",
+          "veto",
+          "centralization",
+          "admin",
+          "governance control"
+        ]
+      },
       "check": [
         "VERIFY: Emergency functions bypass normal governance security",
         "PROVE: Users stake tokens for governance voting power; Tokens are supposed to be locked during active proposals",
@@ -257,7 +499,8 @@
       "antipattern": "Emergency withdraw available during voting",
       "securePattern": "Emergency withdraw checks for active governance",
       "validWhen": "Emergency functions bypass normal governance security",
-      "invalidWhen": "Emergency withdraw checks for active governance"
+      "invalidWhen": "Emergency withdraw checks for active governance",
+      "proofShape": "Users stake tokens for governance voting power -> Tokens are supposed to be locked during active proposals -> Emergency withdraw function exists for \"emergencies"
     },
     {
       "id": "general-governance-governance-takeover-5-unrestricted-deployment-elec-004",
@@ -277,6 +520,29 @@
         621,
         703
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/governance-takeover-via-unrestricted-elections_master-deployment.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "51% attack",
+          "centralization",
+          "access control",
+          "governance control"
+        ],
+        "commonlyComposesWith": [
+          "51 percent attack",
+          "veto",
+          "centralization",
+          "admin",
+          "governance control"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: No access control on critical deployment or election functions",
@@ -287,7 +553,13 @@
       "antipattern": "Anyone can deploy new election master",
       "securePattern": "Only pre-approved bytecode can be deployed",
       "validWhen": "No access control on critical deployment or election functions",
-      "invalidWhen": "Only pre-approved bytecode can be deployed"
+      "invalidWhen": "Only pre-approved bytecode can be deployed",
+      "preconditions": [
+        "Attacker deploys malicious election master",
+        "Malicious master declares attacker as winner",
+        "Attacker gains governance control"
+      ],
+      "proofShape": "Governance uses modular system with deployable \"election masters -> No restriction on who can deploy new election master -> Attacker deploys malicious election master"
     },
     {
       "id": "general-governance-proposal-lifecycle-manipulation-1-unrestricted-proposal-cancel-000",
@@ -307,6 +579,30 @@
         116,
         268
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/dao_governance_findings/unrestricted-proposal-cancellation-allows-governance-process-manipulation.md",
+          "reports/dao_governance_findings/h-04-proposals-can-be-cancelled.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "griefing",
+          "access control",
+          "proposal creation"
+        ],
+        "commonlyComposesWith": [
+          "proposal",
+          "cancellation",
+          "threshold",
+          "state machine",
+          "expiration"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Signal 1: Critical input parameter not validated against expected range or format; Signal 2: Oracle data consumed without staleness check or sanity...",
@@ -318,7 +614,18 @@
       "securePattern": "Check voting power at proposal creation snapshot",
       "validWhen": "Signal 1: Critical input parameter not validated against expected range or format; Signal 2: Oracle data consumed without staleness check or sanity bounds",
       "invalidWhen": "Not this bug when: Validation exists but is in an upstream function caller; Safe if: Parameter range is inherently bounded by the type or protocol invariant",
-      "impact": "Proposals can be cancelled by unauthorized parties"
+      "impact": "Proposals can be cancelled by unauthorized parties",
+      "preconditions": [
+        "attacker control of: specific conditions per pattern",
+        "Attacker (or even proposer's own tokens sold) calls cancel()",
+        "Attacker repeats for every proposal, griefing entire governance"
+      ],
+      "proofShape": "Legitimate proposal passes voting and is queued for execution -> Attacker (or even proposer's own tokens sold) calls cancel() -> Proposal is cancelled, negating all voting efforts",
+      "falsePositiveSignals": [
+        "Not this bug when: Validation exists but is in an upstream function caller",
+        "Safe if: Parameter range is inherently bounded by the type or protocol invariant",
+        "Requires attacker control of: specific conditions per pattern"
+      ]
     },
     {
       "id": "general-governance-proposal-lifecycle-manipulation-2-proposal-threshold-bypass-fo-001",
@@ -338,6 +645,29 @@
         269,
         373
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/bypassing-the-governances-proposal-threshold-to-spam-malicious-proposal-as-a-gri.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "griefing",
+          "access control",
+          "proposal creation"
+        ],
+        "commonlyComposesWith": [
+          "proposal",
+          "cancellation",
+          "threshold",
+          "state machine",
+          "expiration"
+        ]
+      },
       "check": [
         "VERIFY: Threshold is checked at proposal creation time using current voting power.",
         "PROVE: Proposal threshold: 1% of total supply (10,000 tokens); Attacker flash loans 10,000 tokens",
@@ -347,7 +677,14 @@
       "antipattern": "Only checks threshold at creation, no ongoing requirement",
       "securePattern": "Guardian can cancel spam proposals",
       "validWhen": "Threshold is checked at proposal creation time using current voting power.",
-      "invalidWhen": "Guardian can cancel spam proposals"
+      "invalidWhen": "Guardian can cancel spam proposals",
+      "preconditions": [
+        "Proposal threshold: 1% of total supply (10,000 tokens)",
+        "Attacker flash loans 10,000 tokens",
+        "Attacker creates spam proposal",
+        "Attacker repays flash loan in same transaction"
+      ],
+      "proofShape": "Proposal threshold: 1% of total supply (10,000 tokens) -> Attacker flash loans 10,000 tokens -> Attacker creates spam proposal"
     },
     {
       "id": "general-governance-proposal-lifecycle-manipulation-3-proposal-expiration-logic-er-002",
@@ -367,6 +704,29 @@
         374,
         472
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/m-03-the-proposal-expiration-logic-is-incorrect.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "griefing",
+          "access control",
+          "proposal creation"
+        ],
+        "commonlyComposesWith": [
+          "proposal",
+          "cancellation",
+          "threshold",
+          "state machine",
+          "expiration"
+        ]
+      },
       "check": [
         "VERIFY: Expiration timestamp calculation errors",
         "PROVE: Proposal passes voting on day 1; Grace period: 7 days to execute",
@@ -376,7 +736,109 @@
       "antipattern": "Uses startTime instead of endTime",
       "securePattern": "Proper expiration based on voting end time",
       "validWhen": "Expiration timestamp calculation errors",
-      "invalidWhen": "Proper expiration based on voting end time"
+      "invalidWhen": "Proper expiration based on voting end time",
+      "proofShape": "Proposal passes voting on day 1 -> Grace period: 7 days to execute -> Bug: Expiration = startTime + gracePeriod (should be endTime + gracePeriod)"
+    },
+    {
+      "id": "general-governance-proposal-lifecycle-manipulation-4-state-machine-transition-vul-003",
+      "title": "4. State Machine Transition Vulnerabilities",
+      "severity": "HIGH",
+      "grep": "proposal_creation|block.timestamp|updateProposal|block.number|state_machine|_isExpired",
+      "detect": "State machine implementation errors:\n\n- Missing state checks before transitions\n\n- Wrong state returned from state()...",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/dao-governance-vulnerabilities/proposal-lifecycle-manipulation.md",
+      "lines": [
+        473,
+        541
+      ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "griefing",
+          "access control",
+          "proposal creation"
+        ],
+        "commonlyComposesWith": [
+          "proposal",
+          "cancellation",
+          "threshold",
+          "state machine",
+          "expiration"
+        ]
+      },
+      "check": [
+        "VERIFY: State machine implementation errors",
+        "PROVE: Can execute without going through queue",
+        "FALSIFY: Proper state machine with all transitions validated"
+      ],
+      "antipattern": "Can execute without going through queue",
+      "securePattern": "Proper state machine with all transitions validated",
+      "validWhen": "State machine implementation errors",
+      "invalidWhen": "Proper state machine with all transitions validated",
+      "proofShape": "Can execute without going through queue"
+    },
+    {
+      "id": "general-governance-proposal-lifecycle-manipulation-5-proposal-execution-vulnerabi-004",
+      "title": "5. Proposal Execution Vulnerabilities",
+      "severity": "CRITICAL",
+      "grep": "proposal_creation|block.timestamp|updateProposal|block.number|state_machine|_isExpired",
+      "detect": "Execution-related issues:\n\n- Proposal content modified after creation\n\n- Execution without proper state checks\n\n-...",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/dao-governance-vulnerabilities/proposal-lifecycle-manipulation.md",
+      "lines": [
+        542,
+        617
+      ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "proposal_lifecycle_manipulation",
+          "missing validation",
+          "logical error",
+          "griefing",
+          "access control"
+        ],
+        "commonlyComposesWith": [
+          "proposal",
+          "cancellation",
+          "threshold",
+          "state machine",
+          "expiration"
+        ]
+      },
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Execution-related issues",
+        "PROVE: Proposal data not immutable",
+        "FALSIFY: Proposal content stored by hash"
+      ],
+      "antipattern": "Proposal data not immutable",
+      "securePattern": "Proposal content stored by hash",
+      "validWhen": "Execution-related issues",
+      "invalidWhen": "Proposal content stored by hash",
+      "proofShape": "Proposal data not immutable"
     },
     {
       "id": "general-governance-quorum-manipulation-1-quorum-lowering-via-delegati-000",
@@ -396,6 +858,30 @@
         111,
         269
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/dao_governance_findings/m-8-adversary-can-abuse-delegating-to-lower-quorum.md",
+          "reports/dao_governance_findings/cordinated-group-of-attacker-can-artificially-lower-quorum-threshold-during-acti.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "state manipulation",
+          "quorum calculation",
+          "quorum manipulation"
+        ],
+        "commonlyComposesWith": [
+          "quorum",
+          "voting power",
+          "threshold",
+          "delegation",
+          "proposal passing"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Signal 1: Critical input parameter not validated against expected range or format; Signal 2: Oracle data consumed without staleness check or sanity...",
@@ -407,7 +893,20 @@
       "securePattern": "Quorum based on total token supply, not adjusted",
       "validWhen": "Signal 1: Critical input parameter not validated against expected range or format; Signal 2: Oracle data consumed without staleness check or sanity bounds",
       "invalidWhen": "Not this bug when: Validation exists but is in an upstream function caller; Safe if: Parameter range is inherently bounded by the type or protocol invariant",
-      "impact": "Quorum requirement can be artificially lowered"
+      "impact": "Quorum requirement can be artificially lowered",
+      "preconditions": [
+        "attacker control of: specific conditions per pattern",
+        "Proposal starts with 100 ETH total adjusted supply",
+        "Quorum = 20% of adjusted supply = 20 ETH required",
+        "Group delegates 50 ETH to addresses that \"don't count\" as adjusted supply",
+        "Adjusted supply drops to 50 ETH"
+      ],
+      "proofShape": "Proposal starts with 100 ETH total adjusted supply -> Quorum = 20% of adjusted supply = 20 ETH required -> Coordinated group holds 15 ETH of voting power",
+      "falsePositiveSignals": [
+        "Not this bug when: Validation exists but is in an upstream function caller",
+        "Safe if: Parameter range is inherently bounded by the type or protocol invariant",
+        "Requires attacker control of: specific conditions per pattern"
+      ]
     },
     {
       "id": "general-governance-quorum-manipulation-2-dynamic-quorum-manipulation-001",
@@ -427,6 +926,27 @@
         270,
         332
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "manipulation",
+          "dynamic quorum manipulation",
+          "quorum manipulation",
+          "missing validation",
+          "logical error"
+        ],
+        "commonlyComposesWith": [
+          "quorum",
+          "voting power",
+          "threshold",
+          "delegation",
+          "proposal passing"
+        ]
+      },
       "check": [
         "VERIFY: Automatic quorum adjustment algorithms that lower quorum when participation drops can be gamed by coordinated non-participation.",
         "PROVE: Normal quorum: 40% of voting power; Attacker group controls 15% of tokens",
@@ -436,7 +956,12 @@
       "antipattern": "Quorum decreases based on low participation",
       "securePattern": "Quorum has a minimum floor",
       "validWhen": "Automatic quorum adjustment algorithms that lower quorum when participation drops can be gamed by coordinated non-participation.",
-      "invalidWhen": "Quorum has a minimum floor"
+      "invalidWhen": "Quorum has a minimum floor",
+      "preconditions": [
+        "Attacker group controls 15% of tokens",
+        "Attacker's 15% is now sufficient to pass any proposal"
+      ],
+      "proofShape": "Normal quorum: 40% of voting power -> Attacker group controls 15% of tokens -> Group boycotts multiple proposals, reducing participation"
     },
     {
       "id": "general-governance-quorum-manipulation-3-quorum-threshold-miscalculat-002",
@@ -456,6 +981,29 @@
         333,
         427
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/h-01-adversary-can-win-proposals-with-voting-power-as-low-as-4.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "state manipulation",
+          "quorum calculation",
+          "quorum manipulation"
+        ],
+        "commonlyComposesWith": [
+          "quorum",
+          "voting power",
+          "threshold",
+          "delegation",
+          "proposal passing"
+        ]
+      },
       "check": [
         "VERIFY: Mathematical errors in quorum calculation - using wrong base values, missing percentage conversions, or comparing against wrong vote tallies.",
         "PROVE: Intended quorum: 51% of total votes FOR to pass; Bug: Code checks if forVotes > totalVotes * 0.04 (4%)",
@@ -466,7 +1014,11 @@
       "securePattern": "Proper majority calculation",
       "validWhen": "Mathematical errors in quorum calculation - using wrong base values, missing percentage conversions, or comparing against wrong vote tallies.",
       "invalidWhen": "Proper majority calculation",
-      "impact": "Proposals pass without required support"
+      "impact": "Proposals pass without required support",
+      "preconditions": [
+        "Attacker with only 5% voting power can pass any proposal"
+      ],
+      "proofShape": "Intended quorum: 51% of total votes FOR to pass -> Bug: Code checks if forVotes > totalVotes * 0.04 (4%) -> Attacker with only 5% voting power can pass any proposal"
     },
     {
       "id": "general-governance-quorum-manipulation-4-quorum-not-enforced-in-state-003",
@@ -486,6 +1038,29 @@
         428,
         510
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/m-01-quorum-votes-have-no-effect-for-determining-whether-proposal-is-defeated-or.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "state manipulation",
+          "quorum calculation",
+          "quorum manipulation"
+        ],
+        "commonlyComposesWith": [
+          "quorum",
+          "voting power",
+          "threshold",
+          "delegation",
+          "proposal passing"
+        ]
+      },
       "check": [
         "VERIFY: state() function determines proposal outcome but fails to check quorum in the success path, or quorum check is placed in wrong branch of conditional...",
         "PROVE: Proposal receives 10 FOR votes, 5 AGAINST votes; Quorum requirement: 1000 votes",
@@ -495,7 +1070,67 @@
       "antipattern": "Quorum not checked for SUCCEEDED state",
       "securePattern": "Quorum enforced in state transitions",
       "validWhen": "The state() function determines proposal outcome but fails to check quorum in the success path, or quorum check is placed in wrong branch of conditional logic.",
-      "invalidWhen": "Quorum enforced in state transitions"
+      "invalidWhen": "Quorum enforced in state transitions",
+      "proofShape": "Proposal receives 10 FOR votes, 5 AGAINST votes -> Quorum requirement: 1000 votes -> Bug: State function only checks forVotes > againstVotes"
+    },
+    {
+      "id": "general-governance-quorum-manipulation-5-tie-handling-vulnerabilities-004",
+      "title": "5. Tie Handling Vulnerabilities",
+      "severity": "MEDIUM",
+      "grep": "_isProposalSucceeded|supply_based_quorum|adjustedTotalSupply|quorum_calculation|block.timestamp|_quorumReached",
+      "detect": "Using `>=` instead of `>` when comparing FOR votes to AGAINST votes causes ties to pass.",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/dao-governance-vulnerabilities/quorum-manipulation.md",
+      "lines": [
+        511,
+        598
+      ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/dao_governance_findings/m09-ties-in-governance-proposals-are-approved.md",
+          "reports/dao_governance_findings/m-28-state-function-does-not-require-majority-of-votes-for-supporting-and-passin.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "state manipulation",
+          "quorum calculation",
+          "quorum manipulation"
+        ],
+        "commonlyComposesWith": [
+          "quorum",
+          "voting power",
+          "threshold",
+          "delegation",
+          "proposal passing"
+        ]
+      },
+      "check": [
+        "VERIFY: Using >= instead of > when comparing FOR votes to AGAINST votes causes ties to pass.",
+        "PROVE: Proposal: Transfer 1M tokens to attacker address; Voting: 500,000 FOR, 500,000 AGAINST (tie)",
+        "FALSIFY: Explicit tie handling",
+        "ANTIPATTERN: Doesn't require strict majority"
+      ],
+      "antipattern": "Doesn't require strict majority",
+      "securePattern": "Explicit tie handling",
+      "validWhen": "Using >= instead of > when comparing FOR votes to AGAINST votes causes ties to pass.",
+      "invalidWhen": "Explicit tie handling",
+      "preconditions": [
+        "FOR and AGAINST votes are equal, the outcome should typically be rejection.",
+        "Proposal: Transfer 1M tokens to attacker address",
+        "Attacker receives tokens"
+      ],
+      "proofShape": "Proposal: Transfer 1M tokens to attacker address -> Voting: 500,000 FOR, 500,000 AGAINST (tie) -> Bug: Code uses forVotes >= againstVotes"
     },
     {
       "id": "general-governance-timelock-bypass-1-timelock-bypass-via-privileg-000",
@@ -515,6 +1150,29 @@
         116,
         281
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/h-01-timelock-can-be-bypassed.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "access control",
+          "timelock controller",
+          "timelock bypass"
+        ],
+        "commonlyComposesWith": [
+          "timelock",
+          "delay",
+          "governor",
+          "admin",
+          "execution"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Signal 1: Critical input parameter not validated against expected range or format; Signal 2: Oracle data consumed without staleness check or sanity...",
@@ -526,10 +1184,76 @@
       "securePattern": "All administrative actions go through timelock",
       "validWhen": "Signal 1: Critical input parameter not validated against expected range or format; Signal 2: Oracle data consumed without staleness check or sanity bounds",
       "invalidWhen": "Not this bug when: Validation exists but is in an upstream function caller; Safe if: Parameter range is inherently bounded by the type or protocol invariant",
-      "impact": "Complete bypass of all timelock security guarantees"
+      "impact": "Complete bypass of all timelock security guarantees",
+      "preconditions": [
+        "attacker control of: specific conditions per pattern",
+        "Governor/Admin key is compromised or turns malicious",
+        "Attacker calls setGovernor(attackerAddress) - takes effect IMMEDIATELY",
+        "New attacker-controlled governor calls setDelay(0) - takes effect IMMEDIATELY",
+        "Attacker now has unrestricted access to all timelocked functions"
+      ],
+      "proofShape": "Governor/Admin key is compromised or turns malicious -> Attacker calls setGovernor(attackerAddress) - takes effect IMMEDIATELY -> New attacker-controlled governor calls setDelay(0) - takes effect IMMEDIATELY",
+      "falsePositiveSignals": [
+        "Not this bug when: Validation exists but is in an upstream function caller",
+        "Safe if: Parameter range is inherently bounded by the type or protocol invariant",
+        "Requires attacker control of: specific conditions per pattern"
+      ]
     },
     {
-      "id": "general-governance-timelock-bypass-3-timelock-reduction-during-ac-003",
+      "id": "general-governance-timelock-bypass-2-zero-minimal-delay-vulnerabi-001",
+      "title": "2. Zero/Minimal Delay Vulnerabilities",
+      "severity": "MEDIUM",
+      "grep": "emergencyWithdraw|block.timestamp|_timelockMint|onlyTimelock|grace_period|executeBatch",
+      "detect": "Constructor or initialization code sets the delay to zero, or validation logic allows zero/minimal delays, effectively...",
+      "cat": [
+        "governance",
+        "dao",
+        "voting",
+        "stablecoin",
+        "mev"
+      ],
+      "ref": "DB/general/dao-governance-vulnerabilities/timelock-bypass.md",
+      "lines": [
+        282,
+        347
+      ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/timelock-delay-is-set-to-zero-in-the-constructor.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "access control",
+          "timelock controller",
+          "timelock bypass"
+        ],
+        "commonlyComposesWith": [
+          "timelock",
+          "delay",
+          "governor",
+          "admin",
+          "execution"
+        ]
+      },
+      "check": [
+        "VERIFY: Constructor or initialization code sets the delay to zero, or validation logic allows zero/minimal delays, effectively disabling the timelock.",
+        "PROVE: Protocol deploys timelock with delay = 0 (by accident or design flaw); Proposals can be executed immediately after creation",
+        "FALSIFY: Minimum delay enforced",
+        "ANTIPATTERN: Delay hardcoded to 0 despite parameter"
+      ],
+      "antipattern": "Delay hardcoded to 0 despite parameter",
+      "securePattern": "Minimum delay enforced",
+      "validWhen": "Constructor or initialization code sets the delay to zero, or validation logic allows zero/minimal delays, effectively disabling the timelock.",
+      "invalidWhen": "Minimum delay enforced",
+      "proofShape": "Protocol deploys timelock with delay = 0 (by accident or design flaw) -> Proposals can be executed immediately after creation -> Malicious proposals cannot be detected or prevented"
+    },
+    {
+      "id": "general-governance-timelock-bypass-3-timelock-reduction-during-ac-002",
       "title": "3. Timelock Reduction During Active Lock",
       "severity": "MEDIUM",
       "grep": "emergencyWithdraw|block.timestamp|_timelockMint|onlyTimelock|grace_period|executeBatch",
@@ -546,6 +1270,29 @@
         348,
         410
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/m-09-bypass-zap-timelock.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "access control",
+          "timelock controller",
+          "timelock bypass"
+        ],
+        "commonlyComposesWith": [
+          "timelock",
+          "delay",
+          "governor",
+          "admin",
+          "execution"
+        ]
+      },
       "check": [
         "VERIFY: Timelock end timestamp is calculated as block.timestamp + timelockLength every time a minting/locking function is called, rather than taking the...",
         "PROVE: User locks tokens via StakingZap with 7-day timelock; User immediately deposits a tiny amount via a different path with 2ms timelock",
@@ -555,10 +1302,15 @@
       "antipattern": "Always overwrites timelock, even if shorter",
       "securePattern": "Only extend timelock, never reduce",
       "validWhen": "Timelock end timestamp is calculated as block.timestamp + timelockLength every time a minting/locking function is called, rather than taking the maximum of existing and...",
-      "invalidWhen": "Only extend timelock, never reduce"
+      "invalidWhen": "Only extend timelock, never reduce",
+      "preconditions": [
+        "a new timelock duration is applied retroactively to existing locks, users can reduce their lock periods by triggering...",
+        "User immediately deposits a tiny amount via a different path with 2ms timelock"
+      ],
+      "proofShape": "User locks tokens via StakingZap with 7-day timelock -> User immediately deposits a tiny amount via a different path with 2ms timelock -> Timelock is recalculated: block.timestamp + 2ms"
     },
     {
-      "id": "general-governance-timelock-bypass-4-canceled-proposal-still-exec-004",
+      "id": "general-governance-timelock-bypass-4-canceled-proposal-still-exec-003",
       "title": "4. Canceled Proposal Still Executable",
       "severity": "MEDIUM",
       "grep": "TimelockController.executeBatch|emergencyWithdraw|block.timestamp|_timelockMint|onlyTimelock|grace_period",
@@ -575,6 +1327,29 @@
         411,
         501
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/timelock-controller-retains-canceled-proposals-enabling-unauthorized-execution-a.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "access control",
+          "timelock controller",
+          "timelock bypass"
+        ],
+        "commonlyComposesWith": [
+          "timelock",
+          "delay",
+          "governor",
+          "admin",
+          "execution"
+        ]
+      },
       "check": [
         "VERIFY: cancel() function in the governance contract only updates the governance state but does not call cancel() on the TimelockController, leaving the...",
         "PROVE: Proposal is created and passes voting; Proposal is scheduled in TimelockController",
@@ -584,10 +1359,14 @@
       "antipattern": "Cancel only updates governance state, not timelock",
       "securePattern": "Cancel propagates to timelock",
       "validWhen": "The cancel() function in the governance contract only updates the governance state but does not call cancel() on the TimelockController, leaving the operation still...",
-      "invalidWhen": "Cancel propagates to timelock"
+      "invalidWhen": "Cancel propagates to timelock",
+      "preconditions": [
+        "a proposal is canceled in the governance contract but not canceled in the underlying timelock controller, the proposal remains..."
+      ],
+      "proofShape": "Proposal is created and passes voting -> Proposal is scheduled in TimelockController -> Proposer or guardian cancels proposal in Governance contract"
     },
     {
-      "id": "general-governance-timelock-bypass-5-storage-collision-attacks-005",
+      "id": "general-governance-timelock-bypass-5-storage-collision-attacks-004",
       "title": "5. Storage Collision Attacks",
       "severity": "CRITICAL",
       "grep": "cancel(bytes32(0|emergencyWithdraw|block.timestamp|_timelockMint|onlyTimelock|grace_period",
@@ -604,6 +1383,29 @@
         502,
         580
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/cancelling-bytes320-allows-timelock-takeover.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "access control",
+          "timelock controller",
+          "timelock bypass"
+        ],
+        "commonlyComposesWith": [
+          "timelock",
+          "delay",
+          "governor",
+          "admin",
+          "execution"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: cancel() function takes a raw bytes32 id as input without validation.",
@@ -614,7 +1416,12 @@
       "antipattern": "cancel() takes raw id, allowing storage manipulation",
       "securePattern": "ID is computed, not provided directly",
       "validWhen": "The cancel() function takes a raw bytes32 id as input without validation.",
-      "invalidWhen": "ID is computed, not provided directly"
+      "invalidWhen": "ID is computed, not provided directly",
+      "preconditions": [
+        "Attacker with CANCELLER_ROLE calls cancel(bytes32(0))",
+        "Attacker reinitializes with themselves as admin with zero delay"
+      ],
+      "proofShape": "Attacker with CANCELLER_ROLE calls cancel(bytes32(0)) -> Storage slot for minimum delay is cleared (if it has LSB = 0) -> Contract now has zero minimum delay"
     },
     {
       "id": "general-governance-voting-power-manipulation-1-double-voting-via-delegation-000",
@@ -634,6 +1441,31 @@
         118,
         325
       ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/dao_governance_findings/double-voting-by-delegaters.md",
+          "reports/dao_governance_findings/h-04-old-delegatee-not-deleted-when-delegating-to-new-tokenid.md",
+          "reports/dao_governance_findings/h-10-upon-changing-of-delegate-votedelegation-updates-both-the-previous-and-the-.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "economic exploit",
+          "logical error",
+          "voting system",
+          "voting power manipulation"
+        ],
+        "commonlyComposesWith": [
+          "flash loans",
+          "voting power",
+          "delegation",
+          "checkpoints",
+          "vote escrow"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Signal 1: Critical input parameter not validated against expected range or format; Signal 2: Oracle data consumed without staleness check or sanity...",
@@ -645,7 +1477,17 @@
       "securePattern": "Use memory to read checkpoint, only write new one",
       "validWhen": "Signal 1: Critical input parameter not validated against expected range or format; Signal 2: Oracle data consumed without staleness check or sanity bounds",
       "invalidWhen": "Not this bug when: Validation exists but is in an upstream function caller; Safe if: Parameter range is inherently bounded by the type or protocol invariant",
-      "impact": "Voting power can be multiplied arbitrarily"
+      "impact": "Voting power can be multiplied arbitrarily",
+      "preconditions": [
+        "attacker control of: specific conditions per pattern",
+        "a user delegates their voting power and later withdraws/transfers their stake, there are no restrictions preventing the delegated..."
+      ],
+      "proofShape": "Alice delegates her voting power (100 tokens) to Bob -> Bob votes on a proposal with 100 + his own votes -> Alice withdraws her stake during the voting period",
+      "falsePositiveSignals": [
+        "Not this bug when: Validation exists but is in an upstream function caller",
+        "Safe if: Parameter range is inherently bounded by the type or protocol invariant",
+        "Requires attacker control of: specific conditions per pattern"
+      ]
     },
     {
       "id": "general-governance-voting-power-manipulation-2-flash-loan-voting-attacks-001",
@@ -665,6 +1507,29 @@
         326,
         422
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/h-05-flash-loans-can-affect-governance-voting-in-daosol.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "economic exploit",
+          "logical error",
+          "voting system",
+          "voting power manipulation"
+        ],
+        "commonlyComposesWith": [
+          "flash loan voting",
+          "flash loan",
+          "flash loans",
+          "voting power",
+          "delegation"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Voting power is calculated based on current token balance at vote time, rather than a historical snapshot taken before the proposal was created.",
@@ -675,7 +1540,14 @@
       "antipattern": "Voting allowed immediately after receiving tokens",
       "securePattern": "Voting power based on snapshot at proposal creation",
       "validWhen": "Voting power is calculated based on current token balance at vote time, rather than a historical snapshot taken before the proposal was created.",
-      "invalidWhen": "Voting power based on snapshot at proposal creation"
+      "invalidWhen": "Voting power based on snapshot at proposal creation",
+      "preconditions": [
+        "Attacker takes a flash loan of governance tokens",
+        "In the same transaction, attacker votes on a critical proposal",
+        "Attacker returns flash loan",
+        "Proposal outcome is manipulated without real token ownership"
+      ],
+      "proofShape": "Attacker takes a flash loan of governance tokens -> In the same transaction, attacker votes on a critical proposal -> Voting power is calculated based on current (borrowed) balance"
     },
     {
       "id": "general-governance-voting-power-manipulation-3-unlimited-vote-minting-002",
@@ -695,6 +1567,29 @@
         423,
         510
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/h-1-votes-balance-can-be-increased-indefinitely-in-multiple-contracts.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "economic exploit",
+          "logical error",
+          "voting system",
+          "voting power manipulation"
+        ],
+        "commonlyComposesWith": [
+          "flash loans",
+          "voting power",
+          "delegation",
+          "checkpoints",
+          "vote escrow"
+        ]
+      },
       "check": [
         "VERIFY: Public initialization functions that mint voting tokens lack proper access control or single-use enforcement, allowing repeated calls to inflate...",
         "PROVE: Attacker calls initializeDistributionRecord() with valid merkle proof; Function mints voting tokens equal to their total claimable amount",
@@ -704,7 +1599,13 @@
       "antipattern": "Can be called multiple times to mint infinite votes",
       "securePattern": "Only allow initialization once per beneficiary",
       "validWhen": "Public initialization functions that mint voting tokens lack proper access control or single-use enforcement, allowing repeated calls to inflate voting power.",
-      "invalidWhen": "Only allow initialization once per beneficiary"
+      "invalidWhen": "Only allow initialization once per beneficiary",
+      "preconditions": [
+        "Attacker calls initializeDistributionRecord() with valid merkle proof",
+        "Attacker calls the function again (and again)",
+        "Attacker now has unlimited voting power"
+      ],
+      "proofShape": "Attacker calls initializeDistributionRecord() with valid merkle proof -> Function mints voting tokens equal to their total claimable amount -> Attacker calls the function again (and again)"
     },
     {
       "id": "general-governance-voting-power-manipulation-4-missing-voting-power-snapsho-003",
@@ -724,6 +1625,29 @@
         511,
         591
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/voting-power-snapshot-missing.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "economic exploit",
+          "logical error",
+          "voting system",
+          "voting power manipulation"
+        ],
+        "commonlyComposesWith": [
+          "flash loans",
+          "voting power",
+          "delegation",
+          "checkpoints",
+          "vote escrow"
+        ]
+      },
       "check": [
         "VERIFY: governance contract uses current voting power (getVotingPower(msg.sender)) instead of historical voting power at a specific snapshot block.",
         "PROVE: User sees a proposal they want to pass/fail; User increases their locked tokens (or acquires more)",
@@ -733,7 +1657,11 @@
       "antipattern": "Uses current voting power, not snapshot",
       "securePattern": "Use snapshot from proposal creation",
       "validWhen": "The governance contract uses current voting power (getVotingPower(msg.sender)) instead of historical voting power at a specific snapshot block.",
-      "invalidWhen": "Use snapshot from proposal creation"
+      "invalidWhen": "Use snapshot from proposal creation",
+      "preconditions": [
+        "voting power is calculated at vote time rather than at proposal creation, it creates opportunities for manipulation by acquiring..."
+      ],
+      "proofShape": "User sees a proposal they want to pass/fail -> User increases their locked tokens (or acquires more) -> User votes with inflated voting power"
     },
     {
       "id": "general-governance-voting-power-manipulation-5-delegation-logic-errors-004",
@@ -753,6 +1681,27 @@
         592,
         618
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "economic exploit",
+          "logical error",
+          "voting system",
+          "voting power manipulation"
+        ],
+        "commonlyComposesWith": [
+          "flash loans",
+          "voting power",
+          "delegation",
+          "checkpoints",
+          "vote escrow"
+        ]
+      },
       "check": [
         "VERIFY: Self-delegation toggles community power"
       ],
@@ -777,12 +1726,38 @@
         143,
         224
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "governance mechanism bypass",
+          "governance exploit",
+          "governance bypass",
+          "voting proposal timelock",
+          "manipulation or dos"
+        ],
+        "commonlyComposesWith": [
+          "propose",
+          "cast vote",
+          "execute",
+          "queue",
+          "cancel"
+        ]
+      },
       "check": [
         "VERIFY: Signal 1: castVote uses current balance (getVotes(block.number)) instead of snapshot at proposal creation (getPastVotes(proposalSnapshot)); Signal 2:...",
         "FALSIFY: Not this bug when: Governance uses getPastVotes(proposalSnapshot) from OZ Governor, which snapshots at proposal creation; Safe if: Timelock's setDelay and setGovernor..."
       ],
       "validWhen": "Signal 1: castVote uses current balance (getVotes(block.number)) instead of snapshot at proposal creation (getPastVotes(proposalSnapshot)); Signal 2: Quorum calculated...",
-      "invalidWhen": "Not this bug when: Governance uses getPastVotes(proposalSnapshot) from OZ Governor, which snapshots at proposal creation; Safe if: Timelock's setDelay and setGovernor..."
+      "invalidWhen": "Not this bug when: Governance uses getPastVotes(proposalSnapshot) from OZ Governor, which snapshots at proposal creation; Safe if: Timelock's setDelay and setGovernor...",
+      "falsePositiveSignals": [
+        "Not this bug when: Governance uses getPastVotes(proposalSnapshot) from OZ Governor, which snapshots at proposal creation",
+        "Safe if: Timelock's setDelay and setGovernor can only be called via the timelock itself (require(msg.sender == address(this)))",
+        "Safe if: cancel() propagates cancellation to both Governor state and Timelock state"
+      ]
     },
     {
       "id": "general-governance-dao-governance-vulnerabilities-section-1-flash-loan-snapshot--001",
@@ -802,13 +1777,44 @@
         225,
         287
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/dao_governance_findings/h-05-flash-loans-can-affect-governance-voting-in-daosol.md",
+          "reports/dao_governance_findings/h-1-votes-balance-can-be-increased-indefinitely-in-multiple-contracts.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "manipulation",
+          "governance mechanism bypass",
+          "governance exploit",
+          "governance bypass",
+          "voting proposal timelock"
+        ],
+        "commonlyComposesWith": [
+          "propose",
+          "cast vote",
+          "execute",
+          "queue",
+          "cancel"
+        ]
+      },
       "check": [
         "VERIFY: Governance contracts that use current token balance (instead of a historical snapshot at proposal creation) for voting power allow attackers to...",
         "PROVE: *Path A: Flash Loan Voting; Attacker takes a flash loan of governance tokens (or borrows from pool)",
         "ANTIPATTERN: No access control on re-initialization — unlimited voting power mint"
       ],
       "antipattern": "No access control on re-initialization — unlimited voting power mint",
-      "validWhen": "Governance contracts that use current token balance (instead of a historical snapshot at proposal creation) for voting power allow attackers to temporarily inflate their..."
+      "validWhen": "Governance contracts that use current token balance (instead of a historical snapshot at proposal creation) for voting power allow attackers to temporarily inflate their...",
+      "preconditions": [
+        "Attacker takes a flash loan of governance tokens (or borrows from pool)",
+        "Attacker calls castVote() with enormous voting weight",
+        "Attacker repays flash loan in same transaction",
+        "User increases lock/deposit → votes with inflated power → immediately withdraws"
+      ],
+      "proofShape": "*Path A: Flash Loan Voting -> Attacker takes a flash loan of governance tokens (or borrows from pool) -> Attacker calls castVote() with enormous voting weight"
     },
     {
       "id": "general-governance-dao-governance-vulnerabilities-section-2-quorum-manipulation--002",
@@ -828,13 +1834,44 @@
         288,
         351
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/dao_governance_findings/h-01-adversary-can-win-proposals-with-voting-power-as-low-as-4.md",
+          "reports/dao_governance_findings/m-01-quorum-votes-have-no-effect-for-determining-whether-proposal-is-defeated-or.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "manipulation",
+          "section quorum manipulation threshold bypass",
+          "quorum manipulation",
+          "manipulation threshold",
+          "governance mechanism bypass"
+        ],
+        "commonlyComposesWith": [
+          "propose",
+          "cast vote",
+          "execute",
+          "queue",
+          "cancel"
+        ]
+      },
       "check": [
         "VERIFY: Quorum thresholds calculated dynamically from current total supply (instead of frozen at proposal creation) can be manipulated by coordinated token...",
         "PROVE: *Path A: Quorum Lowered via Token Withdrawal; Attacker coordinates with group to lock tokens and create a proposal",
         "ANTIPATTERN: `4` means 4%, NOT 1/4th (25%) — proposals pass at 6.25x lower threshold"
       ],
       "antipattern": "`4` means 4%, NOT 1/4th (25%) — proposals pass at 6.25x lower threshold",
-      "validWhen": "Quorum thresholds calculated dynamically from current total supply (instead of frozen at proposal creation) can be manipulated by coordinated token burns, withdrawals,..."
+      "validWhen": "Quorum thresholds calculated dynamically from current total supply (instead of frozen at proposal creation) can be manipulated by coordinated token burns, withdrawals,...",
+      "preconditions": [
+        "Attacker coordinates with group to lock tokens and create a proposal",
+        "Attacker's votes now exceed lowered quorum → proposal passes",
+        "Proposals pass with only 4% of supply supporting",
+        "Attacker delegates to self, then creates a proposal → quorum locked at reduced total"
+      ],
+      "proofShape": "*Path A: Quorum Lowered via Token Withdrawal -> Attacker coordinates with group to lock tokens and create a proposal -> After proposal enters voting period, coordinated group withdraws locks (after expiry)"
     },
     {
       "id": "general-governance-dao-governance-vulnerabilities-section-3-timelock-bypass-unau-003",
@@ -854,6 +1891,30 @@
         352,
         418
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/dao_governance_findings/h-01-timelock-can-be-bypassed.md",
+          "reports/dao_governance_findings/cancelling-bytes320-allows-timelock-takeover.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "governance mechanism bypass",
+          "governance exploit",
+          "governance bypass",
+          "voting proposal timelock",
+          "manipulation or dos"
+        ],
+        "commonlyComposesWith": [
+          "propose",
+          "cast vote",
+          "execute",
+          "queue",
+          "cancel"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Timelocks are meant to enforce a mandatory delay between proposal approval and execution.",
@@ -861,7 +1922,13 @@
         "ANTIPATTERN: setGovernor effective immediately — no timelock enforcement"
       ],
       "antipattern": "setGovernor effective immediately — no timelock enforcement",
-      "validWhen": "Timelocks are meant to enforce a mandatory delay between proposal approval and execution."
+      "validWhen": "Timelocks are meant to enforce a mandatory delay between proposal approval and execution.",
+      "preconditions": [
+        "Governor calls Timelock.setGovernor(attacker) — effective immediately (no timelock enforcement)",
+        "Attacker (now governor) calls Timelock.setDelay(0) — effective immediately",
+        "Attacker can now execute any operation instantly, including minting unlimited tokens"
+      ],
+      "proofShape": "*Path A: Governor Sets Delay to Zero -> Governor calls Timelock.setGovernor(attacker) — effective immediately (no timelock enforcement) -> Attacker (now governor) calls Timelock.setDelay(0) — effective immediately"
     },
     {
       "id": "general-governance-dao-governance-vulnerabilities-section-4-delegation-checkpoin-004",
@@ -881,13 +1948,42 @@
         419,
         481
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/dao_governance_findings/h-07-_writecheckpoint-does-not-write-to-storage-on-same-block.md",
+          "reports/dao_governance_findings/double-voting-by-delegaters.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "governance mechanism bypass",
+          "governance exploit",
+          "governance bypass",
+          "voting proposal timelock",
+          "manipulation or dos"
+        ],
+        "commonlyComposesWith": [
+          "propose",
+          "cast vote",
+          "execute",
+          "queue",
+          "cancel"
+        ]
+      },
       "check": [
         "VERIFY: Vote delegation and checkpoint systems track historical voting power for governance snapshots.",
         "PROVE: *Path A: _writeCheckpoint Memory vs Storage Bug; User delegates tokenA to userB, then delegates tokenA to userC in same block",
         "ANTIPATTERN: No stake lockup during active voting — delegate→vote→withdraw→re-vote"
       ],
       "antipattern": "No stake lockup during active voting — delegate→vote→withdraw→re-vote",
-      "validWhen": "Vote delegation and checkpoint systems track historical voting power for governance snapshots."
+      "validWhen": "Vote delegation and checkpoint systems track historical voting power for governance snapshots.",
+      "preconditions": [
+        "Only first delegation persists — second is silently lost",
+        "Attacker creates 500 minimum-value lock NFTs, delegates all to victim"
+      ],
+      "proofShape": "*Path A: _writeCheckpoint Memory vs Storage Bug -> User delegates tokenA to userB, then delegates tokenA to userC in same block -> _writeCheckpoint reads oldCheckpoint as memory (not storage)"
     },
     {
       "id": "general-governance-dao-governance-vulnerabilities-section-5-proposal-cancellatio-005",
@@ -907,13 +2003,43 @@
         482,
         535
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/unrestricted-proposal-cancellation-allows-governance-process-manipulation.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "governance mechanism bypass",
+          "governance exploit",
+          "governance bypass",
+          "voting proposal timelock",
+          "manipulation or dos"
+        ],
+        "commonlyComposesWith": [
+          "propose",
+          "cast vote",
+          "execute",
+          "queue",
+          "cancel"
+        ]
+      },
       "check": [
         "VERIFY: Proposal lifecycle functions (cancel, execute, queue) with insufficient state validation allow: executing defeated/expired proposals, canceling...",
         "PROVE: *Path A: Execute Defeated/Expired Proposals; execute() accepts Succeeded, Defeated, and Expired states (too permissive)",
         "ANTIPATTERN: Can cancel in all states except Executed — blocks governance"
       ],
       "antipattern": "Can cancel in all states except Executed — blocks governance",
-      "validWhen": "Proposal lifecycle functions (cancel, execute, queue) with insufficient state validation allow: executing defeated/expired proposals, canceling succeeded proposals to..."
+      "validWhen": "Proposal lifecycle functions (cancel, execute, queue) with insufficient state validation allow: executing defeated/expired proposals, canceling succeeded proposals to...",
+      "preconditions": [
+        "Attacker front-runs legitimate proposal execution with an expired proposal",
+        "Target function has one-time-per-period guard → attacker's execution blocks legitimate one",
+        "Mints new governance NFT with astronomical voting power to attacker",
+        "Attacker now has 100% voting power → creates unanimously-voted proposal"
+      ],
+      "proofShape": "*Path A: Execute Defeated/Expired Proposals -> execute() accepts Succeeded, Defeated, and Expired states (too permissive) -> Attacker front-runs legitimate proposal execution with an expired proposal"
     },
     {
       "id": "general-governance-dao-governance-vulnerabilities-section-6-quadratic-voting-tal-006",
@@ -933,6 +2059,29 @@
         536,
         576
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/m-19-quadratic-voting-tally-done-wrong.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "governance mechanism bypass",
+          "governance exploit",
+          "governance bypass",
+          "voting proposal timelock",
+          "manipulation or dos"
+        ],
+        "commonlyComposesWith": [
+          "propose",
+          "cast vote",
+          "execute",
+          "queue",
+          "cancel"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Quadratic voting systems that fail to properly square individual votes before summing them, or that don't enforce majority requirements (ties pass),...",
@@ -940,7 +2089,11 @@
         "ANTIPATTERN: votes not squared before summing — lower hijack threshold"
       ],
       "antipattern": "votes not squared before summing — lower hijack threshold",
-      "validWhen": "Quadratic voting systems that fail to properly square individual votes before summing them, or that don't enforce majority requirements (ties pass), produce outcomes..."
+      "validWhen": "Quadratic voting systems that fail to properly square individual votes before summing them, or that don't enforce majority requirements (ties pass), produce outcomes...",
+      "preconditions": [
+        "Attacker concentrates all votes on one proposal instead of distributing"
+      ],
+      "proofShape": "*Path A: Quadratic Sum Not Squared -> Spec says: sum of squares of votes ≤ square of token holdings -> Code enforces: sum of absolute votes ≤ square of holdings (votes NOT squared)"
     },
     {
       "id": "general-governance-dao-governance-vulnerabilities-section-7-multisig-safe-module-007",
@@ -960,13 +2113,37 @@
         577,
         618
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/h-4-if-another-module-adds-a-module-the-safe-will-be-bricked.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "governance mechanism bypass",
+          "governance exploit",
+          "governance bypass",
+          "voting proposal timelock",
+          "manipulation or dos"
+        ],
+        "commonlyComposesWith": [
+          "propose",
+          "cast vote",
+          "execute",
+          "queue",
+          "cancel"
+        ]
+      },
       "check": [
         "VERIFY: Gnosis Safe modules and signer gate contracts assume module counts remain consistent and that hat owners are always valid addresses.",
         "PROVE: *Path A: Module Count Desync Bricks Safe; External module calls Safe.enableModule() directly (bypasses enableNewModule())",
         "ANTIPATTERN: External module adds module → enabledModuleCount desync → safe bricked"
       ],
       "antipattern": "External module adds module → enabledModuleCount desync → safe bricked",
-      "validWhen": "Gnosis Safe modules and signer gate contracts assume module counts remain consistent and that hat owners are always valid addresses."
+      "validWhen": "Gnosis Safe modules and signer gate contracts assume module counts remain consistent and that hat owners are always valid addresses.",
+      "proofShape": "*Path A: Module Count Desync Bricks Safe -> External module calls Safe.enableModule() directly (bypasses enableNewModule()) -> enabledModuleCount not incremented → guard hash check fails"
     },
     {
       "id": "general-governance-dao-governance-vulnerabilities-section-8-governance-takeover--008",
@@ -986,13 +2163,42 @@
         619,
         650
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/dao_governance_findings/governance-takeover-via-unrestricted-elections_master-deployment.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "governance mechanism bypass",
+          "governance exploit",
+          "governance bypass",
+          "voting proposal timelock",
+          "manipulation or dos"
+        ],
+        "commonlyComposesWith": [
+          "propose",
+          "cast vote",
+          "execute",
+          "queue",
+          "cancel"
+        ]
+      },
       "check": [
         "VERIFY: When governance contracts accept operations from instances whose deployment origin isn't verified (i.e., anyone can deploy a governance contract with...",
         "PROVE: *Path A: Unrestricted elections_master Deployment; make_action() validates sender by recalculating expected address from parameters",
         "ANTIPATTERN: make_action() validates address but not deployment origin"
       ],
       "antipattern": "make_action() validates address but not deployment origin",
-      "validWhen": "When governance contracts accept operations from instances whose deployment origin isn't verified (i.e., anyone can deploy a governance contract with favorable..."
+      "validWhen": "When governance contracts accept operations from instances whose deployment origin isn't verified (i.e., anyone can deploy a governance contract with favorable...",
+      "preconditions": [
+        "governance contracts accept operations from instances whose deployment origin isn't verified (i.e., anyone can deploy a...",
+        "Attacker deploys elections_master with success_amount = 1",
+        "Attacker casts one vote → quorum reached → calls make_action()"
+      ],
+      "proofShape": "*Path A: Unrestricted elections_master Deployment -> make_action() validates sender by recalculating expected address from parameters -> But doesn't check if the contract was deployed through legitimate..."
     },
     {
       "id": "general-governance-dao-governance-vulnerabilities-contract-call-graph-signals-011",
@@ -1012,6 +2218,27 @@
         713,
         725
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "LOW"
+      },
+      "graphHints": {
+        "variants": [
+          "governance mechanism bypass",
+          "governance exploit",
+          "governance bypass",
+          "voting proposal timelock",
+          "manipulation or dos"
+        ],
+        "commonlyComposesWith": [
+          "propose",
+          "cast vote",
+          "execute",
+          "queue",
+          "cancel"
+        ]
+      },
       "check": [
         "VERIFY: castVote/vote using getVotes(current) instead of getPastVotes(snapshot)"
       ],
@@ -1035,6 +2262,27 @@
         726,
         755
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "governance mechanism bypass",
+          "governance exploit",
+          "governance bypass",
+          "voting proposal timelock",
+          "manipulation or dos"
+        ],
+        "commonlyComposesWith": [
+          "propose",
+          "cast vote",
+          "execute",
+          "queue",
+          "cancel"
+        ]
+      },
       "check": [
         "VERIFY: GovernorVotesQuorumFraction"
       ],
@@ -1058,12 +2306,41 @@
         135,
         201
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "vetoken accounting and governance",
+          "economic exploit",
+          "missing guard",
+          "voting escrow",
+          "lock vote bribe boost"
+        ],
+        "commonlyComposesWith": [
+          "voting power decay",
+          "lock duration",
+          "epoch checkpoint",
+          "gauge weight",
+          "bribe distribution"
+        ]
+      },
       "check": [
         "VERIFY: Signal 1: Bribe.withdraw() does not decrement totalVoting while Bribe.deposit() does increment it; Signal 2: claimBribes/getRewardForOwner does not...",
         "FALSIFY: Not this bug when: Protocol uses time-weighted voting with automatic decay in Bribe deposits; Safe if: Epoch guard modifier (onlyNewEpoch) is applied to all..."
       ],
       "validWhen": "Signal 1: Bribe.withdraw() does not decrement totalVoting while Bribe.deposit() does increment it; Signal 2: claimBribes/getRewardForOwner does not check if the tokenId...",
-      "invalidWhen": "Not this bug when: Protocol uses time-weighted voting with automatic decay in Bribe deposits; Safe if: Epoch guard modifier (onlyNewEpoch) is applied to all..."
+      "invalidWhen": "Not this bug when: Protocol uses time-weighted voting with automatic decay in Bribe deposits; Safe if: Epoch guard modifier (onlyNewEpoch) is applied to all...",
+      "preconditions": [
+        "attacker control of: veNFT (lock/vote timing), or ability to call poke() repeatedly, or knowledge of epoch boundary timing"
+      ],
+      "falsePositiveSignals": [
+        "Not this bug when: Protocol uses time-weighted voting with automatic decay in Bribe deposits",
+        "Safe if: Epoch guard modifier (onlyNewEpoch) is applied to all vote/poke/claim paths",
+        "Safe if: totalVoting is symmetrically updated in both deposit() and withdraw()"
+      ]
     },
     {
       "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-1-bribe-reward-theft-e-001",
@@ -1083,13 +2360,46 @@
         202,
         302
       ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/vetoken_findings/claiming-bribes-for-epochs-you-didnt-vote-for-leading-to-protocol-insolvency.md",
+          "reports/vetoken_findings/deflating-the-total-amount-of-votes-in-a-checkpoint-to-steal-bribes-and-create-s.md",
+          "reports/vetoken_findings/expired-locks-can-be-used-to-claim-rewards.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "vetoken accounting and governance",
+          "economic exploit",
+          "missing guard",
+          "voting escrow",
+          "lock vote bribe boost"
+        ],
+        "commonlyComposesWith": [
+          "voting power decay",
+          "lock duration",
+          "epoch checkpoint",
+          "gauge weight",
+          "bribe distribution"
+        ]
+      },
       "check": [
         "VERIFY: Bribe contracts distribute rewards based on voting checkpoints recorded per epoch.",
         "PROVE: *Path A: Claiming Bribes for Unvoted Epochs; Alice votes in epoch 1, Bob votes in epoch 1",
         "ANTIPATTERN: deposit increments totalVoting, withdraw does not decrement it"
       ],
       "antipattern": "deposit increments totalVoting, withdraw does not decrement it",
-      "validWhen": "Bribe contracts distribute rewards based on voting checkpoints recorded per epoch."
+      "validWhen": "Bribe contracts distribute rewards based on voting checkpoints recorded per epoch.",
+      "preconditions": [
+        "Alice calls claimBribes for epoch 2 — she did NOT vote in epoch 2 but getRewardForOwner reads her checkpoint balance from the...",
+        "Bribe.deposit() increments both balanceOf[tokenId] and totalVoting, writes voting checkpoint",
+        "Attacker repeatedly calls poke() which triggers withdraw → deposit cycles",
+        "Each cycle: withdraw doesn't reduce totalVoting, but the new deposit checkpoint records lowered balance",
+        "Attacker exploits deflated totalVoting to claim disproportionate bribe rewards"
+      ],
+      "proofShape": "*Path A: Claiming Bribes for Unvoted Epochs -> Alice votes in epoch 1, Bob votes in epoch 1 -> Epoch 2 starts — Alice claims epoch 1 bribes correctly"
     },
     {
       "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-2-voting-power-manipul-002",
@@ -1109,13 +2419,38 @@
         303,
         398
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/vetoken_findings/attackers-can-double-voting-power-and-vetoken-amount-by-locking-and-increasing.md",
+          "reports/vetoken_findings/c-01-split-can-be-abused-to-create-locked-data-with-an-arbitrary-amount.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "manipulation",
+          "vetoken accounting and governance",
+          "economic exploit",
+          "missing guard",
+          "voting escrow"
+        ],
+        "commonlyComposesWith": [
+          "voting power decay",
+          "lock duration",
+          "epoch checkpoint",
+          "gauge weight",
+          "bribe distribution"
+        ]
+      },
       "check": [
         "VERIFY: VotingEscrow contracts manage veNFT positions with lock amount and duration tracking.",
         "PROVE: *Path A: Double Voting Power via Lock Increase; User creates a lock with a small initial amount (e.g., 1 wei)",
         "ANTIPATTERN: amount is double-counted — added in increaseLock AND in calculateAndUpdatePower"
       ],
       "antipattern": "amount is double-counted — added in increaseLock AND in calculateAndUpdatePower",
-      "validWhen": "VotingEscrow contracts manage veNFT positions with lock amount and duration tracking."
+      "validWhen": "VotingEscrow contracts manage veNFT positions with lock amount and duration tracking.",
+      "proofShape": "*Path A: Double Voting Power via Lock Increase -> User creates a lock with a small initial amount (e.g., 1 wei) -> User calls increase() with the full amount they want to lock"
     },
     {
       "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-3-gauge-voting-emissio-003",
@@ -1135,13 +2470,41 @@
         399,
         479
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/vetoken_findings/gauge-voting-misallocation-vulnerability.md",
+          "reports/vetoken_findings/killed-gauge-continue-to-accrue-and-steal-rewards-from-minter-contract.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "vetoken accounting and governance",
+          "economic exploit",
+          "missing guard",
+          "voting escrow",
+          "lock vote bribe boost"
+        ],
+        "commonlyComposesWith": [
+          "voting power decay",
+          "lock duration",
+          "epoch checkpoint",
+          "gauge weight",
+          "bribe distribution"
+        ]
+      },
       "check": [
         "VERIFY: GaugeController contracts allow users to allocate voting weight across gauges to direct token emissions.",
         "PROVE: *Path A: Gauge Over-Voting (No Cumulative Weight Tracking); GaugeController.vote() allows setting weight per gauge but doesn't track total weight across all gauges",
         "ANTIPATTERN: No check that total user weight across all gauges <= WEIGHT_PRECISION"
       ],
       "antipattern": "No check that total user weight across all gauges <= WEIGHT_PRECISION",
-      "validWhen": "GaugeController contracts allow users to allocate voting weight across gauges to direct token emissions."
+      "validWhen": "GaugeController contracts allow users to allocate voting weight across gauges to direct token emissions.",
+      "preconditions": [
+        "Admin calls killGauge() — sets isAlive[gauge] = false"
+      ],
+      "proofShape": "*Path A: Gauge Over-Voting (No Cumulative Weight Tracking) -> GaugeController.vote() allows setting weight per gauge but doesn't track total weight across all gauges -> User votes 100% weight on gauge A, then 100%..."
     },
     {
       "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-5-boost-mechanism-expl-005",
@@ -1161,13 +2524,38 @@
         537,
         594
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/vetoken_findings/delegated-boost-persists-even-if-veraac-is-withdrawnreduced.md",
+          "reports/vetoken_findings/flawed-boost-multiplier-calculation-always-yields-maximum-boost.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "vetoken accounting and governance",
+          "economic exploit",
+          "missing guard",
+          "voting escrow",
+          "lock vote bribe boost"
+        ],
+        "commonlyComposesWith": [
+          "voting power decay",
+          "lock duration",
+          "epoch checkpoint",
+          "gauge weight",
+          "bribe distribution"
+        ]
+      },
       "check": [
         "VERIFY: Boost controllers calculate reward multipliers based on veToken holdings.",
         "PROVE: *Path A: Unbacked Boost via Withdraw After Delegation; User has veTokens and calls delegateBoost(to, amount, duration)",
         "ANTIPATTERN: Math simplifies to always returning MAX_BOOST for any nonzero amount"
       ],
       "antipattern": "Math simplifies to always returning MAX_BOOST for any nonzero amount",
-      "validWhen": "Boost controllers calculate reward multipliers based on veToken holdings."
+      "validWhen": "Boost controllers calculate reward multipliers based on veToken holdings.",
+      "proofShape": "*Path A: Unbacked Boost via Withdraw After Delegation -> User has veTokens and calls delegateBoost(to, amount, duration) -> Contract checks user's veToken balance ≥ amount at delegation time"
     },
     {
       "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-6-reward-emission-dist-006",
@@ -1187,13 +2575,44 @@
         595,
         669
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/vetoken_findings/all-reward-tokens-can-be-stolen-by-an-attacker-due-to-misaccounting-in-distribut.md",
+          "reports/vetoken_findings/gauge-reward-system-can-be-gamed-with-repeatedly-stakewithdraw.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "vetoken accounting and governance",
+          "economic exploit",
+          "missing guard",
+          "voting escrow",
+          "lock vote bribe boost"
+        ],
+        "commonlyComposesWith": [
+          "voting power decay",
+          "lock duration",
+          "epoch checkpoint",
+          "gauge weight",
+          "bribe distribution"
+        ]
+      },
       "check": [
         "VERIFY: Minter → Voter → Gauge reward pipelines can fail when: distribution functions don't track per-gauge amounts already sent, epoch ordering between...",
         "PROVE: *Path A: Repeated distributeEx Drains All Rewards; distributeEx() distributes rewards to gauges based on weight ratios",
         "ANTIPATTERN: No tracking of already-distributed amounts per gauge per epoch"
       ],
       "antipattern": "No tracking of already-distributed amounts per gauge per epoch",
-      "validWhen": "Minter → Voter → Gauge reward pipelines can fail when: distribution functions don't track per-gauge amounts already sent, epoch ordering between minter.updatePeriod()..."
+      "validWhen": "Minter → Voter → Gauge reward pipelines can fail when: distribution functions don't track per-gauge amounts already sent, epoch ordering between minter.updatePeriod()...",
+      "preconditions": [
+        "Attacker calls distributeEx() with only their gauge repeatedly",
+        "*Path B: First-Epoch Emissions Stuck Forever",
+        "distribute() is called before minter.updatePeriod() in the first epoch",
+        "Impact: Permanent loss of first-epoch rewards"
+      ],
+      "proofShape": "*Path A: Repeated distributeEx Drains All Rewards -> distributeEx() distributes rewards to gauges based on weight ratios -> If a gauge's notifyRewardAmount() returns false, claimable is added back"
     },
     {
       "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-7-checkpoint-voting-po-007",
@@ -1213,13 +2632,43 @@
         670,
         713
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/vetoken_findings/checkpoints-wont-update-block-number-in-point-because-of-a-rounding-issue.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "vetoken accounting and governance",
+          "economic exploit",
+          "missing guard",
+          "voting escrow",
+          "lock vote bribe boost"
+        ],
+        "commonlyComposesWith": [
+          "voting power decay",
+          "lock duration",
+          "epoch checkpoint",
+          "gauge weight",
+          "bribe distribution"
+        ]
+      },
       "check": [
         "VERIFY: VotingEscrow uses checkpoint systems to record point-in-time voting power that decays linearly over lock duration.",
         "PROVE: *Path A: Checkpoint Block Number Never Updates; Block slope calculation: blockSlope = (MULTIPLIER * (block.number - lastPoint.blk)) / (block.timestamp - lastPoint.ts)",
         "ANTIPATTERN: MULTIPLIER=2 is too small — blockSlope always rounds to zero"
       ],
       "antipattern": "MULTIPLIER=2 is too small — blockSlope always rounds to zero",
-      "validWhen": "VotingEscrow uses checkpoint systems to record point-in-time voting power that decays linearly over lock duration."
+      "validWhen": "VotingEscrow uses checkpoint systems to record point-in-time voting power that decays linearly over lock duration.",
+      "preconditions": [
+        "*Path B: Non-Decaying Bribe Deposits",
+        "User votes once after creating lock — Bribe records full veNFT balance as deposit amount",
+        "veNFT balance decays linearly over time, but Bribe deposit does NOT auto-decay",
+        "User avoids re-voting in subsequent epochs to keep inflated deposit weight"
+      ],
+      "proofShape": "*Path A: Checkpoint Block Number Never Updates -> Block slope calculation: blockSlope = (MULTIPLIER * (block.number - lastPoint.blk)) / (block.timestamp - lastPoint.ts) -> MULTIPLIER = 2, block time ~12 seconds →..."
     },
     {
       "id": "general-governance-vetoken-voting-escrow-vulnerabilities-section-8-delegation-nft-opera-008",
@@ -1239,13 +2688,43 @@
         714,
         757
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/vetoken_findings/extending-the-duration-of-an-expired-position-can-break-protocol-accounting.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "vetoken accounting and governance",
+          "economic exploit",
+          "missing guard",
+          "voting escrow",
+          "lock vote bribe boost"
+        ],
+        "commonlyComposesWith": [
+          "voting power decay",
+          "lock duration",
+          "epoch checkpoint",
+          "gauge weight",
+          "bribe distribution"
+        ]
+      },
       "check": [
         "VERIFY: veNFT-based systems allow delegation, merging, and managed deposits.",
         "PROVE: *Path A: MAX_DELEGATES DoS; Attacker creates 1024 (MAX_DELEGATES) small veNFTs and delegates them all to a target",
         "ANTIPATTERN: Extending expired position uses wrong dailyUnlockedAmounts key"
       ],
       "antipattern": "Extending expired position uses wrong dailyUnlockedAmounts key",
-      "validWhen": "veNFT-based systems allow delegation, merging, and managed deposits."
+      "validWhen": "veNFT-based systems allow delegation, merging, and managed deposits.",
+      "preconditions": [
+        "Attacker creates 1024 (MAX_DELEGATES) small veNFTs and delegates them all to a target",
+        "RewardsDistributor.claim() sends rewards via depositFor if lock is active, or transfers directly if expired",
+        "depositManaged() changes lock state such that the expiry check passes for non-expired locks",
+        "User calls depositManaged → claim extracts unvested VELO as direct transfer"
+      ],
+      "proofShape": "*Path A: MAX_DELEGATES DoS -> Attacker creates 1024 (MAX_DELEGATES) small veNFTs and delegates them all to a target -> Target's transfer/withdraw operations must iterate through all delegations"
     },
     {
       "id": "general-governance-vetoken-voting-escrow-vulnerabilities-high-signal-grep-seeds-012",
@@ -1265,16 +2744,37 @@
         840,
         861
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "vetoken accounting and governance",
+          "economic exploit",
+          "missing guard",
+          "voting escrow",
+          "lock vote bribe boost"
+        ],
+        "commonlyComposesWith": [
+          "voting power decay",
+          "lock duration",
+          "epoch checkpoint",
+          "gauge weight",
+          "bribe distribution"
+        ]
+      },
       "check": [
         "VERIFY: _writeVotingCheckpoint"
       ],
       "validWhen": "_writeVotingCheckpoint"
     },
     {
-      "id": "general-governance-stablecoin-vulnerabilities-vulnerability-description-000",
-      "title": "Vulnerability Description",
+      "id": "general-governance-stablecoin-vulnerabilities-vulnerability-title-000",
+      "title": "Vulnerability Title",
       "severity": "HIGH",
-      "grep": "decimal_normalization|collateral_valuation|oracle_price_feed|block.timestamp|safeTransferFrom|depeg_tolerance",
+      "grep": "decimal_normalization|collateral_valuation|oracle_price_feed|incorrect_pricing|block.timestamp|safeTransferFrom",
       "detect": "Stablecoins are treated as permanently pegged to $1 (or to another stablecoin) without real-time price validation.",
       "cat": [
         "governance",
@@ -1285,16 +2785,59 @@
       ],
       "ref": "DB/general/stablecoin-vulnerabilities/STABLECOIN_VULNERABILITIES.md",
       "lines": [
-        121,
-        199
+        81,
+        307
       ],
+      "reportEvidence": {
+        "count": 9,
+        "sampleReports": [
+          "reports/stablecoin_findings/usd-stablecoins-are-incorrectly-assumed-to-always-be-at-peg.md](reports/stablecoin_findings/usd-stablecoins-are-incorrectly-assumed-to-always-be-at-peg.md",
+          "reports/stablecoin_findings/minter-doesnt-account-for-depegs-exchange-rates-and-decimal-precision-mismatch-b.md](reports/stablecoin_findings/minter-doesnt-account-for-depegs-exchange-rates-and-decimal-precision-mismatch-b.md",
+          "reports/stablecoin_findings/m-03-protocol-assumes-1-stable-1-usd.md](reports/stablecoin_findings/m-03-protocol-assumes-1-stable-1-usd.md",
+          "reports/stablecoin_findings/m-2-usd1-is-priced-as-1-instead-of-being-pegged-to-usdt.md](reports/stablecoin_findings/m-2-usd1-is-priced-as-1-instead-of-being-pegged-to-usdt.md",
+          "reports/stablecoin_findings/l-09-hardcoded-stablecoin-price.md](reports/stablecoin_findings/l-09-hardcoded-stablecoin-price.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "logical error",
+          "pricing logic",
+          "stablecoin pricing assumptions",
+          "title"
+        ],
+        "commonlyComposesWith": [
+          "oracle_price_feed",
+          "oracle price feed",
+          "stablecoin peg",
+          "depeg tolerance",
+          "decimal normalization"
+        ]
+      },
       "check": [
-        "VERIFY: Stablecoins are treated as permanently pegged to $1 (or to another stablecoin) without real-time price validation.",
+        "VERIFY: Signal 1: State variable updated after external interaction instead of before (CEI violation); Signal 2: Withdrawal path produces different...",
         "PROVE: A stablecoin depegs below $1 (or above $1) due to market stress.; The protocol still values the stablecoin at $1 (or at the wrong reference asset) in pricing, minting,...",
-        "ANTIPATTERN: Mints 1:1 without checking decimals or depeg risk"
+        "FALSIFY: Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place; Safe if: Protocol behavior matches documented...",
+        "IMPACT: Incorrect pricing of collateral and mint/redeem operations during depeg events.",
+        "Verify all stablecoin valuations use an oracle or validated peg tolerance.",
+        "Confirm mint/redeem logic handles depeg events and reverts when out of bounds."
       ],
       "antipattern": "Mints 1:1 without checking decimals or depeg risk",
-      "validWhen": "Stablecoins are treated as permanently pegged to $1 (or to another stablecoin) without real-time price validation."
+      "securePattern": "Use price feed with a tight peg tolerance and staleness checks",
+      "validWhen": "Signal 1: State variable updated after external interaction instead of before (CEI violation); Signal 2: Withdrawal path produces different accounting than deposit path...",
+      "invalidWhen": "Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place; Safe if: Protocol behavior matches documented...",
+      "impact": "Incorrect pricing of collateral and mint/redeem operations during depeg events.",
+      "preconditions": [
+        "attacker control of: specific conditions per pattern",
+        "An attacker deposits depegged stablecoins or triggers mint/redeem flows to receive inflated value."
+      ],
+      "proofShape": "A stablecoin depegs below $1 (or above $1) due to market stress.",
+      "falsePositiveSignals": [
+        "Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place",
+        "Safe if: Protocol behavior matches documented specification",
+        "Requires attacker control of: specific conditions per pattern"
+      ]
     },
     {
       "id": "general-governance-rug-pull-detection-patterns-rug-pull-malicious-contract-de-000",
@@ -1314,363 +2857,46 @@
         76,
         138
       ],
+      "graphHints": {
+        "variants": [
+          "malicious code",
+          "intentional malicious code",
+          "token contract",
+          "rug pull detection",
+          "rug"
+        ],
+        "commonlyComposesWith": [
+          "hidden mint function",
+          "transfer restriction",
+          "honeypot mechanism",
+          "hidden fee extraction",
+          "selfdestruct capability"
+        ]
+      },
       "check": [
         "VERIFY: Signal 1: Missing validation or guard on state-changing operation; Signal 2: User-supplied input passed to sensitive operation without sanitization",
         "PROVE: *General Rug Pull Flow; Deployer creates token with hidden malicious functionality",
         "FALSIFY: Not this bug when: Standard security patterns are in place; Safe if: Protocol only interacts with whitelisted/trusted contracts"
       ],
       "validWhen": "Signal 1: Missing validation or guard on state-changing operation; Signal 2: User-supplied input passed to sensitive operation without sanitization",
-      "invalidWhen": "Not this bug when: Standard security patterns are in place; Safe if: Protocol only interacts with whitelisted/trusted contracts"
+      "invalidWhen": "Not this bug when: Standard security patterns are in place; Safe if: Protocol only interacts with whitelisted/trusted contracts",
+      "preconditions": [
+        "attacker control of: specific conditions per pattern"
+      ],
+      "proofShape": "*General Rug Pull Flow -> Deployer creates token with hidden malicious functionality -> Liquidity is added to DEX (Uniswap, PancakeSwap)",
+      "falsePositiveSignals": [
+        "Not this bug when: Standard security patterns are in place",
+        "Safe if: Protocol only interacts with whitelisted/trusted contracts",
+        "Requires attacker control of: specific conditions per pattern"
+      ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      }
     },
     {
-      "id": "general-governance-defihacklabs-mev-bot-2022-patterns-vulnerable-pattern-examples-001",
-      "title": "Vulnerable Pattern Examples",
-      "severity": "HIGH",
-      "grep": "flash_loan_callback_exploit|callback_validation_failure|arbitrary_call_execution|fake_pair_impersonation|_flashLoanActive|_executeSandwich",
-      "detect": "MEV Bot at 0x00000000000a47b1298f18cf67de547bbe0d723f",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/mev-bot/defihacklabs-mev-bot-2022-patterns.md",
-      "lines": [
-        127,
-        295
-      ],
-      "check": [
-        "VERIFY: MEV bot processes Balancer flash loan callbacks without verifying that the flash loan was self-initiated.",
-        "PROVE: MEV Bot at 0x00000000000a47b1298f18cf67de547bbe0d723f"
-      ],
-      "antipattern": "MEV Bot at 0x00000000000a47b1298f18cf67de547bbe0d723f",
-      "validWhen": "The MEV bot processes Balancer flash loan callbacks without verifying that the flash loan was self-initiated."
-    },
-    {
-      "id": "general-governance-mev-bot-vulnerabilities-example-1-0xbad-mev-bot-critic-001",
-      "title": "Example 1: 0xbad MEV Bot [CRITICAL]",
-      "severity": "CRITICAL",
-      "grep": "private_transaction|callback_validation|executeOperation|executeArbitrage|executeAndRevoke|emergencyExecute",
-      "detect": "Open callback function without access control",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/mev-bot/mev-bot-vulnerabilities.md",
-      "lines": [
-        139,
-        179
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Open callback function without access control"
-      ],
-      "antipattern": "Open callback function without access control",
-      "validWhen": "Open callback function without access control"
-    },
-    {
-      "id": "general-governance-mev-bot-vulnerabilities-example-2-bnb48-mev-bot-critic-002",
-      "title": "Example 2: BNB48 MEV Bot [CRITICAL]",
-      "severity": "CRITICAL",
-      "grep": "private_transaction|callback_validation|executeOperation|executeArbitrage|executeAndRevoke|emergencyExecute",
-      "detect": "Sandwich bot with exposed execution function",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/mev-bot/mev-bot-vulnerabilities.md",
-      "lines": [
-        180,
-        211
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Sandwich bot with exposed execution function"
-      ],
-      "antipattern": "Sandwich bot with exposed execution function",
-      "validWhen": "Sandwich bot with exposed execution function"
-    },
-    {
-      "id": "general-governance-mev-bot-vulnerabilities-example-3-uniswap-v3-callback--003",
-      "title": "Example 3: Uniswap V3 Callback Exploitation [HIGH]",
-      "severity": "HIGH",
-      "grep": "uniswapV3SwapCallback|private_transaction|callback_validation|executeOperation|executeArbitrage|executeAndRevoke",
-      "detect": "Flash swap callback without proper validation",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/mev-bot/mev-bot-vulnerabilities.md",
-      "lines": [
-        212,
-        259
-      ],
-      "check": [
-        "VERIFY: Flash swap callback without proper validation",
-        "FALSIFY: Validate callback caller"
-      ],
-      "antipattern": "Flash swap callback without proper validation",
-      "securePattern": "Validate callback caller",
-      "validWhen": "Flash swap callback without proper validation",
-      "invalidWhen": "Validate callback caller"
-    },
-    {
-      "id": "general-governance-mev-bot-vulnerabilities-example-4-token-approval-expos-004",
-      "title": "Example 4: Token Approval Exposure [HIGH]",
-      "severity": "HIGH",
-      "grep": "private_transaction|callback_validation|executeOperation|executeArbitrage|executeAndRevoke|emergencyExecute",
-      "detect": "Bot maintains unlimited approvals",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/mev-bot/mev-bot-vulnerabilities.md",
-      "lines": [
-        260,
-        291
-      ],
-      "check": [
-        "VERIFY: Bot maintains unlimited approvals"
-      ],
-      "antipattern": "Bot maintains unlimited approvals",
-      "validWhen": "Bot maintains unlimited approvals"
-    },
-    {
-      "id": "general-governance-mev-bot-vulnerabilities-example-5-private-transaction--005",
-      "title": "Example 5: Private Transaction Leakage [MEDIUM]",
-      "severity": "MEDIUM",
-      "grep": "private_transaction|callback_validation|executeOperation|executeArbitrage|executeAndRevoke|emergencyExecute",
-      "detect": "Real Exploit: Multiple incidents via Flashbots**",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/mev-bot/mev-bot-vulnerabilities.md",
-      "lines": [
-        292,
-        312
-      ],
-      "check": [
-        "VERIFY: Real Exploit: Multiple incidents via Flashbots"
-      ],
-      "validWhen": "Real Exploit: Multiple incidents via Flashbots"
-    },
-    {
-      "id": "general-governance-mev-bot-vulnerabilities-example-6-omnidex-mev-bot-high-006",
-      "title": "Example 6: OmniDex MEV Bot [HIGH]",
-      "severity": "HIGH",
-      "grep": "private_transaction|callback_validation|executeOperation|executeArbitrage|executeAndRevoke|emergencyExecute",
-      "detect": "Insufficient validation in arbitrage callback",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/mev-bot/mev-bot-vulnerabilities.md",
-      "lines": [
-        313,
-        340
-      ],
-      "check": [
-        "VERIFY: Insufficient validation in arbitrage callback"
-      ],
-      "antipattern": "Insufficient validation in arbitrage callback",
-      "validWhen": "Insufficient validation in arbitrage callback"
-    },
-    {
-      "id": "general-governance-weak-randomness-vulnerabilities-example-1-block-timestamp-rand-001",
-      "title": "Example 1: Block Timestamp Randomness [CRITICAL]",
-      "severity": "CRITICAL",
-      "grep": "fulfillRandomWords|block.difficulty|block.timestamp|DPPFlashLoanCall|Chainlink_VRF|getRandomNumber",
-      "detect": "Predictable randomness from block.",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/randomness/weak-randomness-vulnerabilities.md",
-      "lines": [
-        140,
-        180
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Predictable randomness from block.",
-        "PROVE: Predictable randomness from block.timestamp"
-      ],
-      "antipattern": "Predictable randomness from block.timestamp",
-      "validWhen": "Predictable randomness from block."
-    },
-    {
-      "id": "general-governance-weak-randomness-vulnerabilities-example-2-same-block-predictio-002",
-      "title": "Example 2: Same-Block Prediction [CRITICAL]",
-      "severity": "CRITICAL",
-      "grep": "fulfillRandomWords|block.difficulty|block.timestamp|DPPFlashLoanCall|Chainlink_VRF|getRandomNumber",
-      "detect": "Randomness computable in same transaction",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/randomness/weak-randomness-vulnerabilities.md",
-      "lines": [
-        181,
-        245
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Randomness computable in same transaction"
-      ],
-      "antipattern": "Randomness computable in same transaction",
-      "validWhen": "Randomness computable in same transaction"
-    },
-    {
-      "id": "general-governance-weak-randomness-vulnerabilities-example-3-blockhash-vulnerabil-003",
-      "title": "Example 3: Blockhash Vulnerability [HIGH]",
-      "severity": "HIGH",
-      "grep": "fulfillRandomWords|block.difficulty|block.timestamp|DPPFlashLoanCall|Chainlink_VRF|getRandomNumber",
-      "detect": "blockhash has limitations",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/randomness/weak-randomness-vulnerabilities.md",
-      "lines": [
-        246,
-        292
-      ],
-      "check": [
-        "VERIFY: blockhash has limitations"
-      ],
-      "antipattern": "blockhash has limitations",
-      "validWhen": "blockhash has limitations"
-    },
-    {
-      "id": "general-governance-weak-randomness-vulnerabilities-example-4-prevrandao-misconcep-004",
-      "title": "Example 4: Prevrandao Misconception [HIGH]",
-      "severity": "HIGH",
-      "grep": "fulfillRandomWords|block.difficulty|block.timestamp|DPPFlashLoanCall|Chainlink_VRF|getRandomNumber",
-      "detect": "prevrandao is not truly random",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/randomness/weak-randomness-vulnerabilities.md",
-      "lines": [
-        293,
-        319
-      ],
-      "check": [
-        "VERIFY: prevrandao is not truly random"
-      ],
-      "antipattern": "prevrandao is not truly random",
-      "validWhen": "prevrandao is not truly random"
-    },
-    {
-      "id": "general-governance-weak-randomness-vulnerabilities-example-5-flawed-commit-reveal-005",
-      "title": "Example 5: Flawed Commit-Reveal [MEDIUM]",
-      "severity": "MEDIUM",
-      "grep": "fulfillRandomWords|block.difficulty|block.timestamp|DPPFlashLoanCall|Chainlink_VRF|getRandomNumber",
-      "detect": "Incomplete commit-reveal implementation",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/randomness/weak-randomness-vulnerabilities.md",
-      "lines": [
-        320,
-        384
-      ],
-      "check": [
-        "VERIFY: Incomplete commit-reveal implementation",
-        "FALSIFY: Proper commit-reveal with time locks"
-      ],
-      "antipattern": "Incomplete commit-reveal implementation",
-      "securePattern": "Proper commit-reveal with time locks",
-      "validWhen": "Incomplete commit-reveal implementation",
-      "invalidWhen": "Proper commit-reveal with time locks"
-    },
-    {
-      "id": "general-governance-weak-randomness-vulnerabilities-example-6-rnd-token-exploit-hi-006",
-      "title": "Example 6: RND Token Exploit [HIGH]",
-      "severity": "HIGH",
-      "grep": "fulfillRandomWords|block.difficulty|block.timestamp|DPPFlashLoanCall|Chainlink_VRF|getRandomNumber",
-      "detect": "Lottery with predictable randomness",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/randomness/weak-randomness-vulnerabilities.md",
-      "lines": [
-        385,
-        417
-      ],
-      "check": [
-        "VERIFY: Lottery with predictable randomness"
-      ],
-      "antipattern": "Lottery with predictable randomness",
-      "validWhen": "Lottery with predictable randomness"
-    },
-    {
-      "id": "general-governance-weak-randomness-vulnerabilities-example-7-rfb-token-determinis-007",
-      "title": "Example 7: RFB Token — Deterministic Fee Brute-Force (December 2022, BSC) [HIGH]",
-      "severity": "HIGH",
-      "grep": "fulfillRandomWords|block.difficulty|block.timestamp|DPPFlashLoanCall|Chainlink_VRF|getRandomNumber",
-      "detect": "RFB uses on-chain pseudorandom fee for buy/sell taxes",
-      "cat": [
-        "governance",
-        "dao",
-        "voting",
-        "stablecoin",
-        "mev"
-      ],
-      "ref": "DB/general/randomness/weak-randomness-vulnerabilities.md",
-      "lines": [
-        418,
-        466
-      ],
-      "check": [
-        "VERIFY: RFB uses on-chain pseudorandom fee for buy/sell taxes"
-      ],
-      "antipattern": "RFB uses on-chain pseudorandom fee for buy/sell taxes",
-      "validWhen": "RFB uses on-chain pseudorandom fee for buy/sell taxes"
-    },
-    {
-      "id": "general-governance-weak-randomness-vulnerabilities-manual-checklist-011",
+      "id": "general-governance-weak-randomness-vulnerabilities-manual-checklist-004",
       "title": "Manual Checklist",
       "severity": "HIGH",
       "grep": "fulfillRandomWords|block.difficulty|block.timestamp|DPPFlashLoanCall|Chainlink_VRF|getRandomNumber",
@@ -1687,12 +2913,33 @@
         594,
         603
       ],
+      "graphHints": {
+        "variants": [
+          "weak randomness",
+          "prediction",
+          "random number generation",
+          "manual",
+          "checklist"
+        ],
+        "commonlyComposesWith": [
+          "dppflash loan call",
+          "flash loan",
+          "blockhash",
+          "block timestamp",
+          "block number"
+        ]
+      },
       "check": [
         "VERIFY: [ ] Is randomness needed for high-value decisions?",
         "Is randomness needed for high-value decisions?",
         "Are any block properties (timestamp, number, prevrandao) used?"
       ],
-      "validWhen": "[ ] Is randomness needed for high-value decisions?"
+      "validWhen": "[ ] Is randomness needed for high-value decisions?",
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      }
     }
   ]
 }

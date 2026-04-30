@@ -1,8 +1,15 @@
 ---
 name: protocol-reasoning
-description: 'Deep reasoning-based vulnerability discovery agent. Decomposes codebases into domains, spawns specialized sub-agents per domain, and uses DB vulnerability root causes as reasoning seeds (not keyword patterns). Iterates 4 rounds: standard → cross-domain → edge cases → completeness. Requires reachability proofs for every finding. Focuses exclusively on MEDIUM/HIGH/CRITICAL severity. Integrates into the audit pipeline as Phase 4a.'
-tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
+description: "Deep reasoning-based vulnerability discovery agent. Decomposes codebases into domains, spawns specialized sub-agents per domain, and uses DB vulnerability root causes as reasoning seeds (not keyword patterns). Iterates 4 rounds: standard → cross-domain → edge cases → completeness. Requires reachability proofs for every finding. Focuses exclusively on MEDIUM/HIGH/CRITICAL severity. Integrates into the audit pipeline as Phase 4a."
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
+> **Claude Code Agent Conventions**:
+> - Read DB resources: `DB/index.json` for router, `DB/manifests/*.json` for patterns
+> - Read codebase files with `Read` (specific line ranges only)
+> - Write findings to `audit-output/04a-reasoning-findings.md`
+> - Spawn domain sub-agents with `Agent("protocol-reasoning", "domain-specific prompt...")`
+> - Resource files at `resources/` — key resources: `reasoning-skills.md`, `domain-decomposition.md`, `root-cause-analysis.md`
+> - Every finding MUST have a reachability proof with concrete code references
 
 # Protocol Reasoning Agent
 
@@ -581,5 +588,5 @@ Each finding MUST include the standard schema fields PLUS:
 - **Inter-agent data format**: [inter-agent-data-format.md](resources/inter-agent-data-format.md)
 - **Orchestration pipeline**: [orchestration-pipeline.md](resources/orchestration-pipeline.md)
 - **DB hunting workflow**: [db-hunting-workflow.md](resources/db-hunting-workflow.md)
-- **DB search guide**: [../../DB/SEARCH_GUIDE.md](../../DB/SEARCH_GUIDE.md)
-- **DB router**: [../../DB/index.json](../../DB/index.json)
+- **DB search guide**: [DB/SEARCH_GUIDE.md](../../DB/SEARCH_GUIDE.md)
+- **DB router**: [DB/index.json](../../DB/index.json)

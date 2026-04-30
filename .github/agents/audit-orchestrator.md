@@ -1,17 +1,15 @@
 ---
 name: audit-orchestrator
-description: 'End-to-end smart contract audit orchestrator with configurable modes. Takes a codebase path, optional protocol hint, and flags: --static-only (skip PoC/FV), --judge=<name> (single judge loop), --discovery-rounds=N (iterative cross-pollination). Runs 11-phase pipeline with iterative parallel discovery, a judging self-loop (pre-judge → polish → deep-review), and optional dynamic testing. Produces CONFIRMED-REPORT.md with only judge-verified findings. Language-agnostic. Long-running project agent.'
-tools: [Agent, Bash, Edit, Write, Glob, Grep, Read, WebFetch, WebSearch]
-maxTurns: 200
+description: "End-to-end smart contract audit orchestrator with configurable modes. Takes a codebase path, optional protocol hint, and flags: --static-only (skip PoC/FV), --judge=<name> (single judge loop), --discovery-rounds=N (iterative cross-pollination). Runs 11-phase pipeline with iterative parallel discovery, a judging self-loop (pre-judge → polish → deep-review), and optional dynamic testing. Produces CONFIRMED-REPORT.md with only judge-verified findings. Language-agnostic. Long-running project agent."
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
-
 > **Claude Code Agent Conventions**:
 > - Spawn sub-agents with: `Agent("agent-name", "detailed prompt...")`
 > - All file reads: use `Read` tool with specific line ranges
 > - All file writes: use `Write` for new files, `Edit` for modifications
 > - All searches: use `Grep` for text, `Glob` for file patterns
 > - Shell commands: use `Bash` with explicit commands
-> - Resource files: located at `.claude/resources/` relative to repo root
+> - Resource files: located at `resources/` relative to repo root
 > - Sub-agent files: located at `.claude/agents/` relative to repo root
 > - When spawning sub-agents, include ALL necessary context in the prompt since sub-agents are stateless
 
@@ -250,7 +248,7 @@ This file is created in Phase 1 and updated after EVERY phase. It is the single 
 3. **Parallel phases (4A-4D, 9) write to SEPARATE files** — orchestrator merges
 4. **Pipeline state is THE canonical record** — update it after every phase
 5. **Every finding gets a unique ID at birth** that persists through all phases
-6. **Every agent MUST read `memory-state.md` before starting** and **write a memory entry after completing** — see [memory-state.md](.claude/resources/memory-state.md)
+6. **Every agent MUST read `memory-state.md` before starting** and **write a memory entry after completing** — see [memory-state.md](resources/memory-state.md)
 
 ---
 
@@ -303,7 +301,7 @@ Audit Progress:
 - [ ] Phase 11:   Final report assembly → CONFIRMED-REPORT.md
 ```
 
-For the complete pipeline reference with data flows, error handling, and context budgets, see [orchestration-pipeline.md](.claude/resources/orchestration-pipeline.md).
+For the complete pipeline reference with data flows, error handling, and context budgets, see [orchestration-pipeline.md](resources/orchestration-pipeline.md).
 
 ---
 
@@ -349,40 +347,10 @@ fi
 ### Step P0-4: Merge and finalize graph.json
 
 ```bash
-python3 - <<'PYEOF'
-import json, shutil
-from pathlib import Path
-
-CODEBASE = "<path>"   # substitute actual codebase path
-graphify_extract = Path(CODEBASE) / "graphify-out" / ".graphify_extract.json"
-graphify_graph   = Path(CODEBASE) / "graphify-out" / "graph.json"
-blockchain_ast   = Path("audit-output/graph/blockchain-ast.json")
-out              = Path("audit-output/graph/graph.json")
-
-# Prefer .graphify_extract.json (richer, pre-build) for merge; fall back to graph.json
-base_file = graphify_extract if graphify_extract.exists() else graphify_graph
-if not base_file.exists():
-    print("WARNING: graphify output not found. Phase 0 incomplete.")
-    raise SystemExit(0)
-
-g = json.loads(base_file.read_text())
-
-if blockchain_ast.exists():
-    b = json.loads(blockchain_ast.read_text())
-    seen = {n["id"] for n in g.get("nodes", [])}
-    for n in b.get("nodes", []):
-        if n["id"] not in seen:
-            g.setdefault("nodes", []).append(n)
-            seen.add(n["id"])
-    g.setdefault("edges", []).extend(b.get("edges", []))
-    g.setdefault("hyperedges", []).extend(b.get("hyperedges", []))
-    print(f"Merged: {len(g['nodes'])} nodes, {len(g['edges'])} edges, {len(g['hyperedges'])} hyperedges")
-else:
-    print(f"Graph (graphify-only): {len(g.get('nodes',[]))} nodes, {len(g.get('edges',[]))} edges")
-
-out.write_text(json.dumps(g, indent=2))
-print(f"Written: {out}")
-PYEOF
+python3 scripts/finalize_audit_graph.py \
+  --codebase "$CODEBASE" \
+  --blockchain-ast audit-output/graph/blockchain-ast.json \
+  --out audit-output/graph/graph.json
 ```
 
 ### Step P0-5: Start MCP server in background
@@ -470,7 +438,7 @@ Record the detected language(s) and framework(s) — all subsequent phases adapt
 
 ### Step 3: Detect Protocol Type
 
-Apply the detection rules from [protocol-detection.md](.claude/resources/protocol-detection.md):
+Apply the detection rules from [protocol-detection.md](resources/protocol-detection.md):
 
 1. **If user provided a protocol hint**: Map directly to `DB/index.json` → `protocolContext.mappings.<hint>`
 2. **If no hint**: Run auto-detection using import/keyword analysis
@@ -483,7 +451,7 @@ grep -rn "import\|interface\|function\|module\|use\|pub fn\|entry fun" <path> \
   --include="*.cairo" --include="*.vy" | head -100
 ```
 
-Match output against the detection tables in [protocol-detection.md](.claude/resources/protocol-detection.md).
+Match output against the detection tables in [protocol-detection.md](resources/protocol-detection.md).
 
 ### Step 4: Load the Router
 
@@ -508,7 +476,7 @@ Load `DB/manifests/keywords.json`. Scan the first 100-200 lines of key target fi
 
 ### Step 7: Write Scope Document & Initialize Pipeline State
 
-Write `audit-output/00-scope.md` using the format from [inter-agent-data-format.md](.claude/resources/inter-agent-data-format.md).
+Write `audit-output/00-scope.md` using the format from [inter-agent-data-format.md](resources/inter-agent-data-format.md).
 
 Write `audit-output/pipeline-state.md` with the initial pipeline state (all phases NOT_STARTED, metadata filled in).
 
@@ -815,9 +783,9 @@ PIPELINE CONTEXT (read these files for shared state):
 - audit-output/02-invariants-reviewed.md (fall back to 02-invariants.md)
 - audit-output/01-context.md (architecture reference)
 
-Follow the 2-pass workflow from .claude/resources/db-hunting-workflow.md.
+Follow the 2-pass workflow from resources/db-hunting-workflow.md.
 Write findings to audit-output/03-findings-shard-<shard-id>-R1.md
-Use Finding Schema from .claude/resources/inter-agent-data-format.md.
+Use Finding Schema from resources/inter-agent-data-format.md.
 
 ★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
 Use HYPOTHESIS entries as hunt priorities. Use DEAD_END entries to skip
@@ -889,7 +857,7 @@ Perform your full 6-phase workflow (A-F). Use reasoning-seeds.md instead
 of re-loading hunt cards. Only report MEDIUM+ with reachability proofs.
 
 Write to audit-output/04a-reasoning-findings-R1.md
-Use Finding Schema from .claude/resources/inter-agent-data-format.md.
+Use Finding Schema from resources/inter-agent-data-format.md.
 
 ★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
 Use HYPOTHESIS entries as reasoning seeds alongside DB seeds.
@@ -958,7 +926,7 @@ for a minimum of 2 rounds with knowledge sharing between rounds.
 Write the unified cross-verified findings to audit-output/04c-persona-findings-R1.md
 Also write per-persona and per-round artifacts to audit-output/personas/R1/
 
-Use Finding Schema from .claude/resources/inter-agent-data-format.md.
+Use Finding Schema from resources/inter-agent-data-format.md.
 Every finding MUST have concrete code references and a reachability argument.
 
 ★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
@@ -1022,7 +990,7 @@ PIPELINE CONTEXT (read these files for shared state):
 
 Perform your full 5-phase workflow.
 Write to audit-output/04d-validation-findings-R1.md
-Use Finding Schema from .claude/resources/inter-agent-data-format.md.
+Use Finding Schema from resources/inter-agent-data-format.md.
 
 ★ MEMORY STATE: Read audit-output/memory-state.md BEFORE starting.
 Focus on PATTERN entries (recurring code idioms that may have validation gaps).
@@ -1140,7 +1108,7 @@ Record correlation in each finding: `Sources: [4A-shard-2-R1, 4C-persona-dfs-R1,
 
 ### Step 3: Deduplicate by Root Cause
 
-Apply the 5 critical questions from [root-cause-analysis.md](.claude/resources/root-cause-analysis.md):
+Apply the 5 critical questions from [root-cause-analysis.md](resources/root-cause-analysis.md):
 1. What operation is affected?
 2. What data is involved?
 3. What's missing or wrong?
@@ -1544,7 +1512,7 @@ Append to judge-memory/verdict-log.md
 PRE-JUDGE validity screen for these security findings.
 
 Read audit-output/05-findings-triaged.md for all findings to assess.
-Read .claude/resources/<judge-criteria>.md for the complete judging standards.
+Read resources/<judge-criteria>.md for the complete judging standards.
 
 EXECUTION EVIDENCE (if available — may be absent in static-only mode):
 - audit-output/06-poc-results.md (PoC execution results)
@@ -1700,7 +1668,7 @@ DEEP REVIEW — Line-by-line verification of polished security findings.
 
 Read audit-output/09-polished-findings.md for all polished issues.
 Read individual issues from audit-output/issues/F-NNN-issue.md for full detail.
-Read .claude/resources/<judge-criteria>.md for the complete judging standards.
+Read resources/<judge-criteria>.md for the complete judging standards.
 
 EXECUTION EVIDENCE (if available):
 - audit-output/06-poc-results.md (PoC execution results)
@@ -1830,7 +1798,7 @@ Read these files:
 
 ### Step 2: Assemble Report
 
-Write `audit-output/CONFIRMED-REPORT.md` using the template from [audit-report-template.md](.claude/resources/audit-report-template.md) with these additions:
+Write `audit-output/CONFIRMED-REPORT.md` using the template from [audit-report-template.md](resources/audit-report-template.md) with these additions:
 
 The report MUST include:
 
@@ -1919,7 +1887,7 @@ Present `CONFIRMED-REPORT.md` to the user with a summary:
 6. **Configurable modes**: Respect `--static-only`, `--judge`, and `--discovery-rounds` flags
 7. **Iterative discovery**: Phase 4 runs in rounds with cross-pollination — streams help each other
 8. **Cross-pollination bus**: `discovery-state-round-N.md` files enable inter-stream communication
-9. **Memory state**: Every agent reads `memory-state.md` before starting and writes a memory entry after completing — accumulated knowledge flows forward through the pipeline (see [memory-state.md](.claude/resources/memory-state.md))
+9. **Memory state**: Every agent reads `memory-state.md` before starting and writes a memory entry after completing — accumulated knowledge flows forward through the pipeline (see [memory-state.md](resources/memory-state.md))
 10. **Complete pipeline**: Run all 11 phases even if early phases find nothing — later phases discover novel bugs
 11. **Graceful degradation**: Sub-agent failures don't stop the pipeline — recover and continue
 12. **Pipeline bus**: All agents communicate through `audit-output/` files — no side channels
@@ -2051,15 +2019,15 @@ Report Structure:
 
 ## Resources
 
-- **Memory state architecture**: [memory-state.md](.claude/resources/memory-state.md)
-- **Pipeline reference**: [orchestration-pipeline.md](.claude/resources/orchestration-pipeline.md)
-- **Inter-agent data format**: [inter-agent-data-format.md](.claude/resources/inter-agent-data-format.md)
-- **Protocol detection**: [protocol-detection.md](.claude/resources/protocol-detection.md)
-- **Report template**: [audit-report-template.md](.claude/resources/audit-report-template.md)
-- **Reasoning skills**: [reasoning-skills.md](.claude/resources/reasoning-skills.md)
-- **Domain decomposition**: [domain-decomposition.md](.claude/resources/domain-decomposition.md)
-- **Root cause analysis**: [root-cause-analysis.md](.claude/resources/root-cause-analysis.md)
-- **Vulnerability taxonomy**: [vulnerability-taxonomy.md](.claude/resources/vulnerability-taxonomy.md)
-- **DB hunting workflow**: [db-hunting-workflow.md](.claude/resources/db-hunting-workflow.md)
+- **Memory state architecture**: [memory-state.md](resources/memory-state.md)
+- **Pipeline reference**: [orchestration-pipeline.md](resources/orchestration-pipeline.md)
+- **Inter-agent data format**: [inter-agent-data-format.md](resources/inter-agent-data-format.md)
+- **Protocol detection**: [protocol-detection.md](resources/protocol-detection.md)
+- **Report template**: [audit-report-template.md](resources/audit-report-template.md)
+- **Reasoning skills**: [reasoning-skills.md](resources/reasoning-skills.md)
+- **Domain decomposition**: [domain-decomposition.md](resources/domain-decomposition.md)
+- **Root cause analysis**: [root-cause-analysis.md](resources/root-cause-analysis.md)
+- **Vulnerability taxonomy**: [vulnerability-taxonomy.md](resources/vulnerability-taxonomy.md)
+- **DB hunting workflow**: [db-hunting-workflow.md](resources/db-hunting-workflow.md)
 - **DB search guide**: [DB/SEARCH_GUIDE.md](../../DB/SEARCH_GUIDE.md)
 - **DB router**: [DB/index.json](../../DB/index.json)

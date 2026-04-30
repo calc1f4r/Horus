@@ -87,6 +87,25 @@ Economic arbitrage design flaws occur when protocol mechanisms create predictabl
 | Interaction Scope | `single_contract` |
 | Chain(s) | everychain |
 
+### Valid Bug Signals
+
+- Vault/router deposit accepts arbitrary swap calldata, router target, pool path, or ParaSwap-style payload that can route through attacker-created thin liquidity.
+- Protocol trusts an internal order book, quoted route, or self-created market price without depth, TWAP, or external sanity bounds.
+- Flash-loaned capital can create the price discrepancy and settle the arbitrage atomically.
+
+### False Positive Guards
+
+- Safe if swap routes are allowlisted, minimum outputs are enforced, and pool liquidity/depth checks reject thin attacker-created pools.
+- Not this bug when arbitrage is ordinary market efficiency with no protocol-controlled funds, vault deposits, or trusted price dependency being abused.
+- Requires extractable value from protocol users, reserves, or collateral, not merely a price move in an external pool.
+
+### Code Patterns to Look For
+
+```solidity
+vault.deposit(amount, swapData); // route target/path fully caller-controlled
+paraswap.call(swapData); // no pool allowlist or minOut bound
+placeBuyOrder(size, price); // order book price later trusted by settlement
+```
 
 ### Vulnerability Description
 

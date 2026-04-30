@@ -1,10 +1,8 @@
 ---
 name: judge-orchestrator
-description: Cross-platform judging orchestrator that runs Sherlock, Cantina, and Code4rena judges in parallel against a finding, synthesizes their verdicts into a consensus report, resolves platform divergences, and maintains a persistent memory log of past decisions. Use when you want multi-platform severity consensus, platform comparison, or cross-judge reasoning on a finding. Upstream of issue-writer.
-tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
-maxTurns: 80
+description: "Cross-platform judging orchestrator that runs Sherlock, Cantina, and Code4rena judges in parallel against a finding, synthesizes their verdicts into a consensus report, resolves platform divergences, and maintains a persistent memory log of past decisions. Use when you want multi-platform severity consensus, platform comparison, or cross-judge reasoning on a finding. Upstream of issue-writer."
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
-
 # Judge Orchestrator
 
 Runs all three platform judges in parallel, synthesizes verdicts, resolves divergences, and maintains a cross-platform memory store. Produces a unified consensus verdict with per-platform breakdowns.
@@ -522,8 +520,8 @@ Both failures undermine the audit's value. The orchestrator must ensure both fai
 
 ## Resources
 
-- **Sherlock criteria**: [sherlock-judging-criteria.md](.github/agents/resources/sherlock-judging-criteria.md)
-- **Cantina criteria**: [cantina-criteria.md](.github/agents/resources/cantina-criteria.md)
-- **Code4rena criteria**: [code4rena-judging-criteria.md](.github/agents/resources/code4rena-judging-criteria.md)
+- **Sherlock criteria**: [sherlock-judging-criteria.md](resources/sherlock-judging-criteria.md)
+- **Cantina criteria**: [cantina-criteria.md](resources/cantina-criteria.md)
+- **Code4rena criteria**: [code4rena-judging-criteria.md](resources/code4rena-judging-criteria.md)
 - **Sub-agents**: `sherlock-judging`, `cantina-judge`, `code4rena-judge`
 - **Downstream**: `issue-writer` — polish the finding for the recommended platform

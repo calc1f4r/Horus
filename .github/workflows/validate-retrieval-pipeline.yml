@@ -1,0 +1,51 @@
+name: Validate Retrieval Pipeline
+
+on:
+  push:
+    branches:
+      - hunt-cards
+    paths:
+      - 'DB/**/*.md'
+      - 'DB/index.json'
+      - 'DB/manifests/**'
+      - 'DB/graphify-out/**'
+      - 'scripts/**/*.py'
+      - 'tests/**'
+      - 'requirements.txt'
+      - 'requirements-dev.txt'
+      - '.github/workflows/validate-retrieval-pipeline.yml'
+  pull_request:
+    paths:
+      - 'DB/**/*.md'
+      - 'DB/index.json'
+      - 'DB/manifests/**'
+      - 'DB/graphify-out/**'
+      - 'scripts/**/*.py'
+      - 'tests/**'
+      - 'requirements.txt'
+      - 'requirements-dev.txt'
+      - '.github/workflows/validate-retrieval-pipeline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate retrieval pipeline
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run retrieval pipeline validation
+        run: python3 scripts/validate_retrieval_pipeline.py

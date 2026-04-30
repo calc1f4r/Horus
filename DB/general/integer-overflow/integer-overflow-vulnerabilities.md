@@ -84,33 +84,34 @@ Integer overflow and underflow vulnerabilities occur when arithmetic operations 
 
 #### Agent Quick View
 
-- Root cause statement: "This vulnerability exists because of arithmetic_error"
+- Root cause statement: Arithmetic wraps or truncates in a path that gates balance, debt, reward, supply, or collateral accounting, letting an attacker satisfy checks with a wrapped value while applying the original attacker-chosen amount.
 - Pattern key: `arithmetic_error | numeric_operations | integer_overflow_underflow`
 - Interaction scope: `single_contract`
 - Primary affected component(s): `numeric_operations`
-- High-signal code keywords: `SafeMath`, `_transfer`, `batchTransfer`, `burn`, `claimRewards`, `int256`, `msg.sender`, `overflow`
+- High-signal code keywords: `unchecked`, `uint128`, `uint96`, `uint64`, `int256`, `SafeMath`, `batchTransfer`, `transferProxy`, `amount *`, `value + fee`, `balance - amount`, `claimRewards`, `processWithdraw`, `processReward`
 - Typical sink / impact: `fund_loss`
 - Validation strength: `moderate`
 
 #### Contract / Boundary Map
 
-- Entry surface(s): See pattern-specific attack scenarios below
-- Contract hop(s): `AlkimiyaVault.function -> BeautyChain.function -> LWStaking.function`
-- Trust boundary crossed: `internal`
-- Shared state or sync assumption: `state consistency across operations`
+- Entry surface(s): user-controlled transfer, batch transfer, delegated transfer, reward claim, withdrawal, liquidation, fee, cast, or supply update
+- Contract hop(s): usually single-contract arithmetic; may become multi-contract when wrapped token amounts feed AMM/lending accounting
+- Trust boundary crossed: attacker-controlled numeric input enters invariant-critical arithmetic
+- Shared state or sync assumption: totals, balances, rewards, and debt remain conserved across arithmetic and casts
 
 #### Valid Bug Signals
 
-- Signal 1: Arithmetic operation on user-controlled input without overflow protection
-- Signal 2: Casting between different-width integer types without bounds check
-- Signal 3: Multiplication before division where intermediate product can exceed type max
-- Signal 4: Accumulator variable can wrap around causing incorrect accounting
+- Solidity `<0.8.0` arithmetic lacks SafeMath or uses custom `safeAdd`/`safeMul` after the vulnerable expression already evaluated.
+- Solidity `>=0.8.0` puts balance, reward, debt, or supply math in `unchecked` without a preceding bound that proves the operation cannot wrap.
+- Downcast from `uint256`/`int256` to a smaller signed or unsigned type controls payout, debt delta, shares, or curve supply without `SafeCast`/range checks.
+- A require/assert checks a wrapped intermediate such as `count * amount`, `value + fee`, or `balance - amount`, then later transfers/mints/burns the original amount.
 
 #### False Positive Guards
 
-- Not this bug when: Solidity >= 0.8.0 with default checked arithmetic
-- Safe if: SafeMath library used for all arithmetic on user-controlled values
-- Requires attacker control of: specific conditions per pattern
+- Not this bug when Solidity `>=0.8.0` checked arithmetic covers the operation and no unsafe downcast/unchecked block is on the critical path.
+- Safe if `unchecked` is only used after a local invariant proves the exact operation cannot wrap for all attacker-controlled inputs.
+- Safe if every downcast uses explicit bounds such as `require(x <= type(uint128).max)` or OpenZeppelin `SafeCast`.
+- Requires attacker control of at least one operand or reachable protocol state that can push an intermediate outside the destination type bounds.
 
 ## Vulnerability Categories
 
@@ -532,16 +533,19 @@ rules:
 
 #### Code Patterns to Look For
 ```
-- See vulnerable pattern examples above for specific code smells
-- Check for missing validation on critical state-changing operations
-- Look for assumptions about external component behavior
+- Pre-0.8 arithmetic in guards: `uint256 total = count * amount; require(balance >= total);`
+- Addition before balance check: `require(balance >= value + fee); balances[to] += value; balances[feeTo] += fee;`
+- Unchecked balance/debt/reward math: `unchecked { balances[from] -= amount; rewards += amount * rate; }`
+- Unsafe downcasts on accounting values: `uint128(amount)`, `uint96(shares)`, `int256(uint256Amount)`, `int128(delta)`
+- Multiplication before division with attacker-sized operands: `amount * price / 1e18`, `shares * totalAssets / totalSupply`
 ```
 
 #### Audit Checklist
-- [ ] Verify all state-changing functions have appropriate access controls
-- [ ] Check for CEI pattern compliance on external calls
-- [ ] Validate arithmetic operations for overflow/underflow/precision loss
-- [ ] Confirm oracle data freshness and sanity checks
+- [ ] Verify source version and whether arithmetic is checked by Solidity or SafeMath on the exact expression.
+- [ ] Verify `unchecked` blocks have preceding bounds that prove each operation cannot wrap.
+- [ ] Verify downcasts use `SafeCast` or explicit `<= type(T).max` / signed range checks.
+- [ ] Verify guard expressions and state updates use the same bounded quantity.
+- [ ] Verify multiplication-before-division cannot overflow for maximum attacker-controlled inputs.
 
 ### Keywords for Search
 

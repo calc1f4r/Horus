@@ -1,35 +1,35 @@
 # defi
 
-> 361 nodes · cohesion 0.03
+> 216 nodes · cohesion 0.11
 
 ## Key Concepts
 
-- **calculation** (261 connections) — `DB/index.json`
-- **defi** (261 connections) — `DB/index.json`
-- **flash-loan** (261 connections) — `DB/index.json`
-- **vault** (261 connections) — `DB/index.json`
-- **_convertToShares** (60 connections) — `DB/general/vault-inflation-attack/defihacklabs-vault-inflation-patterns.md`
-- **_beforeTokenTransfer** (48 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **_afterTokenTransfer** (46 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md** (35 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **_getUserManagerState** (35 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **_setTreasuryRewardCutRate** (35 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **_updateRewardsPerToken** (35 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **DPPFlashLoanCall** (30 connections) — `DB/general/token-compatibility/defihacklabs-bsc-token-exploit-patterns-2022.md`
-- **single_contract** (23 connections) — `DB/cosmos/app-chain/abci-lifecycle/abci-lifecycle-vulnerabilities.md`
-- **callback_function** (17 connections) — `DB/general/flash-loan/flash-loan-attack-patterns.md`
-- **_createCredInternal** (14 connections) — `DB/general/bonding-curve/BONDING_CURVE_ACCESS_CONTROL_STATE_VULNERABILITIES.md`
-- **fee_on_transfer** (14 connections) — `DB/cosmos/app-chain/tokens/token-handling-vulnerabilities.md`
-- **DB/general/bonding-curve/BONDING_CURVE_ACCESS_CONTROL_STATE_VULNERABILITIES.md** (13 connections) — `DB/general/bonding-curve/BONDING_CURVE_ACCESS_CONTROL_STATE_VULNERABILITIES.md`
-- **bond_curve_update** (13 connections) — `DB/general/bonding-curve/BONDING_CURVE_ACCESS_CONTROL_STATE_VULNERABILITIES.md`
-- **editionMaxMintable** (13 connections) — `DB/general/bonding-curve/BONDING_CURVE_ACCESS_CONTROL_STATE_VULNERABILITIES.md`
-- **_flashCallback** (13 connections) — `DB/general/business-logic/defihacklabs-business-logic-2023-patterns.md`
-- **self_liquidation** (13 connections) — `DB/general/business-logic/defihacklabs-business-logic-2023-patterns.md`
-- **DB/general/bonding-curve/BONDING_CURVE_MISC_VULNERABILITIES.md** (12 connections) — `DB/general/bonding-curve/BONDING_CURVE_MISC_VULNERABILITIES.md`
-- **DB/general/flash-loan/flash-loan-attack-patterns.md** (12 connections) — `DB/general/flash-loan/flash-loan-attack-patterns.md`
-- **batch_operations** (12 connections) — `DB/general/bonding-curve/BONDING_CURVE_MISC_VULNERABILITIES.md`
-- **closePositionByCondition** (12 connections) — `DB/general/bonding-curve/BONDING_CURVE_MISC_VULNERABILITIES.md`
-- *... and 336 more nodes in this community*
+- **Message Channel DoS and Censorship** (107 connections) — `DB/zk-rollup/bridge-vulnerabilities.md`
+- **Sequencer Economic Issues** (97 connections) — `DB/zk-rollup/sequencer-issues.md`
+- **Token Accounting and Token Mapping Errors** (95 connections) — `DB/zk-rollup/bridge-vulnerabilities.md`
+- **Protocol Functions Breaking During Sequencer Downtime** (95 connections) — `DB/zk-rollup/sequencer-issues.md`
+- **Pattern 1: Token Bridge Reentrancy Corrupts Accounting** (93 connections) — `DB/zk-rollup/bridge-vulnerabilities.md`
+- **1. LST Oracle Manipulation via Upgradeable Proxies** (89 connections) — `DB/general/restaking/LRT_EXCHANGE_RATE_ORACLE_VULNERABILITIES.md`
+- **Pattern 1: Access-Controlled Functions Fail During Sequencer Downtime** (87 connections) — `DB/zk-rollup/sequencer-issues.md`
+- **Pattern 2: Dutch Auctions and Options Expire at Bad Prices During Downtime** (87 connections) — `DB/zk-rollup/sequencer-issues.md`
+- **Pattern 3: Linea / Sequencer Censorship Locking User Funds** (87 connections) — `DB/zk-rollup/sequencer-issues.md`
+- **2. Exchange Rate Sandwich / Frontrunning** (85 connections) — `DB/general/restaking/LRT_EXCHANGE_RATE_ORACLE_VULNERABILITIES.md`
+- **1. Sandwich / Front-Running Reward Claims** (85 connections) — `DB/general/restaking/RESTAKING_REWARD_DISTRIBUTION_VULNERABILITIES.md`
+- **Pattern 2: Wrong Token Order in Bridge Causes Incorrect Routing** (85 connections) — `DB/zk-rollup/bridge-vulnerabilities.md`
+- **Pattern 4: Sequencer Underpaid Due to Incorrect commitScalar** (85 connections) — `DB/zk-rollup/sequencer-issues.md`
+- **Pattern 5: Front-Running finalizeBlocks in Decentralized Sequencer Mode** (85 connections) — `DB/zk-rollup/sequencer-issues.md`
+- **Pattern 6: Single Reverting Withdrawal Blocks Entire Queue** (83 connections) — `DB/zk-rollup/bridge-vulnerabilities.md`
+- **Pattern 5: USDC Blacklist Permanently Locks Bridge Funds** (81 connections) — `DB/zk-rollup/bridge-vulnerabilities.md`
+- **4. Exchange Rate Calculation Errors** (79 connections) — `DB/general/restaking/LRT_EXCHANGE_RATE_ORACLE_VULNERABILITIES.md`
+- **Pattern 3: Router Signatures Replay Across Chains** (79 connections) — `DB/zk-rollup/bridge-vulnerabilities.md`
+- **Pattern 4: Wrong ERC1155 Selector Locks Tokens in Bridge** (79 connections) — `DB/zk-rollup/bridge-vulnerabilities.md`
+- **6. Share Value Appreciation Blocking Settlement** (77 connections) — `DB/general/restaking/LRT_EXCHANGE_RATE_ORACLE_VULNERABILITIES.md`
+- **2. msg.sender Confusion in Reward Re-Staking** (77 connections) — `DB/general/restaking/RESTAKING_REWARD_DISTRIBUTION_VULNERABILITIES.md`
+- **Batch Hashing and Commitment Bugs** (77 connections) — `DB/zk-rollup/batch-processing.md`
+- **3. Stale or Divergent Rate Providers** (75 connections) — `DB/general/restaking/LRT_EXCHANGE_RATE_ORACLE_VULNERABILITIES.md`
+- **5. Withdrawal Pricing During Beacon Chain Exits** (75 connections) — `DB/general/restaking/LRT_EXCHANGE_RATE_ORACLE_VULNERABILITIES.md`
+- **3. Reward Accounting Double-Counting** (75 connections) — `DB/general/restaking/RESTAKING_REWARD_DISTRIBUTION_VULNERABILITIES.md`
+- *... and 191 more nodes in this community*
 
 ## Relationships
 
@@ -37,31 +37,27 @@
 
 ## Source Files
 
-- `DB/cosmos/app-chain/abci-lifecycle/abci-lifecycle-vulnerabilities.md`
-- `DB/cosmos/app-chain/rewards/reward-distribution-failures.md`
-- `DB/cosmos/app-chain/tokens/token-handling-vulnerabilities.md`
-- `DB/general/bonding-curve/BONDING_CURVE_ACCESS_CONTROL_STATE_VULNERABILITIES.md`
-- `DB/general/bonding-curve/BONDING_CURVE_DOS_GRIEFING_VULNERABILITIES.md`
-- `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
+- `DB/account-abstraction/aa-signature-replay-attacks.md`
+- `DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md`
+- `DB/amm/concentrated-liquidity/price-oracle-manipulation.md`
+- `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
+- `DB/bridge/wormhole/wormhole-integration-vulnerabilities.md`
 - `DB/general/bonding-curve/BONDING_CURVE_MATH_FORMULA_VULNERABILITIES.md`
-- `DB/general/bonding-curve/BONDING_CURVE_MISC_VULNERABILITIES.md`
-- `DB/general/bonding-curve/BONDING_CURVE_ORACLE_TWAP_VULNERABILITIES.md`
-- `DB/general/bonding-curve/BONDING_CURVE_PRICE_MANIPULATION_VULNERABILITIES.md`
-- `DB/general/bonding-curve/BONDING_CURVE_REENTRANCY_FLASH_LOAN_VULNERABILITIES.md`
-- `DB/general/bonding-curve/BONDING_CURVE_SLIPPAGE_PROTECTION_VULNERABILITIES.md`
-- `DB/general/bonding-curve/BONDING_CURVE_TOKEN_LAUNCH_GRADUATION_VULNERABILITIES.md`
-- `DB/general/bonding-curve/SANDWICH_ATTACK_MEV_BONDING_CURVE_VULNERABILITIES.md`
-- `DB/general/business-logic/defi-business-logic-flaws.md`
-- `DB/general/business-logic/defihacklabs-business-logic-2023-patterns.md`
-- `DB/general/business-logic/defihacklabs-business-logic-2024-2025.md`
-- `DB/general/business-logic/defihacklabs-protocol-logic-flaws-2021-2022.md`
-- `DB/general/business-logic/defihacklabs-share-accounting-patterns.md`
-- `DB/general/business-logic/defihacklabs-solvency-business-logic-patterns.md`
+- `DB/general/bridge/cross-chain-bridge-vulnerabilities.md`
+- `DB/general/restaking/LRT_EXCHANGE_RATE_ORACLE_VULNERABILITIES.md`
+- `DB/general/restaking/RESTAKING_REWARD_DISTRIBUTION_VULNERABILITIES.md`
+- `DB/oracle/price-manipulation/defihacklabs-flashloan-oracle-2022-patterns.md`
+- `DB/oracle/price-manipulation/flash-loan-oracle-manipulation.md`
+- `DB/unique/defihacklabs/defihacklabs-novel-attack-patterns-2025-2026.md`
+- `DB/zk-rollup/batch-processing.md`
+- `DB/zk-rollup/bridge-vulnerabilities.md`
+- `DB/zk-rollup/l1-l2-messaging.md`
+- `DB/zk-rollup/sequencer-issues.md`
 
 ## Audit Trail
 
-- EXTRACTED: 1300 (64%)
-- INFERRED: 746 (36%)
+- EXTRACTED: 1053 (38%)
+- INFERRED: 1695 (62%)
 - AMBIGUOUS: 0 (0%)
 
 ---

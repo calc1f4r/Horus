@@ -1,7 +1,7 @@
 ---
 paths:
   - "scripts/**/*.py"
-  - "generate_manifests.py"
+  - "scripts/generate_manifests.py"
 ---
 
 # Python Script Rules
@@ -9,7 +9,7 @@ paths:
 When editing Python scripts in this repo:
 
 - Use `python3` explicitly (not `python`)
-- Always activate venv first: `source .venv/bin/activate`
+- Prefer system `python3` unless the local `.venv` has been recreated; the checked-in `.venv` can point at a missing interpreter.
 - `scripts/generate_manifests.py` is the canonical manifest generator — changes here affect the entire 4-tier search system
 - `scripts/build_db_graph.py` is the canonical DB graph generator — run it after hunt-card/manifest changes that should affect graph traversal
 - `scripts/lessons_db.py` manages opt-in cross-audit memory at `~/.horus/lessons.db`

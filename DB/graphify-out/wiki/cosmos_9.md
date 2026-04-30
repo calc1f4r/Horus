@@ -1,35 +1,35 @@
 # cosmos
 
-> 27 nodes · cohesion 0.22
+> 30 nodes · cohesion 0.74
 
 ## Key Concepts
 
-- **calcAndCacheStakes** (25 connections) — `DB/cosmos/app-chain/fund-safety/fund-locking-insolvency.md`
-- **DB/cosmos/app-chain/fund-safety/fund-locking-insolvency.md** (10 connections) — `DB/cosmos/app-chain/fund-safety/fund-locking-insolvency.md`
-- **DB/cosmos/app-chain/timing/epoch-timing-vulnerabilities.md** (10 connections) — `DB/cosmos/app-chain/timing/epoch-timing-vulnerabilities.md`
-- **epoch_duration_break** (10 connections) — `DB/cosmos/app-chain/timing/epoch-timing-vulnerabilities.md`
-- **_initializeValidatorStakeUpdate** (10 connections) — `DB/cosmos/app-chain/timing/epoch-timing-vulnerabilities.md`
-- **1. Timing Epoch Snapshot** (9 connections) — `DB/cosmos/app-chain/timing/epoch-timing-vulnerabilities.md`
-- **2. Timing Cooldown Bypass** (9 connections) — `DB/cosmos/app-chain/timing/epoch-timing-vulnerabilities.md`
-- **3. Timing Timestamp Boundary** (9 connections) — `DB/cosmos/app-chain/timing/epoch-timing-vulnerabilities.md`
-- **4. Timing Unbonding Change** (9 connections) — `DB/cosmos/app-chain/timing/epoch-timing-vulnerabilities.md`
-- **5. Timing Epoch Duration Break** (9 connections) — `DB/cosmos/app-chain/timing/epoch-timing-vulnerabilities.md`
-- **7. Timing Block Time** (9 connections) — `DB/cosmos/app-chain/timing/epoch-timing-vulnerabilities.md`
-- **8. Timing Race Condition** (9 connections) — `DB/cosmos/app-chain/timing/epoch-timing-vulnerabilities.md`
-- **Keywords** (9 connections) — `DB/cosmos/app-chain/timing/epoch-timing-vulnerabilities.md`
-- **Medium Risk Severity Report** (9 connections) — `DB/cosmos/app-chain/timing/epoch-timing-vulnerabilities.md`
-- **insolvency_protocol** (9 connections) — `DB/cosmos/app-chain/fund-safety/fund-locking-insolvency.md`
-- **6. Timing Expiration Bypass** (8 connections) — `DB/cosmos/app-chain/timing/epoch-timing-vulnerabilities.md`
-- **1. Funds Lock Permanent** (8 connections) — `DB/cosmos/app-chain/fund-safety/fund-locking-insolvency.md`
-- **2. Funds Lock Conditional** (8 connections) — `DB/cosmos/app-chain/fund-safety/fund-locking-insolvency.md`
-- **3. Funds Insolvency Protocol** (8 connections) — `DB/cosmos/app-chain/fund-safety/fund-locking-insolvency.md`
-- **4. Funds Insolvency Slash** (8 connections) — `DB/cosmos/app-chain/fund-safety/fund-locking-insolvency.md`
-- **5. Funds Insolvency Rebase** (8 connections) — `DB/cosmos/app-chain/fund-safety/fund-locking-insolvency.md`
-- **6. Funds Bad Debt** (8 connections) — `DB/cosmos/app-chain/fund-safety/fund-locking-insolvency.md`
-- **7. Funds Withdrawal Blocked** (8 connections) — `DB/cosmos/app-chain/fund-safety/fund-locking-insolvency.md`
-- **8. Funds Unsafe Casting Loss** (8 connections) — `DB/cosmos/app-chain/fund-safety/fund-locking-insolvency.md`
-- **Description** (8 connections) — `DB/cosmos/app-chain/fund-safety/fund-locking-insolvency.md`
-- *... and 2 more nodes in this community*
+- **3. Infra Tss** (45 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **4. Infra Keyring** (43 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **5. Infra Error Handling** (43 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **6. Infra Deprecated Usage** (43 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **Description** (43 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **1. Infra Ssrf** (41 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **2. Infra Private Key** (41 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **Vulnerability Report** (39 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **Description** (37 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **Diﬃculty: High** (37 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **Diﬃculty: High** (37 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **Keywords** (31 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **infrastructure_logic** (24 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **config_exposure** (24 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **deprecated_usage** (24 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **error_handling** (24 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **infrastructure_logic** (22 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **logging_info_leak** (22 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **private_key** (20 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md** (12 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **reports/cosmos_cometbft_findings/deprecated-getsigners-usage.md** (6 connections) — `DB/cosmos/app-chain/consensus/consensus-finality-vulnerabilities.md`
+- **reports/cosmos_cometbft_findings/insecure-storage-of-price-feeder-keyring-passwords.md** (4 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **reports/cosmos_cometbft_findings/lack-of-slashingpenalty-mechanism.md** (4 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **reports/cosmos_cometbft_findings/peggo-takes-an-ethereum-private-key-as-a-command-line-argument.md** (4 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- **reports/cosmos_cometbft_findings/peggo-allows-the-use-of-non-local-unencrypted-url-schemes.md** (2 connections) — `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- *... and 5 more nodes in this community*
 
 ## Relationships
 
@@ -37,13 +37,13 @@
 
 ## Source Files
 
-- `DB/cosmos/app-chain/fund-safety/fund-locking-insolvency.md`
-- `DB/cosmos/app-chain/timing/epoch-timing-vulnerabilities.md`
+- `DB/cosmos/app-chain/consensus/consensus-finality-vulnerabilities.md`
+- `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
 
 ## Audit Trail
 
-- EXTRACTED: 100 (60%)
-- INFERRED: 68 (40%)
+- EXTRACTED: 36 (11%)
+- INFERRED: 305 (89%)
 - AMBIGUOUS: 0 (0%)
 
 ---

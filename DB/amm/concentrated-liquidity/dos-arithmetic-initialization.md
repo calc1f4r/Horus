@@ -1,7 +1,13 @@
 ---
 title: "DoS, Arithmetic, and Initialization Vulnerabilities in Concentrated Liquidity AMMs"
+protocol: generic
+category: amm/concentrated-liquidity
 vulnerability_class: "DoS/Arithmetic/Initialization Vulnerabilities"
+vulnerability_type: dos_arithmetic_initialization
+attack_type: denial_of_service|arithmetic_error|initialization_manipulation
+affected_component: pool_initialization|liquidity_math|share_accounting
 severity: high
+impact: fund_loss|denial_of_service|state_corruption
 chain: "Multi-chain"
 affected_protocols:
   - "Uniswap V3/V4"
@@ -96,6 +102,22 @@ Concentrated liquidity AMMs involve complex mathematical operations for price ca
 - Not this bug when: OpenZeppelin `initializer` modifier prevents re-initialization
 - Safe if: Proxy implementation initialize() called in same transaction as deployment
 - Requires attacker control of: specific conditions per pattern
+
+#### Code Patterns to Look For
+
+```solidity
+uint256 prod0 = a * b; // migrated FullMath without unchecked overflow behavior
+amountOut = mulDiv(amountIn, reserveOut, reserveIn); // wrong rounding direction for buys/sells
+initialize(token0, token1, sqrtPriceX96); // callable by anyone or callable twice
+buyShares(1); deposit(donation); // first-depositor or initial-donation share inflation
+for (...) processWithdrawals(queue[i]); // attacker can inflate queue or force permanent revert
+```
+
+#### False Positive Detail
+
+- Initialization issues are high signal when the initializer sets ownership, pool price, trusted tokens, or accounting baselines and remains callable after deployment.
+- Arithmetic DoS requires a realistic input range that triggers revert or zero output in a public path, not only unreachable max-value math.
+- First-depositor findings need a low/empty supply state plus donation, rounding, or initial-price control that transfers value from later users.
 
 ## Vulnerable Pattern Examples
 

@@ -2,18 +2,18 @@
   "meta": {
     "manifest": "tokens",
     "description": "Compressed hunt cards for tokens — one-line detection rules for bulk scanning",
-    "totalCards": 31,
-    "skipped": 16,
-    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 31
+    "totalCards": 32,
+    "skipped": 5,
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, use optional preconditions/proofShape/falsePositiveSignals/reportEvidence when present, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "enriched": 32
   },
   "cards": [
     {
-      "id": "tokens-erc20-token-vulnerabilities-vulnerable-pattern-examples-001",
-      "title": "Vulnerable Pattern Examples",
+      "id": "tokens-erc20-token-vulnerabilities-1-transfer-transferfrom-vulner-001",
+      "title": "1. Transfer & TransferFrom Vulnerabilities",
       "severity": "HIGH",
-      "grep": "calculateCollateralValue|adminRecoverStuckFunds|_convertToShares|_convertToAssets|block.timestamp|addSupportedToken",
-      "detect": "Return value not checked - silent failure possible",
+      "grep": "adminRecoverStuckFunds|_convertToShares|_convertToAssets|block.timestamp|addSupportedToken|ReentrancyGuard",
+      "detect": "The ERC20 standard specifies that `transfer()` and `transferFrom()` should return a boolean indicating success.",
       "cat": [
         "token",
         "erc20",
@@ -22,22 +22,64 @@
       ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
-        219,
-        263
+        196,
+        378
       ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/erc20_token_findings/h-01-unchecked-erc20-transfers-can-cause-lock-up.md",
+          "reports/erc20_token_findings/m-07-erc20-return-values-not-checked.md",
+          "reports/erc20_token_findings/m-14-solmate-safetransfer-and-safetransferfrom-does-not-check-the-code-size-of-t.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "data manipulation",
+          "economic exploit",
+          "logical error",
+          "reentrancy"
+        ],
+        "commonlyComposesWith": [
+          "transfer",
+          "transfer from",
+          "approve",
+          "allowance",
+          "balance of"
+        ]
+      },
       "check": [
-        "VERIFY: Return value not checked - silent failure possible",
-        "PROVE: USDT returns no value, this will revert or misbehave"
+        "VERIFY: Signal 1: External call (.call, .transfer, token transfer) occurs before state variable update; Signal 2: Token implements callback hooks (ERC-777,...",
+        "PROVE: Protocol calls token.transfer() or token.transferFrom(); Transfer fails silently (returns false or no return value)",
+        "FALSIFY: Not this bug when: Contract uses ReentrancyGuard (nonReentrant) on all entry points; Safe if: All state updates complete before any external call (strict CEI)",
+        "IMPACT: Silent transfer failures cause state/balance mismatches",
+        "Is SafeERC20 (OpenZeppelin) used for all token transfers?",
+        "If using Solmate, is contract existence checked for dynamic tokens?"
       ],
       "antipattern": "USDT returns no value, this will revert or misbehave",
-      "validWhen": "Return value not checked - silent failure possible"
+      "securePattern": "Check contract exists before using Solmate",
+      "validWhen": "Signal 1: External call (.call, .transfer, token transfer) occurs before state variable update; Signal 2: Token implements callback hooks (ERC-777, ERC-721) and protocol...",
+      "invalidWhen": "Not this bug when: Contract uses ReentrancyGuard (nonReentrant) on all entry points; Safe if: All state updates complete before any external call (strict CEI)",
+      "impact": "Silent transfer failures cause state/balance mismatches",
+      "preconditions": [
+        "attacker control of: specific conditions per pattern",
+        "Attacker exploits the state/balance mismatch to drain funds or cause DoS"
+      ],
+      "proofShape": "Protocol calls token.transfer() or token.transferFrom() -> Transfer fails silently (returns false or no return value) -> Protocol assumes transfer succeeded and updates internal state",
+      "falsePositiveSignals": [
+        "Not this bug when: Contract uses ReentrancyGuard (nonReentrant) on all entry points",
+        "Safe if: All state updates complete before any external call (strict CEI)",
+        "Requires attacker control of: specific conditions per pattern"
+      ]
     },
     {
-      "id": "tokens-erc20-token-vulnerabilities-vulnerable-pattern-examples-003",
-      "title": "Vulnerable Pattern Examples",
+      "id": "tokens-erc20-token-vulnerabilities-2-approval-allowance-vulnerabi-002",
+      "title": "2. Approval & Allowance Vulnerabilities",
       "severity": "MEDIUM",
-      "grep": "calculateCollateralValue|adminRecoverStuckFunds|calculateRewardSecure|_convertToShares|_convertToAssets|block.timestamp",
-      "detect": "Classic approval race condition",
+      "grep": "adminRecoverStuckFunds|safeApproveWithReset|_convertToShares|_convertToAssets|increaseAllowance|decreaseAllowance",
+      "detect": "Race Condition**: The `approve()` function doesn't protect against front-running when changing allowance from non-zero...",
       "cat": [
         "token",
         "erc20",
@@ -46,22 +88,55 @@
       ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
-        370,
-        413
+        379,
+        542
       ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/erc20_token_findings/approve-function-can-be-front-ran-resulting-in-token-theft.md",
+          "reports/erc20_token_findings/m-02-must-approve-0-first.md",
+          "reports/erc20_token_findings/decrease-allowance-when-it-is-already-set-a-non-zero-value.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "data manipulation",
+          "economic exploit",
+          "logical error",
+          "reentrancy"
+        ],
+        "commonlyComposesWith": [
+          "transfer",
+          "transfer from",
+          "approve",
+          "allowance",
+          "balance of"
+        ]
+      },
       "check": [
-        "VERIFY: Classic approval race condition",
-        "PROVE: USDT requires approve(0) before setting new allowance"
+        "VERIFY: Race Condition: The approve() function doesn't protect against front-running when changing allowance from non-zero...",
+        "PROVE: Alice has approved Bob to spend 100 tokens; Alice sends TX to change approval to 50 tokens",
+        "FALSIFY: Prevents front-running by using relative changes",
+        "IMPACT: Double-spending via front-running",
+        "Does the protocol use increaseAllowance/decreaseAllowance?",
+        "Are USDT-like tokens (require approve 0 first) supported?"
       ],
       "antipattern": "USDT requires approve(0) before setting new allowance",
-      "validWhen": "Classic approval race condition"
+      "securePattern": "Prevents front-running by using relative changes",
+      "validWhen": "Race Condition: The approve() function doesn't protect against front-running when changing allowance from non-zero...",
+      "invalidWhen": "Prevents front-running by using relative changes",
+      "impact": "Double-spending via front-running",
+      "proofShape": "Alice has approved Bob to spend 100 tokens -> Alice sends TX to change approval to 50 tokens -> Bob sees pending TX and front-runs with transferFrom(alice, bob, 100)"
     },
     {
-      "id": "tokens-erc20-token-vulnerabilities-vulnerable-pattern-examples-005",
-      "title": "Vulnerable Pattern Examples",
+      "id": "tokens-erc20-token-vulnerabilities-3-decimals-precision-vulnerabi-003",
+      "title": "3. Decimals & Precision Vulnerabilities",
       "severity": "CRITICAL",
       "grep": "calculateCollateralValue|adminRecoverStuckFunds|_convertToShares|_convertToAssets|block.timestamp|addSupportedToken",
-      "detect": "Assumes 18 decimals for all tokens",
+      "detect": "Hardcoded 18 Decimals**: Using `1e18` or `10**18` as scaling factor regardless of actual token decimals",
       "cat": [
         "token",
         "erc20",
@@ -70,23 +145,56 @@
       ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
-        537,
-        589
+        543,
+        739
       ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/erc20_token_findings/h-1-protocol-assumes-18-decimals-collateral.md",
+          "reports/erc20_token_findings/claim-will-underflow-and-revert-for-all-tokens-without-18-decimals.md",
+          "reports/erc20_token_findings/h-01-reward-calculation-will-be-wrong-for-non-standard-tokens-0-decimals.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "data manipulation",
+          "economic exploit",
+          "logical error",
+          "reentrancy"
+        ],
+        "commonlyComposesWith": [
+          "transfer",
+          "transfer from",
+          "approve",
+          "allowance",
+          "balance of"
+        ]
+      },
       "neverPrune": true,
       "check": [
-        "VERIFY: Assumes 18 decimals for all tokens",
-        "PROVE: Precision loss due to division before multiplication"
+        "VERIFY: Hardcoded 18 Decimals: Using 1e18 or 1018 as scaling factor regardless of actual token decimals",
+        "PROVE: Precision loss due to division before multiplication",
+        "FALSIFY: Use battle-tested fixed-point library",
+        "IMPACT: Calculation results off by 10^12 or more",
+        "Does the protocol query token.decimals() for each token?",
+        "Are calculations normalized to a common precision?"
       ],
       "antipattern": "Precision loss due to division before multiplication",
-      "validWhen": "Assumes 18 decimals for all tokens"
+      "securePattern": "Use battle-tested fixed-point library",
+      "validWhen": "Hardcoded 18 Decimals: Using 1e18 or 1018 as scaling factor regardless of actual token decimals",
+      "invalidWhen": "Use battle-tested fixed-point library",
+      "impact": "Calculation results off by 10^12 or more",
+      "proofShape": "Precision loss due to division before multiplication"
     },
     {
-      "id": "tokens-erc20-token-vulnerabilities-vulnerable-pattern-examples-007",
-      "title": "Vulnerable Pattern Examples",
+      "id": "tokens-erc20-token-vulnerabilities-4-fee-on-transfer-token-vulner-004",
+      "title": "4. Fee-on-Transfer Token Vulnerabilities",
       "severity": "HIGH",
       "grep": "adminRecoverStuckFunds|_convertToShares|_convertToAssets|depositCollateral|block.timestamp|addSupportedToken",
-      "detect": "Assumes received amount equals transferred amount",
+      "detect": "Balance Tracking Mismatch**: Protocol tracks transferred amount instead of actual received amount",
       "cat": [
         "token",
         "erc20",
@@ -95,22 +203,56 @@
       ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
-        733,
-        804
+        740,
+        984
       ],
+      "reportEvidence": {
+        "count": 4,
+        "sampleReports": [
+          "reports/erc20_token_findings/fee-on-transfer-tokens-will-cause-users-to-lose-funds.md",
+          "reports/erc20_token_findings/m-01-incompatibility-with-fee-on-transferinflationarydeflationaryrebasing-tokens.md",
+          "reports/erc20_token_findings/contracts-do-not-support-tokens-with-fees-or-rebasing-tokens.md",
+          "reports/erc20_token_findings/h-3-tokens-with-fees-on-transfer-are-not-fully-supported.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "data manipulation",
+          "economic exploit",
+          "logical error",
+          "reentrancy"
+        ],
+        "commonlyComposesWith": [
+          "transfer",
+          "transfer from",
+          "approve",
+          "allowance",
+          "balance of"
+        ]
+      },
       "check": [
-        "VERIFY: Assumes received amount equals transferred amount",
-        "PROVE: Collateral amount recorded exceeds actual tokens held"
+        "VERIFY: Balance Tracking Mismatch: Protocol tracks transferred amount instead of actual received amount",
+        "PROVE: Collateral amount recorded exceeds actual tokens held",
+        "FALSIFY: Full implementation with proper accounting",
+        "IMPACT: Contract balance becomes less than sum of all user balances",
+        "Does the protocol use balance-before/after pattern for deposits?",
+        "Are fee-on-transfer tokens explicitly supported or rejected?"
       ],
       "antipattern": "Collateral amount recorded exceeds actual tokens held",
-      "validWhen": "Assumes received amount equals transferred amount"
+      "securePattern": "Full implementation with proper accounting",
+      "validWhen": "Balance Tracking Mismatch: Protocol tracks transferred amount instead of actual received amount",
+      "invalidWhen": "Full implementation with proper accounting",
+      "impact": "Contract balance becomes less than sum of all user balances",
+      "proofShape": "Collateral amount recorded exceeds actual tokens held"
     },
     {
-      "id": "tokens-erc20-token-vulnerabilities-vulnerable-pattern-examples-009",
-      "title": "Vulnerable Pattern Examples",
-      "severity": "CRITICAL",
+      "id": "tokens-erc20-token-vulnerabilities-5-rebasing-token-vulnerabiliti-005",
+      "title": "5. Rebasing Token Vulnerabilities",
+      "severity": "HIGH",
       "grep": "adminRecoverStuckFunds|_convertToShares|_convertToAssets|getCollateralValue|getClaimableAmount|block.timestamp",
-      "detect": "Cached balance doesn't reflect rebases",
+      "detect": "Cached Balance**: Storing balanceOf() result and using cached value later",
       "cat": [
         "token",
         "erc20",
@@ -119,23 +261,56 @@
       ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
-        979,
-        1062
+        985,
+        1242
       ],
-      "neverPrune": true,
+      "reportEvidence": {
+        "count": 4,
+        "sampleReports": [
+          "reports/erc20_token_findings/h-05-aaves-share-tokens-are-rebasing-breaking-current-strategy-code.md",
+          "reports/erc20_token_findings/lack-of-rebasable-tokens-support.md",
+          "reports/erc20_token_findings/contracts-do-not-support-tokens-with-fees-or-rebasing-tokens.md",
+          "reports/erc20_token_findings/m-01-incompatibility-with-fee-on-transferinflationarydeflationaryrebasing-tokens.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "data manipulation",
+          "economic exploit",
+          "logical error",
+          "reentrancy"
+        ],
+        "commonlyComposesWith": [
+          "transfer",
+          "transfer from",
+          "approve",
+          "allowance",
+          "balance of"
+        ]
+      },
       "check": [
-        "VERIFY: Cached balance doesn't reflect rebases",
-        "PROVE: Using aToken amount directly without share conversion"
+        "VERIFY: Cached Balance: Storing balanceOf() result and using cached value later",
+        "PROVE: Using aToken amount directly without share conversion",
+        "FALSIFY: Track proportional shares, not absolute amounts",
+        "IMPACT: Cached balances become inaccurate after rebase",
+        "Does the protocol use share-based accounting?",
+        "Are rebasing tokens explicitly supported or rejected?"
       ],
       "antipattern": "Using aToken amount directly without share conversion",
-      "validWhen": "Cached balance doesn't reflect rebases"
+      "securePattern": "Track proportional shares, not absolute amounts",
+      "validWhen": "Cached Balance: Storing balanceOf() result and using cached value later",
+      "invalidWhen": "Track proportional shares, not absolute amounts",
+      "impact": "Cached balances become inaccurate after rebase",
+      "proofShape": "Using aToken amount directly without share conversion"
     },
     {
-      "id": "tokens-erc20-token-vulnerabilities-vulnerable-pattern-examples-011",
-      "title": "Vulnerable Pattern Examples",
+      "id": "tokens-erc20-token-vulnerabilities-6-erc777-reentrancy-vulnerabil-006",
+      "title": "6. ERC777 Reentrancy Vulnerabilities",
       "severity": "CRITICAL",
       "grep": "adminRecoverStuckFunds|_convertToShares|_convertToAssets|withdrawCollateral|block.timestamp|addSupportedToken",
-      "detect": "State updated after external call",
+      "detect": "Hidden Callbacks**: ERC777 transfers trigger hooks that execute arbitrary code",
       "cat": [
         "token",
         "erc20",
@@ -144,23 +319,56 @@
       ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
-        1242,
-        1333
+        1243,
+        1505
       ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/erc20_token_findings/1-erc777-re-entrancy-attack.md",
+          "reports/erc20_token_findings/h-01-reentrancy-in-buy-function-for-erc777-tokens-allows-buying-funds-with-consi.md",
+          "reports/erc20_token_findings/m-04-erc777-reentrancy-when-withdrawing-can-be-used-to-withdraw-all-collateral.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "data manipulation",
+          "economic exploit",
+          "logical error",
+          "reentrancy"
+        ],
+        "commonlyComposesWith": [
+          "reentrancy",
+          "erc777 reentrancy",
+          "transfer",
+          "transfer from",
+          "approve"
+        ]
+      },
       "neverPrune": true,
       "check": [
-        "VERIFY: State updated after external call",
-        "PROVE: Stake and immediately unstake via reentrancy"
+        "VERIFY: Hidden Callbacks: ERC777 transfers trigger hooks that execute arbitrary code",
+        "PROVE: Stake and immediately unstake via reentrancy",
+        "FALSIFY: Update state BEFORE external calls",
+        "IMPACT: Complete protocol drain possible",
+        "Do all functions follow Checks-Effects-Interactions pattern?",
+        "Is ReentrancyGuard applied to all state-changing functions?"
       ],
       "antipattern": "Stake and immediately unstake via reentrancy",
-      "validWhen": "State updated after external call"
+      "securePattern": "Update state BEFORE external calls",
+      "validWhen": "Hidden Callbacks: ERC777 transfers trigger hooks that execute arbitrary code",
+      "invalidWhen": "Update state BEFORE external calls",
+      "impact": "Complete protocol drain possible",
+      "proofShape": "Stake and immediately unstake via reentrancy"
     },
     {
-      "id": "tokens-erc20-token-vulnerabilities-vulnerable-pattern-examples-013",
-      "title": "Vulnerable Pattern Examples",
-      "severity": "HIGH",
+      "id": "tokens-erc20-token-vulnerabilities-7-blacklist-pausable-token-vul-007",
+      "title": "7. Blacklist & Pausable Token Vulnerabilities",
+      "severity": "MEDIUM",
       "grep": "repayAndWithdrawCollateral|adminRecoverStuckFunds|_convertToShares|_convertToAssets|block.timestamp|addSupportedToken",
-      "detect": "Collateral permanently locked if user gets blacklisted",
+      "detect": "Assumed Transferability**: Protocols assume transfers will always succeed",
       "cat": [
         "token",
         "erc20",
@@ -169,21 +377,55 @@
       ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
-        1499,
-        1590
+        1506,
+        1812
       ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/erc20_token_findings/m-17-if-borrower-or-kicker-got-blacklisted-by-asset-contract-their-collateral-or.md",
+          "reports/erc20_token_findings/orderbook-denial-of-service-leveraging-blacklistable-tokens-like-usdc.md",
+          "reports/erc20_token_findings/h-02-funds-will-be-stuck-in-the-contract-if-a-user-becomes-blacklisted.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "data manipulation",
+          "economic exploit",
+          "logical error",
+          "reentrancy"
+        ],
+        "commonlyComposesWith": [
+          "transfer",
+          "transfer from",
+          "approve",
+          "allowance",
+          "balance of"
+        ]
+      },
       "check": [
-        "VERIFY: Collateral permanently locked if user gets blacklisted"
+        "VERIFY: Assumed Transferability: Protocols assume transfers will always succeed",
+        "PROVE: Collateral permanently locked if user gets blacklisted",
+        "FALSIFY: Anyone can cancel orders for blacklisted makers",
+        "IMPACT: Transfer reverts block protocol functions",
+        "Does the protocol use pull-over-push pattern?",
+        "Can users specify alternative recipients for withdrawals?"
       ],
       "antipattern": "Collateral permanently locked if user gets blacklisted",
-      "validWhen": "Collateral permanently locked if user gets blacklisted"
+      "securePattern": "Anyone can cancel orders for blacklisted makers",
+      "validWhen": "Assumed Transferability: Protocols assume transfers will always succeed",
+      "invalidWhen": "Anyone can cancel orders for blacklisted makers",
+      "impact": "Transfer reverts block protocol functions",
+      "proofShape": "Collateral permanently locked if user gets blacklisted"
     },
     {
-      "id": "tokens-erc20-token-vulnerabilities-vulnerable-pattern-examples-015",
-      "title": "Vulnerable Pattern Examples",
+      "id": "tokens-erc20-token-vulnerabilities-8-inflation-first-depositor-at-008",
+      "title": "8. Inflation & First Depositor Attack Vulnerabilities",
       "severity": "CRITICAL",
       "grep": "calculateCollateralValue|adminRecoverStuckFunds|_convertToShares|_convertToAssets|block.timestamp|addSupportedToken",
-      "detect": "Standard share calculation without protection",
+      "detect": "Share Price Manipulation**: First depositor can inflate share price by donating tokens",
       "cat": [
         "token",
         "erc20",
@@ -192,22 +434,60 @@
       ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
-        1812,
-        1905
+        1813,
+        2107
       ],
+      "reportEvidence": {
+        "count": 4,
+        "sampleReports": [
+          "reports/erc20_token_findings/h-04-an-attacker-can-massively-inflate-the-share-value.md",
+          "reports/erc20_token_findings/first-vault-deposit-can-cause-excessive-rounding.md",
+          "reports/erc20_token_findings/initial-mint-front-run-inflation-attack.md",
+          "reports/erc20_token_findings/vault-inflation-attack-is-possible.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "inflation",
+          "inflation first depositor",
+          "inflation first",
+          "callback reentrancy",
+          "data manipulation"
+        ],
+        "commonlyComposesWith": [
+          "transfer",
+          "transfer from",
+          "approve",
+          "allowance",
+          "balance of"
+        ]
+      },
       "neverPrune": true,
       "check": [
-        "VERIFY: Standard share calculation without protection"
+        "VERIFY: Share Price Manipulation: First depositor can inflate share price by donating tokens",
+        "PROVE: Standard share calculation without protection",
+        "FALSIFY: Track assets internally, ignore donations",
+        "IMPACT: First depositor can steal from all subsequent depositors",
+        "Does the vault use virtual shares/assets offset?",
+        "Is totalAssets() based on internal accounting (not balanceOf)?"
       ],
       "antipattern": "Standard share calculation without protection",
-      "validWhen": "Standard share calculation without protection"
+      "securePattern": "Track assets internally, ignore donations",
+      "validWhen": "Share Price Manipulation: First depositor can inflate share price by donating tokens",
+      "invalidWhen": "Track assets internally, ignore donations",
+      "impact": "First depositor can steal from all subsequent depositors",
+      "preconditions": [
+        "coordinated attack before legitimate deposits"
+      ],
+      "proofShape": "Standard share calculation without protection"
     },
     {
-      "id": "tokens-erc20-token-vulnerabilities-vulnerable-pattern-examples-017",
-      "title": "Vulnerable Pattern Examples",
+      "id": "tokens-erc20-token-vulnerabilities-9-mint-burn-vulnerabilities-009",
+      "title": "9. Mint & Burn Vulnerabilities",
       "severity": "CRITICAL",
       "grep": "calculateCollateralValue|adminRecoverStuckFunds|_convertToShares|_convertToAssets|mintBasedOnBalance|block.timestamp",
-      "detect": "Anyone can mint tokens",
+      "detect": "Missing Access Control**: Mint/burn functions without proper authorization",
       "cat": [
         "token",
         "erc20",
@@ -216,19 +496,52 @@
       ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
-        2093,
-        2148
+        2108,
+        2256
       ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/erc20_token_findings/mint-perpetualyieldtokens-for-free-by-self-transfer.md",
+          "reports/erc20_token_findings/h-01-unchecked-erc20-transfers-can-cause-lock-up.md",
+          "reports/erc20_token_findings/unauthorized-token-minting.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "data manipulation",
+          "economic exploit",
+          "logical error",
+          "reentrancy"
+        ],
+        "commonlyComposesWith": [
+          "transfer",
+          "transfer from",
+          "approve",
+          "allowance",
+          "balance of"
+        ]
+      },
       "neverPrune": true,
       "check": [
-        "VERIFY: Anyone can mint tokens",
-        "PROVE: Burns shares but doesn't update internal accounting"
+        "VERIFY: Missing Access Control: Mint/burn functions without proper authorization",
+        "PROVE: Burns shares but doesn't update internal accounting",
+        "FALSIFY: Prevent self-referential operations",
+        "IMPACT: Unlimited token supply creation",
+        "Are mint/burn functions properly access controlled?",
+        "Is there a maximum supply cap?"
       ],
       "antipattern": "Burns shares but doesn't update internal accounting",
-      "validWhen": "Anyone can mint tokens"
+      "securePattern": "Prevent self-referential operations",
+      "validWhen": "Missing Access Control: Mint/burn functions without proper authorization",
+      "invalidWhen": "Prevent self-referential operations",
+      "impact": "Unlimited token supply creation",
+      "proofShape": "Burns shares but doesn't update internal accounting"
     },
     {
-      "id": "tokens-erc20-token-vulnerabilities-10-comprehensive-keyword-index-018",
+      "id": "tokens-erc20-token-vulnerabilities-10-comprehensive-keyword-index-010",
       "title": "10. Comprehensive Keyword Index",
       "severity": "HIGH",
       "grep": "calculateCollateralValue|cancelBlacklistedOrder|adminRecoverStuckFunds|calculateRewardSecure|_convertToShares|_convertToAssets",
@@ -241,16 +554,43 @@
       ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
-        2221,
-        2292
+        2257,
+        2328
       ],
+      "reportEvidence": {
+        "count": 28,
+        "sampleReports": [
+          "reports/erc20_token_findings/h-01-unchecked-erc20-transfers-can-cause-lock-up.md",
+          "reports/erc20_token_findings/m-07-erc20-return-values-not-checked.md",
+          "reports/erc20_token_findings/fee-on-transfer-tokens-will-cause-users-to-lose-funds.md",
+          "reports/erc20_token_findings/m-14-solmate-safetransfer-and-safetransferfrom-does-not-check-the-code-size-of-t.md",
+          "reports/erc20_token_findings/approve-function-can-be-front-ran-resulting-in-token-theft.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "data manipulation",
+          "economic exploit",
+          "logical error",
+          "reentrancy"
+        ],
+        "commonlyComposesWith": [
+          "transfer",
+          "transfer from",
+          "approve",
+          "allowance",
+          "balance of"
+        ]
+      },
       "check": [
         "VERIFY: This section provides keywords optimized for vector search to help auditors find relevant vulnerability patterns."
       ],
       "validWhen": "This section provides keywords optimized for vector search to help auditors find relevant vulnerability patterns."
     },
     {
-      "id": "tokens-erc20-token-vulnerabilities-summary-quick-reference-019",
+      "id": "tokens-erc20-token-vulnerabilities-summary-quick-reference-011",
       "title": "Summary & Quick Reference",
       "severity": "CRITICAL",
       "grep": "calculateCollateralValue|cancelBlacklistedOrder|adminRecoverStuckFunds|calculateRewardSecure|_convertToShares|_convertToAssets",
@@ -263,20 +603,41 @@
       ],
       "ref": "DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md",
       "lines": [
-        2293,
-        2324
+        2329,
+        2360
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "data manipulation",
+          "economic exploit",
+          "logical error",
+          "reentrancy"
+        ],
+        "commonlyComposesWith": [
+          "transfer",
+          "transfer from",
+          "approve",
+          "allowance",
+          "balance of"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Summary & Quick Reference"
       ]
     },
     {
-      "id": "tokens-erc4626-vault-vulnerabilities-vulnerable-pattern-examples-001",
-      "title": "Vulnerable Pattern Examples",
+      "id": "tokens-erc4626-vault-vulnerabilities-1-first-depositor-inflation-at-000",
+      "title": "1. First Depositor / Inflation Attack Vulnerabilities",
       "severity": "CRITICAL",
-      "grep": "balanceOf(address(this|_decimalsOffset|deposit(uint256|previewWithdraw|convertToShares|convertToAssets",
-      "detect": "No protection against first depositor attack",
+      "grep": "asset.balanceOf(address(this|balanceOf(address(this|_decimalsOffset|previewWithdraw|convertToShares|convertToAssets",
+      "detect": "The ERC4626 share calculation formula is:",
       "cat": [
         "token",
         "erc20",
@@ -285,22 +646,64 @@
       ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
-        267,
-        327
+        219,
+        537
       ],
+      "reportEvidence": {
+        "count": 13,
+        "sampleReports": [
+          "reports/erc4626_findings/h-01-stakersvault-depositors-can-be-front-run-and-lose-their-funds.md",
+          "reports/erc4626_findings/h-02-first-depositor-can-break-minting-of-shares.md",
+          "reports/erc4626_findings/vault-is-vulnerable-to-inflation-attack.md",
+          "reports/erc4626_findings/h-02-vault-is-vulnerable-to-first-depositor-inflation-attack.md",
+          "reports/erc4626_findings/m-02-first-xerc4626-deposit-exploit-can-break-share-calculation.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "inflation",
+          "first depositor inflation",
+          "depositor inflation",
+          "share price manipulation",
+          "economic exploit"
+        ],
+        "commonlyComposesWith": [
+          "convert to shares",
+          "convert to assets",
+          "preview deposit",
+          "preview mint",
+          "preview withdraw"
+        ]
+      },
       "neverPrune": true,
       "check": [
-        "VERIFY: No protection against first depositor attack",
-        "PROVE: totalAssets relies on balanceOf which can be manipulated"
+        "VERIFY: ERC4626 share calculation formula is",
+        "PROVE: *Path A: [Classic First Depositor Front-Run]; Vault deployed with totalSupply = 0",
+        "FALSIFY: Use virtual shares to prevent inflation attack",
+        "IMPACT: Complete loss of depositor funds (0 shares minted)",
+        "Check if vault uses virtual shares (decimal offset)",
+        "Verify totalAssets() doesn't rely solely on balanceOf"
       ],
       "antipattern": "totalAssets relies on balanceOf which can be manipulated",
-      "validWhen": "No protection against first depositor attack"
+      "securePattern": "Use virtual shares to prevent inflation attack",
+      "validWhen": "The ERC4626 share calculation formula is",
+      "invalidWhen": "Use virtual shares to prevent inflation attack",
+      "impact": "Complete loss of depositor funds (0 shares minted)",
+      "preconditions": [
+        "totalSupply is 0, shares are typically minted 1:1 with assets.",
+        "*Path A: [Classic First Depositor Front-Run]",
+        "Vault deployed with totalSupply = 0",
+        "Attacker front-runs first legitimate depositor",
+        "Deposits 1 wei → receives 1 share"
+      ],
+      "proofShape": "*Path A: [Classic First Depositor Front-Run] -> Vault deployed with totalSupply = 0 -> Attacker front-runs first legitimate depositor"
     },
     {
-      "id": "tokens-erc4626-vault-vulnerabilities-2-erc4626-compliance-issues-002",
+      "id": "tokens-erc4626-vault-vulnerabilities-2-erc4626-compliance-issues-001",
       "title": "2. ERC4626 Compliance Issues",
       "severity": "MEDIUM",
-      "grep": "balanceOf(address(this|_depositInternal|_decimalsOffset|deposit(uint256|previewWithdraw|convertToShares",
+      "grep": "asset.balanceOf(address(this|balanceOf(address(this|MINIMUM_LIQUIDITY|_depositInternal|_decimalsOffset|previewWithdraw",
       "detect": "ERC4626 specifies exact behavior for all functions including:",
       "cat": [
         "token",
@@ -310,9 +713,34 @@
       ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
-        499,
-        675
+        538,
+        714
       ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/erc4626_findings/h-08-vaultsol-is-not-eip-4626-compliant.md",
+          "reports/erc4626_findings/m-01-vaultbase-is-not-erc4626-compliant.md",
+          "reports/erc4626_findings/h-02-erc4626cloned-deposit-and-mint-logic-differ-on-first-deposit.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "share price manipulation",
+          "economic exploit",
+          "missing initial deposit protection",
+          "vault share accounting",
+          "deposit"
+        ],
+        "commonlyComposesWith": [
+          "convert to shares",
+          "convert to assets",
+          "preview deposit",
+          "preview mint",
+          "preview withdraw"
+        ]
+      },
       "check": [
         "VERIFY: ERC4626 specifies exact behavior for all functions including",
         "PROVE: Different logic for deposit vs mint on first deposit",
@@ -325,13 +753,74 @@
       "securePattern": "Same logic for first deposit in both functions",
       "validWhen": "ERC4626 specifies exact behavior for all functions including",
       "invalidWhen": "Same logic for first deposit in both functions",
-      "impact": "Integration failures with external protocols"
+      "impact": "Integration failures with external protocols",
+      "proofShape": "Different logic for deposit vs mint on first deposit"
     },
     {
-      "id": "tokens-erc4626-vault-vulnerabilities-4-fee-handling-vulnerabilities-005",
+      "id": "tokens-erc4626-vault-vulnerabilities-3-rounding-direction-vulnerabi-002",
+      "title": "3. Rounding Direction Vulnerabilities",
+      "severity": "CRITICAL",
+      "grep": "asset.balanceOf(address(this|balanceOf(address(this|MINIMUM_LIQUIDITY|_decimalsOffset|previewWithdraw|convertToShares",
+      "detect": "ERC4626 rounding rules:\n\n- **Round DOWN** (favor vault): `convertToShares`, `previewDeposit`, `previewRedeem`\n\n-...",
+      "cat": [
+        "token",
+        "erc20",
+        "erc721",
+        "erc4626"
+      ],
+      "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
+      "lines": [
+        715,
+        842
+      ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/erc4626_findings/h-01-rounding-issues-in-certain-functions.md",
+          "reports/erc4626_findings/h-01-erc4626-mint-uses-wrong-amount.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "rounding",
+          "rounding direction",
+          "share price manipulation",
+          "economic exploit",
+          "missing initial deposit protection"
+        ],
+        "commonlyComposesWith": [
+          "convert to shares",
+          "convert to assets",
+          "preview deposit",
+          "preview mint",
+          "preview withdraw"
+        ]
+      },
+      "neverPrune": true,
+      "check": [
+        "VERIFY: ERC4626 rounding rules",
+        "PROVE: Mints 'amount' instead of 'shares'",
+        "FALSIFY: Mint the correct number of shares",
+        "IMPACT: Users can extract more assets than deposited",
+        "Verify convertToShares rounds DOWN",
+        "Verify previewDeposit rounds DOWN"
+      ],
+      "antipattern": "Mints 'amount' instead of 'shares'",
+      "securePattern": "Mint the correct number of shares",
+      "validWhen": "ERC4626 rounding rules",
+      "invalidWhen": "Mint the correct number of shares",
+      "impact": "Users can extract more assets than deposited",
+      "preconditions": [
+        "rounding favors the user instead of the vault, attackers can profit through rounding errors."
+      ],
+      "proofShape": "Mints 'amount' instead of 'shares'"
+    },
+    {
+      "id": "tokens-erc4626-vault-vulnerabilities-4-fee-handling-vulnerabilities-003",
       "title": "4. Fee Handling Vulnerabilities",
       "severity": "HIGH",
-      "grep": "balanceOf(address(this|_decimalsOffset|deposit(uint256|previewWithdraw|convertToShares|convertToAssets",
+      "grep": "asset.balanceOf(address(this|balanceOf(address(this|MINIMUM_LIQUIDITY|_decimalsOffset|previewWithdraw|convertToShares",
       "detect": "Different fee calculations for deposit vs mint",
       "cat": [
         "token",
@@ -341,9 +830,33 @@
       ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
-        804,
-        895
+        843,
+        934
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/erc4626_findings/h-1-incorrect-handling-of-erc4626-vaults-with-fees.md",
+          "reports/erc4626_findings/h-05-fee-calculation-mismatch-in-mint-deposit-redeem-and-withdraw.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "share price manipulation",
+          "economic exploit",
+          "missing initial deposit protection",
+          "vault share accounting",
+          "deposit"
+        ],
+        "commonlyComposesWith": [
+          "convert to shares",
+          "convert to assets",
+          "preview deposit",
+          "preview mint",
+          "preview withdraw"
+        ]
+      },
       "check": [
         "VERIFY: Different fee calculations for deposit vs mint",
         "PROVE: Doesn't account for underlying vault's deposit fees",
@@ -352,13 +865,14 @@
       "antipattern": "Doesn't account for underlying vault's deposit fees",
       "securePattern": "Check actual shares received and adjust accounting",
       "validWhen": "Different fee calculations for deposit vs mint",
-      "invalidWhen": "Check actual shares received and adjust accounting"
+      "invalidWhen": "Check actual shares received and adjust accounting",
+      "proofShape": "Doesn't account for underlying vault's deposit fees"
     },
     {
-      "id": "tokens-erc4626-vault-vulnerabilities-5-slippage-protection-issues-006",
+      "id": "tokens-erc4626-vault-vulnerabilities-5-slippage-protection-issues-004",
       "title": "5. Slippage Protection Issues",
       "severity": "MEDIUM",
-      "grep": "balanceOf(address(this|_decimalsOffset|deposit(uint256|previewWithdraw|convertToShares|convertToAssets",
+      "grep": "asset.balanceOf(address(this|balanceOf(address(this|MINIMUM_LIQUIDITY|_decimalsOffset|previewWithdraw|convertToShares",
       "detect": "User has no control over minimum shares received",
       "cat": [
         "token",
@@ -368,9 +882,33 @@
       ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
-        896,
-        1000
+        935,
+        1039
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/erc4626_findings/missing-slippage-control-for-erc4626-deposits-and-withdrawals-in-the-underlying-.md",
+          "reports/erc4626_findings/m-03-lack-of-slippage-protection-in-deposit-and-mint-functions.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "share price manipulation",
+          "economic exploit",
+          "missing initial deposit protection",
+          "vault share accounting",
+          "deposit"
+        ],
+        "commonlyComposesWith": [
+          "slippage",
+          "slippage protection issues",
+          "slippage protection",
+          "convert to shares",
+          "convert to assets"
+        ]
+      },
       "check": [
         "VERIFY: User has no control over minimum shares received",
         "FALSIFY: Add deadline to prevent stale transactions"
@@ -381,10 +919,10 @@
       "invalidWhen": "Add deadline to prevent stale transactions"
     },
     {
-      "id": "tokens-erc4626-vault-vulnerabilities-6-exchange-rate-manipulation-007",
+      "id": "tokens-erc4626-vault-vulnerabilities-6-exchange-rate-manipulation-005",
       "title": "6. Exchange Rate Manipulation",
       "severity": "MEDIUM",
-      "grep": "balanceOf(address(this|balanceOf(address(this|_decimalsOffset|deposit(uint256|_exchangeRate|previewWithdraw",
+      "grep": "asset.balanceOf(address(this|balanceOf(address(this|MINIMUM_LIQUIDITY|_decimalsOffset|_exchangeRate|previewWithdraw",
       "detect": "Donation can inflate totalAssets",
       "cat": [
         "token",
@@ -394,23 +932,52 @@
       ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
-        1001,
-        1081
+        1040,
+        1129
       ],
+      "reportEvidence": {
+        "count": 4,
+        "sampleReports": [
+          "reports/erc4626_findings/exchange-rate-manipulation-via-direct-transfers.md",
+          "reports/erc4626_findings/converttoshares-can-be-manipulated-to-block-deposits.md",
+          "reports/erc4626_findings/exchangerate-manipulation-via-donation.md",
+          "reports/erc4626_findings/inflated-totalassets-in-strategymainnet-strategyarb-and-strategyop-contracts.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "manipulation",
+          "exchange rate manipulation",
+          "rate manipulation",
+          "share price manipulation",
+          "economic exploit"
+        ],
+        "commonlyComposesWith": [
+          "convert to shares",
+          "convert to assets",
+          "preview deposit",
+          "preview mint",
+          "preview withdraw"
+        ]
+      },
       "check": [
         "VERIFY: Donation can inflate totalAssets",
-        "FALSIFY: Track assets internally"
+        "PROVE: totalAssets() or _totalAssets() returns asset.balanceOf(address(this)) plus accounting variables.",
+        "FALSIFY: Track assets internally",
+        "LOOK FOR: `totalAssets()` or `_totalAssets()` returns `asset.balanceOf(address(this))` plus accounting variables."
       ],
       "antipattern": "Donation can inflate totalAssets",
       "securePattern": "Track assets internally",
       "validWhen": "Donation can inflate totalAssets",
-      "invalidWhen": "Track assets internally"
+      "invalidWhen": "Track assets internally",
+      "proofShape": "totalAssets() or _totalAssets() returns asset.balanceOf(address(this)) plus accounting variables."
     },
     {
-      "id": "tokens-erc4626-vault-vulnerabilities-7-decimal-handling-issues-008",
+      "id": "tokens-erc4626-vault-vulnerabilities-7-decimal-handling-issues-006",
       "title": "7. Decimal Handling Issues",
       "severity": "HIGH",
-      "grep": "balanceOf(address(this|getTokensForShares|_decimalsOffset|deposit(uint256|previewWithdraw|convertToShares",
+      "grep": "asset.balanceOf(address(this|balanceOf(address(this|MINIMUM_LIQUIDITY|getTokensForShares|_decimalsOffset|previewWithdraw",
       "detect": "Assumes all tokens have 18 decimals",
       "cat": [
         "token",
@@ -420,9 +987,32 @@
       ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
-        1082,
-        1150
+        1130,
+        1198
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/erc4626_findings/h-04-yearn-token-shares-conversion-decimal-issue.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "share price manipulation",
+          "economic exploit",
+          "missing initial deposit protection",
+          "vault share accounting",
+          "deposit"
+        ],
+        "commonlyComposesWith": [
+          "convert to shares",
+          "convert to assets",
+          "preview deposit",
+          "preview mint",
+          "preview withdraw"
+        ]
+      },
       "check": [
         "VERIFY: Assumes all tokens have 18 decimals",
         "PROVE: No scaling between different decimal tokens",
@@ -431,13 +1021,14 @@
       "antipattern": "No scaling between different decimal tokens",
       "securePattern": "Handle decimals dynamically",
       "validWhen": "Assumes all tokens have 18 decimals",
-      "invalidWhen": "Handle decimals dynamically"
+      "invalidWhen": "Handle decimals dynamically",
+      "proofShape": "No scaling between different decimal tokens"
     },
     {
-      "id": "tokens-erc4626-vault-vulnerabilities-8-reentrancy-vulnerabilities-009",
+      "id": "tokens-erc4626-vault-vulnerabilities-8-reentrancy-vulnerabilities-007",
       "title": "8. Reentrancy Vulnerabilities",
       "severity": "HIGH",
-      "grep": "balanceOf(address(this|_decimalsOffset|deposit(uint256|previewWithdraw|convertToShares|convertToAssets",
+      "grep": "asset.balanceOf(address(this|balanceOf(address(this|MINIMUM_LIQUIDITY|_decimalsOffset|previewWithdraw|convertToShares",
       "detect": "Balance cached before transfer with ERC777 token",
       "cat": [
         "token",
@@ -447,9 +1038,33 @@
       ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
-        1151,
-        1275
+        1199,
+        1323
       ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/erc4626_findings/h-04-reentrancy-issue-in-yvaultdeposit.md",
+          "reports/erc4626_findings/h-1-cross-contract-reentrancy-allows-yield_token-theft-for-the-genericerc4626-wi.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "share price manipulation",
+          "economic exploit",
+          "missing initial deposit protection",
+          "vault share accounting",
+          "deposit"
+        ],
+        "commonlyComposesWith": [
+          "reentrancy",
+          "convert to shares",
+          "convert to assets",
+          "preview deposit",
+          "preview mint"
+        ]
+      },
       "check": [
         "VERIFY: Balance cached before transfer with ERC777 token",
         "FALSIFY: Global lock across related contracts"
@@ -460,10 +1075,10 @@
       "invalidWhen": "Global lock across related contracts"
     },
     {
-      "id": "tokens-erc4626-vault-vulnerabilities-9-token-compatibility-issues-010",
+      "id": "tokens-erc4626-vault-vulnerabilities-9-token-compatibility-issues-008",
       "title": "9. Token Compatibility Issues",
       "severity": "MEDIUM",
-      "grep": "balanceOf(address(this|_decimalsOffset|deposit(uint256|previewWithdraw|convertToShares|convertToAssets",
+      "grep": "asset.balanceOf(address(this|balanceOf(address(this|MINIMUM_LIQUIDITY|_decimalsOffset|previewWithdraw|convertToShares",
       "detect": "Assumes transferred amount equals requested amount",
       "cat": [
         "token",
@@ -473,9 +1088,32 @@
       ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
-        1276,
-        1337
+        1324,
+        1385
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/erc4626_findings/fee-on-transfer-tokens.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "share price manipulation",
+          "economic exploit",
+          "missing initial deposit protection",
+          "vault share accounting",
+          "deposit"
+        ],
+        "commonlyComposesWith": [
+          "convert to shares",
+          "convert to assets",
+          "preview deposit",
+          "preview mint",
+          "preview withdraw"
+        ]
+      },
       "check": [
         "VERIFY: Assumes transferred amount equals requested amount",
         "FALSIFY: Revert if fee-on-transfer detected"
@@ -486,10 +1124,10 @@
       "invalidWhen": "Revert if fee-on-transfer detected"
     },
     {
-      "id": "tokens-erc4626-vault-vulnerabilities-10-access-control-state-manage-011",
+      "id": "tokens-erc4626-vault-vulnerabilities-10-access-control-state-manage-009",
       "title": "10. Access Control & State Management",
       "severity": "MEDIUM",
-      "grep": "balanceOf(address(this|_decimalsOffset|deposit(uint256|previewWithdraw|convertToShares|convertToAssets",
+      "grep": "asset.balanceOf(address(this|balanceOf(address(this|MINIMUM_LIQUIDITY|_decimalsOffset|previewWithdraw|convertToShares",
       "detect": "Returns max even when paused",
       "cat": [
         "token",
@@ -499,9 +1137,30 @@
       ],
       "ref": "DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md",
       "lines": [
-        1338,
-        1385
+        1386,
+        1433
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "share price manipulation",
+          "economic exploit",
+          "missing initial deposit protection",
+          "vault share accounting",
+          "deposit"
+        ],
+        "commonlyComposesWith": [
+          "convert to shares",
+          "convert to assets",
+          "preview deposit",
+          "preview mint",
+          "preview withdraw"
+        ]
+      },
       "check": [
         "VERIFY: Returns max even when paused",
         "FALSIFY: max* reflects actual state"
@@ -525,9 +1184,32 @@
       ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
-        132,
-        169
+        148,
+        185
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/erc721_nft_findings/m-02-use-safetransferfrom-instead-of-transferfrom-for-erc721.md](../../../reports/erc721_nft_findings/m-02-use-safetransferfrom-instead-of-transferfrom-for-erc721.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "multiple",
+          "nft contracts",
+          "erc721 nft",
+          "using"
+        ],
+        "commonlyComposesWith": [
+          "safe mint",
+          "safe transfer from",
+          "on erc721 received",
+          "approve",
+          "set approval for all"
+        ]
+      },
       "check": [
         "VERIFY: Using the basic transferFrom function instead of safeTransferFrom for ERC721 transfers does not verify whether the recipient can handle NFTs.",
         "PROVE: No check if receiver can handle ERC721",
@@ -536,7 +1218,8 @@
       "antipattern": "No check if receiver can handle ERC721",
       "securePattern": "Validates receiver can handle ERC721",
       "validWhen": "Using the basic transferFrom function instead of safeTransferFrom for ERC721 transfers does not verify whether the recipient can handle NFTs.",
-      "invalidWhen": "Validates receiver can handle ERC721"
+      "invalidWhen": "Validates receiver can handle ERC721",
+      "proofShape": "No check if receiver can handle ERC721"
     },
     {
       "id": "tokens-erc721-nft-vulnerabilities-1-2-using-mint-instead-of-safe-002",
@@ -552,9 +1235,32 @@
       ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
-        170,
-        214
+        186,
+        230
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/erc721_nft_findings/risk-of-locked-assets-due-to-use-of-_mint-instead-of-_safemint.md](../../../reports/erc721_nft_findings/risk-of-locked-assets-due-to-use-of-_mint-instead-of-_safemint.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "multiple",
+          "nft contracts",
+          "erc721 nft",
+          "using"
+        ],
+        "commonlyComposesWith": [
+          "safe mint",
+          "safe transfer from",
+          "on erc721 received",
+          "approve",
+          "set approval for all"
+        ]
+      },
       "check": [
         "VERIFY: Minting NFTs with _mint() does not invoke the onERC721Received callback, potentially sending tokens to contracts that cannot handle them.",
         "PROVE: Vault token minted without safety check",
@@ -563,7 +1269,8 @@
       "antipattern": "Vault token minted without safety check",
       "securePattern": "Validates receiver before minting",
       "validWhen": "Minting NFTs with _mint() does not invoke the onERC721Received callback, potentially sending tokens to contracts that cannot handle them.",
-      "invalidWhen": "Validates receiver before minting"
+      "invalidWhen": "Validates receiver before minting",
+      "proofShape": "Vault token minted without safety check"
     },
     {
       "id": "tokens-erc721-nft-vulnerabilities-2-reentrancy-via-nft-callbacks-003",
@@ -579,9 +1286,35 @@
       ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
-        215,
-        370
+        231,
+        386
       ],
+      "reportEvidence": {
+        "count": 4,
+        "sampleReports": [
+          "reports/erc721_nft_findings/h-01-malicious-user-can-mint-unlimited-amount-of-nfts-due-to-reentrancy-in-white.md](../../../reports/erc721_nft_findings/h-01-malicious-user-can-mint-unlimited-amount-of-nfts-due-to-reentrancy-in-white.md",
+          "reports/erc721_nft_findings/h-01-attacker-can-steal-all-fees-from-sfpm-in-pools-with-erc777-tokens.md](../../../reports/erc721_nft_findings/h-01-attacker-can-steal-all-fees-from-sfpm-in-pools-with-erc777-tokens.md",
+          "reports/erc721_nft_findings/h-01-reentrancy-in-buy-function-for-erc777-tokens-allows-buying-funds-with-consi.md](../../../reports/erc721_nft_findings/h-01-reentrancy-in-buy-function-for-erc777-tokens-allows-buying-funds-with-consi.md",
+          "reports/erc721_nft_findings/h-06-owner-of-a-position-can-prevent-liquidation-due-to-the-onerc721received-cal.md](../../../reports/erc721_nft_findings/h-06-owner-of-a-position-can-prevent-liquidation-due-to-the-onerc721received-cal.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "multiple",
+          "nft contracts",
+          "erc721 nft",
+          "reentrancy"
+        ],
+        "commonlyComposesWith": [
+          "reentrancy",
+          "callbacks",
+          "reentrancy via nft callbacks",
+          "reentrancy via",
+          "nft callbacks"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: safeTransferFrom and _safeMint functions invoke onERC721Received on the recipient, creating a callback opportunity.",
@@ -591,7 +1324,8 @@
       "antipattern": "Base token transfer before fractional balance update",
       "securePattern": "State updated before external call + reentrancy guard",
       "validWhen": "The safeTransferFrom and _safeMint functions invoke onERC721Received on the recipient, creating a callback opportunity.",
-      "invalidWhen": "State updated before external call + reentrancy guard"
+      "invalidWhen": "State updated before external call + reentrancy guard",
+      "proofShape": "Base token transfer before fractional balance update"
     },
     {
       "id": "tokens-erc721-nft-vulnerabilities-3-approval-and-access-control--004",
@@ -607,9 +1341,32 @@
       ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
-        371,
-        462
+        387,
+        478
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/erc721_nft_findings/h-02-nft-transfer-approvals-are-not-removed-and-cannot-be-revoked-thus-leading-t.md](../../../reports/erc721_nft_findings/h-02-nft-transfer-approvals-are-not-removed-and-cannot-be-revoked-thus-leading-t.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "multiple",
+          "nft contracts",
+          "erc721 nft",
+          "approval"
+        ],
+        "commonlyComposesWith": [
+          "safe mint",
+          "safe transfer from",
+          "on erc721 received",
+          "approve",
+          "set approval for all"
+        ]
+      },
       "check": [
         "VERIFY: NFT approvals (single token or operator) are not revoked when the NFT is transferred, allowing previous approved addresses to reclaim the token.",
         "PROVE: Approval persists across transfers",
@@ -618,7 +1375,8 @@
       "antipattern": "Approval persists across transfers",
       "securePattern": "Boolean parameter allows revocation",
       "validWhen": "NFT approvals (single token or operator) are not revoked when the NFT is transferred, allowing previous approved addresses to reclaim the token.",
-      "invalidWhen": "Boolean parameter allows revocation"
+      "invalidWhen": "Boolean parameter allows revocation",
+      "proofShape": "Approval persists across transfers"
     },
     {
       "id": "tokens-erc721-nft-vulnerabilities-4-1-double-voting-through-self-005",
@@ -634,9 +1392,32 @@
       ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
-        465,
-        519
+        481,
+        535
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/erc721_nft_findings/h-04-erc721votes-token-owners-can-double-voting-power-through-self-delegation.md](../../../reports/erc721_nft_findings/h-04-erc721votes-token-owners-can-double-voting-power-through-self-delegation.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "multiple",
+          "nft contracts",
+          "erc721 nft",
+          "double"
+        ],
+        "commonlyComposesWith": [
+          "safe mint",
+          "safe transfer from",
+          "on erc721 received",
+          "approve",
+          "set approval for all"
+        ]
+      },
       "check": [
         "VERIFY: When NFT holders first self-delegate, incorrect checkpoint logic allows them to double their voting power.",
         "PROVE: Self-delegation doubles voting power",
@@ -645,7 +1426,8 @@
       "antipattern": "Self-delegation doubles voting power",
       "securePattern": "Use delegates() function for actual delegate",
       "validWhen": "When NFT holders first self-delegate, incorrect checkpoint logic allows them to double their voting power.",
-      "invalidWhen": "Use delegates() function for actual delegate"
+      "invalidWhen": "Use delegates() function for actual delegate",
+      "proofShape": "Self-delegation doubles voting power"
     },
     {
       "id": "tokens-erc721-nft-vulnerabilities-4-2-delegation-disables-nft-tr-006",
@@ -661,9 +1443,32 @@
       ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
-        520,
-        553
+        536,
+        569
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/erc721_nft_findings/h-02-erc721votess-delegation-disables-nft-transfers-and-burning.md](../../../reports/erc721_nft_findings/h-02-erc721votess-delegation-disables-nft-transfers-and-burning.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "multiple",
+          "nft contracts",
+          "erc721 nft",
+          "delegation"
+        ],
+        "commonlyComposesWith": [
+          "safe mint",
+          "safe transfer from",
+          "on erc721 received",
+          "approve",
+          "set approval for all"
+        ]
+      },
       "check": [
         "VERIFY: After delegating votes away, the _afterTokenTransfer hook attempts to move votes from the token owner (who has 0 votes) instead of the delegate,...",
         "PROVE: Uses owner instead of delegate",
@@ -672,7 +1477,8 @@
       "antipattern": "Uses owner instead of delegate",
       "securePattern": "Move votes between actual delegates",
       "validWhen": "After delegating votes away, the _afterTokenTransfer hook attempts to move votes from the token owner (who has 0 votes) instead of the delegate, causing underflow.",
-      "invalidWhen": "Move votes between actual delegates"
+      "invalidWhen": "Move votes between actual delegates",
+      "proofShape": "Uses owner instead of delegate"
     },
     {
       "id": "tokens-erc721-nft-vulnerabilities-4-3-double-voting-via-managed--007",
@@ -688,9 +1494,32 @@
       ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
-        554,
-        595
+        570,
+        611
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/erc721_nft_findings/double-voting-by-shifting-the-voting-power-between-managed-and-normal-nfts.md](../../../reports/erc721_nft_findings/double-voting-by-shifting-the-voting-power-between-managed-and-normal-nfts.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "multiple",
+          "nft contracts",
+          "erc721 nft",
+          "double"
+        ],
+        "commonlyComposesWith": [
+          "safe mint",
+          "safe transfer from",
+          "on erc721 received",
+          "approve",
+          "set approval for all"
+        ]
+      },
       "check": [
         "VERIFY: Protocols with managed NFTs (holding multiple users' stakes) may allow voting power to be used twice when users withdraw from managed positions.",
         "PROVE: Vote power transferable within epoch",
@@ -699,7 +1528,8 @@
       "antipattern": "Vote power transferable within epoch",
       "securePattern": "Update managed NFT vote state on withdrawal",
       "validWhen": "Protocols with managed NFTs (holding multiple users' stakes) may allow voting power to be used twice when users withdraw from managed positions.",
-      "invalidWhen": "Update managed NFT vote state on withdrawal"
+      "invalidWhen": "Update managed NFT vote state on withdrawal",
+      "proofShape": "Vote power transferable within epoch"
     },
     {
       "id": "tokens-erc721-nft-vulnerabilities-5-royalty-manipulation-008",
@@ -715,9 +1545,32 @@
       ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
-        596,
-        657
+        612,
+        673
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/erc721_nft_findings/h-01-royalty-receiver-can-drain-a-private-pool.md](../../../reports/erc721_nft_findings/h-01-royalty-receiver-can-drain-a-private-pool.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "manipulation",
+          "royalty manipulation",
+          "royalty fee manipulation via reentrancy",
+          "fee manipulation",
+          "manipulation via"
+        ],
+        "commonlyComposesWith": [
+          "reentrancy",
+          "royalty fee manipulation via reentrancy",
+          "via reentrancy",
+          "safe mint",
+          "safe transfer from"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: When royalties are calculated twice (once for validation, once for payment), an attacker controlling the royalty recipient can change the fee between...",
@@ -727,7 +1580,8 @@
       "antipattern": "Royalty queried twice, can change between calls",
       "securePattern": "Calculate and pay royalties in single pass",
       "validWhen": "When royalties are calculated twice (once for validation, once for payment), an attacker controlling the royalty recipient can change the fee between calls.",
-      "invalidWhen": "Calculate and pay royalties in single pass"
+      "invalidWhen": "Calculate and pay royalties in single pass",
+      "proofShape": "Royalty queried twice, can change between calls"
     },
     {
       "id": "tokens-erc721-nft-vulnerabilities-6-erc-721-standard-compliance--009",
@@ -743,9 +1597,34 @@
       ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
-        658,
-        739
+        674,
+        755
       ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/erc721_nft_findings/m-02-violation-of-erc-721-standard-in-verbstokentokenuri-implementation.md](../../../reports/erc721_nft_findings/m-02-violation-of-erc-721-standard-in-verbstokentokenuri-implementation.md",
+          "reports/erc721_nft_findings/m-01-the-onerc721received-is-not-implemented-correctly.md](../../../reports/erc721_nft_findings/m-01-the-onerc721received-is-not-implemented-correctly.md",
+          "reports/erc721_nft_findings/erc721-balanceof-overflow-possible.md](../../../reports/erc721_nft_findings/erc721-balanceof-overflow-possible.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "multiple",
+          "nft contracts",
+          "erc721 nft",
+          "token"
+        ],
+        "commonlyComposesWith": [
+          "safe mint",
+          "safe transfer from",
+          "on erc721 received",
+          "approve",
+          "set approval for all"
+        ]
+      },
       "check": [
         "VERIFY: ERC-721 standard requires tokenURI to revert for non-existent tokens.",
         "PROVE: Overflow protection fails in edge case",
@@ -756,7 +1635,8 @@
       "securePattern": "Reverts for non-existent tokens per EIP-721",
       "validWhen": "ERC-721 standard requires tokenURI to revert for non-existent tokens.",
       "invalidWhen": "Reverts for non-existent tokens per EIP-721",
-      "impact": "Breaks composability with other protocols expecting standard behavior."
+      "impact": "Breaks composability with other protocols expecting standard behavior.",
+      "proofShape": "Overflow protection fails in edge case"
     },
     {
       "id": "tokens-erc721-nft-vulnerabilities-7-nft-liquidation-and-collater-010",
@@ -772,9 +1652,30 @@
       ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
-        740,
-        781
+        756,
+        797
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "multiple",
+          "nft contracts",
+          "erc721 nft",
+          "nfts"
+        ],
+        "commonlyComposesWith": [
+          "liquidation",
+          "nft liquidation collateral issues",
+          "nft liquidation",
+          "liquidation collateral",
+          "safe mint"
+        ]
+      },
       "check": [
         "VERIFY: NFTs used as collateral may become permanently locked if liquidation or withdrawal mechanisms have bugs.",
         "PROVE: NFT stuck if owner blocks transfer",
@@ -783,7 +1684,8 @@
       "antipattern": "NFT stuck if owner blocks transfer",
       "securePattern": "Users pull NFTs instead of automatic push",
       "validWhen": "NFTs used as collateral may become permanently locked if liquidation or withdrawal mechanisms have bugs.",
-      "invalidWhen": "Users pull NFTs instead of automatic push"
+      "invalidWhen": "Users pull NFTs instead of automatic push",
+      "proofShape": "NFT stuck if owner blocks transfer"
     },
     {
       "id": "tokens-erc721-nft-vulnerabilities-8-self-transfer-edge-cases-011",
@@ -799,15 +1701,39 @@
       ],
       "ref": "DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md",
       "lines": [
-        782,
-        833
+        798,
+        849
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/erc721_nft_findings/incorrect-handling-of-nft-self-transfer-in-afterupdate-hook-allows-the-owner-to-.md](../../../reports/erc721_nft_findings/incorrect-handling-of-nft-self-transfer-in-afterupdate-hook-allows-the-owner-to-.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "multiple",
+          "nft contracts",
+          "erc721 nft",
+          "self"
+        ],
+        "commonlyComposesWith": [
+          "safe mint",
+          "safe transfer from",
+          "on erc721 received",
+          "approve",
+          "set approval for all"
+        ]
+      },
       "check": [
         "VERIFY: Self-transfers (from == to) may not be properly handled, causing state corruption in hooks or balance tracking.",
         "PROVE: Self-transfer corrupts state"
       ],
       "antipattern": "Self-transfer corrupts state",
-      "validWhen": "Self-transfers (from == to) may not be properly handled, causing state corruption in hooks or balance tracking."
+      "validWhen": "Self-transfers (from == to) may not be properly handled, causing state corruption in hooks or balance tracking.",
+      "proofShape": "Self-transfer corrupts state"
     }
   ]
 }

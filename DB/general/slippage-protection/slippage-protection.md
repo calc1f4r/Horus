@@ -1,8 +1,14 @@
 ---
 # Core Classification
+protocol: generic
 vulnerability_class: slippage-protection
 title: "Missing or Insufficient Slippage Protection"
-category: DeFi/Token Operations
+category: defi_token_operations
+vulnerability_type: missing_slippage_protection
+attack_type: mev_sandwich_attack
+affected_component: swap_liquidity_operations
+severity: high
+impact: user_value_loss
 severity_range: "MEDIUM to HIGH"
 
 # Affected Patterns
@@ -29,6 +35,8 @@ manifestations:
   - No user-specified minimums
 
 # Reference Reports
+source_reports:
+  - file: "reports/yield_protocol_findings/h-31-unused-slippage-params.md"
     protocol: "Vader Protocol"
     severity: "HIGH"
     auditor: "Code4rena"

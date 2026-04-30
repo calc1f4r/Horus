@@ -28,11 +28,14 @@ AGENTS_ROOT = REPO_ROOT / ".agents"
 NATIVE_SKILLS_ROOT = AGENTS_ROOT / "skills"
 REPO_CODEX_ROOT = REPO_ROOT / ".codex"
 NATIVE_AGENTS_ROOT = REPO_CODEX_ROOT / "agents"
+GITHUB_AGENTS_ROOT = REPO_ROOT / ".github" / "agents"
+GITHUB_RESOURCES_ROOT = GITHUB_AGENTS_ROOT / "resources"
 
 NATIVE_WEB_SEARCH_MODE = "live"
 NATIVE_WEB_SEARCH_CONTEXT_SIZE = "medium"
 NATIVE_AGENT_MAX_THREADS = 12
 NATIVE_AGENT_MAX_DEPTH = 2
+GITHUB_AGENT_TOOLS = "[vscode, execute, read, agent, edit, search, web, browser, todo]"
 
 MIRROR_DIRS = ("agents", "skills", "resources", "rules")
 MANAGED_SCAN_ROOTS = (CODEX_ROOT, AGENTS_ROOT, REPO_CODEX_ROOT)
@@ -195,6 +198,19 @@ def render_native_skill_frontmatter(name: str, description: str) -> str:
             "---",
             f"name: {json.dumps(name, ensure_ascii=False)}",
             f"description: {json.dumps(description, ensure_ascii=False)}",
+            "---",
+            "",
+        ]
+    )
+
+
+def render_github_agent_frontmatter(name: str, description: str) -> str:
+    return "\n".join(
+        [
+            "---",
+            f"name: {name}",
+            f"description: {json.dumps(description, ensure_ascii=False)}",
+            f"tools: {GITHUB_AGENT_TOOLS}",
             "---",
             "",
         ]
@@ -460,6 +476,16 @@ def build_native_agent_toml(src_rel: str, text: str) -> tuple[str, dict]:
     return "\n".join(lines), meta
 
 
+def build_github_agent_content(src_path: Path, text: str) -> str:
+    """Build the GitHub-facing agent mirror from a Claude agent source file."""
+    meta, _, body, _ = split_frontmatter(text)
+    name = str(meta.get("name", src_path.stem))
+    description = str(meta.get("description", "")).replace("\n", " ").strip()
+    body = body.replace(".claude/resources/", "resources/")
+    body = body.replace("](../skills/", "](../../.claude/skills/")
+    return render_github_agent_frontmatter(name, description) + body.lstrip("\n")
+
+
 def build_catalog(title: str, intro: str, rows: list[tuple[str, ...]], headers: tuple[str, ...]) -> str:
     lines = [f"# {title}", "", intro, ""]
     lines.append("| " + " | ".join(headers) + " |")
@@ -678,6 +704,93 @@ def check_outputs(outputs: dict[str, str]) -> int:
     return 0
 
 
+def check_github_agent_surface(
+    *,
+    source_root: Path = CLAUDE_ROOT / "agents",
+    github_root: Path = GITHUB_AGENTS_ROOT,
+) -> list[str]:
+    """Validate that GitHub agent docs are deterministic mirrors of Claude agents."""
+    issues: list[str] = []
+    source_agents = {path.stem: path for path in source_root.glob("*.md")} if source_root.exists() else {}
+    github_agents = {path.stem: path for path in github_root.glob("*.md")} if github_root.exists() else {}
+
+    for name in sorted(source_agents.keys() - github_agents.keys()):
+        issues.append(f"missing GitHub agent mirror: .github/agents/{name}.md")
+    for name in sorted(github_agents.keys() - source_agents.keys()):
+        issues.append(f"unexpected GitHub agent mirror: .github/agents/{name}.md")
+
+    for name in sorted(source_agents.keys() & github_agents.keys()):
+        source_text = source_agents[name].read_text(encoding="utf-8", errors="replace")
+        expected = build_github_agent_content(source_agents[name], source_text)
+        actual = github_agents[name].read_text(encoding="utf-8", errors="replace")
+        if actual != expected:
+            issues.append(f"outdated GitHub agent mirror: .github/agents/{name}.md")
+
+    return issues
+
+
+def sync_github_agent_surface(
+    *,
+    source_root: Path = CLAUDE_ROOT / "agents",
+    github_root: Path = GITHUB_AGENTS_ROOT,
+) -> int:
+    """Write GitHub agent mirrors from Claude agent sources."""
+    if github_root.exists():
+        for path in github_root.glob("*.md"):
+            path.unlink()
+    github_root.mkdir(parents=True, exist_ok=True)
+
+    count = 0
+    for source_path in sorted(source_root.glob("*.md")):
+        text = source_path.read_text(encoding="utf-8", errors="replace")
+        content = build_github_agent_content(source_path, text)
+        (github_root / source_path.name).write_text(content, encoding="utf-8")
+        count += 1
+    return count
+
+
+def check_github_resource_surface(
+    *,
+    source_root: Path = CLAUDE_ROOT / "resources",
+    github_root: Path = GITHUB_RESOURCES_ROOT,
+) -> list[str]:
+    """Validate that GitHub shared resources mirror Claude resources exactly."""
+    issues: list[str] = []
+    source_resources = {
+        path.relative_to(source_root).as_posix(): path
+        for path in source_root.rglob("*")
+        if path.is_file()
+    } if source_root.exists() else {}
+    github_resources = {
+        path.relative_to(github_root).as_posix(): path
+        for path in github_root.rglob("*")
+        if path.is_file()
+    } if github_root.exists() else {}
+
+    for rel_path in sorted(source_resources.keys() - github_resources.keys()):
+        issues.append(f"missing GitHub resource mirror: .github/agents/resources/{rel_path}")
+    for rel_path in sorted(github_resources.keys() - source_resources.keys()):
+        issues.append(f"unexpected GitHub resource mirror: .github/agents/resources/{rel_path}")
+
+    for rel_path in sorted(source_resources.keys() & github_resources.keys()):
+        source_hash = sha256_bytes(source_resources[rel_path].read_bytes())
+        github_hash = sha256_bytes(github_resources[rel_path].read_bytes())
+        if source_hash != github_hash:
+            issues.append(f"content drift in .github/agents/resources/{rel_path}")
+
+    return issues
+
+
+def check_github_agent_outputs() -> int:
+    issues = check_github_agent_surface()
+    issues.extend(check_github_resource_surface())
+    if issues:
+        for issue in issues:
+            print(issue)
+        return 1
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Sync Codex-facing runtime skills, agents, and shared references from .claude/"
@@ -687,11 +800,29 @@ def main() -> int:
         action="store_true",
         help="Verify the committed generated Codex-facing artifacts are up to date",
     )
+    parser.add_argument(
+        "--check-github-agents",
+        action="store_true",
+        help="Verify manually mirrored .github/agents docs and resources track Claude sources",
+    )
+    parser.add_argument(
+        "--sync-github-agents",
+        action="store_true",
+        help="Regenerate .github/agents/*.md from .claude/agents/*.md",
+    )
     args = parser.parse_args()
 
     outputs, _ = generate()
     if args.check:
-        return check_outputs(outputs)
+        codex_status = check_outputs(outputs)
+        github_status = check_github_agent_outputs()
+        return codex_status or github_status
+    if args.check_github_agents:
+        return check_github_agent_outputs()
+    if args.sync_github_agents:
+        count = sync_github_agent_surface()
+        print(f"Wrote {count} GitHub agent mirror files.")
+        return 0
 
     if CODEX_ROOT.exists():
         shutil.rmtree(CODEX_ROOT)

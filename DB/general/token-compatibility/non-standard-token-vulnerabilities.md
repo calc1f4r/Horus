@@ -170,33 +170,34 @@ Non-standard ERC20 tokens implement custom transfer logic that breaks fundamenta
 
 #### Agent Quick View
 
-- Root cause statement: "This vulnerability exists because of missing_token_compatibility"
+- Root cause statement: Protocol accounting assumes ERC20 transfers are linear and side-effect-free, but fee, reflection, rebasing, callback, blacklist, pause, and self-transfer behavior changes actual balances or control flow after the protocol records user credit.
 - Pattern key: `missing_token_compatibility | token_transfer | non_standard_token_behavior`
 - Interaction scope: `multi_contract`
 - Primary affected component(s): `token_transfer|balance_tracking|amm_integration|lending_pool`
-- High-signal code keywords: `DPPFlashLoanCall`, `ERC667`, `ERC777`, `_attackLogic`, `_burn`, `_transfer`, `_updateReserves`, `approve`
+- High-signal code keywords: `safeTransferFrom`, `transferFrom`, `balanceOf`, `skim`, `sync`, `deliver`, `_rOwned`, `_tOwned`, `_rTotal`, `_tTotal`, `tokensReceived`, `onTokenTransfer`, `selfTransfer`, `rebase`, `shares`, `amount`
 - Typical sink / impact: `fund_loss|pool_drain|reentrancy`
 - Validation strength: `moderate`
 
 #### Contract / Boundary Map
 
-- Entry surface(s): See pattern-specific attack scenarios below
-- Contract hop(s): `FloorStaking.function -> LendingPool.function -> SecureAMMPair.function`
-- Trust boundary crossed: `callback / external call`
-- Shared state or sync assumption: `state consistency across operations`
+- Entry surface(s): token deposit/withdraw, AMM swap/mint/burn/skim/sync, lending collateral transfer, staking share mint/burn, callback-capable token transfer
+- Contract hop(s): `Protocol -> token.transferFrom/transfer -> token custom logic -> AMM/pool/lending accounting`
+- Trust boundary crossed: untrusted token code controls transfer side effects and may reenter or alter balances without a direct protocol call
+- Shared state or sync assumption: credited amount equals actual delta, cached reserves equal token balances, shares track rebases, and callbacks cannot mutate state mid-transfer
 
 #### Valid Bug Signals
 
-- Signal 1: Protocol assumes all ERC20 tokens behave identically (no fees, no rebasing)
-- Signal 2: Token balance check uses cached amount instead of actual balanceOf() after transfer
-- Signal 3: Missing support for tokens with non-standard return values (USDT, BNB)
-- Signal 4: Rebasing or fee-on-transfer token breaks accounting assumptions
+- Protocol credits `amount` rather than `balanceAfter - balanceBefore` for deposits, repayments, fee collection, or staking.
+- AMM or vault exposes `skim`, `sync`, reserve updates, or share pricing while reflection/rebase/fee behavior can desync actual token balance from cached accounting.
+- Token transfers can invoke ERC777/ERC667 hooks or arbitrary token code before protocol state is finalized.
+- Token can self-transfer, burn from pair, rebase, blacklist/pause, or return non-standard values in a way that changes solvency or liveness assumptions.
 
 #### False Positive Guards
 
-- Not this bug when: Protocol uses SafeERC20 for all token interactions
-- Safe if: Token whitelist restricts to known-safe implementations
-- Requires attacker control of: specific conditions per pattern
+- Not this bug merely because `SafeERC20` is used; SafeERC20 handles return values, not fee/rebase/callback accounting.
+- Safe if all accepted tokens are immutable, vetted, and explicitly exclude fee-on-transfer, rebasing, reflection, ERC777/ERC667 callbacks, and blacklist/pause behavior.
+- Safe if every token movement uses balance deltas, reentrancy-safe state ordering, and reserve/share reconciliation after transfer side effects.
+- Requires attacker access to a non-standard listed token, a malicious token accepted by the protocol, or an AMM pair/vault containing a token with exploitable custom logic.
 
 ## 1. Reflection Token Vulnerabilities
 

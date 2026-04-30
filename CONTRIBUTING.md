@@ -2,6 +2,14 @@
 
 Thank you for contributing to Horus. This guide covers how to add entries, improve agents, and maintain quality.
 
+## Local Python Setup
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt -r requirements-dev.txt
+```
+
 ## Adding Vulnerability Entries
 
 ### From Audit Reports

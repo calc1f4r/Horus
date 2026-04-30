@@ -1,10 +1,8 @@
 ---
 name: attack-graph-synthesizer
 description: "Systematically searches for multi-step and cross-contract attack chains by walking the codebase knowledge graph and checking each path against the invariant suite. Produces attack-candidates.json for protocol-reasoning to validate. Use after Phase 4 (Discovery) when audit-output/graph/graph.json is available."
-tools: [Agent, Bash, Edit, Write, Glob, Grep, Read, WebFetch, WebSearch]
-maxTurns: 80
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
-
 > **Claude Code Agent Conventions**:
 > - Spawn sub-agents with: `Agent("agent-name", "detailed prompt...")`
 > - All file reads: use `Read` tool with specific line ranges

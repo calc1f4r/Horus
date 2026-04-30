@@ -131,6 +131,33 @@ This entry catalogs 8 AMM-based price manipulation exploits from 2022 sourced fr
 | Chain(s) | BSC, Fantom |
 
 
+### Valid Bug Signals
+
+- Pricing, reward, vault-share, or swap-proxy logic reads AMM pair reserves, raw pair balances, or vault balances that a flash swap or public token function can distort.
+- Token-level functions can mint, swap, sync, skim, or move assets into/out of LP pairs without tight access control or pair-address guards.
+- `transferFrom` or approval logic lets an attacker drain LP reserves or move tokens from the pair without valid allowance from the pair owner.
+- Rewards are computed from `balanceOf(msg.sender)` or current token holdings, allowing the same capital to be recycled across reward contracts or claims.
+- A same-block deposit/withdraw, flash swap callback, or proxy swap path converts the manipulated price into protocol loss.
+
+### False Positive Guards
+
+- Public token functions are not enough by themselves; confirm they can change the reserves or balances used by a value-sensitive protocol calculation.
+- `getReserves()` in router-style quoting is lower risk unless the quoted value is trusted for minting, rewards, borrowing, liquidation, or protected swap execution.
+- Reward systems based on tracked staking balances, lockups, or non-transferable accounting should not be flagged solely because they also expose `balanceOf()`.
+- Pair reserve movement must be economically meaningful after fees, caps, and liquidity depth; shallow proof-of-concept movement without a profit sink is not a valid high-severity issue.
+- Same-block vault operations are lower risk when share price is based on tracked assets, minimum shares/assets are enforced, and direct donations cannot affect accounting.
+
+### Code Patterns to Look For
+
+```text
+- `getPrice()`, `tokenPrice()`, or `claimReward()` reading pair `getReserves()` or `balanceOf(pair)`
+- public `batchToken`, `batchMint`, `swapAndLiquify`, `swapTokensForOther`, `abuse`, or `sync`-triggering functions
+- `transferFrom(from, to, amount)` without `msg.sender == from` or allowance validation
+- `depositSafe`, `withdraw`, or vault exchange-rate math with no same-block/cooldown guard
+- reward loops where one balance snapshot is reused across many contracts or claim targets
+```
+
+
 ## Vulnerability Description
 
 ### Root Cause Analysis

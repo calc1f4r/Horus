@@ -95,7 +95,7 @@ total_exploits_analyzed: 8
 total_losses: "$135M+"
 ---
 
-## References
+## References & Source Reports
 
 | Tag | Source | Path / URL |
 |-----|--------|------------|
@@ -128,6 +128,33 @@ total_losses: "$135M+"
 | Impact | fund_loss |
 | Interaction Scope | `cross_protocol` |
 | Chain(s) | ethereum, arbitrum, polygon, avax, bsc |
+
+
+### Valid Bug Signals
+
+- A lending, vault, AMM, or liquidation path consumes a price that can be moved inside the same transaction by flash loan, concentrated-liquidity rebalance, pool reserve skew, or direct vault donation.
+- Tellor-style integrations read the latest submitted value (`getCurrentValue`) or a too-recent value without enforcing a dispute window, reporter stake-cost analysis, or independent deviation check.
+- Collateral value, borrow limits, liquidation thresholds, share minting, or swap output are derived from spot `getReserves()`, `sqrtPriceX96`, pool balances, `virtual_price`, or vault exchange rates with no TWAP or cap.
+- A permissionless function such as `shift`, `reset`, `rebalance`, `updatePrice`, `deposit`, or `withdraw` can change the oracle input and then immediately use the manipulated value for extraction.
+- The exploit path has a clear profit sink: over-borrowing, bad-debt liquidation, inflated redemption, pool drain, or seizure of other users' collateral.
+
+### False Positive Guards
+
+- Do not flag ordinary AMM reads when they are informational only and cannot influence minting, borrowing, liquidation, redemption, or protocol-owned asset transfers.
+- Treat a spot read as lower risk when a long enough TWAP, Chainlink/independent feed comparison, max deviation bound, and stale-price checks all gate the critical action.
+- Tellor integrations are not automatically vulnerable if they use `getDataBefore` with a protocol-appropriate dispute delay and reject values outside bounded deviation from secondary sources.
+- Permissionless rebalance or shift functions need an exploitable downstream pricing dependency; pure liquidity management without value extraction is not enough.
+- Donation or direct-transfer inflation requires the protocol to price shares from raw balances or exchange rates; internally tracked accounting can neutralize the signal.
+
+### Code Patterns to Look For
+
+```text
+- `getCurrentValue()` or latest Tellor read used before borrow/liquidate/mint without `getDataBefore()` delay
+- `getReserves()`, `balanceOf(pair)`, `sqrtPriceX96`, `slot0()`, or `virtual_price` inside collateral or share valuation
+- permissionless `shift()`, `reset()`, `rebalance()`, or `updatePrice()` followed by valuation-sensitive calls
+- vault exchange rate from `totalAssets() / totalSupply()` or vToken exchange-rate math used as a collateral oracle
+- flash-loan callback paths that swap, update oracle state, borrow, liquidate, redeem, then unwind in one transaction
+```
 
 
 ## 1. Low-Cost Oracle Reporter Manipulation (BonqDAO $88M)

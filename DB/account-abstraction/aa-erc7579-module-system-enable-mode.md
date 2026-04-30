@@ -80,27 +80,20 @@ code_keywords:
   - its
 ---
 
-## References
+## References & Source Reports
 
-| Tag | Report Path |
-|-----|-------------|
-| [MOD-1] | `reports/account_abstraction_findings/erc-7484-registry-checks-missing-on-calls-to-modules.md` |
-| [MOD-2] | `reports/account_abstraction_findings/installing-validators-with-enable-mode-in-validateuserop-doesnt-check-moduletype.md` |
-| [MOD-3] | `reports/account_abstraction_findings/enable-mode-signature-ignores-module-type.md` |
-| [MOD-4] | `reports/account_abstraction_findings/fallback-logic-prevents-hooks-postcheck-from-getting-executed.md` |
-| [MOD-5] | `reports/account_abstraction_findings/missing-call-type-validation-in-_installfallbackhandler.md` |
-| [MOD-6] | `reports/account_abstraction_findings/cannot-install-fallback-handler-for-empty-calldata.md` |
-| [MOD-7] | `reports/account_abstraction_findings/cannot-install-fallback-handler-for-nft-token-callbacks.md` |
-| [MOD-8] | `reports/account_abstraction_findings/module-can-prevent-itself-from-uninstalling.md` |
-| [MOD-9] | `reports/account_abstraction_findings/timelock-on-emergencyuninstallhook-can-be-bypassed.md` |
-| [MOD-10] | `reports/account_abstraction_findings/uninstalling-the-fallback-submodule-of-smartsession-will-break-the-whole-validat.md` |
-| [MOD-11] | `reports/account_abstraction_findings/setting-the-erc-7484-registry-may-put-modules-in-a-insecure-state.md` |
-| [MOD-12] | `reports/account_abstraction_findings/registryfactoryaddattester-allows-duplicate-and-unsorted-attesters-breaking-erc-.md` |
-| [MOD-13] | `reports/account_abstraction_findings/incorrect-check-in-_enablemode-prevents-installing-module-types-other-than-valid.md` |
-| [MOD-14] | `reports/account_abstraction_findings/modules-other-than-validators-cannot-be-installed-in-enable-mode.md` |
-| [MOD-15] | `reports/account_abstraction_findings/in-nexuscheckerc7739support-only-the-last-validator-is-checked-to-determine-if-t.md` |
-| [MOD-16] | `reports/account_abstraction_findings/fallback-can-be-used-for-direct-unauthorised-calls-to-fallback-handlers.md` |
-| [MOD-17] | `reports/account_abstraction_findings/m-02-the-prepostcheck-is-not-checking-the-hook-initialization-of-the-sender.md` |
+| Tag | Report Path | Signal |
+|-----|-------------|--------|
+| [MOD-1] | `reports/account_abstraction_findings/erc-7484-registry-checks-missing-on-calls-to-modules.md` | Registry checked at install but not at module execution |
+| [MOD-2] | `reports/account_abstraction_findings/installing-validators-with-enable-mode-in-validateuserop-doesnt-check-moduletype.md` | Enable mode installs wrong module type |
+| [MOD-3] | `reports/account_abstraction_findings/enable-mode-signature-ignores-module-type.md` | Signature hash omits `moduleType` |
+| [MOD-4] | `reports/account_abstraction_findings/fallback-logic-prevents-hooks-postcheck-from-getting-executed.md` | Fallback flow skips hook `postCheck` |
+| [MOD-5] | `reports/account_abstraction_findings/missing-call-type-validation-in-_installfallbackhandler.md` | Fallback handler accepts invalid call type |
+| [MOD-8] | `reports/account_abstraction_findings/module-can-prevent-itself-from-uninstalling.md` | Module can revert `onUninstall` and persist |
+| [MOD-9] | `reports/account_abstraction_findings/timelock-on-emergencyuninstallhook-can-be-bypassed.md` | Emergency uninstall timelock bypass |
+| [MOD-12] | `reports/account_abstraction_findings/registryfactoryaddattester-allows-duplicate-and-unsorted-attesters-breaking-erc-.md` | Duplicate/unsorted attesters break registry assumptions |
+| [MOD-15] | `reports/account_abstraction_findings/in-nexuscheckerc7739support-only-the-last-validator-is-checked-to-determine-if-t.md` | Aggregated validator support check is incomplete |
+| [MOD-16] | `reports/account_abstraction_findings/fallback-can-be-used-for-direct-unauthorised-calls-to-fallback-handlers.md` | Direct fallback handler calls bypass account policy |
 
 ## Vulnerability Title
 
@@ -131,16 +124,26 @@ ERC-7579 modular smart accounts (e.g., Biconomy Nexus) expose a rich surface of 
 
 #### Valid Bug Signals
 
-- Signal 1: Critical input parameter not validated against expected range or format
-- Signal 2: Oracle data consumed without staleness check or sanity bounds
-- Signal 3: User-supplied address or calldata forwarded without validation
-- Signal 4: Missing check allows operation under invalid or stale state
+- Signal 1: `enableMode` or `validateUserOp` installs a module without committing to `moduleType`, account, nonce, registry, and init data in the signed digest.
+- Signal 2: ERC-7484 registry/attester validation happens only during installation, not during validator, executor, hook, or fallback use.
+- Signal 3: Fallback handler paths can execute without hook `postCheck`, call-type validation, selector validation, or account-owned context checks.
+- Signal 4: `onUninstall`, emergency uninstall, or submodule removal can leave a validator/hook/fallback module permanently installed or break validation for all sessions.
 
 #### False Positive Guards
 
-- Not this bug when: Validation exists but is in an upstream function caller
-- Safe if: Parameter range is inherently bounded by the type or protocol invariant
-- Requires attacker control of: specific conditions per pattern
+- Not this bug when: Module type, account address, chain/domain, init data hash, deadline, nonce, and registry policy are all included in the signed install authorization.
+- Safe if: Every module entry point re-checks current registry trust and fallback/hook execution always runs balanced pre/post checks around the exact call.
+- Requires attacker control of: a user operation, enable-mode signature, module address/init data, fallback selector/calldata, registry configuration, or uninstall hook behavior.
+
+#### Code Patterns to Look For
+
+```text
+- _getEnableModeDataHash or EIP-712 structs that omit moduleType, account, nonce, registry, or initDataHash
+- installModule, _enableMode, or validateUserOp paths that branch differently by module type after signature verification
+- withRegistry used on install but absent from executeFromExecutor, validator checks, hook preCheck/postCheck, or fallback handling
+- _handleFallback, _handleFallbackWithHook, or _installFallbackHandler paths that skip postCheck or accept unsupported callType values
+- onUninstall external calls that can revert without forced removal, quarantine, or emergency bypass with enforced timelock
+```
 
 ### ERC-7579 Module System — Registry Bypass, moduleType Confusion, Hook PostCheck Skip, Fallback Flaws
 

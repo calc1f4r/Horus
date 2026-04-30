@@ -5,6 +5,7 @@ chain: Ethereum, Multi-Chain
 category: Reentrancy, Flash Loans
 vulnerability_type: Reentrancy, Flash Loan Bypass, Callback Exploitation, Atomic Arbitrage
 attack_type: Reentrancy, Flash Loan Attack, Self-Liquidation, Callback Manipulation
+affected_component: bonding_curve_execution|callbacks|flash_loan_guards
 primitives: Bonding Curve, NFT AMM, Crowdfund, Genesis Launch, Rebalance Orders
 severity: critical
 impact: Fund Theft, Protocol Drain, Flash Loan Protection Bypass, Unfair Token Distribution

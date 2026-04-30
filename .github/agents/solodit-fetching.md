@@ -1,9 +1,8 @@
 ---
 name: solodit-fetching
-description: 'Fetches vulnerability reports from the Solodit/Cyfrin API for a given topic and stores them in reports/<topic>_findings/. Preserve the raw source metadata needed for downstream fine-grained report indexing. Use when collecting raw audit findings for a new vulnerability topic, populating the reports/ directory with source data, or preparing input for the variant-template-writer agent.'
-tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
+description: "Fetches vulnerability reports from the Solodit/Cyfrin API for a given topic and stores them in reports/<topic>_findings/. Preserve the raw source metadata needed for downstream fine-grained report indexing. Use when collecting raw audit findings for a new vulnerability topic, populating the reports/ directory with source data, or preparing input for the variant-template-writer agent."
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
-
 # Solodit Fetcher
 
 Fetches vulnerability reports from the Solodit API by topic and stores them in `reports/<topic>_findings/`. Produces the raw source data that `variant-template-writer` uses to create database entries.
@@ -82,7 +81,7 @@ Confirm reports are stored in `reports/<topic>_findings/`.
 
 - Prefer the naming convention `[severity]-[issue-number]-[description].md` when the source provides that information
 - Do not treat the filename as authoritative classification data
-- Confirm the output preserves the metadata required by the [report indexing framework](resources/report-indexing.md)
+- Confirm the output preserves the metadata required by the [report indexing framework](../resources/report-indexing.md)
 
 ---
 

@@ -79,6 +79,42 @@ code_keywords:
   - cancelBlacklistedOrder
 ---
 
+## Agent Quick View
+
+- Root cause families: unchecked transfer results, non-standard token behavior, decimal/precision assumptions, callback reentrancy, rebasing/FoT balance drift, blacklist/pausable DoS, and first-depositor inflation.
+- High-signal sinks: crediting deposits before verifying received balance, using raw `transfer`/`transferFrom`, approving non-zero over non-zero, assuming `decimals() == 18`, and accepting arbitrary ERC777/rebasing/FoT assets.
+- Attacker usually needs one of: a malicious or non-standard token, a supported asset with fee/rebase/blacklist hooks, mempool ordering around allowance changes, or an empty/low-supply share system.
+- Report-backed impact: locked funds, unbacked internal balances, collateral overvaluation, missed liquidations, share inflation, and ERC777 hook drains.
+
+## Valid Bug Signals
+
+- Protocol increases shares, debt, collateral, rewards, or accounting balances using the requested `amount` instead of balance delta after token transfer.
+- Raw ERC20 calls are used without `SafeERC20`-style handling, or a Solmate-style helper is used on user-supplied token addresses without checking code existence.
+- Approval flows set non-zero allowance over existing non-zero allowance, rely on unlimited approvals, or lack allowance reset handling for USDT-like tokens.
+- Accounting assumes 18 decimals, fixed 1e18 scaling, non-rebasing balances, no transfer fees, no blacklist pauses, or no ERC777 hooks on assets that can cross those boundaries.
+- Empty or low-supply vault/share/tokenized-position logic lets a first depositor donate or round subsequent users to zero/near-zero shares.
+
+## False Positive Guards
+
+- Not a token-integration bug if the asset allowlist excludes non-standard/FoT/rebasing/ERC777/blacklistable tokens and that allowlist is enforced before every transfer path.
+- Safe transfer wrappers are not enough when protocol accounting still uses the requested amount instead of the actual received/sent balance delta.
+- Decimals findings require a reachable value path where non-18-decimal tokens are supported; pure display math or constants for a fixed 18-decimal asset are lower signal.
+- ERC777 reentrancy requires a hook-capable token or attacker-controlled token plus a state-changing callback window; strict CEI and `nonReentrant` on all shared entrypoints are strong guards.
+- Blacklist/pausable-token DoS is only impact-bearing when frozen transfers block withdrawals, liquidations, settlement, or solvency-critical accounting rather than only a user opt-in action.
+
+## Code Patterns to Look For
+
+```solidity
+token.transferFrom(user, address(this), amount);
+balances[user] += amount; // requested amount, not balance delta
+
+IERC20(token).transfer(to, amount); // return value ignored
+token.approve(spender, amount); // no zero reset for USDT-like tokens
+
+uint256 value = amount * price / 1e18; // assumes 18 decimals
+shares = amount * totalSupply / token.balanceOf(address(this)); // donation/inflation sensitive
+```
+
 ## References & Source Reports
 
 > **For Agents**: Analysis based on 761+ vulnerability reports from Solodit. Read individual reports in `reports/erc20_token_findings/` for detailed context.

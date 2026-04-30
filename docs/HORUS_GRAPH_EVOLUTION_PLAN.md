@@ -142,7 +142,7 @@ You said "slither should be out of the picture." Two readings:
 
 ### Q8. Graph artifact locations
 Default scheme used throughout this plan:
-- DB graph: `DB/graphify-out/graph.json` (created by `cd DB && /graphify .`)
+- DB graph: `DB/graphify-out/graph.json` (created by `python3 scripts/build_db_graph.py`)
 - Per-audit codebase graph: `audit-output/<audit-id>/graph/graph.json`
 - Cross-audit memory: `~/.horus/lessons.db`
 - Lessons artifacts: `~/.horus/lessons/<audit-id>.md`
@@ -202,7 +202,7 @@ Hunt cards today are independent. Matching `oracle-staleness-001` doesn't pull i
 ### 6.4 Outputs
 - `Horus/DB/graphify-out/graph.json` — persistent graph
 - `Horus/DB/graphify-out/GRAPH_REPORT.md` — god nodes, surprising connections, suggested questions
-- `Horus/DB/graphify-out/wiki/index.md` + per-community articles (agent-crawlable)
+- `Horus/DB/graphify-out/wiki/index.md` + curated multi-node community/god-node articles (agent-crawlable)
 - `Horus/DB/graphify-out/cache/` — SHA256 cache for incremental updates
 - `Horus/DB/graphify-out/.graphify_version` — pin from Q7
 
@@ -389,7 +389,7 @@ All edges include:
 
 8. **Integration with graphify**: Two paths supported:
    - **(a)** As a graphify plugin (graphify auto-discovers via entry points). Out of scope for v1 — depends on graphify's plugin API which may not exist yet.
-   - **(b)** As a pre-processor: `horus-graphify-blockchain extract <path> --out blockchain-ast.json` then `graphify .` then `graphify merge-graphs graphify-out/.graphify_extract.json blockchain-ast.json --out graphify-out/graph.json`. **Use this for v1.**
+   - **(b)** As a pre-processor: `horus-graphify-blockchain extract <path> --out blockchain-ast.json`, run graphify on the codebase, then finalize with `python3 scripts/finalize_audit_graph.py --codebase <path> --blockchain-ast blockchain-ast.json --out audit-output/graph/graph.json`. **Use this for v1.**
 
    Doable 3 wires this into Phase 0.
 
@@ -409,7 +409,7 @@ All edges include:
 - [ ] CLI runs on each supported language fixture and produces valid graphify-compatible JSON
 - [ ] Tests pass: `pytest tests/`
 - [ ] Validation on real codebase shows function detection within ±10% of grep baseline
-- [ ] `merge-graphs` integration produces a graph that graphify's MCP server can serve without error
+- [ ] `scripts/finalize_audit_graph.py` produces a graph that graphify's MCP server can serve without error
 - [ ] `README.md` and `GRAMMARS.md` are complete and explicit about supported languages and known limitations
 
 ### 7.7 Files touched / created
@@ -419,7 +419,7 @@ All edges include:
 ### 7.8 Failure modes & responses
 - **Tree-sitter grammar build fails** for a language: drop that language from v1, document in `GRAMMARS.md`, ship without it. Do not block other languages.
 - **Call resolution produces too many false edges**: tighten to same-file calls only for v1. Cross-file resolution is a follow-up.
-- **graphify's `merge-graphs` doesn't accept our JSON shape**: read graphify's `extract` module to confirm exact schema, adjust. The schema in §7.4 is based on SKILL.md but may need tweaks.
+- **graph finalization doesn't accept our JSON shape**: read graphify's `build` and `export` modules to confirm exact schema, adjust `scripts/finalize_audit_graph.py`, and keep `graph.json` as node-link JSON.
 
 ### 7.9 Estimated effort
 1–2 weeks. Phase 2a (Solidity + Move-Sui + Cairo) = 3–5 days. Phase 2b (rest) = 1 week.
@@ -466,8 +466,9 @@ Without Phase 0, the graph artifacts are orphaned. Every downstream agent must b
         cd <codebase> && /graphify . --mode deep --directed --no-viz
         (Skip --wiki and --html for codebase — too noisy for agents.)
    d. If blockchain extension was run in step b, merge:
-        graphify merge-graphs <codebase>/graphify-out/.graphify_extract.json \
-          audit-output/<id>/graph/blockchain-ast.json \
+        python3 scripts/finalize_audit_graph.py \
+          --codebase <codebase> \
+          --blockchain-ast audit-output/<id>/graph/blockchain-ast.json \
           --out audit-output/<id>/graph/graph.json
       Otherwise:
         cp <codebase>/graphify-out/graph.json audit-output/<id>/graph/graph.json

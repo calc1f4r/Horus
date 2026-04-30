@@ -5,6 +5,7 @@ chain: Ethereum, Solana, Multi-Chain
 category: Price Manipulation
 vulnerability_type: Spot Price Manipulation, Reserve Manipulation, Callback Exploitation, Timing Attacks
 attack_type: Sandwich Attack, Flash Loan, Front-Running, Price Oracle Manipulation
+affected_component: bonding_curve_pricing|pool_reserves|price_discovery
 primitives: Bonding Curve, AMM, Uniswap V2/V3/V4, DEX, Price Discovery
 severity: critical
 impact: Fund Theft, Price Distortion, LP Losses, Reserve Draining

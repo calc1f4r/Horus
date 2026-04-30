@@ -89,6 +89,26 @@ When `msg.value` is used as a payment check inside a loop or across multiple fun
 | Interaction Scope | `single_contract` |
 | Chain(s) | ethereum |
 
+### Valid Bug Signals
+
+- `msg.value` is checked inside a `for`/`while` loop, batch mint, batch buy, or multicall path without tracking per-iteration ETH consumed.
+- A parent payable function calls another payable/internal function multiple times and each child uses the original `msg.value` for authorization.
+- The attacker can choose array length, quantity, token IDs, recipients, or repeated call data while sending ETH once.
+
+### False Positive Guards
+
+- Safe if total required payment is precomputed once, checked against `msg.value`, and each iteration uses an accumulated cost or remaining balance variable.
+- Not this bug when each iteration pulls ERC20 funds separately or the loop consumes an explicit `remainingValue` that decreases.
+- Requires economic impact: repeated mint/buy/claim must grant assets, credits, or rights beyond the ETH actually paid.
+
+### Code Patterns to Look For
+
+```solidity
+for (uint256 i; i < ids.length; ++i) {
+    require(msg.value >= price[ids[i]], "underpaid");
+    _buy(ids[i], msg.sender);
+}
+```
 
 ### Vulnerability Description
 

@@ -1,7 +1,13 @@
 ---
 title: "Liquidity Management Vulnerabilities in Concentrated Liquidity AMMs"
+protocol: generic
+category: amm/concentrated-liquidity
 vulnerability_class: "Liquidity Management Vulnerabilities"
+vulnerability_type: liquidity_management
+attack_type: accounting_manipulation|flash_loan|fee_theft
+affected_component: liquidity_positions|position_accounting|liquidity_manager
 severity: high
+impact: fund_loss|stuck_liquidity|protocol_insolvency
 chain: "Multi-chain"
 affected_protocols:
   - "Uniswap V3/V4"
@@ -94,6 +100,22 @@ Concentrated liquidity AMMs introduce complex liquidity management mechanisms th
 - Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
 - Safe if: Protocol behavior matches documented specification
 - Requires attacker control of: specific conditions per pattern
+
+#### Code Patterns to Look For
+
+```solidity
+uint256 nominalLiq = balance0 / amount0InUnitLiq; // theoretical liquidity exceeds mintable liquidity
+mint(pool, lower, upper, liquidity); // no min amounts or range-specific availability check
+removeLiquidity(pairId, liquidity); // assumes cached ownership/liquidity still matches NFT position
+reallocate(pairA, pairB); // one pair can consume or move another pair's Uniswap position
+value = cachedLiquidity * getPrice(); // collateral value derived from stale/cached CL liquidity
+```
+
+#### False Positive Detail
+
+- A liquidity calculation bug needs a reachable mint/burn/rebalance/withdraw path where theoretical liquidity diverges from actual pool constraints.
+- Cross-pair or cross-position theft requires shared custody, shared NFT ownership, or missing pair/position binding, not merely a strategy holding multiple positions.
+- Initialization/front-run findings are strongest when first liquidity, initial price, or pool creation is permissionless and later user deposits trust that initialized state.
 
 ## Vulnerable Pattern Examples
 

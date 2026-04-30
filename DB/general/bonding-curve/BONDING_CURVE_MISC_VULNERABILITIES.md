@@ -144,33 +144,34 @@ A stablecoin bonding curve pegged to DAI uses all oracle price feeds denominated
 
 #### Agent Quick View
 
-- Root cause statement: "This vulnerability exists because of logic_error"
+- Root cause statement: Miscellaneous bonding-curve failures arise when oracle denomination/freshness, flash-loan guards, rebalance limits, batch semantics, supply casts, or graduation state transitions are inconsistent with the curve invariant.
 - Pattern key: `logic_error | oracle | miscellaneous`
 - Interaction scope: `single_contract`
 - Primary affected component(s): `oracle|twap|stablecoin|rebalance|wash_trading|flash_loan|batch_operations|configuration`
-- High-signal code keywords: `addLiquidity`, `balanceOf`, `batch_operations`, `block.number`, `block.timestamp`, `bonding_curve`, `borrow`, `burn`
+- High-signal code keywords: `getOwnValuation`, `latestAnswer`, `consult`, `update`, `idToBlockOfLastDeposit`, `move`, `liquidate`, `rebalance`, `claimReward`, `batchBuy`, `uint128`, `claimFees`, `graduate`, `burn`, `addLiquidity`
 - Typical sink / impact: `fund_loss|manipulation|dos|value_leak`
 - Validation strength: `moderate`
 
 #### Contract / Boundary Map
 
-- Entry surface(s): See pattern-specific attack scenarios below
-- Contract hop(s): `StableOracleWETH.function -> but.function -> can.function`
-- Trust boundary crossed: `internal`
-- Shared state or sync assumption: `state consistency across operations`
+- Entry surface(s): oracle read/update, mint/redeem, move/transfer, liquidation, rebalance, reward claim, batch purchase, graduation/finalization
+- Contract hop(s): `BondingCurve/Stablecoin -> oracle/metapool/AMM -> vault/rebalance/reward/graduation module`
+- Trust boundary crossed: external oracle/metapool freshness, AMM liquidity, operator-controlled rebalance calls, and third-party assets in batch flows
+- Shared state or sync assumption: curve price denominator, TWAP freshness, flash-loan deposit block, supply width, fee claim window, and graduation burn math remain aligned
 
 #### Valid Bug Signals
 
-- Signal 1: State variable updated after external interaction instead of before (CEI violation)
-- Signal 2: Withdrawal path produces different accounting than deposit path for same principal
-- Signal 3: Reward accrual continues during paused/emergency state
-- Signal 4: Edge case in state machine transition allows invalid state
+- Oracle or curve valuation mixes USD-denominated feeds with DAI/USDC-pegged targets or lacks depeg-aware normalization.
+- TWAP/metapool value is consumed without forcing or verifying a recent update before mint/redeem/rebalance.
+- Same-block flash-loan protection tracks only deposits while `move`, transfer, repay, or self-liquidation can relocate collateral.
+- Rebalance/reward/batch/graduation paths lack rate limits, per-item failure isolation, safe casts, fee claimability after state transitions, or correct unsold-token burns.
 
 #### False Positive Guards
 
-- Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
-- Safe if: Protocol behavior matches documented specification
-- Requires attacker control of: specific conditions per pattern
+- Not this bug when denomination, freshness, and peg assumptions are explicitly normalized and tested across collateral depeg cases.
+- Safe if flash-loan guards are updated on every position-moving path and checked before liquidation/redemption in the same block.
+- Safe if rebalance calls are rate-limited with slippage bounds, batch operations isolate failing assets, and downcasts use checked casts.
+- Requires attacker ability to manipulate a stale/spot oracle, move collateral through an untracked path, force repeated rebalance/reward actions, or push supply/state beyond unchecked assumptions.
 
 ### Vulnerability Description
 

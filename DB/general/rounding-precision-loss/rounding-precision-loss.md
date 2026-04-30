@@ -1,9 +1,17 @@
 ---
+protocol: generic
 vulnerability_class: rounding-precision-loss
 title: "Rounding and Precision Loss Vulnerabilities"
-category: Mathematical Operations
+category: mathematical_operations
+vulnerability_type: rounding_precision_loss
+attack_type: arithmetic_precision_exploit
+affected_component: accounting_math
+severity: high
+impact: fund_loss
 severity_range: "LOW to HIGH"
 
+source_reports:
+  - file: "reports/yield_protocol_findings/m-26-imprecise-calculations-in-launchfor-lead-to-less-liquidity-be-added-to-the-.md"
     protocol: "Virtuals Protocol"
     severity: "MEDIUM"
     auditor: "Code4rena"

@@ -1,7 +1,13 @@
 ---
 title: "Tick, Range, and Position Vulnerabilities in Concentrated Liquidity AMMs"
+protocol: generic
 vulnerability_class: concentrated-liquidity-tick-range-position
 category: amm/concentrated-liquidity
+vulnerability_type: tick_range_position_accounting
+attack_type: tick_boundary_manipulation|accounting_error|denial_of_service
+affected_component: tick_math|position_accounting|range_validation
+severity: high
+impact: fund_loss|fee_theft|denial_of_service
 severity_range: "MEDIUM to HIGH"
 consensus_severity: HIGH
 
@@ -101,6 +107,22 @@ Concentrated liquidity AMMs introduced complex tick-based price ranges that enab
 - Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
 - Safe if: Protocol behavior matches documented specification
 - Requires attacker control of: specific conditions per pattern
+
+#### Code Patterns to Look For
+
+```solidity
+mintPosition(lower, upper); // missing lower < upper and tickSpacing checks
+if (tick > lower && tick < upper) activeLiquidity += amount; // wrong boundary inclusivity
+feeGrowthInside = upper.feeGrowthOutside - lower.feeGrowthOutside; // underflow handling differs from V3
+for (uint256 i; i < tickTracking.length; ++i) crossTicks(tickTracking[i]); // user-inflatable tick arrays
+tick = int24(tickCumulativeDelta / secondsAgo); // negative tick division rounds toward zero
+```
+
+#### False Positive Detail
+
+- Tick validation findings require externally supplied or indirectly controllable ticks; hardcoded valid ranges are low signal.
+- Fee-growth underflow can be intended modulo arithmetic in Uniswap V3 forks, so confirm whether checked arithmetic changed behavior or whether unchecked math is deliberately used.
+- Boundary bugs are impact-bearing when active liquidity, rewards, borrowing power, or position ownership changes at exactly `lower`, `upper`, or current tick.
 
 ## Vulnerable Pattern Examples
 

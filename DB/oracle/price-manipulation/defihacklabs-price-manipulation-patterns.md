@@ -107,6 +107,33 @@ Price manipulation is the highest-loss vulnerability class in DeFi. This entry c
 | Chain(s) | ethereum, bsc |
 
 
+### Valid Bug Signals
+
+- A critical path prices collateral, rewards, shares, or swap output from manipulable on-chain state such as AMM spot reserves, raw token balances, vault `pricePerShare`, or pool weights.
+- The attacker can self-swap, donate assets, call `gulp`/sync-style balance updates, or use a flash loan to alter the price input before the protocol consumes it.
+- The same transaction can manipulate the price source and then mint rewards, borrow, redeem, remove liquidity, or drain swap inventory at the distorted valuation.
+- The protocol uses `balanceOf()` snapshots instead of tracked deposits/reserves for reward eligibility, share pricing, or liquidity withdrawal amounts.
+- There is no slippage, minimum-out, TWAP, cooldown, or deviation check separating price movement from the value-extracting action.
+
+### False Positive Guards
+
+- Do not treat every `balanceOf()` as vulnerable; require that the balance feeds pricing, rewards, or withdrawals and can be changed by an attacker at the relevant time.
+- Self-swap signals are only valid if same-token swaps are allowed through a value-changing pricing path; explicit `tokenIn != tokenOut` checks or no-op handling reduce severity.
+- Donation inflation needs share price or LP valuation to use raw balances; internal reserve accounting or ignored unsolicited transfers can block the exploit.
+- AMM spot reads used only for UI hints, off-chain quoting, or post-action accounting are not enough without a protocol asset transfer or debt creation sink.
+- Flash-loan feasibility should consider pool depth, fees, caps, cooldowns, and whether the manipulated state must persist across blocks.
+
+### Code Patterns to Look For
+
+```text
+- swap/exchange functions missing `tokenIn != tokenOut` or equivalent same-asset guard
+- `pricePerShare`, `getPricePerFullShare`, `totalAssets() / totalSupply()`, or `balanceOf(vault)` used as collateral value
+- `gulp()`, `sync()`, pool weight refresh, or raw `balanceOf(address(this))` before mint/reward/share calculations
+- reward minting based on AMM spot ratio, instantaneous holder balance, or reusable token balance snapshots
+- remove-liquidity logic using live token balances instead of internally tracked reserves
+```
+
+
 ### Root Cause Categories
 
 1. **Self-Swap Price Inflation** — Protocol allows swapping token A for token A, inflating virtual price each swap

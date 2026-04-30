@@ -82,6 +82,35 @@ Integer overflow vulnerabilities in pre-Solidity 0.8. tokens enabled the creatio
 | Interaction Scope | `single_contract` |
 | Chain(s) | ethereum |
 
+#### Valid Bug Signals
+
+- `batchTransfer`, `multiSend`, `airdrop`, or delegated transfer computes `total = count * amount` or `amount + fee` before checking sender balance.
+- Contract is Solidity `<0.8.0`, disables checked arithmetic through inline assembly/custom math, or uses SafeMath only after an unchecked intermediate has already wrapped.
+- The checked value differs from the value later credited, debited, minted, emitted, or transferred.
+- Attacker can choose array length, recipient count, amount, fee, or signed message parameters that make the checked expression wrap to a small value.
+
+#### False Positive Guards
+
+- Not this bug when multiplication/addition is performed with Solidity `>=0.8.0` checked arithmetic or SafeMath on the exact expression being checked.
+- Safe if `amount <= balance / count` or equivalent division-based bound is enforced before multiplication.
+- Safe if delegated transfer signatures bind sane maximums and the contract checks both `value` and `fee` before adding them.
+- Requires attacker-controlled operands and a downstream state update using the unwrapped intended amount.
+
+#### Code Patterns to Look For
+
+```solidity
+uint256 total = recipients.length * amount;
+require(balanceOf[msg.sender] >= total);
+for (...) balanceOf[recipients[i]] += amount;
+
+require(balances[from] >= value + fee);
+balances[to] += value;
+balances[relayer] += fee;
+balances[from] -= value + fee;
+```
+
+Audit `batchTransfer`, `transferProxy`, `airdrop`, `multiTransfer`, relayer fee logic, and any pre-0.8 token code where the guard expression is not exactly the amount deducted.
+
 
 ### Root Cause
 

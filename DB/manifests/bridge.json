@@ -3,7 +3,7 @@
     "category": "bridge",
     "description": "Pattern-level index for bridge vulnerabilities",
     "fileCount": 10,
-    "totalPatterns": 92,
+    "totalPatterns": 84,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
   },
   "files": [
@@ -122,7 +122,6 @@
             "gateway validation bypass",
             "gateway validation",
             "validation bypass",
-            "vulnerable",
             "axelarexecutable",
             "axelar executable",
             "interchaintokenservice",
@@ -147,44 +146,37 @@
             "express receive",
             "flowlimit",
             "flow limit",
-            "mint"
+            "mint",
+            "msg.sender"
           ],
           "rootCause": "The `execute()` function in `AxelarExecutable` calls `_execute()` which is overridden by the child contract. If the child contract doesn't call `gateway.validateContractCall()` (either by not inheriti",
-          "subsections": [
-            {
-              "title": "Vulnerability Description",
-              "lineStart": 171,
-              "lineEnd": 183,
-              "severity": [],
-              "codeKeywords": [
-                "AxelarExecutable",
-                "_execute",
-                "commandId",
-                "execute",
-                "gateway.validateContractCall",
-                "payload",
-                "sourceAddress",
-                "sourceChain"
-              ],
-              "searchKeywords": null
-            },
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 184,
-              "lineEnd": 222,
-              "severity": [
-                "CRITICAL",
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "_execute",
-                "execute"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md",
+              "reports/bridge_crosschain_findings/bypass-of-bridge-limits-in-burnandbridgemulti-function.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gateway bypass",
+              "source spoofing",
+              "express frontrun",
+              "its misconfiguration"
+            ],
+            "commonlyComposesWith": [
+              "axelar executable",
+              "execute",
+              "execute with token",
+              "gateway",
+              "validate contract call"
+            ]
+          }
         },
         {
           "id": "bridge-axelar-integration-vulnerabilities-2-source-chain-address-spoofin-001",
@@ -227,7 +219,6 @@
             "source chain",
             "chain address",
             "address spoofing",
-            "vulnerable",
             "axelarexecutable",
             "axelar executable",
             "interchaintokenservice",
@@ -250,26 +241,37 @@
             "executewithtoken",
             "expressreceive",
             "express receive",
-            "flowlimit"
+            "flowlimit",
+            "flow limit"
           ],
           "rootCause": "Accepts from any source chain/address",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 277,
-              "lineEnd": 317,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "_execute"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md",
+              "reports/bridge_crosschain_findings/bypass-of-bridge-limits-in-burnandbridgemulti-function.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gateway bypass",
+              "source spoofing",
+              "express frontrun",
+              "its misconfiguration"
+            ],
+            "commonlyComposesWith": [
+              "axelar executable",
+              "execute",
+              "execute with token",
+              "gateway",
+              "validate contract call"
+            ]
+          }
         },
         {
           "id": "bridge-axelar-integration-vulnerabilities-3-token-burn-but-call-fails-002",
@@ -313,7 +315,6 @@
             "burn but",
             "but call",
             "call fails",
-            "vulnerable",
             "axelarexecutable",
             "axelar executable",
             "interchaintokenservice",
@@ -334,25 +335,37 @@
             "command id",
             "executewithtoken",
             "expressreceive",
-            "express receive"
+            "express receive",
+            "flowlimit"
           ],
           "rootCause": "Revert after token burn on source = fund loss",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 358,
-              "lineEnd": 382,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "_executeWithToken"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md",
+              "reports/bridge_crosschain_findings/bypass-of-bridge-limits-in-burnandbridgemulti-function.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gateway bypass",
+              "source spoofing",
+              "express frontrun",
+              "its misconfiguration"
+            ],
+            "commonlyComposesWith": [
+              "axelar executable",
+              "execute",
+              "execute with token",
+              "gateway",
+              "validate contract call"
+            ]
+          }
         },
         {
           "id": "bridge-axelar-integration-vulnerabilities-4-express-execution-front-runn-003",
@@ -395,7 +408,6 @@
             "express execution",
             "execution front",
             "front running",
-            "vulnerable",
             "axelarexecutable",
             "axelar executable",
             "interchaintokenservice",
@@ -418,25 +430,37 @@
             "executewithtoken",
             "expressreceive",
             "express receive",
-            "flowlimit"
+            "flowlimit",
+            "flow limit"
           ],
           "rootCause": "No check if express already processed",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 427,
-              "lineEnd": 446,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "_execute"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md",
+              "reports/bridge_crosschain_findings/bypass-of-bridge-limits-in-burnandbridgemulti-function.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gateway bypass",
+              "source spoofing",
+              "express frontrun",
+              "its misconfiguration"
+            ],
+            "commonlyComposesWith": [
+              "axelar executable",
+              "execute",
+              "execute with token",
+              "gateway",
+              "validate contract call"
+            ]
+          }
         },
         {
           "id": "bridge-axelar-integration-vulnerabilities-5-its-token-manager-misconfigu-004",
@@ -480,7 +504,6 @@
             "its token",
             "token manager",
             "manager misconfiguration",
-            "vulnerable",
             "axelarexecutable",
             "axelar executable",
             "interchaintokenservice",
@@ -503,25 +526,37 @@
             "expressreceive",
             "express receive",
             "flowlimit",
-            "flow limit"
+            "flow limit",
+            "gateway"
           ],
           "rootCause": "Lock-Unlock TokenManager on non-origin chains",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 480,
-              "lineEnd": 506,
-              "severity": [
-                "CRITICAL",
-                "HIGH",
-                "LOW"
-              ],
-              "codeKeywords": [],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md",
+              "reports/bridge_crosschain_findings/bypass-of-bridge-limits-in-burnandbridgemulti-function.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gateway bypass",
+              "source spoofing",
+              "express frontrun",
+              "its misconfiguration"
+            ],
+            "commonlyComposesWith": [
+              "axelar executable",
+              "execute",
+              "execute with token",
+              "gateway",
+              "validate contract call"
+            ]
+          }
         },
         {
           "id": "bridge-axelar-integration-vulnerabilities-6-gas-service-payment-issues-005",
@@ -564,7 +599,6 @@
             "gas service",
             "service payment",
             "payment issues",
-            "vulnerable",
             "axelarexecutable",
             "axelar executable",
             "interchaintokenservice",
@@ -587,26 +621,37 @@
             "executewithtoken",
             "expressreceive",
             "express receive",
-            "flowlimit"
+            "flowlimit",
+            "flow limit"
           ],
           "rootCause": "Message sent without gas payment — stuck forever",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 535,
-              "lineEnd": 573,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "sendMessage"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md",
+              "reports/bridge_crosschain_findings/bypass-of-bridge-limits-in-burnandbridgemulti-function.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gateway bypass",
+              "source spoofing",
+              "express frontrun",
+              "its misconfiguration"
+            ],
+            "commonlyComposesWith": [
+              "axelar executable",
+              "execute",
+              "execute with token",
+              "gateway",
+              "validate contract call"
+            ]
+          }
         },
         {
           "id": "bridge-axelar-integration-vulnerabilities-7-string-based-chain-matching-006",
@@ -649,7 +694,6 @@
             "string based",
             "based chain",
             "chain matching",
-            "vulnerable",
             "axelarexecutable",
             "axelar executable",
             "interchaintokenservice",
@@ -672,24 +716,37 @@
             "executewithtoken",
             "expressreceive",
             "express receive",
-            "flowlimit"
+            "flowlimit",
+            "flow limit"
           ],
           "rootCause": "Different representations of same chain",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 618,
-              "lineEnd": 636,
-              "severity": [
-                "LOW",
-                "MEDIUM"
-              ],
-              "codeKeywords": [],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md",
+              "reports/bridge_crosschain_findings/bypass-of-bridge-limits-in-burnandbridgemulti-function.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gateway bypass",
+              "source spoofing",
+              "express frontrun",
+              "its misconfiguration"
+            ],
+            "commonlyComposesWith": [
+              "axelar executable",
+              "execute",
+              "execute with token",
+              "gateway",
+              "validate contract call"
+            ]
+          }
         },
         {
           "id": "bridge-axelar-integration-vulnerabilities-8-executable-contract-reentran-007",
@@ -729,7 +786,6 @@
             "executable contract reentrancy",
             "executable contract",
             "contract reentrancy",
-            "vulnerable",
             "axelarexecutable",
             "axelar executable",
             "interchaintokenservice",
@@ -754,25 +810,37 @@
             "express receive",
             "flowlimit",
             "flow limit",
-            "gateway"
+            "gateway",
+            "mint"
           ],
           "rootCause": "Reentrancy in _executeWithToken",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 670,
-              "lineEnd": 694,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "_executeWithToken"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md",
+              "reports/bridge_crosschain_findings/bypass-of-bridge-limits-in-burnandbridgemulti-function.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gateway bypass",
+              "source spoofing",
+              "express frontrun",
+              "its misconfiguration"
+            ],
+            "commonlyComposesWith": [
+              "reentrancy",
+              "executable contract reentrancy",
+              "contract reentrancy",
+              "axelar executable",
+              "execute"
+            ]
+          }
         },
         {
           "id": "bridge-axelar-integration-vulnerabilities-9-governance-proposal-replay-008",
@@ -812,7 +880,6 @@
             "governance proposal replay",
             "governance proposal",
             "proposal replay",
-            "vulnerable",
             "axelarexecutable",
             "axelar executable",
             "interchaintokenservice",
@@ -837,25 +904,37 @@
             "express receive",
             "flowlimit",
             "flow limit",
-            "gateway"
+            "gateway",
+            "mint"
           ],
           "rootCause": "No tracking of executed governance commands",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 725,
-              "lineEnd": 745,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "_execute"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md",
+              "reports/bridge_crosschain_findings/bypass-of-bridge-limits-in-burnandbridgemulti-function.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "replay",
+              "governance proposal replay",
+              "proposal replay",
+              "missing validation",
+              "gateway bypass"
+            ],
+            "commonlyComposesWith": [
+              "axelar executable",
+              "execute",
+              "execute with token",
+              "gateway",
+              "validate contract call"
+            ]
+          }
         },
         {
           "id": "bridge-axelar-integration-vulnerabilities-10-command-id-collision-009",
@@ -892,7 +971,6 @@
             "command",
             "collision",
             "command collision",
-            "vulnerable",
             "axelarexecutable",
             "axelar executable",
             "interchaintokenservice",
@@ -920,26 +998,37 @@
             "gateway",
             "mint",
             "msg.sender",
-            "msg sender"
+            "msg sender",
+            "paynativegasforcontractcall"
           ],
           "rootCause": "Same commandId space for different message types",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 784,
-              "lineEnd": 806,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "_execute",
-                "_executeWithToken"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md",
+              "reports/bridge_crosschain_findings/bypass-of-bridge-limits-in-burnandbridgemulti-function.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gateway bypass",
+              "source spoofing",
+              "express frontrun",
+              "its misconfiguration"
+            ],
+            "commonlyComposesWith": [
+              "axelar executable",
+              "execute",
+              "execute with token",
+              "gateway",
+              "validate contract call"
+            ]
+          }
         },
         {
           "id": "bridge-axelar-integration-vulnerabilities-detection-patterns-010",
@@ -1007,7 +1096,33 @@
             "recoverfailedtransfer"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md",
+              "reports/bridge_crosschain_findings/bypass-of-bridge-limits-in-burnandbridgemulti-function.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gateway bypass",
+              "source spoofing",
+              "express frontrun",
+              "its misconfiguration"
+            ],
+            "commonlyComposesWith": [
+              "axelar executable",
+              "execute",
+              "execute with token",
+              "gateway",
+              "validate contract call"
+            ]
+          }
         }
       ]
     },
@@ -1127,7 +1242,6 @@
             "router message validation",
             "router message",
             "message validation",
-            "vulnerable",
             "client.any2evmmessage",
             "client any2 evmmessage",
             "client.evm2anymessage",
@@ -1152,46 +1266,38 @@
             "build message",
             "_ccipreceive",
             "ccip receive",
-            "_estimategas"
+            "_estimategas",
+            "estimate gas"
           ],
           "rootCause": "Contracts implementing `IAny2EVMMessageReceiver` expose `ccipReceive()` as a public/external function but omit the critical `msg.sender == getRouter()` check, or fail to inherit from `CCIPReceiver` wh",
-          "subsections": [
-            {
-              "title": "Vulnerability Description",
-              "lineStart": 180,
-              "lineEnd": 193,
-              "severity": [
-                "CRITICAL"
-              ],
-              "codeKeywords": [
-                "CCIPReceiver",
-                "Client.Any2EVMMessage",
-                "IAny2EVMMessageReceiver",
-                "ccipReceive",
-                "data",
-                "sender",
-                "sourceChainSelector"
-              ],
-              "searchKeywords": null
-            },
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 194,
-              "lineEnd": 228,
-              "severity": [
-                "CRITICAL",
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "_ccipReceive",
-                "ccipReceive",
-                "setRouter"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/excessive-fee-is-not-refunded-to-the-user.md",
+              "reports/bridge_crosschain_findings/fixed-gas-limit-in-single-hop-transfers.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "message validation",
+              "fee miscalculation",
+              "token pool bypass",
+              "rate limit griefing"
+            ],
+            "commonlyComposesWith": [
+              "ccip receive",
+              "ccip send",
+              "client evm2 any message",
+              "client any2 evmmessage",
+              "router"
+            ]
+          }
         },
         {
           "id": "bridge-ccip-integration-vulnerabilities-2-fee-estimation-errors-001",
@@ -1232,7 +1338,6 @@
             "fee estimation errors",
             "fee estimation",
             "estimation errors",
-            "vulnerable",
             "client.any2evmmessage",
             "client any2 evmmessage",
             "client.evm2anymessage",
@@ -1257,27 +1362,38 @@
             "_buildmessage",
             "build message",
             "_ccipreceive",
-            "ccip receive"
+            "ccip receive",
+            "_estimategas"
           ],
           "rootCause": "Hardcoded fee doesn't track actual CCIP costs",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 275,
-              "lineEnd": 331,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "sendMessage",
-                "sendWithLink"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/excessive-fee-is-not-refunded-to-the-user.md",
+              "reports/bridge_crosschain_findings/fixed-gas-limit-in-single-hop-transfers.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "message validation",
+              "fee miscalculation",
+              "token pool bypass",
+              "rate limit griefing"
+            ],
+            "commonlyComposesWith": [
+              "ccip receive",
+              "ccip send",
+              "client evm2 any message",
+              "client any2 evmmessage",
+              "router"
+            ]
+          }
         },
         {
           "id": "bridge-ccip-integration-vulnerabilities-3-token-pool-configuration-002",
@@ -1317,7 +1433,6 @@
             "token pool configuration",
             "token pool",
             "pool configuration",
-            "vulnerable",
             "client.any2evmmessage",
             "client any2 evmmessage",
             "client.evm2anymessage",
@@ -1342,27 +1457,38 @@
             "build message",
             "_ccipreceive",
             "ccip receive",
-            "_estimategas"
+            "_estimategas",
+            "estimate gas"
           ],
           "rootCause": "No tracking of locked vs released amounts",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 380,
-              "lineEnd": 416,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "lockTokens",
-                "releaseOrMint",
-                "releaseTokens"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/excessive-fee-is-not-refunded-to-the-user.md",
+              "reports/bridge_crosschain_findings/fixed-gas-limit-in-single-hop-transfers.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "message validation",
+              "fee miscalculation",
+              "token pool bypass",
+              "rate limit griefing"
+            ],
+            "commonlyComposesWith": [
+              "ccip receive",
+              "ccip send",
+              "client evm2 any message",
+              "client any2 evmmessage",
+              "router"
+            ]
+          }
         },
         {
           "id": "bridge-ccip-integration-vulnerabilities-4-extra-args-gas-limit-misconf-003",
@@ -1408,7 +1534,6 @@
             "args gas",
             "gas limit",
             "limit misconfiguration",
-            "vulnerable",
             "client.any2evmmessage",
             "client any2 evmmessage",
             "client.evm2anymessage",
@@ -1429,25 +1554,38 @@
             "rate limiter",
             "router",
             "tokenpool",
-            "token pool"
+            "token pool",
+            "_buildmessage"
           ],
           "rootCause": "Empty extraArgs defaults to 200k gas",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 463,
-              "lineEnd": 496,
-              "severity": [
-                "HIGH",
-                "LOW",
-                "MEDIUM"
-              ],
-              "codeKeywords": [],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/excessive-fee-is-not-refunded-to-the-user.md",
+              "reports/bridge_crosschain_findings/fixed-gas-limit-in-single-hop-transfers.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "message validation",
+              "fee miscalculation",
+              "token pool bypass",
+              "rate limit griefing"
+            ],
+            "commonlyComposesWith": [
+              "ccip receive",
+              "ccip send",
+              "client evm2 any message",
+              "client any2 evmmessage",
+              "router"
+            ]
+          }
         },
         {
           "id": "bridge-ccip-integration-vulnerabilities-5-lane-allowlist-bypass-004",
@@ -1488,7 +1626,6 @@
             "lane allowlist bypass",
             "lane allowlist",
             "allowlist bypass",
-            "vulnerable",
             "client.any2evmmessage",
             "client any2 evmmessage",
             "client.evm2anymessage",
@@ -1513,26 +1650,38 @@
             "_buildmessage",
             "build message",
             "_ccipreceive",
-            "ccip receive"
+            "ccip receive",
+            "_estimategas"
           ],
           "rootCause": "Accepts messages from ANY chain",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 533,
-              "lineEnd": 565,
-              "severity": [
-                "HIGH",
-                "LOW"
-              ],
-              "codeKeywords": [
-                "_ccipReceive"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/excessive-fee-is-not-refunded-to-the-user.md",
+              "reports/bridge_crosschain_findings/fixed-gas-limit-in-single-hop-transfers.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "message validation",
+              "fee miscalculation",
+              "token pool bypass",
+              "rate limit griefing"
+            ],
+            "commonlyComposesWith": [
+              "ccip receive",
+              "ccip send",
+              "client evm2 any message",
+              "client any2 evmmessage",
+              "router"
+            ]
+          }
         },
         {
           "id": "bridge-ccip-integration-vulnerabilities-6-manual-execution-replay-005",
@@ -1572,7 +1721,6 @@
             "manual execution replay",
             "manual execution",
             "execution replay",
-            "vulnerable",
             "client.any2evmmessage",
             "client any2 evmmessage",
             "client.evm2anymessage",
@@ -1597,25 +1745,38 @@
             "_buildmessage",
             "build message",
             "_ccipreceive",
-            "ccip receive"
+            "ccip receive",
+            "_estimategas"
           ],
           "rootCause": "Same message can be manually executed multiple times",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 606,
-              "lineEnd": 622,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "_ccipReceive"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/excessive-fee-is-not-refunded-to-the-user.md",
+              "reports/bridge_crosschain_findings/fixed-gas-limit-in-single-hop-transfers.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "replay",
+              "manual execution replay",
+              "execution replay",
+              "missing validation",
+              "message validation"
+            ],
+            "commonlyComposesWith": [
+              "ccip receive",
+              "ccip send",
+              "client evm2 any message",
+              "client any2 evmmessage",
+              "router"
+            ]
+          }
         },
         {
           "id": "bridge-ccip-integration-vulnerabilities-7-sender-receiver-validation-006",
@@ -1656,7 +1817,6 @@
             "sender receiver validation",
             "sender receiver",
             "receiver validation",
-            "vulnerable",
             "client.any2evmmessage",
             "client any2 evmmessage",
             "client.evm2anymessage",
@@ -1681,27 +1841,38 @@
             "_buildmessage",
             "build message",
             "_ccipreceive",
-            "ccip receive"
+            "ccip receive",
+            "_estimategas"
           ],
           "rootCause": "Incorrect sender decoding",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 667,
-              "lineEnd": 704,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "_ccipReceive",
-                "sendTokensWithData"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/excessive-fee-is-not-refunded-to-the-user.md",
+              "reports/bridge_crosschain_findings/fixed-gas-limit-in-single-hop-transfers.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "message validation",
+              "fee miscalculation",
+              "token pool bypass",
+              "rate limit griefing"
+            ],
+            "commonlyComposesWith": [
+              "ccip receive",
+              "ccip send",
+              "client evm2 any message",
+              "client any2 evmmessage",
+              "router"
+            ]
+          }
         },
         {
           "id": "bridge-ccip-integration-vulnerabilities-8-rate-limiter-griefing-007",
@@ -1741,7 +1912,6 @@
             "rate limiter griefing",
             "rate limiter",
             "limiter griefing",
-            "vulnerable",
             "client.any2evmmessage",
             "client any2 evmmessage",
             "client.evm2anymessage",
@@ -1766,25 +1936,38 @@
             "build message",
             "_ccipreceive",
             "ccip receive",
-            "_estimategas"
+            "_estimategas",
+            "estimate gas"
           ],
           "rootCause": "Global rate limit shared by all users",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 738,
-              "lineEnd": 756,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "lockTokens"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/excessive-fee-is-not-refunded-to-the-user.md",
+              "reports/bridge_crosschain_findings/fixed-gas-limit-in-single-hop-transfers.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "message validation",
+              "fee miscalculation",
+              "token pool bypass",
+              "rate limit griefing"
+            ],
+            "commonlyComposesWith": [
+              "ccip receive",
+              "ccip send",
+              "client evm2 any message",
+              "client any2 evmmessage",
+              "router"
+            ]
+          }
         },
         {
           "id": "bridge-ccip-integration-vulnerabilities-9-off-ramp-processing-failures-008",
@@ -1826,7 +2009,6 @@
             "off ramp",
             "ramp processing",
             "processing failures",
-            "vulnerable",
             "client.any2evmmessage",
             "client any2 evmmessage",
             "client.evm2anymessage",
@@ -1849,25 +2031,38 @@
             "token pool",
             "_buildmessage",
             "build message",
-            "_ccipreceive"
+            "_ccipreceive",
+            "ccip receive"
           ],
           "rootCause": "Revert causes tokens to be stuck in receiver contract",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 794,
-              "lineEnd": 812,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "_ccipReceive"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/excessive-fee-is-not-refunded-to-the-user.md",
+              "reports/bridge_crosschain_findings/fixed-gas-limit-in-single-hop-transfers.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "message validation",
+              "fee miscalculation",
+              "token pool bypass",
+              "rate limit griefing"
+            ],
+            "commonlyComposesWith": [
+              "ccip receive",
+              "ccip send",
+              "client evm2 any message",
+              "client any2 evmmessage",
+              "router"
+            ]
+          }
         },
         {
           "id": "bridge-ccip-integration-vulnerabilities-10-token-amount-validation-009",
@@ -1907,7 +2102,6 @@
             "token amount validation",
             "token amount",
             "amount validation",
-            "vulnerable",
             "client.any2evmmessage",
             "client any2 evmmessage",
             "client.evm2anymessage",
@@ -1932,25 +2126,38 @@
             "_buildmessage",
             "build message",
             "_ccipreceive",
-            "ccip receive"
+            "ccip receive",
+            "_estimategas"
           ],
           "rootCause": "Trusts message.data instead of actual tokenAmounts",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 868,
-              "lineEnd": 886,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "_ccipReceive"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/excessive-fee-is-not-refunded-to-the-user.md",
+              "reports/bridge_crosschain_findings/fixed-gas-limit-in-single-hop-transfers.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "message validation",
+              "fee miscalculation",
+              "token pool bypass",
+              "rate limit griefing"
+            ],
+            "commonlyComposesWith": [
+              "ccip receive",
+              "ccip send",
+              "client evm2 any message",
+              "client any2 evmmessage",
+              "router"
+            ]
+          }
         },
         {
           "id": "bridge-ccip-integration-vulnerabilities-11-message-size-limit-violatio-010",
@@ -1992,7 +2199,6 @@
             "message size",
             "size limit",
             "limit violations",
-            "vulnerable",
             "client.any2evmmessage",
             "client any2 evmmessage",
             "client.evm2anymessage",
@@ -2015,25 +2221,38 @@
             "tokenpool",
             "token pool",
             "_buildmessage",
-            "build message"
+            "build message",
+            "_ccipreceive"
           ],
           "rootCause": "No size check on dynamically built payload",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 916,
-              "lineEnd": 943,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "sendBatchOperation"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/excessive-fee-is-not-refunded-to-the-user.md",
+              "reports/bridge_crosschain_findings/fixed-gas-limit-in-single-hop-transfers.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "message validation",
+              "fee miscalculation",
+              "token pool bypass",
+              "rate limit griefing"
+            ],
+            "commonlyComposesWith": [
+              "ccip receive",
+              "ccip send",
+              "client evm2 any message",
+              "client any2 evmmessage",
+              "router"
+            ]
+          }
         },
         {
           "id": "bridge-ccip-integration-vulnerabilities-12-self-service-token-registra-011",
@@ -2079,7 +2298,6 @@
             "service token",
             "token registration",
             "registration issues",
-            "vulnerable",
             "client.any2evmmessage",
             "client any2 evmmessage",
             "client.evm2anymessage",
@@ -2100,27 +2318,38 @@
             "rate limiter",
             "router",
             "tokenpool",
-            "token pool"
+            "token pool",
+            "_buildmessage"
           ],
           "rootCause": "Lock-release pool on BOTH chains means no burn/mint",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 978,
-              "lineEnd": 1006,
-              "severity": [
-                "CRITICAL",
-                "HIGH",
-                "LOW"
-              ],
-              "codeKeywords": [
-                "releaseOrMint"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/excessive-fee-is-not-refunded-to-the-user.md",
+              "reports/bridge_crosschain_findings/fixed-gas-limit-in-single-hop-transfers.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "message validation",
+              "fee miscalculation",
+              "token pool bypass",
+              "rate limit griefing"
+            ],
+            "commonlyComposesWith": [
+              "ccip receive",
+              "ccip send",
+              "client evm2 any message",
+              "client any2 evmmessage",
+              "router"
+            ]
+          }
         },
         {
           "id": "bridge-ccip-integration-vulnerabilities-detection-patterns-012",
@@ -2188,7 +2417,34 @@
             "burn"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-cross-chain-smart-contract-calls-can-revert-but-source-chain-tokens-remain-.md",
+              "reports/bridge_crosschain_findings/h-6-cross-chain-message-authentication-can-be-bypassed-allowing-an-attacker-to-d.md",
+              "reports/bridge_crosschain_findings/excessive-fee-is-not-refunded-to-the-user.md",
+              "reports/bridge_crosschain_findings/fixed-gas-limit-in-single-hop-transfers.md",
+              "reports/bridge_crosschain_findings/bridging-dstoken-back-and-forth-between-chains-causes-totalissuance-cap-to-be-re.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "message validation",
+              "fee miscalculation",
+              "token pool bypass",
+              "rate limit griefing"
+            ],
+            "commonlyComposesWith": [
+              "ccip receive",
+              "ccip send",
+              "client evm2 any message",
+              "client any2 evmmessage",
+              "router"
+            ]
+          }
         }
       ]
     },
@@ -2301,7 +2557,6 @@
             "cross chain replay",
             "cross chain",
             "chain replay",
-            "vulnerable",
             "approve",
             "balanceof",
             "balance of",
@@ -2326,35 +2581,35 @@
             "createcrosschainaccount",
             "create cross chain account",
             "denormalizeamount",
-            "denormalize amount"
+            "denormalize amount",
+            "deposit"
           ],
           "rootCause": "Bridge messages or signatures don't include sufficient context (chain ID, contract address, nonce) to prevent replay across different chains or contract instances.",
-          "subsections": [
-            {
-              "title": "Vulnerability Description",
-              "lineStart": 180,
-              "lineEnd": 204,
-              "severity": [],
-              "codeKeywords": [],
-              "searchKeywords": null
-            },
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 205,
-              "lineEnd": 276,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "bridgeWithSignature",
-                "execute",
-                "processMessage"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 3,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/message-replays-are-possible-across-different-instances.md",
+              "reports/bridge_crosschain_findings/signatures-can-be-replayed-cross-chain.md",
+              "reports/bridge_crosschain_findings/h-1-replay-of-mpc-signed-messages.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "replay",
+              "cross chain replay",
+              "chain replay",
+              "missing validation",
+              "replay attack"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridgeandswap",
+              "bridge and swap",
+              "bridgenft",
+              "bridge nft"
+            ]
+          }
         },
         {
           "id": "bridge-cross-chain-general-vulnerabilities-2-signature-validation-issues-001",
@@ -2395,7 +2650,6 @@
             "signature validation issues",
             "signature validation",
             "validation issues",
-            "vulnerable",
             "approve",
             "balanceof",
             "balance of",
@@ -2420,27 +2674,38 @@
             "createcrosschainaccount",
             "create cross chain account",
             "denormalizeamount",
-            "denormalize amount"
+            "denormalize amount",
+            "deposit"
           ],
           "rootCause": "No signature length validation",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 393,
-              "lineEnd": 423,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "execute",
-                "verify"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 10,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/message-replays-are-possible-across-different-instances.md",
+              "reports/bridge_crosschain_findings/signatures-can-be-replayed-cross-chain.md",
+              "reports/bridge_crosschain_findings/h-1-replay-of-mpc-signed-messages.md",
+              "reports/bridge_crosschain_findings/access-controlled-functions-cannot-be-called-when-l2-sequencers-are-down.md",
+              "reports/bridge_crosschain_findings/m-15-blast-gateway-reverts-if-it-receives-rebasing-yield-mode-tokens.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "replay attack",
+              "access control",
+              "message validation",
+              "token handling"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridgeandswap",
+              "bridge and swap",
+              "bridgenft",
+              "bridge nft"
+            ]
+          }
         },
         {
           "id": "bridge-cross-chain-general-vulnerabilities-3-token-bridging-issues-002",
@@ -2480,7 +2745,6 @@
             "token bridging issues",
             "token bridging",
             "bridging issues",
-            "vulnerable",
             "approve",
             "balanceof",
             "balance of",
@@ -2505,27 +2769,36 @@
             "createcrosschainaccount",
             "create cross chain account",
             "denormalizeamount",
-            "denormalize amount"
+            "denormalize amount",
+            "deposit"
           ],
           "rootCause": "Doesn't account for transfer fees",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 463,
-              "lineEnd": 510,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "bridge",
-                "bridgeTokens",
-                "deposit"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/across-it-will-not-be-possible-to-bridge-dai-to-blast.md",
+              "reports/bridge_crosschain_findings/m-15-blast-gateway-reverts-if-it-receives-rebasing-yield-mode-tokens.md",
+              "reports/bridge_crosschain_findings/m-09-wrong-token-address-is-passed-to-lzcompose-when-msg_-is-of-compose-type.md",
+              "reports/bridge_crosschain_findings/_slippagetol-does-not-adjust-for-decimal-differences.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "replay attack",
+              "access control",
+              "message validation",
+              "token handling"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridgeandswap",
+              "bridge and swap",
+              "bridgenft",
+              "bridge nft"
+            ]
+          }
         },
         {
           "id": "bridge-cross-chain-general-vulnerabilities-4-sequencer-l2-specific-issues-003",
@@ -2565,7 +2838,6 @@
             "sequencer specific issues",
             "sequencer specific",
             "specific issues",
-            "vulnerable",
             "approve",
             "balanceof",
             "balance of",
@@ -2590,26 +2862,33 @@
             "createcrosschainaccount",
             "create cross chain account",
             "denormalizeamount",
-            "denormalize amount"
+            "denormalize amount",
+            "deposit"
           ],
           "rootCause": "Blocked when sequencer down",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 573,
-              "lineEnd": 604,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "claim",
-                "emergencyWithdraw"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/access-controlled-functions-cannot-be-called-when-l2-sequencers-are-down.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "replay attack",
+              "access control",
+              "message validation",
+              "token handling"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridgeandswap",
+              "bridge and swap",
+              "bridgenft",
+              "bridge nft"
+            ]
+          }
         },
         {
           "id": "bridge-cross-chain-general-vulnerabilities-5-access-control-vulnerabiliti-004",
@@ -2647,7 +2926,6 @@
             "access",
             "control",
             "access control",
-            "vulnerable",
             "approve",
             "balanceof",
             "balance of",
@@ -2675,27 +2953,34 @@
             "denormalize amount",
             "deposit",
             "emergencywithdraw",
-            "emergency withdraw"
+            "emergency withdraw",
+            "emergencywithdrawl1"
           ],
           "rootCause": "Approval persists after bridging",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 657,
-              "lineEnd": 691,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "bridge",
-                "createCrossChainAccount"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/a-user-can-steal-an-already-transfered-and-bridged-resdl-lock-because-of-approva.md",
+              "reports/bridge_crosschain_findings/account-creation-front-running-vulnerability-leading-to-gas-fee-theft.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "replay attack",
+              "access control",
+              "message validation",
+              "token handling"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridgeandswap",
+              "bridge and swap",
+              "bridgenft",
+              "bridge nft"
+            ]
+          }
         },
         {
           "id": "bridge-cross-chain-general-vulnerabilities-6-slippage-mev-issues-005",
@@ -2735,7 +3020,6 @@
             "slippage mev issues",
             "slippage mev",
             "mev issues",
-            "vulnerable",
             "approve",
             "balanceof",
             "balance of",
@@ -2760,27 +3044,38 @@
             "createcrosschainaccount",
             "create cross chain account",
             "denormalizeamount",
-            "denormalize amount"
+            "denormalize amount",
+            "deposit"
           ],
           "rootCause": "No minimum output",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 727,
-              "lineEnd": 763,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "bridgeAndSwap",
-                "complete",
-                "quote"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 10,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/message-replays-are-possible-across-different-instances.md",
+              "reports/bridge_crosschain_findings/signatures-can-be-replayed-cross-chain.md",
+              "reports/bridge_crosschain_findings/h-1-replay-of-mpc-signed-messages.md",
+              "reports/bridge_crosschain_findings/access-controlled-functions-cannot-be-called-when-l2-sequencers-are-down.md",
+              "reports/bridge_crosschain_findings/m-15-blast-gateway-reverts-if-it-receives-rebasing-yield-mode-tokens.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "replay attack",
+              "access control",
+              "message validation",
+              "token handling"
+            ],
+            "commonlyComposesWith": [
+              "slippage",
+              "slippage mev issues",
+              "slippage mev",
+              "bridge",
+              "bridgeandswap"
+            ]
+          }
         },
         {
           "id": "bridge-cross-chain-general-vulnerabilities-7-message-ordering-timing-006",
@@ -2820,7 +3115,6 @@
             "message ordering timing",
             "message ordering",
             "ordering timing",
-            "vulnerable",
             "approve",
             "balanceof",
             "balance of",
@@ -2845,26 +3139,38 @@
             "createcrosschainaccount",
             "create cross chain account",
             "denormalizeamount",
-            "denormalize amount"
+            "denormalize amount",
+            "deposit"
           ],
           "rootCause": "Assumes message order",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 810,
-              "lineEnd": 828,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "deposit",
-                "withdraw"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 10,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/message-replays-are-possible-across-different-instances.md",
+              "reports/bridge_crosschain_findings/signatures-can-be-replayed-cross-chain.md",
+              "reports/bridge_crosschain_findings/h-1-replay-of-mpc-signed-messages.md",
+              "reports/bridge_crosschain_findings/access-controlled-functions-cannot-be-called-when-l2-sequencers-are-down.md",
+              "reports/bridge_crosschain_findings/m-15-blast-gateway-reverts-if-it-receives-rebasing-yield-mode-tokens.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "replay attack",
+              "access control",
+              "message validation",
+              "token handling"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridgeandswap",
+              "bridge and swap",
+              "bridgenft",
+              "bridge nft"
+            ]
+          }
         },
         {
           "id": "bridge-cross-chain-general-vulnerabilities-detection-patterns-007",
@@ -2930,7 +3236,34 @@
             "execute"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 10,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/message-replays-are-possible-across-different-instances.md",
+              "reports/bridge_crosschain_findings/signatures-can-be-replayed-cross-chain.md",
+              "reports/bridge_crosschain_findings/h-1-replay-of-mpc-signed-messages.md",
+              "reports/bridge_crosschain_findings/access-controlled-functions-cannot-be-called-when-l2-sequencers-are-down.md",
+              "reports/bridge_crosschain_findings/m-15-blast-gateway-reverts-if-it-receives-rebasing-yield-mode-tokens.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "replay attack",
+              "access control",
+              "message validation",
+              "token handling"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridgeandswap",
+              "bridge and swap",
+              "bridgenft",
+              "bridge nft"
+            ]
+          }
         },
         {
           "id": "bridge-cross-chain-general-vulnerabilities-defihacklabs-real-world-exploi-008",
@@ -2996,7 +3329,34 @@
             "deposit"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 10,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/message-replays-are-possible-across-different-instances.md",
+              "reports/bridge_crosschain_findings/signatures-can-be-replayed-cross-chain.md",
+              "reports/bridge_crosschain_findings/h-1-replay-of-mpc-signed-messages.md",
+              "reports/bridge_crosschain_findings/access-controlled-functions-cannot-be-called-when-l2-sequencers-are-down.md",
+              "reports/bridge_crosschain_findings/m-15-blast-gateway-reverts-if-it-receives-rebasing-yield-mode-tokens.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "replay attack",
+              "access control",
+              "message validation",
+              "token handling"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridgeandswap",
+              "bridge and swap",
+              "bridgenft",
+              "bridge nft"
+            ]
+          }
         }
       ]
     },
@@ -3069,7 +3429,7 @@
         "language": "solidity",
         "version": ">=0.8.0"
       },
-      "patternCount": 7,
+      "patternCount": 6,
       "patterns": [
         {
           "id": "bridge-defihacklabs-bridge-2022-patterns-overview-000",
@@ -3139,141 +3499,26 @@
             "native_token_wrapping"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "logical error",
+              "missing proof validation",
+              "bridge message handler",
+              "deposit or process"
+            ],
+            "commonlyComposesWith": [
+              "merkle root",
+              "message proof",
+              "zero hash",
+              "address zero",
+              "msg value validation"
+            ]
+          }
         },
         {
-          "id": "bridge-defihacklabs-bridge-2022-patterns-vulnerability-description-001",
-          "title": "Vulnerability Description",
-          "lineStart": 131,
-          "lineEnd": 274,
-          "lineCount": 144,
-          "severity": [
-            "CRITICAL",
-            "LOW"
-          ],
-          "codeKeywords": [
-            "MeterBridgeHandler.deposit",
-            "Replica.process(modifiedMessage",
-            "address(0",
-            "amount",
-            "atomic",
-            "contractWhitelist",
-            "deposit",
-            "msg.value",
-            "process",
-            "resourceID",
-            "resourceIDToTokenContractAddress",
-            "staged",
-            "transferFrom",
-            "confirmAt",
-            "messages",
-            "MessageStatus",
-            "acceptableRoot",
-            "bytes32(0)",
-            "IWETH",
-            "safeTransferFrom"
-          ],
-          "searchKeywords": [
-            "root",
-            "cause",
-            "root cause",
-            "scenario",
-            "path",
-            "variants",
-            "scenario path variants",
-            "scenario path",
-            "path variants",
-            "vulnerable",
-            "confirmat",
-            "confirm at",
-            "process",
-            "messages",
-            "messagestatus",
-            "message status",
-            "acceptableroot",
-            "acceptable root",
-            "bytes32(0)",
-            "resourceid",
-            "resource id",
-            "resourceidtotokencontractaddress",
-            "resource idto token contract address",
-            "contractwhitelist",
-            "contract whitelist",
-            "msg.value",
-            "msg value",
-            "deposit",
-            "iweth",
-            "safetransferfrom",
-            "safe transfer from",
-            "merkle_root"
-          ],
-          "rootCause": "Three variations of missing validation in bridge verification:\n\n\n\n1. **Zero-hash trusted root (Nomad)**: During a routine upgrade the Replica contract was initialized with `confirmAt[bytes32(0)]` set ",
-          "subsections": [
-            {
-              "title": "Root Cause",
-              "lineStart": 133,
-              "lineEnd": 142,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": [
-                "address(0",
-                "amount",
-                "deposit",
-                "msg.value",
-                "process",
-                "resourceID",
-                "transferFrom"
-              ],
-              "searchKeywords": [
-                "root",
-                "cause",
-                "root cause"
-              ]
-            },
-            {
-              "title": "Attack Scenario / Path Variants",
-              "lineStart": 143,
-              "lineEnd": 189,
-              "severity": [
-                "CRITICAL"
-              ],
-              "codeKeywords": [
-                "MeterBridgeHandler.deposit",
-                "Replica.process(modifiedMessage",
-                "address(0",
-                "atomic",
-                "contractWhitelist",
-                "msg.value",
-                "resourceID",
-                "resourceIDToTokenContractAddress"
-              ],
-              "searchKeywords": [
-                "scenario",
-                "path",
-                "variants",
-                "scenario path variants",
-                "scenario path",
-                "path variants"
-              ]
-            },
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 190,
-              "lineEnd": 274,
-              "severity": [
-                "CRITICAL",
-                "LOW"
-              ],
-              "codeKeywords": [],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "bridge-defihacklabs-bridge-2022-patterns-impact-analysis-002",
+          "id": "bridge-defihacklabs-bridge-2022-patterns-impact-analysis-001",
           "title": "Impact Analysis",
           "lineStart": 275,
           "lineEnd": 301,
@@ -3339,10 +3584,26 @@
             "address zero"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "logical error",
+              "missing proof validation",
+              "bridge message handler",
+              "deposit or process"
+            ],
+            "commonlyComposesWith": [
+              "merkle root",
+              "message proof",
+              "zero hash",
+              "address zero",
+              "msg value validation"
+            ]
+          }
         },
         {
-          "id": "bridge-defihacklabs-bridge-2022-patterns-secure-implementation-003",
+          "id": "bridge-defihacklabs-bridge-2022-patterns-secure-implementation-002",
           "title": "Secure Implementation",
           "lineStart": 302,
           "lineEnd": 371,
@@ -3405,10 +3666,26 @@
             "native_token_wrapping"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "logical error",
+              "missing proof validation",
+              "bridge message handler",
+              "deposit or process"
+            ],
+            "commonlyComposesWith": [
+              "merkle root",
+              "message proof",
+              "zero hash",
+              "address zero",
+              "msg value validation"
+            ]
+          }
         },
         {
-          "id": "bridge-defihacklabs-bridge-2022-patterns-contract-call-graph-signals-004",
+          "id": "bridge-defihacklabs-bridge-2022-patterns-contract-call-graph-signals-003",
           "title": "Contract / Call Graph Signals",
           "lineStart": 374,
           "lineEnd": 381,
@@ -3471,10 +3748,26 @@
             "message_proof"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "logical error",
+              "missing proof validation",
+              "bridge message handler",
+              "deposit or process"
+            ],
+            "commonlyComposesWith": [
+              "merkle root",
+              "message proof",
+              "zero hash",
+              "address zero",
+              "msg value validation"
+            ]
+          }
         },
         {
-          "id": "bridge-defihacklabs-bridge-2022-patterns-high-signal-grep-seeds-005",
+          "id": "bridge-defihacklabs-bridge-2022-patterns-high-signal-grep-seeds-004",
           "title": "High-Signal Grep Seeds",
           "lineStart": 382,
           "lineEnd": 395,
@@ -3539,10 +3832,26 @@
             "message_proof"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "logical error",
+              "missing proof validation",
+              "bridge message handler",
+              "deposit or process"
+            ],
+            "commonlyComposesWith": [
+              "merkle root",
+              "message proof",
+              "zero hash",
+              "address zero",
+              "msg value validation"
+            ]
+          }
         },
         {
-          "id": "bridge-defihacklabs-bridge-2022-patterns-real-world-examples-006",
+          "id": "bridge-defihacklabs-bridge-2022-patterns-real-world-examples-005",
           "title": "Real-World Examples",
           "lineStart": 417,
           "lineEnd": 437,
@@ -3618,7 +3927,23 @@
                 "related entries"
               ]
             }
-          ]
+          ],
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "logical error",
+              "missing proof validation",
+              "bridge message handler",
+              "deposit or process"
+            ],
+            "commonlyComposesWith": [
+              "merkle root",
+              "message proof",
+              "zero hash",
+              "address zero",
+              "msg value validation"
+            ]
+          }
         }
       ]
     },
@@ -3695,7 +4020,7 @@
         "language": "solidity",
         "version": ">=0.6.0"
       },
-      "patternCount": 7,
+      "patternCount": 6,
       "patterns": [
         {
           "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-overview-000",
@@ -3764,135 +4089,26 @@
             "delegatecall forwarding"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "graphHints": {
+            "variants": [
+              "identity and custody assumption",
+              "logical error",
+              "cross chain identity mismatch",
+              "deployment or custody",
+              "deterministic address or threshold"
+            ],
+            "commonlyComposesWith": [
+              "address collision",
+              "create nonce determinism",
+              "create2",
+              "multisig threshold",
+              "key compromise"
+            ]
+          }
         },
         {
-          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-vulnerability-description-001",
-          "title": "Vulnerability Description",
-          "lineStart": 134,
-          "lineEnd": 269,
-          "lineCount": 136,
-          "severity": [
-            "CRITICAL",
-            "LOW"
-          ],
-          "codeKeywords": [
-            "CREATE",
-            "atomic",
-            "confirmTransaction(txId",
-            "createProxy",
-            "sweepToken",
-            "sweepToken(tusdLegacy",
-            "testExploit",
-            "transfer",
-            "tusdLegacy.transfer",
-            "create2",
-            "nonce",
-            "submitTransaction",
-            "confirmTransaction",
-            "required",
-            "threshold",
-            "recoverToken",
-            "rescueToken",
-            "underlying",
-            "delegatecall",
-            "fallback"
-          ],
-          "searchKeywords": [
-            "root",
-            "cause",
-            "root cause",
-            "scenario",
-            "path",
-            "variants",
-            "scenario path variants",
-            "scenario path",
-            "path variants",
-            "vulnerable",
-            "createproxy",
-            "create proxy",
-            "create2",
-            "create",
-            "nonce",
-            "submittransaction",
-            "submit transaction",
-            "confirmtransaction",
-            "confirm transaction",
-            "required",
-            "threshold",
-            "sweeptoken",
-            "sweep token",
-            "recovertoken",
-            "recover token",
-            "rescuetoken",
-            "rescue token",
-            "underlying",
-            "delegatecall",
-            "fallback",
-            "address_collision",
-            "address collision"
-          ],
-          "rootCause": "Three vulnerabilities exploiting identity assumptions in cross-chain and cross-contract contexts:\n\n\n\n1. **CREATE nonce determinism across chains (Optimism/Wintermute)**: Addresses created via `CREATE`",
-          "subsections": [
-            {
-              "title": "Root Cause",
-              "lineStart": 136,
-              "lineEnd": 145,
-              "severity": [],
-              "codeKeywords": [
-                "CREATE",
-                "createProxy",
-                "sweepToken",
-                "transfer"
-              ],
-              "searchKeywords": [
-                "root",
-                "cause",
-                "root cause"
-              ]
-            },
-            {
-              "title": "Attack Scenario / Path Variants",
-              "lineStart": 146,
-              "lineEnd": 189,
-              "severity": [
-                "CRITICAL",
-                "LOW"
-              ],
-              "codeKeywords": [
-                "atomic",
-                "confirmTransaction(txId",
-                "sweepToken",
-                "sweepToken(tusdLegacy",
-                "tusdLegacy.transfer"
-              ],
-              "searchKeywords": [
-                "scenario",
-                "path",
-                "variants",
-                "scenario path variants",
-                "scenario path",
-                "path variants"
-              ]
-            },
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 190,
-              "lineEnd": 269,
-              "severity": [
-                "CRITICAL"
-              ],
-              "codeKeywords": [
-                "testExploit"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-impact-analysis-002",
+          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-impact-analysis-001",
           "title": "Impact Analysis",
           "lineStart": 270,
           "lineEnd": 295,
@@ -3957,10 +4173,26 @@
             "token_proxy_bypass"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "graphHints": {
+            "variants": [
+              "identity and custody assumption",
+              "logical error",
+              "cross chain identity mismatch",
+              "deployment or custody",
+              "deterministic address or threshold"
+            ],
+            "commonlyComposesWith": [
+              "address collision",
+              "create nonce determinism",
+              "create2",
+              "multisig threshold",
+              "key compromise"
+            ]
+          }
         },
         {
-          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-secure-implementation-003",
+          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-secure-implementation-002",
           "title": "Secure Implementation",
           "lineStart": 296,
           "lineEnd": 374,
@@ -4025,10 +4257,26 @@
             "delegatecall forwarding"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "graphHints": {
+            "variants": [
+              "identity and custody assumption",
+              "logical error",
+              "cross chain identity mismatch",
+              "deployment or custody",
+              "deterministic address or threshold"
+            ],
+            "commonlyComposesWith": [
+              "address collision",
+              "create nonce determinism",
+              "create2",
+              "multisig threshold",
+              "key compromise"
+            ]
+          }
         },
         {
-          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-contract-call-graph-signals-004",
+          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-contract-call-graph-signals-003",
           "title": "Contract / Call Graph Signals",
           "lineStart": 377,
           "lineEnd": 384,
@@ -4091,10 +4339,26 @@
             "create nonce determinism"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "graphHints": {
+            "variants": [
+              "identity and custody assumption",
+              "logical error",
+              "cross chain identity mismatch",
+              "deployment or custody",
+              "deterministic address or threshold"
+            ],
+            "commonlyComposesWith": [
+              "address collision",
+              "create nonce determinism",
+              "create2",
+              "multisig threshold",
+              "key compromise"
+            ]
+          }
         },
         {
-          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-high-signal-grep-seeds-005",
+          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-high-signal-grep-seeds-004",
           "title": "High-Signal Grep Seeds",
           "lineStart": 385,
           "lineEnd": 400,
@@ -4159,10 +4423,26 @@
             "create nonce determinism"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "graphHints": {
+            "variants": [
+              "identity and custody assumption",
+              "logical error",
+              "cross chain identity mismatch",
+              "deployment or custody",
+              "deterministic address or threshold"
+            ],
+            "commonlyComposesWith": [
+              "address collision",
+              "create nonce determinism",
+              "create2",
+              "multisig threshold",
+              "key compromise"
+            ]
+          }
         },
         {
-          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-real-world-examples-006",
+          "id": "bridge-defihacklabs-bridge-l2-replay-2022-patte-real-world-examples-005",
           "title": "Real-World Examples",
           "lineStart": 421,
           "lineEnd": 441,
@@ -4240,7 +4520,23 @@
                 "related entries"
               ]
             }
-          ]
+          ],
+          "graphHints": {
+            "variants": [
+              "identity and custody assumption",
+              "logical error",
+              "cross chain identity mismatch",
+              "deployment or custody",
+              "deterministic address or threshold"
+            ],
+            "commonlyComposesWith": [
+              "address collision",
+              "create nonce determinism",
+              "create2",
+              "multisig threshold",
+              "key compromise"
+            ]
+          }
         }
       ]
     },
@@ -4308,7 +4604,7 @@
         "language": "solidity",
         "version": ">=0.6.0"
       },
-      "patternCount": 7,
+      "patternCount": 6,
       "patterns": [
         {
           "id": "bridge-defihacklabs-bridge-patterns-overview-000",
@@ -4377,141 +4673,26 @@
             "keeper privilege escalation"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "graphHints": {
+            "variants": [
+              "missing access control",
+              "logical error",
+              "unrestricted cross chain target",
+              "bridge executor",
+              "privileged call"
+            ],
+            "commonlyComposesWith": [
+              "cross chain target bypass",
+              "self referential signature",
+              "relay verification bypass",
+              "keeper privilege escalation",
+              "validator key replacement"
+            ]
+          }
         },
         {
-          "id": "bridge-defihacklabs-bridge-patterns-vulnerability-description-001",
-          "title": "Vulnerability Description",
-          "lineStart": 126,
-          "lineEnd": 297,
-          "lineCount": 172,
-          "severity": [
-            "CRITICAL",
-            "LOW"
-          ],
-          "codeKeywords": [
-            "ChainswapBridge.addKeeper",
-            "ChainswapBridge.receive",
-            "EthCrossChainData",
-            "EthCrossChainData.putCurEpochConPubKeyBytes",
-            "EthCrossChainManager",
-            "EthCrossChainManager.verifyHeaderAndExecuteTx",
-            "LockProxy.unlock",
-            "_executeCrossChainTx",
-            "addKeeper",
-            "address(this",
-            "atomic",
-            "chainId",
-            "onlyOwner",
-            "putCurEpochConPubKeyBytes",
-            "receive",
-            "verifyHeaderAndExecuteTx",
-            "executeCrossChainTx",
-            "onlyKeeper",
-            "keepers",
-            "ecrecover"
-          ],
-          "searchKeywords": [
-            "root",
-            "cause",
-            "root cause",
-            "scenario",
-            "path",
-            "variants",
-            "scenario path variants",
-            "scenario path",
-            "path variants",
-            "vulnerable",
-            "verifyheaderandexecutetx",
-            "verify header and execute tx",
-            "executecrosschaintx",
-            "execute cross chain tx",
-            "putcurepochconpubkeybytes",
-            "put cur epoch con pub key bytes",
-            "onlyowner",
-            "only owner",
-            "addkeeper",
-            "add keeper",
-            "onlykeeper",
-            "only keeper",
-            "keepers",
-            "ecrecover",
-            "abi.encodepacked",
-            "abi encode packed",
-            "toethsignedmessagehash",
-            "to eth signed message hash",
-            "domain_separator",
-            "domain separator",
-            "block.chainid",
-            "block chainid"
-          ],
-          "rootCause": "Two distinct access-control failures in bridge architectures:\n\n\n\n1. **Unrestricted cross-chain message targets**: The bridge executor contract (`EthCrossChainManager`) can call ANY contract, including",
-          "subsections": [
-            {
-              "title": "Root Cause",
-              "lineStart": 128,
-              "lineEnd": 135,
-              "severity": [],
-              "codeKeywords": [
-                "EthCrossChainData",
-                "EthCrossChainManager"
-              ],
-              "searchKeywords": [
-                "root",
-                "cause",
-                "root cause"
-              ]
-            },
-            {
-              "title": "Attack Scenario / Path Variants",
-              "lineStart": 136,
-              "lineEnd": 183,
-              "severity": [
-                "CRITICAL",
-                "HIGH",
-                "LOW"
-              ],
-              "codeKeywords": [
-                "ChainswapBridge.addKeeper",
-                "ChainswapBridge.receive",
-                "EthCrossChainData.putCurEpochConPubKeyBytes",
-                "EthCrossChainManager.verifyHeaderAndExecuteTx",
-                "LockProxy.unlock",
-                "_executeCrossChainTx",
-                "addKeeper",
-                "address(this"
-              ],
-              "searchKeywords": [
-                "scenario",
-                "path",
-                "variants",
-                "scenario path variants",
-                "scenario path",
-                "path variants"
-              ]
-            },
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 184,
-              "lineEnd": 297,
-              "severity": [
-                "CRITICAL",
-                "LOW"
-              ],
-              "codeKeywords": [
-                "_executeCrossChainTx",
-                "addKeeper",
-                "putCurEpochConPubKeyBytes",
-                "receive"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "bridge-defihacklabs-bridge-patterns-impact-analysis-002",
+          "id": "bridge-defihacklabs-bridge-patterns-impact-analysis-001",
           "title": "Impact Analysis",
           "lineStart": 298,
           "lineEnd": 320,
@@ -4576,10 +4757,26 @@
             "relay_verification_bypass"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "graphHints": {
+            "variants": [
+              "missing access control",
+              "logical error",
+              "unrestricted cross chain target",
+              "bridge executor",
+              "privileged call"
+            ],
+            "commonlyComposesWith": [
+              "cross chain target bypass",
+              "self referential signature",
+              "relay verification bypass",
+              "keeper privilege escalation",
+              "validator key replacement"
+            ]
+          }
         },
         {
-          "id": "bridge-defihacklabs-bridge-patterns-secure-implementation-003",
+          "id": "bridge-defihacklabs-bridge-patterns-secure-implementation-002",
           "title": "Secure Implementation",
           "lineStart": 321,
           "lineEnd": 393,
@@ -4644,10 +4841,26 @@
             "keeper privilege escalation"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "graphHints": {
+            "variants": [
+              "missing access control",
+              "logical error",
+              "unrestricted cross chain target",
+              "bridge executor",
+              "privileged call"
+            ],
+            "commonlyComposesWith": [
+              "cross chain target bypass",
+              "self referential signature",
+              "relay verification bypass",
+              "keeper privilege escalation",
+              "validator key replacement"
+            ]
+          }
         },
         {
-          "id": "bridge-defihacklabs-bridge-patterns-contract-call-graph-signals-004",
+          "id": "bridge-defihacklabs-bridge-patterns-contract-call-graph-signals-003",
           "title": "Contract / Call Graph Signals",
           "lineStart": 396,
           "lineEnd": 403,
@@ -4710,10 +4923,26 @@
             "allowed targets"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "graphHints": {
+            "variants": [
+              "missing access control",
+              "logical error",
+              "unrestricted cross chain target",
+              "bridge executor",
+              "privileged call"
+            ],
+            "commonlyComposesWith": [
+              "cross chain target bypass",
+              "self referential signature",
+              "relay verification bypass",
+              "keeper privilege escalation",
+              "validator key replacement"
+            ]
+          }
         },
         {
-          "id": "bridge-defihacklabs-bridge-patterns-high-signal-grep-seeds-005",
+          "id": "bridge-defihacklabs-bridge-patterns-high-signal-grep-seeds-004",
           "title": "High-Signal Grep Seeds",
           "lineStart": 404,
           "lineEnd": 415,
@@ -4778,10 +5007,26 @@
             "allowed targets"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "graphHints": {
+            "variants": [
+              "missing access control",
+              "logical error",
+              "unrestricted cross chain target",
+              "bridge executor",
+              "privileged call"
+            ],
+            "commonlyComposesWith": [
+              "cross chain target bypass",
+              "self referential signature",
+              "relay verification bypass",
+              "keeper privilege escalation",
+              "validator key replacement"
+            ]
+          }
         },
         {
-          "id": "bridge-defihacklabs-bridge-patterns-real-world-examples-006",
+          "id": "bridge-defihacklabs-bridge-patterns-real-world-examples-005",
           "title": "Real-World Examples",
           "lineStart": 435,
           "lineEnd": 454,
@@ -4857,7 +5102,23 @@
                 "related entries"
               ]
             }
-          ]
+          ],
+          "graphHints": {
+            "variants": [
+              "missing access control",
+              "logical error",
+              "unrestricted cross chain target",
+              "bridge executor",
+              "privileged call"
+            ],
+            "commonlyComposesWith": [
+              "cross chain target bypass",
+              "self referential signature",
+              "relay verification bypass",
+              "keeper privilege escalation",
+              "validator key replacement"
+            ]
+          }
         }
       ]
     },
@@ -4928,42 +5189,45 @@
           "retryFailedMessage"
         ]
       },
-      "patternCount": 7,
+      "patternCount": 6,
       "patterns": [
         {
-          "id": "bridge-hyperlane-integration-vulnerabilities-vulnerability-description-000",
-          "title": "Vulnerability Description",
-          "lineStart": 160,
-          "lineEnd": 173,
-          "lineCount": 14,
+          "id": "bridge-hyperlane-integration-vulnerabilities-1-ism-validation-vulnerabiliti-000",
+          "title": "1. ISM Validation Vulnerabilities",
+          "lineStart": 119,
+          "lineEnd": 299,
+          "lineCount": 181,
           "severity": [
+            "CRITICAL",
+            "HIGH",
             "LOW"
           ],
           "codeKeywords": [
-            "Mailbox.process",
             "ISM",
             "Mailbox",
+            "Mailbox.process",
             "TokenRouter",
             "WarpRoute",
             "_estimateGas",
             "_handle",
             "deploy",
             "dispatch",
+            "handle",
+            "moderate",
+            "moduleType",
+            "multi_contract",
+            "verify",
             "enrollRemoteRouter",
             "enrollRemoteRouters",
-            "handle",
             "interchainSecurityModule",
             "mint",
-            "moduleType",
             "msg.sender",
-            "payForGas",
-            "process",
-            "quoteGasPayment",
-            "receive"
+            "payForGas"
           ],
           "searchKeywords": [
-            "scenario",
             "ism",
+            "validation",
+            "ism validation",
             "mailbox",
             "tokenrouter",
             "token router",
@@ -4992,96 +5256,35 @@
             "quotegaspayment",
             "quote gas payment",
             "receive",
-            "retryfailedmessage",
-            "retry failed message"
+            "retryfailedmessage"
           ],
           "rootCause": "Contracts that receive Hyperlane messages fail to configure or validate the ISM properly, allowing arbitrary message acceptance without proper signature/proof verification.",
-          "subsections": [
-            {
-              "title": "Attack Scenario",
-              "lineStart": 166,
-              "lineEnd": 173,
-              "severity": [],
-              "codeKeywords": [
-                "Mailbox.process"
-              ],
-              "searchKeywords": [
-                "scenario"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/m-02-missing-ism-validation.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "ism bypass",
+              "message replay",
+              "handle exploitation",
+              "mailbox abuse"
+            ],
+            "commonlyComposesWith": [
+              "mailbox",
+              "dispatch",
+              "process",
+              "handle",
+              "ism"
+            ]
+          }
         },
         {
-          "id": "bridge-hyperlane-integration-vulnerabilities-vulnerable-pattern-examples-001",
-          "title": "Vulnerable Pattern Examples",
-          "lineStart": 174,
-          "lineEnd": 229,
-          "lineCount": 56,
-          "severity": [
-            "HIGH",
-            "MEDIUM"
-          ],
-          "codeKeywords": [
-            "_handle",
-            "handle",
-            "moduleType",
-            "verify",
-            "ISM",
-            "Mailbox",
-            "TokenRouter",
-            "WarpRoute",
-            "_estimateGas",
-            "deploy",
-            "dispatch",
-            "enrollRemoteRouter",
-            "enrollRemoteRouters",
-            "interchainSecurityModule",
-            "mint",
-            "msg.sender",
-            "payForGas",
-            "process",
-            "quoteGasPayment",
-            "receive"
-          ],
-          "searchKeywords": [
-            "vulnerable",
-            "ism",
-            "mailbox",
-            "tokenrouter",
-            "token router",
-            "warproute",
-            "warp route",
-            "_estimategas",
-            "estimate gas",
-            "_handle",
-            "handle",
-            "deploy",
-            "dispatch",
-            "enrollremoterouter",
-            "enroll remote router",
-            "enrollremoterouters",
-            "enroll remote routers",
-            "interchainsecuritymodule",
-            "interchain security module",
-            "mint",
-            "moduletype",
-            "module type",
-            "msg.sender",
-            "msg sender",
-            "payforgas",
-            "pay for gas",
-            "process",
-            "quotegaspayment",
-            "quote gas payment",
-            "receive",
-            "retryfailedmessage",
-            "retry failed message"
-          ],
-          "rootCause": "No ISM set",
-          "subsections": null
-        },
-        {
-          "id": "bridge-hyperlane-integration-vulnerabilities-2-message-replay-attacks-002",
+          "id": "bridge-hyperlane-integration-vulnerabilities-2-message-replay-attacks-001",
           "title": "2. Message Replay Attacks",
           "lineStart": 300,
           "lineEnd": 464,
@@ -5115,7 +5318,6 @@
             "message",
             "replay",
             "message replay",
-            "vulnerable",
             "ism",
             "mailbox",
             "tokenrouter",
@@ -5143,36 +5345,36 @@
             "pay for gas",
             "process",
             "quotegaspayment",
-            "quote gas payment"
+            "quote gas payment",
+            "receive"
           ],
           "rootCause": "When message processing fails (reverts), the protocol may not mark the message as consumed. Subsequent retries process the message again, causing double-spend or unlimited minting.",
-          "subsections": [
-            {
-              "title": "Vulnerability Description",
-              "lineStart": 309,
-              "lineEnd": 323,
-              "severity": [],
-              "codeKeywords": [],
-              "searchKeywords": null
-            },
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 324,
-              "lineEnd": 375,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "_handle"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-failed-message-can-be-replayed-to-mint-tokens-repeatedly.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "replay",
+              "message replay",
+              "missing validation",
+              "ism bypass",
+              "handle exploitation"
+            ],
+            "commonlyComposesWith": [
+              "mailbox",
+              "dispatch",
+              "process",
+              "handle",
+              "ism"
+            ]
+          }
         },
         {
-          "id": "bridge-hyperlane-integration-vulnerabilities-3-router-configuration-issues-003",
+          "id": "bridge-hyperlane-integration-vulnerabilities-3-router-configuration-issues-002",
           "title": "3. Router Configuration Issues",
           "lineStart": 465,
           "lineEnd": 546,
@@ -5211,7 +5413,6 @@
             "router configuration issues",
             "router configuration",
             "configuration issues",
-            "vulnerable",
             "ism",
             "mailbox",
             "tokenrouter",
@@ -5236,30 +5437,38 @@
             "msg.sender",
             "msg sender",
             "payforgas",
-            "pay for gas"
+            "pay for gas",
+            "process"
           ],
           "rootCause": "Any sender accepted",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 471,
-              "lineEnd": 508,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "_handle",
-                "handle"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/m-02-missing-ism-validation.md",
+              "reports/bridge_crosschain_findings/h-01-failed-message-can-be-replayed-to-mint-tokens-repeatedly.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "ism bypass",
+              "message replay",
+              "handle exploitation",
+              "mailbox abuse"
+            ],
+            "commonlyComposesWith": [
+              "mailbox",
+              "dispatch",
+              "process",
+              "handle",
+              "ism"
+            ]
+          }
         },
         {
-          "id": "bridge-hyperlane-integration-vulnerabilities-4-handle-function-vulnerabilit-004",
+          "id": "bridge-hyperlane-integration-vulnerabilities-4-handle-function-vulnerabilit-003",
           "title": "4. Handle Function Vulnerabilities",
           "lineStart": 547,
           "lineEnd": 625,
@@ -5293,7 +5502,6 @@
             "handle",
             "function",
             "handle function",
-            "vulnerable",
             "ism",
             "mailbox",
             "tokenrouter",
@@ -5321,29 +5529,38 @@
             "process",
             "quotegaspayment",
             "quote gas payment",
-            "receive"
+            "receive",
+            "retryfailedmessage"
           ],
           "rootCause": "State change after external call",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 553,
-              "lineEnd": 594,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "_handle",
-                "handle"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/m-02-missing-ism-validation.md",
+              "reports/bridge_crosschain_findings/h-01-failed-message-can-be-replayed-to-mint-tokens-repeatedly.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "ism bypass",
+              "message replay",
+              "handle exploitation",
+              "mailbox abuse"
+            ],
+            "commonlyComposesWith": [
+              "mailbox",
+              "dispatch",
+              "process",
+              "handle",
+              "ism"
+            ]
+          }
         },
         {
-          "id": "bridge-hyperlane-integration-vulnerabilities-5-gas-payment-issues-005",
+          "id": "bridge-hyperlane-integration-vulnerabilities-5-gas-payment-issues-004",
           "title": "5. Gas Payment Issues",
           "lineStart": 626,
           "lineEnd": 700,
@@ -5380,7 +5597,6 @@
             "gas payment issues",
             "gas payment",
             "payment issues",
-            "vulnerable",
             "ism",
             "mailbox",
             "tokenrouter",
@@ -5405,28 +5621,38 @@
             "msg.sender",
             "msg sender",
             "payforgas",
-            "pay for gas"
+            "pay for gas",
+            "process"
           ],
           "rootCause": "Hardcoded gas may be insufficient",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 632,
-              "lineEnd": 653,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "sendMessage"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/m-02-missing-ism-validation.md",
+              "reports/bridge_crosschain_findings/h-01-failed-message-can-be-replayed-to-mint-tokens-repeatedly.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "ism bypass",
+              "message replay",
+              "handle exploitation",
+              "mailbox abuse"
+            ],
+            "commonlyComposesWith": [
+              "mailbox",
+              "dispatch",
+              "process",
+              "handle",
+              "ism"
+            ]
+          }
         },
         {
-          "id": "bridge-hyperlane-integration-vulnerabilities-detection-patterns-006",
+          "id": "bridge-hyperlane-integration-vulnerabilities-detection-patterns-005",
           "title": "Detection Patterns",
           "lineStart": 701,
           "lineEnd": 726,
@@ -5489,7 +5715,31 @@
             "retry failed message"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/m-02-missing-ism-validation.md",
+              "reports/bridge_crosschain_findings/h-01-failed-message-can-be-replayed-to-mint-tokens-repeatedly.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "ism bypass",
+              "message replay",
+              "handle exploitation",
+              "mailbox abuse"
+            ],
+            "commonlyComposesWith": [
+              "mailbox",
+              "dispatch",
+              "process",
+              "handle",
+              "ism"
+            ]
+          }
         }
       ]
     },
@@ -5580,189 +5830,45 @@
           "allowance"
         ]
       },
-      "patternCount": 14,
+      "patternCount": 12,
       "patterns": [
         {
-          "id": "bridge-layerzero-integration-vulnerabilities-vulnerability-description-000",
-          "title": "Vulnerability Description",
-          "lineStart": 442,
-          "lineEnd": 455,
-          "lineCount": 14,
-          "severity": [],
-          "codeKeywords": [
-            "LzApp",
-            "NonblockingLzApp",
-            "forceResumeReceive",
-            "lzReceive",
-            "storedPayload",
-            "Compose",
-            "MessagingFee",
-            "OFT",
-            "OFTAdapter",
-            "OFTComposeMsgCodec",
-            "OFTCore",
-            "ONFT",
-            "Same",
-            "_creditTill",
-            "_getGasLimit",
-            "_getPeer",
-            "_lzReceive",
-            "_lzSend",
-            "_nonblockingLzReceive",
-            "_transferViaOFT"
-          ],
-          "searchKeywords": [
-            "scenario",
-            "compose",
-            "lzapp",
-            "lz app",
-            "messagingfee",
-            "messaging fee",
-            "nonblockinglzapp",
-            "nonblocking lz app",
-            "oft",
-            "oftadapter",
-            "oftcomposemsgcodec",
-            "oftcompose msg codec",
-            "oftcore",
-            "onft",
-            "same",
-            "storedpayload",
-            "stored payload",
-            "_credittill",
-            "credit till",
-            "_getgaslimit",
-            "get gas limit",
-            "_getpeer",
-            "get peer",
-            "_lzreceive",
-            "lz receive",
-            "_lzsend",
-            "lz send",
-            "_nonblockinglzreceive",
-            "nonblocking lz receive",
-            "_transferviaoft",
-            "transfer via oft",
-            "adapterparams"
-          ],
-          "rootCause": "Protocols inherit from `LzApp` without implementing the non-blocking pattern (`NonblockingLzApp`), or they implement it incorrectly. When `lzReceive()` reverts, the message is stored in `storedPayload",
-          "subsections": [
-            {
-              "title": "Attack Scenario",
-              "lineStart": 448,
-              "lineEnd": 455,
-              "severity": [],
-              "codeKeywords": [
-                "forceResumeReceive",
-                "storedPayload"
-              ],
-              "searchKeywords": [
-                "scenario"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "bridge-layerzero-integration-vulnerabilities-vulnerable-pattern-examples-001",
-          "title": "Vulnerable Pattern Examples",
-          "lineStart": 456,
-          "lineEnd": 508,
-          "lineCount": 53,
+          "id": "bridge-layerzero-integration-vulnerabilities-1-channel-blocking-vulnerabili-000",
+          "title": "1. Channel Blocking Vulnerabilities",
+          "lineStart": 399,
+          "lineEnd": 578,
+          "lineCount": 180,
           "severity": [
-            "HIGH"
-          ],
-          "codeKeywords": [
-            "_nonblockingLzReceive",
-            "lzReceive",
-            "Compose",
-            "LzApp",
-            "MessagingFee",
-            "NonblockingLzApp",
-            "OFT",
-            "OFTAdapter",
-            "OFTComposeMsgCodec",
-            "OFTCore",
-            "ONFT",
-            "Same",
-            "StoredPayload",
-            "_creditTill",
-            "_getGasLimit",
-            "_getPeer",
-            "_lzReceive",
-            "_lzSend",
-            "_transferViaOFT",
-            "adapterParams"
-          ],
-          "searchKeywords": [
-            "vulnerable",
-            "compose",
-            "lzapp",
-            "lz app",
-            "messagingfee",
-            "messaging fee",
-            "nonblockinglzapp",
-            "nonblocking lz app",
-            "oft",
-            "oftadapter",
-            "oftcomposemsgcodec",
-            "oftcompose msg codec",
-            "oftcore",
-            "onft",
-            "same",
-            "storedpayload",
-            "stored payload",
-            "_credittill",
-            "credit till",
-            "_getgaslimit",
-            "get gas limit",
-            "_getpeer",
-            "get peer",
-            "_lzreceive",
-            "lz receive",
-            "_lzsend",
-            "lz send",
-            "_nonblockinglzreceive",
-            "nonblocking lz receive",
-            "_transferviaoft",
-            "transfer via oft",
-            "adapterparams"
-          ],
-          "rootCause": "Inherits LzApp directly without non-blocking wrapper",
-          "subsections": null
-        },
-        {
-          "id": "bridge-layerzero-integration-vulnerabilities-vulnerability-description-002",
-          "title": "Vulnerability Description",
-          "lineStart": 589,
-          "lineEnd": 601,
-          "lineCount": 13,
-          "severity": [
+            "CRITICAL",
+            "HIGH",
             "LOW"
           ],
           "codeKeywords": [
-            "NonblockingLzApp",
-            "adapterParams",
-            "storedPayload",
             "Compose",
             "LzApp",
             "MessagingFee",
+            "NonblockingLzApp",
             "OFT",
             "OFTAdapter",
             "OFTComposeMsgCodec",
             "OFTCore",
+            "_nonblockingLzReceive",
+            "forceResumeReceive",
+            "lzReceive",
+            "moderate",
+            "multi_contract",
+            "storedPayload",
             "ONFT",
             "Same",
             "_creditTill",
             "_getGasLimit",
             "_getPeer",
-            "_lzReceive",
-            "_lzSend",
-            "_nonblockingLzReceive",
-            "_transferViaOFT",
-            "allowance"
+            "_lzReceive"
           ],
           "searchKeywords": [
-            "scenario",
+            "channel",
+            "blocking",
+            "channel blocking",
             "compose",
             "lzapp",
             "lz app",
@@ -5791,62 +5897,74 @@
             "lz send",
             "_nonblockinglzreceive",
             "nonblocking lz receive",
-            "_transferviaoft",
-            "transfer via oft",
-            "adapterparams"
+            "_transferviaoft"
           ],
-          "rootCause": "Protocols allow users to specify arbitrary `adapterParams` without validating the gas limit meets minimum requirements for the destination chain operation.",
-          "subsections": [
-            {
-              "title": "Attack Scenario",
-              "lineStart": 595,
-              "lineEnd": 601,
-              "severity": [],
-              "codeKeywords": [
-                "NonblockingLzApp",
-                "adapterParams",
-                "storedPayload"
-              ],
-              "searchKeywords": [
-                "scenario"
-              ]
-            }
-          ]
+          "rootCause": "Protocols inherit from `LzApp` without implementing the non-blocking pattern (`NonblockingLzApp`), or they implement it incorrectly. When `lzReceive()` reverts, the message is stored in `storedPayload",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 3,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-06-attacker-can-block-layerzero-channel.md",
+              "reports/bridge_crosschain_findings/h-16-attacker-can-block-layerzero-channel-due-to-variable-gas-cost-of-saving-pay.md",
+              "reports/bridge_crosschain_findings/h-17-attacker-can-block-layerzero-channel-due-to-missing-check-of-minimum-gas-pa.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "channel blocking",
+              "gas griefing",
+              "message replay",
+              "fund loss"
+            ],
+            "commonlyComposesWith": [
+              "lz receive",
+              "lz send",
+              "nonblocking lz app",
+              "lz app",
+              "adapter params"
+            ]
+          }
         },
         {
-          "id": "bridge-layerzero-integration-vulnerabilities-vulnerable-pattern-examples-003",
-          "title": "Vulnerable Pattern Examples",
-          "lineStart": 602,
-          "lineEnd": 639,
-          "lineCount": 38,
+          "id": "bridge-layerzero-integration-vulnerabilities-2-minimum-gas-validation-vulne-001",
+          "title": "2. Minimum Gas Validation Vulnerabilities",
+          "lineStart": 579,
+          "lineEnd": 689,
+          "lineCount": 111,
           "severity": [
             "HIGH",
             "LOW"
           ],
           "codeKeywords": [
+            "NonblockingLzApp",
+            "_getGasLimit",
+            "_lzSend",
+            "adapterParams",
             "bridge",
+            "setMinDstGas",
+            "storedPayload",
             "triggerSendFrom",
             "Compose",
             "LzApp",
             "MessagingFee",
-            "NonblockingLzApp",
             "OFT",
             "OFTAdapter",
             "OFTComposeMsgCodec",
             "OFTCore",
             "ONFT",
             "Same",
-            "StoredPayload",
             "_creditTill",
-            "_getGasLimit",
             "_getPeer",
-            "_lzReceive",
-            "_lzSend",
-            "_nonblockingLzReceive",
-            "_transferViaOFT"
+            "_lzReceive"
           ],
           "searchKeywords": [
-            "vulnerable",
+            "minimum",
+            "gas",
+            "validation",
+            "minimum gas validation",
+            "minimum gas",
+            "gas validation",
             "compose",
             "lzapp",
             "lz app",
@@ -5872,18 +5990,36 @@
             "_lzreceive",
             "lz receive",
             "_lzsend",
-            "lz send",
-            "_nonblockinglzreceive",
-            "nonblocking lz receive",
-            "_transferviaoft",
-            "transfer via oft",
-            "adapterparams"
+            "lz send"
           ],
-          "rootCause": "User controls gas amount without validation",
-          "subsections": null
+          "rootCause": "Protocols allow users to specify arbitrary `adapterParams` without validating the gas limit meets minimum requirements for the destination chain operation.",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-17-attacker-can-block-layerzero-channel-due-to-missing-check-of-minimum-gas-pa.md",
+              "reports/bridge_crosschain_findings/h-02-due-to-missing-checks-on-minimum-gas-passed-through-layerzero-executions-ca.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "channel blocking",
+              "gas griefing",
+              "message replay",
+              "fund loss"
+            ],
+            "commonlyComposesWith": [
+              "lz receive",
+              "lz send",
+              "nonblocking lz app",
+              "lz app",
+              "adapter params"
+            ]
+          }
         },
         {
-          "id": "bridge-layerzero-integration-vulnerabilities-3-gas-estimation-fee-calculati-004",
+          "id": "bridge-layerzero-integration-vulnerabilities-3-gas-estimation-fee-calculati-002",
           "title": "3. Gas Estimation & Fee Calculation",
           "lineStart": 690,
           "lineEnd": 796,
@@ -5923,7 +6059,6 @@
             "gas estimation",
             "estimation fee",
             "fee calculation",
-            "vulnerable",
             "compose",
             "lzapp",
             "lz app",
@@ -5946,31 +6081,38 @@
             "get gas limit",
             "_getpeer",
             "get peer",
-            "_lzreceive"
+            "_lzreceive",
+            "lz receive"
           ],
           "rootCause": "Uses source chain gas config for destination",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 701,
-              "lineEnd": 750,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "quoteLayerZeroFee",
-                "requestSnapshot",
-                "send"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 3,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-03-layerzeromodule-miscalculates-gas-risking-loss-of-assets.md",
+              "reports/bridge_crosschain_findings/trst-m-10-mozbridge-underestimates-gas-for-sending-of-moz-messages.md",
+              "reports/bridge_crosschain_findings/trst-h-3-all-layerzero-requests-will-fail-making-the-contracts-are-unfunctional.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "channel blocking",
+              "gas griefing",
+              "message replay",
+              "fund loss"
+            ],
+            "commonlyComposesWith": [
+              "lz receive",
+              "lz send",
+              "nonblocking lz app",
+              "lz app",
+              "adapter params"
+            ]
+          }
         },
         {
-          "id": "bridge-layerzero-integration-vulnerabilities-4-fee-refund-handling-005",
+          "id": "bridge-layerzero-integration-vulnerabilities-4-fee-refund-handling-003",
           "title": "4. Fee Refund Handling",
           "lineStart": 797,
           "lineEnd": 878,
@@ -6008,7 +6150,6 @@
             "fee refund handling",
             "fee refund",
             "refund handling",
-            "vulnerable",
             "compose",
             "lzapp",
             "lz app",
@@ -6033,30 +6174,38 @@
             "get peer",
             "_lzreceive",
             "lz receive",
-            "_lzsend"
+            "_lzsend",
+            "lz send"
           ],
           "rootCause": "Contract cannot receive refunds",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 808,
-              "lineEnd": 843,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "_lzReceive",
-                "sendMessage"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 3,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/m-01-layerzero-fee-refunds-cannot-be-processed.md",
+              "reports/bridge_crosschain_findings/h-02-_lzreceive-reverts-when-there-is-a-fee-refund.md",
+              "reports/bridge_crosschain_findings/m-04-layerzero-fee-refunds-misdirected-to-deposit-contracts.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "channel blocking",
+              "gas griefing",
+              "message replay",
+              "fund loss"
+            ],
+            "commonlyComposesWith": [
+              "lz receive",
+              "lz send",
+              "nonblocking lz app",
+              "lz app",
+              "adapter params"
+            ]
+          }
         },
         {
-          "id": "bridge-layerzero-integration-vulnerabilities-5-payload-size-address-validat-006",
+          "id": "bridge-layerzero-integration-vulnerabilities-5-payload-size-address-validat-004",
           "title": "5. Payload Size & Address Validation",
           "lineStart": 879,
           "lineEnd": 924,
@@ -6096,7 +6245,6 @@
             "payload size",
             "size address",
             "address validation",
-            "vulnerable",
             "compose",
             "lzapp",
             "lz app",
@@ -6119,28 +6267,36 @@
             "get gas limit",
             "_getpeer",
             "get peer",
-            "_lzreceive"
+            "_lzreceive",
+            "lz receive"
           ],
           "rootCause": "No limit on _toAddress length",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 888,
-              "lineEnd": 905,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "sendFrom"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-2-malicious-user-can-use-an-excessively-large-_toaddress-in-oftcoresendfrom-to.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "channel blocking",
+              "gas griefing",
+              "message replay",
+              "fund loss"
+            ],
+            "commonlyComposesWith": [
+              "lz receive",
+              "lz send",
+              "nonblocking lz app",
+              "lz app",
+              "adapter params"
+            ]
+          }
         },
         {
-          "id": "bridge-layerzero-integration-vulnerabilities-6-composed-message-vulnerabili-007",
+          "id": "bridge-layerzero-integration-vulnerabilities-6-composed-message-vulnerabili-005",
           "title": "6. Composed Message Vulnerabilities (LayerZero V2)",
           "lineStart": 925,
           "lineEnd": 1027,
@@ -6175,7 +6331,6 @@
             "composed",
             "message",
             "composed message",
-            "vulnerable",
             "compose",
             "lzapp",
             "lz app",
@@ -6203,38 +6358,38 @@
             "_lzsend",
             "lz send",
             "_nonblockinglzreceive",
-            "nonblocking lz receive"
+            "nonblocking lz receive",
+            "_transferviaoft"
           ],
           "rootCause": "Composed messages introduce dual-transaction patterns where the initial receive and subsequent compose execution are separate transactions. Failures in either stage can leave tokens stranded or preven",
-          "subsections": [
-            {
-              "title": "Vulnerability Description",
-              "lineStart": 935,
-              "lineEnd": 940,
-              "severity": [],
-              "codeKeywords": [],
-              "searchKeywords": null
-            },
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 941,
-              "lineEnd": 990,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "_lzReceive",
-                "lzCompose"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 3,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/configuring-compose-option-will-prevent-users-from-receiving-tgld-on-the-destina.md",
+              "reports/bridge_crosschain_findings/tokens-deposit-in-exchangestargatevadapterlzcompose-is.md",
+              "reports/bridge_crosschain_findings/h-02-dual-transaction-nature-of-composed-message-transfer-allows-anyone-to-stea.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "channel blocking",
+              "gas griefing",
+              "message replay",
+              "fund loss"
+            ],
+            "commonlyComposesWith": [
+              "lz receive",
+              "lz send",
+              "nonblocking lz app",
+              "lz app",
+              "adapter params"
+            ]
+          }
         },
         {
-          "id": "bridge-layerzero-integration-vulnerabilities-7-oft-onft-specific-vulnerabil-008",
+          "id": "bridge-layerzero-integration-vulnerabilities-7-oft-onft-specific-vulnerabil-006",
           "title": "7. OFT/ONFT Specific Vulnerabilities",
           "lineStart": 1028,
           "lineEnd": 1141,
@@ -6271,7 +6426,6 @@
             "oft onft specific",
             "oft onft",
             "onft specific",
-            "vulnerable",
             "compose",
             "lzapp",
             "lz app",
@@ -6296,31 +6450,39 @@
             "lz receive",
             "_lzsend",
             "lz send",
-            "_nonblockinglzreceive"
+            "_nonblockinglzreceive",
+            "nonblocking lz receive"
           ],
           "rootCause": "Doesn't account for different decimals on chains",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 1040,
-              "lineEnd": 1109,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "_nonblockingLzReceive",
-                "_transferViaOFT",
-                "bridgeTokens"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/oft-transfers-revert-if-chains-have-different-local-decimals.md",
+              "reports/bridge_crosschain_findings/oft-transfer-might-revert-due-to-non-zero-zro-token-fee-quote.md",
+              "reports/bridge_crosschain_findings/c-01-the-communication-channel-for-honeyjaronft-can-be-blocked.md",
+              "reports/bridge_crosschain_findings/unaccounted-amount-trimming.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "channel blocking",
+              "gas griefing",
+              "message replay",
+              "fund loss"
+            ],
+            "commonlyComposesWith": [
+              "lz receive",
+              "lz send",
+              "nonblocking lz app",
+              "lz app",
+              "adapter params"
+            ]
+          }
         },
         {
-          "id": "bridge-layerzero-integration-vulnerabilities-8-peer-trust-configuration-vul-009",
+          "id": "bridge-layerzero-integration-vulnerabilities-8-peer-trust-configuration-vul-007",
           "title": "8. Peer & Trust Configuration Vulnerabilities",
           "lineStart": 1142,
           "lineEnd": 1203,
@@ -6358,7 +6520,6 @@
             "peer trust configuration",
             "peer trust",
             "trust configuration",
-            "vulnerable",
             "compose",
             "lzapp",
             "lz app",
@@ -6383,30 +6544,37 @@
             "get peer",
             "_lzreceive",
             "lz receive",
-            "_lzsend"
+            "_lzsend",
+            "lz send"
           ],
           "rootCause": "Uses sender address if peer not configured",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 1152,
-              "lineEnd": 1179,
-              "severity": [
-                "LOW",
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "_getPeer",
-                "setPeer"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/potential-loss-of-user-funds-due-to-optimistic-peer-assumption.md",
+              "reports/bridge_crosschain_findings/setting-a-peer-nttmanager-contract-for-the-same-chain-can-cause-loss-of-user-fun.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "channel blocking",
+              "gas griefing",
+              "message replay",
+              "fund loss"
+            ],
+            "commonlyComposesWith": [
+              "lz receive",
+              "lz send",
+              "nonblocking lz app",
+              "lz app",
+              "adapter params"
+            ]
+          }
         },
         {
-          "id": "bridge-layerzero-integration-vulnerabilities-9-stargate-sgreceive-integrati-010",
+          "id": "bridge-layerzero-integration-vulnerabilities-9-stargate-sgreceive-integrati-008",
           "title": "9. Stargate/sgReceive Integration Vulnerabilities",
           "lineStart": 1204,
           "lineEnd": 1325,
@@ -6443,7 +6611,6 @@
             "stargate receive integration",
             "stargate receive",
             "receive integration",
-            "vulnerable",
             "compose",
             "lzapp",
             "lz app",
@@ -6468,30 +6635,39 @@
             "get peer",
             "_lzreceive",
             "lz receive",
-            "_lzsend"
+            "_lzsend",
+            "lz send"
           ],
           "rootCause": "Complex operations can run out of gas",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 1216,
-              "lineEnd": 1292,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "participate",
-                "retryRevert",
-                "sgReceive"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/sgreceive-could-run-out-of-gas.md",
+              "reports/bridge_crosschain_findings/h-02-stargatelbphelpersgreceive-could-encounter-permanent-error-that-causes-rece.md",
+              "reports/bridge_crosschain_findings/h-01-stargatelbphelperparticipate-will-send-tokens-to-the-wrong-address.md",
+              "reports/bridge_crosschain_findings/h-07-underpayingoverpaying-of-stargate-fee-will-occur-in-stargatelbphelperpartic.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "channel blocking",
+              "gas griefing",
+              "message replay",
+              "fund loss"
+            ],
+            "commonlyComposesWith": [
+              "lz receive",
+              "lz send",
+              "nonblocking lz app",
+              "lz app",
+              "adapter params"
+            ]
+          }
         },
         {
-          "id": "bridge-layerzero-integration-vulnerabilities-10-cross-chain-payload-validat-011",
+          "id": "bridge-layerzero-integration-vulnerabilities-10-cross-chain-payload-validat-009",
           "title": "10. Cross-Chain Payload Validation Vulnerabilities",
           "lineStart": 1326,
           "lineEnd": 1424,
@@ -6530,7 +6706,6 @@
             "cross chain",
             "chain payload",
             "payload validation",
-            "vulnerable",
             "compose",
             "lzapp",
             "lz app",
@@ -6553,29 +6728,37 @@
             "get gas limit",
             "_getpeer",
             "get peer",
-            "_lzreceive"
+            "_lzreceive",
+            "lz receive"
           ],
           "rootCause": "tapSendData.tapOftAddress not validated",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 1336,
-              "lineEnd": 1389,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "exerciseInternal",
-                "sendFrom"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-11-toft-exerciseoption-can-be-used-to-steal-all-underlying-erc20-tokens.md",
+              "reports/bridge_crosschain_findings/h-05-incorrect-address-for-toft-debit.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "channel blocking",
+              "gas griefing",
+              "message replay",
+              "fund loss"
+            ],
+            "commonlyComposesWith": [
+              "lz receive",
+              "lz send",
+              "nonblocking lz app",
+              "lz app",
+              "adapter params"
+            ]
+          }
         },
         {
-          "id": "bridge-layerzero-integration-vulnerabilities-11-insufficient-gas-limit-calc-012",
+          "id": "bridge-layerzero-integration-vulnerabilities-11-insufficient-gas-limit-calc-010",
           "title": "11. Insufficient Gas Limit Calculation",
           "lineStart": 1425,
           "lineEnd": 1519,
@@ -6615,7 +6798,6 @@
             "insufficient gas",
             "gas limit",
             "limit calculation",
-            "vulnerable",
             "compose",
             "lzapp",
             "lz app",
@@ -6638,30 +6820,37 @@
             "get gas limit",
             "_getpeer",
             "get peer",
-            "_lzreceive"
+            "_lzreceive",
+            "lz receive"
           ],
           "rootCause": "20k gas per token is insufficient for minting",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 1435,
-              "lineEnd": 1479,
-              "severity": [
-                "HIGH",
-                "LOW"
-              ],
-              "codeKeywords": [
-                "anyFallback",
-                "getSendOptions"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-02-lzreceive-call-for-releaseoneid-results-in-oog-error.md",
+              "reports/bridge_crosschain_findings/h-04-min_fallback_reserve-in-branchbridgeagent-doesnt-consider-the-actual-gas-co.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "channel blocking",
+              "gas griefing",
+              "message replay",
+              "fund loss"
+            ],
+            "commonlyComposesWith": [
+              "lz receive",
+              "lz send",
+              "nonblocking lz app",
+              "lz app",
+              "adapter params"
+            ]
+          }
         },
         {
-          "id": "bridge-layerzero-integration-vulnerabilities-detection-patterns-013",
+          "id": "bridge-layerzero-integration-vulnerabilities-detection-patterns-011",
           "title": "Detection Patterns",
           "lineStart": 1520,
           "lineEnd": 1561,
@@ -6726,7 +6915,34 @@
             "adapterparams"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 109,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-06-attacker-can-block-layerzero-channel.md",
+              "reports/bridge_crosschain_findings/h-16-attacker-can-block-layerzero-channel-due-to-variable-gas-cost-of-saving-pay.md",
+              "reports/bridge_crosschain_findings/h-17-attacker-can-block-layerzero-channel-due-to-missing-check-of-minimum-gas-pa.md",
+              "reports/bridge_crosschain_findings/h-02-due-to-missing-checks-on-minimum-gas-passed-through-layerzero-executions-ca.md",
+              "reports/bridge_crosschain_findings/c-01-the-communication-channel-for-honeyjaronft-can-be-blocked.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "channel blocking",
+              "gas griefing",
+              "message replay",
+              "fund loss"
+            ],
+            "commonlyComposesWith": [
+              "lz receive",
+              "lz send",
+              "nonblocking lz app",
+              "lz app",
+              "adapter params"
+            ]
+          }
         }
       ]
     },
@@ -6845,7 +7061,6 @@
             "receive out gas",
             "receive out",
             "out gas",
-            "vulnerable",
             "istargaterouter",
             "istargate router",
             "oftcomposemsgcodec",
@@ -6870,26 +7085,34 @@
             "bridgeviastargate",
             "bridge via stargate",
             "bridgewithcallback",
-            "bridge with callback"
+            "bridge with callback",
+            "bridgewithslippage"
           ],
           "rootCause": "Complex multi-step logic can run out of gas",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 174,
-              "lineEnd": 217,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "retryRevert",
-                "sgReceive"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/sgreceive-could-run-out-of-gas.md",
+              "reports/bridge_crosschain_findings/h-02-stargatelbphelpersgreceive-could-encounter-permanent-error-that-causes-rece.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gas exhaustion",
+              "slippage bypass",
+              "credit imbalance",
+              "compose failure"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridgetokens",
+              "bridge tokens",
+              "bridgeviastargate",
+              "bridge via stargate"
+            ]
+          }
         },
         {
           "id": "bridge-stargate-integration-vulnerabilities-2-router-swap-slippage-001",
@@ -6931,7 +7154,6 @@
             "router swap slippage",
             "router swap",
             "swap slippage",
-            "vulnerable",
             "istargaterouter",
             "istargate router",
             "oftcomposemsgcodec",
@@ -6956,27 +7178,38 @@
             "bridge via stargate",
             "bridgewithcallback",
             "bridge with callback",
-            "bridgewithslippage"
+            "bridgewithslippage",
+            "bridge with slippage"
           ],
           "rootCause": "Zero slippage protection — sandwich attackable",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 257,
-              "lineEnd": 296,
-              "severity": [
-                "HIGH",
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "bridgeViaStargate",
-                "bridgeWithSlippage"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/sgreceive-could-run-out-of-gas.md",
+              "reports/bridge_crosschain_findings/h-02-stargatelbphelpersgreceive-could-encounter-permanent-error-that-causes-rece.md",
+              "reports/bridge_crosschain_findings/h-01-stargatelbphelperparticipate-will-send-tokens-to-the-wrong-address.md",
+              "reports/bridge_crosschain_findings/h-07-underpayingoverpaying-of-stargate-fee-will-occur-in-stargatelbphelperpartic.md",
+              "reports/bridge_crosschain_findings/tokens-deposit-in-exchangestargatevadapterlzcompose-is.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gas exhaustion",
+              "slippage bypass",
+              "credit imbalance",
+              "compose failure"
+            ],
+            "commonlyComposesWith": [
+              "slippage",
+              "router swap slippage",
+              "swap slippage",
+              "bridge",
+              "bridgetokens"
+            ]
+          }
         },
         {
           "id": "bridge-stargate-integration-vulnerabilities-3-pool-credit-imbalance-002",
@@ -7016,7 +7249,6 @@
             "pool credit imbalance",
             "pool credit",
             "credit imbalance",
-            "vulnerable",
             "istargaterouter",
             "istargate router",
             "oftcomposemsgcodec",
@@ -7041,25 +7273,38 @@
             "bridge via stargate",
             "bridgewithcallback",
             "bridge with callback",
-            "bridgewithslippage"
+            "bridgewithslippage",
+            "bridge with slippage"
           ],
           "rootCause": "No credit check before swap — reverts confusingly",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 333,
-              "lineEnd": 350,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "bridge"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/sgreceive-could-run-out-of-gas.md",
+              "reports/bridge_crosschain_findings/h-02-stargatelbphelpersgreceive-could-encounter-permanent-error-that-causes-rece.md",
+              "reports/bridge_crosschain_findings/h-01-stargatelbphelperparticipate-will-send-tokens-to-the-wrong-address.md",
+              "reports/bridge_crosschain_findings/h-07-underpayingoverpaying-of-stargate-fee-will-occur-in-stargatelbphelperpartic.md",
+              "reports/bridge_crosschain_findings/tokens-deposit-in-exchangestargatevadapterlzcompose-is.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gas exhaustion",
+              "slippage bypass",
+              "credit imbalance",
+              "compose failure"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridgetokens",
+              "bridge tokens",
+              "bridgeviastargate",
+              "bridge via stargate"
+            ]
+          }
         },
         {
           "id": "bridge-stargate-integration-vulnerabilities-4-stargate-v2-compose-failures-003",
@@ -7099,7 +7344,6 @@
             "stargate compose failures",
             "stargate compose",
             "compose failures",
-            "vulnerable",
             "istargaterouter",
             "istargate router",
             "oftcomposemsgcodec",
@@ -7124,25 +7368,33 @@
             "bridgeviastargate",
             "bridge via stargate",
             "bridgewithcallback",
-            "bridge with callback"
+            "bridge with callback",
+            "bridgewithslippage"
           ],
           "rootCause": "No error handling in lzCompose",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 383,
-              "lineEnd": 405,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "lzCompose"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/tokens-deposit-in-exchangestargatevadapterlzcompose-is.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gas exhaustion",
+              "slippage bypass",
+              "credit imbalance",
+              "compose failure"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridgetokens",
+              "bridge tokens",
+              "bridgeviastargate",
+              "bridge via stargate"
+            ]
+          }
         },
         {
           "id": "bridge-stargate-integration-vulnerabilities-5-dstgasforcall-misconfigurati-004",
@@ -7185,7 +7437,6 @@
             "dst gas",
             "gas call",
             "call misconfiguration",
-            "vulnerable",
             "istargaterouter",
             "istargate router",
             "oftcomposemsgcodec",
@@ -7208,23 +7459,33 @@
             "bridgetokens",
             "bridge tokens",
             "bridgeviastargate",
-            "bridge via stargate"
+            "bridge via stargate",
+            "bridgewithcallback"
           ],
           "rootCause": "dstGasForCall = 0 uses default 200k gas",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 444,
-              "lineEnd": 462,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-07-underpayingoverpaying-of-stargate-fee-will-occur-in-stargatelbphelperpartic.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gas exhaustion",
+              "slippage bypass",
+              "credit imbalance",
+              "compose failure"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridgetokens",
+              "bridge tokens",
+              "bridgeviastargate",
+              "bridge via stargate"
+            ]
+          }
         },
         {
           "id": "bridge-stargate-integration-vulnerabilities-6-destination-address-mismatch-005",
@@ -7264,7 +7525,6 @@
             "destination address mismatch",
             "destination address",
             "address mismatch",
-            "vulnerable",
             "istargaterouter",
             "istargate router",
             "oftcomposemsgcodec",
@@ -7289,25 +7549,33 @@
             "bridgeviastargate",
             "bridge via stargate",
             "bridgewithcallback",
-            "bridge with callback"
+            "bridge with callback",
+            "bridgewithslippage"
           ],
           "rootCause": "Destination set to msg.sender instead of helper contract",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 501,
-              "lineEnd": 523,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "participate"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-01-stargatelbphelperparticipate-will-send-tokens-to-the-wrong-address.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gas exhaustion",
+              "slippage bypass",
+              "credit imbalance",
+              "compose failure"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridgetokens",
+              "bridge tokens",
+              "bridgeviastargate",
+              "bridge via stargate"
+            ]
+          }
         },
         {
           "id": "bridge-stargate-integration-vulnerabilities-7-fee-layer-exploitation-006",
@@ -7347,7 +7615,6 @@
             "fee layer exploitation",
             "fee layer",
             "layer exploitation",
-            "vulnerable",
             "istargaterouter",
             "istargate router",
             "oftcomposemsgcodec",
@@ -7372,25 +7639,38 @@
             "bridgeviastargate",
             "bridge via stargate",
             "bridgewithcallback",
-            "bridge with callback"
+            "bridge with callback",
+            "bridgewithslippage"
           ],
           "rootCause": "quoteLayerZeroFee with different payload than actual swap",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 555,
-              "lineEnd": 579,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "estimateAndBridge"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/sgreceive-could-run-out-of-gas.md",
+              "reports/bridge_crosschain_findings/h-02-stargatelbphelpersgreceive-could-encounter-permanent-error-that-causes-rece.md",
+              "reports/bridge_crosschain_findings/h-01-stargatelbphelperparticipate-will-send-tokens-to-the-wrong-address.md",
+              "reports/bridge_crosschain_findings/h-07-underpayingoverpaying-of-stargate-fee-will-occur-in-stargatelbphelperpartic.md",
+              "reports/bridge_crosschain_findings/tokens-deposit-in-exchangestargatevadapterlzcompose-is.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gas exhaustion",
+              "slippage bypass",
+              "credit imbalance",
+              "compose failure"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridgetokens",
+              "bridge tokens",
+              "bridgeviastargate",
+              "bridge via stargate"
+            ]
+          }
         },
         {
           "id": "bridge-stargate-integration-vulnerabilities-8-amount-trimming-decimal-dust-007",
@@ -7432,7 +7712,6 @@
             "amount trimming",
             "trimming decimal",
             "decimal dust",
-            "vulnerable",
             "istargaterouter",
             "istargate router",
             "oftcomposemsgcodec",
@@ -7455,25 +7734,33 @@
             "bridgetokens",
             "bridge tokens",
             "bridgeviastargate",
-            "bridge via stargate"
+            "bridge via stargate",
+            "bridgewithcallback"
           ],
           "rootCause": "Dust stays in bridge contract",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 626,
-              "lineEnd": 645,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "bridgeTokens"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/unaccounted-amount-trimming.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gas exhaustion",
+              "slippage bypass",
+              "credit imbalance",
+              "compose failure"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridgetokens",
+              "bridge tokens",
+              "bridgeviastargate",
+              "bridge via stargate"
+            ]
+          }
         },
         {
           "id": "bridge-stargate-integration-vulnerabilities-detection-patterns-008",
@@ -7539,7 +7826,34 @@
             "dstgasforcall"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/sgreceive-could-run-out-of-gas.md",
+              "reports/bridge_crosschain_findings/h-02-stargatelbphelpersgreceive-could-encounter-permanent-error-that-causes-rece.md",
+              "reports/bridge_crosschain_findings/h-01-stargatelbphelperparticipate-will-send-tokens-to-the-wrong-address.md",
+              "reports/bridge_crosschain_findings/h-07-underpayingoverpaying-of-stargate-fee-will-occur-in-stargatelbphelperpartic.md",
+              "reports/bridge_crosschain_findings/tokens-deposit-in-exchangestargatevadapterlzcompose-is.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "gas exhaustion",
+              "slippage bypass",
+              "credit imbalance",
+              "compose failure"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridgetokens",
+              "bridge tokens",
+              "bridgeviastargate",
+              "bridge via stargate"
+            ]
+          }
         }
       ]
     },
@@ -7611,163 +7925,17 @@
           "receiveMessage"
         ]
       },
-      "patternCount": 8,
+      "patternCount": 6,
       "patterns": [
         {
-          "id": "bridge-wormhole-integration-vulnerabilities-vulnerability-description-000",
-          "title": "Vulnerability Description",
-          "lineStart": 171,
-          "lineEnd": 183,
-          "lineCount": 13,
-          "severity": [],
-          "codeKeywords": [
-            "parseAndVerifyVAA",
-            "NttManager",
-            "TokenBridge",
-            "TransceiverMessage",
-            "VAA",
-            "approve",
-            "bridgeToUser",
-            "bridgeTokens",
-            "bridgeWithPayload",
-            "completeTransfer",
-            "consistencyLevel",
-            "emitterAddress",
-            "emitterChainId",
-            "executeProposal",
-            "guardianSet",
-            "message",
-            "msg.sender",
-            "nonce",
-            "processMessage",
-            "receiveMessage"
-          ],
-          "searchKeywords": [
-            "scenario",
-            "nttmanager",
-            "ntt manager",
-            "tokenbridge",
-            "token bridge",
-            "transceivermessage",
-            "transceiver message",
-            "vaa",
-            "approve",
-            "bridgetouser",
-            "bridge to user",
-            "bridgetokens",
-            "bridge tokens",
-            "bridgewithpayload",
-            "bridge with payload",
-            "completetransfer",
-            "complete transfer",
-            "consistencylevel",
-            "consistency level",
-            "emitteraddress",
-            "emitter address",
-            "emitterchainid",
-            "emitter chain id",
-            "executeproposal",
-            "execute proposal",
-            "guardianset",
-            "guardian set",
-            "message",
-            "msg.sender",
-            "msg sender",
-            "nonce",
-            "parseandverifyvaa"
-          ],
-          "rootCause": "Protocols either use outdated/deprecated Wormhole methods for VAA parsing, fail to validate all VAA fields properly, or don't verify the guardian signatures correctly.",
-          "subsections": [
-            {
-              "title": "Attack Scenario",
-              "lineStart": 177,
-              "lineEnd": 183,
-              "severity": [],
-              "codeKeywords": [
-                "parseAndVerifyVAA"
-              ],
-              "searchKeywords": [
-                "scenario"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "bridge-wormhole-integration-vulnerabilities-vulnerable-pattern-examples-001",
-          "title": "Vulnerable Pattern Examples",
-          "lineStart": 184,
-          "lineEnd": 241,
-          "lineCount": 58,
+          "id": "bridge-wormhole-integration-vulnerabilities-1-vaa-parsing-vulnerabilities-000",
+          "title": "1. VAA Parsing Vulnerabilities",
+          "lineStart": 129,
+          "lineEnd": 294,
+          "lineCount": 166,
           "severity": [
+            "CRITICAL",
             "HIGH",
-            "MEDIUM"
-          ],
-          "codeKeywords": [
-            "receiveMessage",
-            "NttManager",
-            "TokenBridge",
-            "TransceiverMessage",
-            "VAA",
-            "approve",
-            "bridgeToUser",
-            "bridgeTokens",
-            "bridgeWithPayload",
-            "completeTransfer",
-            "consistencyLevel",
-            "emitterAddress",
-            "emitterChainId",
-            "executeProposal",
-            "guardianSet",
-            "message",
-            "msg.sender",
-            "nonce",
-            "parseAndVerifyVAA",
-            "processMessage"
-          ],
-          "searchKeywords": [
-            "vulnerable",
-            "nttmanager",
-            "ntt manager",
-            "tokenbridge",
-            "token bridge",
-            "transceivermessage",
-            "transceiver message",
-            "vaa",
-            "approve",
-            "bridgetouser",
-            "bridge to user",
-            "bridgetokens",
-            "bridge tokens",
-            "bridgewithpayload",
-            "bridge with payload",
-            "completetransfer",
-            "complete transfer",
-            "consistencylevel",
-            "consistency level",
-            "emitteraddress",
-            "emitter address",
-            "emitterchainid",
-            "emitter chain id",
-            "executeproposal",
-            "execute proposal",
-            "guardianset",
-            "guardian set",
-            "message",
-            "msg.sender",
-            "msg sender",
-            "nonce",
-            "parseandverifyvaa"
-          ],
-          "rootCause": "Uses deprecated method",
-          "subsections": null
-        },
-        {
-          "id": "bridge-wormhole-integration-vulnerabilities-vulnerability-description-002",
-          "title": "Vulnerability Description",
-          "lineStart": 304,
-          "lineEnd": 316,
-          "lineCount": 13,
-          "severity": [
             "LOW"
           ],
           "codeKeywords": [
@@ -7779,6 +7947,10 @@
             "bridgeToUser",
             "bridgeTokens",
             "bridgeWithPayload",
+            "moderate",
+            "multi_contract",
+            "parseAndVerifyVAA",
+            "receiveMessage",
             "completeTransfer",
             "consistencyLevel",
             "emitterAddress",
@@ -7786,21 +7958,18 @@
             "executeProposal",
             "guardianSet",
             "message",
-            "msg.sender",
-            "nonce",
-            "parseAndVerifyVAA",
-            "processMessage",
-            "receiveMessage"
+            "msg.sender"
           ],
           "searchKeywords": [
-            "scenario",
+            "vaa",
+            "parsing",
+            "vaa parsing",
             "nttmanager",
             "ntt manager",
             "tokenbridge",
             "token bridge",
             "transceivermessage",
             "transceiver message",
-            "vaa",
             "approve",
             "bridgetouser",
             "bridge to user",
@@ -7823,34 +7992,47 @@
             "message",
             "msg.sender",
             "msg sender",
-            "nonce",
-            "parseandverifyvaa"
+            "nonce"
           ],
-          "rootCause": "Protocols don't account for guardian set transitions properly. During transitions, both old and new guardian set signatures are valid, potentially allowing replay of old guardian actions.",
-          "subsections": [
-            {
-              "title": "Attack Scenario",
-              "lineStart": 310,
-              "lineEnd": 316,
-              "severity": [],
-              "codeKeywords": [],
-              "searchKeywords": [
-                "scenario"
-              ]
-            }
-          ]
+          "rootCause": "Protocols either use outdated/deprecated Wormhole methods for VAA parsing, fail to validate all VAA fields properly, or don't verify the guardian signatures correctly.",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/wormhole-integ.md",
+              "reports/bridge_crosschain_findings/m-1-wrong-integration-of-wormhole-allows-arbitrary-callers-for-receivewithanycall.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "vaa parsing",
+              "guardian bypass",
+              "message replay",
+              "signature validation"
+            ],
+            "commonlyComposesWith": [
+              "tokenbridge",
+              "token bridge",
+              "bridgetouser",
+              "bridge to user",
+              "bridgetokens"
+            ]
+          }
         },
         {
-          "id": "bridge-wormhole-integration-vulnerabilities-vulnerable-pattern-examples-003",
-          "title": "Vulnerable Pattern Examples",
-          "lineStart": 317,
-          "lineEnd": 343,
-          "lineCount": 27,
+          "id": "bridge-wormhole-integration-vulnerabilities-2-guardian-set-vulnerabilities-001",
+          "title": "2. Guardian Set Vulnerabilities",
+          "lineStart": 295,
+          "lineEnd": 382,
+          "lineCount": 88,
           "severity": [
-            "HIGH"
+            "HIGH",
+            "LOW"
           ],
           "codeKeywords": [
             "executeProposal",
+            "updateMinimumGuardianSet",
             "NttManager",
             "TokenBridge",
             "TransceiverMessage",
@@ -7868,11 +8050,12 @@
             "msg.sender",
             "nonce",
             "parseAndVerifyVAA",
-            "processMessage",
-            "receiveMessage"
+            "processMessage"
           ],
           "searchKeywords": [
-            "vulnerable",
+            "guardian",
+            "set",
+            "guardian set",
             "nttmanager",
             "ntt manager",
             "tokenbridge",
@@ -7898,18 +8081,38 @@
             "executeproposal",
             "execute proposal",
             "guardianset",
-            "guardian set",
             "message",
             "msg.sender",
             "msg sender",
-            "nonce",
-            "parseandverifyvaa"
+            "nonce"
           ],
-          "rootCause": "Doesn't track which guardian set signed",
-          "subsections": null
+          "rootCause": "Protocols don't account for guardian set transitions properly. During transitions, both old and new guardian set signatures are valid, potentially allowing replay of old guardian actions.",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-03-an-attacker-can-exploit-the-wormhole-guardian-change-process-to-gain-govern.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "vaa parsing",
+              "guardian bypass",
+              "message replay",
+              "signature validation"
+            ],
+            "commonlyComposesWith": [
+              "tokenbridge",
+              "token bridge",
+              "bridgetouser",
+              "bridge to user",
+              "bridgetokens"
+            ]
+          }
         },
         {
-          "id": "bridge-wormhole-integration-vulnerabilities-3-message-replay-attacks-004",
+          "id": "bridge-wormhole-integration-vulnerabilities-3-message-replay-attacks-002",
           "title": "3. Message Replay Attacks",
           "lineStart": 383,
           "lineEnd": 448,
@@ -7943,7 +8146,6 @@
             "message",
             "replay",
             "message replay",
-            "vulnerable",
             "nttmanager",
             "ntt manager",
             "tokenbridge",
@@ -7971,28 +8173,36 @@
             "guardianset",
             "guardian set",
             "msg.sender",
-            "msg sender"
+            "msg sender",
+            "nonce"
           ],
           "rootCause": "Same VAA can be replayed across instances",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 392,
-              "lineEnd": 414,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "processMessage"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/message-replays-are-possible-across-different-instances.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "replay",
+              "message replay",
+              "missing validation",
+              "vaa parsing",
+              "guardian bypass"
+            ],
+            "commonlyComposesWith": [
+              "tokenbridge",
+              "token bridge",
+              "bridgetouser",
+              "bridge to user",
+              "bridgetokens"
+            ]
+          }
         },
         {
-          "id": "bridge-wormhole-integration-vulnerabilities-4-token-bridge-integration-005",
+          "id": "bridge-wormhole-integration-vulnerabilities-4-token-bridge-integration-003",
           "title": "4. Token Bridge Integration",
           "lineStart": 449,
           "lineEnd": 557,
@@ -8029,7 +8239,6 @@
             "token bridge integration",
             "token bridge",
             "bridge integration",
-            "vulnerable",
             "nttmanager",
             "ntt manager",
             "tokenbridge",
@@ -8054,30 +8263,37 @@
             "executeproposal",
             "execute proposal",
             "guardianset",
-            "guardian set"
+            "guardian set",
+            "message"
           ],
           "rootCause": "Uses transferWithPayload incorrectly",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 458,
-              "lineEnd": 503,
-              "severity": [
-                "LOW",
-                "MEDIUM"
-              ],
-              "codeKeywords": [
-                "bridgeTokens",
-                "completeTransfer"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/m-20-wormhole-integration-will-not-work-for-bridging-tokens-with-external-calls.md",
+              "reports/bridge_crosschain_findings/m-1-wrong-integration-of-wormhole-allows-arbitrary-callers-for-receivewithanycall.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "vaa parsing",
+              "guardian bypass",
+              "message replay",
+              "signature validation"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "token bridge integration",
+              "token bridge",
+              "bridge integration",
+              "tokenbridge"
+            ]
+          }
         },
         {
-          "id": "bridge-wormhole-integration-vulnerabilities-5-gas-limit-issues-006",
+          "id": "bridge-wormhole-integration-vulnerabilities-5-gas-limit-issues-004",
           "title": "5. Gas Limit Issues",
           "lineStart": 558,
           "lineEnd": 613,
@@ -8114,7 +8330,6 @@
             "gas limit issues",
             "gas limit",
             "limit issues",
-            "vulnerable",
             "nttmanager",
             "ntt manager",
             "tokenbridge",
@@ -8139,28 +8354,36 @@
             "emitter chain id",
             "executeproposal",
             "execute proposal",
-            "guardianset"
+            "guardianset",
+            "guardian set"
           ],
           "rootCause": "Gas limit cannot be updated",
-          "subsections": [
-            {
-              "title": "Vulnerable Pattern Examples",
-              "lineStart": 567,
-              "lineEnd": 588,
-              "severity": [
-                "HIGH"
-              ],
-              "codeKeywords": [
-                "requestCrossChainMessage"
-              ],
-              "searchKeywords": [
-                "vulnerable"
-              ]
-            }
-          ]
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/h-10-immutable-gaslimit-may-be-insufficient-for-wormhole-relayers-current-impl.md"
+            ]
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "vaa parsing",
+              "guardian bypass",
+              "message replay",
+              "signature validation"
+            ],
+            "commonlyComposesWith": [
+              "tokenbridge",
+              "token bridge",
+              "bridgetouser",
+              "bridge to user",
+              "bridgetokens"
+            ]
+          }
         },
         {
-          "id": "bridge-wormhole-integration-vulnerabilities-detection-patterns-007",
+          "id": "bridge-wormhole-integration-vulnerabilities-detection-patterns-005",
           "title": "Detection Patterns",
           "lineStart": 614,
           "lineEnd": 639,
@@ -8223,7 +8446,34 @@
             "parseandverifyvaa"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/bridge_crosschain_findings/wormhole-integ.md",
+              "reports/bridge_crosschain_findings/message-replays-are-possible-across-different-instances.md",
+              "reports/bridge_crosschain_findings/h-03-an-attacker-can-exploit-the-wormhole-guardian-change-process-to-gain-govern.md",
+              "reports/bridge_crosschain_findings/h-10-immutable-gaslimit-may-be-insufficient-for-wormhole-relayers-current-impl.md",
+              "reports/bridge_crosschain_findings/m-20-wormhole-integration-will-not-work-for-bridging-tokens-with-external-calls.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "vaa parsing",
+              "guardian bypass",
+              "message replay",
+              "signature validation"
+            ],
+            "commonlyComposesWith": [
+              "tokenbridge",
+              "token bridge",
+              "bridgetouser",
+              "bridge to user",
+              "bridgetokens"
+            ]
+          }
         }
       ]
     }

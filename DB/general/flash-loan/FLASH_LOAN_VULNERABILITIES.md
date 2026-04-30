@@ -97,33 +97,34 @@ This vulnerability exists because flash loan flows skip critical validations (po
 
 #### Agent Quick View
 
-- Root cause statement: "This vulnerability exists because of missing_validation"
+- Root cause statement: Flash-loan abuse exists when loan issuance, callback execution, repayment deltas, fee logic, receiver selection, or anti-flash-loan state checks are not enforced on the exact path the attacker can call.
 - Pattern key: `missing_validation | flash_loan | flash_loan_abuse`
 - Interaction scope: `single_contract`
 - Primary affected component(s): `flash_loan|repayment_validation|fee_logic|state_transition`
-- High-signal code keywords: `allowance`, `approve`, `balanceOf`, `block.number`, `block.timestamp`, `borrow`, `burn`, `callback`
+- High-signal code keywords: `flashLoan`, `onFlashLoan`, `IERC3156FlashBorrower`, `receiver`, `initiator`, `balanceBefore`, `balanceAfter`, `fee`, `allowance`, `approve`, `callback`, `block.number`, `lastDepositBlock`, `liquidate`
 - Typical sink / impact: `fund_loss|manipulation|dos`
 - Validation strength: `moderate`
 
 #### Contract / Boundary Map
 
-- Entry surface(s): See pattern-specific attack scenarios below
-- Contract hop(s): `never.function -> uint256.function`
-- Trust boundary crossed: `internal`
-- Shared state or sync assumption: `state consistency across operations`
+- Entry surface(s): `flashLoan`, ERC3156 callback, custom lender callback, receiver-specified loan, liquidation, delegated voting, oracle-sensitive operation
+- Contract hop(s): `FlashLender -> receiver callback -> target protocol -> repayment/fee check`
+- Trust boundary crossed: lender hands temporary assets and control flow to an arbitrary receiver, then trusts repayment, allowance, or post-callback balances
+- Shared state or sync assumption: repayment delta, fee accrual, receiver authorization, same-block guard, vote snapshot, and oracle state must survive callback manipulation
 
 #### Valid Bug Signals
 
-- Signal 1: Critical input parameter not validated against expected range or format
-- Signal 2: Oracle data consumed without staleness check or sanity bounds
-- Signal 3: User-supplied address or calldata forwarded without validation
-- Signal 4: Missing check allows operation under invalid or stale state
+- Lender lets caller choose `receiver`/`onBehalfOf` and then pulls repayment or fees from that address without opt-in or allowance semantics matching ERC3156.
+- Repayment check compares wrong balances, omits fee, charges fee in wrong units/decimals, or accepts unchanged balance after callback.
+- Flash-loan path skips reserve status, pause, caps, debt ceilings, solvency checks, or fee updates enforced by normal borrow/withdraw paths.
+- Anti-flash-loan protection is tied to `deposit` only and can be bypassed through transfer, liquidation, self-liquidation, delegated voting, or snapshot timing.
 
 #### False Positive Guards
 
-- Not this bug when: Validation exists but is in an upstream function caller
-- Safe if: Parameter range is inherently bounded by the type or protocol invariant
-- Requires attacker control of: specific conditions per pattern
+- Not this bug when receiver choice, callback return value, initiator, asset, amount, fee, and repayment delta are all checked against the requested loan.
+- Safe if flash-loan code reuses the same reserve status, cap, pause, and accounting validations as borrow/withdraw, then verifies post-callback balance increased by `amount + fee`.
+- Safe if same-block guards update on every position-moving path and governance/oracle logic uses manipulation-resistant snapshots.
+- Requires attacker-controlled callback execution, receiver selection, or an alternate state transition that observes flash-loaned liquidity.
 
 ### Vulnerability Description
 

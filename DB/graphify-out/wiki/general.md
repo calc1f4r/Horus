@@ -1,35 +1,35 @@
 # general
 
-> 172 nodes · cohesion 0.06
+> 158 nodes · cohesion 0.16
 
 ## Key Concepts
 
-- **general** (235 connections) — `DB/index.json`
-- **calculate_available_dividends** (42 connections) — `DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
-- **convert_to_wal_amount** (41 connections) — `DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
-- **distribute_rewards** (39 connections) — `DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md`
-- **DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md** (23 connections) — `DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
-- **DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md** (23 connections) — `DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md`
-- **add_reward_program** (23 connections) — `DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md`
-- **cancel_schedule_interval** (23 connections) — `DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md`
-- **cancel_schedule_interval_safe** (23 connections) — `DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md`
-- **create_obligation** (23 connections) — `DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md`
-- **divide_and_round_up_safe** (23 connections) — `DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
-- **divide_and_round_up_u128** (23 connections) — `DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
-- **end_withdraw_session** (23 connections) — `DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md`
-- **fixed_point_arithmetic** (23 connections) — `DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
-- **from_u256balance_safe** (23 connections) — `DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
-- **DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md** (19 connections) — `DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md`
-- **calculate_exchange_rate** (18 connections) — `DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md`
-- **claim_rewards_paginated** (18 connections) — `DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md`
-- **create_position_index** (18 connections) — `DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md`
-- **DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md** (14 connections) — `DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md`
-- **DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md** (13 connections) — `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
-- **assert_and_configure_validator_set** (13 connections) — `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
-- **get_collateral_value** (13 connections) — `DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md`
-- **get_lpt_collateral_value** (13 connections) — `DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md`
-- **get_validated_price** (13 connections) — `DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md`
-- *... and 147 more nodes in this community*
+- **state_manipulation** (220 connections) — `DB/general/bonding-curve/BONDING_CURVE_ACCESS_CONTROL_STATE_VULNERABILITIES.md`
+- **10. Liquid Staking: Share Rounding Direction** (79 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
+- **12. Order Book: Partial Fill Tracking** (73 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
+- **1. Improper Stake Accounting Updates** (69 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
+- **11. Order Book: Base/Quote Quantity Mismatch** (67 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
+- **13. Share Price Manipulation via Donation** (67 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
+- **14. Share Price Inflation via Rounding Drift** (67 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
+- **10. Share Price Inflation / First-Depositor Attack** (65 connections) — `DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
+- **15. Exchange Rate Manipulation at Low TVL** (63 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
+- **2. Tank/Stability Pool Value Update Errors** (63 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
+- **3. Surplus Claim Logic Failure** (63 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
+- **4. Incorrect Flow Rate Tracking** (63 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
+- **5. Wrong Function Call in Integration** (63 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
+- **6. Reward Accumulation During Inactive Periods** (63 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
+- **8. Liquid Staking: Pending Coin Inclusion in Unstake** (63 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
+- **9. Liquid Staking: Restake Routing Errors** (63 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
+- **Move State Management & Data Integrity Vulnerabilities** (61 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
+- **1. CLMM Sqrt-Price Overflow** (61 connections) — `DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
+- **Pattern 1: Local Copy Mutation Without Write-Back — move-state-001** (59 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
+- **11. Share-to-Asset Rounding Direction** (59 connections) — `DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
+- **13. Incorrect Quantity Calculation in Order Books** (59 connections) — `DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
+- **14. Reward Period Miscalculation** (59 connections) — `DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
+- **Pattern 10: Last Modifier Tracking Failure — move-state-010** (57 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
+- **5. Type Boundary Overflow (u64 → u128)** (57 connections) — `DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
+- **9. Reward Calculation Rounding Errors** (57 connections) — `DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
+- *... and 133 more nodes in this community*
 
 ## Relationships
 
@@ -37,21 +37,23 @@
 
 ## Source Files
 
-- `DB/Sui-Move-specific/MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
-- `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
-- `DB/Sui-Move-specific/MOVE_DEFI_PROTOCOL_LOGIC_VULNERABILITIES.md`
-- `DB/Sui-Move-specific/MOVE_DENIAL_OF_SERVICE_VULNERABILITIES.md`
-- `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
-- `DB/Sui-Move-specific/MOVE_ORACLE_PRICING_VULNERABILITIES.md`
-- `DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
-- `DB/Sui-Move-specific/SUI_MOVE_OBJECT_MODEL_VULNERABILITIES.md`
-- `DB/Sui-Move-specific/SUI_WALLET_SNAP_VULNERABILITIES.md`
-- `DB/index.json`
+- `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
+- `DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md`
+- `DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
+- `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
+- `DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md`
+- `DB/cosmos/app-chain/rewards/reward-distribution-failures.md`
+- `DB/general/bonding-curve/BONDING_CURVE_ACCESS_CONTROL_STATE_VULNERABILITIES.md`
+- `DB/general/restaking/LRT_EXCHANGE_RATE_ORACLE_VULNERABILITIES.md`
+- `DB/general/restaking/RESTAKING_OPERATOR_DELEGATION_VULNERABILITIES.md`
+- `DB/general/restaking/RESTAKING_REWARD_DISTRIBUTION_VULNERABILITIES.md`
+- `DB/general/restaking/RESTAKING_SLASHING_VULNERABILITIES.md`
 
 ## Audit Trail
 
-- EXTRACTED: 256 (30%)
-- INFERRED: 609 (70%)
+- EXTRACTED: 923 (41%)
+- INFERRED: 1327 (59%)
 - AMBIGUOUS: 0 (0%)
 
 ---

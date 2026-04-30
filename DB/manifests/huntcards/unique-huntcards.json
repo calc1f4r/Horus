@@ -2,10 +2,10 @@
   "meta": {
     "manifest": "unique",
     "description": "Compressed hunt cards for unique — one-line detection rules for bulk scanning",
-    "totalCards": 30,
-    "skipped": 91,
-    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
-    "enriched": 30
+    "totalCards": 23,
+    "skipped": 81,
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, use optional preconditions/proofShape/falsePositiveSignals/reportEvidence when present, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "enriched": 23
   },
   "cards": [
     {
@@ -23,13 +23,35 @@
         111,
         128
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund theft",
+          "uniswap v3 integration",
+          "unrestricted callback",
+          "vulnerable"
+        ],
+        "commonlyComposesWith": [
+          "uniswapv3mintcallback",
+          "uniswap v3 mint callback",
+          "unrestricted_callback",
+          "unrestricted callback",
+          "uniswap v3 integration"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: // CRITICAL: No access control on callback",
         "PROVE: TransferHelper.safeTransferFrom(token1, source, address(pool), amount1Owed);"
       ],
       "antipattern": "TransferHelper.safeTransferFrom(token1, source, address(pool), amount1Owed);",
-      "validWhen": "// CRITICAL: No access control on callback"
+      "validWhen": "// CRITICAL: No access control on callback",
+      "proofShape": "TransferHelper.safeTransferFrom(token1, source, address(pool), amount1Owed);"
     },
     {
       "id": "unique-burve-unrestricted-callback-keywords-005",
@@ -46,6 +68,27 @@
         198,
         221
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund theft",
+          "uniswap v3 integration",
+          "unrestricted callback",
+          "keywords"
+        ],
+        "commonlyComposesWith": [
+          "uniswapv3mintcallback",
+          "uniswap v3 mint callback",
+          "unrestricted_callback",
+          "unrestricted callback",
+          "uniswap v3 integration"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: uniswapV3MintCallback, callback_access_control, approval_exploit, transferFrom_arbitrary_source,...",
@@ -55,7 +98,8 @@
         "LOOK FOR: See vulnerable pattern examples above for specific code smells"
       ],
       "antipattern": "> These keywords enhance vector search retrieval:",
-      "validWhen": "uniswapV3MintCallback, callback_access_control, approval_exploit, transferFrom_arbitrary_source,..."
+      "validWhen": "uniswapV3MintCallback, callback_access_control, approval_exploit, transferFrom_arbitrary_source,...",
+      "proofShape": "> These keywords enhance vector search retrieval"
     },
     {
       "id": "unique-lambo-deterministic-address-dos-keywords-009",
@@ -72,6 +116,23 @@
         250,
         273
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "denial of service",
+          "pool factory",
+          "deterministic address dos",
+          "keywords"
+        ],
+        "commonlyComposesWith": [
+          "pool factory"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: CREATE_opcode, deterministic_address, factory_dos, nonce_manipulation, front_running, CREATE2,...",
@@ -81,7 +142,8 @@
         "LOOK FOR: See vulnerable pattern examples above for specific code smells"
       ],
       "antipattern": "> These keywords enhance vector search retrieval:",
-      "validWhen": "CREATE_opcode, deterministic_address, factory_dos, nonce_manipulation, front_running, CREATE2,..."
+      "validWhen": "CREATE_opcode, deterministic_address, factory_dos, nonce_manipulation, front_running, CREATE2,...",
+      "proofShape": "> These keywords enhance vector search retrieval"
     },
     {
       "id": "unique-sentiment-curve-readonly-reentrancy-vulnerable-code-pattern-003",
@@ -98,6 +160,27 @@
         133,
         169
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "LOW"
+      },
+      "graphHints": {
+        "variants": [
+          "oracle_manipulation",
+          "oracle manipulation",
+          "logic error",
+          "reentrancy",
+          "read only reentrancy"
+        ],
+        "commonlyComposesWith": [
+          "oracle_manipulation",
+          "oracle manipulation",
+          "read_only_reentrancy",
+          "read only reentrancy",
+          "reentrancy"
+        ]
+      },
       "check": [
         "VERIFY: Oracle uses virtual_price during remove_liquidity callback"
       ],
@@ -119,6 +202,27 @@
         309,
         332
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "oracle_manipulation",
+          "oracle manipulation",
+          "logic error",
+          "reentrancy",
+          "read only reentrancy"
+        ],
+        "commonlyComposesWith": [
+          "oracle_manipulation",
+          "oracle manipulation",
+          "read_only_reentrancy",
+          "read only reentrancy",
+          "reentrancy"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: read_only_reentrancy, view_reentrancy, curve_virtual_price, liquidation_manipulation, wsteth_eth,...",
@@ -128,7 +232,8 @@
         "LOOK FOR: See vulnerable pattern examples above for specific code smells"
       ],
       "antipattern": "> These keywords enhance vector search retrieval:",
-      "validWhen": "read_only_reentrancy, view_reentrancy, curve_virtual_price, liquidation_manipulation, wsteth_eth,..."
+      "validWhen": "read_only_reentrancy, view_reentrancy, curve_virtual_price, liquidation_manipulation, wsteth_eth,...",
+      "proofShape": "> These keywords enhance vector search retrieval"
     },
     {
       "id": "unique-spartan-dividend-gaming-keywords-007",
@@ -145,6 +250,23 @@
         219,
         242
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "economic exploit",
+          "fee distribution",
+          "dividend gaming",
+          "keywords"
+        ],
+        "commonlyComposesWith": [
+          "fee distribution"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: dividend_gaming, rolling_average, micro_trade_manipulation, fee_distribution, reserve_drainage, spartan,...",
@@ -154,7 +276,8 @@
         "LOOK FOR: See vulnerable pattern examples above for specific code smells"
       ],
       "antipattern": "> These keywords enhance vector search retrieval:",
-      "validWhen": "dividend_gaming, rolling_average, micro_trade_manipulation, fee_distribution, reserve_drainage, spartan,..."
+      "validWhen": "dividend_gaming, rolling_average, micro_trade_manipulation, fee_distribution, reserve_drainage, spartan,...",
+      "proofShape": "> These keywords enhance vector search retrieval"
     },
     {
       "id": "unique-spartan-lp-burn-hijack-vulnerable-code-pattern-002",
@@ -171,6 +294,25 @@
         119,
         162
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/constantproduct/h-10-hijack-token-pool-by-burning-liquidity-token.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "pool hijack",
+          "liquidity token",
+          "lp hijack",
+          "vulnerable"
+        ],
+        "commonlyComposesWith": [
+          "liquidity token"
+        ]
+      },
       "check": [
         "VERIFY: Burn without withdrawal allowed"
       ],
@@ -192,6 +334,23 @@
         306,
         329
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "pool hijack",
+          "liquidity token",
+          "lp hijack",
+          "keywords"
+        ],
+        "commonlyComposesWith": [
+          "liquidity token"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: LP_burn, pool_hijack, totalSupply_manipulation, rounding_attack, liquidity_token, spartan,...",
@@ -201,7 +360,8 @@
         "LOOK FOR: See vulnerable pattern examples above for specific code smells"
       ],
       "antipattern": "> These keywords enhance vector search retrieval:",
-      "validWhen": "LP_burn, pool_hijack, totalSupply_manipulation, rounding_attack, liquidity_token, spartan,..."
+      "validWhen": "LP_burn, pool_hijack, totalSupply_manipulation, rounding_attack, liquidity_token, spartan,...",
+      "proofShape": "> These keywords enhance vector search retrieval"
     },
     {
       "id": "unique-stakehouse-reentrancy-fund-freeze-state-machine-corruption-flow-005",
@@ -218,6 +378,28 @@
         211,
         239
       ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/constantproduct/h-11-protocol-insolvent-permanent-freeze-of-funds.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "reentrancy",
+          "staking lifecycle",
+          "reentrancy fund freeze",
+          "state"
+        ],
+        "commonlyComposesWith": [
+          "reentrancy_fund_freeze",
+          "reentrancy fund freeze",
+          "reentrancy",
+          "staking lifecycle"
+        ]
+      },
       "check": [
         "VERIFY: Step 1: Node runner registers BLS key"
       ],
@@ -238,6 +420,26 @@
         324,
         347
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "reentrancy",
+          "staking lifecycle",
+          "reentrancy fund freeze",
+          "keywords"
+        ],
+        "commonlyComposesWith": [
+          "reentrancy_fund_freeze",
+          "reentrancy fund freeze",
+          "reentrancy",
+          "staking lifecycle"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: reentrancy, fund_freeze, lifecycle_state, protocol_insolvency, stakehouse, state_machine_corruption,...",
@@ -247,7 +449,8 @@
         "LOOK FOR: See vulnerable pattern examples above for specific code smells"
       ],
       "antipattern": "> These keywords enhance vector search retrieval:",
-      "validWhen": "reentrancy, fund_freeze, lifecycle_state, protocol_insolvency, stakehouse, state_machine_corruption,..."
+      "validWhen": "reentrancy, fund_freeze, lifecycle_state, protocol_insolvency, stakehouse, state_machine_corruption,...",
+      "proofShape": "> These keywords enhance vector search retrieval"
     },
     {
       "id": "unique-traderjoe-fee-debt-theft-keywords-008",
@@ -264,6 +467,23 @@
         294,
         317
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "debt model exploit",
+          "fee collection",
+          "fee accounting bypass",
+          "keywords"
+        ],
+        "commonlyComposesWith": [
+          "fee collection"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: fee_debt_model, accTokenPerShare, debt_bypass, LBToken_exemption, reserve_theft, trader_joe_v2,...",
@@ -273,7 +493,8 @@
         "LOOK FOR: See vulnerable pattern examples above for specific code smells"
       ],
       "antipattern": "> These keywords enhance vector search retrieval:",
-      "validWhen": "fee_debt_model, accTokenPerShare, debt_bypass, LBToken_exemption, reserve_theft, trader_joe_v2,..."
+      "validWhen": "fee_debt_model, accTokenPerShare, debt_bypass, LBToken_exemption, reserve_theft, trader_joe_v2,...",
+      "proofShape": "> These keywords enhance vector search retrieval"
     },
     {
       "id": "unique-vader-il-protection-drain-keywords-008",
@@ -290,6 +511,24 @@
         282,
         305
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "impermanent_loss_manipulation",
+          "impermanent loss manipulation",
+          "logic error",
+          "economic exploit",
+          "reserve drain"
+        ],
+        "commonlyComposesWith": [
+          "flash loan",
+          "reserve drain"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: impermanent_loss, IL_protection, reserve_drain, flash_loan_attack, spot_price_manipulation, vader,...",
@@ -299,7 +538,66 @@
         "LOOK FOR: See vulnerable pattern examples above for specific code smells"
       ],
       "antipattern": "> These keywords enhance vector search retrieval:",
-      "validWhen": "impermanent_loss, IL_protection, reserve_drain, flash_loan_attack, spot_price_manipulation, vader,..."
+      "validWhen": "impermanent_loss, IL_protection, reserve_drain, flash_loan_attack, spot_price_manipulation, vader,...",
+      "proofShape": "> These keywords enhance vector search retrieval"
+    },
+    {
+      "id": "unique-compiler-level-vulnerabilities-compiler-level-vulnerability-p-000",
+      "title": "Compiler-Level Vulnerability Patterns",
+      "severity": "CRITICAL",
+      "grep": "storage_slot_collision|nonreentrant_bypass|callback_reentrancy|bytecode_generation|remove_liquidity|single_contract",
+      "detect": "The Vyper compiler versions 0.2.15, 0.2.16, and 0.3.0 had a bug in the code generation for the `@nonreentrant` decorator.",
+      "cat": [
+        "protocol-specific",
+        "unique"
+      ],
+      "ref": "DB/unique/defihacklabs/compiler-level-vulnerabilities.md",
+      "lines": [
+        56,
+        136
+      ],
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "reentrancy",
+          "vyper reentrancy lock bug",
+          "vyper compiler",
+          "fund loss"
+        ],
+        "commonlyComposesWith": [
+          "reentrancy_lock",
+          "reentrancy lock",
+          "vyper_reentrancy_lock_bug",
+          "vyper reentrancy lock bug",
+          "callback_reentrancy"
+        ]
+      },
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Vyper source was compiled with vulnerable versions 0.2.15, 0.2.16, or 0.3.0 and relies on @nonreentrant for cross-function protection.; A...",
+        "PROVE: Attacker calls remove_liquidity() on the Curve pool (compiled with vulnerable Vyper); Pool sends ETH to the attacker before updating state (standard ETH transfer)",
+        "FALSIFY: Not this bug for Solidity ReentrancyGuard or Vyper versions outside the affected compiler range unless a separate compiler issue is proven.; Safe if vulnerable compiler..."
+      ],
+      "validWhen": "Vyper source was compiled with vulnerable versions 0.2.15, 0.2.16, or 0.3.0 and relies on @nonreentrant for cross-function protection.; A liquidity/removal/withdraw path...",
+      "invalidWhen": "Not this bug for Solidity ReentrancyGuard or Vyper versions outside the affected compiler range unless a separate compiler issue is proven.; Safe if vulnerable compiler...",
+      "preconditions": [
+        "deployed bytecode compiled by the affected compiler; source-only pattern matching is insufficient.",
+        "Attacker calls remove_liquidity() on the Curve pool (compiled with vulnerable Vyper)",
+        "Pool sends ETH to the attacker before updating state (standard ETH transfer)",
+        "Attacker's receive() function calls add_liquidity() on the same pool",
+        "Both calls complete — attacker holds more LP tokens than they should"
+      ],
+      "proofShape": "Attacker calls remove_liquidity() on the Curve pool (compiled with vulnerable Vyper) -> Pool sends ETH to the attacker before updating state (standard ETH transfer) -> Attacker's receive() function calls add_liquidity()...",
+      "falsePositiveSignals": [
+        "Not this bug for Solidity ReentrancyGuard or Vyper versions outside the affected compiler range unless a separate compiler issue is proven.",
+        "Safe if vulnerable compiler output is not deployed, or no external callback path can reach another state-changing guarded function.",
+        "Requires deployed bytecode compiled by the affected compiler; source-only pattern matching is insufficient."
+      ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      }
     },
     {
       "id": "unique-defihacklabs-novel-attack-patterns-2025--1-transient-storage-eip-1153-a-001",
@@ -316,6 +614,22 @@
         125,
         201
       ],
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "arithmetic overflow",
+          "state manipulation",
+          "transient storage bypass"
+        ],
+        "commonlyComposesWith": [
+          "tstore",
+          "tload",
+          "transient storage",
+          "create2",
+          "address collision"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: EIP-1153 introduced tstore/tload opcodes for transient storage that persists only within a single transaction.",
@@ -323,7 +637,20 @@
         "ANTIPATTERN: Transient storage used for callback authorization"
       ],
       "antipattern": "Transient storage used for callback authorization",
-      "validWhen": "EIP-1153 introduced tstore/tload opcodes for transient storage that persists only within a single transaction."
+      "validWhen": "EIP-1153 introduced tstore/tload opcodes for transient storage that persists only within a single transaction.",
+      "preconditions": [
+        "Create fake ERC20 tokens (AttackerC_A, AttackerC_B) with malicious mint() that returns uint160(address(this))",
+        "Initialize the victim vault with the fake token pair",
+        "Call vault.mint() — the fake token's mint() returns attacker's address, which gets stored via tstore(1, amount)",
+        "The deployed contract calls vault.uniswapV3SwapCallback() — passes tload(1) check",
+        "Drain all vault tokens through the authorized callback"
+      ],
+      "proofShape": "Create fake ERC20 tokens (AttackerC_A, AttackerC_B) with malicious mint() that returns uint160(address(this)) -> Create a fake Uniswap V3 pool using these tokens -> Initialize the victim vault with the fake token pair",
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      }
     },
     {
       "id": "unique-defihacklabs-novel-attack-patterns-2025--2-fee-on-transfer-token-overch-002",
@@ -340,13 +667,39 @@
         202,
         265
       ],
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "arithmetic overflow",
+          "state manipulation",
+          "transient storage bypass"
+        ],
+        "commonlyComposesWith": [
+          "tstore",
+          "tload",
+          "transient storage",
+          "create2",
+          "address collision"
+        ]
+      },
       "check": [
         "VERIFY: When a token's _transfer() function applies fees based on a percentage list where sum(shares) > 100%, the sender is debited more tokens than the...",
         "PROVE: Flash loan USDT; Buy the buggy token from the pair (large amount)",
         "ANTIPATTERN: transactionFee() splits fees by unbounded percentages"
       ],
       "antipattern": "transactionFee() splits fees by unbounded percentages",
-      "validWhen": "When a token's _transfer() function applies fees based on a percentage list where sum(shares) > 100%, the sender is debited more tokens than the recipient receives."
+      "validWhen": "When a token's _transfer() function applies fees based on a percentage list where sum(shares) > 100%, the sender is debited more tokens than the recipient receives.",
+      "preconditions": [
+        "a token's _transfer() function applies fees based on a percentage list where sum(shares) > 100%, the sender is debited more...",
+        "Call pair.skim(attacker) — extract excess tokens (fee triggers again, debiting pair more)"
+      ],
+      "proofShape": "Flash loan USDT -> Buy the buggy token from the pair (large amount) -> Transfer tokens TO the pair — fee overcharge debits pair's balance excessively",
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      }
     },
     {
       "id": "unique-defihacklabs-novel-attack-patterns-2025--3-staking-reward-farming-via-c-003",
@@ -363,13 +716,38 @@
         266,
         337
       ],
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "arithmetic overflow",
+          "state manipulation",
+          "transient storage bypass"
+        ],
+        "commonlyComposesWith": [
+          "tstore",
+          "tload",
+          "transient storage",
+          "create2",
+          "address collision"
+        ]
+      },
       "check": [
         "VERIFY: When a staking contract calculates rewards per-address without tracking total claimed amounts globally, an attacker can transfer staked tokens to...",
         "PROVE: Buy and stake tokens to get staked token (stPRXVT); Deploy fresh contract via CREATE2 with unique salt",
         "ANTIPATTERN: Rewards calculated per-address without global tracking"
       ],
       "antipattern": "Rewards calculated per-address without global tracking",
-      "validWhen": "When a staking contract calculates rewards per-address without tracking total claimed amounts globally, an attacker can transfer staked tokens to freshly-deployed..."
+      "validWhen": "When a staking contract calculates rewards per-address without tracking total claimed amounts globally, an attacker can transfer staked tokens to freshly-deployed...",
+      "preconditions": [
+        "a staking contract calculates rewards per-address without tracking total claimed amounts globally, an attacker can transfer..."
+      ],
+      "proofShape": "Buy and stake tokens to get staked token (stPRXVT) -> Deploy fresh contract via CREATE2 with unique salt -> Transfer all staked tokens to the new contract",
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      }
     },
     {
       "id": "unique-defihacklabs-novel-attack-patterns-2025--4-batch-array-refund-multiplic-004",
@@ -386,13 +764,39 @@
         338,
         405
       ],
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "arithmetic overflow",
+          "state manipulation",
+          "transient storage bypass"
+        ],
+        "commonlyComposesWith": [
+          "tstore",
+          "tload",
+          "transient storage",
+          "create2",
+          "address collision"
+        ]
+      },
       "check": [
         "VERIFY: When a sale/purchase function accepts arrays of recipients, rates, and refund flags, and processes refunds per-iteration using msg.value (which is...",
         "PROVE: Calculate: refundPerIteration = msg.value / rate (e.g., 1 ETH / 10 = 0.1 ETH); Calculate: maxIterations = contractBalance / refundPerIteration (e.g., 20)",
         "ANTIPATTERN: buy() processes refunds per-array-element using msg.value"
       ],
       "antipattern": "buy() processes refunds per-array-element using msg.value",
-      "validWhen": "When a sale/purchase function accepts arrays of recipients, rates, and refund flags, and processes refunds per-iteration using msg.value (which is constant across all..."
+      "validWhen": "When a sale/purchase function accepts arrays of recipients, rates, and refund flags, and processes refunds per-iteration using msg.value (which is constant across all...",
+      "preconditions": [
+        "a sale/purchase function accepts arrays of recipients, rates, and refund flags, and processes refunds per-iteration using...",
+        "Build arrays: all recipients = attacker, all refundFlags = true"
+      ],
+      "proofShape": "Calculate: refundPerIteration = msg.value / rate (e.g., 1 ETH / 10 = 0.1 ETH) -> Calculate: maxIterations = contractBalance / refundPerIteration (e.g., 20) -> Build arrays: all recipients = attacker, all refundFlags =...",
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      }
     },
     {
       "id": "unique-defihacklabs-novel-attack-patterns-2025--5-bonding-curve-arithmetic-ove-005",
@@ -409,6 +813,22 @@
         406,
         478
       ],
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "arithmetic overflow",
+          "state manipulation",
+          "transient storage bypass"
+        ],
+        "commonlyComposesWith": [
+          "tstore",
+          "tload",
+          "transient storage",
+          "create2",
+          "address collision"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Bonding curve contracts calculate buy/sell prices using polynomial formulas.",
@@ -416,7 +836,18 @@
         "ANTIPATTERN: Bonding curve price formula overflows at extreme amounts"
       ],
       "antipattern": "Bonding curve price formula overflows at extreme amounts",
-      "validWhen": "Bonding curve contracts calculate buy/sell prices using polynomial formulas."
+      "validWhen": "Bonding curve contracts calculate buy/sell prices using polynomial formulas.",
+      "preconditions": [
+        "Read bonding curve parameters: reserve, THETA, totalSupply",
+        "Solve: $\\text{amount} = \\sqrt{\\frac{\\text{type(uint256).max}}{100 \\times \\text{reserve}} + \\text{totalSupply}^2} -...",
+        "Repeat until pool drained (each iteration extracts more ETH than deposited)"
+      ],
+      "proofShape": "Read bonding curve parameters: reserve, THETA, totalSupply -> Solve: $\\text{amount} = \\sqrt{\\frac{\\text{type(uint256).max}}{100 \\times \\text{reserve}} + \\text{totalSupply}^2} -...",
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      }
     },
     {
       "id": "unique-defihacklabs-novel-attack-patterns-2025--6-fee-unit-mismatch-between-sy-006",
@@ -433,6 +864,22 @@
         479,
         543
       ],
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "arithmetic overflow",
+          "state manipulation",
+          "transient storage bypass"
+        ],
+        "commonlyComposesWith": [
+          "tstore",
+          "tload",
+          "transient storage",
+          "create2",
+          "address collision"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: When one system computes a fee in token units (e.g., 500 USDC) and passes it to another system that interprets it as basis points or weight (e.g.,...",
@@ -440,7 +887,17 @@
         "ANTIPATTERN: Fee computed in token units, interpreted as bps/weight"
       ],
       "antipattern": "Fee computed in token units, interpreted as bps/weight",
-      "validWhen": "When one system computes a fee in token units (e.g., 500 USDC) and passes it to another system that interprets it as basis points or weight (e.g., 500 = 5%), the..."
+      "validWhen": "When one system computes a fee in token units (e.g., 500 USDC) and passes it to another system that interprets it as basis points or weight (e.g., 500 = 5%), the...",
+      "preconditions": [
+        "one system computes a fee in token units (e.g., 500 USDC) and passes it to another system that interprets it as basis points or...",
+        "Attacker's allocated fee credit is astronomical"
+      ],
+      "proofShape": "Flash loan USDC -> Open a large position — fee computed as abs(delta) × feeRateWad / 1e18 = token amount -> Fee forwarded to FeeManager as addFee(tokenAmount) — but FeeManager treats it as weight/bps",
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      }
     },
     {
       "id": "unique-defihacklabs-novel-attack-patterns-2025--7-permissionless-aum-oracle-ma-007",
@@ -457,6 +914,22 @@
         544,
         611
       ],
+      "graphHints": {
+        "variants": [
+          "manipulation",
+          "permissionless aum oracle manipulation",
+          "oracle manipulation",
+          "missing validation",
+          "logical error"
+        ],
+        "commonlyComposesWith": [
+          "oracle",
+          "permissionless aum oracle manipulation",
+          "aum oracle",
+          "oracle manipulation",
+          "tstore"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: When a protocol's updateTotalAum() function is permissionless (callable by anyone, not just keepers or admins), and its return value feeds into an...",
@@ -464,187 +937,16 @@
         "ANTIPATTERN: updateTotalAum() is permissionless"
       ],
       "antipattern": "updateTotalAum() is permissionless",
-      "validWhen": "When a protocol's updateTotalAum() function is permissionless (callable by anyone, not just keepers or admins), and its return value feeds into an oracle used by other..."
-    },
-    {
-      "id": "unique-economic-arbitrage-design-flaws-vulnerable-pattern-examples-001",
-      "title": "Vulnerable Pattern Examples",
-      "severity": "HIGH",
-      "grep": "VaultRouter.deposit|order_book_manipulation|flash_loan_arbitrage|thin_liquidity_pool|pricing_mechanism|price_discrepancy",
-      "detect": "VaultRouter.deposit() accepts arbitrary swap routing data",
-      "cat": [
-        "protocol-specific",
-        "unique"
+      "validWhen": "When a protocol's updateTotalAum() function is permissionless (callable by anyone, not just keepers or admins), and its return value feeds into an oracle used by other...",
+      "preconditions": [
+        "a protocol's updateTotalAum() function is permissionless (callable by anyone, not just keepers or admins), and its return value..."
       ],
-      "ref": "DB/unique/defihacklabs/economic-arbitrage-design-flaws.md",
-      "lines": [
-        118,
-        289
-      ],
-      "check": [
-        "VERIFY: VaultRouter.deposit() forwards arbitrary swapData to the ParaSwap aggregator without restricting which pools can be used as routing targets.",
-        "PROVE: VaultRouter.deposit() accepts arbitrary swap routing data"
-      ],
-      "antipattern": "VaultRouter.deposit() accepts arbitrary swap routing data",
-      "validWhen": "VaultRouter.deposit() forwards arbitrary swapData to the ParaSwap aggregator without restricting which pools can be used as routing targets."
-    },
-    {
-      "id": "unique-fee-mechanism-exploitation-vulnerable-pattern-examples-001",
-      "title": "Vulnerable Pattern Examples",
-      "severity": "CRITICAL",
-      "grep": "_safeTransferWithFeeCheck|_handleFeeToken|safeTransferFrom|fee_distribution|broken_fee_logic|zero_fee_bypass",
-      "detect": "buyItem allows quantity=0, resulting in zero payment",
-      "cat": [
-        "protocol-specific",
-        "unique"
-      ],
-      "ref": "DB/unique/defihacklabs/fee-mechanism-exploitation.md",
-      "lines": [
-        120,
-        235
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: buyItem() calculates totalPrice = _quantity * _pricePerItem without requiring _quantity > 0.",
-        "PROVE: Token has broken fee mechanism creating phantom balance"
-      ],
-      "antipattern": "Token has broken fee mechanism creating phantom balance",
-      "validWhen": "buyItem() calculates totalPrice = _quantity * _pricePerItem without requiring _quantity > 0."
-    },
-    {
-      "id": "unique-liquidity-migration-exploit-vulnerable-pattern-examples-001",
-      "title": "Vulnerable Pattern Examples",
-      "severity": "CRITICAL",
-      "grep": "token_parameter_mismatch|LpMigration.migrate|V3Migrator.migrate|pancakeV3FlashCallback|factory.getPair|liquidity_migration",
-      "detect": "migrate() accepts arbitrary token0/token1 without validating against pair",
-      "cat": [
-        "protocol-specific",
-        "unique"
-      ],
-      "ref": "DB/unique/defihacklabs/liquidity-migration-exploit.md",
-      "lines": [
-        126,
-        335
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: migrate() doesn't validate that token0/token1 match pair.token0()/pair.token1().",
-        "PROVE: migrate() accepts arbitrary token0/token1 without validating against pair"
-      ],
-      "antipattern": "migrate() accepts arbitrary token0/token1 without validating against pair",
-      "validWhen": "migrate() doesn't validate that token0/token1 match pair.token0()/pair.token1()."
-    },
-    {
-      "id": "unique-msgvalue-in-loop-vulnerable-pattern-examples-001",
-      "title": "Vulnerable Pattern Examples",
-      "severity": "CRITICAL",
-      "grep": "payment_verification|double_spending|batch_operation|batch_functions|loop_iteration|batchPurchase",
-      "detect": "msg.value checked per vault in a loop",
-      "cat": [
-        "protocol-specific",
-        "unique"
-      ],
-      "ref": "DB/unique/defihacklabs/msgvalue-in-loop.md",
-      "lines": [
-        116,
-        280
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: exercise() iterates over multiple vaults and checks msg.value >= ethCost per iteration.",
-        "PROVE: SushiMiso DutchAuction batch() forwards msg.value to each sub-call"
-      ],
-      "antipattern": "SushiMiso DutchAuction batch() forwards msg.value to each sub-call",
-      "validWhen": "exercise() iterates over multiple vaults and checks msg.value >= ethCost per iteration."
-    },
-    {
-      "id": "unique-nft-specific-exploit-patterns-vulnerable-pattern-examples-001",
-      "title": "Vulnerable Pattern Examples",
-      "severity": "HIGH",
-      "grep": "signature_validation|buyer_verification|marketplace_logic|nft_marketplace|incrementNonce|fillSellOrder",
-      "detect": "Only seller signature validated, buyer address is caller-controlled",
-      "cat": [
-        "protocol-specific",
-        "unique"
-      ],
-      "ref": "DB/unique/defihacklabs/nft-specific-exploit-patterns.md",
-      "lines": [
-        106,
-        223
-      ],
-      "check": [
-        "VERIFY: fillSellOrder() only validates the seller's signature.",
-        "PROVE: Only seller signature validated, buyer address is caller-controlled"
-      ],
-      "antipattern": "Only seller signature validated, buyer address is caller-controlled",
-      "validWhen": "fillSellOrder() only validates the seller's signature."
-    },
-    {
-      "id": "unique-skim-balance-attack-vulnerable-pattern-examples-001",
-      "title": "Vulnerable Pattern Examples",
-      "severity": "MEDIUM",
-      "grep": "addLiquidityWithFeeToken|skim(address(pair|balance_discrepancy|deflationary_token|pair_manipulation|reserve_tracking",
-      "detect": "Pair.skim() with fee-on-transfer token creates exploitable reserve gap",
-      "cat": [
-        "protocol-specific",
-        "unique"
-      ],
-      "ref": "DB/unique/defihacklabs/skim-balance-attack.md",
-      "lines": [
-        132,
-        295
-      ],
-      "check": [
-        "VERIFY: GSS token has a transfer fee.",
-        "PROVE: Pair.skim() with fee-on-transfer token creates exploitable reserve gap"
-      ],
-      "antipattern": "Pair.skim() with fee-on-transfer token creates exploitable reserve gap",
-      "validWhen": "GSS token has a transfer fee."
-    },
-    {
-      "id": "unique-stale-cached-state-exploits-vulnerable-pattern-examples-001",
-      "title": "Vulnerable Pattern Examples",
-      "severity": "HIGH",
-      "grep": "_updateExchangeRate|updateExchangeRate|self_liquidation|global_variable|getExchangeRate|stale_variable",
-      "detect": "Global sellAmount variable is inflated by buys, reduces burn on sells",
-      "cat": [
-        "protocol-specific",
-        "unique"
-      ],
-      "ref": "DB/unique/defihacklabs/stale-cached-state-exploits.md",
-      "lines": [
-        116,
-        253
-      ],
-      "check": [
-        "VERIFY: sellAmount global variable is accumulated by buy transactions without any cap, decay, or per-address tracking.",
-        "PROVE: Global sellAmount variable is inflated by buys, reduces burn on sells"
-      ],
-      "antipattern": "Global sellAmount variable is inflated by buys, reduces burn on sells",
-      "validWhen": "The sellAmount global variable is accumulated by buy transactions without any cap, decay, or per-address tracking."
-    },
-    {
-      "id": "unique-swap-metapool-attack-vulnerable-pattern-examples-001",
-      "title": "Vulnerable Pattern Examples",
-      "severity": "CRITICAL",
-      "grep": "price_dependency_chain|cross_pool_arbitrage|executeOperation|imbalanced_pool|getVirtualPrice|curve_metapool",
-      "detect": "Metapool swap rate depends on base pool state",
-      "cat": [
-        "protocol-specific",
-        "unique"
-      ],
-      "ref": "DB/unique/defihacklabs/swap-metapool-attack.md",
-      "lines": [
-        111,
-        217
-      ],
-      "neverPrune": true,
-      "check": [
-        "VERIFY: Saddle's metapool swaps use a virtual price derived from its base pool LP token.",
-        "PROVE: Metapool swap rate depends on base pool state"
-      ],
-      "antipattern": "Metapool swap rate depends on base pool state",
-      "validWhen": "Saddle's metapool swaps use a virtual price derived from its base pool LP token."
+      "proofShape": "Call machine.updateTotalAum() — permissionless, anyone can trigger -> AUM is calculated based on current asset balances (which may include flash-loaned assets) -> MachineShareOracle.getSharePrice() now returns inflated...",
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      }
     },
     {
       "id": "unique-converttoshares-manipulation-dos-converttoshares-manipulation-b-000",
@@ -661,6 +963,27 @@
         73,
         399
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "manipulation",
+          "converttoshares_manipulation",
+          "convert to shares manipulation",
+          "donation_attack",
+          "donation attack"
+        ],
+        "commonlyComposesWith": [
+          "convert to shares manipulation",
+          "balance of dependency",
+          "donation attack",
+          "zero share minting",
+          "deposit dos"
+        ]
+      },
       "check": [
         "VERIFY: Signal 1: Unbounded loop over user-controlled array can exceed block gas limit; Signal 2: External call failure causes entire transaction to revert",
         "PROVE: balanceOf can be manipulated by direct transfers",
@@ -672,7 +995,17 @@
       "securePattern": "Permanent dead shares prevent empty vault manipulation",
       "validWhen": "Signal 1: Unbounded loop over user-controlled array can exceed block gas limit; Signal 2: External call failure causes entire transaction to revert",
       "invalidWhen": "Not this bug when: Loop iterations are bounded by a reasonable constant; Safe if: External call failures are handled gracefully (try/catch or pull pattern)",
-      "impact": "Zero Share Minting: Deposits return 0 shares, users lose funds"
+      "impact": "Zero Share Minting: Deposits return 0 shares, users lose funds",
+      "preconditions": [
+        "attacker control of: specific conditions per pattern",
+        "totalSupply > 0 but small"
+      ],
+      "proofShape": "balanceOf can be manipulated by direct transfers",
+      "falsePositiveSignals": [
+        "Not this bug when: Loop iterations are bounded by a reasonable constant",
+        "Safe if: External call failures are handled gracefully (try/catch or pull pattern)",
+        "Requires attacker control of: specific conditions per pattern"
+      ]
     },
     {
       "id": "unique-cross-contract-reentrancy-yield-token-th-cross-contract-reentrancy-allo-000",
@@ -689,6 +1022,27 @@
         70,
         392
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "yield token theft",
+          "withdrawal request manager",
+          "cross contract reentrancy",
+          "cross"
+        ],
+        "commonlyComposesWith": [
+          "reentrancy",
+          "cross_contract_reentrancy",
+          "cross contract reentrancy",
+          "balance accounting",
+          "multi vault architecture"
+        ]
+      },
       "check": [
         "VERIFY: Signal 1: External call (.call, .transfer, token transfer) occurs before state variable update; Signal 2: Token implements callback hooks (ERC-777,...",
         "PROVE: *Prerequisites; WithdrawalRequestManager manages multiple vault strategies",
@@ -700,7 +1054,20 @@
       "securePattern": "Balance snapshot after all external calls",
       "validWhen": "Signal 1: External call (.call, .transfer, token transfer) occurs before state variable update; Signal 2: Token implements callback hooks (ERC-777, ERC-721) and protocol...",
       "invalidWhen": "Not this bug when: Contract uses ReentrancyGuard (nonReentrant) on all entry points; Safe if: All state updates complete before any external call (strict CEI)",
-      "impact": "Inflated Share Minting: Attacker receives more vault shares than their deposit value"
+      "impact": "Inflated Share Minting: Attacker receives more vault shares than their deposit value",
+      "preconditions": [
+        "attacker control of: specific conditions per pattern",
+        "WithdrawalRequestManager manages multiple vault strategies",
+        "control a vault that is whitelisted OR exploit via EIP-7702",
+        "Attacker can control a vault that is whitelisted OR exploit via EIP-7702",
+        "Attacker identifies target: Pending withdrawal requests hold YIELD_TOKEN in the manager"
+      ],
+      "proofShape": "*Prerequisites -> WithdrawalRequestManager manages multiple vault strategies -> Other users have pending withdrawal requests (yield tokens sitting in manager)",
+      "falsePositiveSignals": [
+        "Not this bug when: Contract uses ReentrancyGuard (nonReentrant) on all entry points",
+        "Safe if: All state updates complete before any external call (strict CEI)",
+        "Requires attacker control of: specific conditions per pattern"
+      ]
     },
     {
       "id": "unique-flash-loan-vault-deflation-attack-flash-loan-vault-deflation-att-000",
@@ -717,6 +1084,27 @@
         75,
         509
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "yield drain",
+          "principal token",
+          "flash loan vault deflation",
+          "context"
+        ],
+        "commonlyComposesWith": [
+          "flash loan",
+          "max flash loan",
+          "erc4626 share price",
+          "vault deflation",
+          "share price reset"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Signal 1: Critical input parameter not validated against expected range or format; Signal 2: Oracle data consumed without staleness check or sanity...",
@@ -730,7 +1118,19 @@
       "securePattern": "Prevent borrowing amounts that could empty underlying vault",
       "validWhen": "Signal 1: Critical input parameter not validated against expected range or format; Signal 2: Oracle data consumed without staleness check or sanity bounds",
       "invalidWhen": "Not this bug when: Validation exists but is in an upstream function caller; Safe if: Parameter range is inherently bounded by the type or protocol invariant",
-      "impact": "Share Price Reset: Vault's share price forcibly returned to default value"
+      "impact": "Share Price Reset: Vault's share price forcibly returned to default value",
+      "preconditions": [
+        "attacker control of: specific conditions per pattern",
+        "totalAssets = 0 and totalShares = 0, the vault falls back to a default price (typically 1:1).",
+        "ERC4626 IBT vault with accumulated yield (share price > 1)",
+        "PrincipalToken contract holds majority/all of IBT supply"
+      ],
+      "proofShape": "*Prerequisites -> ERC4626 IBT vault with accumulated yield (share price > 1) -> PrincipalToken contract holds majority/all of IBT supply",
+      "falsePositiveSignals": [
+        "Not this bug when: Validation exists but is in an upstream function caller",
+        "Safe if: Parameter range is inherently bounded by the type or protocol invariant",
+        "Requires attacker control of: specific conditions per pattern"
+      ]
     }
   ]
 }

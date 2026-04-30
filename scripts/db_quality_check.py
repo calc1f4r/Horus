@@ -1,15 +1,79 @@
 #!/usr/bin/env python3
 """DB Quality Monitor - Comprehensive health check script."""
-import os, re, json, yaml, subprocess, sys
+import os, re, json, shutil, subprocess, sys
 from collections import Counter
+from pathlib import Path
+
+from horus_retrieval.documents import DBDocument, parse_frontmatter_with_errors
+from horus_retrieval.protocol_context import PROTOCOL_CONTEXTS
 
 DB_ROOT = "DB/"
 MANIFESTS_DIR = "DB/manifests/"
 HUNTCARDS_DIR = "DB/manifests/huntcards/"
 IGNORED_ENTRY_DIRS = {"manifests", "graphify-out", "_drafts", "_telemetry"}
+GENERATOR_PATH = Path("scripts/generate_manifests.py")
+DB_GRAPH_PATH = Path("DB/graphify-out/graph.json")
 
 REQUIRED_FM_FIELDS = ['protocol', 'category', 'vulnerability_type', 'attack_type', 'affected_component', 'severity', 'impact']
 VALID_SEVERITY = ['critical', 'high', 'medium', 'low']
+
+ROOT_CAUSE_RE = re.compile(
+    r"(?:^|\n)\s*(?:[-*]\s*)?(?:#{2,6}\s*)?(?:\*\*)?"
+    r"(?:Root\s*Cause(?:\s*(?:Statement|Categories|Analysis))?|Fundamental\s*Issue)"
+    r"(?:\*\*)?\s*(?::|\n)",
+    re.I,
+)
+VULNERABLE_EXAMPLE_RE = re.compile(
+    r"(?:❌|"
+    r"(?:^|\n)\s*#{2,6}\s*(?:Vulnerable\s+(?:Pattern\s+|Code\s+)?(?:Examples?|Patterns?)|"
+    r"Vulnerability\s+Examples?|Real-World\s+Examples?)|"
+    r"\bVULNERABLE\s*:|"
+    r"//\s*VULNERABLE\b)",
+    re.I,
+)
+SECURE_GUIDANCE_RE = re.compile(
+    r"(?:✅|"
+    r"(?:^|\n)\s*#{2,6}\s*(?:Secure\s+(?:Pattern|Code|Implementation)|"
+    r"Recommended\s+Fix|Remediation|Mitigation|False\s+Positive(?:\s+Guards?|\s+Detail)?)|"
+    r"\bSafe\s+if\s*:|"
+    r"\bNot\s+this\s+bug\s+when\s*:)",
+    re.I,
+)
+KEYWORDS_RE = re.compile(
+    r"(?:^|\n)\s*#{2,6}\s*(?:Keywords|Code\s+Keywords|Search\s+Keywords)\b|"
+    r"\bHigh-signal\s+code\s+keywords\s*:",
+    re.I,
+)
+
+def iter_text_values(value):
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, dict):
+        for nested in value.values():
+            yield from iter_text_values(nested)
+    elif isinstance(value, list):
+        for nested in value:
+            yield from iter_text_values(nested)
+
+def normalized_text(value):
+    return re.sub(r"[^a-z0-9]+", "", str(value).lower())
+
+def text_contains_focus(haystack, focus):
+    return focus.lower() in haystack or normalized_text(focus) in normalized_text(haystack)
+
+def score_graph_labels(nodes, query):
+    terms = [term.lower() for term in query.split() if len(term) > 2]
+    scored = []
+    for node in nodes:
+        if not isinstance(node, dict):
+            continue
+        label = str(node.get("label", "")).lower()
+        source = str(node.get("source_file", "")).lower()
+        score = sum(1 for term in terms if term in label)
+        score += sum(0.5 for term in terms if term in source)
+        if score > 0:
+            scored.append((score, label))
+    return [label for _score, label in sorted(scored, reverse=True)]
 
 def find_entries():
     result = []
@@ -22,30 +86,22 @@ def find_entries():
     return result
 
 def parse_frontmatter(filepath):
-    with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
-        content = f.read()
+    document = DBDocument.from_path(Path(filepath))
+    content = document.content
     lines = content.split('\n')
     total_lines = len(lines)
+    fm, fm_errors = parse_frontmatter_with_errors(content)
+    fm_for_checks = fm or {}
     
-    fm = None
-    fm_errors = []
-    if lines and lines[0].strip() == '---':
-        end = -1
-        for i in range(1, min(len(lines), 80)):
-            if lines[i].strip() == '---':
-                end = i
-                break
-        if end > 0:
-            fm_text = '\n'.join(lines[1:end])
-            try:
-                fm = yaml.safe_load(fm_text)
-            except Exception as e:
-                fm_errors.append(f'YAML parse error: {str(e)[:80]}')
-    
-    has_vuln_ex = bool(re.search(r'❌', content))
-    has_secure = bool(re.search(r'✅', content))
-    has_root_cause = bool(re.search(r'#{2,4}\s*(Root\s*Cause|Fundamental\s*Issue)', content, re.I))
-    has_keywords = bool(re.search(r'#{2,4}\s*Keywords', content, re.I))
+    has_vuln_ex = bool(VULNERABLE_EXAMPLE_RE.search(content))
+    has_secure = bool(SECURE_GUIDANCE_RE.search(content))
+    has_root_cause = bool(ROOT_CAUSE_RE.search(content))
+    has_keywords = bool(
+        KEYWORDS_RE.search(content)
+        or fm_for_checks.get("code_keywords")
+        or fm_for_checks.get("search_keywords")
+        or fm_for_checks.get("grep_keywords")
+    )
     has_code_blocks = '```' in content
     has_detection = bool(re.search(r'#{2,4}\s*(Detection\s*Pattern|Audit\s*Checklist)', content, re.I))
     has_reference = bool(re.search(r'#{1,3}\s*Reference', content, re.I))
@@ -164,8 +220,7 @@ def skill2():
     
     issues = []
     
-    # Check generate_manifests.py runs
-    print("Testing generate_manifests.py...")
+    print("Validating generated manifest JSON...")
     
     # Load all manifests and validate
     manifest_files = [f for f in os.listdir(MANIFESTS_DIR) if f.endswith('.json') and f != 'keywords.json']
@@ -368,9 +423,7 @@ def skill4():
         issues.append(('WARNING', f'Orphan manifest files not in index: {orphan_manifests}'))
     
     # 4B: protocolContext
-    required_contexts = ['lending_protocol', 'dex_amm', 'vault_yield', 'governance_dao', 
-                         'cross_chain_bridge', 'cosmos_appchain', 'solana_program',
-                         'perpetuals_derivatives', 'token_launch', 'staking_liquid_staking', 'nft_marketplace']
+    required_contexts = list(PROTOCOL_CONTEXTS)
     
     present_contexts = list(index.get('protocolContext', {}).get('mappings', {}).keys())
     for ctx in required_contexts:
@@ -389,17 +442,21 @@ def skill4():
             with open(index['manifests'][m]['file']) as f:
                 manifest = json.load(f)
             for fe in manifest.get('files', []):
+                haystacks.append(' '.join(iter_text_values(fe.get('frontmatter', {}))).lower())
                 for pattern in fe.get('patterns', []):
                     fragments = [pattern.get('title', ''), pattern.get('rootCause', '') or '']
                     fragments.extend(pattern.get('codeKeywords', []))
                     fragments.extend(pattern.get('searchKeywords', []))
+                    fragments.extend(iter_text_values(pattern.get('graphHints', {})))
+                    fragments.extend(iter_text_values(pattern.get('reportEvidence', {})))
                     for subsection in pattern.get('subsections') or []:
                         fragments.append(subsection.get('title', ''))
                         fragments.extend(subsection.get('searchKeywords') or [])
+                        fragments.extend(iter_text_values(subsection.get('graphHints', {})))
                     haystacks.append(' '.join(str(fragment) for fragment in fragments if fragment).lower())
 
         for focus in cinfo.get('focusPatterns', []):
-            if haystacks and not any(focus.lower() in haystack for haystack in haystacks):
+            if haystacks and not any(text_contains_focus(haystack, focus) for haystack in haystacks):
                 issues.append(('WARNING', f'protocolContext {ctx} focusPattern "{focus}" is not discoverable from its manifests'))
     
     # 4C: Keyword index
@@ -457,10 +514,10 @@ def skill5():
             issues.append(('WARNING', f'{s} does not exist'))
             print(f"  ⚠️ {s} missing")
     
-    if os.path.isfile('generate_manifests.py'):
-        print(f"  ✅ generate_manifests.py exists")
+    if GENERATOR_PATH.is_file():
+        print(f"  ✅ {GENERATOR_PATH} exists")
     else:
-        issues.append(('CRITICAL', 'generate_manifests.py missing'))
+        issues.append(('CRITICAL', f'{GENERATOR_PATH} missing'))
     
     return issues
 
@@ -608,6 +665,140 @@ def skill7():
     
     return issues
 
+def skill8():
+    """Graphify artifact health."""
+    print("\n" + "=" * 60)
+    print("SKILL 8: GRAPHIFY ARTIFACT HEALTH")
+    print("=" * 60)
+
+    issues = []
+
+    if not DB_GRAPH_PATH.is_file():
+        issues.append(("WARNING", f"DB graph missing: {DB_GRAPH_PATH}"))
+        print(f"  ⚠️ DB graph missing: {DB_GRAPH_PATH}")
+        return issues
+
+    try:
+        with DB_GRAPH_PATH.open("r", encoding="utf-8") as f:
+            graph = json.load(f)
+    except json.JSONDecodeError as exc:
+        issues.append(("CRITICAL", f"{DB_GRAPH_PATH}: invalid JSON: {exc}"))
+        graph = None
+
+    if isinstance(graph, dict):
+        nodes = graph.get("nodes")
+        edges = graph.get("links") if "links" in graph else graph.get("edges")
+
+        if not isinstance(nodes, list) or not nodes:
+            issues.append(("CRITICAL", f"{DB_GRAPH_PATH}: missing or empty nodes list"))
+            nodes = []
+        if not isinstance(edges, list) or not edges:
+            issues.append(("CRITICAL", f"{DB_GRAPH_PATH}: missing or empty links/edges list"))
+            edges = []
+
+        node_ids = {node.get("id") for node in nodes if isinstance(node, dict)}
+        missing_endpoints = 0
+        for edge in edges:
+            if not isinstance(edge, dict):
+                missing_endpoints += 1
+                continue
+            if edge.get("source") not in node_ids or edge.get("target") not in node_ids:
+                missing_endpoints += 1
+
+        if missing_endpoints:
+            issues.append(("CRITICAL", f"{DB_GRAPH_PATH}: {missing_endpoints} edges have missing endpoints"))
+
+        node_kinds = {node.get("node_kind") for node in nodes if isinstance(node, dict)}
+        required_kinds = {
+            "HuntCard",
+            "DBEntry",
+            "Category",
+            "Manifest",
+            "ProtocolContext",
+            "RootCauseFamily",
+            "AttackType",
+            "AffectedComponent",
+            "GraphHint",
+            "ReportEvidence",
+            "Severity",
+        }
+        missing_kinds = sorted(required_kinds - node_kinds)
+        if missing_kinds:
+            issues.append(("CRITICAL", f"{DB_GRAPH_PATH}: missing semantic node kinds: {missing_kinds}"))
+
+        relation_counts = Counter(edge.get("relation") for edge in edges if isinstance(edge, dict))
+        if relation_counts.get("related_variant", 0) == 0:
+            issues.append(("CRITICAL", f"{DB_GRAPH_PATH}: missing related_variant edges"))
+        if relation_counts.get("has_graph_hint", 0) == 0:
+            issues.append(("CRITICAL", f"{DB_GRAPH_PATH}: missing graph hint edges"))
+        if relation_counts.get("has_root_cause_family", 0) == 0:
+            issues.append(("CRITICAL", f"{DB_GRAPH_PATH}: missing root-cause-family edges"))
+
+        labels = {str(node.get("label", "")).lower() for node in nodes if isinstance(node, dict)}
+        expected_label_fragments = [
+            "flash loan oracle manipulation",
+            "oracle stale price",
+            "cross_chain_bridge",
+        ]
+        for expected in expected_label_fragments:
+            if not any(expected in label for label in labels):
+                issues.append(("WARNING", f"{DB_GRAPH_PATH}: expected graph label not found: {expected}"))
+
+        relevance_checks = {
+            "oracle flash loan": "flash loan oracle manipulation",
+            "erc4626 first depositor": "first depositor",
+            "cross chain replay": "cross-chain replay",
+        }
+        for query, expected in relevance_checks.items():
+            ranked_labels = score_graph_labels(nodes, query)[:10]
+            if not any(expected in label for label in ranked_labels):
+                issues.append(("WARNING", f"{DB_GRAPH_PATH}: query '{query}' did not rank '{expected}' in top 10 labels"))
+
+        if not any(level == "CRITICAL" for level, _ in issues):
+            print(f"  ✅ Graph JSON shape OK ({len(nodes)} nodes, {len(edges)} edges)")
+            print(
+                "  ✅ Semantic graph OK "
+                f"({len(node_kinds)} node kinds, {relation_counts.get('related_variant', 0)} related_variant edges)"
+            )
+
+    graphify_bin = shutil.which("graphify")
+    if graphify_bin and not any(level == "CRITICAL" for level, _ in issues):
+        try:
+            result = subprocess.run(
+                [
+                    graphify_bin,
+                    "query",
+                    "oracle staleness",
+                    "--graph",
+                    str(DB_GRAPH_PATH),
+                    "--budget",
+                    "200",
+                ],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=20,
+                check=False,
+            )
+            if result.returncode != 0:
+                detail = result.stderr.strip() or f"exit code {result.returncode}"
+                issues.append(("CRITICAL", f"graphify query failed for {DB_GRAPH_PATH}: {detail}"))
+            else:
+                print("  ✅ graphify query smoke test OK")
+        except subprocess.TimeoutExpired:
+            issues.append(("WARNING", f"graphify query timed out for {DB_GRAPH_PATH}"))
+    elif not graphify_bin:
+        issues.append(("WARNING", "graphify CLI not found; skipped query smoke test"))
+
+    for level, msg in issues:
+        icon = "🔴" if level == "CRITICAL" else "⚠️"
+        print(f"  {icon} {msg}")
+
+    if not issues:
+        print("  ✅ Graphify artifacts OK")
+
+    return issues
+
 if __name__ == '__main__':
     s1 = skill1()
     s2 = skill2()
@@ -616,6 +807,7 @@ if __name__ == '__main__':
     s5 = skill5()
     s6 = skill6_sample()
     s7 = skill7()
+    s8 = skill8()
     
     print("\n" + "=" * 60)
     print("SUMMARY")
@@ -623,7 +815,7 @@ if __name__ == '__main__':
     
     all_critical = []
     all_warnings = []
-    for results in [s2, s3, s4, s5, s6, s7]:
+    for results in [s2, s3, s4, s5, s6, s7, s8]:
         if isinstance(results, list):
             for level, msg in results:
                 if level == 'CRITICAL':

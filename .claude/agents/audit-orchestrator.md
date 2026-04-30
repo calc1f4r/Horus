@@ -349,40 +349,10 @@ fi
 ### Step P0-4: Merge and finalize graph.json
 
 ```bash
-python3 - <<'PYEOF'
-import json, shutil
-from pathlib import Path
-
-CODEBASE = "<path>"   # substitute actual codebase path
-graphify_extract = Path(CODEBASE) / "graphify-out" / ".graphify_extract.json"
-graphify_graph   = Path(CODEBASE) / "graphify-out" / "graph.json"
-blockchain_ast   = Path("audit-output/graph/blockchain-ast.json")
-out              = Path("audit-output/graph/graph.json")
-
-# Prefer .graphify_extract.json (richer, pre-build) for merge; fall back to graph.json
-base_file = graphify_extract if graphify_extract.exists() else graphify_graph
-if not base_file.exists():
-    print("WARNING: graphify output not found. Phase 0 incomplete.")
-    raise SystemExit(0)
-
-g = json.loads(base_file.read_text())
-
-if blockchain_ast.exists():
-    b = json.loads(blockchain_ast.read_text())
-    seen = {n["id"] for n in g.get("nodes", [])}
-    for n in b.get("nodes", []):
-        if n["id"] not in seen:
-            g.setdefault("nodes", []).append(n)
-            seen.add(n["id"])
-    g.setdefault("edges", []).extend(b.get("edges", []))
-    g.setdefault("hyperedges", []).extend(b.get("hyperedges", []))
-    print(f"Merged: {len(g['nodes'])} nodes, {len(g['edges'])} edges, {len(g['hyperedges'])} hyperedges")
-else:
-    print(f"Graph (graphify-only): {len(g.get('nodes',[]))} nodes, {len(g.get('edges',[]))} edges")
-
-out.write_text(json.dumps(g, indent=2))
-print(f"Written: {out}")
-PYEOF
+python3 scripts/finalize_audit_graph.py \
+  --codebase "$CODEBASE" \
+  --blockchain-ast audit-output/graph/blockchain-ast.json \
+  --out audit-output/graph/graph.json
 ```
 
 ### Step P0-5: Start MCP server in background

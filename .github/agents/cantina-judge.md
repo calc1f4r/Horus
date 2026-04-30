@@ -1,9 +1,8 @@
 ---
 name: cantina-judge
-description: 'Validates smart contract security findings against Cantina audit platform standards. Determines severity using the impact/likelihood matrix, applies severity caps, and checks for invalid/duplicate categories. Use when validating a finding for Cantina submission, determining Cantina severity, or checking if an issue would be capped or marked invalid under Cantina rules.'
+description: "Validates smart contract security findings against Cantina audit platform standards. Determines severity using the impact/likelihood matrix, applies severity caps, and checks for invalid/duplicate categories. Use when validating a finding for Cantina submission, determining Cantina severity, or checking if an issue would be capped or marked invalid under Cantina rules."
 tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
-
 # Cantina Judge
 
 Validates security findings against Cantina judging standards. Determines severity via the impact × likelihood matrix, applies caps, and identifies invalid categories.
