@@ -79,7 +79,7 @@ total_exploits_analyzed: 15
 total_losses: "$10M+"
 ---
 
-## References
+## References & Source Reports
 
 | Tag | Source | Path |
 |-----|--------|------|
@@ -115,6 +115,41 @@ Reflection tokens (SafeMoon forks) and tax/deflationary tokens continued to be o
 | Impact | fund_loss |
 | Interaction Scope | `single_contract` |
 | Chain(s) | everychain |
+
+#### Valid Bug Signals
+
+- Reflection math changes `rTotal`, `tTotal`, `currentRate`, or pair balances without a corresponding AMM reserve update.
+- Pair is not excluded from reflections, burns, taxes, or rebases, so `balanceOf(pair)` can diverge from `reserve0`/`reserve1`.
+- Public or attacker-reachable `deliver`, `burn`, self-transfer, `burnPairs`, or pair-tax path can be combined with `skim`, `sync`, or direct `swap`.
+- Token `_transfer` handles `sender == recipient`, excluded accounts, pair addresses, or fee redistribution asymmetrically.
+
+#### False Positive Guards
+
+- Not this bug when AMM pair addresses are excluded from reflection/rebase effects and cannot be targeted by burn/tax side effects.
+- Safe if `deliver`/burn/reflection functions cannot affect pair balances or are disabled after liquidity creation.
+- Safe if the AMM integration forbids public `skim`/`sync` abuse or verifies reserves against invariant-preserving deltas before swaps.
+- Requires a pair with meaningful base-token liquidity and an attacker path to change pair token balance or reflected rate before extracting via swap.
+
+#### Code Patterns to Look For
+
+```solidity
+function deliver(uint256 tAmount) external {
+    uint256 rAmount = tAmount * _getRate();
+    _rOwned[msg.sender] -= rAmount;
+    _rTotal -= rAmount; // pair balanceOf can increase without transfer
+}
+
+function _transfer(address from, address to, uint256 amount) internal {
+    if (from == to) { /* fee/self-transfer special case */ }
+    if (to == pair || from == pair) { _burn(pair, fee); }
+}
+
+pair.skim(attacker);
+pair.sync();
+pair.swap(...);
+```
+
+Focus review on reflection-rate state, pair exclusion lists, self-transfer branches, pair-specific burn/tax logic, and direct AMM calls after `deliver`/`burn`/`sync`.
 
 
 ### Vulnerability Description

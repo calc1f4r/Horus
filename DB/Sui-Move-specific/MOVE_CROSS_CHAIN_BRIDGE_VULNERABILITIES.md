@@ -102,16 +102,26 @@ Cross-chain vulnerabilities appeared in 3/29 OtterSec Move audit reports (10%), 
 
 #### Valid Bug Signals
 
-- Signal 1: Critical input parameter not validated against expected range or format
-- Signal 2: Oracle data consumed without staleness check or sanity bounds
-- Signal 3: User-supplied address or calldata forwarded without validation
-- Signal 4: Missing check allows operation under invalid or stale state
+- Signal 1: Payload validation is separated from the value-moving action, allowing a third party to mark a payload consumed before mint/claim/fulfillment.
+- Signal 2: Validator set updates accept duplicate keys, insufficient threshold, stale epoch, or unordered signer data that changes quorum semantics.
+- Signal 3: Incoming messages are decoded without binding source chain, sender, nonce, destination module, asset, amount, and recipient into the verified digest.
+- Signal 4: Sui recipient handling can send funds or gas to an object ID, bridge object, or non-user address with no recovery path.
 
 #### False Positive Guards
 
-- Not this bug when: Validation exists but is in an upstream function caller
-- Safe if: Parameter range is inherently bounded by the type or protocol invariant
-- Requires attacker control of: specific conditions per pattern
+- Not this bug when: Verification, replay marking, and mint/claim execution are one atomic entry path with all digest fields domain-separated.
+- Safe if: Validator sets are sorted, duplicate-free, threshold-checked, epoch-bound, and replaced only through authenticated governance/committee flows.
+- Requires attacker control of: a bridge payload/proof, mempool ordering, validator-set input, cross-chain message fields, or destination recipient data.
+
+#### Code Patterns to Look For
+
+```text
+- validate_and_store_payload, mark_used, or table::add(used_payloads, hash, true) callable separately from mint/claim
+- signature hash omits chain ID, source address, nonce, module/function selector, asset ID, amount, recipient, or deadline
+- validator_set updates without duplicate-key checks, sortedness checks, threshold bounds, or epoch monotonicity
+- transfer::public_transfer or claim_on_behalf using decoded recipient bytes without address/object-kind validation
+- lz_receive, receive_message, execute_transfer, or process_incoming_asset callable by non-endpoint/non-bridge senders
+```
 
 ### Vulnerability Description
 

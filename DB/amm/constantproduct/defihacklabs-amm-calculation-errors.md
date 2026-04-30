@@ -115,6 +115,17 @@ Attacker → Pair.swap(amount0Out, amount1Out, to, data)
 3. Safe if the protocol uses unmodified UniswapV2 code (`3/1000` fee with `1000**2` K-check)
 4. Safe if a separate `_kCheck()` helper enforces `K_SCALE_FACTOR = FEE_DENOMINATOR`
 
+### Code Patterns to Look For
+
+```solidity
+uint balance0Adjusted = balance0 * 10000 - amount0In * 16;
+uint balance1Adjusted = balance1 * 10000 - amount1In * 16;
+require(balance0Adjusted * balance1Adjusted >= reserve0 * reserve1 * 1000**2, "K");
+```
+
+- High signal when fee-adjusted balances use a 10000 basis-point denominator but the final K comparison still scales reserves by `1000**2`.
+- Also inspect forks that changed fee constants, pair math, flash-swap callbacks, or fallback swap routes without updating every invariant comparison.
+
 ---
 
 ## Root Cause

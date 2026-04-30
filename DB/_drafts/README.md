@@ -1,14 +1,18 @@
 # Draft DB Entries
 
-This directory holds auto-generated draft vulnerability entries from
-`db-quality-monitor --gap-analysis`.
+This directory is for automatically drafted or agent-suggested vulnerability entries that are not yet part of the live Horus database.
 
-Drafts are not part of the runtime DB and must not be indexed into manifests.
-To promote a draft:
+Rules:
 
-1. Review it against `TEMPLATE.md`.
-2. Move it into the appropriate `DB/<category>/...` directory.
-3. Remove `status: draft` from frontmatter.
-4. Run `python3 scripts/generate_manifests.py`.
-5. Run `python3 scripts/db_quality_check.py`.
+- Files here must follow `TEMPLATE.md` before promotion.
+- Files here must not be loaded into `DB/index.json`, manifests, hunt cards, or graph artifacts.
+- Promotion is manual: move a reviewed draft into the appropriate `DB/<category>/` directory, then run:
+
+```bash
+python3 scripts/generate_manifests.py
+python3 scripts/db_quality_check.py
+python3 scripts/build_db_graph.py
+```
+
+The generator currently ignores `DB/_drafts/`.
 

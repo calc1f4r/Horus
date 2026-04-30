@@ -1,9 +1,8 @@
 ---
 name: sherlock-judging
-description: 'Validates smart contract security findings against Sherlock audit platform standards. Determines correct severity (High/Medium/Invalid), checks validity against Sherlock criteria, and assesses duplication. Use when validating findings for Sherlock contests, determining Sherlock severity levels, checking if issues meet Sherlock judging criteria, or reviewing audit reports for Sherlock submission.'
-tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
+description: "Validates smart contract security findings against Sherlock audit platform standards. Determines correct severity (High/Medium/Invalid), checks validity against Sherlock criteria, and assesses duplication. Use when validating findings for Sherlock contests, determining Sherlock severity levels, checking if issues meet Sherlock judging criteria, or reviewing audit reports for Sherlock submission."
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
-
 # Sherlock Judge
 
 Validates security findings against Sherlock official judging criteria. Determines whether findings are valid, assigns correct severity (High/Medium/Invalid), and checks compliance with Sherlock contest standards.

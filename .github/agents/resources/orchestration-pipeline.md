@@ -198,12 +198,14 @@ All agents communicate through the **pipeline bus** — a shared file system und
 1. Create `audit-output/graph/`.
 2. Run graphify on the target codebase.
 3. If `horus-graphify-blockchain` is installed and blockchain DSL files exist, emit `blockchain-ast.json`.
-4. Merge graphify output and blockchain AST into `audit-output/graph/graph.json`.
+4. Finalize graphify output and optional blockchain AST into queryable node-link JSON with `python3 scripts/finalize_audit_graph.py --codebase <path> --blockchain-ast audit-output/graph/blockchain-ast.json --out audit-output/graph/graph.json`.
 5. Start graphify MCP with `python3 -m graphify.serve audit-output/graph/graph.json` when available.
 6. Write `coverage.jsonl` for later blind-spot tracking.
 7. If memory is enabled, query `scripts/lessons_db.py` and write `memory-recall.md`.
 
-**Phase gate**: Soft gate. If graph construction or MCP startup fails, log the failure and continue to Phase 1 without graph features.
+**Graph contract**: `graph.json` means graphify node-link JSON that can be loaded by graphify CLI/MCP. Raw `.graphify_extract.json` is an intermediate extraction file and must not be served directly.
+
+**Phase gate**: Soft gate. If graph construction, finalization, or MCP startup fails, log the failure and continue to Phase 1 without graph features.
 
 **Transition**: Pass graph artifact paths and memory recall path to all downstream agents.
 

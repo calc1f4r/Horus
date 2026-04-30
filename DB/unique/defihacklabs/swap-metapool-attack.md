@@ -85,6 +85,25 @@ Metapool attacks target Curve-style metapools — pools that combine a base pool
 | Interaction Scope | `single_contract` |
 | Chain(s) | ethereum |
 
+### Valid Bug Signals
+
+- A metapool prices a base-pool LP token through `virtual_price`, cached base-pool state, or another pool's imbalanced reserves during the same transaction.
+- Swap route alternates between base pool and metapool, letting the attacker create and harvest temporary divergence.
+- Invariant checks are local to each pool and do not enforce consistency across the nested pool dependency chain.
+
+### False Positive Guards
+
+- Not this bug when the metapool does not use a live base-pool LP price or when withdrawals/swaps are bounded by robust minOut checks across the whole route.
+- Safe if virtual price is delayed, rate-limited, or otherwise resistant to same-transaction manipulation and nested pool imbalance.
+- Requires sufficient liquidity and route access to make the cross-pool differential profitable after fees.
+
+### Code Patterns to Look For
+
+```solidity
+uint256 vp = basePool.get_virtual_price();
+metaPool.exchange(i, j, dx, minDy); // prices LP token using base pool state
+basePool.exchange(i, j, dx, minDy); // same transaction moves dependency pool
+```
 
 ### Vulnerability Description
 

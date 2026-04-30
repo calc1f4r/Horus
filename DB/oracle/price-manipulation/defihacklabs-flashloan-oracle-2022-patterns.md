@@ -76,7 +76,7 @@ language: "solidity"
 version: ">=0.6.0"
 ---
 
-## References
+## References & Source Reports
 
 | Tag | Source | Path / URL |
 |-----|--------|------------|
@@ -106,6 +106,22 @@ Flash loan-based oracle manipulation is the single most common DeFi attack vecto
 | Impact | fund_loss |
 | Interaction Scope | `cross_protocol` |
 | Chain(s) | ethereum, bsc, fantom, arbitrum |
+
+### Valid Bug Signals
+
+- A borrow, mint, redeem, claim, or collateral path consumes AMM reserves, Curve `virtual_price`, vault exchange rate, or Solidly-style LP pricing that can be changed inside a flash-loan transaction.
+- The attacker can distort the price source and immediately invoke the vulnerable protocol before the manipulated state is arbitraged back.
+- LP tokens, vault shares, or receipt tokens are accepted as collateral using exchange-rate math that can be inflated by donation, deposit cycling, or pool imbalance.
+- Oracle signature or off-chain update validation is weak enough that manipulated LP pricing can be combined with a forged or replayable price authorization.
+- There is no effective TWAP, rate-change cap, same-block guard, liquidity-depth check, or independent oracle comparison before value is transferred.
+
+### False Positive Guards
+
+- Do not flag flash-loan availability alone; the manipulated oracle input must feed a privileged economic decision in the same reachable path.
+- Curve or AMM reads are lower risk when used only after long-window TWAPs, bounded rate changes, or multi-source deviation checks that are enforced on-chain.
+- Vault donation signals require share/exchange-rate inflation to affect collateral or redemption; locked shares, tracked accounting, and min-share checks can block exploitation.
+- Same-block interactions are not sufficient if the protocol snapshots prices before manipulation or only settles after a delay.
+- Cryptographic oracle issues need concrete bypass conditions; merely using signatures is not a weak-validation finding.
 
 
 ## 1. AMM Reserve-Based Price Oracle — Direct LP Pool Manipulation

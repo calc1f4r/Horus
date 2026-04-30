@@ -99,6 +99,26 @@ Skim balance attacks exploit the `skim()` function in Uniswap V2-style AMMs. The
 | Interaction Scope | `single_contract` |
 | Chain(s) | bsc |
 
+### Valid Bug Signals
+
+- Pair exposes UniswapV2-style `skim(to)` and the paired token is fee-on-transfer, deflationary, rebasing, or has custom transfer-side mint/burn logic.
+- Repeated `skim(address(pair))`, `transfer(pair, amount)`, or `sync()` cycles change actual balances without matching reserve updates.
+- Profit comes from compounding balance/reserve divergence, then swapping or skimming accumulated excess.
+
+### False Positive Guards
+
+- Not this bug for standard ERC20 pairs where transfers preserve balances exactly and `skim()` only removes accidental donations.
+- Safe if the AMM blocks skim-to-self loops for incompatible tokens or updates reserves in a way that cannot be compounded.
+- Requires loopable state drift; a one-time excess balance with no attacker-controlled amplification is lower signal.
+
+### Code Patterns to Look For
+
+```solidity
+pair.skim(address(pair));
+pair.sync();
+token.transfer(address(pair), amount); // custom fee/burn/mint side effects
+uint256 excess = token.balanceOf(address(pair)) - reserve;
+```
 
 ### Vulnerability Description
 

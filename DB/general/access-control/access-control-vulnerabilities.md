@@ -1,7 +1,13 @@
 ---
 vulnerability_class: access_control
 title: "Access Control Vulnerabilities"
+protocol: generic
 category: Access Control
+vulnerability_type: access_control
+attack_type: missing_access_control|authorization_bypass|privilege_escalation
+affected_component: privileged_operations|admin_functions|initialization_functions
+severity: critical
+impact: fund_loss|privilege_escalation|unauthorized_state_change
 severity_range: "MEDIUM to CRITICAL"
 source: DeFiHackLabs
 

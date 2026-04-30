@@ -91,6 +91,34 @@ Deflationary (fee-on-transfer) tokens burn or tax a percentage on every transfer
 | Interaction Scope | `single_contract` |
 | Chain(s) | ethereum, bsc, avalanche |
 
+#### Valid Bug Signals
+
+- Deposit, staking, repayment, LP minting, or farm accounting credits `_amount`/`amount` while the token can burn, tax, redirect, or otherwise deliver less than requested.
+- Withdrawal sends the recorded nominal balance back to the user rather than the net amount actually received by the contract.
+- AMM/pool logic keeps an internal token balance that diverges from `balanceOf(pool)` and exposes `gulp`, `sync`, `skim`, or equivalent reconciliation callable by anyone.
+- Attack can repeat deposit/withdraw or swap/sync loops so each iteration extracts the transfer fee gap from existing pool/farm liquidity.
+
+#### False Positive Guards
+
+- Not this bug when the protocol measures `received = balanceAfter - balanceBefore` and credits only `received`.
+- Safe if accepted tokens are whitelisted and verified to have no fee-on-transfer, burn-on-transfer, rebase, reflection, blacklist, or callback behavior.
+- Safe if pool math updates internal balances from observed deltas and does not allow external reconciliation to create a price discontinuity.
+- Requires a fee/burn/tax token already accepted by the protocol or a pool/farm containing such a token with enough victim liquidity.
+
+#### Code Patterns to Look For
+
+```solidity
+stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
+user.amount += _amount; // should use balance delta
+
+IERC20(tokenIn).transferFrom(msg.sender, address(this), tokenAmountIn);
+records[tokenIn].balance += tokenAmountIn; // actual balance may be smaller
+
+records[token].balance = IERC20(token).balanceOf(address(this)); // gulp/sync discontinuity
+```
+
+Prioritize `deposit`, `withdraw`, `stake`, `unstake`, `mint`, `swapExactAmountIn`, `gulp`, `sync`, and `skim` paths that use nominal parameters instead of observed deltas.
+
 
 ### Root Cause Categories
 

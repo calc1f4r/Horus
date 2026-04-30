@@ -1,35 +1,35 @@
 # cosmos
 
-> 28 nodes · cohesion 0.25
+> 35 nodes · cohesion 0.74
 
 ## Key Concepts
 
-- **verifyDoubleSigning** (21 connections) — `DB/cosmos/app-chain/consensus/consensus-finality-vulnerabilities.md`
-- **DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md** (13 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **deployment_param** (13 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **migration_failure** (13 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **module_registration** (13 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **1. Lifecycle Upgrade Error** (11 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **2. Lifecycle Migration Failure** (11 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **3. Lifecycle Init Error** (11 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **6. Lifecycle Genesis Error** (11 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **7. Lifecycle Deployment Param** (11 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **8. Lifecycle State Export** (11 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **9. Lifecycle Version Compat** (11 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **Error Reporting** (11 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **Error Reporting** (11 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **lifecycle_logic** (11 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **4. Lifecycle Storage Gap** (10 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **5. Lifecycle Module Registration** (10 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **Upgrades** (9 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **Keywords** (8 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **version_compat** (8 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **DB/cosmos/app-chain/dos/gas-resource-exhaustion.md** (7 connections) — `DB/cosmos/app-chain/dos/gas-resource-exhaustion.md`
-- **1. Dos Gas Limit Exploit** (6 connections) — `DB/cosmos/app-chain/dos/gas-resource-exhaustion.md`
-- **2. Dos Gas Metering Bypass** (6 connections) — `DB/cosmos/app-chain/dos/gas-resource-exhaustion.md`
-- **3. Dos Memory Exhaustion** (6 connections) — `DB/cosmos/app-chain/dos/gas-resource-exhaustion.md`
-- **4. Dos Storage Exhaustion** (6 connections) — `DB/cosmos/app-chain/dos/gas-resource-exhaustion.md`
-- *... and 3 more nodes in this community*
+- **closeRebalanceRequests** (82 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **1. Access Missing Control** (81 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **3. Access Antehandler Bypass** (63 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **Diﬃculty: N/A** (57 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **Upgrades** (55 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **2. Access Role Assignment** (53 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **4. Access Allowlist Bypass** (51 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **6. Access Amino Signing** (51 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **8. Access Owner Privilege** (51 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **9. Access Msg Sender Validation** (51 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **Severity: High Risk** (51 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **10. Access Module Authority** (49 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **5. Access Cosmwasm Bypass** (49 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **7. Access Predecessor Misuse** (49 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **Keywords** (49 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **Description** (47 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **access_control_logic** (30 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **access control logic** (30 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **antehandler_bypass** (30 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **RegisterConcrete** (30 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **allowlist_bypass** (28 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **missing_control** (18 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md** (15 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **reports/cosmos_cometbft_findings/h-02-arbitrary-tokens-and-data-can-be-bridged-to-gnosistargetdispenserl2-to-mani.md** (4 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- **reports/cosmos_cometbft_findings/h-09-attackers-can-force-the-rewards-to-be-stuck-in-the-contract-with-malicious-.md** (2 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- *... and 10 more nodes in this community*
 
 ## Relationships
 
@@ -37,14 +37,12 @@
 
 ## Source Files
 
-- `DB/cosmos/app-chain/consensus/consensus-finality-vulnerabilities.md`
-- `DB/cosmos/app-chain/dos/gas-resource-exhaustion.md`
-- `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
+- `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
 
 ## Audit Trail
 
-- EXTRACTED: 100 (56%)
-- INFERRED: 77 (44%)
+- EXTRACTED: 60 (11%)
+- INFERRED: 488 (89%)
 - AMBIGUOUS: 0 (0%)
 
 ---

@@ -1,9 +1,8 @@
 ---
 name: invariant-indexer
-description: 'Indexes invariants from major DeFi protocol repositories, formal verification specs, fuzzing harnesses, and documented formal properties. Writes structured, language-agnostic, protocol-type-agnostic invariant reference files into invariants/<category>/. Produces canonical invariant libraries consumed by the invariant-writer agent as seed context. Can accept a protocol name or GitHub URL to index on demand. Use when building protocol-level invariant reference libraries, studying how top protocols specify formal properties, or bootstrapping invariant suites for a new audit.'
-tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
+description: "Indexes invariants from major DeFi protocol repositories, formal verification specs, fuzzing harnesses, and documented formal properties. Writes structured, language-agnostic, protocol-type-agnostic invariant reference files into invariants/<category>/. Produces canonical invariant libraries consumed by the invariant-writer agent as seed context. Can accept a protocol name or GitHub URL to index on demand. Use when building protocol-level invariant reference libraries, studying how top protocols specify formal properties, or bootstrapping invariant suites for a new audit."
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
-
 # Invariant Indexer Agent
 
 Mines, categorizes, and writes **canonical invariants** from production DeFi protocols into per-category reference files under `invariants/`. Reads formal verification specs (Certora CVL, Sui Prover, etc.), property test suites (Echidna, Medusa, Foundry, etc.), standard specifications, protocol documentation, and formal verification artifacts. Produces structured plaintext **consumed by** the `invariant-writer` agent as authoritative seed context for any audit.

@@ -1,9 +1,8 @@
 ---
 name: invariant-writer
-description: 'Extracts and documents all system invariants, properties, and constraints from a smart contract codebase into a single structured plaintext file. Uses a dual-mode sub-agent architecture: "What Should Happen" (positive specification from specs, standards, docs, reference implementations) and "What Must Never Happen" (adversarial, fear-driven, multi-call attack sequences). Researches canonical invariants for the protocol type before extraction. Produces language-agnostic invariants consumed by fuzzing and formal verification tools. Use when preparing invariant suites, writing property specifications, or before fuzzing campaign setup.'
-tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
+description: "Extracts and documents all system invariants, properties, and constraints from a smart contract codebase into a single structured plaintext file. Uses a dual-mode sub-agent architecture: \"What Should Happen\" (positive specification from specs, standards, docs, reference implementations) and \"What Must Never Happen\" (adversarial, fear-driven, multi-call attack sequences). Researches canonical invariants for the protocol type before extraction. Produces language-agnostic invariants consumed by fuzzing and formal verification tools. Use when preparing invariant suites, writing property specifications, or before fuzzing campaign setup."
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
-
 # Invariant Writer Agent
 
 Extracts every invariant, property, and constraint from a codebase and writes them as structured plaintext in a single file. This agent **does not write test code** — it produces the language-agnostic specification that downstream fuzzing and formal verification agents consume.
@@ -1080,4 +1079,5 @@ Each sub-agent returns structured invariants in the output format.
 - **Invariant methodology**: [invariant-methodology.md](resources/invariant-methodology.md)
 - **Root cause analysis**: [root-cause-analysis.md](resources/root-cause-analysis.md)
 - **Crytic properties**: Reference for ERC20/ERC721/ERC4626 standard invariants (github.com/crytic/properties)
+- **Invariant writing guide**: [invariant-writing-guide.md](resources/invariant-writing-guide.md) — Fuzz Fest 2024 methodologies (Dacian's Matrix, shadow accounting, shortcut functions, lifecycle classification)
 - **Inter-agent data format**: [inter-agent-data-format.md](resources/inter-agent-data-format.md) — output schema when spawned by orchestrator

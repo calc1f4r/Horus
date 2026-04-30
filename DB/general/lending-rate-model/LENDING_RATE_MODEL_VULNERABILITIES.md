@@ -153,20 +153,20 @@ LendingPool / Market
 
 #### Valid Bug Signals
 
-- Signal 1: `blocksPerYear` constant doesn't match the deployment chain's actual block time
-- Signal 2: `reserves` included in utilization denominator but represents cTokens/protocol fees (not lendable cash)
-- Signal 3: Utilization rate can exceed 100% — withdrawal doesn't cap utilization ratio
-- Signal 4: Rate model uses spot balances instead of time-weighted averages
-- Signal 5: DebtToken.totalSupply() returns scaled (not actual) values used directly in rate calculation
-- Signal 6: AMO's deposit/withdraw decisions use manipulable utilization to trigger actions
+- `blocksPerYear`, per-block multiplier, or annual-to-block conversion is copied from another chain and does not match deployment block cadence.
+- Utilization denominator includes reserves/protocol fees/non-lendable accounting units or omits cash/borrows in a way that can make utilization exceed 100% or revert.
+- `withdraw`, `redeem`, reserve seizure, or collateral removal can push utilization above the borrow-time maximum without rechecking the cap.
+- Rate model uses spot `balanceOf`, current pool cash, or zero/empty averages that can be gamed around `accrueInterest`/`updateInterestRates`.
+- Debt token `totalSupply`, scaled balances, indexes, or shares are used without converting to underlying debt units.
+- AMO/treasury update logic can be triggered after manipulating utilization, forcing deposits/withdrawals that subsidize borrowers or increase treasury risk.
 
 #### False Positive Guards
 
-- Not this bug when: Protocol uses time-based rates (per-second) instead of per-block rates
-- Safe if: Utilization formula correctly excludes non-lendable reserves from calculation
-- Safe if: Protocol enforces maximum utilization cap on withdrawals
-- Safe if: Rate model uses time-weighted average balances instead of spot values
-- Requires attacker control of: Large capital to manipulate utilization, or ability to front-run rate updates
+- Not this bug merely because rates are per-second; still inspect utilization units, debt scaling, caps, and manipulable inputs.
+- Safe if chain timing constants are deployment-specific or configurable with governance controls and tests for the target chain.
+- Safe if utilization formula uses actual lendable cash and actual borrows, caps or reverts cleanly above max utilization, and all withdrawal-like paths enforce the same invariant.
+- Safe if rate inputs are time-weighted or otherwise manipulation-resistant and debt shares are converted through the current index before use.
+- Requires attacker capital, liquidity timing, low-liquidity market access, AMO update influence, or a public path that can trigger accrual/rate updates after state manipulation.
 
 ---
 

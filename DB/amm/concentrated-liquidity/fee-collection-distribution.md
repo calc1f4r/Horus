@@ -1,7 +1,13 @@
 ---
 title: "Fee Collection and Distribution Vulnerabilities in AMMs"
+protocol: generic
 vulnerability_class: amm-fee-vulnerabilities
 category: amm/concentrated-liquidity
+vulnerability_type: fee_collection_distribution
+attack_type: fee_theft|accounting_manipulation|denial_of_service
+affected_component: fee_accounting|fee_collection|fee_distribution
+severity: high
+impact: fund_loss|fee_theft|denial_of_service
 severity_range: "MEDIUM to HIGH"
 consensus_severity: HIGH
 
@@ -111,6 +117,22 @@ Fee collection and distribution mechanisms in AMMs are critical revenue sources 
 - Not this bug when: Standard security patterns (access control, reentrancy guards, input validation) are in place
 - Safe if: Protocol behavior matches documented specification
 - Requires attacker control of: specific conditions per pattern
+
+#### Code Patterns to Look For
+
+```solidity
+collectFees(tokenId); // callable for another user's position without recipient/accounting checks
+feesOwed = feeGrowthInside - lastFeeGrowthInside; // underflow expected but not handled intentionally
+withdraw(amount); // principal and uncollected fees share the same balance bucket
+addMakerLiquidity(); swap(); removeLiquidity(); // JIT liquidity earns fees for no inventory risk
+claimFees(pool, token0, token1); // parameter order or fee tier not authenticated
+```
+
+#### False Positive Detail
+
+- Permissionless fee collection is acceptable only when fees are credited to the rightful owner or an authenticated recipient, not `msg.sender`.
+- Fee-growth underflow is normal in Uniswap-style math only if the implementation deliberately mirrors the modulo arithmetic; checked arithmetic that reverts can create DoS.
+- JIT-liquidity findings need an economic path where the attacker captures fees or rewards without bearing the intended exposure, not merely a profitable LP strategy.
 
 ## Vulnerable Pattern Examples
 

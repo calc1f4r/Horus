@@ -3,8 +3,8 @@
     "manifest": "zk-rollup",
     "description": "Compressed hunt cards for zk-rollup — one-line detection rules for bulk scanning",
     "totalCards": 77,
-    "skipped": 23,
-    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "skipped": 13,
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, use optional preconditions/proofShape/falsePositiveSignals/reportEvidence when present, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
     "enriched": 77
   },
   "cards": [
@@ -31,13 +31,40 @@
         95,
         106
       ],
+      "reportEvidence": {
+        "count": 5,
+        "sampleReports": [
+          "reports/zk_rollup_findings/incorrect-batch-hashes-due-to-memory-corruption.md",
+          "reports/zk_rollup_findings/incorrect-basefee-calculation-on-taiko-rollups-phase-1.md",
+          "reports/zk_rollup_findings/m-11-in-the-revertbatch-function-inchallenge-is-set-to-false-incorrectly-causing.md",
+          "reports/zk_rollup_findings/block-submission-susceptible-to-dos-phase-1.md",
+          "reports/zk_rollup_findings/insufficient-validation-of-block-numbers-during-submission-and-finalization.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "dos",
+          "consensus split",
+          "finalization failure",
+          "block stuffing"
+        ],
+        "commonlyComposesWith": [
+          "eip4844 blobs",
+          "batch frames",
+          "calldata batch",
+          "block submission",
+          "finalize blocks"
+        ]
+      },
       "check": [
         "VERIFY: Batch Hashing and Commitment Bugs"
       ],
       "validWhen": "Batch Hashing and Commitment Bugs"
     },
     {
-      "id": "zk-rollup-batch-processing-pattern-1-batcher-frame-decodi-003",
+      "id": "zk-rollup-batch-processing-pattern-1-batcher-frame-decodi-002",
       "title": "Pattern 1: Batcher Frame Decoding Inconsistency Causes Consensus Split",
       "severity": "MEDIUM",
       "grep": "blob_versioned_hash|basefee_calculation|_hashBatchHeader|block_submission|batch_commitment|EIP4844_blobs",
@@ -59,6 +86,27 @@
         161,
         203
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "dos",
+          "consensus split",
+          "finalization failure",
+          "block stuffing"
+        ],
+        "commonlyComposesWith": [
+          "eip4844 blobs",
+          "batch frames",
+          "calldata batch",
+          "block submission",
+          "finalize blocks"
+        ]
+      },
       "check": [
         "VERIFY: Optimism's batch decoding in op-node and node software must implement the exact same frame-decoding logic.",
         "PROVE: Op-node batch decoder behavior differs from reference implementation",
@@ -67,10 +115,11 @@
       "antipattern": "Op-node batch decoder behavior differs from reference implementation",
       "securePattern": "Strict adherence to spec; comprehensive test suite including edge cases",
       "validWhen": "Optimism's batch decoding in op-node and node software must implement the exact same frame-decoding logic.",
-      "invalidWhen": "Strict adherence to spec; comprehensive test suite including edge cases"
+      "invalidWhen": "Strict adherence to spec; comprehensive test suite including edge cases",
+      "proofShape": "Op-node batch decoder behavior differs from reference implementation"
     },
     {
-      "id": "zk-rollup-batch-processing-pattern-2-eip-4844-blob-incomp-004",
+      "id": "zk-rollup-batch-processing-pattern-2-eip-4844-blob-incomp-003",
       "title": "Pattern 2: EIP-4844 Blob Incompatibility Halts Block Processing",
       "severity": "HIGH",
       "grep": "blob_versioned_hash|basefee_calculation|_hashBatchHeader|block_submission|batch_commitment|EIP4844_blobs",
@@ -92,6 +141,27 @@
         204,
         250
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "dos",
+          "consensus split",
+          "finalization failure",
+          "block stuffing"
+        ],
+        "commonlyComposesWith": [
+          "eip4844 blobs",
+          "batch frames",
+          "calldata batch",
+          "block submission",
+          "finalize blocks"
+        ]
+      },
       "check": [
         "VERIFY: EIP-4844 blobs use blob_versioned_hash (prefix 0x01) to address blob data.",
         "PROVE: L1 contract expects raw keccak hash, not blob versioned hash",
@@ -100,10 +170,11 @@
       "antipattern": "L1 contract expects raw keccak hash, not blob versioned hash",
       "securePattern": "Validate blob versioned hash prefix and use BLOBHASH opcode",
       "validWhen": "EIP-4844 blobs use blob_versioned_hash (prefix 0x01) to address blob data.",
-      "invalidWhen": "Validate blob versioned hash prefix and use BLOBHASH opcode"
+      "invalidWhen": "Validate blob versioned hash prefix and use BLOBHASH opcode",
+      "proofShape": "L1 contract expects raw keccak hash, not blob versioned hash"
     },
     {
-      "id": "zk-rollup-batch-processing-pattern-3-rollup-cannot-split--005",
+      "id": "zk-rollup-batch-processing-pattern-3-rollup-cannot-split--004",
       "title": "Pattern 3: Rollup Cannot Split Batches Across Blobs → Block Stuffing",
       "severity": "MEDIUM",
       "grep": "blob_versioned_hash|basefee_calculation|_hashBatchHeader|block_submission|batch_commitment|EIP4844_blobs",
@@ -125,6 +196,27 @@
         251,
         291
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "dos",
+          "consensus split",
+          "finalization failure",
+          "block stuffing"
+        ],
+        "commonlyComposesWith": [
+          "eip4844 blobs",
+          "batch frames",
+          "calldata batch",
+          "block submission",
+          "finalize blocks"
+        ]
+      },
       "check": [
         "VERIFY: EIP-4844 blobs have a fixed maximum size (128KB).",
         "PROVE: rollup.sol only supports single-blob batches",
@@ -133,10 +225,11 @@
       "antipattern": "rollup.sol only supports single-blob batches",
       "securePattern": "Support multi-blob batches with array of blob hashes",
       "validWhen": "EIP-4844 blobs have a fixed maximum size (128KB).",
-      "invalidWhen": "Support multi-blob batches with array of blob hashes"
+      "invalidWhen": "Support multi-blob batches with array of blob hashes",
+      "proofShape": "rollup.sol only supports single-blob batches"
     },
     {
-      "id": "zk-rollup-batch-processing-pattern-4-malformed-blob-trans-006",
+      "id": "zk-rollup-batch-processing-pattern-4-malformed-blob-trans-005",
       "title": "Pattern 4: Malformed Blob Transaction Crashes Validator Nodes",
       "severity": "HIGH",
       "grep": "blob_versioned_hash|basefee_calculation|_hashBatchHeader|block_submission|batch_commitment|EIP4844_blobs",
@@ -158,13 +251,34 @@
         292,
         315
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "dos",
+          "consensus split",
+          "finalization failure",
+          "block stuffing"
+        ],
+        "commonlyComposesWith": [
+          "eip4844 blobs",
+          "batch frames",
+          "calldata batch",
+          "block submission",
+          "finalize blocks"
+        ]
+      },
       "check": [
         "VERIFY: Some L2 validator clients (e.g., Nethermind) have latent bugs in their EIP-4844 blob transaction parsing that surface only on specific malformed..."
       ],
       "validWhen": "Some L2 validator clients (e.g., Nethermind) have latent bugs in their EIP-4844 blob transaction parsing that surface only on specific malformed input."
     },
     {
-      "id": "zk-rollup-batch-processing-pattern-5-memory-corruption-ca-007",
+      "id": "zk-rollup-batch-processing-pattern-5-memory-corruption-ca-006",
       "title": "Pattern 5: Memory Corruption Causing Incorrect Batch Hashes (Scroll)",
       "severity": "HIGH",
       "grep": "blob_versioned_hash|basefee_calculation|_hashBatchHeader|block_submission|batch_commitment|EIP4844_blobs",
@@ -186,6 +300,27 @@
         316,
         366
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "dos",
+          "consensus split",
+          "finalization failure",
+          "block stuffing"
+        ],
+        "commonlyComposesWith": [
+          "eip4844 blobs",
+          "batch frames",
+          "calldata batch",
+          "block submission",
+          "finalize blocks"
+        ]
+      },
       "check": [
         "VERIFY: In Scroll's batch hashing implementation, batch header data was assembled in memory with an off-by-one error in the field packing, causing some bytes...",
         "PROVE: Incorrect memory encoding of batch header (Scroll)",
@@ -194,10 +329,11 @@
       "antipattern": "Incorrect memory encoding of batch header (Scroll)",
       "securePattern": "Use abi.encode for structured hashing to prevent manual offset errors",
       "validWhen": "In Scroll's batch hashing implementation, batch header data was assembled in memory with an off-by-one error in the field packing, causing some bytes from one field to...",
-      "invalidWhen": "Use abi.encode for structured hashing to prevent manual offset errors"
+      "invalidWhen": "Use abi.encode for structured hashing to prevent manual offset errors",
+      "proofShape": "Incorrect memory encoding of batch header (Scroll)"
     },
     {
-      "id": "zk-rollup-batch-processing-pattern-6-incorrect-basefee-ca-008",
+      "id": "zk-rollup-batch-processing-pattern-6-incorrect-basefee-ca-007",
       "title": "Pattern 6: Incorrect basefee Calculation on Taiko Rollup",
       "severity": "HIGH",
       "grep": "blob_versioned_hash|basefee_calculation|_hashBatchHeader|block_submission|batch_commitment|EIP4844_blobs",
@@ -219,15 +355,37 @@
         367,
         394
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "dos",
+          "consensus split",
+          "finalization failure",
+          "block stuffing"
+        ],
+        "commonlyComposesWith": [
+          "eip4844 blobs",
+          "batch frames",
+          "calldata batch",
+          "block submission",
+          "finalize blocks"
+        ]
+      },
       "check": [
         "VERIFY: Taiko's L2 basefee follows EIP-1559 but adjusts based on two inputs: actual L2 gas used and configured gas target.",
         "PROVE: Uses anchorGasTarget instead of the configured target"
       ],
       "antipattern": "Uses anchorGasTarget instead of the configured target",
-      "validWhen": "Taiko's L2 basefee follows EIP-1559 but adjusts based on two inputs: actual L2 gas used and configured gas target."
+      "validWhen": "Taiko's L2 basefee follows EIP-1559 but adjusts based on two inputs: actual L2 gas used and configured gas target.",
+      "proofShape": "Uses anchorGasTarget instead of the configured target"
     },
     {
-      "id": "zk-rollup-batch-processing-pattern-7-inchallenge-incorrec-009",
+      "id": "zk-rollup-batch-processing-pattern-7-inchallenge-incorrec-008",
       "title": "Pattern 7: inChallenge Incorrectly Reset in revertBatch",
       "severity": "MEDIUM",
       "grep": "blob_versioned_hash|basefee_calculation|_hashBatchHeader|block_submission|batch_commitment|EIP4844_blobs",
@@ -249,6 +407,27 @@
         395,
         431
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "dos",
+          "consensus split",
+          "finalization failure",
+          "block stuffing"
+        ],
+        "commonlyComposesWith": [
+          "eip4844 blobs",
+          "batch frames",
+          "calldata batch",
+          "block submission",
+          "finalize blocks"
+        ]
+      },
       "check": [
         "VERIFY: inChallenge flag is used to gate new batch commitments and prevent race conditions during challenge periods.",
         "PROVE: inChallenge reset too early in revertBatch",
@@ -257,7 +436,8 @@
       "antipattern": "inChallenge reset too early in revertBatch",
       "securePattern": "Reset inChallenge only after full cleanup",
       "validWhen": "The inChallenge flag is used to gate new batch commitments and prevent race conditions during challenge periods.",
-      "invalidWhen": "Reset inChallenge only after full cleanup"
+      "invalidWhen": "Reset inChallenge only after full cleanup",
+      "proofShape": "inChallenge reset too early in revertBatch"
     },
     {
       "id": "zk-rollup-bridge-vulnerabilities-token-accounting-and-token-map-000",
@@ -282,6 +462,33 @@
         86,
         97
       ],
+      "reportEvidence": {
+        "count": 7,
+        "sampleReports": [
+          "reports/zk_rollup_findings/token-bridge-reentrancy-can-corrupt-token-accounting.md",
+          "reports/zk_rollup_findings/l1blastbridge-uses-wrong-token-order-when-bridging-usd-yield-tokens.md",
+          "reports/zk_rollup_findings/m-02-owner-can-steal-all-funds-locked-in-bridge-by-changing-remote_token-value.md",
+          "reports/zk_rollup_findings/erc-20-representation-of-native-currency-can-be-used-to-drain-native-currency-po.md",
+          "reports/zk_rollup_findings/using-the-wrong-selector-causes-token-loss-during-erc1155-bridging.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "reentrancy",
+          "replay attack",
+          "fund theft",
+          "signature replay"
+        ],
+        "commonlyComposesWith": [
+          "bridge_adapter",
+          "bridge adapter",
+          "bridge_suspension",
+          "bridge suspension",
+          "l1_bridge"
+        ]
+      },
       "check": [
         "VERIFY: Token Accounting and Token Mapping Errors"
       ],
@@ -310,13 +517,40 @@
         114,
         124
       ],
+      "reportEvidence": {
+        "count": 6,
+        "sampleReports": [
+          "reports/zk_rollup_findings/a-dos-attack-can-prevent-teleports.md",
+          "reports/zk_rollup_findings/design-flaw-in-bridge-contract-suspension-mechanism-phase-1.md",
+          "reports/zk_rollup_findings/m-06-malicious-proposer-can-dos-bridge-withdrawals.md",
+          "reports/zk_rollup_findings/rate-limiters-can-lead-to-a-denial-of-service-attack.md",
+          "reports/zk_rollup_findings/single-reverting-withdrawal-can-block-the-basistradevault-withdrawal-queue.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "reentrancy",
+          "replay attack",
+          "fund theft",
+          "signature replay"
+        ],
+        "commonlyComposesWith": [
+          "bridge_adapter",
+          "bridge adapter",
+          "bridge_suspension",
+          "bridge suspension",
+          "l1_bridge"
+        ]
+      },
       "check": [
         "VERIFY: Message Channel DoS and Censorship"
       ],
       "validWhen": "Message Channel DoS and Censorship"
     },
     {
-      "id": "zk-rollup-bridge-vulnerabilities-pattern-1-token-bridge-reentra-006",
+      "id": "zk-rollup-bridge-vulnerabilities-pattern-1-token-bridge-reentra-005",
       "title": "Pattern 1: Token Bridge Reentrancy Corrupts Accounting",
       "severity": "HIGH",
       "grep": "_initiateERC20Deposit|_domainSeparator|ERC1155_selector|processWithdrawals|bridge_suspension|domain_separator",
@@ -338,6 +572,27 @@
         189,
         246
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "reentrancy",
+          "replay attack",
+          "fund theft",
+          "signature replay"
+        ],
+        "commonlyComposesWith": [
+          "bridge",
+          "reentrancy",
+          "token bridge reentrancy corrupts accounting",
+          "token bridge",
+          "bridge reentrancy"
+        ]
+      },
       "check": [
         "VERIFY: Bridge processes deposit with external call before state update",
         "PROVE: User calls bridge with an ERC777 or callback-capable token (e.g., ERC1363); Bridge receives tokens and starts processing the deposit",
@@ -346,10 +601,17 @@
       "antipattern": "Bridge processes deposit with external call before state update",
       "securePattern": "Update state BEFORE making any external calls (CEI pattern)",
       "validWhen": "Bridge processes deposit with external call before state update",
-      "invalidWhen": "Update state BEFORE making any external calls (CEI pattern)"
+      "invalidWhen": "Update state BEFORE making any external calls (CEI pattern)",
+      "preconditions": [
+        "Bridge receives tokens and starts processing the deposit",
+        "Attacker's token contract re-enters the bridge's deposit function",
+        "Since accounting isn't updated, the second deposit appears legitimate at the pre-attack balance",
+        "Attacker drains the bridge pool"
+      ],
+      "proofShape": "User calls bridge with an ERC777 or callback-capable token (e.g., ERC1363) -> Bridge receives tokens and starts processing the deposit -> Before updating internal balance accounting, bridge makes an external call (e.g.,..."
     },
     {
-      "id": "zk-rollup-bridge-vulnerabilities-pattern-2-wrong-token-order-in-007",
+      "id": "zk-rollup-bridge-vulnerabilities-pattern-2-wrong-token-order-in-006",
       "title": "Pattern 2: Wrong Token Order in Bridge Causes Incorrect Routing",
       "severity": "HIGH",
       "grep": "_initiateERC20Deposit|_domainSeparator|ERC1155_selector|processWithdrawals|bridge_suspension|domain_separator",
@@ -371,6 +633,27 @@
         247,
         295
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "reentrancy",
+          "replay attack",
+          "fund theft",
+          "signature replay"
+        ],
+        "commonlyComposesWith": [
+          "bridge",
+          "bridge_adapter",
+          "bridge adapter",
+          "bridge_suspension",
+          "bridge suspension"
+        ]
+      },
       "check": [
         "VERIFY: Bridges that handle token pairs (e.g., yield-bearing USD tokens: USDB/USDW) sometimes accept token A and B as arguments but switch their positions...",
         "PROVE: L1BlastBridge swaps token order when emitting event",
@@ -379,10 +662,11 @@
       "antipattern": "L1BlastBridge swaps token order when emitting event",
       "securePattern": "Verify token arguments are in correct order",
       "validWhen": "Bridges that handle token pairs (e.g., yield-bearing USD tokens: USDB/USDW) sometimes accept token A and B as arguments but switch their positions internally.",
-      "invalidWhen": "Verify token arguments are in correct order"
+      "invalidWhen": "Verify token arguments are in correct order",
+      "proofShape": "L1BlastBridge swaps token order when emitting event"
     },
     {
-      "id": "zk-rollup-bridge-vulnerabilities-pattern-3-router-signatures-re-008",
+      "id": "zk-rollup-bridge-vulnerabilities-pattern-3-router-signatures-re-007",
       "title": "Pattern 3: Router Signatures Replay Across Chains",
       "severity": "HIGH",
       "grep": "_initiateERC20Deposit|_domainSeparator|ERC1155_selector|verifyingContract|bridge_suspension|domain_separator",
@@ -404,6 +688,27 @@
         296,
         350
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "replay",
+          "router signatures replay across chains",
+          "signatures replay",
+          "replay across",
+          "callback reentrancy"
+        ],
+        "commonlyComposesWith": [
+          "bridge_adapter",
+          "bridge adapter",
+          "bridge_suspension",
+          "bridge suspension",
+          "token bridge"
+        ]
+      },
       "check": [
         "VERIFY: Cross-chain routers use off-chain signatures to authorize message execution.",
         "PROVE: Signed message has no domain separator",
@@ -412,10 +717,11 @@
       "antipattern": "Signed message has no domain separator",
       "securePattern": "Include EIP-712 domain separator in signed digest",
       "validWhen": "Cross-chain routers use off-chain signatures to authorize message execution.",
-      "invalidWhen": "Include EIP-712 domain separator in signed digest"
+      "invalidWhen": "Include EIP-712 domain separator in signed digest",
+      "proofShape": "Signed message has no domain separator"
     },
     {
-      "id": "zk-rollup-bridge-vulnerabilities-pattern-4-wrong-erc1155-select-009",
+      "id": "zk-rollup-bridge-vulnerabilities-pattern-4-wrong-erc1155-select-008",
       "title": "Pattern 4: Wrong ERC1155 Selector Locks Tokens in Bridge",
       "severity": "HIGH",
       "grep": "safeBatchTransferFrom(...|_initiateERC20Deposit|_domainSeparator|ERC1155_selector|bridge_suspension|domain_separator",
@@ -437,6 +743,27 @@
         351,
         390
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "reentrancy",
+          "replay attack",
+          "fund theft",
+          "signature replay"
+        ],
+        "commonlyComposesWith": [
+          "bridge",
+          "wrong erc1155 selector locks tokens bridge",
+          "tokens bridge",
+          "bridge_adapter",
+          "bridge adapter"
+        ]
+      },
       "check": [
         "VERIFY: ERC1155 has two transfer functions: safeTransferFrom(address,address,uint256,uint256,bytes) and safeBatchTransferFrom(...).",
         "PROVE: Bridge uses wrong selector for ERC1155 safeTransferFrom",
@@ -445,10 +772,11 @@
       "antipattern": "Bridge uses wrong selector for ERC1155 safeTransferFrom",
       "securePattern": "Use correct ERC1155 function signature",
       "validWhen": "ERC1155 has two transfer functions: safeTransferFrom(address,address,uint256,uint256,bytes) and safeBatchTransferFrom(...).",
-      "invalidWhen": "Use correct ERC1155 function signature"
+      "invalidWhen": "Use correct ERC1155 function signature",
+      "proofShape": "Bridge uses wrong selector for ERC1155 safeTransferFrom"
     },
     {
-      "id": "zk-rollup-bridge-vulnerabilities-pattern-5-usdc-blacklist-perma-010",
+      "id": "zk-rollup-bridge-vulnerabilities-pattern-5-usdc-blacklist-perma-009",
       "title": "Pattern 5: USDC Blacklist Permanently Locks Bridge Funds",
       "severity": "MEDIUM",
       "grep": "_initiateERC20Deposit|_domainSeparator|ERC1155_selector|bridge_suspension|domain_separator|USDC_adapter",
@@ -470,6 +798,27 @@
         391,
         440
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "reentrancy",
+          "replay attack",
+          "fund theft",
+          "signature replay"
+        ],
+        "commonlyComposesWith": [
+          "bridge",
+          "usdc blacklist permanently locks bridge funds",
+          "locks bridge",
+          "bridge funds",
+          "bridge_adapter"
+        ]
+      },
       "check": [
         "VERIFY: USDC has a blacklist mechanism: blacklisted addresses cannot receive USDC transfers (the transfer call reverts).",
         "PROVE: Bridge adapter doesn't handle USDC blacklist",
@@ -478,10 +827,11 @@
       "antipattern": "Bridge adapter doesn't handle USDC blacklist",
       "securePattern": "Implement fallback for USDC transfer failures",
       "validWhen": "USDC has a blacklist mechanism: blacklisted addresses cannot receive USDC transfers (the transfer call reverts).",
-      "invalidWhen": "Implement fallback for USDC transfer failures"
+      "invalidWhen": "Implement fallback for USDC transfer failures",
+      "proofShape": "Bridge adapter doesn't handle USDC blacklist"
     },
     {
-      "id": "zk-rollup-bridge-vulnerabilities-pattern-6-single-reverting-wit-011",
+      "id": "zk-rollup-bridge-vulnerabilities-pattern-6-single-reverting-wit-010",
       "title": "Pattern 6: Single Reverting Withdrawal Blocks Entire Queue",
       "severity": "HIGH",
       "grep": "_initiateERC20Deposit|_domainSeparator|ERC1155_selector|processWithdrawals|bridge_suspension|domain_separator",
@@ -503,6 +853,27 @@
         441,
         482
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "callback reentrancy",
+          "reentrancy",
+          "replay attack",
+          "fund theft",
+          "signature replay"
+        ],
+        "commonlyComposesWith": [
+          "bridge_adapter",
+          "bridge adapter",
+          "bridge_suspension",
+          "bridge suspension",
+          "token bridge"
+        ]
+      },
       "check": [
         "VERIFY: Vault or bridge withdrawal queues are processed in order (FIFO).",
         "PROVE: Process all withdrawals in a loop — any revert blocks queue",
@@ -511,7 +882,8 @@
       "antipattern": "Process all withdrawals in a loop — any revert blocks queue",
       "securePattern": "Skip failing withdrawals (try/catch) and record for manual resolution",
       "validWhen": "Vault or bridge withdrawal queues are processed in order (FIFO).",
-      "invalidWhen": "Skip failing withdrawals (try/catch) and record for manual resolution"
+      "invalidWhen": "Skip failing withdrawals (try/catch) and record for manual resolution",
+      "proofShape": "Process all withdrawals in a loop — any revert blocks queue"
     },
     {
       "id": "zk-rollup-circuit-constraints-missing-pil-air-constraints-000",
@@ -536,6 +908,33 @@
         83,
         92
       ],
+      "reportEvidence": {
+        "count": 5,
+        "sampleReports": [
+          "reports/zk_rollup_findings/2-missing-constraint-in-pil-leading-to-proving-fake-inclusion-in-the-smt.md",
+          "reports/zk_rollup_findings/4-missing-constraint-in-pil-leading-to-execution-flow-hijack.md",
+          "reports/zk_rollup_findings/3-incorrect-ctx-assignation-leading-to-addition-of-random-amount-of-ether-to-the.md",
+          "reports/zk_rollup_findings/5-bug-in-maxmem-handling-can-halt-the-batch-verification.md",
+          "reports/zk_rollup_findings/underconstrained-carry-value-in-the-binary-state-machine.md"
+        ],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "proof forgery",
+          "state manipulation",
+          "execution hijack",
+          "circuit constraints"
+        ],
+        "commonlyComposesWith": [
+          "pil",
+          "zkasm",
+          "polynomial identity language",
+          "constraint system",
+          "binary state machine"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: Missing PIL / AIR Constraints"
@@ -543,7 +942,7 @@
       "validWhen": "Missing PIL / AIR Constraints"
     },
     {
-      "id": "zk-rollup-circuit-constraints-pattern-1-missing-pil-constrai-005",
+      "id": "zk-rollup-circuit-constraints-pattern-1-missing-pil-constrai-004",
       "title": "Pattern 1: Missing PIL Constraint for SMT Inclusion",
       "severity": "CRITICAL",
       "grep": "polynomial_identity_language|binary_state_machine|circuit_constraints|comparison_circuit|constraint_system|air_constraints",
@@ -565,6 +964,27 @@
         175,
         208
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "proof forgery",
+          "state manipulation",
+          "execution hijack",
+          "circuit constraints"
+        ],
+        "commonlyComposesWith": [
+          "pil",
+          "zkasm",
+          "polynomial identity language",
+          "constraint system",
+          "binary state machine"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: storage.pil - Missing constraint on SMT sibling node relationship",
@@ -574,10 +994,15 @@
       "antipattern": "storage.pil - Missing constraint on SMT sibling node relationship",
       "securePattern": "Add constraint ensuring sibling relationship is enforced at each level",
       "validWhen": "storage.pil - Missing constraint on SMT sibling node relationship",
-      "invalidWhen": "Add constraint ensuring sibling relationship is enforced at each level"
+      "invalidWhen": "Add constraint ensuring sibling relationship is enforced at each level",
+      "preconditions": [
+        "Attacker targets a PIL constraint file (e.g., storage.pil) that verifies Sparse Merkle Tree inclusion proofs",
+        "Attacker proves ownership/balance that does not exist → drains funds"
+      ],
+      "proofShape": "Attacker targets a PIL constraint file (e.g., storage.pil) that verifies Sparse Merkle Tree inclusion proofs -> Due to a missing polynomial identity, the prover can assign witness values that satisfy all present..."
     },
     {
-      "id": "zk-rollup-circuit-constraints-pattern-2-underconstrained-car-006",
+      "id": "zk-rollup-circuit-constraints-pattern-2-underconstrained-car-005",
       "title": "Pattern 2: Underconstrained Carry Value in Binary State Machine",
       "severity": "CRITICAL",
       "grep": "polynomial_identity_language|binary_state_machine|circuit_constraints|comparison_circuit|constraint_system|air_constraints",
@@ -599,6 +1024,27 @@
         209,
         240
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "proof forgery",
+          "state manipulation",
+          "execution hijack",
+          "circuit constraints"
+        ],
+        "commonlyComposesWith": [
+          "pil",
+          "zkasm",
+          "polynomial identity language",
+          "constraint system",
+          "binary state machine"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: binary.pil - carry bit not range-constrained",
@@ -608,10 +1054,14 @@
       "antipattern": "binary.pil - carry bit not range-constrained",
       "securePattern": "Add Boolean constraint on carry",
       "validWhen": "binary.pil - carry bit not range-constrained",
-      "invalidWhen": "Add Boolean constraint on carry"
+      "invalidWhen": "Add Boolean constraint on carry",
+      "preconditions": [
+        "An adversary sets carry = arbitrary field element, causing any bitwise operation to produce an attacker-chosen result"
+      ],
+      "proofShape": "The binary state machine processes bitwise operations (AND, OR, XOR) -> The carry bit between operations is allocated as a witness variable but never constrained to {0, 1} -> An adversary sets carry = arbitrary field..."
     },
     {
-      "id": "zk-rollup-circuit-constraints-pattern-3-missing-range-constr-007",
+      "id": "zk-rollup-circuit-constraints-pattern-3-missing-range-constr-006",
       "title": "Pattern 3: Missing Range Constraint on Division Remainder (zkEVM Opcode)",
       "severity": "CRITICAL",
       "grep": "polynomial_identity_language|binary_state_machine|circuit_constraints|comparison_circuit|constraint_system|air_constraints",
@@ -633,6 +1083,27 @@
         241,
         292
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "proof forgery",
+          "state manipulation",
+          "execution hijack",
+          "circuit constraints"
+        ],
+        "commonlyComposesWith": [
+          "pil",
+          "zkasm",
+          "polynomial identity language",
+          "constraint system",
+          "binary state machine"
+        ]
+      },
       "neverPrune": true,
       "check": [
         "VERIFY: When implementing integer division (a / b = q, remainder r) in a ZK circuit, the standard approach allocates witness variables for q and r, then...",
@@ -643,10 +1114,14 @@
       "antipattern": "zkevm_circuits/src/main_vm/opcodes/mul_div.rs",
       "securePattern": "Add range constraint: remainder < divisor",
       "validWhen": "When implementing integer division (a / b = q, remainder r) in a ZK circuit, the standard approach allocates witness variables for q and r, then constrains: q * b + r =...",
-      "invalidWhen": "Add range constraint: remainder < divisor"
+      "invalidWhen": "Add range constraint: remainder < divisor",
+      "preconditions": [
+        "implementing integer division (a / b = q, remainder r) in a ZK circuit, the standard approach allocates witness variables for q..."
+      ],
+      "proofShape": "Adversary crafts a transaction that performs a specific division (e.g., SHR r1, 1) -> The witness generation produces incorrect quotient = 0 for a specially crafted value (e.g., 1337) -> The circuit accepts this proof..."
     },
     {
-      "id": "zk-rollup-circuit-constraints-pattern-4-isltarraysubair-soun-008",
+      "id": "zk-rollup-circuit-constraints-pattern-4-isltarraysubair-soun-007",
       "title": "Pattern 4: IsLtArraySubAir Soundness Issue (RISC-V Circuit)",
       "severity": "HIGH",
       "grep": "polynomial_identity_language|binary_state_machine|circuit_constraints|comparison_circuit|constraint_system|IsLtArraySubAir",
@@ -668,6 +1143,27 @@
         293,
         324
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "proof forgery",
+          "state manipulation",
+          "execution hijack",
+          "circuit constraints"
+        ],
+        "commonlyComposesWith": [
+          "pil",
+          "zkasm",
+          "polynomial identity language",
+          "constraint system",
+          "binary state machine"
+        ]
+      },
       "check": [
         "VERIFY: IsLtArraySubAir circuit is supposed to compare two arrays lexicographically and output true if the first is strictly less than the second.",
         "FALSIFY: Enforce that diff_marker[i] = 1 implies a[i] != b[i]",
@@ -679,7 +1175,7 @@
       "invalidWhen": "Enforce that diff_marker[i] = 1 implies a[i] != b[i]"
     },
     {
-      "id": "zk-rollup-circuit-constraints-pattern-5-sha256-air-unconstra-009",
+      "id": "zk-rollup-circuit-constraints-pattern-5-sha256-air-unconstra-008",
       "title": "Pattern 5: SHA256 AIR Unconstrained final_hash at Last Block",
       "severity": "HIGH",
       "grep": "polynomial_identity_language|binary_state_machine|circuit_constraints|comparison_circuit|constraint_system|air_constraints",
@@ -701,6 +1197,27 @@
         325,
         353
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "proof forgery",
+          "state manipulation",
+          "execution hijack",
+          "circuit constraints"
+        ],
+        "commonlyComposesWith": [
+          "pil",
+          "zkasm",
+          "polynomial identity language",
+          "constraint system",
+          "binary state machine"
+        ]
+      },
       "check": [
         "VERIFY: sha256-air processes input data in 64-byte blocks.",
         "FALSIFY: Add constraint at last block row"
@@ -710,7 +1227,7 @@
       "invalidWhen": "Add constraint at last block row"
     },
     {
-      "id": "zk-rollup-circuit-constraints-pattern-6-partial-sha256-var-i-010",
+      "id": "zk-rollup-circuit-constraints-pattern-6-partial-sha256-var-i-009",
       "title": "Pattern 6: partial_sha256_var_interstitial Hash Collision (Undersized Input)",
       "severity": "HIGH",
       "grep": "partial_sha256_var_interstitial|polynomial_identity_language|binary_state_machine|circuit_constraints|comparison_circuit|constraint_system",
@@ -732,15 +1249,37 @@
         354,
         377
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "proof forgery",
+          "state manipulation",
+          "execution hijack",
+          "circuit constraints"
+        ],
+        "commonlyComposesWith": [
+          "pil",
+          "zkasm",
+          "polynomial identity language",
+          "constraint system",
+          "binary state machine"
+        ]
+      },
       "check": [
         "VERIFY: partial_sha256_var_interstitial hashes BLOCK_SIZE * floor(N / BLOCK_SIZE) bytes, not N bytes.",
         "PROVE: partial_sha256_var_interstitial"
       ],
       "antipattern": "partial_sha256_var_interstitial",
-      "validWhen": "partial_sha256_var_interstitial hashes BLOCK_SIZE * floor(N / BLOCK_SIZE) bytes, not N bytes."
+      "validWhen": "partial_sha256_var_interstitial hashes BLOCK_SIZE * floor(N / BLOCK_SIZE) bytes, not N bytes.",
+      "proofShape": "partial_sha256_var_interstitial"
     },
     {
-      "id": "zk-rollup-circuit-constraints-pattern-7-jalr-imm-sign-uncons-011",
+      "id": "zk-rollup-circuit-constraints-pattern-7-jalr-imm-sign-uncons-010",
       "title": "Pattern 7: JALR imm_sign Unconstrained (RISC-V zkVM)",
       "severity": "HIGH",
       "grep": "polynomial_identity_language|binary_state_machine|circuit_constraints|comparison_circuit|constraint_system|air_constraints",
@@ -762,6 +1301,27 @@
         378,
         404
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "proof forgery",
+          "state manipulation",
+          "execution hijack",
+          "circuit constraints"
+        ],
+        "commonlyComposesWith": [
+          "pil",
+          "zkasm",
+          "polynomial identity language",
+          "constraint system",
+          "binary state machine"
+        ]
+      },
       "check": [
         "VERIFY: In the JALR opcode circuit, there is an imm_sign flag that controls whether the 12-bit immediate is sign-extended.",
         "FALSIFY: Constrain imm_sign to equal the MSB of the immediate",
@@ -795,6 +1355,33 @@
         87,
         97
       ],
+      "reportEvidence": {
+        "count": 6,
+        "sampleReports": [
+          "reports/zk_rollup_findings/factory-deployments-wont-work-correctly-on-the-zksync-chain.md",
+          "reports/zk_rollup_findings/m-2-create-opcode-works-differently-in-the-zksync-chain.md",
+          "reports/zk_rollup_findings/m-6-computepooladdress-will-not-work-on-zksync-era.md",
+          "reports/zk_rollup_findings/m-15-create3-is-not-available-in-the-zksync-era.md",
+          "reports/zk_rollup_findings/m-08-factorycreate-is-vulnerable-to-reorg-attacks.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "deployment failure",
+          "address collision",
+          "authentication bypass",
+          "state corruption"
+        ],
+        "commonlyComposesWith": [
+          "create",
+          "create2",
+          "create3",
+          "extcodehash",
+          "ecrecover"
+        ]
+      },
       "check": [
         "VERIFY: CREATE / CREATE2 / CREATE3 Incompatibilities"
       ],
@@ -823,6 +1410,33 @@
         98,
         109
       ],
+      "reportEvidence": {
+        "count": 7,
+        "sampleReports": [
+          "reports/zk_rollup_findings/m-17-discrepancy-in-ecrecover-precompile-when-using-delegatecall.md",
+          "reports/zk_rollup_findings/m-19-divergences-in-the-simulation-of-the-extcodehash-evm-opcode.md",
+          "reports/zk_rollup_findings/h-01-unauthorized-contracts-can-bypass-precompile-authorization-via-delegatecall.md",
+          "reports/zk_rollup_findings/m-04-incorrect-max-precompile-address.md",
+          "reports/zk_rollup_findings/m-01-sessionkeyvalidator-is-not-working-on-zksync-mainnet.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "deployment failure",
+          "address collision",
+          "authentication bypass",
+          "state corruption"
+        ],
+        "commonlyComposesWith": [
+          "create",
+          "create2",
+          "create3",
+          "extcodehash",
+          "ecrecover"
+        ]
+      },
       "check": [
         "VERIFY: Opcode and Precompile Divergences"
       ],
@@ -851,6 +1465,33 @@
         119,
         128
       ],
+      "reportEvidence": {
+        "count": 5,
+        "sampleReports": [
+          "reports/zk_rollup_findings/preservation-of-msgsender-in-zksync-could-break-certain-trust-assumption.md",
+          "reports/zk_rollup_findings/m-04-time-sensitive-contracts-deployed-on-zksync.md",
+          "reports/zk_rollup_findings/incorrect-use-of-l1-blocknumber-on-arbitrum.md",
+          "reports/zk_rollup_findings/m-6-blsbn254-is-not-available-in-certain-chains-due-to-hardcoded-gas-limit.md",
+          "reports/zk_rollup_findings/scope-1-multisig-is-incompatible-with-erc-4337.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "deployment failure",
+          "address collision",
+          "authentication bypass",
+          "state corruption"
+        ],
+        "commonlyComposesWith": [
+          "create",
+          "create2",
+          "create3",
+          "extcodehash",
+          "ecrecover"
+        ]
+      },
       "check": [
         "VERIFY: msg.sender and Context Differences"
       ],
@@ -879,10 +1520,35 @@
         129,
         138
       ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/zk_rollup_findings/m-22-potential-gas-manipulation-via-bytecode-compression.md",
+          "reports/zk_rollup_findings/lack-of-data-availability-of-bytecode.md",
+          "reports/zk_rollup_findings/h-5-compress-right-after-convert-can-bypass-completeness-checks.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "deployment failure",
+          "address collision",
+          "authentication bypass",
+          "state corruption"
+        ],
+        "commonlyComposesWith": [
+          "create",
+          "create2",
+          "create3",
+          "extcodehash",
+          "ecrecover"
+        ]
+      },
       "validWhen": "Bytecode Compression"
     },
     {
-      "id": "zk-rollup-evm-incompatibilities-pattern-1-create2-address-deri-006",
+      "id": "zk-rollup-evm-incompatibilities-pattern-1-create2-address-deri-005",
       "title": "Pattern 1: CREATE2 Address Derivation Differs on ZKSync",
       "severity": "MEDIUM",
       "grep": "_computeCreate2Address|keccak256_of_initcode|bytecode_compression|computePoolAddress|address_derivation|block.timestamp",
@@ -904,6 +1570,27 @@
         192,
         241
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "deployment failure",
+          "address collision",
+          "authentication bypass",
+          "state corruption"
+        ],
+        "commonlyComposesWith": [
+          "create",
+          "create2",
+          "create3",
+          "extcodehash",
+          "ecrecover"
+        ]
+      },
       "check": [
         "VERIFY: Uniswap V3-style pool address computation",
         "PROVE: Protocol uses CREATE2 with a factory contract to deploy predictable-address proxies or pool contracts; Frontend / off-chain tooling computes the expected deployment...",
@@ -912,10 +1599,14 @@
       "antipattern": "Uniswap V3-style pool address computation",
       "securePattern": "Use ZKSync-specific address derivation when deploying on ZKSync",
       "validWhen": "Uniswap V3-style pool address computation",
-      "invalidWhen": "Use ZKSync-specific address derivation when deploying on ZKSync"
+      "invalidWhen": "Use ZKSync-specific address derivation when deploying on ZKSync",
+      "preconditions": [
+        "Deposits sent to the pre-computed address are lost; pool lookup by expected address fails"
+      ],
+      "proofShape": "Protocol uses CREATE2 with a factory contract to deploy predictable-address proxies or pool contracts -> Frontend / off-chain tooling computes the expected deployment address using Ethereum's CREATE2 formula:..."
     },
     {
-      "id": "zk-rollup-evm-incompatibilities-pattern-2-ecrecover-discrepanc-007",
+      "id": "zk-rollup-evm-incompatibilities-pattern-2-ecrecover-discrepanc-006",
       "title": "Pattern 2: ecrecover Discrepancy in delegatecall Context on ZKSync",
       "severity": "MEDIUM",
       "grep": "_computeCreate2Address|keccak256_of_initcode|bytecode_compression|computePoolAddress|address_derivation|block.timestamp",
@@ -937,6 +1628,27 @@
         242,
         286
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "deployment failure",
+          "address collision",
+          "authentication bypass",
+          "state corruption"
+        ],
+        "commonlyComposesWith": [
+          "create",
+          "create2",
+          "create3",
+          "extcodehash",
+          "ecrecover"
+        ]
+      },
       "check": [
         "VERIFY: On Ethereum, when contract A delegatecalls contract B, and B calls the ecrecover precompile, the call context (including caller identity) is...",
         "PROVE: Library using ecrecover — correct on Ethereum, wrong on ZKSync",
@@ -945,10 +1657,11 @@
       "antipattern": "Library using ecrecover — correct on Ethereum, wrong on ZKSync",
       "securePattern": "On ZKSync, call ecrecover directly (not via delegatecall)",
       "validWhen": "On Ethereum, when contract A delegatecalls contract B, and B calls the ecrecover precompile, the call context (including caller identity) is correctly preserved.",
-      "invalidWhen": "On ZKSync, call ecrecover directly (not via delegatecall)"
+      "invalidWhen": "On ZKSync, call ecrecover directly (not via delegatecall)",
+      "proofShape": "Library using ecrecover — correct on Ethereum, wrong on ZKSync"
     },
     {
-      "id": "zk-rollup-evm-incompatibilities-pattern-3-unauthorized-precomp-008",
+      "id": "zk-rollup-evm-incompatibilities-pattern-3-unauthorized-precomp-007",
       "title": "Pattern 3: Unauthorized Precompile Authorization Bypass via delegatecall",
       "severity": "HIGH",
       "grep": "_computeCreate2Address|keccak256_of_initcode|bytecode_compression|computePoolAddress|address_derivation|block.timestamp",
@@ -970,15 +1683,37 @@
         287,
         312
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "deployment failure",
+          "address collision",
+          "authentication bypass",
+          "state corruption"
+        ],
+        "commonlyComposesWith": [
+          "create",
+          "create2",
+          "create3",
+          "extcodehash",
+          "ecrecover"
+        ]
+      },
       "check": [
         "VERIFY: ZKSync system contracts have an authorization mechanism allowing only certain callers to invoke restricted precompile functions.",
         "PROVE: ZKSync precompile checks msg.sender but not tx.origin"
       ],
       "antipattern": "ZKSync precompile checks msg.sender but not tx.origin",
-      "validWhen": "ZKSync system contracts have an authorization mechanism allowing only certain callers to invoke restricted precompile functions."
+      "validWhen": "ZKSync system contracts have an authorization mechanism allowing only certain callers to invoke restricted precompile functions.",
+      "proofShape": "ZKSync precompile checks msg.sender but not tx.origin"
     },
     {
-      "id": "zk-rollup-evm-incompatibilities-pattern-4-nonce-doesn-t-increm-009",
+      "id": "zk-rollup-evm-incompatibilities-pattern-4-nonce-doesn-t-increm-008",
       "title": "Pattern 4: Nonce Doesn't Increment for Reverted Child Deployments",
       "severity": "MEDIUM",
       "grep": "_computeCreate2Address|max_precompile_address|keccak256_of_initcode|bytecode_compression|computePoolAddress|address_derivation",
@@ -1000,13 +1735,34 @@
         313,
         340
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "deployment failure",
+          "address collision",
+          "authentication bypass",
+          "state corruption"
+        ],
+        "commonlyComposesWith": [
+          "create",
+          "create2",
+          "create3",
+          "extcodehash",
+          "ecrecover"
+        ]
+      },
       "check": [
         "VERIFY: On Ethereum (post-EIP-161), a contract's deployment nonce is incremented before the inner CREATE executes, so a reverted deployment still increments..."
       ],
       "validWhen": "On Ethereum (post-EIP-161), a contract's deployment nonce is incremented before the inner CREATE executes, so a reverted deployment still increments the parent's nonce."
     },
     {
-      "id": "zk-rollup-evm-incompatibilities-pattern-5-block-number-returns-010",
+      "id": "zk-rollup-evm-incompatibilities-pattern-5-block-number-returns-009",
       "title": "Pattern 5: block.number Returns L1 Block Number on Arbitrum (Not L2)",
       "severity": "MEDIUM",
       "grep": "_computeCreate2Address|max_precompile_address|keccak256_of_initcode|bytecode_compression|computePoolAddress|address_derivation",
@@ -1028,6 +1784,27 @@
         341,
         385
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "deployment failure",
+          "address collision",
+          "authentication bypass",
+          "state corruption"
+        ],
+        "commonlyComposesWith": [
+          "create",
+          "create2",
+          "create3",
+          "extcodehash",
+          "ecrecover"
+        ]
+      },
       "check": [
         "VERIFY: On Arbitrum, block.number returns the L1 block number (approximately every 15 seconds), not the L2 block number (which advances with every L2...",
         "PROVE: Protocol uses block.number for interest accrual",
@@ -1036,7 +1813,8 @@
       "antipattern": "Protocol uses block.number for interest accrual",
       "securePattern": "Use block.timestamp for time-based calculations on L2",
       "validWhen": "On Arbitrum, block.number returns the L1 block number (approximately every 15 seconds), not the L2 block number (which advances with every L2 transaction).",
-      "invalidWhen": "Use block.timestamp for time-based calculations on L2"
+      "invalidWhen": "Use block.timestamp for time-based calculations on L2",
+      "proofShape": "Protocol uses block.number for interest accrual"
     },
     {
       "id": "zk-rollup-fraud-proofs-dispute-game-manipulation-000",
@@ -1061,6 +1839,33 @@
         86,
         96
       ],
+      "reportEvidence": {
+        "count": 6,
+        "sampleReports": [
+          "reports/zk_rollup_findings/h-2-attacker-can-freeze-chain-and-steal-challenge-deposits-using-fake-prevstater.md",
+          "reports/zk_rollup_findings/h-01-challenger-misses-discrepancy-events-allowing-executors-to-perform-maliciou.md",
+          "reports/zk_rollup_findings/m-02-opfaultverifier-ingests-games-that-resolve-incorrectly.md",
+          "reports/zk_rollup_findings/m-5-malicious-challenger-can-brick-finalizetimestamp-of-unfinalized-batches.md",
+          "reports/zk_rollup_findings/m-5-panic-in-mips-vm-could-lead-to-unchallengeable-l2-output-root-claim.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "manipulation",
+          "dispute game manipulation",
+          "game manipulation",
+          "logic error",
+          "fund theft"
+        ],
+        "commonlyComposesWith": [
+          "l2outputoracle",
+          "l2 output oracle",
+          "fault dispute game",
+          "dispute game factory",
+          "opfault verifier"
+        ]
+      },
       "check": [
         "VERIFY: Dispute Game Manipulation"
       ],
@@ -1089,13 +1894,40 @@
         97,
         110
       ],
+      "reportEvidence": {
+        "count": 7,
+        "sampleReports": [
+          "reports/zk_rollup_findings/m-4-batches-committed-during-an-on-going-challenge-can-avoid-being-challenged.md",
+          "reports/zk_rollup_findings/m-11-in-the-revertbatch-function-inchallenge-is-set-to-false-incorrectly-causing.md",
+          "reports/zk_rollup_findings/m03-initial-state-root-cannot-be-challenged.md",
+          "reports/zk_rollup_findings/m02-pre-state-root-and-transaction-may-not-uniquely-identify-transitions.md",
+          "reports/zk_rollup_findings/h-01-adversary-can-make-honest-parties-unable-to-retrieve-their-assertion-stakes.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund theft",
+          "chain freeze",
+          "dos",
+          "incorrect resolution"
+        ],
+        "commonlyComposesWith": [
+          "l2outputoracle",
+          "l2 output oracle",
+          "fault dispute game",
+          "dispute game factory",
+          "opfault verifier"
+        ]
+      },
       "check": [
         "VERIFY: State Root and Batch Challenge Issues"
       ],
       "validWhen": "State Root and Batch Challenge Issues"
     },
     {
-      "id": "zk-rollup-fraud-proofs-pattern-1-attacker-freezes-cha-003",
+      "id": "zk-rollup-fraud-proofs-pattern-1-attacker-freezes-cha-002",
       "title": "Pattern 1: Attacker Freezes Chain via Fake prevStateRoot",
       "severity": "HIGH",
       "grep": "DiscrepancyDetected|bisection_protocol|assertion_protocol|DisputeGameFactory|block.timestamp|challenge_period",
@@ -1117,6 +1949,27 @@
         165,
         218
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund theft",
+          "chain freeze",
+          "dos",
+          "incorrect resolution"
+        ],
+        "commonlyComposesWith": [
+          "l2outputoracle",
+          "l2 output oracle",
+          "fault dispute game",
+          "dispute game factory",
+          "opfault verifier"
+        ]
+      },
       "check": [
         "VERIFY: Rollup contract doesn't validate prevStateRoot exists in history",
         "PROVE: Attacker monitors the rollup for opportunities to submit a new batch with a crafted prevStateRoot; The prevStateRoot references a state that does not actually exist in...",
@@ -1125,10 +1978,15 @@
       "antipattern": "Rollup contract doesn't validate prevStateRoot exists in history",
       "securePattern": "Enforce prevStateRoot is from the canonical chain",
       "validWhen": "Rollup contract doesn't validate prevStateRoot exists in history",
-      "invalidWhen": "Enforce prevStateRoot is from the canonical chain"
+      "invalidWhen": "Enforce prevStateRoot is from the canonical chain",
+      "preconditions": [
+        "Attacker monitors the rollup for opportunities to submit a new batch with a crafted prevStateRoot",
+        "Attacker steals all challenge deposits from honest parties who tried to dispute it"
+      ],
+      "proofShape": "Attacker monitors the rollup for opportunities to submit a new batch with a crafted prevStateRoot -> The prevStateRoot references a state that does not actually exist in the chain history -> Honest challengers cannot..."
     },
     {
-      "id": "zk-rollup-fraud-proofs-pattern-2-challenger-misses-di-004",
+      "id": "zk-rollup-fraud-proofs-pattern-2-challenger-misses-di-003",
       "title": "Pattern 2: Challenger Misses Discrepancy Events → Malicious Execution",
       "severity": "HIGH",
       "grep": "DiscrepancyDetected|bisection_protocol|assertion_protocol|DisputeGameFactory|block.timestamp|challenge_period",
@@ -1150,15 +2008,37 @@
         219,
         253
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund theft",
+          "chain freeze",
+          "dos",
+          "incorrect resolution"
+        ],
+        "commonlyComposesWith": [
+          "l2outputoracle",
+          "l2 output oracle",
+          "fault dispute game",
+          "dispute game factory",
+          "opfault verifier"
+        ]
+      },
       "check": [
         "VERIFY: challenger (fraud proof monitor) relies on on-chain events to detect discrepancies between proposed state transitions and the actual L2 computation.",
         "PROVE: Discrepancy event only emitted for one execution type"
       ],
       "antipattern": "Discrepancy event only emitted for one execution type",
-      "validWhen": "The challenger (fraud proof monitor) relies on on-chain events to detect discrepancies between proposed state transitions and the actual L2 computation."
+      "validWhen": "The challenger (fraud proof monitor) relies on on-chain events to detect discrepancies between proposed state transitions and the actual L2 computation.",
+      "proofShape": "Discrepancy event only emitted for one execution type"
     },
     {
-      "id": "zk-rollup-fraud-proofs-pattern-3-opfaultverifier-inge-005",
+      "id": "zk-rollup-fraud-proofs-pattern-3-opfaultverifier-inge-004",
       "title": "Pattern 3: opFaultVerifier Ingests Games That Resolve Incorrectly",
       "severity": "MEDIUM",
       "grep": "DiscrepancyDetected|bisection_protocol|assertion_protocol|DisputeGameFactory|block.timestamp|challenge_period",
@@ -1180,6 +2060,27 @@
         254,
         301
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "CRITICAL"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund theft",
+          "chain freeze",
+          "dos",
+          "incorrect resolution"
+        ],
+        "commonlyComposesWith": [
+          "l2outputoracle",
+          "l2 output oracle",
+          "fault dispute game",
+          "dispute game factory",
+          "opfault verifier"
+        ]
+      },
       "check": [
         "VERIFY: OPFaultVerifier (or similar finalization contract) reads the outcome of a FaultDisputeGame to determine if a proposed output root should be accepted.",
         "PROVE: OPFaultVerifier checks game existence but not winning party",
@@ -1188,10 +2089,11 @@
       "antipattern": "OPFaultVerifier checks game existence but not winning party",
       "securePattern": "Check game was resolved in favor of the correct party",
       "validWhen": "The OPFaultVerifier (or similar finalization contract) reads the outcome of a FaultDisputeGame to determine if a proposed output root should be accepted.",
-      "invalidWhen": "Check game was resolved in favor of the correct party"
+      "invalidWhen": "Check game was resolved in favor of the correct party",
+      "proofShape": "OPFaultVerifier checks game existence but not winning party"
     },
     {
-      "id": "zk-rollup-fraud-proofs-pattern-4-mips-vm-panic-causes-006",
+      "id": "zk-rollup-fraud-proofs-pattern-4-mips-vm-panic-causes-005",
       "title": "Pattern 4: MIPS VM Panic Causes Unchallengeable Output Root",
       "severity": "MEDIUM",
       "grep": "DiscrepancyDetected|bisection_protocol|assertion_protocol|DisputeGameFactory|block.timestamp|challenge_period",
@@ -1213,6 +2115,27 @@
         302,
         343
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund theft",
+          "chain freeze",
+          "dos",
+          "incorrect resolution"
+        ],
+        "commonlyComposesWith": [
+          "l2outputoracle",
+          "l2 output oracle",
+          "fault dispute game",
+          "dispute game factory",
+          "opfault verifier"
+        ]
+      },
       "check": [
         "VERIFY: optimistic rollup's fault proof uses an on-chain MIPS VM to simulate a single disputed instruction.",
         "PROVE: MIPS VM can panic on certain opcode inputs",
@@ -1221,10 +2144,11 @@
       "antipattern": "MIPS VM can panic on certain opcode inputs",
       "securePattern": "Validate all array indices before access; return error state instead of panicking",
       "validWhen": "The optimistic rollup's fault proof uses an on-chain MIPS VM to simulate a single disputed instruction.",
-      "invalidWhen": "Validate all array indices before access; return error state instead of panicking"
+      "invalidWhen": "Validate all array indices before access; return error state instead of panicking",
+      "proofShape": "MIPS VM can panic on certain opcode inputs"
     },
     {
-      "id": "zk-rollup-fraud-proofs-pattern-5-bond-slashed-for-cor-007",
+      "id": "zk-rollup-fraud-proofs-pattern-5-bond-slashed-for-cor-006",
       "title": "Pattern 5: Bond Slashed for Correct/Honest Assertion",
       "severity": "HIGH",
       "grep": "DiscrepancyDetected|bisection_protocol|assertion_protocol|DisputeGameFactory|block.timestamp|challenge_period",
@@ -1246,15 +2170,37 @@
         344,
         369
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund theft",
+          "chain freeze",
+          "dos",
+          "incorrect resolution"
+        ],
+        "commonlyComposesWith": [
+          "l2outputoracle",
+          "l2 output oracle",
+          "fault dispute game",
+          "dispute game factory",
+          "opfault verifier"
+        ]
+      },
       "check": [
         "VERIFY: In assertion-based fraud proof systems (e.g., Arbitrum BOLD), each participant puts up a bond that can be slashed if their assertion is proven wrong.",
         "PROVE: Bond slashing uses stale game state during challenge rounds"
       ],
       "antipattern": "Bond slashing uses stale game state during challenge rounds",
-      "validWhen": "In assertion-based fraud proof systems (e.g., Arbitrum BOLD), each participant puts up a bond that can be slashed if their assertion is proven wrong."
+      "validWhen": "In assertion-based fraud proof systems (e.g., Arbitrum BOLD), each participant puts up a bond that can be slashed if their assertion is proven wrong.",
+      "proofShape": "Bond slashing uses stale game state during challenge rounds"
     },
     {
-      "id": "zk-rollup-fraud-proofs-pattern-6-batches-committed-du-008",
+      "id": "zk-rollup-fraud-proofs-pattern-6-batches-committed-du-007",
       "title": "Pattern 6: Batches Committed During Challenge Avoid Being Challenged",
       "severity": "MEDIUM",
       "grep": "DiscrepancyDetected|bisection_protocol|assertion_protocol|DisputeGameFactory|block.timestamp|challenge_period",
@@ -1276,12 +2222,34 @@
         370,
         399
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund theft",
+          "chain freeze",
+          "dos",
+          "incorrect resolution"
+        ],
+        "commonlyComposesWith": [
+          "l2outputoracle",
+          "l2 output oracle",
+          "fault dispute game",
+          "dispute game factory",
+          "opfault verifier"
+        ]
+      },
       "check": [
         "VERIFY: Some rollup implementations use an inChallenge flag to prevent commitment of new batches while a challenge is ongoing.",
         "PROVE: inChallenge only blocks future challenges, not new commitments"
       ],
       "antipattern": "inChallenge only blocks future challenges, not new commitments",
-      "validWhen": "Some rollup implementations use an inChallenge flag to prevent commitment of new batches while a challenge is ongoing."
+      "validWhen": "Some rollup implementations use an inChallenge flag to prevent commitment of new batches while a challenge is ongoing.",
+      "proofShape": "inChallenge only blocks future challenges, not new commitments"
     },
     {
       "id": "zk-rollup-gas-accounting-gas-calculation-errors-000",
@@ -1306,6 +2274,33 @@
         86,
         95
       ],
+      "reportEvidence": {
+        "count": 5,
+        "sampleReports": [
+          "reports/zk_rollup_findings/gas-calculation-frequently-uses-unchecked-free-variables.md",
+          "reports/zk_rollup_findings/invalid-gas-accounting.md",
+          "reports/zk_rollup_findings/gas-tracking-introduces-resource-consumption-related-dos.md",
+          "reports/zk_rollup_findings/h-3-sequencer-will-be-underpaid-because-of-incorrect-commitscalar.md",
+          "reports/zk_rollup_findings/lack-of-fee-limits-for-v3-transactions-fixed.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "fund theft",
+          "resource dos",
+          "fee bypass",
+          "underpayment"
+        ],
+        "commonlyComposesWith": [
+          "pubdata cost",
+          "bootloader gas",
+          "commit scalar",
+          "spent on pubdata",
+          "gasleft tracking"
+        ]
+      },
       "check": [
         "VERIFY: Gas Calculation Errors"
       ],
@@ -1334,13 +2329,40 @@
         96,
         108
       ],
+      "reportEvidence": {
+        "count": 6,
+        "sampleReports": [
+          "reports/zk_rollup_findings/m-14-operator-can-steal-all-gas-provided-by-any-user-for-l1l2-transactions.md",
+          "reports/zk_rollup_findings/h-01-paymaster-will-refund-spentonpubdata-to-user-instead-of-burning-it.md",
+          "reports/zk_rollup_findings/m-08-burning-of-the-user-gas-in-the-sendcompressedbytecode-function.md",
+          "reports/zk_rollup_findings/m-22-potential-gas-manipulation-via-bytecode-compression.md",
+          "reports/zk_rollup_findings/batch-fees-multiplier-cap-bypassed-with-multiple-calls.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "manipulation",
+          "fee theft manipulation",
+          "theft manipulation",
+          "arithmetic error",
+          "fund theft"
+        ],
+        "commonlyComposesWith": [
+          "pubdata cost",
+          "bootloader gas",
+          "commit scalar",
+          "spent on pubdata",
+          "gasleft tracking"
+        ]
+      },
       "check": [
         "VERIFY: Fee Theft and Manipulation"
       ],
       "validWhen": "Fee Theft and Manipulation"
     },
     {
-      "id": "zk-rollup-gas-accounting-pattern-1-paymaster-refunds-sp-003",
+      "id": "zk-rollup-gas-accounting-pattern-1-paymaster-refunds-sp-002",
       "title": "Pattern 1: Paymaster Refunds spentOnPubdata Instead of Burning",
       "severity": "HIGH",
       "grep": "publishCompressedBytecode|batch_fees_multiplier|requestL2Transaction|gas_per_pubdata_byte|bytecode_compression|operator_gas_steal",
@@ -1362,6 +2384,27 @@
         163,
         195
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "fund theft",
+          "resource dos",
+          "fee bypass",
+          "underpayment"
+        ],
+        "commonlyComposesWith": [
+          "pubdata cost",
+          "bootloader gas",
+          "commit scalar",
+          "spent on pubdata",
+          "gasleft tracking"
+        ]
+      },
       "check": [
         "VERIFY: In ZKSync, spentOnPubdata represents the gas consumed by posting state diffs to L1 (pubdata).",
         "PROVE: Bootloader refunds full gas including pubdata cost",
@@ -1370,10 +2413,11 @@
       "antipattern": "Bootloader refunds full gas including pubdata cost",
       "securePattern": "Burn spentOnPubdata; only refund pure L2 gas not consumed",
       "validWhen": "In ZKSync, spentOnPubdata represents the gas consumed by posting state diffs to L1 (pubdata).",
-      "invalidWhen": "Burn spentOnPubdata; only refund pure L2 gas not consumed"
+      "invalidWhen": "Burn spentOnPubdata; only refund pure L2 gas not consumed",
+      "proofShape": "Bootloader refunds full gas including pubdata cost"
     },
     {
-      "id": "zk-rollup-gas-accounting-pattern-2-operator-steals-all--004",
+      "id": "zk-rollup-gas-accounting-pattern-2-operator-steals-all--003",
       "title": "Pattern 2: Operator Steals All Gas Provided for L1→L2 Transactions",
       "severity": "HIGH",
       "grep": "gasPerPubdataByteLimit|batch_fees_multiplier|requestL2Transaction|gas_per_pubdata_byte|bytecode_compression|operator_gas_steal",
@@ -1395,6 +2439,27 @@
         196,
         238
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "fund theft",
+          "resource dos",
+          "fee bypass",
+          "underpayment"
+        ],
+        "commonlyComposesWith": [
+          "pubdata cost",
+          "bootloader gas",
+          "commit scalar",
+          "spent on pubdata",
+          "gasleft tracking"
+        ]
+      },
       "check": [
         "VERIFY: When a user sends an L1→L2 transaction, they specify gasLimit and gasPerPubdataByte.",
         "PROVE: L1 contract trusts operator-provided gas parameters",
@@ -1403,10 +2468,14 @@
       "antipattern": "L1 contract trusts operator-provided gas parameters",
       "securePattern": "Enforce minimum gasPerPubdataByteLimit",
       "validWhen": "When a user sends an L1→L2 transaction, they specify gasLimit and gasPerPubdataByte.",
-      "invalidWhen": "Enforce minimum gasPerPubdataByteLimit"
+      "invalidWhen": "Enforce minimum gasPerPubdataByteLimit",
+      "preconditions": [
+        "a user sends an L1→L2 transaction, they specify gasLimit and gasPerPubdataByte."
+      ],
+      "proofShape": "L1 contract trusts operator-provided gas parameters"
     },
     {
-      "id": "zk-rollup-gas-accounting-pattern-3-gas-calculation-uses-005",
+      "id": "zk-rollup-gas-accounting-pattern-3-gas-calculation-uses-004",
       "title": "Pattern 3: Gas Calculation Uses Unchecked Free Variables",
       "severity": "HIGH",
       "grep": "publishCompressedBytecode|batch_fees_multiplier|requestL2Transaction|gas_per_pubdata_byte|bytecode_compression|operator_gas_steal",
@@ -1428,13 +2497,34 @@
         239,
         265
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "fund theft",
+          "resource dos",
+          "fee bypass",
+          "underpayment"
+        ],
+        "commonlyComposesWith": [
+          "pubdata cost",
+          "bootloader gas",
+          "commit scalar",
+          "spent on pubdata",
+          "gasleft tracking"
+        ]
+      },
       "check": [
         "VERIFY: In STARK/ZK proof systems compiled from high-level languages, some intermediate variables in gas calculations may not be constrained by the proof..."
       ],
       "validWhen": "In STARK/ZK proof systems compiled from high-level languages, some intermediate variables in gas calculations may not be constrained by the proof (they are \"free\" or..."
     },
     {
-      "id": "zk-rollup-gas-accounting-pattern-4-burning-user-gas-in--006",
+      "id": "zk-rollup-gas-accounting-pattern-4-burning-user-gas-in--005",
       "title": "Pattern 4: Burning User Gas in sendCompressedBytecode",
       "severity": "MEDIUM",
       "grep": "publishCompressedBytecode|sendCompressedBytecode|batch_fees_multiplier|requestL2Transaction|gas_per_pubdata_byte|bytecode_compression",
@@ -1456,15 +2546,40 @@
         266,
         289
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "fund theft",
+          "resource dos",
+          "fee bypass",
+          "underpayment"
+        ],
+        "commonlyComposesWith": [
+          "pubdata cost",
+          "bootloader gas",
+          "commit scalar",
+          "spent on pubdata",
+          "gasleft tracking"
+        ]
+      },
       "check": [
         "VERIFY: When a new contract is deployed on ZKSync Era, the bytecode may need to be compressed and sent to L1 as part of pubdata.",
         "PROVE: sendCompressedBytecode() called in user-funded transaction context"
       ],
       "antipattern": "sendCompressedBytecode() called in user-funded transaction context",
-      "validWhen": "When a new contract is deployed on ZKSync Era, the bytecode may need to be compressed and sent to L1 as part of pubdata."
+      "validWhen": "When a new contract is deployed on ZKSync Era, the bytecode may need to be compressed and sent to L1 as part of pubdata.",
+      "preconditions": [
+        "a new contract is deployed on ZKSync Era, the bytecode may need to be compressed and sent to L1 as part of pubdata."
+      ],
+      "proofShape": "sendCompressedBytecode() called in user-funded transaction context"
     },
     {
-      "id": "zk-rollup-gas-accounting-pattern-5-incorrect-commitscal-007",
+      "id": "zk-rollup-gas-accounting-pattern-5-incorrect-commitscal-006",
       "title": "Pattern 5: Incorrect commitScalar Underpays Sequencer",
       "severity": "HIGH",
       "grep": "publishCompressedBytecode|batch_fees_multiplier|requestL2Transaction|gas_per_pubdata_byte|bytecode_compression|operator_gas_steal",
@@ -1486,6 +2601,27 @@
         290,
         326
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "fund theft",
+          "resource dos",
+          "fee bypass",
+          "underpayment"
+        ],
+        "commonlyComposesWith": [
+          "pubdata cost",
+          "bootloader gas",
+          "commit scalar",
+          "spent on pubdata",
+          "gasleft tracking"
+        ]
+      },
       "check": [
         "VERIFY: When computing how much the protocol should reimburse the sequencer for posting batch commitments to L1, a commitScalar constant is used...",
         "PROVE: commitScalar is miscalculated — too low",
@@ -1494,10 +2630,14 @@
       "antipattern": "commitScalar is miscalculated — too low",
       "securePattern": "commitScalar includes all L1 calldata overhead",
       "validWhen": "When computing how much the protocol should reimburse the sequencer for posting batch commitments to L1, a commitScalar constant is used (representing the approximate L1...",
-      "invalidWhen": "commitScalar includes all L1 calldata overhead"
+      "invalidWhen": "commitScalar includes all L1 calldata overhead",
+      "preconditions": [
+        "computing how much the protocol should reimburse the sequencer for posting batch commitments to L1, a commitScalar constant is..."
+      ],
+      "proofShape": "commitScalar is miscalculated — too low"
     },
     {
-      "id": "zk-rollup-gas-accounting-pattern-6-batch-fees-multiplie-008",
+      "id": "zk-rollup-gas-accounting-pattern-6-batch-fees-multiplie-007",
       "title": "Pattern 6: Batch Fees Multiplier Cap Bypassed with Multiple Calls",
       "severity": "MEDIUM",
       "grep": "publishCompressedBytecode|batch_fees_multiplier|requestL2Transaction|gas_per_pubdata_byte|bytecode_compression|updateFeeMultiplier",
@@ -1519,6 +2659,27 @@
         327,
         368
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "fund theft",
+          "resource dos",
+          "fee bypass",
+          "underpayment"
+        ],
+        "commonlyComposesWith": [
+          "pubdata cost",
+          "bootloader gas",
+          "commit scalar",
+          "spent on pubdata",
+          "gasleft tracking"
+        ]
+      },
       "check": [
         "VERIFY: A batch fee multiplier is used to limit fee escalation.",
         "PROVE: Cap enforced per-call, compounding across multiple calls",
@@ -1527,10 +2688,11 @@
       "antipattern": "Cap enforced per-call, compounding across multiple calls",
       "securePattern": "Apply cap relative to a reference point that resets periodically (per block/epoch)",
       "validWhen": "A batch fee multiplier is used to limit fee escalation.",
-      "invalidWhen": "Apply cap relative to a reference point that resets periodically (per block/epoch)"
+      "invalidWhen": "Apply cap relative to a reference point that resets periodically (per block/epoch)",
+      "proofShape": "Cap enforced per-call, compounding across multiple calls"
     },
     {
-      "id": "zk-rollup-gas-accounting-pattern-7-bytecode-compression-009",
+      "id": "zk-rollup-gas-accounting-pattern-7-bytecode-compression-008",
       "title": "Pattern 7: Bytecode Compression Bypass Completeness Checks",
       "severity": "HIGH",
       "grep": "publishCompressedBytecode|batch_fees_multiplier|gas_per_pubdata_byte|bytecode_compression|operator_gas_steal|calculateBatchFee",
@@ -1552,12 +2714,34 @@
         369,
         395
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "arithmetic error",
+          "fund theft",
+          "resource dos",
+          "fee bypass",
+          "underpayment"
+        ],
+        "commonlyComposesWith": [
+          "pubdata cost",
+          "bootloader gas",
+          "commit scalar",
+          "spent on pubdata",
+          "gasleft tracking"
+        ]
+      },
       "check": [
         "VERIFY: Bytecode compression in ZKSync involves two steps: convert (encode dictionary) and compress (apply encoding).",
         "PROVE: Compress called in same transaction as convert, skipping completeness"
       ],
       "antipattern": "Compress called in same transaction as convert, skipping completeness",
-      "validWhen": "Bytecode compression in ZKSync involves two steps: convert (encode dictionary) and compress (apply encoding)."
+      "validWhen": "Bytecode compression in ZKSync involves two steps: convert (encode dictionary) and compress (apply encoding).",
+      "proofShape": "Compress called in same transaction as convert, skipping completeness"
     },
     {
       "id": "zk-rollup-l1-l2-messaging-l1-l2-transaction-failures-000",
@@ -1582,6 +2766,33 @@
         86,
         96
       ],
+      "reportEvidence": {
+        "count": 6,
+        "sampleReports": [
+          "reports/zk_rollup_findings/m-03-loss-of-funds-for-the-sender-when-l1-l2-tx-fails-in-the-bootloader-on-l2.md",
+          "reports/zk_rollup_findings/m-09-lack-of-access-to-eth-on-l2-through-l1-l2-transactions.md",
+          "reports/zk_rollup_findings/m-14-operator-can-steal-all-gas-provided-by-any-user-for-l1l2-transactions.md",
+          "reports/zk_rollup_findings/m-15-mailboxrequestl2transaction-checks-the-deposit-limit-of-msgsender-l1wethbri.md",
+          "reports/zk_rollup_findings/m-11-gasless-eth-bridging-from-l1-to-l2.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund loss",
+          "dos",
+          "gas theft",
+          "message ordering"
+        ],
+        "commonlyComposesWith": [
+          "l1 to l2 transaction",
+          "bootloader",
+          "msg value simulator",
+          "address aliasing",
+          "request l2 transaction"
+        ]
+      },
       "check": [
         "VERIFY: L1 → L2 Transaction Failures"
       ],
@@ -1610,13 +2821,40 @@
         111,
         126
       ],
+      "reportEvidence": {
+        "count": 9,
+        "sampleReports": [
+          "reports/zk_rollup_findings/burnamount-sent-from-l2-to-l1-may-not-be-accurate-as-it-does-not-account-for-pen.md",
+          "reports/zk_rollup_findings/m-9-attacker-can-fill-merkle-tree-in-l2tol1messagepasser-blocking-any-future-wit.md",
+          "reports/zk_rollup_findings/multiple-withdrawals-in-a-single-l3-transaction-are-not-provable-through-op-with.md",
+          "reports/zk_rollup_findings/m-13-withdrawal-transactions-can-get-stuck-if-output-root-is-reproposed.md",
+          "reports/zk_rollup_findings/temporary-failed-l1-to-l2-token-transfers-might-lock-tokens-in-l1-if-replayed-af.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund loss",
+          "dos",
+          "gas theft",
+          "message ordering"
+        ],
+        "commonlyComposesWith": [
+          "l1 to l2 transaction",
+          "bootloader",
+          "msg value simulator",
+          "address aliasing",
+          "request l2 transaction"
+        ]
+      },
       "check": [
         "VERIFY: L2 → L1 Withdrawal Issues"
       ],
       "validWhen": "L2 → L1 Withdrawal Issues"
     },
     {
-      "id": "zk-rollup-l1-l2-messaging-pattern-1-loss-of-funds-when-l-005",
+      "id": "zk-rollup-l1-l2-messaging-pattern-1-loss-of-funds-when-l-004",
       "title": "Pattern 1: Loss of Funds When L1→L2 Transaction Fails in Bootloader",
       "severity": "MEDIUM",
       "grep": "requestL2TransactionSafe|requestL2Transaction|CrossDomainMessenger|initiateWithdrawal|MsgValueSimulator|L1ToL2Transaction",
@@ -1638,6 +2876,27 @@
         181,
         232
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund loss",
+          "dos",
+          "gas theft",
+          "message ordering"
+        ],
+        "commonlyComposesWith": [
+          "l1 to l2 transaction",
+          "bootloader",
+          "msg value simulator",
+          "address aliasing",
+          "request l2 transaction"
+        ]
+      },
       "check": [
         "VERIFY: L1 Mailbox doesn't guarantee refund on L2 execution failure",
         "PROVE: User sends ETH + L1→L2 message via requestL2Transaction() on L1; The transaction is successfully included in an L2 batch but fails during bootloader execution...",
@@ -1646,10 +2905,11 @@
       "antipattern": "L1 Mailbox doesn't guarantee refund on L2 execution failure",
       "securePattern": "Ensure refund recipient is explicitly set to an EOA or",
       "validWhen": "L1 Mailbox doesn't guarantee refund on L2 execution failure",
-      "invalidWhen": "Ensure refund recipient is explicitly set to an EOA or"
+      "invalidWhen": "Ensure refund recipient is explicitly set to an EOA or",
+      "proofShape": "User sends ETH + L1→L2 message via requestL2Transaction() on L1 -> The transaction is successfully included in an L2 batch but fails during bootloader execution (out-of-gas or contract..."
     },
     {
-      "id": "zk-rollup-l1-l2-messaging-pattern-2-msgvaluesimulator-no-006",
+      "id": "zk-rollup-l1-l2-messaging-pattern-2-msgvaluesimulator-no-005",
       "title": "Pattern 2: MsgValueSimulator Non-Zero Value Calls Sender Itself",
       "severity": "HIGH",
       "grep": "CrossDomainMessenger|initiateWithdrawal|MsgValueSimulator|L1ToL2Transaction|message_ordering|forced_inclusion",
@@ -1671,15 +2931,37 @@
         233,
         262
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund loss",
+          "dos",
+          "gas theft",
+          "message ordering"
+        ],
+        "commonlyComposesWith": [
+          "l1 to l2 transaction",
+          "bootloader",
+          "msg value simulator",
+          "address aliasing",
+          "request l2 transaction"
+        ]
+      },
       "check": [
         "VERIFY: In ZKSync's system contract MsgValueSimulator, when a call is made with non-zero msg.value, the simulator is supposed to forward ETH and then call...",
         "PROVE: MsgValueSimulator.sol (ZKSync Era)"
       ],
       "antipattern": "MsgValueSimulator.sol (ZKSync Era)",
-      "validWhen": "In ZKSync's system contract MsgValueSimulator, when a call is made with non-zero msg.value, the simulator is supposed to forward ETH and then call the target contract."
+      "validWhen": "In ZKSync's system contract MsgValueSimulator, when a call is made with non-zero msg.value, the simulator is supposed to forward ETH and then call the target contract.",
+      "proofShape": "MsgValueSimulator.sol (ZKSync Era)"
     },
     {
-      "id": "zk-rollup-l1-l2-messaging-pattern-3-address-aliasing-loc-007",
+      "id": "zk-rollup-l1-l2-messaging-pattern-3-address-aliasing-loc-006",
       "title": "Pattern 3: Address Aliasing Locks ETH",
       "severity": "MEDIUM",
       "grep": "requestL2Transaction|CrossDomainMessenger|initiateWithdrawal|MsgValueSimulator|L1ToL2Transaction|forced_inclusion",
@@ -1701,6 +2983,27 @@
         263,
         311
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund loss",
+          "dos",
+          "gas theft",
+          "message ordering"
+        ],
+        "commonlyComposesWith": [
+          "l1 to l2 transaction",
+          "bootloader",
+          "msg value simulator",
+          "address aliasing",
+          "request l2 transaction"
+        ]
+      },
       "check": [
         "VERIFY: When L1 contracts send ETH to L2 via requestL2Transaction, Ethereum applies \"address aliasing\": the L2 msg.sender is the L1 contract address +...",
         "PROVE: L2 contract assumes msg.sender == L1 contract address",
@@ -1709,10 +3012,14 @@
       "antipattern": "L2 contract assumes msg.sender == L1 contract address",
       "securePattern": "Apply address alias correction when receiving from L1 contracts",
       "validWhen": "When L1 contracts send ETH to L2 via requestL2Transaction, Ethereum applies \"address aliasing\": the L2 msg.sender is the L1 contract address +...",
-      "invalidWhen": "Apply address alias correction when receiving from L1 contracts"
+      "invalidWhen": "Apply address alias correction when receiving from L1 contracts",
+      "preconditions": [
+        "L1 contracts send ETH to L2 via requestL2Transaction, Ethereum applies \"address aliasing\": the L2 msg.sender is the L1 contract..."
+      ],
+      "proofShape": "L2 contract assumes msg.sender == L1 contract address"
     },
     {
-      "id": "zk-rollup-l1-l2-messaging-pattern-4-attacker-fills-l2tol-008",
+      "id": "zk-rollup-l1-l2-messaging-pattern-4-attacker-fills-l2tol-007",
       "title": "Pattern 4: Attacker Fills L2ToL1MessagePasser Merkle Tree",
       "severity": "MEDIUM",
       "grep": "CrossDomainMessenger|L2ToL1MessagePasser|initiateWithdrawal|MsgValueSimulator|L1ToL2Transaction|message_ordering",
@@ -1734,15 +3041,37 @@
         312,
         338
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund loss",
+          "dos",
+          "gas theft",
+          "message ordering"
+        ],
+        "commonlyComposesWith": [
+          "l1 to l2 transaction",
+          "bootloader",
+          "msg value simulator",
+          "address aliasing",
+          "request l2 transaction"
+        ]
+      },
       "check": [
         "VERIFY: Optimism L2ToL1MessagePasser contract stores all L2→L1 withdrawal messages in a Merkle trie for later L1 proof verification.",
         "PROVE: L2ToL1MessagePasser has finite capacity"
       ],
       "antipattern": "L2ToL1MessagePasser has finite capacity",
-      "validWhen": "The Optimism L2ToL1MessagePasser contract stores all L2→L1 withdrawal messages in a Merkle trie for later L1 proof verification."
+      "validWhen": "The Optimism L2ToL1MessagePasser contract stores all L2→L1 withdrawal messages in a Merkle trie for later L1 proof verification.",
+      "proofShape": "L2ToL1MessagePasser has finite capacity"
     },
     {
-      "id": "zk-rollup-l1-l2-messaging-pattern-5-paymaster-refunds-sp-009",
+      "id": "zk-rollup-l1-l2-messaging-pattern-5-paymaster-refunds-sp-008",
       "title": "Pattern 5: Paymaster Refunds spentOnPubdata to User",
       "severity": "HIGH",
       "grep": "CrossDomainMessenger|initiateWithdrawal|MsgValueSimulator|L1ToL2Transaction|message_ordering|forced_inclusion",
@@ -1764,6 +3093,27 @@
         339,
         380
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund loss",
+          "dos",
+          "gas theft",
+          "message ordering"
+        ],
+        "commonlyComposesWith": [
+          "l1 to l2 transaction",
+          "bootloader",
+          "msg value simulator",
+          "address aliasing",
+          "request l2 transaction"
+        ]
+      },
       "check": [
         "VERIFY: In ZKSync, spentOnPubdata represents gas consumed for L1 data availability publishing.",
         "PROVE: Paymaster incorrectly includes spentOnPubdata in user refund",
@@ -1772,10 +3122,11 @@
       "antipattern": "Paymaster incorrectly includes spentOnPubdata in user refund",
       "securePattern": "Burn spentOnPubdata; only refund unused computation gas",
       "validWhen": "In ZKSync, spentOnPubdata represents gas consumed for L1 data availability publishing.",
-      "invalidWhen": "Burn spentOnPubdata; only refund unused computation gas"
+      "invalidWhen": "Burn spentOnPubdata; only refund unused computation gas",
+      "proofShape": "Paymaster incorrectly includes spentOnPubdata in user refund"
     },
     {
-      "id": "zk-rollup-l1-l2-messaging-pattern-6-crossdomainmessenger-010",
+      "id": "zk-rollup-l1-l2-messaging-pattern-6-crossdomainmessenger-009",
       "title": "Pattern 6: CrossDomainMessenger Cannot Guarantee Replayability",
       "severity": "MEDIUM",
       "grep": "CrossDomainMessenger|initiateWithdrawal|MsgValueSimulator|L1ToL2Transaction|message_ordering|forced_inclusion",
@@ -1797,12 +3148,34 @@
         381,
         411
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "replayability",
+          "cross domain messenger cannot guarantee replayability",
+          "guarantee replayability",
+          "logic error",
+          "fund loss"
+        ],
+        "commonlyComposesWith": [
+          "l1 to l2 transaction",
+          "bootloader",
+          "msg value simulator",
+          "address aliasing",
+          "request l2 transaction"
+        ]
+      },
       "check": [
         "VERIFY: CrossDomainMessenger is supposed to allow failed L1→L2 messages to be replayed.",
         "PROVE: Failed L1→L2 messages not stored for replay"
       ],
       "antipattern": "Failed L1→L2 messages not stored for replay",
-      "validWhen": "The CrossDomainMessenger is supposed to allow failed L1→L2 messages to be replayed."
+      "validWhen": "The CrossDomainMessenger is supposed to allow failed L1→L2 messages to be replayed.",
+      "proofShape": "Failed L1→L2 messages not stored for replay"
     },
     {
       "id": "zk-rollup-proof-verification-cryptographic-weaknesses-in-pr-001",
@@ -1827,13 +3200,40 @@
         86,
         98
       ],
+      "reportEvidence": {
+        "count": 6,
+        "sampleReports": [
+          "reports/zk_rollup_findings/incorrect-randomness-computation-allows-proof-forgery.md",
+          "reports/zk_rollup_findings/m-01-plonkgroth16-verifiers-accept-proofs-with-untrusted-recursion-vk-root.md",
+          "reports/zk_rollup_findings/weak-fiat-shamir-implementation-for-the-logup-phase-allows-crafting-backdoored-c.md",
+          "reports/zk_rollup_findings/m-4-malicious-verifier-will-recover-private-witness-values-breaking-zero-knowled.md",
+          "reports/zk_rollup_findings/m-07-unbounded-decimal-public-inputs-enable-verifier-side-dos-via-oversized-nume.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "weak randomness",
+          "proof forgery",
+          "zkp bypass",
+          "economic exploit",
+          "privacy violation"
+        ],
+        "commonlyComposesWith": [
+          "plonk verifier",
+          "groth16 verifier",
+          "fiat shamir",
+          "verification key",
+          "recursive proof"
+        ]
+      },
       "check": [
         "VERIFY: Cryptographic Weaknesses in Proof Systems"
       ],
       "validWhen": "Cryptographic Weaknesses in Proof Systems"
     },
     {
-      "id": "zk-rollup-proof-verification-pattern-1-missing-on-chain-zk--003",
+      "id": "zk-rollup-proof-verification-pattern-1-missing-on-chain-zk--002",
       "title": "Pattern 1: Missing On-Chain ZK Proof Verification",
       "severity": "HIGH",
       "grep": "SIGNED_USING_ZK_WALLET|on_chain_verification|fiat_shamir_challenge|verifyWithTrustedVK|on_chain_verifier|verify_signature",
@@ -1855,6 +3255,27 @@
         154,
         195
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "weak randomness",
+          "proof forgery",
+          "zkp bypass",
+          "economic exploit",
+          "privacy violation"
+        ],
+        "commonlyComposesWith": [
+          "plonk verifier",
+          "groth16 verifier",
+          "fiat shamir",
+          "verification key",
+          "recursive proof"
+        ]
+      },
       "check": [
         "VERIFY: library.move - verify_signature()",
         "PROVE: Protocol uses an off-chain/hybrid ZK authentication scheme (e.g., zkLogin on Sui/Move); The on-chain verify_signature() function checks the scheme byte",
@@ -1863,10 +3284,14 @@
       "antipattern": "library.move - verify_signature()",
       "securePattern": "Verify ZK proof on-chain for zkLogin scheme",
       "validWhen": "library.move - verify_signature()",
-      "invalidWhen": "Verify ZK proof on-chain for zkLogin scheme"
+      "invalidWhen": "Verify ZK proof on-chain for zkLogin scheme",
+      "preconditions": [
+        "Attacker submits any signature claiming SIGNED_USING_ZK_WALLET to bypass authentication for any user account"
+      ],
+      "proofShape": "Protocol uses an off-chain/hybrid ZK authentication scheme (e.g., zkLogin on Sui/Move) -> The on-chain verify_signature() function checks the scheme byte -> When scheme == SIGNED_USING_ZK_WALLET (3), the function sets..."
     },
     {
-      "id": "zk-rollup-proof-verification-pattern-2-incorrect-randomness-004",
+      "id": "zk-rollup-proof-verification-pattern-2-incorrect-randomness-003",
       "title": "Pattern 2: Incorrect Randomness Computation Allows Proof Forgery",
       "severity": "HIGH",
       "grep": "randomness_generation|on_chain_verification|fiat_shamir_challenge|verifyWithTrustedVK|on_chain_verifier|verification_key",
@@ -1888,6 +3313,27 @@
         196,
         247
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "weak randomness",
+          "proof forgery",
+          "zkp bypass",
+          "economic exploit",
+          "privacy violation"
+        ],
+        "commonlyComposesWith": [
+          "plonk verifier",
+          "groth16 verifier",
+          "fiat shamir",
+          "verification key",
+          "recursive proof"
+        ]
+      },
       "check": [
         "VERIFY: In interactive proof systems converted to non-interactive via Fiat-Shamir, the \"random\" challenge must be derived from all previous transcript values.",
         "PROVE: Prover generates multiple commitments and includes them in the transcript; The Fiat-Shamir challenge is computed as H(C1, C2, ...) but due to a bug, some Ci are excluded",
@@ -1897,10 +3343,14 @@
       "antipattern": "Incorrect randomness — missing some commitments in transcript",
       "securePattern": "Include ALL public commitments in the Fiat-Shamir transcript",
       "validWhen": "In interactive proof systems converted to non-interactive via Fiat-Shamir, the \"random\" challenge must be derived from all previous transcript values.",
-      "invalidWhen": "Include ALL public commitments in the Fiat-Shamir transcript"
+      "invalidWhen": "Include ALL public commitments in the Fiat-Shamir transcript",
+      "preconditions": [
+        "Attacker produces a valid-looking proof for an incorrect statement"
+      ],
+      "proofShape": "Prover generates multiple commitments and includes them in the transcript -> The Fiat-Shamir challenge is computed as H(C1, C2, ...) but due to a bug, some Ci are excluded -> Prover searches for commitment values where..."
     },
     {
-      "id": "zk-rollup-proof-verification-pattern-3-plonk-groth16-verifi-005",
+      "id": "zk-rollup-proof-verification-pattern-3-plonk-groth16-verifi-004",
       "title": "Pattern 3: Plonk/Groth16 Verifiers Accept Untrusted Recursion VK Root",
       "severity": "MEDIUM",
       "grep": "randomness_generation|on_chain_verification|fiat_shamir_challenge|verifyWithTrustedVK|on_chain_verifier|verification_key",
@@ -1922,6 +3372,27 @@
         248,
         289
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "weak randomness",
+          "proof forgery",
+          "zkp bypass",
+          "economic exploit",
+          "privacy violation"
+        ],
+        "commonlyComposesWith": [
+          "plonk verifier",
+          "groth16 verifier",
+          "fiat shamir",
+          "verification key",
+          "recursive proof"
+        ]
+      },
       "check": [
         "VERIFY: In recursive proof systems (e.g., Groth16 with Fflonk recursion, Plonk with proof composition), the inner verifier circuit uses a \"verification key...",
         "PROVE: On-chain Groth16 verifier accepts prover-supplied VK root",
@@ -1930,10 +3401,11 @@
       "antipattern": "On-chain Groth16 verifier accepts prover-supplied VK root",
       "securePattern": "Hard-code the trusted VK root; reject proofs with different roots",
       "validWhen": "In recursive proof systems (e.g., Groth16 with Fflonk recursion, Plonk with proof composition), the inner verifier circuit uses a \"verification key root\" to identify...",
-      "invalidWhen": "Hard-code the trusted VK root; reject proofs with different roots"
+      "invalidWhen": "Hard-code the trusted VK root; reject proofs with different roots",
+      "proofShape": "On-chain Groth16 verifier accepts prover-supplied VK root"
     },
     {
-      "id": "zk-rollup-proof-verification-pattern-4-weak-fiat-shamir-in--006",
+      "id": "zk-rollup-proof-verification-pattern-4-weak-fiat-shamir-in--005",
       "title": "Pattern 4: Weak Fiat-Shamir in LogUp Phase Enables Backdoored Circuits",
       "severity": "HIGH",
       "grep": "randomness_generation|on_chain_verification|fiat_shamir_challenge|verifyWithTrustedVK|on_chain_verifier|verification_key",
@@ -1955,15 +3427,37 @@
         290,
         313
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "weak randomness",
+          "proof forgery",
+          "zkp bypass",
+          "economic exploit",
+          "privacy violation"
+        ],
+        "commonlyComposesWith": [
+          "plonk verifier",
+          "groth16 verifier",
+          "fiat shamir",
+          "verification key",
+          "recursive proof"
+        ]
+      },
       "check": [
         "VERIFY: LogUp (a lookup argument used in STARK/Plonky2 proofs) uses Fiat-Shamir to generate challenges for the LogUp sum-check.",
         "PROVE: LogUp challenge uses only partial transcript"
       ],
       "antipattern": "LogUp challenge uses only partial transcript",
-      "validWhen": "LogUp (a lookup argument used in STARK/Plonky2 proofs) uses Fiat-Shamir to generate challenges for the LogUp sum-check."
+      "validWhen": "LogUp (a lookup argument used in STARK/Plonky2 proofs) uses Fiat-Shamir to generate challenges for the LogUp sum-check.",
+      "proofShape": "LogUp challenge uses only partial transcript"
     },
     {
-      "id": "zk-rollup-proof-verification-pattern-5-verifier-side-dos-vi-007",
+      "id": "zk-rollup-proof-verification-pattern-5-verifier-side-dos-vi-006",
       "title": "Pattern 5: Verifier-Side DoS via Unbounded Public Inputs",
       "severity": "MEDIUM",
       "grep": "randomness_generation|on_chain_verification|fiat_shamir_challenge|verifyWithTrustedVK|on_chain_verifier|verification_key",
@@ -1985,6 +3479,27 @@
         314,
         347
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "weak randomness",
+          "proof forgery",
+          "zkp bypass",
+          "economic exploit",
+          "privacy violation"
+        ],
+        "commonlyComposesWith": [
+          "plonk verifier",
+          "groth16 verifier",
+          "fiat shamir",
+          "verification key",
+          "recursive proof"
+        ]
+      },
       "check": [
         "VERIFY: ZK verifier contracts or APIs that accept public inputs as uint256 decimal strings (rather than validated field elements) may not check that values...",
         "PROVE: verify() panics on inputs ≥ field prime",
@@ -1993,10 +3508,11 @@
       "antipattern": "verify() panics on inputs ≥ field prime",
       "securePattern": "Validate all public inputs are valid field elements",
       "validWhen": "ZK verifier contracts or APIs that accept public inputs as uint256 decimal strings (rather than validated field elements) may not check that values are less than the...",
-      "invalidWhen": "Validate all public inputs are valid field elements"
+      "invalidWhen": "Validate all public inputs are valid field elements",
+      "proofShape": "verify() panics on inputs ≥ field prime"
     },
     {
-      "id": "zk-rollup-proof-verification-pattern-6-malicious-verifier-r-008",
+      "id": "zk-rollup-proof-verification-pattern-6-malicious-verifier-r-007",
       "title": "Pattern 6: Malicious Verifier Recovers Private Witness Values",
       "severity": "MEDIUM",
       "grep": "randomness_generation|on_chain_verification|fiat_shamir_challenge|verifyWithTrustedVK|on_chain_verifier|verification_key",
@@ -2018,12 +3534,34 @@
         348,
         374
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "weak randomness",
+          "proof forgery",
+          "zkp bypass",
+          "economic exploit",
+          "privacy violation"
+        ],
+        "commonlyComposesWith": [
+          "plonk verifier",
+          "groth16 verifier",
+          "fiat shamir",
+          "verification key",
+          "recursive proof"
+        ]
+      },
       "check": [
         "VERIFY: In some ZK proof systems (particularly those using interactive protocols or weak Fiat-Shamir), a verifier that can choose its own challenges can...",
         "PROVE: Challenge is fully determined by commitment (no verifier randomness)"
       ],
       "antipattern": "Challenge is fully determined by commitment (no verifier randomness)",
-      "validWhen": "In some ZK proof systems (particularly those using interactive protocols or weak Fiat-Shamir), a verifier that can choose its own challenges can extract private witness..."
+      "validWhen": "In some ZK proof systems (particularly those using interactive protocols or weak Fiat-Shamir), a verifier that can choose its own challenges can extract private witness...",
+      "proofShape": "Challenge is fully determined by commitment (no verifier randomness)"
     },
     {
       "id": "zk-rollup-reorg-attacks-factory-reorg-attacks-000",
@@ -2048,13 +3586,40 @@
         85,
         95
       ],
+      "reportEvidence": {
+        "count": 6,
+        "sampleReports": [
+          "reports/zk_rollup_findings/m-01-questfactory-is-suspicious-of-the-reorg-attack.md",
+          "reports/zk_rollup_findings/m-04-many-create-methods-are-suspicious-of-the-reorg-attack.md",
+          "reports/zk_rollup_findings/m-08-factorycreate-is-vulnerable-to-reorg-attacks.md",
+          "reports/zk_rollup_findings/m-09-create-methods-are-suspicious-of-reorg-attack.md",
+          "reports/zk_rollup_findings/m-14-re-org-attack-in-factory.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund theft",
+          "frontrun",
+          "address collision",
+          "impersonation"
+        ],
+        "commonlyComposesWith": [
+          "create",
+          "create2",
+          "create3",
+          "block reorg",
+          "factory pattern"
+        ]
+      },
       "check": [
         "VERIFY: Factory Reorg Attacks"
       ],
       "validWhen": "Factory Reorg Attacks"
     },
     {
-      "id": "zk-rollup-reorg-attacks-pattern-1-questfactory-reorg-a-003",
+      "id": "zk-rollup-reorg-attacks-pattern-1-questfactory-reorg-a-002",
       "title": "Pattern 1: questFactory Reorg Attack",
       "severity": "HIGH",
       "grep": "questFactory.createQuest(...|liquidity_pool_deployment|createPoolAndAddLiquidity|deterministic_address|deployment_frontrun|initialize_pattern",
@@ -2076,6 +3641,27 @@
         165,
         220
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund theft",
+          "frontrun",
+          "address collision",
+          "impersonation"
+        ],
+        "commonlyComposesWith": [
+          "create",
+          "create2",
+          "create3",
+          "block reorg",
+          "factory pattern"
+        ]
+      },
       "check": [
         "VERIFY: Factory uses CREATE (nonce-based address) for Quest deployment",
         "FALSIFY: Include msg.sender and block-specific data in CREATE2 salt"
@@ -2086,7 +3672,7 @@
       "invalidWhen": "Include msg.sender and block-specific data in CREATE2 salt"
     },
     {
-      "id": "zk-rollup-reorg-attacks-pattern-2-stealing-liquidity-p-004",
+      "id": "zk-rollup-reorg-attacks-pattern-2-stealing-liquidity-p-003",
       "title": "Pattern 2: Stealing Liquidity Pool Funds via Reorg",
       "severity": "HIGH",
       "grep": "liquidity_pool_deployment|createPoolAndAddLiquidity|deterministic_address|deployment_frontrun|msg_sender_address|initialize_pattern",
@@ -2108,6 +3694,27 @@
         221,
         277
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund theft",
+          "frontrun",
+          "address collision",
+          "impersonation"
+        ],
+        "commonlyComposesWith": [
+          "create",
+          "create2",
+          "create3",
+          "block reorg",
+          "factory pattern"
+        ]
+      },
       "check": [
         "VERIFY: Pool deployed in one tx, funded in another",
         "FALSIFY: Deploy and fund in the same atomic transaction"
@@ -2115,10 +3722,13 @@
       "antipattern": "Pool deployed in one tx, funded in another",
       "securePattern": "Deploy and fund in the same atomic transaction",
       "validWhen": "Pool deployed in one tx, funded in another",
-      "invalidWhen": "Deploy and fund in the same atomic transaction"
+      "invalidWhen": "Deploy and fund in the same atomic transaction",
+      "preconditions": [
+        "a new liquidity pool is deployed (e.g., via Uniswap-style factory), a \"first depositor\" must provide initial liquidity."
+      ]
     },
     {
-      "id": "zk-rollup-reorg-attacks-pattern-3-general-factory-crea-005",
+      "id": "zk-rollup-reorg-attacks-pattern-3-general-factory-crea-004",
       "title": "Pattern 3: General Factory.create Reorg (Multiple Protocols)",
       "severity": "MEDIUM",
       "grep": "createPoolAndAddLiquidity|deterministic_address|deployment_frontrun|block.prevrandao|block.timestamp|factory_pattern",
@@ -2140,15 +3750,37 @@
         278,
         322
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund theft",
+          "frontrun",
+          "address collision",
+          "impersonation"
+        ],
+        "commonlyComposesWith": [
+          "create",
+          "create2",
+          "create3",
+          "block reorg",
+          "factory pattern"
+        ]
+      },
       "check": [
         "VERIFY: (a) deploys a contract with a nonce-predictable or salt-predictable address, AND",
         "PROVE: Canonical pattern seen in 5+ reports"
       ],
       "antipattern": "Canonical pattern seen in 5+ reports",
-      "validWhen": "(a) deploys a contract with a nonce-predictable or salt-predictable address, AND"
+      "validWhen": "(a) deploys a contract with a nonce-predictable or salt-predictable address, AND",
+      "proofShape": "Canonical pattern seen in 5+ reports"
     },
     {
-      "id": "zk-rollup-reorg-attacks-pattern-4-create-vs-create2-re-006",
+      "id": "zk-rollup-reorg-attacks-pattern-4-create-vs-create2-re-005",
       "title": "Pattern 4: CREATE vs CREATE2 Reorg Risk Comparison",
       "severity": "HIGH",
       "grep": "liquidity_pool_deployment|createPoolAndAddLiquidity|deterministic_address|deployment_frontrun|msg_sender_address|initialize_pattern",
@@ -2170,6 +3802,27 @@
         323,
         349
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "fund theft",
+          "frontrun",
+          "address collision",
+          "impersonation"
+        ],
+        "commonlyComposesWith": [
+          "create",
+          "create2",
+          "create3",
+          "block reorg",
+          "factory pattern"
+        ]
+      },
       "check": [
         "VERIFY: Frequency: Observed across all 7 reorg-related reports | Validation: Strong"
       ],
@@ -2198,6 +3851,33 @@
         83,
         93
       ],
+      "reportEvidence": {
+        "count": 6,
+        "sampleReports": [
+          "reports/zk_rollup_findings/access-controlled-functions-cannot-be-called-when-l2-sequencers-are-down.md",
+          "reports/zk_rollup_findings/redemptions-are-blocked-when-l2-sequencers-are-down.md",
+          "reports/zk_rollup_findings/m-4-loss-of-option-token-from-teller-and-reward-from-otlm-if-l2-sequencer-goes-d.md",
+          "reports/zk_rollup_findings/m-11-arbitrum-sequencer-downtime-lasting-before-and-beyond-epoch-expiry-prevents.md",
+          "reports/zk_rollup_findings/user-might-be-unfairly-liquidated-after-l2-sequencer-grace-period.md"
+        ],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "denial of service",
+          "economic exploit",
+          "censorship",
+          "front running"
+        ],
+        "commonlyComposesWith": [
+          "sequencer downtime",
+          "forced inclusion",
+          "l2 block timestamp",
+          "batch submission",
+          "sequencer uptime feed"
+        ]
+      },
       "check": [
         "VERIFY: Protocol Functions Breaking During Sequencer Downtime"
       ],
@@ -2226,13 +3906,40 @@
         103,
         115
       ],
+      "reportEvidence": {
+        "count": 6,
+        "sampleReports": [
+          "reports/zk_rollup_findings/h-3-sequencer-will-be-underpaid-because-of-incorrect-commitscalar.md",
+          "reports/zk_rollup_findings/aggregator-rewards-are-averaged-across-forced-batches-rollups.md",
+          "reports/zk_rollup_findings/h-6-keepers-will-suffer-significant-losses-due-to-miss-compensation-for-l1-rollu.md",
+          "reports/zk_rollup_findings/broken-block-time-assumptions-affect-am-amm-epoch-duration-and-can-dos-rebalanci.md",
+          "reports/zk_rollup_findings/l2-proposer-can-signiﬁcantly-bias-diﬃculty.md"
+        ],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "denial of service",
+          "economic exploit",
+          "censorship",
+          "front running"
+        ],
+        "commonlyComposesWith": [
+          "sequencer downtime",
+          "forced inclusion",
+          "l2 block timestamp",
+          "batch submission",
+          "sequencer uptime feed"
+        ]
+      },
       "check": [
         "VERIFY: Sequencer Economic Issues"
       ],
       "validWhen": "Sequencer Economic Issues"
     },
     {
-      "id": "zk-rollup-sequencer-issues-pattern-1-access-controlled-fu-004",
+      "id": "zk-rollup-sequencer-issues-pattern-1-access-controlled-fu-003",
       "title": "Pattern 1: Access-Controlled Functions Fail During Sequencer Downtime",
       "severity": "MEDIUM",
       "grep": "forced_transaction_queue|censorship_resistance|executeDutchAuction|block.timestamp|forced_inclusion|batch_submission",
@@ -2254,6 +3961,27 @@
         170,
         226
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "denial of service",
+          "economic exploit",
+          "censorship",
+          "front running"
+        ],
+        "commonlyComposesWith": [
+          "sequencer downtime",
+          "forced inclusion",
+          "l2 block timestamp",
+          "batch submission",
+          "sequencer uptime feed"
+        ]
+      },
       "check": [
         "VERIFY: emergencyRepay() can only be called on L2",
         "PROVE: Protocol has time-sensitive functions (e.g., debt repayment, collateral deposit, emergency pause); These functions require calling a smart contract on L2",
@@ -2262,10 +3990,14 @@
       "antipattern": "emergencyRepay() can only be called on L2",
       "securePattern": "Add sequencer uptime check before enforcing deadlines",
       "validWhen": "emergencyRepay() can only be called on L2",
-      "invalidWhen": "Add sequencer uptime check before enforcing deadlines"
+      "invalidWhen": "Add sequencer uptime check before enforcing deadlines",
+      "preconditions": [
+        "Protocol has time-sensitive functions (e.g., debt repayment, collateral deposit, emergency pause)"
+      ],
+      "proofShape": "Protocol has time-sensitive functions (e.g., debt repayment, collateral deposit, emergency pause) -> These functions require calling a smart contract on L2 -> L2 sequencer goes down for 4-24 hours"
     },
     {
-      "id": "zk-rollup-sequencer-issues-pattern-2-dutch-auctions-and-o-005",
+      "id": "zk-rollup-sequencer-issues-pattern-2-dutch-auctions-and-o-004",
       "title": "Pattern 2: Dutch Auctions and Options Expire at Bad Prices During Downtime",
       "severity": "HIGH",
       "grep": "forced_transaction_queue|censorship_resistance|executeDutchAuction|block.timestamp|forced_inclusion|batch_submission",
@@ -2287,6 +4019,27 @@
         227,
         277
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "denial of service",
+          "economic exploit",
+          "censorship",
+          "front running"
+        ],
+        "commonlyComposesWith": [
+          "sequencer downtime",
+          "forced inclusion",
+          "l2 block timestamp",
+          "batch submission",
+          "sequencer uptime feed"
+        ]
+      },
       "check": [
         "VERIFY: Dutch auction price depends on block.",
         "PROVE: Protocol runs Dutch auctions (price decreases linearly over time) or time-limited options; L2 sequencer goes down during an active auction/option period",
@@ -2296,10 +4049,11 @@
       "antipattern": "Dutch auction price depends on block.timestamp",
       "securePattern": "Check sequencer is up (and has been up for grace period) before auctions",
       "validWhen": "Dutch auction price depends on block.",
-      "invalidWhen": "Check sequencer is up (and has been up for grace period) before auctions"
+      "invalidWhen": "Check sequencer is up (and has been up for grace period) before auctions",
+      "proofShape": "Protocol runs Dutch auctions (price decreases linearly over time) or time-limited options -> L2 sequencer goes down during an active auction/option period -> When sequencer comes back online, auction start price was..."
     },
     {
-      "id": "zk-rollup-sequencer-issues-pattern-3-linea-sequencer-cens-006",
+      "id": "zk-rollup-sequencer-issues-pattern-3-linea-sequencer-cens-005",
       "title": "Pattern 3: Linea / Sequencer Censorship Locking User Funds",
       "severity": "MEDIUM",
       "grep": "forced_transaction_queue|censorship_resistance|submitL2ToL1Message|executeDutchAuction|block.timestamp|forced_inclusion",
@@ -2321,6 +4075,27 @@
         278,
         320
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "MEDIUM"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "denial of service",
+          "economic exploit",
+          "censorship",
+          "front running"
+        ],
+        "commonlyComposesWith": [
+          "sequencer downtime",
+          "forced inclusion",
+          "l2 block timestamp",
+          "batch submission",
+          "sequencer uptime feed"
+        ]
+      },
       "check": [
         "VERIFY: On some L2 chains (e.g., early Linea), the sequencer has a denylist or role-based exclusion mechanism.",
         "PROVE: Linea L2MessageService allows sequencer to denylist users",
@@ -2329,10 +4104,11 @@
       "antipattern": "Linea L2MessageService allows sequencer to denylist users",
       "securePattern": "Uncensorable withdrawal path — users can always force-exit to L1",
       "validWhen": "On some L2 chains (e.g., early Linea), the sequencer has a denylist or role-based exclusion mechanism.",
-      "invalidWhen": "Uncensorable withdrawal path — users can always force-exit to L1"
+      "invalidWhen": "Uncensorable withdrawal path — users can always force-exit to L1",
+      "proofShape": "Linea L2MessageService allows sequencer to denylist users"
     },
     {
-      "id": "zk-rollup-sequencer-issues-pattern-4-sequencer-underpaid--007",
+      "id": "zk-rollup-sequencer-issues-pattern-4-sequencer-underpaid--006",
       "title": "Pattern 4: Sequencer Underpaid Due to Incorrect commitScalar",
       "severity": "HIGH",
       "grep": "forced_transaction_queue|censorship_resistance|executeDutchAuction|block.timestamp|forced_inclusion|batch_submission",
@@ -2354,6 +4130,27 @@
         321,
         357
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "denial of service",
+          "economic exploit",
+          "censorship",
+          "front running"
+        ],
+        "commonlyComposesWith": [
+          "sequencer downtime",
+          "forced inclusion",
+          "l2 block timestamp",
+          "batch submission",
+          "sequencer uptime feed"
+        ]
+      },
       "check": [
         "VERIFY: ZK rollup sequencers (or keepers who submit proofs) are compensated for L1 gas costs via a commitScalar parameter encoded in transaction fee...",
         "PROVE: commitScalar uses wrong L1 gas cost estimate",
@@ -2362,10 +4159,11 @@
       "antipattern": "commitScalar uses wrong L1 gas cost estimate",
       "securePattern": "Set commitScalar based on current L1 gas parameters and blob pricing",
       "validWhen": "ZK rollup sequencers (or keepers who submit proofs) are compensated for L1 gas costs via a commitScalar parameter encoded in transaction fee calculations.",
-      "invalidWhen": "Set commitScalar based on current L1 gas parameters and blob pricing"
+      "invalidWhen": "Set commitScalar based on current L1 gas parameters and blob pricing",
+      "proofShape": "commitScalar uses wrong L1 gas cost estimate"
     },
     {
-      "id": "zk-rollup-sequencer-issues-pattern-5-front-running-finali-008",
+      "id": "zk-rollup-sequencer-issues-pattern-5-front-running-finali-007",
       "title": "Pattern 5: Front-Running finalizeBlocks in Decentralized Sequencer Mode",
       "severity": "HIGH",
       "grep": "forced_transaction_queue|censorship_resistance|executeDutchAuction|block.timestamp|forced_inclusion|batch_submission",
@@ -2387,6 +4185,27 @@
         358,
         401
       ],
+      "reportEvidence": {
+        "count": 0,
+        "sampleReports": [],
+        "severityConsensus": "HIGH"
+      },
+      "graphHints": {
+        "variants": [
+          "logic error",
+          "denial of service",
+          "economic exploit",
+          "censorship",
+          "front running"
+        ],
+        "commonlyComposesWith": [
+          "sequencer downtime",
+          "forced inclusion",
+          "l2 block timestamp",
+          "batch submission",
+          "sequencer uptime feed"
+        ]
+      },
       "check": [
         "VERIFY: In decentralized sequencer systems where multiple proposers can submit finalizeBlocks, the ordering of finalization transactions can be manipulated.",
         "PROVE: Anyone can call finalizeBlocks for a batch",
@@ -2395,7 +4214,8 @@
       "antipattern": "Anyone can call finalizeBlocks for a batch",
       "securePattern": "Commit-reveal or permissioned submission prevents front-running",
       "validWhen": "In decentralized sequencer systems where multiple proposers can submit finalizeBlocks, the ordering of finalization transactions can be manipulated.",
-      "invalidWhen": "Commit-reveal or permissioned submission prevents front-running"
+      "invalidWhen": "Commit-reveal or permissioned submission prevents front-running",
+      "proofShape": "Anyone can call finalizeBlocks for a batch"
     }
   ]
 }

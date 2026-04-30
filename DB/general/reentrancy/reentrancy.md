@@ -1,9 +1,17 @@
 ---
+protocol: generic
 vulnerability_class: reentrancy
 title: "Reentrancy Vulnerabilities"
-category: Access Control/State Management
+category: access_control_state_management
+vulnerability_type: reentrancy
+attack_type: callback_reentrancy
+affected_component: external_call_state_accounting
+severity: high
+impact: fund_loss
 severity_range: "MEDIUM to HIGH"
 
+source_reports:
+  - file: "reports/yield_protocol_findings/h-13-balancerpairoracle-can-be-manipulated-using-read-only-reentrancy.md"
     protocol: "Blueberry Update"
     severity: "HIGH"
     auditor: "Sherlock"

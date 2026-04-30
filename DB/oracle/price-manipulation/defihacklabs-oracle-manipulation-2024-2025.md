@@ -87,7 +87,7 @@ language: "solidity"
 version: ">=0.8.0"
 ---
 
-## References
+## References & Source Reports
 
 | Tag | Source | Path / URL |
 |-----|--------|------------|
@@ -118,6 +118,22 @@ Price manipulation and oracle attacks remain a dominant exploit vector in 2024-2
 | Impact | fund_loss |
 | Interaction Scope | `single_contract` |
 | Chain(s) | ethereum, arbitrum, bsc, base |
+
+### Valid Bug Signals
+
+- Lending, vault, or DEX logic trusts Curve pool state, AMM spot price, self-updating PMM state, or Chainlink feed configuration for collateral valuation without independent sanity checks.
+- A flash loan, large swap, deposit/withdraw cycle, token transfer hook, or broken mint ratio can move the consumed price and extract value before the system normalizes.
+- Oracle updates occur inside the same swap or transfer path that an attacker controls, creating a self-referencing price feedback loop.
+- Wrapped or staked asset feeds are mapped to the wrong underlying, missing exchange-rate normalization, or lacking stale/deviation checks before liquidation or borrowing.
+- The path creates a measurable loss sink: inflated liquidation bonus, undercollateralized borrow, overpriced redemption, or vault share over-mint.
+
+### False Positive Guards
+
+- Do not flag every Curve, Chainlink, or AMM integration; confirm the feed output is directly trusted for a value-moving action and lacks effective bounds.
+- Chainlink feed-mapping issues require wrong asset/denomination/decimals/staleness assumptions, not merely use of Chainlink.
+- Same-block deposit/withdraw cycles are less severe when min shares/assets, cooldowns, and rate-change caps are enforced before minting or redemption.
+- Transfer-hook `sync()` or `skim()` behavior must affect a price source consumed by another protocol path; isolated token accounting quirks are insufficient.
+- A self-referencing oracle needs attacker-controlled trade flow large enough to bypass fees, caps, and circuit breakers.
 
 
 ## 1. Curve Pool-Based Oracle Manipulation for Lending Liquidation

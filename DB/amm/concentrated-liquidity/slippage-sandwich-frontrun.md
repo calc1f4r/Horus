@@ -128,6 +128,22 @@ Protocols integrating with Uniswap V3/V4 or similar concentrated liquidity AMMs 
 - Safe if: Slippage protection with reasonable bounds is enforced
 - Requires attacker control of: specific conditions per pattern
 
+#### Code Patterns to Look For
+
+```solidity
+router.exactInput(params); // amountOutMinimum is 0 or caller-unbounded
+params.deadline = block.timestamp; // deadline does not protect queued transactions
+pool.swap(recipient, zeroForOne, amountSpecified, sqrtPriceLimitX96, data); // limit derived from spot slot0
+deposit(amount0, amount1, 0, 0); // no min liquidity or min token outputs
+withdraw(shares, 0, 0); // proportional redeem can be sandwiched
+```
+
+#### False Positive Detail
+
+- A deadline check is weak if the function overwrites user input with `block.timestamp` or accepts stale signed calldata with no expiry bound.
+- Slippage controls are only meaningful when the user or caller supplies minimum outputs/liquidity for the exact route and the contract enforces them after all casts and unit conversions.
+- Do not flag keeper-only rebalances as user-loss bugs unless MEV can move the pre-state and the protocol absorbs the unfavorable execution.
+
 ### Vulnerability Description
 
 #### Root Cause

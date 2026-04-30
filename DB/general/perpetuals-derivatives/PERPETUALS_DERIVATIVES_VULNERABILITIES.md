@@ -79,8 +79,8 @@ code_keywords:
   - priceImpact
 
 # Impact Classification (Required)
-severity: critical|high|medium
-impact: fund_loss|insolvency|unfair_liquidation|position_manipulation
+severity: critical
+impact: fund_loss_or_insolvency
 exploitability: 0.75
 financial_impact: critical
 

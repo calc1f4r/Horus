@@ -114,6 +114,22 @@ NFT security vulnerabilities manifest across multiple dimensions: transfer safet
 - Safe if: Parameter range is inherently bounded by the type or protocol invariant
 - Requires attacker control of: specific conditions per pattern
 
+#### Code Patterns to Look For
+
+```solidity
+_mint(to, tokenId); // receiver compatibility not checked
+IERC721(nft).transferFrom(address(this), to, tokenId); // can lock in contracts
+safeTransferFrom(from, to, tokenId); // callback before all related accounting is finalized
+_delegate(delegatee);
+_moveDelegateVotes(src, dst, amount); // self-transfer/delegation edge cases
+delete getApproved[tokenId]; // missing or ordered after external flow
+```
+
+#### References & Source Reports
+
+- Local report corpus: `reports/erc721_nft_findings/` when present, plus the examples embedded below for transfer safety, callback reentrancy, delegation/voting, royalty, metadata, and liquidation patterns.
+- Use source-backed examples below to distinguish pure ERC721 standard non-compliance from exploitable fund loss, governance manipulation, liquidation DoS, or permanent NFT lockup.
+
 ## Table of Contents
 
 1. [Transfer Safety Vulnerabilities](#1-transfer-safety-vulnerabilities)

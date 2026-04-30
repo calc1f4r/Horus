@@ -60,13 +60,22 @@ code_keywords:
   - _convertToAssets
   - _convertToShares
   - _decimalsOffset
+  - decimalOffset
+  - virtual_offset
+  - dead_shares
+  - MINIMUM_LIQUIDITY
   - _deposit
   - _mint_shares
   - _withdraw
   - balanceOf
+  - asset.balanceOf(address(this))
+  - _totalAssets
+  - freeFunds
   - burn
   - convertToAssets
   - convertToShares
+  - previewDeposit
+  - previewMint
   - deposit
   - depositExactAmount
   - donation
@@ -98,6 +107,12 @@ code_keywords:
 | Kelp DAO - rsETH Price Manipulation | `reports/yield_protocol_findings/unexpected-amount-of-supported-assets-could-increase-rseth-price.md` | MEDIUM | Code4rena |
 | Staking Vault - Initial Grief Attack | `reports/yield_protocol_findings/m-01-staking-vault-is-susceptible-to-initial-grief-attack.md` | MEDIUM | Sherlock |
 | xERC4626 - First Deposit Exploit | `reports/yield_protocol_findings/m-02-first-xerc4626-deposit-exploit-can-break-share-calculation.md` | MEDIUM | Sherlock |
+| xERC4626 - First Deposit Share Calculation | `reports/erc4626_findings/m-02-first-xerc4626-deposit-exploit-can-break-share-calculation.md` | MEDIUM | Sherlock |
+| Empty Aave Vault Donation | `reports/erc4626_findings/donation-attacks-on-empty-aave-vaults-can-steal-deposits.md` | HIGH | Solodit |
+| Custom Balance Inflation Zero Shares | `reports/erc4626_findings/m-06-zero-share-minting-via-token-balance-inflation.md` | MEDIUM | Pashov Audit Group |
+| First Deposit Preview Mismatch | `reports/erc4626_findings/h-02-erc4626cloned-deposit-and-mint-logic-differ-on-first-deposit.md` | HIGH | Code4rena |
+| Weak Decimal Offset Protection | `reports/erc4626_findings/issue-with-decimal-offset-calculation-leading-to-weak-donation-protection.md` | MEDIUM | Solodit |
+| Low-Supply State Regression | `reports/erc4626_findings/vault-can-be-placed-back-into-vulnerable-low-supply-state.md` | MEDIUM | Solodit |
 
 ### External Links
 - [OpenZeppelin ERC4626 Inflation Attack Analysis](https://github.com/OpenZeppelin/openzeppelin-contracts/issues/3706)
@@ -146,16 +161,16 @@ The Vault Inflation Attack (also known as First Depositor Attack, Share Price Ma
 - Pattern key: `first_depositor_attack | share_calculation | vault_share_inflation`
 - Interaction scope: `single_contract`
 - Primary affected component(s): `share_calculation|vault_deposit|token_minting`
-- High-signal code keywords: `ERC4626`, `_convertToAssets`, `_convertToShares`, `_decimalsOffset`, `_deposit`, `_mint_shares`, `_withdraw`, `balanceOf`
+- High-signal code keywords: `ERC4626`, `_convertToAssets`, `_convertToShares`, `previewDeposit`, `previewMint`, `_decimalsOffset`, `MINIMUM_LIQUIDITY`, `asset.balanceOf(address(this))`, `_totalAssets`, `freeFunds`
 - Typical sink / impact: `fund_loss|share_dilution|zero_share_minting`
 - Validation strength: `moderate`
 
 #### Contract / Boundary Map
 
-- Entry surface(s): See pattern-specific attack scenarios below
-- Contract hop(s): `3.function -> DonationImmuneVault.function -> MinimumDepositVault.function`
-- Trust boundary crossed: `internal`
-- Shared state or sync assumption: `state consistency across operations`
+- Entry surface(s): `deposit()`, `mint()`, `previewDeposit()`, `previewMint()`, `convertToShares()`, `totalAssets()`
+- Contract hop(s): `User -> Vault.deposit()/convertToShares() -> Vault.totalAssets() -> Token.balanceOf()/Strategy`
+- Trust boundary crossed: `direct token donation`, `external token balance query`, `reward compounding`, `yield strategy balance`
+- Shared state or sync assumption: `totalAssets()` must not be attacker-inflatable before share minting
 
 #### Valid Bug Signals
 
@@ -163,12 +178,16 @@ The Vault Inflation Attack (also known as First Depositor Attack, Share Price Ma
 - Signal 2: Direct asset transfer (donation) changes exchange rate before victim's deposit
 - Signal 3: No minimum initial deposit or dead shares mechanism
 - Signal 4: Share price can be inflated atomically in a single transaction
+- Signal 5: `previewDeposit()` / `previewMint()` use different first-deposit branches
+- Signal 6: Vault can return to low supply after all shares are withdrawn
 
 #### False Positive Guards
 
-- Not this bug when: Vault uses virtual offset (ERC4626 `_decimalsOffset()`) to prevent inflation
-- Safe if: Dead shares mechanism: minimum initial deposit burned to address(dead)
-- Requires attacker control of: specific conditions per pattern
+- Not this bug when: Vault uses an effective fixed virtual offset (ERC4626 `_decimalsOffset()`) that makes donation uneconomic
+- Safe if: dead shares or minimum liquidity are burned to an unrecoverable address and remain for the vault lifetime
+- Safe if: `totalAssets()` uses internal accounting and ignores unsolicited direct transfers
+- Not safe by itself: `require(shares > 0)` prevents zero-share minting but can leave a deposit DoS
+- Not safe if: the initial minimum deposit can later be withdrawn and the vault returns to low supply
 
 ## Vulnerability Description
 
@@ -203,6 +222,26 @@ Subsequent depositors receive zero or negligible shares due to rounding, while t
    - If `V <= D`, shares round down to 0
 6. **Victim Receives 0 Shares**: Victim's deposit goes to the vault but they get nothing
 7. **Attacker Withdraws**: Attacker withdraws 1 share and receives `totalAssets` (original + victim's deposit)
+
+### Preconditions
+
+- Vault is empty, near-empty, or can be returned to low supply after withdrawals.
+- Share minting uses `assets * totalSupply / totalAssets` or equivalent exchange-rate math.
+- `totalAssets()`, `_totalAssets`, `freeFunds`, or `asset.balanceOf(address(this))` can be inflated without minting matching shares.
+- There is no effective fixed virtual offset, unrecoverable dead-share mint, or locked minimum first deposit.
+- Attacker can sequence a direct transfer, donation, reward compounding, or strategy balance change before the victim's deposit.
+
+### Proof Shape
+
+The attacker mints dust shares, inflates the asset side of the exchange rate through donation or balance manipulation, waits for a victim deposit to mint zero or too few shares, then exits with value represented by the victim's assets. Variants replace the direct donation with reward compounding, strategy balance inflation, or a `previewDeposit`/`previewMint` mismatch.
+
+### False Positive Signals
+
+- Fixed virtual assets/shares make the donation cost exceed the value that can be stolen.
+- Dead shares or minimum liquidity are unrecoverably burned and cannot be redeemed by any user or factory.
+- Internal accounting excludes unsolicited token transfers from `totalAssets()`.
+- A minimum first deposit is permanently locked; it cannot be withdrawn after initialization.
+- A zero-share revert alone changes the failure mode to deposit DoS and should not be treated as full theft mitigation.
 
 **Numerical Example (from Resolv StUSR Report):**
 
@@ -568,8 +607,11 @@ pub fn execute_deposit(e: &Env, from: &Address, amount: i128) -> i128 {
 Anti-Patterns (VULNERABLE):
 - totalSupply() == 0 ? assets : assets * totalSupply() / totalAssets()
 - balanceOf(address(this)) used in share calculation
+- asset.balanceOf(address(this)) or _totalAssets() used as the conversion denominator
+- freeFunds = totalAssets() - lockedProfit used before share minting
 - First depositor receives shares == depositAmount
 - No virtual offset in _convertToShares
+- previewDeposit() and previewMint() use different zero-supply branches
 - No MINIMUM_LIQUIDITY or dead shares mechanism
 - No minimum deposit requirement
 - mulDiv without virtual offset protection
@@ -579,6 +621,7 @@ Safe Patterns (SECURE):
 - MINIMUM_LIQUIDITY constant with burn to address(0)
 - Internal asset tracking separate from balanceOf
 - Virtual shares/assets in conversion formulas
+- Minimum first deposit locked for vault lifetime
 - require(shares > 0) after calculation
 ```
 

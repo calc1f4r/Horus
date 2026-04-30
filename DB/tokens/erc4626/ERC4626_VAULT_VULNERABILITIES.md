@@ -34,8 +34,15 @@ code_keywords:
   - previewRedeem
   - previewWithdraw
   - _decimalsOffset
+  - decimalOffset
+  - virtual_offset
+  - dead_shares
+  - MINIMUM_LIQUIDITY
   - virtual shares
   - balanceOf(address(this))
+  - asset.balanceOf(address(this))
+  - _totalAssets
+  - freeFunds
   - mulDivDown
   - mulDivUp
   - deposit(uint256,address)
@@ -101,9 +108,9 @@ version: all
 #### Contract / Boundary Map
 
 - Entry surface(s): `deposit()`, `mint()`, `withdraw()`, `redeem()`, `totalAssets()`, `convertToShares()`
-- Contract hop(s): `User -> Vault.deposit() -> Token.transferFrom() -> [YieldSource.deposit()]`
-- Trust boundary crossed:nal token transfer (ERC20 with hooks / fee-on-transfer / rebasing)`, `yield source callback`, `direct token donation`
-- Shared state or sync assumption: `totalAssets() must equal actual vault holdi `externgs; share/asset ratio must be monotonically accurate`
+- Contract hop(s): `User -> Vault.deposit()/previewDeposit()/convertToShares() -> Vault.totalAssets() -> Token.balanceOf()/YieldSource`
+- Trust boundary crossed: `external token transfer`, `direct token donation`, `yield source callback`, `ERC20 with hooks / fee-on-transfer / rebasing`
+- Shared state or sync assumption: `totalAssets()` must not be attacker-inflatable before share minting; share/asset ratio must remain fair across deposits and withdrawals
 
 #### Valid Bug Signals
 
@@ -112,6 +119,8 @@ version: all
 - Signal 3: Rounding uses `mulDivDown` for both deposit and withdraw — one direction must round against the user
 - Signal 4: Vault does not implement `maxDeposit()`, `maxMint()`, etc. per EIP-4626 — integrator contracts assume spec compliance
 - Signal 5: Deposit or mint function does not use a reentrancy guard and underlying token has transfer hooks (ERC777, ERC1155)
+- Signal 6: `previewDeposit()` / `previewMint()` disagree on the first deposit path or use different zero-supply branches
+- Signal 7: `_totalAssets`, `freeFunds`, or `asset.balanceOf(address(this))` can be increased by direct transfer before share calculation
 
 #### False Positive Guards
 
@@ -120,6 +129,9 @@ version: all
 - Safe if: minimum deposit amount is enforced that makes donation attack economically unfeasible
 - Not this bug when: `totalAssets()` uses internal accounting separate from `balanceOf()` — donation does not affect share math
 - Requires attacker control of: first deposit timing (frontrunning), or ability to call `transfer()` directly to vault address
+- Not safe by itself: `require(shares > 0)` prevents zero-share theft but can convert the issue into deposit DoS
+- Not safe if: virtual offset or decimal offset is dynamic, too small, or can be weakened after deployment
+- Not safe if: minimum first deposit can later be withdrawn, letting the vault return to a low-supply vulnerable state
 
 ---
 
@@ -215,6 +227,13 @@ The first depositor (inflation) attack is the most common and critical vulnerabi
 > - `reports/erc4626_findings/h-02-first-depositor-can-break-minting-of-shares.md` (prePO - Code4rena)
 > - `reports/erc4626_findings/vault-is-vulnerable-to-inflation-attack.md` (Steadefi - Zokyo)
 > - `reports/erc4626_findings/h-02-vault-is-vulnerable-to-first-depositor-inflation-attack.md` (BakerFi - Code4rena)
+> - `reports/erc4626_findings/m-02-first-xerc4626-deposit-exploit-can-break-share-calculation.md` (Solmate-style `convertToShares` first-cycle manipulation)
+> - `reports/erc4626_findings/m-06-zero-share-minting-via-token-balance-inflation.md` (custom staking/vault balance inflation)
+> - `reports/erc4626_findings/donation-attacks-on-empty-aave-vaults-can-steal-deposits.md` (empty-vault donation below share threshold)
+> - `reports/erc4626_findings/converttoshares-can-be-manipulated-to-block-deposits.md` (`_totalAssets()` / direct-transfer deposit blocking)
+> - `reports/erc4626_findings/h-02-erc4626cloned-deposit-and-mint-logic-differ-on-first-deposit.md` (`previewDeposit` / `previewMint` first-deposit mismatch)
+> - `reports/erc4626_findings/issue-with-decimal-offset-calculation-leading-to-weak-donation-protection.md` (weak virtual offset mitigation)
+> - `reports/erc4626_findings/vault-can-be-placed-back-into-vulnerable-low-supply-state.md` (minimum deposit not locked for vault lifetime)
 
 ### Vulnerability Description
 
@@ -263,6 +282,26 @@ Boundary crossed: `internal (factory call to vault)`
 1. Factory mints initial "dead shares" but to msg.sender instead of dead address
 2. Dead shares can be redeemed, eliminating the protection
 3. First depositor attack becomes viable again
+
+#### Preconditions
+
+- Vault is empty, near-empty, or can be returned to low supply after withdrawals.
+- Share minting uses `assets * totalSupply / totalAssets` or equivalent balance-derived math.
+- `totalAssets()`, `_totalAssets`, `freeFunds`, or `asset.balanceOf(address(this))` can be inflated before a victim deposit.
+- The protocol lacks effective virtual shares/assets, unrecoverable dead shares, or a locked minimum first deposit.
+- The attacker can front-run a victim deposit or otherwise sequence donation/compounding before share minting.
+
+#### Proof Shape
+
+Attacker seeds dust shares, inflates the asset denominator through donation, direct transfer, or reward compounding, then a victim deposit mints zero or too few shares. The attacker later redeems or benefits from the inflated exchange rate while the victim's assets remain trapped in the vault.
+
+#### False Positive Signals
+
+- OpenZeppelin-style fixed virtual shares/assets make the donation cost exceed the victim value.
+- Dead shares are unrecoverably burned and remain in supply for the vault lifetime.
+- `totalAssets()` ignores unsolicited token transfers through internal accounting or explicit asset sweeping.
+- A minimum first deposit is locked forever and cannot be withdrawn to recreate the low-supply state.
+- `require(shares > 0)` exists but no economic protection exists: classify as DoS or blocked-deposit risk, not theft mitigation.
 
 ### Vulnerable Pattern Examples
 
@@ -1007,6 +1046,15 @@ Vaults that rely on `balanceOf(address(this))` for total assets calculation are 
 > **📚 Source Reports for Deep Dive:**
 > - `reports/erc4626_findings/exchange-rate-manipulation-via-direct-transfers.md` (Heurist - Zokyo)
 > - `reports/erc4626_findings/converttoshares-can-be-manipulated-to-block-deposits.md` (GSquared - Trail of Bits)
+> - `reports/erc4626_findings/exchangerate-manipulation-via-donation.md`
+> - `reports/erc4626_findings/inflated-totalassets-in-strategymainnet-strategyarb-and-strategyop-contracts.md`
+
+#### Code Patterns To Look For
+
+- `totalAssets()` or `_totalAssets()` returns `asset.balanceOf(address(this))` plus accounting variables.
+- Share conversion uses `freeFunds = totalAssets() - lockedProfit` before `assets * totalSupply / freeFunds`.
+- Direct token transfers, donations, rewards, or strategy balances can change the denominator without minting shares.
+- Sweep or rescue functions can move donated assets after share price has already been used.
 
 ### Vulnerable Pattern Examples
 

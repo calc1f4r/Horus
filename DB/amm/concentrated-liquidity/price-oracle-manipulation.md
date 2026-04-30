@@ -1,7 +1,13 @@
 ---
 title: "Price Oracle Manipulation in Concentrated Liquidity AMMs"
+protocol: generic
+category: amm/concentrated-liquidity
 vulnerability_class: "Price Oracle Vulnerabilities"
+vulnerability_type: price_oracle_manipulation
+attack_type: oracle_manipulation|flash_loan|sandwich_attack
+affected_component: price_oracle|twap_oracle|slot0_price_feed
 severity: high
+impact: fund_loss|unfair_liquidation|incorrect_valuation
 chain: "Multi-chain"
 affected_protocols:
   - "Uniswap V3/V4"
@@ -95,6 +101,23 @@ Concentrated liquidity AMMs like Uniswap V3 provide on-chain price data through 
 - Not this bug when: Validation exists but is in an upstream function caller
 - Safe if: Parameter range is inherently bounded by the type or protocol invariant
 - Requires attacker control of: specific conditions per pattern
+
+#### Code Patterns to Look For
+
+```solidity
+(uint160 sqrtPriceX96,,,,,,) = pool.slot0();
+uint256 price = FullMath.mulDiv(uint256(sqrtPriceX96) * sqrtPriceX96, 1e18, 1 << 192);
+
+(int56[] memory ticks,) = pool.observe(secondsAgos); // secondsAgos too short or cardinality attacker-controlled
+factory.deployPool(token0, token1, fee, initialSqrtPriceX96); // initial spot price becomes trusted state
+oracle.getPriceUnsafe(pool); // price feeds liquidations, collateral, or swaps
+```
+
+#### False Positive Detail
+
+- Direct `slot0` reads are not automatically exploitable when used only for UI quotes or bounded hints; prioritize reads that determine collateral value, liquidation eligibility, swap limits, mint/burn amounts, or accounting.
+- TWAP usage is still suspect when the window is short, observation cardinality can be cheaply changed, negative ticks are rounded the wrong way, or decimal normalization differs by token.
+- Flash-loan manipulation requires sufficient pool price impact or thin liquidity on the trusted pool; deep liquidity plus independent sanity bounds lowers severity.
 
 ## Vulnerable Pattern Examples
 

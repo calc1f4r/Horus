@@ -97,33 +97,34 @@ Flash loan attacks exploit the atomic nature of blockchain transactions to borro
 
 #### Agent Quick View
 
-- Root cause statement: "This vulnerability exists because of missing_validation"
+- Root cause statement: Flash-loan bugs become exploitable when a protocol treats atomic borrowed liquidity as durable state, fails to authenticate callbacks/initiators, or updates accounting after attacker-controlled flash-loan hops.
 - Pattern key: `missing_validation | flash_loan_mechanism | flash_loan_attack`
 - Interaction scope: `multi_contract`
 - Primary affected component(s): `flash_loan_mechanism|callback_validation|state_transition|collateral_calculation`
-- High-signal code keywords: `Aave_flash`, `Balancer_flash`, `DODO_DVM`, `DVMFlashLoanCall`, `ERC3156`, `Reinitialization`, `Uniswap_flash`, `addLiquidity`
+- High-signal code keywords: `flashLoan`, `onFlashLoan`, `executeOperation`, `receiveFlashLoan`, `uniswapV2Call`, `pancakeCall`, `DVMFlashLoanCall`, `flash`, `initiator`, `callback`, `borrow`, `repay`, `balanceOf`, `deposit`, `withdraw`, `liquidate`, `selfLiquidate`
 - Typical sink / impact: `fund_loss`
 - Validation strength: `moderate`
 
 #### Contract / Boundary Map
 
-- Entry surface(s): See pattern-specific attack scenarios below
-- Contract hop(s): `AttackerToken.function -> EvilToken.function -> SecureAirdrop.function`
-- Trust boundary crossed: `callback / external call`
-- Shared state or sync assumption: `state consistency across operations`
+- Entry surface(s): flash-loan callback, external liquidation/repayment path, deposit/withdraw path callable during callback, pool initialization/reinitialization path
+- Contract hop(s): `FlashLender -> borrower callback -> target protocol -> AMM/lending/vault accounting`
+- Trust boundary crossed: lender callback into attacker-controlled code, token callbacks, and protocol functions that assume balances are organic
+- Shared state or sync assumption: balance snapshots, utilization, collateral value, voting power, share supply, or last-deposit block must not be spoofed by same-transaction liquidity
 
 #### Valid Bug Signals
 
-- Signal 1: Critical input parameter not validated against expected range or format
-- Signal 2: Oracle data consumed without staleness check or sanity bounds
-- Signal 3: User-supplied address or calldata forwarded without validation
-- Signal 4: Missing check allows operation under invalid or stale state
+- Callback accepts calls without checking `msg.sender` is the lender and `initiator`/decoded user data matches the original borrower.
+- Accounting uses raw `balanceOf(address(this))`, spot reserves, or same-block deposits after attacker-controlled flash liquidity has moved through the protocol.
+- Flash-loan guard only tags `deposit`/`mint` but not `transfer`, `move`, `repay`, `liquidate`, `borrow`, or position-management paths.
+- Pool, vault, or market can be initialized/reinitialized or have critical parameters changed from inside a flash-loan callback.
 
 #### False Positive Guards
 
-- Not this bug when: Validation exists but is in an upstream function caller
-- Safe if: Parameter range is inherently bounded by the type or protocol invariant
-- Requires attacker control of: specific conditions per pattern
+- Not this bug when the callback verifies lender, initiator, assets, amounts, fees, and a nonce/hash tied to the original request.
+- Safe if accounting is based on pre/post deltas plus share/debt invariants that cannot be improved by temporary liquidity.
+- Safe if same-block or callback-sensitive operations are blocked consistently across all paths that change collateral, debt, shares, votes, or liquidation eligibility.
+- Requires attacker control of enough flash liquidity or a flash-mintable/callback token plus an externally callable state transition that observes manipulated state.
 
 ## Attack Categories
 
@@ -1149,16 +1150,19 @@ contract SecureAirdrop {
 
 #### Code Patterns to Look For
 ```
-- See vulnerable pattern examples above for specific code smells
-- Check for missing validation on critical state-changing operations
-- Look for assumptions about external component behavior
+- Callback lacks lender/initiator verification: `receiveFlashLoan`, `executeOperation`, `onFlashLoan`, `DVMFlashLoanCall`, `uniswapV2Call`, `pancakeCall`
+- Repayment/fee check uses wrong delta: `balanceBefore`, `balanceAfter`, `amount + fee`, `allowance(receiver, lender)`, `transferFrom(receiver, ...)`
+- Same-block guard only updates one path: `lastDepositBlock`, `idToBlockOfLastDeposit`, `deposit`, `move`, `transfer`, `liquidate`, `selfLiquidate`
+- Temporary liquidity feeds accounting: `balanceOf(address(this))`, `getReserves`, `totalSupply`, `totalAssets`, `getVotes`, `getPriorVotes`, `snapshot`
+- Callback can reenter or initialize state: `initialize`, `reinitialize`, `depositFor`, arbitrary token `transferFrom`, ERC777/ERC667 hooks
 ```
 
 #### Audit Checklist
-- [ ] Verify all state-changing functions have appropriate access controls
-- [ ] Check for CEI pattern compliance on external calls
-- [ ] Validate arithmetic operations for overflow/underflow/precision loss
-- [ ] Confirm oracle data freshness and sanity checks
+- [ ] Verify callback authenticates lender, initiator, assets, amounts, fee, and expected return value.
+- [ ] Verify repayment uses post-callback balance delta and requires `amount + fee` in the correct token/decimals.
+- [ ] Verify every collateral/debt/share/vote-moving path updates anti-flash-loan state, not only deposit/mint.
+- [ ] Verify temporary balances/reserves/votes cannot influence mint, redeem, borrow, liquidate, or governance decisions.
+- [ ] Verify callback-controlled external calls cannot reenter or reinitialize protocol state.
 
 ### Keywords for Search
 

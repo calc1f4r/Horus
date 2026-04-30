@@ -56,12 +56,15 @@ code_keywords:
   - linear_iteration
 ---
 
-## References
-- [h-18-asa-2025-003-groups-module-can-halt-chain-when-handling-a-malicious-proposa.md](../../reports/cosmos_cometbft_findings/h-18-asa-2025-003-groups-module-can-halt-chain-when-handling-a-malicious-proposa.md)
-- [linear-iteration-over-rewards-plans-in-beginblock-exposes-permissionless-chain-h.md](../../reports/cosmos_cometbft_findings/linear-iteration-over-rewards-plans-in-beginblock-exposes-permissionless-chain-h.md)
-- [h-3-adversary-can-arbitrarily-trigger-a-chain-halt-by-sending-msgremovedelegates.md](../../reports/cosmos_cometbft_findings/h-3-adversary-can-arbitrarily-trigger-a-chain-halt-by-sending-msgremovedelegates.md)
-- [potential-non-determinism-issue-in-finalizeblock.md](../../reports/cosmos_cometbft_findings/potential-non-determinism-issue-in-finalizeblock.md)
-- [dos-in-cometbft-block-sync-githubcomcometbftcometbftblocksync.md](../../reports/cosmos_cometbft_findings/dos-in-cometbft-block-sync-githubcomcometbftcometbftblocksync.md)
+## References & Source Reports
+
+| Report | Path | Severity | Signal |
+|--------|------|----------|--------|
+| Groups module malicious proposal chain halt | `reports/cosmos_cometbft_findings/h-18-asa-2025-003-groups-module-can-halt-chain-when-handling-a-malicious-proposa.md` | HIGH | Division-by-zero or invalid group state in consensus path |
+| BeginBlock rewards plan iteration halt | `reports/cosmos_cometbft_findings/linear-iteration-over-rewards-plans-in-beginblock-exposes-permissionless-chain-h.md` | HIGH | Permissionless state growth consumed by BeginBlock |
+| MsgRemoveDelegates arbitrary halt | `reports/cosmos_cometbft_findings/h-3-adversary-can-arbitrarily-trigger-a-chain-halt-by-sending-msgremovedelegates.md` | HIGH | User message creates later consensus panic |
+| FinalizeBlock non-determinism | `reports/cosmos_cometbft_findings/potential-non-determinism-issue-in-finalizeblock.md` | HIGH | Validator-dependent result in consensus execution |
+| CometBFT block sync DoS | `reports/cosmos_cometbft_findings/dos-in-cometbft-block-sync-githubcomcometbftcometbftblocksync.md` | MEDIUM | Peer-controlled resource exhaustion |
 
 ## Vulnerability Title
 
@@ -92,16 +95,16 @@ Cosmos SDK appchains are susceptible to various chain halt and denial of service
 
 #### Valid Bug Signals
 
-- Signal 1: Unbounded loop over user-controlled array can exceed block gas limit
-- Signal 2: External call failure causes entire transaction to revert
-- Signal 3: Attacker can grief operations by manipulating state to cause reverts
-- Signal 4: Resource exhaustion through repeated operations without rate limiting
+- Signal 1: `BeginBlock`, `EndBlocker`, `FinalizeBlock`, `PrepareProposal`, or `ProcessProposal` iterates over permissionlessly growable state.
+- Signal 2: A normal user message can store malformed state that later panics in consensus code, even if the original transaction succeeds.
+- Signal 3: Consensus-critical code depends on map iteration order, wall-clock time, local node state, peer input, floating point, or nondeterministic sorting.
+- Signal 4: Arithmetic in consensus paths can divide by zero, create negative coins, overflow counters, or call SDK constructors that panic on attacker-controlled values.
 
 #### False Positive Guards
 
-- Not this bug when: Loop iterations are bounded by a reasonable constant
-- Safe if: External call failures are handled gracefully (try/catch or pull pattern)
-- Requires attacker control of: specific conditions per pattern
+- Not this bug when: The loop is over validator-set, module-constant, governance-bounded, or paginated state with enforced caps.
+- Safe if: Malformed user input is rejected at message handling time and consensus paths treat stored state as already validated without panic-prone recomputation.
+- Requires attacker control of: proposal contents, delegation/group/reward-plan state, mempool ordering, peer block-sync input, or any state read by ABCI lifecycle hooks.
 
 ### Root Cause
 
@@ -153,9 +156,11 @@ chain_halt, BeginBlock, EndBlocker, FinalizeBlock, linear_iteration, unbounded_l
 
 #### Code Patterns to Look For
 ```
-- See vulnerable pattern examples above for specific code smells
-- Check for missing validation on critical state-changing operations
-- Look for assumptions about external component behavior
+- `for _, x := range keeper.GetAll...` inside BeginBlocker, EndBlocker, FinalizeBlock, PrepareProposal, or ProcessProposal
+- `sdk.NewCoin`, `Quo`, `QuoInt`, `Int64`, division, or percentage math in consensus paths without zero/negative validation
+- map iteration or unsorted key traversal used to build proposals, votes, commitments, or state roots
+- message handlers that append unbounded plans/delegates/groups consumed globally each block
+- panics, `Must*` helpers, or unchecked errors reachable from ABCI lifecycle hooks
 ```
 
 #### Audit Checklist

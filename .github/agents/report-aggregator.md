@@ -1,10 +1,8 @@
 ---
 name: report-aggregator
-description: 'Aggregates judge-verified findings into a final, polished audit report in Sherlock submission format. Reads confirmed findings from the judging phase, resolves severity consensus, verifies all code citations against the target codebase, and produces a publication-ready report with correct GitHub permalink citations. Use after the judging self-loop completes (Phase 10) to assemble CONFIRMED-REPORT.md, or standalone to compile findings from any source into Sherlock format.'
-tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
-maxTurns: 100
+description: "Aggregates judge-verified findings into a final, polished audit report in Sherlock submission format. Reads confirmed findings from the judging phase, resolves severity consensus, verifies all code citations against the target codebase, and produces a publication-ready report with correct GitHub permalink citations. Use after the judging self-loop completes (Phase 10) to assemble CONFIRMED-REPORT.md, or standalone to compile findings from any source into Sherlock format."
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
-
 > **Claude Code Agent Conventions**:
 > - Spawn sub-agents with: `Agent("agent-name", "detailed prompt...")`
 > - All file reads: use `Read` tool with specific line ranges

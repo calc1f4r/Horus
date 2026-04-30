@@ -1,8 +1,15 @@
 ---
 name: multi-persona-orchestrator
-description: 'Multi-persona audit orchestrator that spawns 6 parallel sub-agents, each using a different auditing approach (BFS, DFS, Working Backward, State Machine, Mirror, Re-Implementation). Agents loop with the Feynman technique, share findings between rounds, cross-verify, and converge on a unified findings document. Use when deep-reasoning audit coverage from multiple perspectives is needed on a codebase.'
-tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
+description: "Multi-persona audit orchestrator that spawns 6 parallel sub-agents, each using a different auditing approach (BFS, DFS, Working Backward, State Machine, Mirror, Re-Implementation). Agents loop with the Feynman technique, share findings between rounds, cross-verify, and converge on a unified findings document. Use when deep-reasoning audit coverage from multiple perspectives is needed on a codebase."
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
+> **Claude Code Agent Conventions**:
+> - Spawn 6 persona sub-agents: `Agent("persona-bfs", "...")`, `Agent("persona-dfs", "...")`, `Agent("persona-working-backward", "...")`, `Agent("persona-state-machine", "...")`, `Agent("persona-mirror", "...")`, `Agent("persona-reimplementer", "...")`
+> - Write per-persona findings to `audit-output/personas/round-N/<persona>.md`
+> - Write shared knowledge to `audit-output/personas/shared-knowledge-round-N.md`
+> - Write unified findings to `audit-output/04c-persona-findings.md`
+> - Each persona sub-agent is stateless — include ALL context (scope, codebase path, shared knowledge from previous rounds) in their prompt
+> - Resource files at `resources/` relative to repo root
 
 # Multi-Persona Audit Orchestrator
 
@@ -112,7 +119,7 @@ When spawned as part of the audit pipeline:
 Round 1                         Consolidation            Round 2                       Final
 ┌──────────────┐               ┌──────────────┐         ┌──────────────┐           ┌──────────────┐
 │ 6× Persona   │               │ MEM-4C-R1-   │         │ 6× Persona   │           │ MEM-4C-FINAL │
-│ spawn        │──────────────▶│ CONSOLIDATION│────────▶│ spawn        │──...──────▶│ -ORCHESTRATOR│
+│ spawn        │──────────────▶│ CONSOLIDATION│────────▶│ spawn        │───...─────▶│ -ORCHESTRATOR│
 │              │               │              │         │              │           │              │
 │ Each writes: │               │ Contradicts? │         │ Each reads:  │           │ All findings │
 │ MEM-4C-R1-   │               │ Promotes?    │         │ - Consol.    │           │ Memory trail │
@@ -276,10 +283,10 @@ Spawn each persona sub-agent with the following prompt template. All 6 are launc
 You are a [PERSONA_NAME] security auditor.
 
 Read your full methodology and instructions from:
-  .github/agents/[persona-agent-file].md
+  .claude/agents/[persona-agent-file].md
 
 Read the Feynman Question Framework from:
-  .github/agents/resources/feynman-question-framework.md
+  resources/feynman-question-framework.md
 
 TARGET CODEBASE: <codebase-path>
 CONTEXT: <contents of audit-output/personas/00-scope.md or 01-context.md>
@@ -464,10 +471,10 @@ Create `audit-output/personas/shared-knowledge-round-1.md`:
 You are a [PERSONA_NAME] security auditor.
 
 Read your full methodology and instructions from:
-  .github/agents/[persona-agent-file].md
+  .claude/agents/[persona-agent-file].md
 
 Read the Feynman Question Framework from:
-  .github/agents/resources/feynman-question-framework.md
+  resources/feynman-question-framework.md
 
 TARGET CODEBASE: <codebase-path>
 CONTEXT: <contents of 00-scope.md or 01-context.md>

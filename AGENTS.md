@@ -103,18 +103,15 @@ python3 scripts/build_db_graph.py
 - Do not hand-edit generated files under `.agents/skills/` or `.codex/`; regenerate them from `.claude/` with `python3 scripts/sync_codex_compat.py`.
 - If you modify a DB entry, assume manifest regeneration is required.
 - If you modify Claude playbooks, regenerate the Codex-facing outputs and verify them with `python3 scripts/sync_codex_compat.py --check`.
-- If the GitHub-facing agent docs should match the Claude playbooks, update the corresponding `.github/agents/**` files explicitly; the Codex sync script does not generate `.github/agents`.
-- If you modify agent docs, inspect both `.claude/` and `.github/` copies before deciding what to change.
-- Prefer `python3` directly unless the virtualenv has been repaired locally.
+- If you modify Claude playbooks, regenerate the GitHub-facing agent mirror with `python3 scripts/sync_codex_compat.py --sync-github-agents`.
+- If you modify agent docs, inspect `.claude/` first; `.github/agents/**` is the generated GitHub-facing mirror.
+- Use system `python3` or the local `.venv` if present and healthy.
 
-## Known Inconsistencies
+## Generated Surface Rules
 
-- `.venv` exists, but its Python symlink points to a missing Homebrew Python 3.13 install on this machine. Use system `python3` unless you recreate the venv.
-- The real generator is `scripts/generate_manifests.py`, but several docs and workflows still reference a missing root `generate_manifests.py`.
-- `.claude/agents` and `.github/agents` are duplicated but not byte-identical.
-- `.claude/resources` and `.github/agents/resources` are also not perfectly synchronized.
+- `.claude/agents` is the source of truth for `.github/agents`; `python3 scripts/sync_codex_compat.py --check` enforces the generated mirror.
+- `.claude/resources` and `.github/agents/resources` are expected to stay byte-identical; `python3 scripts/sync_codex_compat.py --check` enforces this.
 - `.agents/skills/` and `.codex/` are intentionally generated from `.claude/`, not from `.github/agents/`.
-- `scripts/db_quality_check.py` currently checks for a missing root `generate_manifests.py`, so part of its current "BROKEN" summary is repository drift rather than a Codex incompatibility issue.
 
 ## Useful Commands
 

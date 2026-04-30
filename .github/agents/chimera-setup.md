@@ -1,10 +1,8 @@
 ---
 name: chimera-setup
-description: Scaffolds a complete Chimera-based property testing suite from an invariant-writer spec. Generates all test/recon/ files (Setup, BeforeAfter, Properties, TargetFunctions, targets/, CryticTester, CryticToFoundry) plus foundry.toml, echidna.yaml, and medusa.json. Supports Echidna, Medusa, Foundry invariant tests, and Halmos symbolic execution out of the box. Use after invariant-writer produces an invariant spec and before running any fuzzing campaign.
+description: "Scaffolds a complete Chimera-based property testing suite from an invariant-writer spec. Generates all test/recon/ files (Setup, BeforeAfter, Properties, TargetFunctions, targets/, CryticTester, CryticToFoundry) plus foundry.toml, echidna.yaml, and medusa.json. Supports Echidna, Medusa, Foundry invariant tests, and Halmos symbolic execution out of the box. Use after invariant-writer produces an invariant spec and before running any fuzzing campaign."
 tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
-maxTurns: 80
 ---
-
 # Chimera Setup Agent
 
 Translates an `invariant-writer` spec into a fully compilable Chimera test suite targeting Echidna, Medusa, Foundry invariant tests, and Halmos — all from a single shared codebase.
@@ -41,7 +39,7 @@ BaseSetup                        ← abstract; setup() virtual
 
 ## Flags
 
-- `--fork=<rpc-url>` — scaffold in fork mode: `medusa.json` sets `forkModeEnabled: true` with the given RPC URL, `foundry.toml` sets `fork_url`, and `Setup.sol` references existing deployed contracts instead of deploying new ones. See fork-mode templates in [chimera-templates.md](.github/agents/resources/chimera-templates.md).
+- `--fork=<rpc-url>` — scaffold in fork mode: `medusa.json` sets `forkModeEnabled: true` with the given RPC URL, `foundry.toml` sets `fork_url`, and `Setup.sol` references existing deployed contracts instead of deploying new ones. See fork-mode templates in [chimera-templates.md](resources/chimera-templates.md).
 - `--fork-block=<N>` — pin the fork to a specific block (default: latest). Only valid with `--fork`.
 - `--no-echidna` — skip `echidna.yaml` generation. Use when the protocol uses `startPrank` or `etch` which Echidna doesn't support.
 - `--medusa-only` — generate only the Medusa + Foundry path; skip Echidna config entirely.
@@ -954,9 +952,9 @@ Halmos (symbolic, bounded):
 
 ## Resources
 
-- **Framework reference**: [chimera-reference.md](.github/agents/resources/chimera-reference.md) — class hierarchy, assert backends, cheatcode compatibility, recon-utils API
-- **Config templates**: [chimera-templates.md](.github/agents/resources/chimera-templates.md) — foundry.toml, echidna.yaml, medusa.json (standard + fork), CryticTester, CryticToFoundry, BeforeAfter templates
-- **Halmos reference**: [halmos-reference.md](.github/agents/resources/halmos-reference.md) — symbolic variable API, run commands, limitations
+- **Framework reference**: [chimera-reference.md](resources/chimera-reference.md) — class hierarchy, assert backends, cheatcode compatibility, recon-utils API
+- **Config templates**: [chimera-templates.md](resources/chimera-templates.md) — foundry.toml, echidna.yaml, medusa.json (standard + fork), CryticTester, CryticToFoundry, BeforeAfter templates
+- **Halmos reference**: [halmos-reference.md](resources/halmos-reference.md) — symbolic variable API, run commands, limitations
 - **Invariant spec input**: `audit-output/02-invariants.md` (from `invariant-writer`)
 - **Downstream**: `medusa-fuzzing` — advanced Medusa-only harness configuration beyond the template
 - **Downstream**: `halmos-verification` — standalone Halmos symbolic verification specs

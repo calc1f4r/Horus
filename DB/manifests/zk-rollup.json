@@ -3,7 +3,7 @@
     "category": "zk-rollup",
     "description": "Pattern-level index for zk-rollup vulnerabilities",
     "fileCount": 10,
-    "totalPatterns": 100,
+    "totalPatterns": 90,
     "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
   },
   "files": [
@@ -79,7 +79,7 @@
           "rollup_node"
         ]
       },
-      "patternCount": 10,
+      "patternCount": 9,
       "patterns": [
         {
           "id": "zk-rollup-batch-processing-batch-decoding-and-blob-issues-000",
@@ -149,7 +149,33 @@
             "finalize blocks"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-1-batcher-frames-are-incorrectly-decoded-leading-to-consensus-split.md",
+              "reports/zk_rollup_findings/incompatibility-with-blobs-lead-to-halt-of-block-processing.md",
+              "reports/zk_rollup_findings/m-1-rollupsol-cannot-split-batches-across-blobs-allowing-inexpensive-block-stuff.md",
+              "reports/zk_rollup_findings/h-2-malformed-blob-tx-causes-nethermind-validators-to-stop-producing-blocks.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "dos",
+              "consensus split",
+              "finalization failure",
+              "block stuffing"
+            ],
+            "commonlyComposesWith": [
+              "eip4844 blobs",
+              "batch frames",
+              "calldata batch",
+              "block submission",
+              "finalize blocks"
+            ]
+          }
         },
         {
           "id": "zk-rollup-batch-processing-batch-hashing-and-commitment-b-001",
@@ -218,92 +244,37 @@
             "finalize blocks"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 5,
+            "sampleReports": [
+              "reports/zk_rollup_findings/incorrect-batch-hashes-due-to-memory-corruption.md",
+              "reports/zk_rollup_findings/incorrect-basefee-calculation-on-taiko-rollups-phase-1.md",
+              "reports/zk_rollup_findings/m-11-in-the-revertbatch-function-inchallenge-is-set-to-false-incorrectly-causing.md",
+              "reports/zk_rollup_findings/block-submission-susceptible-to-dos-phase-1.md",
+              "reports/zk_rollup_findings/insufficient-validation-of-block-numbers-during-submission-and-finalization.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "dos",
+              "consensus split",
+              "finalization failure",
+              "block stuffing"
+            ],
+            "commonlyComposesWith": [
+              "eip4844 blobs",
+              "batch frames",
+              "calldata batch",
+              "block submission",
+              "finalize blocks"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-batch-processing-vulnerability-description-002",
-          "title": "Vulnerability Description",
-          "lineStart": 149,
-          "lineEnd": 160,
-          "lineCount": 12,
-          "severity": [],
-          "codeKeywords": [
-            "inChallenge",
-            "revertBatch",
-            "EIP4844_blobs",
-            "_hashBatchHeader",
-            "basefee_calculation",
-            "batch_commitment",
-            "batch_frames",
-            "batch_hashes",
-            "batcher_frames",
-            "blob_versioned_hash",
-            "block_submission",
-            "calldata_batch",
-            "consensus_split",
-            "finalize_blocks",
-            "getBasefee",
-            "honest",
-            "manual",
-            "msg.sender",
-            "race",
-            "rollup_node"
-          ],
-          "searchKeywords": [
-            "root",
-            "cause",
-            "root cause",
-            "eip4844_blobs",
-            "eip4844 blobs",
-            "_hashbatchheader",
-            "hash batch header",
-            "basefee_calculation",
-            "basefee calculation",
-            "batch_commitment",
-            "batch commitment",
-            "batch_frames",
-            "batch frames",
-            "batch_hashes",
-            "batch hashes",
-            "batcher_frames",
-            "batcher frames",
-            "blob_versioned_hash",
-            "blob versioned hash",
-            "block_submission",
-            "block submission",
-            "calldata_batch",
-            "calldata batch",
-            "consensus_split",
-            "consensus split",
-            "finalize_blocks",
-            "finalize blocks",
-            "getbasefee",
-            "get basefee",
-            "honest",
-            "inchallenge",
-            "in challenge"
-          ],
-          "rootCause": "1. **Frame decoding ambiguity**: Different op-node implementations (or versions) may decode the same batch frame differently when edge cases are hit (e.g., trailing bytes, channel size limits), splitt",
-          "subsections": [
-            {
-              "title": "Root Cause",
-              "lineStart": 151,
-              "lineEnd": 160,
-              "severity": [],
-              "codeKeywords": [
-                "inChallenge",
-                "revertBatch"
-              ],
-              "searchKeywords": [
-                "root",
-                "cause",
-                "root cause"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "zk-rollup-batch-processing-pattern-1-batcher-frame-decodi-003",
+          "id": "zk-rollup-batch-processing-pattern-1-batcher-frame-decodi-002",
           "title": "Pattern 1: Batcher Frame Decoding Inconsistency Causes Consensus Split",
           "lineStart": 161,
           "lineEnd": 203,
@@ -383,10 +354,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 9,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-1-batcher-frames-are-incorrectly-decoded-leading-to-consensus-split.md",
+              "reports/zk_rollup_findings/incompatibility-with-blobs-lead-to-halt-of-block-processing.md",
+              "reports/zk_rollup_findings/m-1-rollupsol-cannot-split-batches-across-blobs-allowing-inexpensive-block-stuff.md",
+              "reports/zk_rollup_findings/h-2-malformed-blob-tx-causes-nethermind-validators-to-stop-producing-blocks.md",
+              "reports/zk_rollup_findings/incorrect-batch-hashes-due-to-memory-corruption.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "dos",
+              "consensus split",
+              "finalization failure",
+              "block stuffing"
+            ],
+            "commonlyComposesWith": [
+              "eip4844 blobs",
+              "batch frames",
+              "calldata batch",
+              "block submission",
+              "finalize blocks"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-batch-processing-pattern-2-eip-4844-blob-incomp-004",
+          "id": "zk-rollup-batch-processing-pattern-2-eip-4844-blob-incomp-003",
           "title": "Pattern 2: EIP-4844 Blob Incompatibility Halts Block Processing",
           "lineStart": 204,
           "lineEnd": 250,
@@ -469,10 +467,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 9,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-1-batcher-frames-are-incorrectly-decoded-leading-to-consensus-split.md",
+              "reports/zk_rollup_findings/incompatibility-with-blobs-lead-to-halt-of-block-processing.md",
+              "reports/zk_rollup_findings/m-1-rollupsol-cannot-split-batches-across-blobs-allowing-inexpensive-block-stuff.md",
+              "reports/zk_rollup_findings/h-2-malformed-blob-tx-causes-nethermind-validators-to-stop-producing-blocks.md",
+              "reports/zk_rollup_findings/incorrect-batch-hashes-due-to-memory-corruption.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "dos",
+              "consensus split",
+              "finalization failure",
+              "block stuffing"
+            ],
+            "commonlyComposesWith": [
+              "eip4844 blobs",
+              "batch frames",
+              "calldata batch",
+              "block submission",
+              "finalize blocks"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-batch-processing-pattern-3-rollup-cannot-split--005",
+          "id": "zk-rollup-batch-processing-pattern-3-rollup-cannot-split--004",
           "title": "Pattern 3: Rollup Cannot Split Batches Across Blobs → Block Stuffing",
           "lineStart": 251,
           "lineEnd": 291,
@@ -556,10 +581,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 9,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-1-batcher-frames-are-incorrectly-decoded-leading-to-consensus-split.md",
+              "reports/zk_rollup_findings/incompatibility-with-blobs-lead-to-halt-of-block-processing.md",
+              "reports/zk_rollup_findings/m-1-rollupsol-cannot-split-batches-across-blobs-allowing-inexpensive-block-stuff.md",
+              "reports/zk_rollup_findings/h-2-malformed-blob-tx-causes-nethermind-validators-to-stop-producing-blocks.md",
+              "reports/zk_rollup_findings/incorrect-batch-hashes-due-to-memory-corruption.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "dos",
+              "consensus split",
+              "finalization failure",
+              "block stuffing"
+            ],
+            "commonlyComposesWith": [
+              "eip4844 blobs",
+              "batch frames",
+              "calldata batch",
+              "block submission",
+              "finalize blocks"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-batch-processing-pattern-4-malformed-blob-trans-006",
+          "id": "zk-rollup-batch-processing-pattern-4-malformed-blob-trans-005",
           "title": "Pattern 4: Malformed Blob Transaction Crashes Validator Nodes",
           "lineStart": 292,
           "lineEnd": 315,
@@ -639,10 +691,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 9,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-1-batcher-frames-are-incorrectly-decoded-leading-to-consensus-split.md",
+              "reports/zk_rollup_findings/incompatibility-with-blobs-lead-to-halt-of-block-processing.md",
+              "reports/zk_rollup_findings/m-1-rollupsol-cannot-split-batches-across-blobs-allowing-inexpensive-block-stuff.md",
+              "reports/zk_rollup_findings/h-2-malformed-blob-tx-causes-nethermind-validators-to-stop-producing-blocks.md",
+              "reports/zk_rollup_findings/incorrect-batch-hashes-due-to-memory-corruption.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "dos",
+              "consensus split",
+              "finalization failure",
+              "block stuffing"
+            ],
+            "commonlyComposesWith": [
+              "eip4844 blobs",
+              "batch frames",
+              "calldata batch",
+              "block submission",
+              "finalize blocks"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-batch-processing-pattern-5-memory-corruption-ca-007",
+          "id": "zk-rollup-batch-processing-pattern-5-memory-corruption-ca-006",
           "title": "Pattern 5: Memory Corruption Causing Incorrect Batch Hashes (Scroll)",
           "lineStart": 316,
           "lineEnd": 366,
@@ -725,10 +804,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 9,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-1-batcher-frames-are-incorrectly-decoded-leading-to-consensus-split.md",
+              "reports/zk_rollup_findings/incompatibility-with-blobs-lead-to-halt-of-block-processing.md",
+              "reports/zk_rollup_findings/m-1-rollupsol-cannot-split-batches-across-blobs-allowing-inexpensive-block-stuff.md",
+              "reports/zk_rollup_findings/h-2-malformed-blob-tx-causes-nethermind-validators-to-stop-producing-blocks.md",
+              "reports/zk_rollup_findings/incorrect-batch-hashes-due-to-memory-corruption.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "dos",
+              "consensus split",
+              "finalization failure",
+              "block stuffing"
+            ],
+            "commonlyComposesWith": [
+              "eip4844 blobs",
+              "batch frames",
+              "calldata batch",
+              "block submission",
+              "finalize blocks"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-batch-processing-pattern-6-incorrect-basefee-ca-008",
+          "id": "zk-rollup-batch-processing-pattern-6-incorrect-basefee-ca-007",
           "title": "Pattern 6: Incorrect basefee Calculation on Taiko Rollup",
           "lineStart": 367,
           "lineEnd": 394,
@@ -812,10 +918,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 9,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-1-batcher-frames-are-incorrectly-decoded-leading-to-consensus-split.md",
+              "reports/zk_rollup_findings/incompatibility-with-blobs-lead-to-halt-of-block-processing.md",
+              "reports/zk_rollup_findings/m-1-rollupsol-cannot-split-batches-across-blobs-allowing-inexpensive-block-stuff.md",
+              "reports/zk_rollup_findings/h-2-malformed-blob-tx-causes-nethermind-validators-to-stop-producing-blocks.md",
+              "reports/zk_rollup_findings/incorrect-batch-hashes-due-to-memory-corruption.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "dos",
+              "consensus split",
+              "finalization failure",
+              "block stuffing"
+            ],
+            "commonlyComposesWith": [
+              "eip4844 blobs",
+              "batch frames",
+              "calldata batch",
+              "block submission",
+              "finalize blocks"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-batch-processing-pattern-7-inchallenge-incorrec-009",
+          "id": "zk-rollup-batch-processing-pattern-7-inchallenge-incorrec-008",
           "title": "Pattern 7: inChallenge Incorrectly Reset in revertBatch",
           "lineStart": 395,
           "lineEnd": 431,
@@ -901,7 +1034,34 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 9,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-1-batcher-frames-are-incorrectly-decoded-leading-to-consensus-split.md",
+              "reports/zk_rollup_findings/incompatibility-with-blobs-lead-to-halt-of-block-processing.md",
+              "reports/zk_rollup_findings/m-1-rollupsol-cannot-split-batches-across-blobs-allowing-inexpensive-block-stuff.md",
+              "reports/zk_rollup_findings/h-2-malformed-blob-tx-causes-nethermind-validators-to-stop-producing-blocks.md",
+              "reports/zk_rollup_findings/incorrect-batch-hashes-due-to-memory-corruption.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "dos",
+              "consensus split",
+              "finalization failure",
+              "block stuffing"
+            ],
+            "commonlyComposesWith": [
+              "eip4844 blobs",
+              "batch frames",
+              "calldata batch",
+              "block submission",
+              "finalize blocks"
+            ]
+          }
         }
       ]
     },
@@ -977,7 +1137,7 @@
           "receive"
         ]
       },
-      "patternCount": 12,
+      "patternCount": 11,
       "patterns": [
         {
           "id": "zk-rollup-bridge-vulnerabilities-token-accounting-and-token-map-000",
@@ -1046,7 +1206,34 @@
             "l1 bridge"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 7,
+            "sampleReports": [
+              "reports/zk_rollup_findings/token-bridge-reentrancy-can-corrupt-token-accounting.md",
+              "reports/zk_rollup_findings/l1blastbridge-uses-wrong-token-order-when-bridging-usd-yield-tokens.md",
+              "reports/zk_rollup_findings/m-02-owner-can-steal-all-funds-locked-in-bridge-by-changing-remote_token-value.md",
+              "reports/zk_rollup_findings/erc-20-representation-of-native-currency-can-be-used-to-drain-native-currency-po.md",
+              "reports/zk_rollup_findings/using-the-wrong-selector-causes-token-loss-during-erc1155-bridging.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "callback reentrancy",
+              "reentrancy",
+              "replay attack",
+              "fund theft",
+              "signature replay"
+            ],
+            "commonlyComposesWith": [
+              "bridge_adapter",
+              "bridge adapter",
+              "bridge_suspension",
+              "bridge suspension",
+              "l1_bridge"
+            ]
+          }
         },
         {
           "id": "zk-rollup-bridge-vulnerabilities-signature-replay-and-message-r-001",
@@ -1114,7 +1301,33 @@
             "l2 bridge"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/zk_rollup_findings/router-signatures-can-be-replayed-when-executing-messages-on-the-destination-dom.md",
+              "reports/zk_rollup_findings/verifier-signatures-can-be-replayed.md",
+              "reports/zk_rollup_findings/signed-swap-digest-lacks-a-domain-separator.md",
+              "reports/zk_rollup_findings/relayer-can-use-valid-evidence-of-one-trade-to-avoid-getting-slashed-for-another.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "replay",
+              "signature replay message replay",
+              "signature replay",
+              "replay message",
+              "message replay"
+            ],
+            "commonlyComposesWith": [
+              "bridge_adapter",
+              "bridge adapter",
+              "bridge_suspension",
+              "bridge suspension",
+              "l1_bridge"
+            ]
+          }
         },
         {
           "id": "zk-rollup-bridge-vulnerabilities-usdc-and-adapter-vulnerabiliti-002",
@@ -1183,7 +1396,31 @@
             "nonreentrant"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/zk_rollup_findings/usdc-sent-may-be-permanently-lockedburnt-inby-the-adapter-if-the-_to-address-is-.md",
+              "reports/zk_rollup_findings/syncswap_swapfrom-does-not-encode-native-eth-correctly.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "callback reentrancy",
+              "reentrancy",
+              "replay attack",
+              "fund theft",
+              "signature replay"
+            ],
+            "commonlyComposesWith": [
+              "bridge_adapter",
+              "bridge adapter",
+              "bridge_suspension",
+              "bridge suspension",
+              "l1_bridge"
+            ]
+          }
         },
         {
           "id": "zk-rollup-bridge-vulnerabilities-message-channel-dos-and-censor-003",
@@ -1252,7 +1489,34 @@
             "message_relay"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/zk_rollup_findings/a-dos-attack-can-prevent-teleports.md",
+              "reports/zk_rollup_findings/design-flaw-in-bridge-contract-suspension-mechanism-phase-1.md",
+              "reports/zk_rollup_findings/m-06-malicious-proposer-can-dos-bridge-withdrawals.md",
+              "reports/zk_rollup_findings/rate-limiters-can-lead-to-a-denial-of-service-attack.md",
+              "reports/zk_rollup_findings/single-reverting-withdrawal-can-block-the-basistradevault-withdrawal-queue.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "callback reentrancy",
+              "reentrancy",
+              "replay attack",
+              "fund theft",
+              "signature replay"
+            ],
+            "commonlyComposesWith": [
+              "bridge_adapter",
+              "bridge adapter",
+              "bridge_suspension",
+              "bridge suspension",
+              "l1_bridge"
+            ]
+          }
         },
         {
           "id": "zk-rollup-bridge-vulnerabilities-starknet-specific-bridge-issue-004",
@@ -1320,95 +1584,34 @@
             "l2_bridge"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/zk_rollup_findings/starknet-tokens-deposited-with-use_withdraw_auto-can-never-be-withdrawn.md",
+              "reports/zk_rollup_findings/tokens-irrecoverable-by-owner-on-l1-if-not-an-erc721-receiver.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "callback reentrancy",
+              "reentrancy",
+              "replay attack",
+              "fund theft",
+              "signature replay"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "starknet specific bridge issues",
+              "specific bridge",
+              "bridge issues",
+              "bridge_adapter"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-bridge-vulnerabilities-vulnerability-description-005",
-          "title": "Vulnerability Description",
-          "lineStart": 176,
-          "lineEnd": 188,
-          "lineCount": 13,
-          "severity": [
-            "LOW"
-          ],
-          "codeKeywords": [
-            "safeTransferFrom",
-            "ERC1155_selector",
-            "Teleports",
-            "USDC_adapter",
-            "_domainSeparator",
-            "_initiateERC20Deposit",
-            "bridge_adapter",
-            "bridge_suspension",
-            "burn",
-            "claimTo",
-            "deposit",
-            "domain_separator",
-            "executeMessage",
-            "fallback",
-            "l1_bridge",
-            "l2_bridge",
-            "message_relay",
-            "msg.sender",
-            "nonReentrant",
-            "processWithdrawals"
-          ],
-          "searchKeywords": [
-            "root",
-            "cause",
-            "root cause",
-            "erc1155_selector",
-            "erc1155 selector",
-            "teleports",
-            "usdc_adapter",
-            "usdc adapter",
-            "_domainseparator",
-            "domain separator",
-            "_initiateerc20deposit",
-            "initiate erc20 deposit",
-            "bridge_adapter",
-            "bridge adapter",
-            "bridge_suspension",
-            "bridge suspension",
-            "burn",
-            "claimto",
-            "claim to",
-            "deposit",
-            "domain_separator",
-            "executemessage",
-            "execute message",
-            "fallback",
-            "l1_bridge",
-            "l1 bridge",
-            "l2_bridge",
-            "l2 bridge",
-            "message_relay",
-            "message relay",
-            "msg.sender",
-            "msg sender"
-          ],
-          "rootCause": "1. **Reentrancy in token accounting**: Bridge contracts update internal accounting after external calls, allowing re-entrant calls to exploit inconsistent state\n\n2. **Token pair ordering**: Bridges th",
-          "subsections": [
-            {
-              "title": "Root Cause",
-              "lineStart": 178,
-              "lineEnd": 188,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": [
-                "safeTransferFrom"
-              ],
-              "searchKeywords": [
-                "root",
-                "cause",
-                "root cause"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "zk-rollup-bridge-vulnerabilities-pattern-1-token-bridge-reentra-006",
+          "id": "zk-rollup-bridge-vulnerabilities-pattern-1-token-bridge-reentra-005",
           "title": "Pattern 1: Token Bridge Reentrancy Corrupts Accounting",
           "lineStart": 189,
           "lineEnd": 246,
@@ -1488,10 +1691,37 @@
                 "scenario"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 21,
+            "sampleReports": [
+              "reports/zk_rollup_findings/token-bridge-reentrancy-can-corrupt-token-accounting.md",
+              "reports/zk_rollup_findings/l1blastbridge-uses-wrong-token-order-when-bridging-usd-yield-tokens.md",
+              "reports/zk_rollup_findings/m-02-owner-can-steal-all-funds-locked-in-bridge-by-changing-remote_token-value.md",
+              "reports/zk_rollup_findings/erc-20-representation-of-native-currency-can-be-used-to-drain-native-currency-po.md",
+              "reports/zk_rollup_findings/using-the-wrong-selector-causes-token-loss-during-erc1155-bridging.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "callback reentrancy",
+              "reentrancy",
+              "replay attack",
+              "fund theft",
+              "signature replay"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "reentrancy",
+              "token bridge reentrancy corrupts accounting",
+              "token bridge",
+              "bridge reentrancy"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-bridge-vulnerabilities-pattern-2-wrong-token-order-in-007",
+          "id": "zk-rollup-bridge-vulnerabilities-pattern-2-wrong-token-order-in-006",
           "title": "Pattern 2: Wrong Token Order in Bridge Causes Incorrect Routing",
           "lineStart": 247,
           "lineEnd": 295,
@@ -1573,10 +1803,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 21,
+            "sampleReports": [
+              "reports/zk_rollup_findings/token-bridge-reentrancy-can-corrupt-token-accounting.md",
+              "reports/zk_rollup_findings/l1blastbridge-uses-wrong-token-order-when-bridging-usd-yield-tokens.md",
+              "reports/zk_rollup_findings/m-02-owner-can-steal-all-funds-locked-in-bridge-by-changing-remote_token-value.md",
+              "reports/zk_rollup_findings/erc-20-representation-of-native-currency-can-be-used-to-drain-native-currency-po.md",
+              "reports/zk_rollup_findings/using-the-wrong-selector-causes-token-loss-during-erc1155-bridging.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "callback reentrancy",
+              "reentrancy",
+              "replay attack",
+              "fund theft",
+              "signature replay"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridge_adapter",
+              "bridge adapter",
+              "bridge_suspension",
+              "bridge suspension"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-bridge-vulnerabilities-pattern-3-router-signatures-re-008",
+          "id": "zk-rollup-bridge-vulnerabilities-pattern-3-router-signatures-re-007",
           "title": "Pattern 3: Router Signatures Replay Across Chains",
           "lineStart": 296,
           "lineEnd": 350,
@@ -1661,10 +1918,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 21,
+            "sampleReports": [
+              "reports/zk_rollup_findings/token-bridge-reentrancy-can-corrupt-token-accounting.md",
+              "reports/zk_rollup_findings/l1blastbridge-uses-wrong-token-order-when-bridging-usd-yield-tokens.md",
+              "reports/zk_rollup_findings/m-02-owner-can-steal-all-funds-locked-in-bridge-by-changing-remote_token-value.md",
+              "reports/zk_rollup_findings/erc-20-representation-of-native-currency-can-be-used-to-drain-native-currency-po.md",
+              "reports/zk_rollup_findings/using-the-wrong-selector-causes-token-loss-during-erc1155-bridging.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "replay",
+              "router signatures replay across chains",
+              "signatures replay",
+              "replay across",
+              "callback reentrancy"
+            ],
+            "commonlyComposesWith": [
+              "bridge_adapter",
+              "bridge adapter",
+              "bridge_suspension",
+              "bridge suspension",
+              "token bridge"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-bridge-vulnerabilities-pattern-4-wrong-erc1155-select-009",
+          "id": "zk-rollup-bridge-vulnerabilities-pattern-4-wrong-erc1155-select-008",
           "title": "Pattern 4: Wrong ERC1155 Selector Locks Tokens in Bridge",
           "lineStart": 351,
           "lineEnd": 390,
@@ -1747,10 +2031,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 21,
+            "sampleReports": [
+              "reports/zk_rollup_findings/token-bridge-reentrancy-can-corrupt-token-accounting.md",
+              "reports/zk_rollup_findings/l1blastbridge-uses-wrong-token-order-when-bridging-usd-yield-tokens.md",
+              "reports/zk_rollup_findings/m-02-owner-can-steal-all-funds-locked-in-bridge-by-changing-remote_token-value.md",
+              "reports/zk_rollup_findings/erc-20-representation-of-native-currency-can-be-used-to-drain-native-currency-po.md",
+              "reports/zk_rollup_findings/using-the-wrong-selector-causes-token-loss-during-erc1155-bridging.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "callback reentrancy",
+              "reentrancy",
+              "replay attack",
+              "fund theft",
+              "signature replay"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "wrong erc1155 selector locks tokens bridge",
+              "tokens bridge",
+              "bridge_adapter",
+              "bridge adapter"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-bridge-vulnerabilities-pattern-5-usdc-blacklist-perma-010",
+          "id": "zk-rollup-bridge-vulnerabilities-pattern-5-usdc-blacklist-perma-009",
           "title": "Pattern 5: USDC Blacklist Permanently Locks Bridge Funds",
           "lineStart": 391,
           "lineEnd": 440,
@@ -1835,10 +2146,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 21,
+            "sampleReports": [
+              "reports/zk_rollup_findings/token-bridge-reentrancy-can-corrupt-token-accounting.md",
+              "reports/zk_rollup_findings/l1blastbridge-uses-wrong-token-order-when-bridging-usd-yield-tokens.md",
+              "reports/zk_rollup_findings/m-02-owner-can-steal-all-funds-locked-in-bridge-by-changing-remote_token-value.md",
+              "reports/zk_rollup_findings/erc-20-representation-of-native-currency-can-be-used-to-drain-native-currency-po.md",
+              "reports/zk_rollup_findings/using-the-wrong-selector-causes-token-loss-during-erc1155-bridging.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "callback reentrancy",
+              "reentrancy",
+              "replay attack",
+              "fund theft",
+              "signature replay"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "usdc blacklist permanently locks bridge funds",
+              "locks bridge",
+              "bridge funds",
+              "bridge_adapter"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-bridge-vulnerabilities-pattern-6-single-reverting-wit-011",
+          "id": "zk-rollup-bridge-vulnerabilities-pattern-6-single-reverting-wit-010",
           "title": "Pattern 6: Single Reverting Withdrawal Blocks Entire Queue",
           "lineStart": 441,
           "lineEnd": 482,
@@ -1920,7 +2258,34 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 21,
+            "sampleReports": [
+              "reports/zk_rollup_findings/token-bridge-reentrancy-can-corrupt-token-accounting.md",
+              "reports/zk_rollup_findings/l1blastbridge-uses-wrong-token-order-when-bridging-usd-yield-tokens.md",
+              "reports/zk_rollup_findings/m-02-owner-can-steal-all-funds-locked-in-bridge-by-changing-remote_token-value.md",
+              "reports/zk_rollup_findings/erc-20-representation-of-native-currency-can-be-used-to-drain-native-currency-po.md",
+              "reports/zk_rollup_findings/using-the-wrong-selector-causes-token-loss-during-erc1155-bridging.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "callback reentrancy",
+              "reentrancy",
+              "replay attack",
+              "fund theft",
+              "signature replay"
+            ],
+            "commonlyComposesWith": [
+              "bridge_adapter",
+              "bridge adapter",
+              "bridge_suspension",
+              "bridge suspension",
+              "token bridge"
+            ]
+          }
         }
       ]
     },
@@ -1993,7 +2358,7 @@
           "zkasm"
         ]
       },
-      "patternCount": 12,
+      "patternCount": 11,
       "patterns": [
         {
           "id": "zk-rollup-circuit-constraints-missing-pil-air-constraints-000",
@@ -2062,7 +2427,34 @@
             "range check"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 5,
+            "sampleReports": [
+              "reports/zk_rollup_findings/2-missing-constraint-in-pil-leading-to-proving-fake-inclusion-in-the-smt.md",
+              "reports/zk_rollup_findings/4-missing-constraint-in-pil-leading-to-execution-flow-hijack.md",
+              "reports/zk_rollup_findings/3-incorrect-ctx-assignation-leading-to-addition-of-random-amount-of-ether-to-the.md",
+              "reports/zk_rollup_findings/5-bug-in-maxmem-handling-can-halt-the-batch-verification.md",
+              "reports/zk_rollup_findings/underconstrained-carry-value-in-the-binary-state-machine.md"
+            ],
+            "severityConsensus": "CRITICAL"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "proof forgery",
+              "state manipulation",
+              "execution hijack",
+              "circuit constraints"
+            ],
+            "commonlyComposesWith": [
+              "pil",
+              "zkasm",
+              "polynomial identity language",
+              "constraint system",
+              "binary state machine"
+            ]
+          }
         },
         {
           "id": "zk-rollup-circuit-constraints-opcode-arithmetic-constraints-001",
@@ -2129,7 +2521,33 @@
             "shr_opcode"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/zk_rollup_findings/h-01-missing-range-constraint-on-remainder-check-in-div-opcode-implementation.md",
+              "reports/zk_rollup_findings/h-04-missing-constraint-on-remainder-in-shr-opcode-implementation.md",
+              "reports/zk_rollup_findings/insufﬁcient-check-about-division-remainder.md",
+              "reports/zk_rollup_findings/incorrect-implementation-of-pow_u32-exponentiation-for-even-exponent.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "proof forgery",
+              "state manipulation",
+              "execution hijack",
+              "circuit constraints"
+            ],
+            "commonlyComposesWith": [
+              "pil",
+              "zkasm",
+              "polynomial identity language",
+              "constraint system",
+              "binary state machine"
+            ]
+          }
         },
         {
           "id": "zk-rollup-circuit-constraints-risc-v-vm-circuit-constraints-002",
@@ -2196,7 +2614,31 @@
             "shr_opcode"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/zk_rollup_findings/isltarraysubairis-unsound.md",
+              "reports/zk_rollup_findings/jalr-imm_signis-unconstrained.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "proof forgery",
+              "state manipulation",
+              "execution hijack",
+              "circuit constraints"
+            ],
+            "commonlyComposesWith": [
+              "pil",
+              "zkasm",
+              "polynomial identity language",
+              "constraint system",
+              "binary state machine"
+            ]
+          }
         },
         {
           "id": "zk-rollup-circuit-constraints-hash-circuit-constraints-003",
@@ -2263,93 +2705,34 @@
             "shr_opcode"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/zk_rollup_findings/sha256-air-doesnt-constrain-final_hash-at-the-last-block-but-this-value-is-read-.md",
+              "reports/zk_rollup_findings/partial_sha256_var_interstitial-may-give-the-same-hash-state-h-for-different-dat.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "proof forgery",
+              "state manipulation",
+              "execution hijack",
+              "circuit constraints"
+            ],
+            "commonlyComposesWith": [
+              "pil",
+              "zkasm",
+              "polynomial identity language",
+              "constraint system",
+              "binary state machine"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-circuit-constraints-vulnerability-description-004",
-          "title": "Vulnerability Description",
-          "lineStart": 160,
-          "lineEnd": 174,
-          "lineCount": 15,
-          "severity": [],
-          "codeKeywords": [
-            "alloc_without_values",
-            "false",
-            "true",
-            "JALR",
-            "PIL",
-            "SHA256_AIR",
-            "binary_state_machine",
-            "borrow",
-            "carry_bit",
-            "comparison_circuit",
-            "constraint_system",
-            "div_opcode",
-            "final_hash",
-            "hash_state",
-            "partial_sha256",
-            "polynomial_identity_language",
-            "range_check",
-            "shr_opcode",
-            "zkasm",
-            "circuit_constraints"
-          ],
-          "searchKeywords": [
-            "root",
-            "cause",
-            "root cause",
-            "jalr",
-            "pil",
-            "sha256_air",
-            "sha256 air",
-            "binary_state_machine",
-            "binary state machine",
-            "borrow",
-            "carry_bit",
-            "carry bit",
-            "comparison_circuit",
-            "comparison circuit",
-            "constraint_system",
-            "constraint system",
-            "div_opcode",
-            "div opcode",
-            "final_hash",
-            "final hash",
-            "hash_state",
-            "hash state",
-            "partial_sha256",
-            "partial sha256",
-            "polynomial_identity_language",
-            "polynomial identity language",
-            "range_check",
-            "range check",
-            "shr_opcode",
-            "shr opcode",
-            "zkasm",
-            "circuit_constraints"
-          ],
-          "rootCause": "In ZK proof systems, soundness requires that **every wire and intermediate value be fully constrained** by the circuit's polynomial identities. When a constraint is missing or incomplete, an adversary",
-          "subsections": [
-            {
-              "title": "Root Cause",
-              "lineStart": 162,
-              "lineEnd": 174,
-              "severity": [],
-              "codeKeywords": [
-                "alloc_without_values",
-                "false",
-                "true"
-              ],
-              "searchKeywords": [
-                "root",
-                "cause",
-                "root cause"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "zk-rollup-circuit-constraints-pattern-1-missing-pil-constrai-005",
+          "id": "zk-rollup-circuit-constraints-pattern-1-missing-pil-constrai-004",
           "title": "Pattern 1: Missing PIL Constraint for SMT Inclusion",
           "lineStart": 175,
           "lineEnd": 208,
@@ -2431,10 +2814,37 @@
                 "scenario"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/zk_rollup_findings/2-missing-constraint-in-pil-leading-to-proving-fake-inclusion-in-the-smt.md",
+              "reports/zk_rollup_findings/4-missing-constraint-in-pil-leading-to-execution-flow-hijack.md",
+              "reports/zk_rollup_findings/3-incorrect-ctx-assignation-leading-to-addition-of-random-amount-of-ether-to-the.md",
+              "reports/zk_rollup_findings/5-bug-in-maxmem-handling-can-halt-the-batch-verification.md",
+              "reports/zk_rollup_findings/underconstrained-carry-value-in-the-binary-state-machine.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "proof forgery",
+              "state manipulation",
+              "execution hijack",
+              "circuit constraints"
+            ],
+            "commonlyComposesWith": [
+              "pil",
+              "zkasm",
+              "polynomial identity language",
+              "constraint system",
+              "binary state machine"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-circuit-constraints-pattern-2-underconstrained-car-006",
+          "id": "zk-rollup-circuit-constraints-pattern-2-underconstrained-car-005",
           "title": "Pattern 2: Underconstrained Carry Value in Binary State Machine",
           "lineStart": 209,
           "lineEnd": 240,
@@ -2513,10 +2923,37 @@
                 "scenario"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/zk_rollup_findings/2-missing-constraint-in-pil-leading-to-proving-fake-inclusion-in-the-smt.md",
+              "reports/zk_rollup_findings/4-missing-constraint-in-pil-leading-to-execution-flow-hijack.md",
+              "reports/zk_rollup_findings/3-incorrect-ctx-assignation-leading-to-addition-of-random-amount-of-ether-to-the.md",
+              "reports/zk_rollup_findings/5-bug-in-maxmem-handling-can-halt-the-batch-verification.md",
+              "reports/zk_rollup_findings/underconstrained-carry-value-in-the-binary-state-machine.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "proof forgery",
+              "state manipulation",
+              "execution hijack",
+              "circuit constraints"
+            ],
+            "commonlyComposesWith": [
+              "pil",
+              "zkasm",
+              "polynomial identity language",
+              "constraint system",
+              "binary state machine"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-circuit-constraints-pattern-3-missing-range-constr-007",
+          "id": "zk-rollup-circuit-constraints-pattern-3-missing-range-constr-006",
           "title": "Pattern 3: Missing Range Constraint on Division Remainder (zkEVM Opcode)",
           "lineStart": 241,
           "lineEnd": 292,
@@ -2594,10 +3031,37 @@
                 "scenario"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/zk_rollup_findings/2-missing-constraint-in-pil-leading-to-proving-fake-inclusion-in-the-smt.md",
+              "reports/zk_rollup_findings/4-missing-constraint-in-pil-leading-to-execution-flow-hijack.md",
+              "reports/zk_rollup_findings/3-incorrect-ctx-assignation-leading-to-addition-of-random-amount-of-ether-to-the.md",
+              "reports/zk_rollup_findings/5-bug-in-maxmem-handling-can-halt-the-batch-verification.md",
+              "reports/zk_rollup_findings/underconstrained-carry-value-in-the-binary-state-machine.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "proof forgery",
+              "state manipulation",
+              "execution hijack",
+              "circuit constraints"
+            ],
+            "commonlyComposesWith": [
+              "pil",
+              "zkasm",
+              "polynomial identity language",
+              "constraint system",
+              "binary state machine"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-circuit-constraints-pattern-4-isltarraysubair-soun-008",
+          "id": "zk-rollup-circuit-constraints-pattern-4-isltarraysubair-soun-007",
           "title": "Pattern 4: IsLtArraySubAir Soundness Issue (RISC-V Circuit)",
           "lineStart": 293,
           "lineEnd": 324,
@@ -2683,10 +3147,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/zk_rollup_findings/2-missing-constraint-in-pil-leading-to-proving-fake-inclusion-in-the-smt.md",
+              "reports/zk_rollup_findings/4-missing-constraint-in-pil-leading-to-execution-flow-hijack.md",
+              "reports/zk_rollup_findings/3-incorrect-ctx-assignation-leading-to-addition-of-random-amount-of-ether-to-the.md",
+              "reports/zk_rollup_findings/5-bug-in-maxmem-handling-can-halt-the-batch-verification.md",
+              "reports/zk_rollup_findings/underconstrained-carry-value-in-the-binary-state-machine.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "proof forgery",
+              "state manipulation",
+              "execution hijack",
+              "circuit constraints"
+            ],
+            "commonlyComposesWith": [
+              "pil",
+              "zkasm",
+              "polynomial identity language",
+              "constraint system",
+              "binary state machine"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-circuit-constraints-pattern-5-sha256-air-unconstra-009",
+          "id": "zk-rollup-circuit-constraints-pattern-5-sha256-air-unconstra-008",
           "title": "Pattern 5: SHA256 AIR Unconstrained final_hash at Last Block",
           "lineStart": 325,
           "lineEnd": 353,
@@ -2769,10 +3260,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/zk_rollup_findings/2-missing-constraint-in-pil-leading-to-proving-fake-inclusion-in-the-smt.md",
+              "reports/zk_rollup_findings/4-missing-constraint-in-pil-leading-to-execution-flow-hijack.md",
+              "reports/zk_rollup_findings/3-incorrect-ctx-assignation-leading-to-addition-of-random-amount-of-ether-to-the.md",
+              "reports/zk_rollup_findings/5-bug-in-maxmem-handling-can-halt-the-batch-verification.md",
+              "reports/zk_rollup_findings/underconstrained-carry-value-in-the-binary-state-machine.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "proof forgery",
+              "state manipulation",
+              "execution hijack",
+              "circuit constraints"
+            ],
+            "commonlyComposesWith": [
+              "pil",
+              "zkasm",
+              "polynomial identity language",
+              "constraint system",
+              "binary state machine"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-circuit-constraints-pattern-6-partial-sha256-var-i-010",
+          "id": "zk-rollup-circuit-constraints-pattern-6-partial-sha256-var-i-009",
           "title": "Pattern 6: partial_sha256_var_interstitial Hash Collision (Undersized Input)",
           "lineStart": 354,
           "lineEnd": 377,
@@ -2854,10 +3372,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/zk_rollup_findings/2-missing-constraint-in-pil-leading-to-proving-fake-inclusion-in-the-smt.md",
+              "reports/zk_rollup_findings/4-missing-constraint-in-pil-leading-to-execution-flow-hijack.md",
+              "reports/zk_rollup_findings/3-incorrect-ctx-assignation-leading-to-addition-of-random-amount-of-ether-to-the.md",
+              "reports/zk_rollup_findings/5-bug-in-maxmem-handling-can-halt-the-batch-verification.md",
+              "reports/zk_rollup_findings/underconstrained-carry-value-in-the-binary-state-machine.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "proof forgery",
+              "state manipulation",
+              "execution hijack",
+              "circuit constraints"
+            ],
+            "commonlyComposesWith": [
+              "pil",
+              "zkasm",
+              "polynomial identity language",
+              "constraint system",
+              "binary state machine"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-circuit-constraints-pattern-7-jalr-imm-sign-uncons-011",
+          "id": "zk-rollup-circuit-constraints-pattern-7-jalr-imm-sign-uncons-010",
           "title": "Pattern 7: JALR imm_sign Unconstrained (RISC-V zkVM)",
           "lineStart": 378,
           "lineEnd": 404,
@@ -2939,7 +3484,34 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/zk_rollup_findings/2-missing-constraint-in-pil-leading-to-proving-fake-inclusion-in-the-smt.md",
+              "reports/zk_rollup_findings/4-missing-constraint-in-pil-leading-to-execution-flow-hijack.md",
+              "reports/zk_rollup_findings/3-incorrect-ctx-assignation-leading-to-addition-of-random-amount-of-ether-to-the.md",
+              "reports/zk_rollup_findings/5-bug-in-maxmem-handling-can-halt-the-batch-verification.md",
+              "reports/zk_rollup_findings/underconstrained-carry-value-in-the-binary-state-machine.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "proof forgery",
+              "state manipulation",
+              "execution hijack",
+              "circuit constraints"
+            ],
+            "commonlyComposesWith": [
+              "pil",
+              "zkasm",
+              "polynomial identity language",
+              "constraint system",
+              "binary state machine"
+            ]
+          }
         }
       ]
     },
@@ -3016,7 +3588,7 @@
           "msg.sender"
         ]
       },
-      "patternCount": 11,
+      "patternCount": 10,
       "patterns": [
         {
           "id": "zk-rollup-evm-incompatibilities-create-create2-create3-incompa-000",
@@ -3084,7 +3656,34 @@
             "keccak256_of_initcode"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/zk_rollup_findings/factory-deployments-wont-work-correctly-on-the-zksync-chain.md",
+              "reports/zk_rollup_findings/m-2-create-opcode-works-differently-in-the-zksync-chain.md",
+              "reports/zk_rollup_findings/m-6-computepooladdress-will-not-work-on-zksync-era.md",
+              "reports/zk_rollup_findings/m-15-create3-is-not-available-in-the-zksync-era.md",
+              "reports/zk_rollup_findings/m-08-factorycreate-is-vulnerable-to-reorg-attacks.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "deployment failure",
+              "address collision",
+              "authentication bypass",
+              "state corruption"
+            ],
+            "commonlyComposesWith": [
+              "create",
+              "create2",
+              "create3",
+              "extcodehash",
+              "ecrecover"
+            ]
+          }
         },
         {
           "id": "zk-rollup-evm-incompatibilities-opcode-and-precompile-divergen-001",
@@ -3153,7 +3752,34 @@
             "ecrecover"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 7,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-17-discrepancy-in-ecrecover-precompile-when-using-delegatecall.md",
+              "reports/zk_rollup_findings/m-19-divergences-in-the-simulation-of-the-extcodehash-evm-opcode.md",
+              "reports/zk_rollup_findings/h-01-unauthorized-contracts-can-bypass-precompile-authorization-via-delegatecall.md",
+              "reports/zk_rollup_findings/m-04-incorrect-max-precompile-address.md",
+              "reports/zk_rollup_findings/m-01-sessionkeyvalidator-is-not-working-on-zksync-mainnet.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "deployment failure",
+              "address collision",
+              "authentication bypass",
+              "state corruption"
+            ],
+            "commonlyComposesWith": [
+              "create",
+              "create2",
+              "create3",
+              "extcodehash",
+              "ecrecover"
+            ]
+          }
         },
         {
           "id": "zk-rollup-evm-incompatibilities-nonce-and-account-behavior-002",
@@ -3221,7 +3847,33 @@
             "ecrecover"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-20-nonce-behavior-discrepancy-between-zksync-era-and-eip-161.md",
+              "reports/zk_rollup_findings/m-21-deployment-nonce-does-not-increment-for-a-reverted-child-contract.md",
+              "reports/zk_rollup_findings/m-18-discrepancy-in-default-account-behavior.md",
+              "reports/zk_rollup_findings/m-06-nonce-ordering-of-eoa-can-be-updated-to-arbitrary-through-an-l1-tx.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "deployment failure",
+              "address collision",
+              "authentication bypass",
+              "state corruption"
+            ],
+            "commonlyComposesWith": [
+              "create",
+              "create2",
+              "create3",
+              "extcodehash",
+              "ecrecover"
+            ]
+          }
         },
         {
           "id": "zk-rollup-evm-incompatibilities-msg-sender-and-context-differe-003",
@@ -3289,7 +3941,34 @@
             "deployment_nonce"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 5,
+            "sampleReports": [
+              "reports/zk_rollup_findings/preservation-of-msgsender-in-zksync-could-break-certain-trust-assumption.md",
+              "reports/zk_rollup_findings/m-04-time-sensitive-contracts-deployed-on-zksync.md",
+              "reports/zk_rollup_findings/incorrect-use-of-l1-blocknumber-on-arbitrum.md",
+              "reports/zk_rollup_findings/m-6-blsbn254-is-not-available-in-certain-chains-due-to-hardcoded-gas-limit.md",
+              "reports/zk_rollup_findings/scope-1-multisig-is-incompatible-with-erc-4337.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "deployment failure",
+              "address collision",
+              "authentication bypass",
+              "state corruption"
+            ],
+            "commonlyComposesWith": [
+              "create",
+              "create2",
+              "create3",
+              "extcodehash",
+              "ecrecover"
+            ]
+          }
         },
         {
           "id": "zk-rollup-evm-incompatibilities-bytecode-compression-004",
@@ -3358,101 +4037,35 @@
             "max precompile address"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 3,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-22-potential-gas-manipulation-via-bytecode-compression.md",
+              "reports/zk_rollup_findings/lack-of-data-availability-of-bytecode.md",
+              "reports/zk_rollup_findings/h-5-compress-right-after-convert-can-bypass-completeness-checks.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "deployment failure",
+              "address collision",
+              "authentication bypass",
+              "state corruption"
+            ],
+            "commonlyComposesWith": [
+              "create",
+              "create2",
+              "create3",
+              "extcodehash",
+              "ecrecover"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-evm-incompatibilities-vulnerability-description-005",
-          "title": "Vulnerability Description",
-          "lineStart": 181,
-          "lineEnd": 191,
-          "lineCount": 11,
-          "severity": [
-            "LOW"
-          ],
-          "codeKeywords": [
-            "CREATE2",
-            "CREATE3",
-            "delegatecall",
-            "ecrecover",
-            "keccak256(bytecode",
-            "keccak256(initcode",
-            "msg.sender",
-            "CREATE",
-            "EIP161",
-            "EXTCODEHASH",
-            "_computeCreate2Address",
-            "accruedInterest",
-            "address_derivation",
-            "block.number",
-            "block.timestamp",
-            "borrow",
-            "bypassPrecompile",
-            "bytecode_compression",
-            "computePoolAddress",
-            "deployment_nonce"
-          ],
-          "searchKeywords": [
-            "root",
-            "cause",
-            "root cause",
-            "create",
-            "create2",
-            "create3",
-            "eip161",
-            "extcodehash",
-            "_computecreate2address",
-            "compute create2 address",
-            "accruedinterest",
-            "accrued interest",
-            "address_derivation",
-            "address derivation",
-            "block.number",
-            "block number",
-            "block.timestamp",
-            "block timestamp",
-            "borrow",
-            "bypassprecompile",
-            "bypass precompile",
-            "bytecode_compression",
-            "bytecode compression",
-            "computepooladdress",
-            "compute pool address",
-            "delegatecall",
-            "deployment_nonce",
-            "deployment nonce",
-            "ecrecover",
-            "keccak256_of_initcode",
-            "keccak256 of initcode",
-            "max_precompile_address"
-          ],
-          "rootCause": "1. **CREATE2 address derivation**: On ZKSync, `CREATE2` uses `keccak256(bytecode)` while Ethereum uses `keccak256(initcode)`. Protocols computing expected deployment addresses off-chain (via pool addr",
-          "subsections": [
-            {
-              "title": "Root Cause",
-              "lineStart": 183,
-              "lineEnd": 191,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": [
-                "CREATE2",
-                "CREATE3",
-                "delegatecall",
-                "ecrecover",
-                "keccak256(bytecode",
-                "keccak256(initcode",
-                "msg.sender"
-              ],
-              "searchKeywords": [
-                "root",
-                "cause",
-                "root cause"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "zk-rollup-evm-incompatibilities-pattern-1-create2-address-deri-006",
+          "id": "zk-rollup-evm-incompatibilities-pattern-1-create2-address-deri-005",
           "title": "Pattern 1: CREATE2 Address Derivation Differs on ZKSync",
           "lineStart": 192,
           "lineEnd": 241,
@@ -3535,10 +4148,37 @@
                 "scenario"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 25,
+            "sampleReports": [
+              "reports/zk_rollup_findings/factory-deployments-wont-work-correctly-on-the-zksync-chain.md",
+              "reports/zk_rollup_findings/m-2-create-opcode-works-differently-in-the-zksync-chain.md",
+              "reports/zk_rollup_findings/m-6-computepooladdress-will-not-work-on-zksync-era.md",
+              "reports/zk_rollup_findings/m-15-create3-is-not-available-in-the-zksync-era.md",
+              "reports/zk_rollup_findings/m-08-factorycreate-is-vulnerable-to-reorg-attacks.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "deployment failure",
+              "address collision",
+              "authentication bypass",
+              "state corruption"
+            ],
+            "commonlyComposesWith": [
+              "create",
+              "create2",
+              "create3",
+              "extcodehash",
+              "ecrecover"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-evm-incompatibilities-pattern-2-ecrecover-discrepanc-007",
+          "id": "zk-rollup-evm-incompatibilities-pattern-2-ecrecover-discrepanc-006",
           "title": "Pattern 2: ecrecover Discrepancy in delegatecall Context on ZKSync",
           "lineStart": 242,
           "lineEnd": 286,
@@ -3623,10 +4263,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 25,
+            "sampleReports": [
+              "reports/zk_rollup_findings/factory-deployments-wont-work-correctly-on-the-zksync-chain.md",
+              "reports/zk_rollup_findings/m-2-create-opcode-works-differently-in-the-zksync-chain.md",
+              "reports/zk_rollup_findings/m-6-computepooladdress-will-not-work-on-zksync-era.md",
+              "reports/zk_rollup_findings/m-15-create3-is-not-available-in-the-zksync-era.md",
+              "reports/zk_rollup_findings/m-08-factorycreate-is-vulnerable-to-reorg-attacks.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "deployment failure",
+              "address collision",
+              "authentication bypass",
+              "state corruption"
+            ],
+            "commonlyComposesWith": [
+              "create",
+              "create2",
+              "create3",
+              "extcodehash",
+              "ecrecover"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-evm-incompatibilities-pattern-3-unauthorized-precomp-008",
+          "id": "zk-rollup-evm-incompatibilities-pattern-3-unauthorized-precomp-007",
           "title": "Pattern 3: Unauthorized Precompile Authorization Bypass via delegatecall",
           "lineStart": 287,
           "lineEnd": 312,
@@ -3713,10 +4380,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 25,
+            "sampleReports": [
+              "reports/zk_rollup_findings/factory-deployments-wont-work-correctly-on-the-zksync-chain.md",
+              "reports/zk_rollup_findings/m-2-create-opcode-works-differently-in-the-zksync-chain.md",
+              "reports/zk_rollup_findings/m-6-computepooladdress-will-not-work-on-zksync-era.md",
+              "reports/zk_rollup_findings/m-15-create3-is-not-available-in-the-zksync-era.md",
+              "reports/zk_rollup_findings/m-08-factorycreate-is-vulnerable-to-reorg-attacks.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "deployment failure",
+              "address collision",
+              "authentication bypass",
+              "state corruption"
+            ],
+            "commonlyComposesWith": [
+              "create",
+              "create2",
+              "create3",
+              "extcodehash",
+              "ecrecover"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-evm-incompatibilities-pattern-4-nonce-doesn-t-increm-009",
+          "id": "zk-rollup-evm-incompatibilities-pattern-4-nonce-doesn-t-increm-008",
           "title": "Pattern 4: Nonce Doesn't Increment for Reverted Child Deployments",
           "lineStart": 313,
           "lineEnd": 340,
@@ -3800,10 +4494,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 25,
+            "sampleReports": [
+              "reports/zk_rollup_findings/factory-deployments-wont-work-correctly-on-the-zksync-chain.md",
+              "reports/zk_rollup_findings/m-2-create-opcode-works-differently-in-the-zksync-chain.md",
+              "reports/zk_rollup_findings/m-6-computepooladdress-will-not-work-on-zksync-era.md",
+              "reports/zk_rollup_findings/m-15-create3-is-not-available-in-the-zksync-era.md",
+              "reports/zk_rollup_findings/m-08-factorycreate-is-vulnerable-to-reorg-attacks.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "deployment failure",
+              "address collision",
+              "authentication bypass",
+              "state corruption"
+            ],
+            "commonlyComposesWith": [
+              "create",
+              "create2",
+              "create3",
+              "extcodehash",
+              "ecrecover"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-evm-incompatibilities-pattern-5-block-number-returns-010",
+          "id": "zk-rollup-evm-incompatibilities-pattern-5-block-number-returns-009",
           "title": "Pattern 5: block.number Returns L1 Block Number on Arbitrum (Not L2)",
           "lineStart": 341,
           "lineEnd": 385,
@@ -3886,7 +4607,34 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 25,
+            "sampleReports": [
+              "reports/zk_rollup_findings/factory-deployments-wont-work-correctly-on-the-zksync-chain.md",
+              "reports/zk_rollup_findings/m-2-create-opcode-works-differently-in-the-zksync-chain.md",
+              "reports/zk_rollup_findings/m-6-computepooladdress-will-not-work-on-zksync-era.md",
+              "reports/zk_rollup_findings/m-15-create3-is-not-available-in-the-zksync-era.md",
+              "reports/zk_rollup_findings/m-08-factorycreate-is-vulnerable-to-reorg-attacks.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "deployment failure",
+              "address collision",
+              "authentication bypass",
+              "state corruption"
+            ],
+            "commonlyComposesWith": [
+              "create",
+              "create2",
+              "create3",
+              "extcodehash",
+              "ecrecover"
+            ]
+          }
         }
       ]
     },
@@ -3962,7 +4710,7 @@
           "execute"
         ]
       },
-      "patternCount": 9,
+      "patternCount": 8,
       "patterns": [
         {
           "id": "zk-rollup-fraud-proofs-dispute-game-manipulation-000",
@@ -4032,7 +4780,34 @@
             "challenge period"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/zk_rollup_findings/h-2-attacker-can-freeze-chain-and-steal-challenge-deposits-using-fake-prevstater.md",
+              "reports/zk_rollup_findings/h-01-challenger-misses-discrepancy-events-allowing-executors-to-perform-maliciou.md",
+              "reports/zk_rollup_findings/m-02-opfaultverifier-ingests-games-that-resolve-incorrectly.md",
+              "reports/zk_rollup_findings/m-5-malicious-challenger-can-brick-finalizetimestamp-of-unfinalized-batches.md",
+              "reports/zk_rollup_findings/m-5-panic-in-mips-vm-could-lead-to-unchallengeable-l2-output-root-claim.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "manipulation",
+              "dispute game manipulation",
+              "game manipulation",
+              "logic error",
+              "fund theft"
+            ],
+            "commonlyComposesWith": [
+              "l2outputoracle",
+              "l2 output oracle",
+              "fault dispute game",
+              "dispute game factory",
+              "opfault verifier"
+            ]
+          }
         },
         {
           "id": "zk-rollup-fraud-proofs-state-root-and-batch-challenge-001",
@@ -4101,95 +4876,37 @@
             "bond slashing"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 7,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-4-batches-committed-during-an-on-going-challenge-can-avoid-being-challenged.md",
+              "reports/zk_rollup_findings/m-11-in-the-revertbatch-function-inchallenge-is-set-to-false-incorrectly-causing.md",
+              "reports/zk_rollup_findings/m03-initial-state-root-cannot-be-challenged.md",
+              "reports/zk_rollup_findings/m02-pre-state-root-and-transaction-may-not-uniquely-identify-transitions.md",
+              "reports/zk_rollup_findings/h-01-adversary-can-make-honest-parties-unable-to-retrieve-their-assertion-stakes.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund theft",
+              "chain freeze",
+              "dos",
+              "incorrect resolution"
+            ],
+            "commonlyComposesWith": [
+              "l2outputoracle",
+              "l2 output oracle",
+              "fault dispute game",
+              "dispute game factory",
+              "opfault verifier"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-fraud-proofs-vulnerability-description-002",
-          "title": "Vulnerability Description",
-          "lineStart": 153,
-          "lineEnd": 164,
-          "lineCount": 12,
-          "severity": [
-            "LOW"
-          ],
-          "codeKeywords": [
-            "prevStateRoot",
-            "DiscrepancyDetected",
-            "DisputeGameFactory",
-            "FaultDisputeGame",
-            "L2OutputOracle",
-            "MIPS_VM",
-            "OPFaultVerifier",
-            "anchor_state",
-            "assertion_protocol",
-            "bisection_protocol",
-            "block.timestamp",
-            "bond_slashing",
-            "challengeBatch",
-            "challenge_period",
-            "checkWithdrawal",
-            "commitBatch",
-            "commitment",
-            "emission",
-            "emitted",
-            "execute"
-          ],
-          "searchKeywords": [
-            "root",
-            "cause",
-            "root cause",
-            "discrepancydetected",
-            "discrepancy detected",
-            "disputegamefactory",
-            "dispute game factory",
-            "faultdisputegame",
-            "fault dispute game",
-            "l2outputoracle",
-            "l2 output oracle",
-            "mips_vm",
-            "mips vm",
-            "opfaultverifier",
-            "opfault verifier",
-            "anchor_state",
-            "anchor state",
-            "assertion_protocol",
-            "assertion protocol",
-            "bisection_protocol",
-            "bisection protocol",
-            "block.timestamp",
-            "block timestamp",
-            "bond_slashing",
-            "bond slashing",
-            "challengebatch",
-            "challenge batch",
-            "challenge_period",
-            "challenge period",
-            "checkwithdrawal",
-            "check withdrawal",
-            "commitbatch"
-          ],
-          "rootCause": "1. **Event monitoring gaps**: Challengers rely on on-chain events to detect fraudulent claims. If key events are not emitted or emitted incorrectly, challengers miss malicious executions.\n\n2. **Bisect",
-          "subsections": [
-            {
-              "title": "Root Cause",
-              "lineStart": 155,
-              "lineEnd": 164,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": [
-                "prevStateRoot"
-              ],
-              "searchKeywords": [
-                "root",
-                "cause",
-                "root cause"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "zk-rollup-fraud-proofs-pattern-1-attacker-freezes-cha-003",
+          "id": "zk-rollup-fraud-proofs-pattern-1-attacker-freezes-cha-002",
           "title": "Pattern 1: Attacker Freezes Chain via Fake prevStateRoot",
           "lineStart": 165,
           "lineEnd": 218,
@@ -4270,10 +4987,37 @@
                 "scenario"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/zk_rollup_findings/h-2-attacker-can-freeze-chain-and-steal-challenge-deposits-using-fake-prevstater.md",
+              "reports/zk_rollup_findings/h-01-challenger-misses-discrepancy-events-allowing-executors-to-perform-maliciou.md",
+              "reports/zk_rollup_findings/m-02-opfaultverifier-ingests-games-that-resolve-incorrectly.md",
+              "reports/zk_rollup_findings/m-5-malicious-challenger-can-brick-finalizetimestamp-of-unfinalized-batches.md",
+              "reports/zk_rollup_findings/m-5-panic-in-mips-vm-could-lead-to-unchallengeable-l2-output-root-claim.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund theft",
+              "chain freeze",
+              "dos",
+              "incorrect resolution"
+            ],
+            "commonlyComposesWith": [
+              "l2outputoracle",
+              "l2 output oracle",
+              "fault dispute game",
+              "dispute game factory",
+              "opfault verifier"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-fraud-proofs-pattern-2-challenger-misses-di-004",
+          "id": "zk-rollup-fraud-proofs-pattern-2-challenger-misses-di-003",
           "title": "Pattern 2: Challenger Misses Discrepancy Events → Malicious Execution",
           "lineStart": 219,
           "lineEnd": 253,
@@ -4355,10 +5099,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/zk_rollup_findings/h-2-attacker-can-freeze-chain-and-steal-challenge-deposits-using-fake-prevstater.md",
+              "reports/zk_rollup_findings/h-01-challenger-misses-discrepancy-events-allowing-executors-to-perform-maliciou.md",
+              "reports/zk_rollup_findings/m-02-opfaultverifier-ingests-games-that-resolve-incorrectly.md",
+              "reports/zk_rollup_findings/m-5-malicious-challenger-can-brick-finalizetimestamp-of-unfinalized-batches.md",
+              "reports/zk_rollup_findings/m-5-panic-in-mips-vm-could-lead-to-unchallengeable-l2-output-root-claim.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund theft",
+              "chain freeze",
+              "dos",
+              "incorrect resolution"
+            ],
+            "commonlyComposesWith": [
+              "l2outputoracle",
+              "l2 output oracle",
+              "fault dispute game",
+              "dispute game factory",
+              "opfault verifier"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-fraud-proofs-pattern-3-opfaultverifier-inge-005",
+          "id": "zk-rollup-fraud-proofs-pattern-3-opfaultverifier-inge-004",
           "title": "Pattern 3: opFaultVerifier Ingests Games That Resolve Incorrectly",
           "lineStart": 254,
           "lineEnd": 301,
@@ -4443,10 +5214,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/zk_rollup_findings/h-2-attacker-can-freeze-chain-and-steal-challenge-deposits-using-fake-prevstater.md",
+              "reports/zk_rollup_findings/h-01-challenger-misses-discrepancy-events-allowing-executors-to-perform-maliciou.md",
+              "reports/zk_rollup_findings/m-02-opfaultverifier-ingests-games-that-resolve-incorrectly.md",
+              "reports/zk_rollup_findings/m-5-malicious-challenger-can-brick-finalizetimestamp-of-unfinalized-batches.md",
+              "reports/zk_rollup_findings/m-5-panic-in-mips-vm-could-lead-to-unchallengeable-l2-output-root-claim.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund theft",
+              "chain freeze",
+              "dos",
+              "incorrect resolution"
+            ],
+            "commonlyComposesWith": [
+              "l2outputoracle",
+              "l2 output oracle",
+              "fault dispute game",
+              "dispute game factory",
+              "opfault verifier"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-fraud-proofs-pattern-4-mips-vm-panic-causes-006",
+          "id": "zk-rollup-fraud-proofs-pattern-4-mips-vm-panic-causes-005",
           "title": "Pattern 4: MIPS VM Panic Causes Unchallengeable Output Root",
           "lineStart": 302,
           "lineEnd": 343,
@@ -4529,10 +5327,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/zk_rollup_findings/h-2-attacker-can-freeze-chain-and-steal-challenge-deposits-using-fake-prevstater.md",
+              "reports/zk_rollup_findings/h-01-challenger-misses-discrepancy-events-allowing-executors-to-perform-maliciou.md",
+              "reports/zk_rollup_findings/m-02-opfaultverifier-ingests-games-that-resolve-incorrectly.md",
+              "reports/zk_rollup_findings/m-5-malicious-challenger-can-brick-finalizetimestamp-of-unfinalized-batches.md",
+              "reports/zk_rollup_findings/m-5-panic-in-mips-vm-could-lead-to-unchallengeable-l2-output-root-claim.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund theft",
+              "chain freeze",
+              "dos",
+              "incorrect resolution"
+            ],
+            "commonlyComposesWith": [
+              "l2outputoracle",
+              "l2 output oracle",
+              "fault dispute game",
+              "dispute game factory",
+              "opfault verifier"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-fraud-proofs-pattern-5-bond-slashed-for-cor-007",
+          "id": "zk-rollup-fraud-proofs-pattern-5-bond-slashed-for-cor-006",
           "title": "Pattern 5: Bond Slashed for Correct/Honest Assertion",
           "lineStart": 344,
           "lineEnd": 369,
@@ -4614,10 +5439,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/zk_rollup_findings/h-2-attacker-can-freeze-chain-and-steal-challenge-deposits-using-fake-prevstater.md",
+              "reports/zk_rollup_findings/h-01-challenger-misses-discrepancy-events-allowing-executors-to-perform-maliciou.md",
+              "reports/zk_rollup_findings/m-02-opfaultverifier-ingests-games-that-resolve-incorrectly.md",
+              "reports/zk_rollup_findings/m-5-malicious-challenger-can-brick-finalizetimestamp-of-unfinalized-batches.md",
+              "reports/zk_rollup_findings/m-5-panic-in-mips-vm-could-lead-to-unchallengeable-l2-output-root-claim.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund theft",
+              "chain freeze",
+              "dos",
+              "incorrect resolution"
+            ],
+            "commonlyComposesWith": [
+              "l2outputoracle",
+              "l2 output oracle",
+              "fault dispute game",
+              "dispute game factory",
+              "opfault verifier"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-fraud-proofs-pattern-6-batches-committed-du-008",
+          "id": "zk-rollup-fraud-proofs-pattern-6-batches-committed-du-007",
           "title": "Pattern 6: Batches Committed During Challenge Avoid Being Challenged",
           "lineStart": 370,
           "lineEnd": 399,
@@ -4701,7 +5553,34 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/zk_rollup_findings/h-2-attacker-can-freeze-chain-and-steal-challenge-deposits-using-fake-prevstater.md",
+              "reports/zk_rollup_findings/h-01-challenger-misses-discrepancy-events-allowing-executors-to-perform-maliciou.md",
+              "reports/zk_rollup_findings/m-02-opfaultverifier-ingests-games-that-resolve-incorrectly.md",
+              "reports/zk_rollup_findings/m-5-malicious-challenger-can-brick-finalizetimestamp-of-unfinalized-batches.md",
+              "reports/zk_rollup_findings/m-5-panic-in-mips-vm-could-lead-to-unchallengeable-l2-output-root-claim.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund theft",
+              "chain freeze",
+              "dos",
+              "incorrect resolution"
+            ],
+            "commonlyComposesWith": [
+              "l2outputoracle",
+              "l2 output oracle",
+              "fault dispute game",
+              "dispute game factory",
+              "opfault verifier"
+            ]
+          }
         }
       ]
     },
@@ -4777,7 +5656,7 @@
           "spentOnPubdata"
         ]
       },
-      "patternCount": 10,
+      "patternCount": 9,
       "patterns": [
         {
           "id": "zk-rollup-gas-accounting-gas-calculation-errors-000",
@@ -4845,7 +5724,34 @@
             "gas per pubdata byte"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 5,
+            "sampleReports": [
+              "reports/zk_rollup_findings/gas-calculation-frequently-uses-unchecked-free-variables.md",
+              "reports/zk_rollup_findings/invalid-gas-accounting.md",
+              "reports/zk_rollup_findings/gas-tracking-introduces-resource-consumption-related-dos.md",
+              "reports/zk_rollup_findings/h-3-sequencer-will-be-underpaid-because-of-incorrect-commitscalar.md",
+              "reports/zk_rollup_findings/lack-of-fee-limits-for-v3-transactions-fixed.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "fund theft",
+              "resource dos",
+              "fee bypass",
+              "underpayment"
+            ],
+            "commonlyComposesWith": [
+              "pubdata cost",
+              "bootloader gas",
+              "commit scalar",
+              "spent on pubdata",
+              "gasleft tracking"
+            ]
+          }
         },
         {
           "id": "zk-rollup-gas-accounting-fee-theft-and-manipulation-001",
@@ -4914,96 +5820,37 @@
             "gas per pubdata byte"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-14-operator-can-steal-all-gas-provided-by-any-user-for-l1l2-transactions.md",
+              "reports/zk_rollup_findings/h-01-paymaster-will-refund-spentonpubdata-to-user-instead-of-burning-it.md",
+              "reports/zk_rollup_findings/m-08-burning-of-the-user-gas-in-the-sendcompressedbytecode-function.md",
+              "reports/zk_rollup_findings/m-22-potential-gas-manipulation-via-bytecode-compression.md",
+              "reports/zk_rollup_findings/batch-fees-multiplier-cap-bypassed-with-multiple-calls.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "manipulation",
+              "fee theft manipulation",
+              "theft manipulation",
+              "arithmetic error",
+              "fund theft"
+            ],
+            "commonlyComposesWith": [
+              "pubdata cost",
+              "bootloader gas",
+              "commit scalar",
+              "spent on pubdata",
+              "gasleft tracking"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-gas-accounting-vulnerability-description-002",
-          "title": "Vulnerability Description",
-          "lineStart": 151,
-          "lineEnd": 162,
-          "lineCount": 12,
-          "severity": [
-            "LOW"
-          ],
-          "codeKeywords": [
-            "commitScalar",
-            "spentOnPubdata",
-            "L1_gas_price",
-            "L2_gas_limit",
-            "baseFeePerGas",
-            "batch",
-            "batch_fees_multiplier",
-            "block.number",
-            "bootloader_gas",
-            "burn",
-            "bytecode_compression",
-            "calculateBatchFee",
-            "executeOp",
-            "free_variables",
-            "gas_per_pubdata_byte",
-            "gasleft_tracking",
-            "operator_gas_steal",
-            "pubdata_cost",
-            "publishCompressedBytecode",
-            "requestL2Transaction"
-          ],
-          "searchKeywords": [
-            "root",
-            "cause",
-            "root cause",
-            "l1_gas_price",
-            "l1 gas price",
-            "l2_gas_limit",
-            "l2 gas limit",
-            "basefeepergas",
-            "base fee per gas",
-            "batch",
-            "batch_fees_multiplier",
-            "batch fees multiplier",
-            "block.number",
-            "block number",
-            "bootloader_gas",
-            "bootloader gas",
-            "burn",
-            "bytecode_compression",
-            "bytecode compression",
-            "calculatebatchfee",
-            "calculate batch fee",
-            "commitscalar",
-            "commit scalar",
-            "executeop",
-            "execute op",
-            "free_variables",
-            "free variables",
-            "gas_per_pubdata_byte",
-            "gas per pubdata byte",
-            "gasleft_tracking",
-            "gasleft tracking",
-            "operator_gas_steal"
-          ],
-          "rootCause": "1. **Pubdata gas not burned**: If `spentOnPubdata` (the gas consumed by L1 pubdata costs) is refunded to users or paymasters instead of being burned, the protocol subsidizes L1 costs from treasury fun",
-          "subsections": [
-            {
-              "title": "Root Cause",
-              "lineStart": 153,
-              "lineEnd": 162,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": [
-                "commitScalar",
-                "spentOnPubdata"
-              ],
-              "searchKeywords": [
-                "root",
-                "cause",
-                "root cause"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "zk-rollup-gas-accounting-pattern-1-paymaster-refunds-sp-003",
+          "id": "zk-rollup-gas-accounting-pattern-1-paymaster-refunds-sp-002",
           "title": "Pattern 1: Paymaster Refunds spentOnPubdata Instead of Burning",
           "lineStart": 163,
           "lineEnd": 195,
@@ -5087,10 +5934,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 11,
+            "sampleReports": [
+              "reports/zk_rollup_findings/gas-calculation-frequently-uses-unchecked-free-variables.md",
+              "reports/zk_rollup_findings/invalid-gas-accounting.md",
+              "reports/zk_rollup_findings/gas-tracking-introduces-resource-consumption-related-dos.md",
+              "reports/zk_rollup_findings/h-3-sequencer-will-be-underpaid-because-of-incorrect-commitscalar.md",
+              "reports/zk_rollup_findings/lack-of-fee-limits-for-v3-transactions-fixed.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "fund theft",
+              "resource dos",
+              "fee bypass",
+              "underpayment"
+            ],
+            "commonlyComposesWith": [
+              "pubdata cost",
+              "bootloader gas",
+              "commit scalar",
+              "spent on pubdata",
+              "gasleft tracking"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-gas-accounting-pattern-2-operator-steals-all--004",
+          "id": "zk-rollup-gas-accounting-pattern-2-operator-steals-all--003",
           "title": "Pattern 2: Operator Steals All Gas Provided for L1→L2 Transactions",
           "lineStart": 196,
           "lineEnd": 238,
@@ -5179,10 +6053,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 11,
+            "sampleReports": [
+              "reports/zk_rollup_findings/gas-calculation-frequently-uses-unchecked-free-variables.md",
+              "reports/zk_rollup_findings/invalid-gas-accounting.md",
+              "reports/zk_rollup_findings/gas-tracking-introduces-resource-consumption-related-dos.md",
+              "reports/zk_rollup_findings/h-3-sequencer-will-be-underpaid-because-of-incorrect-commitscalar.md",
+              "reports/zk_rollup_findings/lack-of-fee-limits-for-v3-transactions-fixed.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "fund theft",
+              "resource dos",
+              "fee bypass",
+              "underpayment"
+            ],
+            "commonlyComposesWith": [
+              "pubdata cost",
+              "bootloader gas",
+              "commit scalar",
+              "spent on pubdata",
+              "gasleft tracking"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-gas-accounting-pattern-3-gas-calculation-uses-005",
+          "id": "zk-rollup-gas-accounting-pattern-3-gas-calculation-uses-004",
           "title": "Pattern 3: Gas Calculation Uses Unchecked Free Variables",
           "lineStart": 239,
           "lineEnd": 265,
@@ -5264,10 +6165,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 11,
+            "sampleReports": [
+              "reports/zk_rollup_findings/gas-calculation-frequently-uses-unchecked-free-variables.md",
+              "reports/zk_rollup_findings/invalid-gas-accounting.md",
+              "reports/zk_rollup_findings/gas-tracking-introduces-resource-consumption-related-dos.md",
+              "reports/zk_rollup_findings/h-3-sequencer-will-be-underpaid-because-of-incorrect-commitscalar.md",
+              "reports/zk_rollup_findings/lack-of-fee-limits-for-v3-transactions-fixed.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "fund theft",
+              "resource dos",
+              "fee bypass",
+              "underpayment"
+            ],
+            "commonlyComposesWith": [
+              "pubdata cost",
+              "bootloader gas",
+              "commit scalar",
+              "spent on pubdata",
+              "gasleft tracking"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-gas-accounting-pattern-4-burning-user-gas-in--006",
+          "id": "zk-rollup-gas-accounting-pattern-4-burning-user-gas-in--005",
           "title": "Pattern 4: Burning User Gas in sendCompressedBytecode",
           "lineStart": 266,
           "lineEnd": 289,
@@ -5349,10 +6277,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 11,
+            "sampleReports": [
+              "reports/zk_rollup_findings/gas-calculation-frequently-uses-unchecked-free-variables.md",
+              "reports/zk_rollup_findings/invalid-gas-accounting.md",
+              "reports/zk_rollup_findings/gas-tracking-introduces-resource-consumption-related-dos.md",
+              "reports/zk_rollup_findings/h-3-sequencer-will-be-underpaid-because-of-incorrect-commitscalar.md",
+              "reports/zk_rollup_findings/lack-of-fee-limits-for-v3-transactions-fixed.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "fund theft",
+              "resource dos",
+              "fee bypass",
+              "underpayment"
+            ],
+            "commonlyComposesWith": [
+              "pubdata cost",
+              "bootloader gas",
+              "commit scalar",
+              "spent on pubdata",
+              "gasleft tracking"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-gas-accounting-pattern-5-incorrect-commitscal-007",
+          "id": "zk-rollup-gas-accounting-pattern-5-incorrect-commitscal-006",
           "title": "Pattern 5: Incorrect commitScalar Underpays Sequencer",
           "lineStart": 290,
           "lineEnd": 326,
@@ -5437,10 +6392,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 11,
+            "sampleReports": [
+              "reports/zk_rollup_findings/gas-calculation-frequently-uses-unchecked-free-variables.md",
+              "reports/zk_rollup_findings/invalid-gas-accounting.md",
+              "reports/zk_rollup_findings/gas-tracking-introduces-resource-consumption-related-dos.md",
+              "reports/zk_rollup_findings/h-3-sequencer-will-be-underpaid-because-of-incorrect-commitscalar.md",
+              "reports/zk_rollup_findings/lack-of-fee-limits-for-v3-transactions-fixed.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "fund theft",
+              "resource dos",
+              "fee bypass",
+              "underpayment"
+            ],
+            "commonlyComposesWith": [
+              "pubdata cost",
+              "bootloader gas",
+              "commit scalar",
+              "spent on pubdata",
+              "gasleft tracking"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-gas-accounting-pattern-6-batch-fees-multiplie-008",
+          "id": "zk-rollup-gas-accounting-pattern-6-batch-fees-multiplie-007",
           "title": "Pattern 6: Batch Fees Multiplier Cap Bypassed with Multiple Calls",
           "lineStart": 327,
           "lineEnd": 368,
@@ -5522,10 +6504,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 11,
+            "sampleReports": [
+              "reports/zk_rollup_findings/gas-calculation-frequently-uses-unchecked-free-variables.md",
+              "reports/zk_rollup_findings/invalid-gas-accounting.md",
+              "reports/zk_rollup_findings/gas-tracking-introduces-resource-consumption-related-dos.md",
+              "reports/zk_rollup_findings/h-3-sequencer-will-be-underpaid-because-of-incorrect-commitscalar.md",
+              "reports/zk_rollup_findings/lack-of-fee-limits-for-v3-transactions-fixed.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "fund theft",
+              "resource dos",
+              "fee bypass",
+              "underpayment"
+            ],
+            "commonlyComposesWith": [
+              "pubdata cost",
+              "bootloader gas",
+              "commit scalar",
+              "spent on pubdata",
+              "gasleft tracking"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-gas-accounting-pattern-7-bytecode-compression-009",
+          "id": "zk-rollup-gas-accounting-pattern-7-bytecode-compression-008",
           "title": "Pattern 7: Bytecode Compression Bypass Completeness Checks",
           "lineStart": 369,
           "lineEnd": 395,
@@ -5611,7 +6620,34 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 11,
+            "sampleReports": [
+              "reports/zk_rollup_findings/gas-calculation-frequently-uses-unchecked-free-variables.md",
+              "reports/zk_rollup_findings/invalid-gas-accounting.md",
+              "reports/zk_rollup_findings/gas-tracking-introduces-resource-consumption-related-dos.md",
+              "reports/zk_rollup_findings/h-3-sequencer-will-be-underpaid-because-of-incorrect-commitscalar.md",
+              "reports/zk_rollup_findings/lack-of-fee-limits-for-v3-transactions-fixed.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "arithmetic error",
+              "fund theft",
+              "resource dos",
+              "fee bypass",
+              "underpayment"
+            ],
+            "commonlyComposesWith": [
+              "pubdata cost",
+              "bootloader gas",
+              "commit scalar",
+              "spent on pubdata",
+              "gasleft tracking"
+            ]
+          }
         }
       ]
     },
@@ -5687,7 +6723,7 @@
           "paymaster"
         ]
       },
-      "patternCount": 11,
+      "patternCount": 10,
       "patterns": [
         {
           "id": "zk-rollup-l1-l2-messaging-l1-l2-transaction-failures-000",
@@ -5756,7 +6792,34 @@
             "l2 to l1 log"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-03-loss-of-funds-for-the-sender-when-l1-l2-tx-fails-in-the-bootloader-on-l2.md",
+              "reports/zk_rollup_findings/m-09-lack-of-access-to-eth-on-l2-through-l1-l2-transactions.md",
+              "reports/zk_rollup_findings/m-14-operator-can-steal-all-gas-provided-by-any-user-for-l1l2-transactions.md",
+              "reports/zk_rollup_findings/m-15-mailboxrequestl2transaction-checks-the-deposit-limit-of-msgsender-l1wethbri.md",
+              "reports/zk_rollup_findings/m-11-gasless-eth-bridging-from-l1-to-l2.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund loss",
+              "dos",
+              "gas theft",
+              "message ordering"
+            ],
+            "commonlyComposesWith": [
+              "l1 to l2 transaction",
+              "bootloader",
+              "msg value simulator",
+              "address aliasing",
+              "request l2 transaction"
+            ]
+          }
         },
         {
           "id": "zk-rollup-l1-l2-messaging-paymaster-and-value-simulator--001",
@@ -5824,7 +6887,31 @@
             "forwardedether"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/zk_rollup_findings/h-01-paymaster-will-refund-spentonpubdata-to-user.md",
+              "reports/zk_rollup_findings/h-01-the-call-to-msgvaluesimulator-with-non-zero-msgvalue-will-call-to-sender-it.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund loss",
+              "dos",
+              "gas theft",
+              "message ordering"
+            ],
+            "commonlyComposesWith": [
+              "l1 to l2 transaction",
+              "bootloader",
+              "msg value simulator",
+              "address aliasing",
+              "request l2 transaction"
+            ]
+          }
         },
         {
           "id": "zk-rollup-l1-l2-messaging-address-aliasing-issues-002",
@@ -5892,7 +6979,31 @@
             "initiate withdrawal"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/zk_rollup_findings/eth-can-be-locked-through-address-aliasing.md",
+              "reports/zk_rollup_findings/preservation-of-msgsender-in-zksync-could-break-certain-trust-assumption.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund loss",
+              "dos",
+              "gas theft",
+              "message ordering"
+            ],
+            "commonlyComposesWith": [
+              "l1 to l2 transaction",
+              "bootloader",
+              "msg value simulator",
+              "address aliasing",
+              "request l2 transaction"
+            ]
+          }
         },
         {
           "id": "zk-rollup-l1-l2-messaging-l2-l1-withdrawal-issues-003",
@@ -5961,93 +7072,37 @@
             "l2 to l1 log"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 9,
+            "sampleReports": [
+              "reports/zk_rollup_findings/burnamount-sent-from-l2-to-l1-may-not-be-accurate-as-it-does-not-account-for-pen.md",
+              "reports/zk_rollup_findings/m-9-attacker-can-fill-merkle-tree-in-l2tol1messagepasser-blocking-any-future-wit.md",
+              "reports/zk_rollup_findings/multiple-withdrawals-in-a-single-l3-transaction-are-not-provable-through-op-with.md",
+              "reports/zk_rollup_findings/m-13-withdrawal-transactions-can-get-stuck-if-output-root-is-reproposed.md",
+              "reports/zk_rollup_findings/temporary-failed-l1-to-l2-token-transfers-might-lock-tokens-in-l1-if-replayed-af.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund loss",
+              "dos",
+              "gas theft",
+              "message ordering"
+            ],
+            "commonlyComposesWith": [
+              "l1 to l2 transaction",
+              "bootloader",
+              "msg value simulator",
+              "address aliasing",
+              "request l2 transaction"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-l1-l2-messaging-vulnerability-description-004",
-          "title": "Vulnerability Description",
-          "lineStart": 169,
-          "lineEnd": 180,
-          "lineCount": 12,
-          "severity": [
-            "MEDIUM"
-          ],
-          "codeKeywords": [
-            "CrossDomainMessenger",
-            "L1ToL2Transaction",
-            "MessagePasser",
-            "MsgValueSimulator",
-            "OutputRoot",
-            "SpentOnPubdata",
-            "_refundUser",
-            "address_aliasing",
-            "applyL1ToL2Alias",
-            "bootloader",
-            "deposit",
-            "exhaustion",
-            "forced_inclusion",
-            "forwardedEther",
-            "initiateWithdrawal",
-            "l2ToL1Log",
-            "message_ordering",
-            "msg.sender",
-            "onL1Deposit",
-            "paymaster"
-          ],
-          "searchKeywords": [
-            "root",
-            "cause",
-            "root cause",
-            "crossdomainmessenger",
-            "cross domain messenger",
-            "l1tol2transaction",
-            "l1 to l2 transaction",
-            "messagepasser",
-            "message passer",
-            "msgvaluesimulator",
-            "msg value simulator",
-            "outputroot",
-            "output root",
-            "spentonpubdata",
-            "spent on pubdata",
-            "_refunduser",
-            "refund user",
-            "address_aliasing",
-            "address aliasing",
-            "applyl1tol2alias",
-            "apply l1 to l2 alias",
-            "bootloader",
-            "deposit",
-            "exhaustion",
-            "forced_inclusion",
-            "forced inclusion",
-            "forwardedether",
-            "forwarded ether",
-            "initiatewithdrawal",
-            "initiate withdrawal",
-            "l2tol1log",
-            "l2 to l1 log"
-          ],
-          "rootCause": "1. **Failed bootloader handling**: When an L1→L2 tx fails mid-execution on the L2 bootloader, the refund logic may not correctly return all ETH/gas to the original sender\n\n2. **Address aliasing**: Eth",
-          "subsections": [
-            {
-              "title": "Root Cause",
-              "lineStart": 171,
-              "lineEnd": 180,
-              "severity": [
-                "MEDIUM"
-              ],
-              "codeKeywords": [],
-              "searchKeywords": [
-                "root",
-                "cause",
-                "root cause"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "zk-rollup-l1-l2-messaging-pattern-1-loss-of-funds-when-l-005",
+          "id": "zk-rollup-l1-l2-messaging-pattern-1-loss-of-funds-when-l-004",
           "title": "Pattern 1: Loss of Funds When L1→L2 Transaction Fails in Bootloader",
           "lineStart": 181,
           "lineEnd": 232,
@@ -6128,10 +7183,37 @@
                 "scenario"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 19,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-03-loss-of-funds-for-the-sender-when-l1-l2-tx-fails-in-the-bootloader-on-l2.md",
+              "reports/zk_rollup_findings/m-09-lack-of-access-to-eth-on-l2-through-l1-l2-transactions.md",
+              "reports/zk_rollup_findings/m-14-operator-can-steal-all-gas-provided-by-any-user-for-l1l2-transactions.md",
+              "reports/zk_rollup_findings/m-15-mailboxrequestl2transaction-checks-the-deposit-limit-of-msgsender-l1wethbri.md",
+              "reports/zk_rollup_findings/m-11-gasless-eth-bridging-from-l1-to-l2.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund loss",
+              "dos",
+              "gas theft",
+              "message ordering"
+            ],
+            "commonlyComposesWith": [
+              "l1 to l2 transaction",
+              "bootloader",
+              "msg value simulator",
+              "address aliasing",
+              "request l2 transaction"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-l1-l2-messaging-pattern-2-msgvaluesimulator-no-006",
+          "id": "zk-rollup-l1-l2-messaging-pattern-2-msgvaluesimulator-no-005",
           "title": "Pattern 2: MsgValueSimulator Non-Zero Value Calls Sender Itself",
           "lineStart": 233,
           "lineEnd": 262,
@@ -6216,10 +7298,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 19,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-03-loss-of-funds-for-the-sender-when-l1-l2-tx-fails-in-the-bootloader-on-l2.md",
+              "reports/zk_rollup_findings/m-09-lack-of-access-to-eth-on-l2-through-l1-l2-transactions.md",
+              "reports/zk_rollup_findings/m-14-operator-can-steal-all-gas-provided-by-any-user-for-l1l2-transactions.md",
+              "reports/zk_rollup_findings/m-15-mailboxrequestl2transaction-checks-the-deposit-limit-of-msgsender-l1wethbri.md",
+              "reports/zk_rollup_findings/m-11-gasless-eth-bridging-from-l1-to-l2.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund loss",
+              "dos",
+              "gas theft",
+              "message ordering"
+            ],
+            "commonlyComposesWith": [
+              "l1 to l2 transaction",
+              "bootloader",
+              "msg value simulator",
+              "address aliasing",
+              "request l2 transaction"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-l1-l2-messaging-pattern-3-address-aliasing-loc-007",
+          "id": "zk-rollup-l1-l2-messaging-pattern-3-address-aliasing-loc-006",
           "title": "Pattern 3: Address Aliasing Locks ETH",
           "lineStart": 263,
           "lineEnd": 311,
@@ -6304,10 +7413,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 19,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-03-loss-of-funds-for-the-sender-when-l1-l2-tx-fails-in-the-bootloader-on-l2.md",
+              "reports/zk_rollup_findings/m-09-lack-of-access-to-eth-on-l2-through-l1-l2-transactions.md",
+              "reports/zk_rollup_findings/m-14-operator-can-steal-all-gas-provided-by-any-user-for-l1l2-transactions.md",
+              "reports/zk_rollup_findings/m-15-mailboxrequestl2transaction-checks-the-deposit-limit-of-msgsender-l1wethbri.md",
+              "reports/zk_rollup_findings/m-11-gasless-eth-bridging-from-l1-to-l2.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund loss",
+              "dos",
+              "gas theft",
+              "message ordering"
+            ],
+            "commonlyComposesWith": [
+              "l1 to l2 transaction",
+              "bootloader",
+              "msg value simulator",
+              "address aliasing",
+              "request l2 transaction"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-l1-l2-messaging-pattern-4-attacker-fills-l2tol-008",
+          "id": "zk-rollup-l1-l2-messaging-pattern-4-attacker-fills-l2tol-007",
           "title": "Pattern 4: Attacker Fills L2ToL1MessagePasser Merkle Tree",
           "lineStart": 312,
           "lineEnd": 338,
@@ -6390,10 +7526,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 19,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-03-loss-of-funds-for-the-sender-when-l1-l2-tx-fails-in-the-bootloader-on-l2.md",
+              "reports/zk_rollup_findings/m-09-lack-of-access-to-eth-on-l2-through-l1-l2-transactions.md",
+              "reports/zk_rollup_findings/m-14-operator-can-steal-all-gas-provided-by-any-user-for-l1l2-transactions.md",
+              "reports/zk_rollup_findings/m-15-mailboxrequestl2transaction-checks-the-deposit-limit-of-msgsender-l1wethbri.md",
+              "reports/zk_rollup_findings/m-11-gasless-eth-bridging-from-l1-to-l2.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund loss",
+              "dos",
+              "gas theft",
+              "message ordering"
+            ],
+            "commonlyComposesWith": [
+              "l1 to l2 transaction",
+              "bootloader",
+              "msg value simulator",
+              "address aliasing",
+              "request l2 transaction"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-l1-l2-messaging-pattern-5-paymaster-refunds-sp-009",
+          "id": "zk-rollup-l1-l2-messaging-pattern-5-paymaster-refunds-sp-008",
           "title": "Pattern 5: Paymaster Refunds spentOnPubdata to User",
           "lineStart": 339,
           "lineEnd": 380,
@@ -6476,10 +7639,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 19,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-03-loss-of-funds-for-the-sender-when-l1-l2-tx-fails-in-the-bootloader-on-l2.md",
+              "reports/zk_rollup_findings/m-09-lack-of-access-to-eth-on-l2-through-l1-l2-transactions.md",
+              "reports/zk_rollup_findings/m-14-operator-can-steal-all-gas-provided-by-any-user-for-l1l2-transactions.md",
+              "reports/zk_rollup_findings/m-15-mailboxrequestl2transaction-checks-the-deposit-limit-of-msgsender-l1wethbri.md",
+              "reports/zk_rollup_findings/m-11-gasless-eth-bridging-from-l1-to-l2.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund loss",
+              "dos",
+              "gas theft",
+              "message ordering"
+            ],
+            "commonlyComposesWith": [
+              "l1 to l2 transaction",
+              "bootloader",
+              "msg value simulator",
+              "address aliasing",
+              "request l2 transaction"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-l1-l2-messaging-pattern-6-crossdomainmessenger-010",
+          "id": "zk-rollup-l1-l2-messaging-pattern-6-crossdomainmessenger-009",
           "title": "Pattern 6: CrossDomainMessenger Cannot Guarantee Replayability",
           "lineStart": 381,
           "lineEnd": 411,
@@ -6564,7 +7754,34 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 19,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-03-loss-of-funds-for-the-sender-when-l1-l2-tx-fails-in-the-bootloader-on-l2.md",
+              "reports/zk_rollup_findings/m-09-lack-of-access-to-eth-on-l2-through-l1-l2-transactions.md",
+              "reports/zk_rollup_findings/m-14-operator-can-steal-all-gas-provided-by-any-user-for-l1l2-transactions.md",
+              "reports/zk_rollup_findings/m-15-mailboxrequestl2transaction-checks-the-deposit-limit-of-msgsender-l1wethbri.md",
+              "reports/zk_rollup_findings/m-11-gasless-eth-bridging-from-l1-to-l2.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "replayability",
+              "cross domain messenger cannot guarantee replayability",
+              "guarantee replayability",
+              "logic error",
+              "fund loss"
+            ],
+            "commonlyComposesWith": [
+              "l1 to l2 transaction",
+              "bootloader",
+              "msg value simulator",
+              "address aliasing",
+              "request l2 transaction"
+            ]
+          }
         }
       ]
     },
@@ -6633,7 +7850,7 @@
           "zkLogin"
         ]
       },
-      "patternCount": 9,
+      "patternCount": 8,
       "patterns": [
         {
           "id": "zk-rollup-proof-verification-missing-bypassed-on-chain-veri-000",
@@ -6700,7 +7917,31 @@
             "witness_privacy"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/zk_rollup_findings/missing-on-chain-zk-proof-verification.md",
+              "reports/zk_rollup_findings/potential-economic-gain-when-submitting-false-proofs.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "weak randomness",
+              "proof forgery",
+              "zkp bypass",
+              "economic exploit",
+              "privacy violation"
+            ],
+            "commonlyComposesWith": [
+              "plonk verifier",
+              "groth16 verifier",
+              "fiat shamir",
+              "verification key",
+              "recursive proof"
+            ]
+          }
         },
         {
           "id": "zk-rollup-proof-verification-cryptographic-weaknesses-in-pr-001",
@@ -6769,92 +8010,37 @@
             "witness_privacy"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/zk_rollup_findings/incorrect-randomness-computation-allows-proof-forgery.md",
+              "reports/zk_rollup_findings/m-01-plonkgroth16-verifiers-accept-proofs-with-untrusted-recursion-vk-root.md",
+              "reports/zk_rollup_findings/weak-fiat-shamir-implementation-for-the-logup-phase-allows-crafting-backdoored-c.md",
+              "reports/zk_rollup_findings/m-4-malicious-verifier-will-recover-private-witness-values-breaking-zero-knowled.md",
+              "reports/zk_rollup_findings/m-07-unbounded-decimal-public-inputs-enable-verifier-side-dos-via-oversized-nume.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "weak randomness",
+              "proof forgery",
+              "zkp bypass",
+              "economic exploit",
+              "privacy violation"
+            ],
+            "commonlyComposesWith": [
+              "plonk verifier",
+              "groth16 verifier",
+              "fiat shamir",
+              "verification key",
+              "recursive proof"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-proof-verification-vulnerability-description-002",
-          "title": "Vulnerability Description",
-          "lineStart": 141,
-          "lineEnd": 153,
-          "lineCount": 13,
-          "severity": [
-            "LOW"
-          ],
-          "codeKeywords": [
-            "challenge",
-            "execute",
-            "executeZkLogin",
-            "fiat_shamir",
-            "groth16_verifier",
-            "logup",
-            "on_chain_verification",
-            "plonk_verifier",
-            "randomness",
-            "recursive_proof",
-            "verification_key",
-            "verify",
-            "verifyWithTrustedVK",
-            "vk_root",
-            "witness_privacy",
-            "zkLogin",
-            "on_chain_verifier",
-            "fiat_shamir_challenge",
-            "randomness_generation"
-          ],
-          "searchKeywords": [
-            "root",
-            "cause",
-            "root cause",
-            "challenge",
-            "execute",
-            "executezklogin",
-            "execute zk login",
-            "fiat_shamir",
-            "fiat shamir",
-            "groth16_verifier",
-            "groth16 verifier",
-            "logup",
-            "on_chain_verification",
-            "on chain verification",
-            "plonk_verifier",
-            "plonk verifier",
-            "randomness",
-            "recursive_proof",
-            "recursive proof",
-            "verification_key",
-            "verification key",
-            "verify",
-            "verifywithtrustedvk",
-            "verify with trusted vk",
-            "vk_root",
-            "vk root",
-            "witness_privacy",
-            "witness privacy",
-            "zklogin",
-            "zk login",
-            "on_chain_verifier",
-            "on chain verifier"
-          ],
-          "rootCause": "ZK proof verification bugs arise from:\n\n1. **Missing verification**: Code branches that unconditionally set `is_verified = true` without checking a ZK proof\n\n2. **Weak randomness**: Fiat-Shamir challe",
-          "subsections": [
-            {
-              "title": "Root Cause",
-              "lineStart": 143,
-              "lineEnd": 153,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": [],
-              "searchKeywords": [
-                "root",
-                "cause",
-                "root cause"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "zk-rollup-proof-verification-pattern-1-missing-on-chain-zk--003",
+          "id": "zk-rollup-proof-verification-pattern-1-missing-on-chain-zk--002",
           "title": "Pattern 1: Missing On-Chain ZK Proof Verification",
           "lineStart": 154,
           "lineEnd": 195,
@@ -6935,10 +8121,37 @@
                 "scenario"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 8,
+            "sampleReports": [
+              "reports/zk_rollup_findings/missing-on-chain-zk-proof-verification.md",
+              "reports/zk_rollup_findings/potential-economic-gain-when-submitting-false-proofs.md",
+              "reports/zk_rollup_findings/incorrect-randomness-computation-allows-proof-forgery.md",
+              "reports/zk_rollup_findings/m-01-plonkgroth16-verifiers-accept-proofs-with-untrusted-recursion-vk-root.md",
+              "reports/zk_rollup_findings/weak-fiat-shamir-implementation-for-the-logup-phase-allows-crafting-backdoored-c.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "weak randomness",
+              "proof forgery",
+              "zkp bypass",
+              "economic exploit",
+              "privacy violation"
+            ],
+            "commonlyComposesWith": [
+              "plonk verifier",
+              "groth16 verifier",
+              "fiat shamir",
+              "verification key",
+              "recursive proof"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-proof-verification-pattern-2-incorrect-randomness-004",
+          "id": "zk-rollup-proof-verification-pattern-2-incorrect-randomness-003",
           "title": "Pattern 2: Incorrect Randomness Computation Allows Proof Forgery",
           "lineStart": 196,
           "lineEnd": 247,
@@ -7016,10 +8229,37 @@
                 "scenario"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 8,
+            "sampleReports": [
+              "reports/zk_rollup_findings/missing-on-chain-zk-proof-verification.md",
+              "reports/zk_rollup_findings/potential-economic-gain-when-submitting-false-proofs.md",
+              "reports/zk_rollup_findings/incorrect-randomness-computation-allows-proof-forgery.md",
+              "reports/zk_rollup_findings/m-01-plonkgroth16-verifiers-accept-proofs-with-untrusted-recursion-vk-root.md",
+              "reports/zk_rollup_findings/weak-fiat-shamir-implementation-for-the-logup-phase-allows-crafting-backdoored-c.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "weak randomness",
+              "proof forgery",
+              "zkp bypass",
+              "economic exploit",
+              "privacy violation"
+            ],
+            "commonlyComposesWith": [
+              "plonk verifier",
+              "groth16 verifier",
+              "fiat shamir",
+              "verification key",
+              "recursive proof"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-proof-verification-pattern-3-plonk-groth16-verifi-005",
+          "id": "zk-rollup-proof-verification-pattern-3-plonk-groth16-verifi-004",
           "title": "Pattern 3: Plonk/Groth16 Verifiers Accept Untrusted Recursion VK Root",
           "lineStart": 248,
           "lineEnd": 289,
@@ -7100,10 +8340,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 8,
+            "sampleReports": [
+              "reports/zk_rollup_findings/missing-on-chain-zk-proof-verification.md",
+              "reports/zk_rollup_findings/potential-economic-gain-when-submitting-false-proofs.md",
+              "reports/zk_rollup_findings/incorrect-randomness-computation-allows-proof-forgery.md",
+              "reports/zk_rollup_findings/m-01-plonkgroth16-verifiers-accept-proofs-with-untrusted-recursion-vk-root.md",
+              "reports/zk_rollup_findings/weak-fiat-shamir-implementation-for-the-logup-phase-allows-crafting-backdoored-c.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "weak randomness",
+              "proof forgery",
+              "zkp bypass",
+              "economic exploit",
+              "privacy violation"
+            ],
+            "commonlyComposesWith": [
+              "plonk verifier",
+              "groth16 verifier",
+              "fiat shamir",
+              "verification key",
+              "recursive proof"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-proof-verification-pattern-4-weak-fiat-shamir-in--006",
+          "id": "zk-rollup-proof-verification-pattern-4-weak-fiat-shamir-in--005",
           "title": "Pattern 4: Weak Fiat-Shamir in LogUp Phase Enables Backdoored Circuits",
           "lineStart": 290,
           "lineEnd": 313,
@@ -7184,10 +8451,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 8,
+            "sampleReports": [
+              "reports/zk_rollup_findings/missing-on-chain-zk-proof-verification.md",
+              "reports/zk_rollup_findings/potential-economic-gain-when-submitting-false-proofs.md",
+              "reports/zk_rollup_findings/incorrect-randomness-computation-allows-proof-forgery.md",
+              "reports/zk_rollup_findings/m-01-plonkgroth16-verifiers-accept-proofs-with-untrusted-recursion-vk-root.md",
+              "reports/zk_rollup_findings/weak-fiat-shamir-implementation-for-the-logup-phase-allows-crafting-backdoored-c.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "weak randomness",
+              "proof forgery",
+              "zkp bypass",
+              "economic exploit",
+              "privacy violation"
+            ],
+            "commonlyComposesWith": [
+              "plonk verifier",
+              "groth16 verifier",
+              "fiat shamir",
+              "verification key",
+              "recursive proof"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-proof-verification-pattern-5-verifier-side-dos-vi-007",
+          "id": "zk-rollup-proof-verification-pattern-5-verifier-side-dos-vi-006",
           "title": "Pattern 5: Verifier-Side DoS via Unbounded Public Inputs",
           "lineStart": 314,
           "lineEnd": 347,
@@ -7271,10 +8565,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 8,
+            "sampleReports": [
+              "reports/zk_rollup_findings/missing-on-chain-zk-proof-verification.md",
+              "reports/zk_rollup_findings/potential-economic-gain-when-submitting-false-proofs.md",
+              "reports/zk_rollup_findings/incorrect-randomness-computation-allows-proof-forgery.md",
+              "reports/zk_rollup_findings/m-01-plonkgroth16-verifiers-accept-proofs-with-untrusted-recursion-vk-root.md",
+              "reports/zk_rollup_findings/weak-fiat-shamir-implementation-for-the-logup-phase-allows-crafting-backdoored-c.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "weak randomness",
+              "proof forgery",
+              "zkp bypass",
+              "economic exploit",
+              "privacy violation"
+            ],
+            "commonlyComposesWith": [
+              "plonk verifier",
+              "groth16 verifier",
+              "fiat shamir",
+              "verification key",
+              "recursive proof"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-proof-verification-pattern-6-malicious-verifier-r-008",
+          "id": "zk-rollup-proof-verification-pattern-6-malicious-verifier-r-007",
           "title": "Pattern 6: Malicious Verifier Recovers Private Witness Values",
           "lineStart": 348,
           "lineEnd": 374,
@@ -7353,7 +8674,34 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 8,
+            "sampleReports": [
+              "reports/zk_rollup_findings/missing-on-chain-zk-proof-verification.md",
+              "reports/zk_rollup_findings/potential-economic-gain-when-submitting-false-proofs.md",
+              "reports/zk_rollup_findings/incorrect-randomness-computation-allows-proof-forgery.md",
+              "reports/zk_rollup_findings/m-01-plonkgroth16-verifiers-accept-proofs-with-untrusted-recursion-vk-root.md",
+              "reports/zk_rollup_findings/weak-fiat-shamir-implementation-for-the-logup-phase-allows-crafting-backdoored-c.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "weak randomness",
+              "proof forgery",
+              "zkp bypass",
+              "economic exploit",
+              "privacy violation"
+            ],
+            "commonlyComposesWith": [
+              "plonk verifier",
+              "groth16 verifier",
+              "fiat shamir",
+              "verification key",
+              "recursive proof"
+            ]
+          }
         }
       ]
     },
@@ -7428,7 +8776,7 @@
           "msg_sender_address"
         ]
       },
-      "patternCount": 7,
+      "patternCount": 6,
       "patterns": [
         {
           "id": "zk-rollup-reorg-attacks-factory-reorg-attacks-000",
@@ -7496,7 +8844,34 @@
             "initialize pattern"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-01-questfactory-is-suspicious-of-the-reorg-attack.md",
+              "reports/zk_rollup_findings/m-04-many-create-methods-are-suspicious-of-the-reorg-attack.md",
+              "reports/zk_rollup_findings/m-08-factorycreate-is-vulnerable-to-reorg-attacks.md",
+              "reports/zk_rollup_findings/m-09-create-methods-are-suspicious-of-reorg-attack.md",
+              "reports/zk_rollup_findings/m-14-re-org-attack-in-factory.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund theft",
+              "frontrun",
+              "address collision",
+              "impersonation"
+            ],
+            "commonlyComposesWith": [
+              "create",
+              "create2",
+              "create3",
+              "block reorg",
+              "factory pattern"
+            ]
+          }
         },
         {
           "id": "zk-rollup-reorg-attacks-liquidity-pool-reorg-attack-001",
@@ -7564,96 +8939,33 @@
             "factory_pattern"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/zk_rollup_findings/stealing-liquidity-pool-fund-with-reorg.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund theft",
+              "frontrun",
+              "address collision",
+              "impersonation"
+            ],
+            "commonlyComposesWith": [
+              "create",
+              "create2",
+              "create3",
+              "block reorg",
+              "factory pattern"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-reorg-attacks-vulnerability-description-002",
-          "title": "Vulnerability Description",
-          "lineStart": 146,
-          "lineEnd": 164,
-          "lineCount": 19,
-          "severity": [
-            "LOW"
-          ],
-          "codeKeywords": [
-            "CREATE",
-            "CREATE2",
-            "CREATE3",
-            "addLiquidity",
-            "block.number",
-            "block.timestamp",
-            "block_reorg",
-            "createPool",
-            "createPoolAndAddLiquidity",
-            "createQuest",
-            "deploy",
-            "deployProxy",
-            "deployment_frontrun",
-            "deposit",
-            "deterministic_address",
-            "factory_pattern",
-            "initialize_pattern",
-            "liquidity_pool_deployment",
-            "msg.sender",
-            "msg_sender_address"
-          ],
-          "searchKeywords": [
-            "root",
-            "cause",
-            "root cause",
-            "create",
-            "create2",
-            "create3",
-            "addliquidity",
-            "add liquidity",
-            "block.number",
-            "block number",
-            "block.timestamp",
-            "block timestamp",
-            "block_reorg",
-            "block reorg",
-            "createpool",
-            "create pool",
-            "createpoolandaddliquidity",
-            "create pool and add liquidity",
-            "createquest",
-            "create quest",
-            "deploy",
-            "deployproxy",
-            "deploy proxy",
-            "deployment_frontrun",
-            "deployment frontrun",
-            "deposit",
-            "deterministic_address",
-            "deterministic address",
-            "factory_pattern",
-            "factory pattern",
-            "initialize_pattern",
-            "initialize pattern"
-          ],
-          "rootCause": "1. **CREATE-based address predictability**: `CREATE` produces an address based on `keccak256(deployer_address, nonce)`. If a factory's nonce is predictable (or the factory call is replayed from a reor",
-          "subsections": [
-            {
-              "title": "Root Cause",
-              "lineStart": 148,
-              "lineEnd": 164,
-              "severity": [
-                "LOW"
-              ],
-              "codeKeywords": [
-                "CREATE",
-                "CREATE2"
-              ],
-              "searchKeywords": [
-                "root",
-                "cause",
-                "root cause"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "zk-rollup-reorg-attacks-pattern-1-questfactory-reorg-a-003",
+          "id": "zk-rollup-reorg-attacks-pattern-1-questfactory-reorg-a-002",
           "title": "Pattern 1: questFactory Reorg Attack",
           "lineStart": 165,
           "lineEnd": 220,
@@ -7733,10 +9045,37 @@
               ],
               "searchKeywords": null
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 7,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-01-questfactory-is-suspicious-of-the-reorg-attack.md",
+              "reports/zk_rollup_findings/m-04-many-create-methods-are-suspicious-of-the-reorg-attack.md",
+              "reports/zk_rollup_findings/m-08-factorycreate-is-vulnerable-to-reorg-attacks.md",
+              "reports/zk_rollup_findings/m-09-create-methods-are-suspicious-of-reorg-attack.md",
+              "reports/zk_rollup_findings/m-14-re-org-attack-in-factory.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund theft",
+              "frontrun",
+              "address collision",
+              "impersonation"
+            ],
+            "commonlyComposesWith": [
+              "create",
+              "create2",
+              "create3",
+              "block reorg",
+              "factory pattern"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-reorg-attacks-pattern-2-stealing-liquidity-p-004",
+          "id": "zk-rollup-reorg-attacks-pattern-2-stealing-liquidity-p-003",
           "title": "Pattern 2: Stealing Liquidity Pool Funds via Reorg",
           "lineStart": 221,
           "lineEnd": 277,
@@ -7817,10 +9156,37 @@
               ],
               "searchKeywords": null
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 7,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-01-questfactory-is-suspicious-of-the-reorg-attack.md",
+              "reports/zk_rollup_findings/m-04-many-create-methods-are-suspicious-of-the-reorg-attack.md",
+              "reports/zk_rollup_findings/m-08-factorycreate-is-vulnerable-to-reorg-attacks.md",
+              "reports/zk_rollup_findings/m-09-create-methods-are-suspicious-of-reorg-attack.md",
+              "reports/zk_rollup_findings/m-14-re-org-attack-in-factory.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund theft",
+              "frontrun",
+              "address collision",
+              "impersonation"
+            ],
+            "commonlyComposesWith": [
+              "create",
+              "create2",
+              "create3",
+              "block reorg",
+              "factory pattern"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-reorg-attacks-pattern-3-general-factory-crea-005",
+          "id": "zk-rollup-reorg-attacks-pattern-3-general-factory-crea-004",
           "title": "Pattern 3: General Factory.create Reorg (Multiple Protocols)",
           "lineStart": 278,
           "lineEnd": 322,
@@ -7907,10 +9273,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 7,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-01-questfactory-is-suspicious-of-the-reorg-attack.md",
+              "reports/zk_rollup_findings/m-04-many-create-methods-are-suspicious-of-the-reorg-attack.md",
+              "reports/zk_rollup_findings/m-08-factorycreate-is-vulnerable-to-reorg-attacks.md",
+              "reports/zk_rollup_findings/m-09-create-methods-are-suspicious-of-reorg-attack.md",
+              "reports/zk_rollup_findings/m-14-re-org-attack-in-factory.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund theft",
+              "frontrun",
+              "address collision",
+              "impersonation"
+            ],
+            "commonlyComposesWith": [
+              "create",
+              "create2",
+              "create3",
+              "block reorg",
+              "factory pattern"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-reorg-attacks-pattern-4-create-vs-create2-re-006",
+          "id": "zk-rollup-reorg-attacks-pattern-4-create-vs-create2-re-005",
           "title": "Pattern 4: CREATE vs CREATE2 Reorg Risk Comparison",
           "lineStart": 323,
           "lineEnd": 349,
@@ -7976,7 +9369,34 @@
             "deterministic_address"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 7,
+            "sampleReports": [
+              "reports/zk_rollup_findings/m-01-questfactory-is-suspicious-of-the-reorg-attack.md",
+              "reports/zk_rollup_findings/m-04-many-create-methods-are-suspicious-of-the-reorg-attack.md",
+              "reports/zk_rollup_findings/m-08-factorycreate-is-vulnerable-to-reorg-attacks.md",
+              "reports/zk_rollup_findings/m-09-create-methods-are-suspicious-of-reorg-attack.md",
+              "reports/zk_rollup_findings/m-14-re-org-attack-in-factory.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "fund theft",
+              "frontrun",
+              "address collision",
+              "impersonation"
+            ],
+            "commonlyComposesWith": [
+              "create",
+              "create2",
+              "create3",
+              "block reorg",
+              "factory pattern"
+            ]
+          }
         }
       ]
     },
@@ -8049,7 +9469,7 @@
           "isSequencerUp"
         ]
       },
-      "patternCount": 9,
+      "patternCount": 8,
       "patterns": [
         {
           "id": "zk-rollup-sequencer-issues-protocol-functions-breaking-du-000",
@@ -8117,7 +9537,34 @@
             "execute dutch auction"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/zk_rollup_findings/access-controlled-functions-cannot-be-called-when-l2-sequencers-are-down.md",
+              "reports/zk_rollup_findings/redemptions-are-blocked-when-l2-sequencers-are-down.md",
+              "reports/zk_rollup_findings/m-4-loss-of-option-token-from-teller-and-reward-from-otlm-if-l2-sequencer-goes-d.md",
+              "reports/zk_rollup_findings/m-11-arbitrum-sequencer-downtime-lasting-before-and-beyond-epoch-expiry-prevents.md",
+              "reports/zk_rollup_findings/user-might-be-unfairly-liquidated-after-l2-sequencer-grace-period.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "denial of service",
+              "economic exploit",
+              "censorship",
+              "front running"
+            ],
+            "commonlyComposesWith": [
+              "sequencer downtime",
+              "forced inclusion",
+              "l2 block timestamp",
+              "batch submission",
+              "sequencer uptime feed"
+            ]
+          }
         },
         {
           "id": "zk-rollup-sequencer-issues-sequencer-centralization-and-c-001",
@@ -8186,7 +9633,33 @@
             "force withdraw"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/zk_rollup_findings/linea-can-permanently-lock-user-eth-on-l2-by-censoring-user-transactions-through.md",
+              "reports/zk_rollup_findings/no-mechanism-to-flag-sequencer-fraud.md",
+              "reports/zk_rollup_findings/front-running-finalizeblocks-when-sequencers-are-decentralized.md",
+              "reports/zk_rollup_findings/lack-of-validator-penalties-enables-risk-free-economic-censorship-and-liveness-a.md"
+            ],
+            "severityConsensus": "HIGH"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "denial of service",
+              "economic exploit",
+              "censorship",
+              "front running"
+            ],
+            "commonlyComposesWith": [
+              "sequencer downtime",
+              "forced inclusion",
+              "l2 block timestamp",
+              "batch submission",
+              "sequencer uptime feed"
+            ]
+          }
         },
         {
           "id": "zk-rollup-sequencer-issues-sequencer-economic-issues-002",
@@ -8255,92 +9728,37 @@
             "force withdraw"
           ],
           "rootCause": null,
-          "subsections": null
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/zk_rollup_findings/h-3-sequencer-will-be-underpaid-because-of-incorrect-commitscalar.md",
+              "reports/zk_rollup_findings/aggregator-rewards-are-averaged-across-forced-batches-rollups.md",
+              "reports/zk_rollup_findings/h-6-keepers-will-suffer-significant-losses-due-to-miss-compensation-for-l1-rollu.md",
+              "reports/zk_rollup_findings/broken-block-time-assumptions-affect-am-amm-epoch-duration-and-can-dos-rebalanci.md",
+              "reports/zk_rollup_findings/l2-proposer-can-signiﬁcantly-bias-diﬃculty.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "denial of service",
+              "economic exploit",
+              "censorship",
+              "front running"
+            ],
+            "commonlyComposesWith": [
+              "sequencer downtime",
+              "forced inclusion",
+              "l2 block timestamp",
+              "batch submission",
+              "sequencer uptime feed"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-sequencer-issues-vulnerability-description-003",
-          "title": "Vulnerability Description",
-          "lineStart": 158,
-          "lineEnd": 169,
-          "lineCount": 12,
-          "severity": [],
-          "codeKeywords": [
-            "block.timestamp",
-            "commitScalar",
-            "batch_submission",
-            "block.number",
-            "block_proposer",
-            "buy",
-            "calculateL2Fee",
-            "censorship_resistance",
-            "commit_scalar",
-            "deposit",
-            "emergencyRepay",
-            "executeDutchAuction",
-            "fallback",
-            "finalizeBlocks",
-            "finalize_blocks",
-            "forceWithdraw",
-            "forced_inclusion",
-            "forced_transaction_queue",
-            "getCurrentPrice",
-            "grace_period"
-          ],
-          "searchKeywords": [
-            "root",
-            "cause",
-            "root cause",
-            "batch_submission",
-            "batch submission",
-            "block.number",
-            "block number",
-            "block.timestamp",
-            "block timestamp",
-            "block_proposer",
-            "block proposer",
-            "buy",
-            "calculatel2fee",
-            "calculate l2 fee",
-            "censorship_resistance",
-            "censorship resistance",
-            "commit_scalar",
-            "commit scalar",
-            "deposit",
-            "emergencyrepay",
-            "emergency repay",
-            "executedutchauction",
-            "execute dutch auction",
-            "fallback",
-            "finalizeblocks",
-            "finalize blocks",
-            "finalize_blocks",
-            "forcewithdraw",
-            "force withdraw",
-            "forced_inclusion",
-            "forced inclusion",
-            "forced_transaction_queue"
-          ],
-          "rootCause": "1. **Downtime blindness**: Protocols assume L2 is always live and use `block.timestamp` without checking if the sequencer is operational\n\n2. **No grace period logic**: After sequencer restart, there i",
-          "subsections": [
-            {
-              "title": "Root Cause",
-              "lineStart": 160,
-              "lineEnd": 169,
-              "severity": [],
-              "codeKeywords": [
-                "block.timestamp",
-                "commitScalar"
-              ],
-              "searchKeywords": [
-                "root",
-                "cause",
-                "root cause"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "zk-rollup-sequencer-issues-pattern-1-access-controlled-fu-004",
+          "id": "zk-rollup-sequencer-issues-pattern-1-access-controlled-fu-003",
           "title": "Pattern 1: Access-Controlled Functions Fail During Sequencer Downtime",
           "lineStart": 170,
           "lineEnd": 226,
@@ -8421,10 +9839,37 @@
                 "scenario"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 16,
+            "sampleReports": [
+              "reports/zk_rollup_findings/access-controlled-functions-cannot-be-called-when-l2-sequencers-are-down.md",
+              "reports/zk_rollup_findings/redemptions-are-blocked-when-l2-sequencers-are-down.md",
+              "reports/zk_rollup_findings/m-4-loss-of-option-token-from-teller-and-reward-from-otlm-if-l2-sequencer-goes-d.md",
+              "reports/zk_rollup_findings/m-11-arbitrum-sequencer-downtime-lasting-before-and-beyond-epoch-expiry-prevents.md",
+              "reports/zk_rollup_findings/user-might-be-unfairly-liquidated-after-l2-sequencer-grace-period.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "denial of service",
+              "economic exploit",
+              "censorship",
+              "front running"
+            ],
+            "commonlyComposesWith": [
+              "sequencer downtime",
+              "forced inclusion",
+              "l2 block timestamp",
+              "batch submission",
+              "sequencer uptime feed"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-sequencer-issues-pattern-2-dutch-auctions-and-o-005",
+          "id": "zk-rollup-sequencer-issues-pattern-2-dutch-auctions-and-o-004",
           "title": "Pattern 2: Dutch Auctions and Options Expire at Bad Prices During Downtime",
           "lineStart": 227,
           "lineEnd": 277,
@@ -8510,10 +9955,37 @@
                 "scenario"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 16,
+            "sampleReports": [
+              "reports/zk_rollup_findings/access-controlled-functions-cannot-be-called-when-l2-sequencers-are-down.md",
+              "reports/zk_rollup_findings/redemptions-are-blocked-when-l2-sequencers-are-down.md",
+              "reports/zk_rollup_findings/m-4-loss-of-option-token-from-teller-and-reward-from-otlm-if-l2-sequencer-goes-d.md",
+              "reports/zk_rollup_findings/m-11-arbitrum-sequencer-downtime-lasting-before-and-beyond-epoch-expiry-prevents.md",
+              "reports/zk_rollup_findings/user-might-be-unfairly-liquidated-after-l2-sequencer-grace-period.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "denial of service",
+              "economic exploit",
+              "censorship",
+              "front running"
+            ],
+            "commonlyComposesWith": [
+              "sequencer downtime",
+              "forced inclusion",
+              "l2 block timestamp",
+              "batch submission",
+              "sequencer uptime feed"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-sequencer-issues-pattern-3-linea-sequencer-cens-006",
+          "id": "zk-rollup-sequencer-issues-pattern-3-linea-sequencer-cens-005",
           "title": "Pattern 3: Linea / Sequencer Censorship Locking User Funds",
           "lineStart": 278,
           "lineEnd": 320,
@@ -8599,10 +10071,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 16,
+            "sampleReports": [
+              "reports/zk_rollup_findings/access-controlled-functions-cannot-be-called-when-l2-sequencers-are-down.md",
+              "reports/zk_rollup_findings/redemptions-are-blocked-when-l2-sequencers-are-down.md",
+              "reports/zk_rollup_findings/m-4-loss-of-option-token-from-teller-and-reward-from-otlm-if-l2-sequencer-goes-d.md",
+              "reports/zk_rollup_findings/m-11-arbitrum-sequencer-downtime-lasting-before-and-beyond-epoch-expiry-prevents.md",
+              "reports/zk_rollup_findings/user-might-be-unfairly-liquidated-after-l2-sequencer-grace-period.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "denial of service",
+              "economic exploit",
+              "censorship",
+              "front running"
+            ],
+            "commonlyComposesWith": [
+              "sequencer downtime",
+              "forced inclusion",
+              "l2 block timestamp",
+              "batch submission",
+              "sequencer uptime feed"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-sequencer-issues-pattern-4-sequencer-underpaid--007",
+          "id": "zk-rollup-sequencer-issues-pattern-4-sequencer-underpaid--006",
           "title": "Pattern 4: Sequencer Underpaid Due to Incorrect commitScalar",
           "lineStart": 321,
           "lineEnd": 357,
@@ -8687,10 +10186,37 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 16,
+            "sampleReports": [
+              "reports/zk_rollup_findings/access-controlled-functions-cannot-be-called-when-l2-sequencers-are-down.md",
+              "reports/zk_rollup_findings/redemptions-are-blocked-when-l2-sequencers-are-down.md",
+              "reports/zk_rollup_findings/m-4-loss-of-option-token-from-teller-and-reward-from-otlm-if-l2-sequencer-goes-d.md",
+              "reports/zk_rollup_findings/m-11-arbitrum-sequencer-downtime-lasting-before-and-beyond-epoch-expiry-prevents.md",
+              "reports/zk_rollup_findings/user-might-be-unfairly-liquidated-after-l2-sequencer-grace-period.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "denial of service",
+              "economic exploit",
+              "censorship",
+              "front running"
+            ],
+            "commonlyComposesWith": [
+              "sequencer downtime",
+              "forced inclusion",
+              "l2 block timestamp",
+              "batch submission",
+              "sequencer uptime feed"
+            ]
+          }
         },
         {
-          "id": "zk-rollup-sequencer-issues-pattern-5-front-running-finali-008",
+          "id": "zk-rollup-sequencer-issues-pattern-5-front-running-finali-007",
           "title": "Pattern 5: Front-Running finalizeBlocks in Decentralized Sequencer Mode",
           "lineStart": 358,
           "lineEnd": 401,
@@ -8772,7 +10298,34 @@
                 "root cause"
               ]
             }
-          ]
+          ],
+          "reportEvidence": {
+            "count": 16,
+            "sampleReports": [
+              "reports/zk_rollup_findings/access-controlled-functions-cannot-be-called-when-l2-sequencers-are-down.md",
+              "reports/zk_rollup_findings/redemptions-are-blocked-when-l2-sequencers-are-down.md",
+              "reports/zk_rollup_findings/m-4-loss-of-option-token-from-teller-and-reward-from-otlm-if-l2-sequencer-goes-d.md",
+              "reports/zk_rollup_findings/m-11-arbitrum-sequencer-downtime-lasting-before-and-beyond-epoch-expiry-prevents.md",
+              "reports/zk_rollup_findings/user-might-be-unfairly-liquidated-after-l2-sequencer-grace-period.md"
+            ],
+            "severityConsensus": "MEDIUM"
+          },
+          "graphHints": {
+            "variants": [
+              "logic error",
+              "denial of service",
+              "economic exploit",
+              "censorship",
+              "front running"
+            ],
+            "commonlyComposesWith": [
+              "sequencer downtime",
+              "forced inclusion",
+              "l2 block timestamp",
+              "batch submission",
+              "sequencer uptime feed"
+            ]
+          }
         }
       ]
     }

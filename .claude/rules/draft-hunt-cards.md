@@ -26,7 +26,7 @@ DB/
 - File names: auto-generated IDs from `db-quality-monitor` gap analysis, e.g., `draft-oracle-staleness-003.md`
 - Format: must follow `TEMPLATE.md` exactly — same sections, same frontmatter
 - Status field: drafts have `status: draft` in frontmatter (not present in production entries)
-- **Never included in manifests** — `generate_manifests.py` skips `_drafts/` and `_telemetry/`
+- **Never included in manifests** — `scripts/generate_manifests.py` skips `_drafts/` and `_telemetry/`
 - **Never referenced by index.json** until promoted
 - Promotion: move file to correct `DB/<category>/` subdirectory, remove `status: draft`, run `python3 scripts/generate_manifests.py`
 
@@ -55,9 +55,9 @@ Per-card JSON schema:
 - Updated by `db-quality-monitor --gap-analysis` after each audit
 - Read by `invariant-catcher` to prioritize hunt cards with high miss rates
 
-## generate_manifests.py Integration
+## scripts/generate_manifests.py Integration
 
-These directories must be in the ignore list inside `generate_manifests.py`:
+These directories must be in the ignore list inside `scripts/generate_manifests.py`:
 ```python
 IGNORE_DIRS = {"_drafts", "_telemetry", ".git", "__pycache__"}
 ```

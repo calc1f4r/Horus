@@ -71,6 +71,36 @@ Compiler-level vulnerabilities occur when bugs in the compiler itself generate i
 | Interaction Scope | `single_contract` |
 | Chain(s) | ethereum |
 
+### Valid Bug Signals
+
+- Vyper source was compiled with vulnerable versions `0.2.15`, `0.2.16`, or `0.3.0` and relies on `@nonreentrant` for cross-function protection.
+- A liquidity/removal/withdraw path sends ETH or tokens before all pool accounting is finalized, and a callback can enter another guarded function.
+- Source code appears protected, but verified compiler metadata or bytecode provenance matches a known bad compiler release.
+
+### False Positive Guards
+
+- Not this bug for Solidity `ReentrancyGuard` or Vyper versions outside the affected compiler range unless a separate compiler issue is proven.
+- Safe if vulnerable compiler output is not deployed, or no external callback path can reach another state-changing guarded function.
+- Requires deployed bytecode compiled by the affected compiler; source-only pattern matching is insufficient.
+
+### Code Patterns to Look For
+
+```vyper
+@external
+@nonreentrant("lock")
+def remove_liquidity(...):
+    raw_call(msg.sender, b"", value=amount) # callback window
+
+@external
+@nonreentrant("lock")
+def add_liquidity(...):
+    ...
+```
+
+### References & Source Reports
+
+- `DeFiHackLabs/src/test/2023-07/Curve_exp.sol`
+- Curve/Vyper compiler incident class: source-level locks were present, but affected compiler output failed to enforce the intended cross-function guard.
 
 ### Vulnerability Description
 

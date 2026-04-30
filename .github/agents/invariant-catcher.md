@@ -1,10 +1,8 @@
 ---
 name: invariant-catcher
-description: Hunts for vulnerability patterns in smart contract codebases using Horus (`DB/`). Language-agnostic — works with any smart contract language. Searches by vulnerability class, extracts detection patterns from DB entries, runs ripgrep/Semgrep against target code, and generates structured findings reports. Use when given a vulnerability topic, performing variant analysis, or systematically searching for known vulnerability classes.
-tools: [Write, Agent, Bash, Edit, Glob, Grep, Read, WebFetch, WebSearch]
-maxTurns: 50
+description: "Hunts for vulnerability patterns in smart contract codebases using Horus (`DB/`). Language-agnostic — works with any smart contract language. Searches by vulnerability class, extracts detection patterns from DB entries, runs ripgrep/Semgrep against target code, and generates structured findings reports. Use when given a vulnerability topic, performing variant analysis, or systematically searching for known vulnerability classes."
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
-
 # Invariant Catcher Agent
 
 Hunts for known vulnerability patterns in codebases by leveraging Horus (`DB/`).
@@ -129,7 +127,7 @@ If acting standalone without the orchestrator, use the utility scripts to prepar
    ```
 3. Process the output shards using the 2-pass workflow.
 
-> **CRITICAL REFERENCE**: For the complete hunt card JSON schema, grep rules, 2-pass analysis micro-directives, and finding schema, you MUST read **[db-hunting-workflow.md](.claude/resources/db-hunting-workflow.md)**.
+> **CRITICAL REFERENCE**: For the complete hunt card JSON schema, grep rules, 2-pass analysis micro-directives, and finding schema, you MUST read **[db-hunting-workflow.md](resources/db-hunting-workflow.md)**.
 
 ### Step 4: Validate Findings in Target Codebase
 
@@ -155,7 +153,7 @@ For each match, classify:
 
 ### Step 5: Generate Reports
 
-Create output in `invariants-caught/` at the project root (standalone mode) or `audit-output/03-findings-raw.md` (sub-agent mode). See [invariant-report-templates.md](.claude/resources/invariant-report-templates.md) for the complete report and finding templates.
+Create output in `invariants-caught/` at the project root (standalone mode) or `audit-output/03-findings-raw.md` (sub-agent mode). See [invariant-report-templates.md](resources/invariant-report-templates.md) for the complete report and finding templates.
 
 ---
 
@@ -201,13 +199,13 @@ Testing only with valid users → missing bypass when `userId = null` matches `r
 2. **Micro-directives first** — execute `check` steps directly against target code.
 3. **Search entire codebase** — never limit scope to one module.
 4. **Link to sources** — every finding must reference its DB origin (card ID).
-5. **Follow the Workflow** — Strictly adhere to [db-hunting-workflow.md](.claude/resources/db-hunting-workflow.md).
+5. **Follow the Workflow** — Strictly adhere to [db-hunting-workflow.md](resources/db-hunting-workflow.md).
 
 ---
 
 ## Resources
 
-- **Report templates**: [invariant-report-templates.md](.claude/resources/invariant-report-templates.md)
-- **Variant analysis methodology**: [invariant-methodology.md](.claude/resources/invariant-methodology.md)
-- **CodeQL templates**: `.claude/resources/codeql/` (python, javascript, java, go, cpp)
-- **Semgrep templates**: `.claude/resources/semgrep/` (python, javascript, java, go, cpp)
+- **Report templates**: [invariant-report-templates.md](resources/invariant-report-templates.md)
+- **Variant analysis methodology**: [invariant-methodology.md](resources/invariant-methodology.md)
+- **CodeQL templates**: `resources/codeql/` (python, javascript, java, go, cpp)
+- **Semgrep templates**: `resources/semgrep/` (python, javascript, java, go, cpp)

@@ -1,9 +1,8 @@
 ---
 name: variant-template-writer
-description: Analyzes security audit reports from reports/<topic>_findings/ folders to build a fine-grained, duplicate-aware report index, identify cross-report vulnerability patterns, and create or migrate TEMPLATE.md-compliant database entries optimized for vector search. Synthesizes 5-10+ reports per pattern with verified severity consensus and evidence-backed examples. Use when synthesizing audit findings into database entries, performing variant analysis across auditors, or creating comprehensive vulnerability templates.
-tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
+description: "Analyzes security audit reports from reports/<topic>_findings/ folders to build a fine-grained, duplicate-aware report index, identify cross-report vulnerability patterns, and create or migrate TEMPLATE.md-compliant database entries optimized for vector search. Synthesizes 5-10+ reports per pattern with verified severity consensus and evidence-backed examples. Use when synthesizing audit findings into database entries, performing variant analysis across auditors, or creating comprehensive vulnerability templates."
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
-
 # Variant Template Writer
 
 Synthesizes multiple security audit reports from `reports/<topic>_findings/` into comprehensive, search-optimized Horus entries. Also migrates existing legacy `DB/**/*.md` entries forward to the current template when an overlap already exists. Requires minimum 5 reports per pattern for cross-validation and approx 40 patterns per topic for robust coverage.
@@ -31,7 +30,7 @@ Analysis Progress:
 ### Phase 1: Build Canonical Report Index
 
 1. List every file in `reports/<topic>_findings/`
-2. Build a canonical record for each file using the [report indexing framework](resources/report-indexing.md)
+2. Build a canonical record for each file using the [report indexing framework](../resources/report-indexing.md)
 3. Treat folder name, title, and frontmatter classification as hints only; derive classification from the body and source metadata
 4. Classify each file as `finding`, `fix-review`, `duplicate-summary`, `analysis/meta`, or `noise`
 5. Prioritize HIGH/CRITICAL `finding` reports first, and keep all non-finding files in a side list so they do not inflate evidence counts
@@ -64,7 +63,7 @@ For each unique `finding` in a bucket, extract:
 | Field | What to extract |
 |-------|----------------|
 | Vulnerable code | Exact code snippets |
-| Root cause | Fundamental issue (use [root cause analysis](resources/root-cause-analysis.md)) |
+| Root cause | Fundamental issue (use [root cause analysis](../resources/root-cause-analysis.md)) |
 | Interaction scope | Single-contract, multi-contract, cross-protocol, cross-chain |
 | Contract set | Contracts / modules / programs materially involved |
 | Entry surface | User-callable function, callback, admin path, bridge message, etc. |
@@ -90,7 +89,7 @@ Build a matrix to surface consensus and outliers:
 
 Identify:
 - **Consensus**: Common pattern across 3+ unique findings
-- **Severity range**: Using LOWEST rating across unique supporting findings (see [severity rules](resources/vector-search-optimization.md))
+- **Severity range**: Using LOWEST rating across unique supporting findings (see [severity rules](../resources/vector-search-optimization.md))
 - **Variants**: Different manifestations of the same root cause family after fine-grained bucketing
 - **Path families**: Reports that share one `patternKey` but need separate `pathKey` values because entry surfaces or contract hop sets differ
 - **Outliers**: Files that look related by keyword but are actually different patterns, duplicates, or non-findings
@@ -123,11 +122,11 @@ Impact across reports:
 - Scenarios: {affected use cases with frequency}
 ```
 
-Apply the [pattern abstraction ladder](resources/pattern-abstraction-ladder.md) only after the fine-grained grouping is correct. Use the [report indexing framework](resources/report-indexing.md) to avoid merging unrelated reports that merely share a topical keyword.
+Apply the [pattern abstraction ladder](../resources/pattern-abstraction-ladder.md) only after the fine-grained grouping is correct. Use the [report indexing framework](../resources/report-indexing.md) to avoid merging unrelated reports that merely share a topical keyword.
 
 ### Phase 6: Create Or Migrate Database Entry
 
-Before writing a new file, search `DB/**/*.md` for an existing entry with the same root cause family, component, and sink. If a legacy entry already covers the pattern, migrate it in-place using the [entry migration guide](resources/entry-migration-guide.md) instead of creating a duplicate. See [TEMPLATE.md](../../TEMPLATE.md) for structure. Treat `TEMPLATE.md` as authoritative if it conflicts with [Example.md](../../Example.md).
+Before writing a new file, search `DB/**/*.md` for an existing entry with the same root cause family, component, and sink. If a legacy entry already covers the pattern, migrate it in-place using the [entry migration guide](../resources/entry-migration-guide.md) instead of creating a duplicate. See [TEMPLATE.md](../../TEMPLATE.md) for structure. Treat `TEMPLATE.md` as authoritative if it conflicts with [Example.md](../../Example.md).
 
 Key requirements:
 1. **YAML frontmatter** with all required fields, including `root_cause_family`, `pattern_key`, and `code_keywords`
@@ -141,7 +140,7 @@ Key requirements:
 9. **2-3 secure implementations** with explanations
 10. **Impact analysis** with frequency data: `Unfair liquidations (3/12 unique findings)`
 11. **Detection patterns** derived from actual vulnerable code, plus grep-able `code_keywords`
-12. **10+ keywords** for vector search (see [optimization guide](resources/vector-search-optimization.md))
+12. **10+ keywords** for vector search (see [optimization guide](../resources/vector-search-optimization.md))
 
 Migration rules:
 1. **Prefer in-place migration** when a legacy DB entry already covers the pattern
@@ -149,7 +148,7 @@ Migration rules:
 3. **Do not create a second DB file** for the same `pattern_key` unless the category boundary is intentional and clearly documented
 4. **Use the migration guide** for touched legacy entries even if the original request was only to add examples or frontmatter
 
-Map categories using the [taxonomy](resources/vulnerability-taxonomy.md).
+Map categories using the [taxonomy](../resources/vulnerability-taxonomy.md).
 
 ### Phase 7: Verification Gate
 
@@ -166,7 +165,7 @@ Verification Gate:
 - [ ] Severity ratings match source reports exactly
 - [ ] No hallucinated protocol names or findings
 - [ ] Existing overlapping DB entries were searched before deciding to create a new file
-- [ ] Any touched legacy entry was migrated using the [entry migration guide](resources/entry-migration-guide.md)
+- [ ] Any touched legacy entry was migrated using the [entry migration guide](../resources/entry-migration-guide.md)
 - [ ] The first ~150 lines contain enough context for a low-window agent to triage the pattern
 - [ ] Multi-contract issues record `interaction_scope`, `involved_contracts`, and a `Contract / Boundary Map`
 - [ ] Multi-path issues use one family-level `pattern_key` and distinct `path_keys` instead of collapsing all routes together
@@ -190,7 +189,7 @@ After creating the entry, regenerate the search manifests:
 python3 scripts/generate_manifests.py
 ```
 
-This auto-updates `DB/index.json` and all `DB/manifests/*.json` files. See the [manifest update guide](resources/index-update-guide.md) for verification steps and tips for better indexing.
+This auto-updates `DB/index.json` and all `DB/manifests/*.json` files. See the [manifest update guide](../resources/index-update-guide.md) for verification steps and tips for better indexing.
 
 ---
 
@@ -231,7 +230,7 @@ If uncertain, write: "Insufficient data — only {n} unique finding(s) confirm t
 
 ### Falsification Protocol
 
-Before finalizing, apply [falsification checks](resources/root-cause-analysis.md) to each pattern. Actively search for reports where the pattern was present but NOT flagged — this may indicate the pattern requires specific preconditions you haven't documented.
+Before finalizing, apply [falsification checks](../resources/root-cause-analysis.md) to each pattern. Actively search for reports where the pattern was present but NOT flagged — this may indicate the pattern requires specific preconditions you haven't documented.
 
 ---
 

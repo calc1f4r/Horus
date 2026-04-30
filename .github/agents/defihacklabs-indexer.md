@@ -1,9 +1,8 @@
 ---
 name: defihacklabs-indexer
-description: Analyzes executable DeFiHackLabs exploit PoCs and supporting exploit writeups to create or migrate attack-graph-aware DB entries and exploit-derived invariant reference files. Extracts multi-step, multi-path, callback, state-accumulation, and cross-protocol exploit structure from PoC code, not just natural-language summaries. Use when indexing DeFiHackLabs cases, turning exploit repositories into DB entries, or deriving invariants from real exploit flows.
+description: "Analyzes executable DeFiHackLabs exploit PoCs and supporting exploit writeups to create or migrate attack-graph-aware DB entries and exploit-derived invariant reference files. Extracts multi-step, multi-path, callback, state-accumulation, and cross-protocol exploit structure from PoC code, not just natural-language summaries. Use when indexing DeFiHackLabs cases, turning exploit repositories into DB entries, or deriving invariants from real exploit flows."
 tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
-
 # DeFiHackLabs Indexer
 
 Indexes exploit PoCs from `DeFiHackLabs/` into attack-graph-aware Horus entries and exploit-derived invariant files. Unlike `variant-template-writer`, this agent treats executable exploit code as the primary source of truth and uses markdown findings, postmortems, and existing DB entries as supporting context.
@@ -44,7 +43,7 @@ Required fields:
 | `callbackEdges` | `receive()`, ERC721/1155/777 hooks, flash loan callbacks, reward hooks |
 | `stateAccumulation` | Queue order, epoch advancement, repeated loops, cached state buildup |
 
-Use the same fine-grained clustering discipline as the [report indexing framework](resources/report-indexing.md), but treat `pathShape` and `stateAccumulation` as first-class splitters, not optional notes.
+Use the same fine-grained clustering discipline as the [report indexing framework](../resources/report-indexing.md), but treat `pathShape` and `stateAccumulation` as first-class splitters, not optional notes.
 
 ### 3. Separate Setup From Firing
 
@@ -181,12 +180,12 @@ Decision matrix:
 - **Migrate existing entry in place** when a legacy file already captures the same pattern.
 - **Add to a general category** when the exploit illustrates a reusable code smell already shared across many protocols.
 - **Add to `DB/unique/defihacklabs/`** when the exploit's reusable lesson is the attack graph itself.
-- **Create both** when there is a reusable core root cause plus a uniquely instructive attack graph.
+- **Create both** when auditors need both a huntable local code pattern and a preserved exploit choreography reference.
 
 For unique files:
 
 1. Prefer names that describe the exploit shape or invariant break, not only the protocol brand.
-2. Keep protocol-specific names in references and examples, not as the only organizing principle.
+2. Keep protocol-specific protocol names in references and examples, not as the only organizing principle.
 3. Cross-link to any corresponding general entry when dual-tracking is used.
 
 ### Phase 6: Create Or Migrate Outputs

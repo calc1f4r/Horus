@@ -1,35 +1,35 @@
 # solana
 
-> 30 nodes · cohesion 0.35
+> 36 nodes · cohesion 0.83
 
 ## Key Concepts
 
-- **anchor** (20 connections) — `DB/index.json`
-- **solana** (20 connections) — `DB/index.json`
-- **spl** (20 connections) — `DB/index.json`
-- **DB/Solana-chain-specific/solana-program-security.md** (13 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **account_closure** (13 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **account_reallocation** (13 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **lamports_transfer** (13 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **pda_validation** (13 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **remaining_accounts** (13 connections) — `DB/general/arbitrary-call/dex-aggregator-unvalidated-call-data.md`
-- **init_if_needed** (12 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **21. CPI Policy and Program Upgradeability Bypass** (10 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **8. DOS Attack Vectors** (10 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **Vulnerable Pattern Example** (10 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **Vulnerable Pattern Example** (10 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **Vulnerable Pattern Example** (10 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **Vulnerable Pattern Examples** (10 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **Vulnerable Pattern Examples** (10 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **Vulnerable Pattern Examples** (10 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **Vulnerable Pattern Examples** (10 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **Vulnerable Pattern Examples** (10 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **Vulnerable Pattern Examples** (10 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **18. Create Account Pre-Funding DOS** (9 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **19. Rent Exemption Validation Errors** (9 connections) — `DB/Solana-chain-specific/solana-program-security.md`
-- **DB/Solana-chain-specific/token-2022-extensions.md** (6 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
-- **13. Metadata Pointer Extension Vulnerabilities** (4 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
-- *... and 5 more nodes in this community*
+- **13. Metadata Pointer Extension Vulnerabilities** (61 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **2. Freeze Authority Vulnerabilities** (57 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **3. Transfer Fee Extension Vulnerabilities** (55 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **5. Token Account Size Vulnerabilities** (55 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **1. MintCloseAuthority Extension Vulnerabilities** (51 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **11. Non-Transferable Token Extension Vulnerabilities** (51 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **15. CPI Guard Extension Vulnerabilities** (51 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **18. Comprehensive Token-2022 Extension Whitelist Pattern** (51 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **4. Permanent Delegate Extension Vulnerabilities** (51 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **6. Default Account State Extension Vulnerabilities** (51 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **7. Transfer Hook Extension Vulnerabilities** (51 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **Token-2022 Extension Quick Reference** (51 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **12. Confidential Transfer Extension Vulnerabilities** (49 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **8. Interest Bearing Extension Vulnerabilities** (47 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **extensions** (28 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **mint** (28 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **token_account** (28 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **default account state** (28 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **mint close authority** (28 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **confidential_transfer** (28 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **default_account_state** (28 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **group_member_pointer** (28 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **mint_close_authority** (28 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **non_transferable** (22 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- **permanent_delegate** (22 connections) — `DB/Solana-chain-specific/token-2022-extensions.md`
+- *... and 11 more nodes in this community*
 
 ## Relationships
 
@@ -37,15 +37,12 @@
 
 ## Source Files
 
-- `DB/Solana-chain-specific/solana-program-security.md`
 - `DB/Solana-chain-specific/token-2022-extensions.md`
-- `DB/general/arbitrary-call/dex-aggregator-unvalidated-call-data.md`
-- `DB/index.json`
 
 ## Audit Trail
 
-- EXTRACTED: 76 (50%)
-- INFERRED: 76 (50%)
+- EXTRACTED: 112 (21%)
+- INFERRED: 424 (79%)
 - AMBIGUOUS: 0 (0%)
 
 ---

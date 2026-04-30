@@ -5,6 +5,7 @@ chain: Ethereum
 category: Oracle Manipulation
 vulnerability_type: Stale TWAP, TWAP Design Flaws, Oracle Denomination Errors, Collateral Depeg Arbitrage
 attack_type: TWAP Manipulation, Oracle Arbitrage, Stale Price Exploitation
+affected_component: bonding_curve_oracle|twap_oracle|price_feed
 primitives: Bonding Curve, TWAP Oracle, Curve Metapool, Uniswap V2 Oracle, Chainlink
 severity: high
 impact: Price Manipulation, DoS, Stablecoin Depeg, Collateral Draining

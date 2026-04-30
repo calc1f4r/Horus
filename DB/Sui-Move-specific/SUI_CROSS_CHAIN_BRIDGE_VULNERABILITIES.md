@@ -169,16 +169,26 @@ When ZetaChain processes a cross-chain call from EVM → Sui, the EVM state chan
 
 #### Valid Bug Signals
 
-- Signal 1: Critical input parameter not validated against expected range or format
-- Signal 2: Oracle data consumed without staleness check or sanity bounds
-- Signal 3: User-supplied address or calldata forwarded without validation
-- Signal 4: Missing check allows operation under invalid or stale state
+- Signal 1: Source-chain state is committed before the Sui deposit, mint, or receiver call is known to have succeeded.
+- Signal 2: Outbound nonce, gas coin amount, gas price, or coin type can be influenced without matching an approved Sui bridge configuration.
+- Signal 3: Receiver modules or destination object IDs are accepted without checking allowlists, expected package/module/function, or recipient type.
+- Signal 4: Bridge committee, epoch, blocklist, or flow-limit checks can be bypassed because validation order differs between send and receive paths.
 
 #### False Positive Guards
 
-- Not this bug when: Validation exists but is in an upstream function caller
-- Safe if: Parameter range is inherently bounded by the type or protocol invariant
-- Requires attacker control of: specific conditions per pattern
+- Not this bug when: The bridge uses an atomic cache/commit model or compensating rollback that makes source and Sui-side state changes all-or-nothing.
+- Safe if: Nonce advancement, gas budgeting, coin-type selection, receiver dispatch, and flow accounting are all derived from trusted bridge state rather than user payload fields.
+- Requires attacker control of: an inbound/outbound bridge message, a receiver payload, gas-price inputs, or a route where validator/TSS signing can be induced before final validation.
+
+#### Code Patterns to Look For
+
+```text
+- EVM/Cosmos state writes, burns, or CCTX status updates before Sui execution success is checked
+- nonce++ or outbound signing before duplicate, finalized, or already-signed status checks
+- user-supplied receiver module/function/object IDs passed into Sui calls without allowlist validation
+- gas coin amount or PostGasPrice calculated from stale or attacker-influenced fields
+- flow_limiter or blocklist checks performed after transfer/mint side effects
+```
 
 ### Vulnerability Description
 

@@ -1,9 +1,8 @@
 ---
 name: invariant-reviewer
-description: 'Reviews and hardens invariant specifications produced by invariant-writer. Re-understands the protocol from scratch, researches canonical invariants for the protocol type, enforces multi-step attack vector coverage, calibrates bounds to avoid over- or under-specification, and produces a revised invariant file ready for formal verification suites. Use after invariant-writer when preparing invariants for formal verification or fuzzing tools — or when invariant quality is suspect.'
-tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
+description: "Reviews and hardens invariant specifications produced by invariant-writer. Re-understands the protocol from scratch, researches canonical invariants for the protocol type, enforces multi-step attack vector coverage, calibrates bounds to avoid over- or under-specification, and produces a revised invariant file ready for formal verification suites. Use after invariant-writer when preparing invariants for formal verification or fuzzing tools — or when invariant quality is suspect."
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
-
 # Invariant Reviewer Agent
 
 Reviews, challenges, and hardens invariant specifications. Takes the output of `invariant-writer` (or any hand-written invariant file), re-derives what the protocol MUST guarantee from first principles and external research, then patches the spec to close gaps.

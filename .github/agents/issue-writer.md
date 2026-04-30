@@ -1,9 +1,8 @@
 ---
 name: issue-writer
-description: 'Takes a validated vulnerability finding and produces a polished, Sherlock-format submission-ready write-up. Use after triage to convert raw findings into professional audit report entries or contest submissions.'
-tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
+description: "Takes a validated vulnerability finding and produces a polished, Sherlock-format submission-ready write-up. Use after triage to convert raw findings into professional audit report entries or contest submissions."
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
-
 # Issue Writer Agent
 
 Converts validated vulnerability findings into polished, submission-ready write-ups using **Sherlock format by default**. Also supports Cantina engagements and standalone audit reports when explicitly requested.
