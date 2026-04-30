@@ -30,7 +30,7 @@ Horus/
 │   │   ├── zk-rollup.json                #     100 patterns · 10 files
 │   │   ├── keywords.json                  #     Keyword → manifest routing
 │   │   └── huntcards/                     #   Compressed detection cards (Tier 1.5)
-│   │       ├── all-huntcards.json         #     1,522 cards — all manifests combined
+│   │       ├── all-huntcards.json         #     1,362 cards — all manifests combined
 │   │       ├── oracle-huntcards.json      #     Per-manifest hunt cards
 │   │       ├── amm-huntcards.json
 │   │       ├── bridge-huntcards.json
@@ -45,6 +45,11 @@ Horus/
 │   │       ├── unique-huntcards.json
 │   │       ├── account-abstraction-huntcards.json
 │   │       └── zk-rollup-huntcards.json
+│   │
+│   ├── graphify-out/                      #   Generated DB knowledge graph (Tier 2.5)
+│   │   ├── graph.json                     #     5,270 nodes · 51,146 edges
+│   │   ├── GRAPH_REPORT.md                #     Graph summary and central concepts
+│   │   └── wiki/                          #     Curated agent-crawlable community pages
 │   │
 │   ├── oracle/                            #   Oracle vulnerabilities
 │   │   ├── chainlink/                     #     Chainlink price feeds & aggregators
@@ -135,16 +140,20 @@ Horus/
 │   ├── classify_and_group.py              #   Classify reports by vulnerability type
 │   ├── generate_entries.py                #   Generate DB entries from reports
 │   ├── generate_micro_directives.py       #   Generate hunt card micro-directives
+│   ├── build_db_graph.py                  #   Build DB/graphify-out graph artifacts
+│   ├── finalize_audit_graph.py            #   Finalize audit-time graphify output
+│   ├── validate_retrieval_pipeline.py     #   Full retrieval/graph validation
+│   ├── validate_codex_runtime.py          #   Generated runtime surface validation
 │   ├── grep_prune.py                      #   Prune hunt cards by grep hits
 │   ├── partition_shards.py                #   Partition cards into agent shards
 │   ├── merge_shard_findings.py            #   Merge parallel shard findings
 │   ├── db_quality_check.py                #   Validate DB integrity
 │   ├── rebuild_report_artifacts.py        #   Rebuild report branch artifacts
 │   ├── update_codebase_structure.py       #   Auto-update this file's branch table
-│   └── ...                                #   (6 more utility scripts)
+│   └── ...                                #   additional utility scripts
 │
 ├── .github/
-│   ├── agents/                            # 35 specialized audit agents
+│   ├── agents/                            # 37 generated GitHub-facing audit agents
 │   │   ├── audit-orchestrator.md          #   Entry point — 11-phase pipeline
 │   │   ├── audit-context-building.md      #   Line-by-line codebase analysis
 │   │   ├── function-analyzer.md           #   Per-contract function analysis
@@ -176,7 +185,7 @@ Horus/
 │   │   ├── code4rena-judge.md             #   Code4rena severity validation
 │   │   └── db-quality-monitor.md          #   DB health monitoring & auto-fix
 │   │
-│   └── agents/resources/                  # Agent reference materials (39 files)
+│   └── agents/resources/                  # Resource parity mirror from .claude/resources
 │       ├── audit-report-template.md       #   Final report structure template
 │       ├── inter-agent-data-format.md     #   Standardized data contracts between phases
 │       ├── protocol-detection.md          #   Auto-classification decision tree
@@ -212,9 +221,11 @@ Horus/
 ```
 Tier 1    DB/index.json                            ← Lean router. ALWAYS start here.
    ↓
-Tier 1.5  DB/manifests/huntcards/all-huntcards.json ← 1,522 compressed detection cards
+Tier 1.5  DB/manifests/huntcards/all-huntcards.json ← 1,362 compressed detection cards
    ↓                                                   with grep patterns & micro-directives
 Tier 2    DB/manifests/<name>.json                  ← Full pattern-level indexes with line ranges
+   ↓
+Tier 2.5  DB/graphify-out/graph.json                ← Additive related-variant expansion
    ↓
 Tier 3    DB/**/*.md                                ← Vulnerability content.
                                                        Read ONLY targeted line ranges.
@@ -238,7 +249,7 @@ DB/manifests/keywords.json → "getPriceUnsafe" → ["oracle"]
 **Bulk audit (hunt cards):**
 ```
 DB/manifests/huntcards/all-huntcards.json
-  → grep target code per card.grep → prune zero-hit cards → shard → spawn sub-agents
+  → optional graph expansion → grep target code per card.grep → prune zero-hit cards → shard → spawn sub-agents
 ```
 
 For the full search guide, see [DB/SEARCH_GUIDE.md](../DB/SEARCH_GUIDE.md).
@@ -250,14 +261,19 @@ For the full search guide, see [DB/SEARCH_GUIDE.md](../DB/SEARCH_GUIDE.md).
 | File | Purpose |
 |------|---------|
 | `DB/index.json` | Master router — protocol context, manifest listing, audit checklist, keyword index |
-| `DB/manifests/huntcards/all-huntcards.json` | All 1,522 hunt cards — primary interface for bulk audits |
+| `DB/manifests/huntcards/all-huntcards.json` | All 1,362 hunt cards — primary interface for bulk audits |
 | `DB/manifests/<name>.json` | Per-category manifests with pattern IDs, titles, line ranges, severity, keywords |
 | `DB/manifests/keywords.json` | Keyword → manifest routing for targeted lookup |
+| `DB/graphify-out/graph.json` | Graphify-compatible DB graph for additive related-card expansion |
+| `DB/graphify-out/GRAPH_REPORT.md` | Graph summary, community data, and central concepts |
 | `DB/SEARCH_GUIDE.md` | Comprehensive search guide for agent consumption |
 | `TEMPLATE.md` | Canonical structure for all vulnerability entries |
 | `Example.md` | Reference implementation showing a complete entry |
 | `docs/db-guide.md` | DB entry conventions, search workflows, audit mode |
 | `scripts/generate_manifests.py` | Regenerates all manifests and hunt cards from DB content |
+| `scripts/build_db_graph.py` | Rebuilds DB graph artifacts from manifests and hunt cards |
+| `scripts/finalize_audit_graph.py` | Converts audit-time graphify output into queryable node-link JSON |
+| `scripts/validate_retrieval_pipeline.py` | Runs the full retrieval, graph, sync, and finalizer validation suite |
 | `scripts/solodit_fetcher.py` | Fetches vulnerability reports from the Solodit/Cyfrin API |
 
 ---
@@ -420,17 +436,20 @@ See [TEMPLATE.md](../TEMPLATE.md) for the full specification and [Example.md](..
 | `scripts/classify_and_group.py` | Classifies raw reports by vulnerability type |
 | `scripts/generate_entries.py` | Generates DB entries from classified reports |
 | `scripts/generate_micro_directives.py` | Enriches hunt cards with micro-directives |
+| `scripts/build_db_graph.py` | Rebuilds `DB/graphify-out/` from generated retrieval artifacts |
+| `scripts/finalize_audit_graph.py` | Finalizes audit-time graphify output into queryable graph JSON |
 | `scripts/grep_prune.py` | Prunes hunt cards based on grep hit results |
 | `scripts/partition_shards.py` | Partitions surviving hunt cards into agent shards |
 | `scripts/merge_shard_findings.py` | Merges findings from parallel shard agents |
 | `scripts/db_quality_check.py` | Validates DB integrity (line ranges, references, structure) |
+| `scripts/validate_retrieval_pipeline.py` | Validates tests, DB quality, graph queries, sync checks, and graph finalization |
+| `scripts/validate_codex_runtime.py` | Validates generated Codex runtime surfaces and skill links |
 | `scripts/rebuild_report_artifacts.py` | Rebuilds report branch artifacts |
 | `scripts/update_codebase_structure.py` | Auto-updates the report branch table in this file |
 | `scripts/extract_defihacklabs.py` | Extracts vulnerability patterns from DeFiHackLabs PoCs |
 | `scripts/classify_cosmos.py` | Cosmos-specific report classification |
 | `scripts/generate_cosmos_entries.py` | Generates Cosmos DB entries |
 | `scripts/generate_cosmos_v2.py` | V2 Cosmos entry generator |
-| `scripts/convert_pdfs_to_md.py` | Converts PDF audit reports to Markdown |
 | `scripts/download_ottersec_move.py` | Downloads OtterSec Move audit reports |
 
 ---

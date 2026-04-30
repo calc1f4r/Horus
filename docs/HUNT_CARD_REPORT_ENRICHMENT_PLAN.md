@@ -546,7 +546,9 @@ After each DB or generator batch:
 
 ```bash
 python3 scripts/generate_manifests.py
+python3 scripts/build_db_graph.py
 python3 scripts/db_quality_check.py
+python3 scripts/validate_retrieval_pipeline.py
 ```
 
 After graph-relevant enrichment:
@@ -555,11 +557,13 @@ After graph-relevant enrichment:
 python3 scripts/build_db_graph.py
 ```
 
-When changing Codex-facing or Claude playbooks:
+When changing Claude playbooks or generated runtime surfaces:
 
 ```bash
 python3 scripts/sync_codex_compat.py
+python3 scripts/sync_codex_compat.py --sync-github-agents
 python3 scripts/sync_codex_compat.py --check
+python3 scripts/validate_codex_runtime.py
 ```
 
 If generator output changes, inspect:

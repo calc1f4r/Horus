@@ -16,6 +16,8 @@ Tier 1.5: DB/manifests/huntcards/*-huntcards.json  (Hunt Cards — compressed de
    ↓      Grep-based bulk scanning. Combined corpus can be large after enrichment, so prefer per-manifest cards or bundles when context is tight.
 Tier 2:   DB/manifests/<name>.json                 (Manifest — 30-130KB each)
    ↓      Full pattern metadata with line ranges, keywords, root causes
+Tier 2.5: DB/graphify-out/graph.json               (Additive related-card expansion)
+   ↓      Use after baseline routing; never use graph results to remove baseline cards.
 Tier 3:   DB/**/*.md                               (Vulnerability files — read only relevant lines)
 ```
 
@@ -144,21 +146,22 @@ Each hunt card:
 ```
 1. Read DB/index.json → protocolContext.mappings.<protocol_type>
 2. Get manifest list
-3. Load hunt cards for those manifests:
+3. Optionally query `DB/graphify-out/graph.json` for neighboring topics and related hunt cards
+4. Load hunt cards for those manifests plus any graph-expanded neighbors:
    - Option A: Load per-manifest cards: DB/manifests/huntcards/<name>-huntcards.json
    - Option B: Load DB/manifests/huntcards/all-huntcards.json only if your context budget is large enough; otherwise stick to per-manifest cards
-4. For each card, grep target codebase for card.grep pattern:
+5. For each card, grep target codebase for card.grep pattern:
    grep -rn "card.grep" <target_path> --include="*.sol"
-5. Cards with `neverPrune: true` always survive (CRITICAL safety net)
-6. Prune cards with zero grep hits (removes ~60-80% of patterns)
-7. PARTITION surviving cards into shards of 50-80 cards (grouped by cat tag)
+6. Cards with `neverPrune: true` always survive (CRITICAL safety net)
+7. Prune cards with zero grep hits (removes ~60-80% of patterns)
+8. PARTITION surviving cards into shards of 50-80 cards (grouped by cat tag)
    - Separate neverPrune cards → duplicate to every shard
    - Target: each shard fits comfortably in one agent's context
-8. SPAWN one sub-agent per shard (parallel):
+9. SPAWN one sub-agent per shard (parallel):
    - Each agent gets: its shard cards + neverPrune cards + full target code + invariants
    - Each agent runs Pass 1 (micro-directives) + Pass 2 (evidence lookup)
    - Each agent writes to audit-output/03-findings-shard-<id>.md
-9. MERGE all shard findings → deduplicate by root cause → 03-findings-raw.md
+10. MERGE all shard findings → deduplicate by root cause → 03-findings-raw.md
 ```
 
 **Example**: Auditing an ERC4626 vault
@@ -208,17 +211,20 @@ Each hunt card:
 
 | Manifest | File | Patterns | Focus |
 |----------|------|----------|-------|
-| `oracle` | DB/manifests/oracle.json | 39 | Chainlink, Pyth, price manipulation |
-| `amm` | DB/manifests/amm.json | 65 | Concentrated liquidity, constant product AMMs |
-| `bridge` | DB/manifests/bridge.json | 32 | LayerZero, Wormhole, Hyperlane, cross-chain |
-| `tokens` | DB/manifests/tokens.json | 33 | ERC20, ERC4626, ERC721 |
-| `cosmos` | DB/manifests/cosmos.json | 26 | Cosmos SDK, IBC, staking, precompiles |
-| `solana` | DB/manifests/solana.json | 38 | Solana programs, Token-2022 |
-| `general-security` | DB/manifests/general-security.json | 31 | Access control, signatures, validation |
-| `general-defi` | DB/manifests/general-defi.json | 115 | Flash loans, vaults, precision, calculations |
-| `general-infrastructure` | DB/manifests/general-infrastructure.json | 41 | Proxies, reentrancy, storage, bridges |
-| `general-governance` | DB/manifests/general-governance.json | 56 | Governance, stablecoins, rug pulls, MEV |
-| `unique` | DB/manifests/unique.json | 59 | Protocol-specific unique exploits |
+| `general-defi` | DB/manifests/general-defi.json | 382 | Flash loans, vaults, slippage, precision, calculations, yield |
+| `cosmos` | DB/manifests/cosmos.json | 416 | Cosmos SDK, IBC, staking, CometBFT, app-chain invariants |
+| `sui-move` | DB/manifests/sui-move.json | 304 | Sui Move object model, access control, DeFi logic, bridges |
+| `general-infrastructure` | DB/manifests/general-infrastructure.json | 125 | Proxies, reentrancy, storage, upgrades |
+| `general-security` | DB/manifests/general-security.json | 114 | Access control, signatures, input validation, initialization |
+| `unique` | DB/manifests/unique.json | 104 | Protocol-specific exploits from real-world incidents |
+| `general-governance` | DB/manifests/general-governance.json | 99 | DAOs, stablecoins, MEV, randomness, malicious patterns |
+| `zk-rollup` | DB/manifests/zk-rollup.json | 90 | Circuit constraints, fraud proofs, sequencer, L1-L2 messaging |
+| `amm` | DB/manifests/amm.json | 87 | Concentrated liquidity, constant product, sandwich attacks |
+| `oracle` | DB/manifests/oracle.json | 85 | Chainlink, Pyth, price manipulation, staleness |
+| `bridge` | DB/manifests/bridge.json | 84 | LayerZero, Wormhole, Hyperlane, CCIP, Axelar, Stargate |
+| `solana` | DB/manifests/solana.json | 41 | Solana programs, Anchor, Token-2022, SPL |
+| `tokens` | DB/manifests/tokens.json | 37 | ERC20, ERC4626, ERC721, token compatibility |
+| `account-abstraction` | DB/manifests/account-abstraction.json | 4 | ERC-4337, ERC-7579, paymasters, session keys |
 
 ---
 
@@ -263,7 +269,7 @@ Each pattern in a manifest looks like:
 
 ### DO
 - **Start with index.json** to route to the right manifest(s)
-- **Load only relevant manifests** — don't load all 11
+- **Load only relevant manifests** — don't load all 14
 - **Use lineStart/lineEnd** to read only the exact section needed
 - **Search by codeKeywords/searchKeywords** to match both exact identifiers and normalized focus terms
 - **Check severity** to prioritize findings
@@ -297,7 +303,7 @@ When running a full audit via `audit-orchestrator`, use maximum-depth search:
 1. **Load ALL manifests** relevant to the detected protocol type(s) — union manifests from all matched `protocolContext.mappings` entries
 2. **Always include** `general-security` and `unique` as baseline manifests
 3. **Keyword cross-check**: Load `DB/manifests/keywords.json`, scan target code for keyword hits, and add any newly-discovered manifests
-4. **If no protocol detected**: Load all 11 manifests (fallback for unknown codebases)
+4. **If no protocol detected**: Load all 14 manifests (fallback for unknown codebases)
 
 ### Per-Manifest Search Sequence
 

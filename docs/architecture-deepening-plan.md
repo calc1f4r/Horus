@@ -2,6 +2,8 @@
 
 This plan captures the recommended refactor sequence for making Horus easier to maintain without destabilizing the generated retrieval artifacts.
 
+Status: Implemented through retrieval module extraction, generated GitHub agent mirrors, and validation coverage.
+
 ## Goal
 
 Improve locality and leverage in the Horus maintenance code by moving repeated domain concepts behind deeper modules:
@@ -15,24 +17,24 @@ The plan deliberately favors byte-stable, low-blast-radius steps over a large re
 
 ## Progress
 
-- Started: extracted the shared protocol context taxonomy into `scripts/horus_retrieval/protocol_context.py`.
-- Started: updated router generation, partition bundle generation, and DB quality required-context checks to consume the shared taxonomy.
-- Started: added `tests/test_protocol_context.py` to lock the shared taxonomy interface.
-- Started: added a narrow DB document parser in `scripts/horus_retrieval/documents.py` and migrated manifest-file parsing to it.
-- Started: added fixture-level manifest output coverage in `tests/test_generate_manifest_fixture.py`.
-- Started: moved category and general-subcategory taxonomy into `scripts/horus_retrieval/taxonomy.py`.
-- Started: introduced `scripts/horus_retrieval/build.py` with `build_retrieval_db` orchestration and made `scripts/generate_manifests.py` delegate through it.
-- Started: added temp-directory orchestration coverage in `tests/test_retrieval_build.py`.
-- Started: extracted router builders into `scripts/horus_retrieval/router.py`.
-- Started: extracted keyword-index builders into `scripts/horus_retrieval/keywords.py`.
-- Started: extracted manifest builders into `scripts/horus_retrieval/manifests.py`, with `scripts/generate_manifests.py` retaining thin compatibility wrappers.
-- Started: extracted hunt-card builders into `scripts/horus_retrieval/huntcards.py`, with focused regression coverage for filtering, grep selection, identifier extraction, and file writes.
-- Started: extracted partition-bundle builders into `scripts/horus_retrieval/bundles.py`, keeping protocol shard generation testable without writing real DB artifacts.
-- Started: migrated `scripts/db_quality_check.py` and `scripts/huntcard_enrichment.py` entry parsing paths onto shared `DBDocument`/frontmatter helpers while preserving their public result shapes.
-- Started: added `.github/agents` surface validation to `scripts/sync_codex_compat.py --check`, covering missing, extra, and identity metadata drift against `.claude/agents`.
-- Started: moved standard retrieval-build dependency wiring into `scripts/horus_retrieval/build.py`, so `build_retrieval_db(db_dir=...)` is now the main interface and `scripts/generate_manifests.py` is a thin compatibility CLI.
-- Started: extracted retrieval artifact writing and summary reporting into `scripts/horus_retrieval/writers.py`, reducing filesystem mechanics inside the build orchestrator.
-- Started: extracted optional hunt-card micro-directive enrichment into `scripts/horus_retrieval/enrichment.py`, keeping `build.py` responsible only for deciding whether the phase runs.
+- Done: extracted the shared protocol context taxonomy into `scripts/horus_retrieval/protocol_context.py`.
+- Done: updated router generation, partition bundle generation, and DB quality required-context checks to consume the shared taxonomy.
+- Done: added `tests/test_protocol_context.py` to lock the shared taxonomy interface.
+- Done: added a narrow DB document parser in `scripts/horus_retrieval/documents.py` and migrated manifest-file parsing to it.
+- Done: added fixture-level manifest output coverage in `tests/test_generate_manifest_fixture.py`.
+- Done: moved category and general-subcategory taxonomy into `scripts/horus_retrieval/taxonomy.py`.
+- Done: introduced `scripts/horus_retrieval/build.py` with `build_retrieval_db` orchestration and made `scripts/generate_manifests.py` delegate through it.
+- Done: added temp-directory orchestration coverage in `tests/test_retrieval_build.py`.
+- Done: extracted router builders into `scripts/horus_retrieval/router.py`.
+- Done: extracted keyword-index builders into `scripts/horus_retrieval/keywords.py`.
+- Done: extracted manifest builders into `scripts/horus_retrieval/manifests.py`, with `scripts/generate_manifests.py` retaining thin compatibility wrappers.
+- Done: extracted hunt-card builders into `scripts/horus_retrieval/huntcards.py`, with focused regression coverage for filtering, grep selection, identifier extraction, and file writes.
+- Done: extracted partition-bundle builders into `scripts/horus_retrieval/bundles.py`, keeping protocol shard generation testable without writing real DB artifacts.
+- Done: migrated `scripts/db_quality_check.py` and `scripts/huntcard_enrichment.py` entry parsing paths onto shared `DBDocument`/frontmatter helpers while preserving their public result shapes.
+- Done: added `.github/agents` mirror generation and validation to `scripts/sync_codex_compat.py`.
+- Done: moved standard retrieval-build dependency wiring into `scripts/horus_retrieval/build.py`, so `build_retrieval_db(db_dir=...)` is now the main interface and `scripts/generate_manifests.py` is a thin compatibility CLI.
+- Done: extracted retrieval artifact writing and summary reporting into `scripts/horus_retrieval/writers.py`, reducing filesystem mechanics inside the build orchestrator.
+- Done: extracted optional hunt-card micro-directive enrichment into `scripts/horus_retrieval/enrichment.py`, keeping `build.py` responsible only for deciding whether the phase runs.
 
 ## Current Friction
 
@@ -50,7 +52,7 @@ Frontmatter, headings, sections, line ranges, references, and metadata are parse
 
 ### Runtime surface drift
 
-`.claude/` is the source of truth for Codex generation, but `.github/agents/` remains a manually maintained parallel surface. That makes agent workflow changes easy to partially synchronize.
+`.claude/` is the source of truth for Codex generation and for the generated `.github/agents/` mirror. `scripts/sync_codex_compat.py --check` now catches mirror drift.
 
 ## Revised Sequence
 
@@ -186,11 +188,10 @@ Success criteria:
 
 `RuntimeSurfaceSync` is useful, but it is not coupled to retrieval generation and should not block that work.
 
-Recommended first step:
+Implemented path:
 
-- Add GitHub-facing validation before adding generation.
-
-Do not immediately auto-generate `.github/agents/`; that changes repo policy and may be surprising.
+- GitHub-facing validation was added first.
+- `.github/agents/` generation was then added after the repo policy was updated to make `.claude/agents/` the source of truth.
 
 Potential module shape:
 
@@ -205,9 +206,9 @@ scripts/horus_runtime_sync/
 
 Success criteria:
 
-- Existing `.claude -> .agents/.codex` generation remains unchanged.
-- `.github/agents` drift becomes explicit in validation output.
-- No generated Codex artifacts change unexpectedly.
+- Existing `.claude -> .agents/.codex` generation remains stable.
+- `.github/agents` drift is explicit in validation output.
+- `.github/agents` can be regenerated deterministically with `python3 scripts/sync_codex_compat.py --sync-github-agents`.
 
 ## Guardrails
 
@@ -217,7 +218,7 @@ Success criteria:
 - Do not make `RetrievalBuild` another large implementation module; it should orchestrate narrower builders.
 - Keep `CATEGORY_MAP`, `GENERAL_SUBCATEGORIES`, and `PROTOCOL_CONTEXTS` in taxonomy/config modules.
 - Keep `auditChecklist` separate unless it becomes data-driven as part of a later change.
-- Start `.github/agents` work with validation, not automatic generation.
+- Treat `.github/agents` as a generated mirror; update `.claude/agents` first and regenerate.
 
 ## Recommended Milestones
 
@@ -249,7 +250,8 @@ Success criteria:
 - Migrate quality checks and enrichment onto `DBDocument`.
 - Expand tests for compliance and enrichment behavior.
 
-### Milestone 6: Runtime sync validation
+### Milestone 6: Runtime sync validation and mirror generation
 
 - Add validation for `.github/agents` parity.
+- Generate `.github/agents` deterministically from `.claude/agents`.
 - Keep Codex generation behavior stable.

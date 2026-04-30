@@ -934,13 +934,16 @@ Add to the "Key Agents" table:
 Add to "Common Commands":
 ```
 # Build/refresh DB graph
-cd DB && /graphify . --mode deep --directed --wiki
+python3 scripts/build_db_graph.py
 
 # Query lessons
 python3 scripts/lessons_db.py query --ecosystem <eco> --topic "..."
 
 # Build blockchain AST for codebase
 horus-graphify-blockchain extract <path> --out blockchain-ast.json
+
+# Finalize audit-time graph output
+python3 scripts/finalize_audit_graph.py --codebase <path> --out audit-output/graph/graph.json
 ```
 
 ---
