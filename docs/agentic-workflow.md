@@ -120,6 +120,7 @@ These make the workflow operational rather than purely descriptive.
 - `.codex/rules/`
 - `.codex/config.toml`
 - `DB/graphify-out/**`
+- `.github/agents/*.md`
 
 Operational rule: change the source, then regenerate the generated surfaces.
 
@@ -148,7 +149,7 @@ Codex gets a generated compatibility layer built from `.claude/` by [`scripts/sy
 
 ### GitHub-Facing Agent Docs
 
-GitHub-facing agents live in [`.github/agents/`](../.github/agents). They are a repo surface for agent definitions and shared resources, but not the source tree from which Codex compatibility is generated.
+GitHub-facing agents live in [`.github/agents/`](../.github/agents). They are generated from [`.claude/agents/`](../.claude/agents) by `python3 scripts/sync_codex_compat.py --sync-github-agents`. Do not hand-edit them for behavior changes.
 
 ### Gemini CLI
 
@@ -166,8 +167,8 @@ The retrieval stack has four tiers plus graph expansion:
 Tier 1    DB/index.json
 Tier 1.5  DB/manifests/huntcards/*.json
 Tier 2    DB/manifests/*.json
-Tier 3    DB/**/*.md
 Graph     DB/graphify-out/graph.json
+Tier 3    DB/**/*.md
 ```
 
 ### Tier 1: Router
@@ -314,6 +315,7 @@ Then run:
 
 ```bash
 python3 scripts/generate_manifests.py
+python3 scripts/build_db_graph.py
 python3 scripts/db_quality_check.py
 ```
 
@@ -339,11 +341,12 @@ Then run:
 
 ```bash
 python3 scripts/sync_codex_compat.py
+python3 scripts/sync_codex_compat.py --sync-github-agents
 python3 scripts/sync_codex_compat.py --check
+python3 scripts/validate_codex_runtime.py
 ```
 
-If GitHub-facing agent docs should match the same behavior, also update the
-corresponding `.github/agents/**` and `.github/agents/resources/**` files.
+The GitHub-facing agent mirror is generated from `.claude/agents/`; resources under `.github/agents/resources/**` are checked for parity with `.claude/resources/**`.
 
 ### If you are updating graph artifacts
 
@@ -373,7 +376,7 @@ Look at:
 - Treating `reports/` as normal always-on context
 - Editing generated manifests or hunt cards directly
 - Editing generated Codex surfaces instead of the `.claude/` sources
-- Assuming `.github/agents/` is the source of truth for Codex generation
+- Editing generated `.github/agents/` mirrors instead of the `.claude/` sources
 - Forgetting to regenerate after changing DB or `.claude/` sources
 
 ## 10. Recommended Reading Order

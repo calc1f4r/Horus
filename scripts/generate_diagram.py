@@ -76,7 +76,7 @@ E.extend(box(P, 10, CW, 55,
     "VULNERABILITY DATABASE — COMPLETE ARCHITECTURE & AGENTIC WORKFLOW",
     bg="#1a1a2e", stroke="#1a1a2e", sz=24, color="#e0e0ff", bold=True))
 _, t = mk_text(P+100, 72, CW-200, 18,
-    "4-Tier Search · 11 Manifests · 500+ Patterns · 7-Phase Audit Pipeline · 16 Agents · Parallel Fan-Out",
+    "4-Tier Search · 14 Manifests · 1,972 Patterns · 1,362 Hunt Cards · 11-Phase Audit Pipeline · 37 Agents",
     sz=13, color="#888")
 E.append(t)
 
@@ -131,9 +131,9 @@ for i, (lbl, bg2, desc) in enumerate([
     ("TIER 1 → Router  (DB/index.json)",          "#BBDEFB",
      "~330 lines — protocolContext, manifest list, keyword index, audit checklist"),
     ("TIER 1.5 → Hunt Cards  (huntcards/*.json)",  "#90CAF9",
-     "451 compressed cards (~55K tokens) — grep patterns, micro-directives, neverPrune"),
+     "1,362 compressed cards — grep patterns, micro-directives, neverPrune"),
     ("TIER 2 → Manifests  (manifests/*.json)",     "#64B5F6",
-     "11 manifests — pattern indexes with lineStart/lineEnd, codeKeywords, rootCause"),
+     "14 manifests — pattern indexes with lineStart/lineEnd, codeKeywords, rootCause"),
     ("TIER 3 → Entries  (DB/**/*.md)",             "#42A5F5",
      "Full vuln content — YAML frontmatter, vulnerable/secure patterns, targeted reads only"),
 ]):
@@ -146,20 +146,23 @@ for i, (lbl, bg2, desc) in enumerate([
 
 # Manifest list (right side)
 MX = P + TW + 80
-E.extend(badge(MX, CY2+30, 240, "11 Manifest Categories", bg="#42A5F5"))
+E.extend(badge(MX, CY2+30, 240, "14 Manifest Categories", bg="#42A5F5"))
 mw = CW - TW - 110
 for i, m in enumerate([
-    "oracle (39) — Chainlink, Pyth, price manipulation",
-    "amm (65) — Concentrated liquidity, constant product",
-    "bridge (32) — LayerZero, Wormhole, Hyperlane, CCIP",
-    "tokens (33) — ERC20, ERC4626, ERC721",
-    "cosmos (26) — Cosmos SDK, IBC, staking",
-    "solana (38) — Solana programs, Token-2022",
-    "general-security (31) — Access control, signatures",
-    "general-defi (115) — Flash loans, vaults, precision",
-    "general-infrastructure (41) — Proxies, reentrancy",
-    "general-governance (56) — Governance, stablecoins, MEV",
-    "unique (59) — Protocol-specific exploits",
+    "general-defi (382) — Flash loans, vaults, yield",
+    "cosmos (416) — Cosmos SDK, IBC, app-chain invariants",
+    "sui-move (304) — Sui Move object model, bridges",
+    "general-infrastructure (125) — Proxies, reentrancy",
+    "general-security (114) — Access control, validation",
+    "unique (104) — Protocol-specific exploits",
+    "general-governance (99) — DAOs, stablecoins, MEV",
+    "zk-rollup (90) — Circuits, sequencers, L1/L2",
+    "amm (87) — Concentrated liquidity, constant product",
+    "oracle (85) — Chainlink, Pyth, price manipulation",
+    "bridge (84) — LayerZero, Wormhole, Hyperlane, CCIP",
+    "solana (41) — Solana programs, Token-2022",
+    "tokens (37) — ERC20, ERC4626, ERC721",
+    "account-abstraction (4) — ERC-4337, ERC-7579",
 ]):
     E.extend(box(MX, CY2+67+i*30, mw, 27, m,
         bg="#E3F2FD" if i%2==0 else "#FFF", stroke="#90CAF9", sz=11))

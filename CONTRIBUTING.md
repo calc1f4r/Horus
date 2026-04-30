@@ -30,16 +30,21 @@ pip install -r requirements.txt -r requirements-dev.txt
 4. **Regenerate manifests**:
    ```bash
    python3 scripts/generate_manifests.py
+   python3 scripts/build_db_graph.py
    ```
 
-5. **Verify** the new entry appears correctly in `DB/manifests/*.json` and `DB/index.json`.
+5. **Verify** the new entry appears correctly in `DB/manifests/*.json`, `DB/index.json`, and the regenerated graph artifacts:
+   ```bash
+   python3 scripts/db_quality_check.py
+   python3 scripts/validate_retrieval_pipeline.py
+   ```
 
 ### From DeFiHackLabs Exploits
 
 1. Read the exploit PoC in `DeFiHackLabs/src/test/`
 2. Extract vulnerability pattern, root cause, and attack steps
 3. Create a TEMPLATE.md-compliant entry with real code from the PoC
-4. Regenerate manifests
+4. Regenerate manifests and graph artifacts
 
 ## Entry Quality Checklist
 
@@ -64,13 +69,23 @@ Before submitting:
 
 ## Improving Agents
 
-Agent skill files live in `.github/agents/`. When modifying:
+The canonical agent and skill sources live in `.claude/`. The `.github/agents/`,
+`.agents/skills/`, and `.codex/` surfaces are generated mirrors. When modifying
+agent behavior:
 
-1. Keep the SKILL.md body under 500 lines
-2. Use third-person descriptions
-3. Include a workflow checklist with trackable steps
-4. Reference detailed content in separate files under `resources/`
-5. Test with real tasks before submitting
+1. Edit the source files under `.claude/agents/`, `.claude/skills/`, `.claude/resources/`, or `.claude/rules/`.
+2. Keep skill bodies focused and move detailed reference material into shared resources.
+3. Regenerate generated surfaces:
+   ```bash
+   python3 scripts/sync_codex_compat.py
+   python3 scripts/sync_codex_compat.py --sync-github-agents
+   ```
+4. Verify runtime and mirror integrity:
+   ```bash
+   python3 scripts/sync_codex_compat.py --check
+   python3 scripts/validate_codex_runtime.py
+   ```
+5. Test with real tasks before submitting.
 
 ## Code Style
 

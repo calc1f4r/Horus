@@ -7,15 +7,17 @@ This repository is **Horus**, a curated vulnerability database for smart contrac
 - **DB Router**: `DB/index.json` — START HERE for any vulnerability lookup
 - **Hunt Cards**: `DB/manifests/huntcards/all-huntcards.json` — combined enriched hunt-card corpus; prefer per-manifest cards when context is tight
 - **Manifests**: `DB/manifests/*.json` — full pattern-level indexes with line ranges
+- **DB Graph**: `DB/graphify-out/graph.json` — additive related-variant expansion after initial routing
 - **Template**: `TEMPLATE.md` — structure for new and migrated vulnerability entries
 - **Example**: `Example.md` — reference implementation of an entry
 
-## Architecture: 4-Tier Search
+## Architecture: 4-Tier Search + Graph Expansion
 
 ```
 Tier 1:   DB/index.json                          ← Router (~350 lines). Start here.
 Tier 1.5: DB/manifests/huntcards/*-huntcards.json ← Compressed detection cards
 Tier 2:   DB/manifests/<name>.json                ← Full pattern-level index with line ranges
+Graph:    DB/graphify-out/graph.json             ← Additive related-card expansion
 Tier 3:   DB/**/*.md                              ← Vulnerability content. Read ONLY targeted line ranges.
 ```
 
@@ -110,17 +112,27 @@ python3 scripts/solodit_fetcher.py <topic>
 # Run DB quality checks
 python3 scripts/db_quality_check.py
 
+# Run full retrieval/graph validation
+python3 scripts/validate_retrieval_pipeline.py
+
 # Generate entries from reports
 python3 scripts/generate_entries.py
 
 # Build/refresh DB knowledge graph (run from repo root)
-cd DB && /graphify . --mode deep --directed --wiki
+python3 scripts/build_db_graph.py
+
+# Validate generated Codex/GitHub runtime surfaces
+python3 scripts/sync_codex_compat.py --check
+python3 scripts/validate_codex_runtime.py
 
 # Query cross-audit lessons
 python3 scripts/lessons_db.py query --ecosystem evm --topic "price manipulation"
 
 # Extract blockchain AST for a codebase (Solidity/Move/Cairo)
 horus-graphify-blockchain extract <path> --out audit-output/graph/blockchain-ast.json
+
+# Finalize audit-time graphify output into queryable node-link graph JSON
+python3 scripts/finalize_audit_graph.py --codebase <path> --out audit-output/graph/graph.json
 ```
 
 ## Conventions

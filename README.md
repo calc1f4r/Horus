@@ -236,7 +236,7 @@ Normal maintenance rule:
 | [`invariants/`](invariants) | Canonical invariant reference library |
 | [`scripts/`](scripts) | Generators, validators, shard tools, migration utilities, runtime sync |
 | [`.claude/`](.claude) | Canonical playbooks, skills, rules, and shared references |
-| [`.github/agents/`](.github/agents) | Generated GitHub-facing agent definitions and resources |
+| [`.github/agents/`](.github/agents) | Generated GitHub-facing agent definitions plus resource parity mirror |
 | [`.agents/skills/`](.agents/skills) | Generated Codex repo-local skills |
 | [`.codex/`](.codex) | Generated Codex agents, resources, rules, and config |
 | [`CLAUDE.md`](CLAUDE.md) | Claude entry instructions |

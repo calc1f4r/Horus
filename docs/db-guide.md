@@ -297,7 +297,7 @@ Post-triage:
 
 ### Data Pipeline Producers & Consumers
 
-> **Cross-cutting**: `memory-state.md` is read and written by ALL agents. Every agent reads it before starting and appends a memory entry after completing. The orchestrator consolidates between phases. See [memory-state.md](.claude/resources/memory-state.md).
+> **Cross-cutting**: `memory-state.md` is read and written by ALL agents. Every agent reads it before starting and appends a memory entry after completing. The orchestrator consolidates between phases. See [memory-state.md](../.claude/resources/memory-state.md).
 
 | Agent | Produces | Consumes |
 |-------|----------|----------|

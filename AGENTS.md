@@ -44,7 +44,8 @@ Do not hand-edit generated files under `.agents/skills/` or `.codex/`. Change th
 
 4. Audit workflow layer
    - `scripts/grep_prune.py`, `scripts/partition_shards.py`, and `scripts/merge_shard_findings.py` implement the DB-powered hunting loop.
-   - `.claude/` and `.github/agents/` contain agent playbooks for the larger multi-phase audit pipeline.
+   - `.claude/` contains the canonical agent playbooks for the larger multi-phase audit pipeline.
+   - `.github/agents/` is the generated GitHub-facing mirror.
    - `.agents/skills/`, `.codex/agents/`, `.codex/resources/`, `.codex/rules/`, and `.codex/config.toml` are the generated Codex runtime surfaces.
 
 ## Start Here By Task
@@ -104,6 +105,7 @@ python3 scripts/build_db_graph.py
 - If you modify a DB entry, assume manifest regeneration is required.
 - If you modify Claude playbooks, regenerate the Codex-facing outputs and verify them with `python3 scripts/sync_codex_compat.py --check`.
 - If you modify Claude playbooks, regenerate the GitHub-facing agent mirror with `python3 scripts/sync_codex_compat.py --sync-github-agents`.
+- If runtime files or skill links changed, run `python3 scripts/validate_codex_runtime.py`.
 - If you modify agent docs, inspect `.claude/` first; `.github/agents/**` is the generated GitHub-facing mirror.
 - Use system `python3` or the local `.venv` if present and healthy.
 
@@ -120,7 +122,10 @@ python3 scripts/generate_manifests.py
 python3 scripts/build_db_graph.py
 python3 scripts/db_quality_check.py
 python3 scripts/sync_codex_compat.py
+python3 scripts/sync_codex_compat.py --sync-github-agents
 python3 scripts/sync_codex_compat.py --check
+python3 scripts/validate_codex_runtime.py
+python3 scripts/validate_retrieval_pipeline.py
 python3 scripts/grep_prune.py <target_path> DB/manifests/huntcards/all-huntcards.json
 python3 scripts/partition_shards.py audit-output/hunt-card-hits.json
 python3 scripts/merge_shard_findings.py audit-output

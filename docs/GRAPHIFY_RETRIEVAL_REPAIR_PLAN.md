@@ -71,7 +71,7 @@ python3 scripts/validate_retrieval_pipeline.py
 - Do not hand-edit generated Codex files under `.agents/skills/**` or `.codex/**`.
 - If DB Markdown changes, run `python3 scripts/generate_manifests.py`.
 - If hunt-card or graph relationship inputs change, run `python3 scripts/build_db_graph.py`.
-- If Claude playbooks change, run `python3 scripts/sync_codex_compat.py` and `python3 scripts/sync_codex_compat.py --check`.
+- If Claude playbooks change, run `python3 scripts/sync_codex_compat.py`, `python3 scripts/sync_codex_compat.py --sync-github-agents`, and `python3 scripts/sync_codex_compat.py --check`.
 - Preserve existing untracked work unless explicitly asked to replace it.
 
 ## 2. Current Baseline
@@ -299,7 +299,9 @@ Then run:
 
 ```bash
 python3 scripts/sync_codex_compat.py
+python3 scripts/sync_codex_compat.py --sync-github-agents
 python3 scripts/sync_codex_compat.py --check
+python3 scripts/validate_codex_runtime.py
 ```
 
 Definition of done:
@@ -578,6 +580,7 @@ Commands:
 
 ```bash
 python3 scripts/sync_codex_compat.py
+python3 scripts/sync_codex_compat.py --sync-github-agents
 python3 scripts/sync_codex_compat.py --check
 ```
 

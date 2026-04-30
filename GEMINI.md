@@ -46,7 +46,7 @@ gh repo clone calc1f4r/Horus reports/<CATEGORY> \
 
 ## 3. Emulating the Agent System & Skills
 
-Horus contains 35 specialized audit workflows and tools. When running an audit phase or performing targeted discovery, you must leverage Gemini's skill system and sub-agents:
+Horus contains 37 specialized audit workflows and tools. When running an audit phase or performing targeted discovery, you must leverage Gemini's skill system and sub-agents:
 
 1. **Activate Skills:** Use the `activate_skill` tool to dynamically load expert procedural guidance. For example, if asked to run an audit phase or generate formal verification, call `activate_skill` with the appropriate name (e.g., `invariant-writer`, `protocol-reasoning`, `audit-orchestrator`). These skills are mapped from the repository's `.agents/skills/` directory.
 2. **Sub-Agents:** 
@@ -67,6 +67,8 @@ When adding or updating vulnerabilities in `DB/`:
    ```bash
    source .venv/bin/activate
    python3 scripts/generate_manifests.py
+   python3 scripts/build_db_graph.py
+   python3 scripts/db_quality_check.py
    ```
 
 ---
@@ -84,8 +86,11 @@ pip install -r requirements.txt -r requirements-dev.txt
 ```
 
 - **`scripts/generate_manifests.py`**: Crucial. Rebuilds the search index. Run after any DB edit.
+- **`scripts/build_db_graph.py`**: Rebuilds `DB/graphify-out/` from manifests and hunt cards. Run after DB or hunt-card relationship changes.
 - **`scripts/solodit_fetcher.py`**: Use to fetch raw audit reports into the `reports/` structure.
 - **`scripts/db_quality_check.py`**: Validates the structural integrity and line ranges of DB entries. Run this to verify your DB edits.
+- **`scripts/validate_retrieval_pipeline.py`**: Runs compile checks, unit tests, DB quality checks, graph smoke tests, sync checks, and audit graph finalization.
+- **`scripts/validate_codex_runtime.py`**: Validates generated Codex runtime files and generated skill links.
 - **`scripts/generate_entries.py`**: Assists in generating DB entries from fetched reports.
 
 ---
