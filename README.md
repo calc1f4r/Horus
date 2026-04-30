@@ -7,10 +7,11 @@
 Horus is a security knowledge system built so multiple agent runtimes can work from the same database, the same retrieval discipline, and the same audit playbooks.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Patterns](https://img.shields.io/badge/patterns-2%2C258-brightgreen)](DB/manifests)
+[![Patterns](https://img.shields.io/badge/patterns-1%2C972-brightgreen)](DB/manifests)
 [![Manifests](https://img.shields.io/badge/manifests-14-orange)](DB/manifests)
-[![Hunt Cards](https://img.shields.io/badge/hunt%20cards-1%2C522-red)](DB/manifests/huntcards)
-[![Agents](https://img.shields.io/badge/agents-35-blueviolet)](.github/agents)
+[![Hunt Cards](https://img.shields.io/badge/hunt%20cards-1%2C362-red)](DB/manifests/huntcards)
+[![Graph](https://img.shields.io/badge/graph-5%2C270%20nodes-informational)](DB/graphify-out/graph.json)
+[![Agents](https://img.shields.io/badge/agents-37-blueviolet)](.github/agents)
 [![Reports](https://img.shields.io/badge/raw%20reports-22%2C200%2B-yellow)](reports)
 
 </div>
@@ -24,7 +25,7 @@ Horus is not a normal app and it is not just a prompt collection.
 It is a layered system:
 
 1. Knowledge sources: curated vulnerability entries in `DB/`, raw findings in `reports/`, exploit PoCs in `DeFiHackLabs/`, and reference properties in `invariants/`.
-2. Retrieval layer: generated routers, manifests, keyword indexes, and hunt cards that let agents narrow context before reading long-form content.
+2. Retrieval layer: generated routers, manifests, keyword indexes, hunt cards, and graph artifacts that let agents narrow context before reading long-form content.
 3. Workflow layer: reusable audit playbooks, skills, rules, and shared references.
 4. Runtime layer: runtime-specific entrypoints and generated surfaces for Claude, Codex, GitHub, Gemini CLI, and editor-based agents.
 5. Execution layer: grep-prune, shard partitioning, merge, PoC, fuzzing, formal verification, and judging flows.
@@ -44,6 +45,7 @@ Horus couples those pieces together:
 
 - retrieval is route-first and grep-first
 - DB entries are indexed into compact machine-usable artifacts
+- Graphify-compatible graph output adds related-variant expansion without replacing route-first retrieval
 - the audit lifecycle is encoded as reusable agent playbooks
 - those playbooks are exposed through multiple runtime surfaces
 
@@ -59,7 +61,7 @@ The compatibility model is deliberate. Some runtimes have native surfaces here; 
 |---|---|---|
 | Claude Code | Native source runtime | [`CLAUDE.md`](CLAUDE.md), [`.claude/agents/`](.claude/agents), [`.claude/skills/`](.claude/skills), [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) |
 | Codex CLI | Native generated runtime | [`AGENTS.md`](AGENTS.md), [`.agents/skills/`](.agents/skills), [`.codex/agents/`](.codex/agents), [`.codex/config.toml`](.codex/config.toml) |
-| GitHub-facing agent docs | Repo-native docs surface | [`.github/agents/`](.github/agents) |
+| GitHub-facing agent docs | Generated repo-native mirror | [`.github/agents/`](.github/agents) |
 | Gemini CLI | Native workspace instructions & skills | [`GEMINI.md`](GEMINI.md), [`.agents/skills/`](.agents/skills) |
 | Cursor | Portable workspace consumption | [`AGENTS.md`](AGENTS.md), [`CLAUDE.md`](CLAUDE.md), [`.claude/agents/`](.claude/agents) |
 | VS Code | Portable workspace consumption | [`AGENTS.md`](AGENTS.md), [`CLAUDE.md`](CLAUDE.md), [`GEMINI.md`](GEMINI.md), [`.claude/agents/`](.claude/agents) |
@@ -68,7 +70,7 @@ Key rule:
 
 - `.claude/` is the canonical workflow source tree
 - `.agents/skills/` and `.codex/` are generated from `.claude/`
-- `.github/agents/` is a GitHub-facing documentation/runtime surface
+- `.github/agents/` is generated from `.claude/agents/` as the GitHub-facing documentation/runtime mirror
 - Cursor and VS Code consume the repo through these instruction files and playbooks, not through a dedicated generated integration layer
 
 ---
@@ -88,6 +90,14 @@ DB/index.json
 DB/manifests/*.json
 DB/manifests/huntcards/*.json
 DB/manifests/keywords.json
+            |
+            v
+Graph Generation
+scripts/build_db_graph.py
+            |
+            v
+DB/graphify-out/graph.json
+DB/graphify-out/GRAPH_REPORT.md
             |
             v
 Audit Workflow Playbooks
@@ -115,6 +125,7 @@ Horus is designed around retrieval minimization.
 Tier 1    DB/index.json
 Tier 1.5  DB/manifests/huntcards/*.json
 Tier 2    DB/manifests/*.json
+Tier 2.5  DB/graphify-out/graph.json
 Tier 3    DB/**/*.md
 ```
 
@@ -123,8 +134,9 @@ How agents should use it:
 1. Start with [`DB/index.json`](DB/index.json).
 2. Resolve relevant manifests from protocol context or keywords.
 3. Use hunt cards to grep the target codebase and prune irrelevant patterns.
-4. Use manifests to resolve exact `lineStart` and `lineEnd` ranges.
-5. Read only those targeted DB Markdown ranges.
+4. Optionally expand related variants through [`DB/graphify-out/graph.json`](DB/graphify-out/graph.json). Do not use graph results to remove baseline hunt cards.
+5. Use manifests to resolve exact `lineStart` and `lineEnd` ranges.
+6. Read only those targeted DB Markdown ranges.
 
 This is the central design constraint of the repo. Reading all DB files or all reports directly defeats the architecture.
 
@@ -166,6 +178,11 @@ The workflow is agent-driven, but it is also script-backed. The sharded hunt-car
 - [`scripts/partition_shards.py`](scripts/partition_shards.py)
 - [`scripts/merge_shard_findings.py`](scripts/merge_shard_findings.py)
 
+Graph-aware audit setup also uses:
+
+- [`scripts/build_db_graph.py`](scripts/build_db_graph.py)
+- [`scripts/finalize_audit_graph.py`](scripts/finalize_audit_graph.py)
+
 For a longer walkthrough, see [`docs/agentic-workflow.md`](docs/agentic-workflow.md).
 
 ---
@@ -190,16 +207,21 @@ This distinction is critical for maintenance.
 - [`DB/index.json`](DB/index.json)
 - [`DB/manifests/*.json`](DB/manifests)
 - [`DB/manifests/huntcards/*.json`](DB/manifests/huntcards)
+- [`DB/graphify-out/graph.json`](DB/graphify-out/graph.json)
+- [`DB/graphify-out/GRAPH_REPORT.md`](DB/graphify-out/GRAPH_REPORT.md)
 - [`.agents/skills/`](.agents/skills)
 - [`.codex/agents/`](.codex/agents)
 - [`.codex/resources/`](.codex/resources)
 - [`.codex/rules/`](.codex/rules)
 - [`.codex/config.toml`](.codex/config.toml)
+- [`.github/agents/`](.github/agents)
 
 Normal maintenance rule:
 
 - do not hand-edit generated manifests or hunt cards
+- do not hand-edit generated graph artifacts
 - do not hand-edit generated Codex runtime files
+- do not hand-edit generated GitHub agent mirrors
 - update the source content or source playbooks, then regenerate
 
 ---
@@ -214,7 +236,7 @@ Normal maintenance rule:
 | [`invariants/`](invariants) | Canonical invariant reference library |
 | [`scripts/`](scripts) | Generators, validators, shard tools, migration utilities, runtime sync |
 | [`.claude/`](.claude) | Canonical playbooks, skills, rules, and shared references |
-| [`.github/agents/`](.github/agents) | GitHub-facing agent definitions and resources |
+| [`.github/agents/`](.github/agents) | Generated GitHub-facing agent definitions and resources |
 | [`.agents/skills/`](.agents/skills) | Generated Codex repo-local skills |
 | [`.codex/`](.codex) | Generated Codex agents, resources, rules, and config |
 | [`CLAUDE.md`](CLAUDE.md) | Claude entry instructions |
@@ -237,7 +259,7 @@ Normal maintenance rule:
 | Judging | `sherlock-judging`, `cantina-judge`, `code4rena-judge`, `judge-orchestrator` | Validate reportability and severity |
 | DB maintenance | `variant-template-writer`, `defihacklabs-indexer`, `solodit-fetching`, `db-quality-monitor` | Expand and maintain the knowledge base |
 
-The canonical source playbooks live in [`.claude/agents/`](.claude/agents). The Codex-generated mirrors live in [`.codex/agents/`](.codex/agents).
+The canonical source playbooks live in [`.claude/agents/`](.claude/agents). The Codex-generated mirrors live in [`.codex/agents/`](.codex/agents), and the GitHub-facing mirrors live in [`.github/agents/`](.github/agents).
 
 ---
 
@@ -253,7 +275,7 @@ Start with [`AGENTS.md`](AGENTS.md). The generated runtime surface is in [`.agen
 
 ### GitHub-Facing Agent Docs
 
-Start with [`.github/agents/`](.github/agents).
+Start with [`.github/agents/`](.github/agents). These files are generated from [`.claude/agents/`](.claude/agents); edit the Claude source first when changing behavior.
 
 ### Gemini CLI
 
@@ -297,9 +319,13 @@ Start from the orchestrator for the runtime you are using:
 
 Edit [`scripts/generate_manifests.py`](scripts/generate_manifests.py), then regenerate outputs.
 
+### Change graph behavior
+
+Edit [`scripts/build_db_graph.py`](scripts/build_db_graph.py), then rebuild [`DB/graphify-out/`](DB/graphify-out).
+
 ### Change runtime playbooks
 
-Edit the canonical `.claude/` sources, then regenerate the Codex-compatible surfaces.
+Edit the canonical `.claude/` sources, then regenerate the Codex-compatible and GitHub-facing generated surfaces.
 
 ---
 
@@ -307,9 +333,13 @@ Edit the canonical `.claude/` sources, then regenerate the Codex-compatible surf
 
 ```bash
 python3 scripts/generate_manifests.py
+python3 scripts/build_db_graph.py
 python3 scripts/db_quality_check.py
 python3 scripts/sync_codex_compat.py
+python3 scripts/sync_codex_compat.py --sync-github-agents
 python3 scripts/sync_codex_compat.py --check
+python3 scripts/validate_codex_runtime.py
+python3 scripts/validate_retrieval_pipeline.py
 python3 scripts/grep_prune.py <target_path> DB/manifests/huntcards/all-huntcards.json
 python3 scripts/partition_shards.py audit-output/hunt-card-hits.json
 python3 scripts/merge_shard_findings.py audit-output
@@ -324,6 +354,7 @@ python3 scripts/update_codebase_structure.py
 |---|---|
 | [`docs/agentic-workflow.md`](docs/agentic-workflow.md) | End-to-end system and workflow overview |
 | [`docs/codex-architecture.md`](docs/codex-architecture.md) | Codex-oriented explanation of source, generated, and runtime surfaces |
+| [`docs/GRAPHIFY_RETRIEVAL_REPAIR_PLAN.md`](docs/GRAPHIFY_RETRIEVAL_REPAIR_PLAN.md) | Completed Graphify, retrieval, validation, and generated-surface repair plan |
 | [`docs/codebase-structure.md`](docs/codebase-structure.md) | Detailed directory-by-directory repo map |
 | [`docs/db-guide.md`](docs/db-guide.md) | DB authoring, search, and hunt-card workflows |
 | [`AGENTS.md`](AGENTS.md) | Codex working guide |
@@ -336,7 +367,7 @@ python3 scripts/update_codebase_structure.py
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-If you change DB source files, regenerate manifests. If you change `.claude/` playbooks, regenerate the Codex-facing outputs. Prefer updating canonical sources over patching generated artifacts directly.
+If you change DB source files, regenerate manifests and rebuild the graph when relationships may change. If you change `.claude/` playbooks, regenerate the Codex-facing outputs and GitHub-facing mirrors. Prefer updating canonical sources over patching generated artifacts directly.
 
 ---
 
