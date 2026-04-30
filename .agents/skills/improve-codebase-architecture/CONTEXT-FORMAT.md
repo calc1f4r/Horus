@@ -45,8 +45,8 @@ Use a root `CONTEXT-MAP.md` that points to context-specific files.
 
 ## Contexts
 
-- [Ordering](./src/ordering/CONTEXT.md) - receives and tracks customer orders
-- [Billing](./src/billing/CONTEXT.md) - creates invoices and payments
+- `src/ordering/CONTEXT.md` - receives and tracks customer orders
+- `src/billing/CONTEXT.md` - creates invoices and payments
 
 ## Relationships
 
