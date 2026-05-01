@@ -153,15 +153,17 @@ Each hunt card:
 5. For each card, grep target codebase for card.grep pattern:
    grep -rn "card.grep" <target_path> --include="*.sol"
 6. Cards with `neverPrune: true` always survive (CRITICAL safety net)
-7. Prune cards with zero grep hits (removes ~60-80% of patterns)
-8. PARTITION surviving cards into shards of 50-80 cards (grouped by cat tag)
+7. Cards with search execution errors survive with `searchError` for manual review
+8. Prune cards with zero grep hits (removes ~60-80% of patterns)
+9. PARTITION surviving cards into shards of 50-80 cards (grouped by cat tag)
    - Separate neverPrune cards → duplicate to every shard
+   - If only neverPrune cards survive, keep a critical-only shard so the safety-net review still runs
    - Target: each shard fits comfortably in one agent's context
-9. SPAWN one sub-agent per shard (parallel):
+10. SPAWN one sub-agent per shard (parallel):
    - Each agent gets: its shard cards + neverPrune cards + full target code + invariants
    - Each agent runs Pass 1 (micro-directives) + Pass 2 (evidence lookup)
    - Each agent writes to audit-output/03-findings-shard-<id>.md
-10. MERGE all shard findings → deduplicate by root cause → 03-findings-raw.md
+11. MERGE all shard findings → deduplicate by root cause → 03-findings-raw.md
 ```
 
 **Example**: Auditing an ERC4626 vault

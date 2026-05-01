@@ -10,6 +10,7 @@ from horus_retrieval.protocol_context import PROTOCOL_CONTEXTS
 DB_ROOT = "DB/"
 MANIFESTS_DIR = "DB/manifests/"
 HUNTCARDS_DIR = "DB/manifests/huntcards/"
+BUNDLES_DIR = "DB/manifests/bundles/"
 IGNORED_ENTRY_DIRS = {"manifests", "graphify-out", "_drafts", "_telemetry"}
 GENERATOR_PATH = Path("scripts/generate_manifests.py")
 DB_GRAPH_PATH = Path("DB/graphify-out/graph.json")
@@ -74,6 +75,111 @@ def score_graph_labels(nodes, query):
         if score > 0:
             scored.append((score, label))
     return [label for _score, label in sorted(scored, reverse=True)]
+
+def validate_partition_bundle_data(bundle, source="<bundle>"):
+    """Validate a generated protocol shard bundle."""
+    issues = []
+
+    if not isinstance(bundle, dict):
+        return [("CRITICAL", f"{source}: bundle is not a JSON object")]
+
+    meta = bundle.get("meta", {})
+    shards = bundle.get("shards", [])
+    if not isinstance(meta, dict):
+        issues.append(("CRITICAL", f"{source}: meta is not an object"))
+        meta = {}
+    if not isinstance(shards, list):
+        issues.append(("CRITICAL", f"{source}: shards is not a list"))
+        return issues
+
+    critical_ids = meta.get("criticalCardIds", [])
+    if not isinstance(critical_ids, list):
+        issues.append(("CRITICAL", f"{source}: meta.criticalCardIds is not a list"))
+        critical_ids = []
+    critical_set = set(critical_ids)
+
+    if meta.get("criticalCards") != len(critical_ids):
+        issues.append((
+            "CRITICAL",
+            f"{source}: meta.criticalCards={meta.get('criticalCards')} but criticalCardIds has {len(critical_ids)}",
+        ))
+    if meta.get("shardCount") != len(shards):
+        issues.append((
+            "CRITICAL",
+            f"{source}: meta.shardCount={meta.get('shardCount')} but shards has {len(shards)}",
+        ))
+    if meta.get("totalCards", 0) > 0 and not shards:
+        issues.append(("CRITICAL", f"{source}: totalCards > 0 but no shards are actionable"))
+
+    regular_ids = []
+    duplicate_regular_ids = []
+    seen_regular = set()
+
+    for idx, shard in enumerate(shards):
+        shard_label = shard.get("id", f"shard[{idx}]") if isinstance(shard, dict) else f"shard[{idx}]"
+        if not isinstance(shard, dict):
+            issues.append(("CRITICAL", f"{source}: {shard_label} is not an object"))
+            continue
+
+        card_ids = shard.get("cardIds", [])
+        shard_critical_ids = shard.get("criticalCardIds", [])
+        if not isinstance(card_ids, list):
+            issues.append(("CRITICAL", f"{source}: {shard_label}.cardIds is not a list"))
+            card_ids = []
+        if not isinstance(shard_critical_ids, list):
+            issues.append(("CRITICAL", f"{source}: {shard_label}.criticalCardIds is not a list"))
+            shard_critical_ids = []
+
+        if set(shard_critical_ids) != critical_set:
+            issues.append(("CRITICAL", f"{source}: {shard_label} does not carry the full criticalCardIds set"))
+
+        critical_only = bool(shard.get("criticalOnly"))
+        if not critical_only:
+            overlap = sorted(set(card_ids) & critical_set)
+            if overlap:
+                issues.append(("CRITICAL", f"{source}: {shard_label}.cardIds includes critical IDs: {overlap[:5]}"))
+
+        expected_regular_count = len(card_ids)
+        if shard.get("cardCount") != expected_regular_count:
+            issues.append((
+                "CRITICAL",
+                f"{source}: {shard_label}.cardCount={shard.get('cardCount')} but cardIds has {expected_regular_count}",
+            ))
+        if shard.get("regularCardCount", expected_regular_count) != expected_regular_count:
+            issues.append((
+                "CRITICAL",
+                f"{source}: {shard_label}.regularCardCount={shard.get('regularCardCount')} but cardIds has {expected_regular_count}",
+            ))
+        if shard.get("criticalCardCount", len(critical_ids)) != len(critical_ids):
+            issues.append((
+                "CRITICAL",
+                f"{source}: {shard_label}.criticalCardCount={shard.get('criticalCardCount')} but meta has {len(critical_ids)} critical IDs",
+            ))
+        if shard.get("effectiveCardCount", expected_regular_count + len(critical_ids)) != expected_regular_count + len(critical_ids):
+            issues.append((
+                "CRITICAL",
+                f"{source}: {shard_label}.effectiveCardCount={shard.get('effectiveCardCount')} but expected {expected_regular_count + len(critical_ids)}",
+            ))
+
+        for card_id in card_ids:
+            if card_id in critical_set and critical_only:
+                continue
+            if card_id in seen_regular:
+                duplicate_regular_ids.append(card_id)
+            seen_regular.add(card_id)
+            regular_ids.append(card_id)
+
+    if duplicate_regular_ids:
+        issues.append(("CRITICAL", f"{source}: duplicate regular card IDs across shards: {sorted(set(duplicate_regular_ids))[:10]}"))
+
+    total_unique = len((set(regular_ids) - critical_set) | critical_set)
+    if meta.get("totalCards") != total_unique:
+        issues.append((
+            "CRITICAL",
+            f"{source}: meta.totalCards={meta.get('totalCards')} but regular+critical unique cards total {total_unique}",
+        ))
+
+    return issues
 
 def find_entries():
     result = []
@@ -341,6 +447,11 @@ def skill3():
                 unknown_severity += 1
             if not card.get('grep'):
                 issues.append(('WARNING', f'{mname}: card {cid} has empty grep'))
+            else:
+                try:
+                    re.compile(card.get('grep', ''))
+                except re.error as exc:
+                    issues.append(('CRITICAL', f'{mname}: card {cid} has invalid grep regex: {exc}'))
             if not card.get('ref'):
                 issues.append(('CRITICAL', f'{mname}: card {cid} has no ref'))
             elif not os.path.isfile(card.get('ref', '')):
@@ -799,6 +910,39 @@ def skill8():
 
     return issues
 
+def skill9():
+    """Partition bundle health."""
+    print("\n" + "=" * 60)
+    print("SKILL 9: PARTITION BUNDLE HEALTH")
+    print("=" * 60)
+
+    issues = []
+    bundles_dir = Path(BUNDLES_DIR)
+    if not bundles_dir.is_dir():
+        issues.append(("WARNING", f"Partition bundles directory missing: {BUNDLES_DIR}"))
+    else:
+        bundle_files = sorted(bundles_dir.glob("*-shards.json"))
+        if not bundle_files:
+            issues.append(("WARNING", f"No partition bundle files found in {BUNDLES_DIR}"))
+
+        for bundle_file in bundle_files:
+            try:
+                with bundle_file.open("r", encoding="utf-8") as f:
+                    bundle = json.load(f)
+            except json.JSONDecodeError as exc:
+                issues.append(("CRITICAL", f"{bundle_file}: invalid JSON: {exc}"))
+                continue
+            issues.extend(validate_partition_bundle_data(bundle, str(bundle_file)))
+
+        if not any(level == "CRITICAL" for level, _ in issues):
+            print(f"  ✅ Partition bundles OK ({len(bundle_files)} bundles)")
+
+    for level, msg in issues:
+        icon = "🔴" if level == "CRITICAL" else "⚠️"
+        print(f"  {icon} {msg}")
+
+    return issues
+
 if __name__ == '__main__':
     s1 = skill1()
     s2 = skill2()
@@ -808,6 +952,7 @@ if __name__ == '__main__':
     s6 = skill6_sample()
     s7 = skill7()
     s8 = skill8()
+    s9 = skill9()
     
     print("\n" + "=" * 60)
     print("SUMMARY")
@@ -815,7 +960,7 @@ if __name__ == '__main__':
     
     all_critical = []
     all_warnings = []
-    for results in [s2, s3, s4, s5, s6, s7, s8]:
+    for results in [s2, s3, s4, s5, s6, s7, s8, s9]:
         if isinstance(results, list):
             for level, msg in results:
                 if level == 'CRITICAL':

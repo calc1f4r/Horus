@@ -12,6 +12,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 from horus_retrieval.huntcards import (  # noqa: E402
+    build_grep_pattern,
     build_all_huntcards,
     build_huntcard,
     build_huntcards_for_manifest,
@@ -93,11 +94,19 @@ class TestHuntcards(unittest.TestCase):
         card = build_huntcard(pattern, "DB/oracle/sample.md", "oracle")
 
         self.assertEqual(card["severity"], "CRITICAL")
-        self.assertEqual(card["grep"], "latestRoundData|block.timestamp")
+        self.assertEqual(card["grep"], "latestRoundData|block\\.timestamp")
         self.assertEqual(card["cat"], ["oracle", "price-feed", "data-freshness"])
         self.assertTrue(card["neverPrune"])
         self.assertIn("reportEvidence", card)
         self.assertIn("graphHints", card)
+
+    def test_build_grep_pattern_escapes_regex_metacharacters(self):
+        pattern = build_grep_pattern(["balanceOf(address(this", "block.timestamp", "sharesToUnderlying(amountShares"])
+
+        self.assertEqual(
+            pattern,
+            "balanceOf\\(address\\(this|block\\.timestamp|sharesToUnderlying\\(amountShares",
+        )
 
     def test_build_huntcards_for_manifest_counts_skipped_patterns(self):
         manifest = {

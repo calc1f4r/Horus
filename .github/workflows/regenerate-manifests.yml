@@ -2,7 +2,8 @@ name: Regenerate Manifests & Sync to Master
 
 # Runs on every push to the hunt-cards working branch.
 # Job 1 (regenerate): rebuilds DB/index.json + DB/manifests/ (including hunt
-#   cards) only when vulnerability .md files or the generator script change.
+#   cards) and DB/graphify-out/ only when vulnerability .md files or retrieval
+#   generator scripts change.
 # Job 2 (sync-to-master): always runs after Job 1 and pushes the curated
 #   public-facing subset of the repo to the master branch.
 
@@ -15,7 +16,7 @@ permissions:
   contents: write
 
 jobs:
-  # ── Job 1: Regenerate manifests & hunt cards ─────────────────────────────
+  # ── Job 1: Regenerate manifests, hunt cards, and DB graph ────────────────
   regenerate:
     name: Regenerate manifests
     runs-on: ubuntu-latest
@@ -50,25 +51,27 @@ jobs:
 
       - name: Run manifest & hunt-card generator
         if: steps.check_paths.outputs.paths_changed != '0'
-        run: python3 scripts/generate_manifests.py
+        run: |
+          python3 scripts/generate_manifests.py
+          python3 scripts/build_db_graph.py
 
       - name: Detect generated changes
         id: diff
         if: steps.check_paths.outputs.paths_changed != '0'
         run: |
-          git diff --quiet DB/index.json DB/manifests/ \
+          git diff --quiet DB/index.json DB/manifests/ DB/graphify-out/ \
             && echo "changed=false" >> "$GITHUB_OUTPUT" \
             || echo "changed=true"  >> "$GITHUB_OUTPUT"
 
-      - name: Commit & push updated manifests
+      - name: Commit & push updated retrieval artifacts
         if: >
           steps.check_paths.outputs.paths_changed != '0' &&
           steps.diff.outputs.changed == 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add DB/index.json DB/manifests/
-          git commit -m "chore: regenerate manifests + hunt cards [skip ci]"
+          git add DB/index.json DB/manifests/ DB/graphify-out/
+          git commit -m "chore: regenerate retrieval artifacts [skip ci]"
           git push
 
   # ── Job 2: Sync curated subset → master ──────────────────────────────────

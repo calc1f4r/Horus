@@ -67,7 +67,7 @@ jobs:
           BASELINE_COUNT: ${{ steps.baseline.outputs.count }}
         run: |
           python3 - <<'EOF'
-          import json, os, sys
+          import json, os, re, sys
           from pathlib import Path
 
           HUNTCARDS_DIR = Path("DB/manifests/huntcards")
@@ -85,6 +85,15 @@ jobs:
 
           # ── Per-card metrics ─────────────────────────────────────────────
           empty_grep      = [c for c in cards if not c.get("grep", "").strip()]
+          invalid_grep    = []
+          for c in cards:
+              grep = c.get("grep", "")
+              if not grep.strip():
+                  continue
+              try:
+                  re.compile(grep)
+              except re.error as exc:
+                  invalid_grep.append((c, str(exc)))
           empty_detect    = [c for c in cards if not c.get("detect", "").strip()]
           no_severity     = [c for c in cards if not c.get("severity")]
           never_prune     = [c for c in cards if c.get("neverPrune")]
@@ -128,6 +137,7 @@ jobs:
           print(f"  Never-prune   : {len(never_prune):>6}  (CRITICAL safety-net cards)")
           print()
           print(f"  Empty grep    : {len(empty_grep):>6}  ({empty_grep_ratio*100:.1f}%)")
+          print(f"  Invalid grep  : {len(invalid_grep):>6}")
           print(f"  Empty detect  : {len(empty_detect):>6}  ({empty_detect_ratio*100:.1f}%)")
           print(f"  No severity   : {len(no_severity):>6}")
           print()
@@ -152,6 +162,12 @@ jobs:
                   f"Fix: ensure DB entries contain backtick-wrapped identifiers."
               )
 
+          if invalid_grep:
+              failures.append(
+                  f"{len(invalid_grep)} generated grep patterns are invalid regexes. "
+                  f"Fix: escape literal keywords in hunt-card generation."
+              )
+
           if empty_detect_ratio > 0.20:
               failures.append(
                   f"Empty detect ratio {empty_detect_ratio*100:.1f}% exceeds 20% threshold "
@@ -173,6 +189,12 @@ jobs:
               print(f"  Cards with empty grep (top 20):")
               for c in empty_grep[:20]:
                   print(f"    [{c.get('severity','?')}] {c['id']} — {c['title']}")
+
+          if invalid_grep:
+              print()
+              print(f"  Cards with invalid grep regex (top 20):")
+              for c, error in invalid_grep[:20]:
+                  print(f"    [{c.get('severity','?')}] {c['id']} — {error}")
 
           print()
           print("=" * 65)

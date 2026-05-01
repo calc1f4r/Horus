@@ -141,6 +141,21 @@ class TestGithubResourceSurface(unittest.TestCase):
 
         self.assertEqual(issues, ["content drift in .github/agents/resources/guide.md"])
 
+    def test_sync_github_resource_surface_copies_source_resources(self):
+        write_resource(self.source_root / "guide.md", "source\n")
+        write_resource(self.source_root / "nested" / "deep.md", "nested\n")
+        write_resource(self.github_root / "stale.md", "stale\n")
+
+        count = sync.sync_github_resource_surface(
+            source_root=self.source_root,
+            github_root=self.github_root,
+        )
+
+        self.assertEqual(count, 2)
+        self.assertEqual((self.github_root / "guide.md").read_text(encoding="utf-8"), "source\n")
+        self.assertEqual((self.github_root / "nested" / "deep.md").read_text(encoding="utf-8"), "nested\n")
+        self.assertFalse((self.github_root / "stale.md").exists())
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -11,7 +11,7 @@ Use live web search when external facts, protocol docs, standards, prior inciden
 Delegate to narrower repo custom agents when the work decomposes cleanly and doing so improves coverage or verification.
 # Improve Codebase Architecture Agent
 
-You run an architecture-deepening workflow. Your job is to find places where the codebase would improve by turning shallow modules into deeper modules: more behavior behind smaller interfaces, clearer seams, better locality, and better tests.
+Run an architecture-deepening workflow. Find places where the codebase would improve by turning shallow modules into deeper modules: more behavior behind smaller interfaces, clearer seams, better locality, and better tests.
 
 Do not start by implementing refactors. First produce candidates and ask which one the user wants to explore, unless the user explicitly asks for implementation.
 
@@ -40,9 +40,19 @@ The user may provide:
 - A request for a broad architecture review
 - A selected candidate from a previous review
 
-If no target is provided, review the repository entry points, docs, tests, and recently changed areas before narrowing.
+If no target is provided, review repository entry points, docs, tests, and recently changed areas before narrowing.
 
-## Phase 1: Read Context And Constraints
+## Workflow
+
+```
+- [ ] Step 1: Read project context and constraints
+- [ ] Step 2: Explore architecture friction
+- [ ] Step 3: Produce deepening candidates
+- [ ] Step 4: Grill the selected candidate with the user
+- [ ] Step 5: Design interfaces only when requested
+```
+
+## Step 1: Read context and constraints
 
 Read only what is relevant. Prefer targeted discovery over loading the whole repo.
 
@@ -59,9 +69,7 @@ Read only what is relevant. Prefer targeted discovery over loading the whole rep
    - Use targeted `rg` for domain terms, entry points, adapters, tests, and call sites.
    - Read representative files and tests around the target.
 
-## Phase 2: Explore Friction
-
-Explore organically and note where the code resists understanding or testing.
+## Step 2: Explore architecture friction
 
 Look for:
 
@@ -74,24 +82,16 @@ Look for:
 - Tests that must reach past the interface to verify behavior.
 - Dependencies whose category changes where the seam should live.
 
-Apply the deletion test to suspected shallow modules:
+Apply the deletion test:
 
-- If deleting it removes complexity, the module was pass-through.
+- If deleting a module removes complexity, the module was pass-through.
 - If deleting it pushes complexity into many callers, the module was earning its keep.
 
-### Subagent Use
+Use explorer sub-agents when independent areas can be inspected in parallel. Do not delegate the immediate blocking task if you need its result before proceeding.
 
-Use explorer subagents when independent areas can be inspected in parallel. Give each subagent a narrow question, such as:
+## Step 3: Produce deepening candidates
 
-- "Map call sites and tests around `<module>` and identify what callers must know."
-- "Trace the `<domain concept>` flow from entry point to persistence."
-- "Classify dependencies used by `<feature>` and identify local substitutes or adapters."
-
-Do not delegate the immediate blocking task if you need its result before proceeding.
-
-## Phase 3: Produce Deepening Candidates
-
-Produce a numbered list. For each candidate:
+Produce a numbered list. For each candidate include:
 
 - Files: exact files and modules involved.
 - Problem: why the current interface or seam causes friction.
@@ -105,9 +105,9 @@ Produce a numbered list. For each candidate:
 
 Do not propose concrete interfaces in this phase. End by asking which candidate the user wants to explore.
 
-## Phase 4: Grilling Loop
+## Step 4: Grilling loop
 
-When the user picks a candidate, explore the design tree with them:
+When the user picks a candidate, explore the design tree:
 
 - What behavior belongs behind the interface?
 - What must callers still decide?
@@ -117,17 +117,17 @@ When the user picks a candidate, explore the design tree with them:
 - Which tests should survive the refactor unchanged?
 - What domain term should name the deepened module?
 
-Side effects during this loop:
+Side effects:
 
 - If a load-bearing domain term is clarified, update `CONTEXT.md` using [CONTEXT-FORMAT.md](../../.agents/skills/improve-codebase-architecture/CONTEXT-FORMAT.md).
 - If the user rejects a candidate for a durable architectural reason, offer to record an ADR using [ADR-FORMAT.md](../../.agents/skills/improve-codebase-architecture/ADR-FORMAT.md).
-- If the user asks for interface options, move to Phase 5.
+- If the user asks for interface options, move to Step 5.
 
-## Phase 5: Interface Design
+## Step 5: Interface design
 
 Use [INTERFACE-DESIGN.md](../../.agents/skills/improve-codebase-architecture/INTERFACE-DESIGN.md).
 
-Frame the problem space first, then generate at least three different interface designs when parallel agents are available:
+Frame the problem space first, then generate at least three meaningfully different interface designs when parallel agents are available:
 
 1. Minimal interface: 1 to 3 entry points, maximum leverage.
 2. Flexible interface: more extension points and uncommon cases.
@@ -136,7 +136,7 @@ Frame the problem space first, then generate at least three different interface 
 
 Compare designs by depth, locality, seam placement, dependency strategy, test surface, and migration cost. Finish with a recommendation.
 
-## Output For Initial Review
+## Output Shape
 
 ```md
 # Architecture Deepening Candidates

@@ -117,15 +117,15 @@ def _split_semantic_field(value) -> list[str]:
     return list(dict.fromkeys(terms))
 
 
-def _load_cards() -> list[dict]:
-    path = DB / "manifests" / "huntcards" / "all-huntcards.json"
+def _load_cards(db: Path = DB) -> list[dict]:
+    path = db / "manifests" / "huntcards" / "all-huntcards.json"
     data = json.loads(path.read_text(encoding="utf-8"))
     return data.get("cards", [])
 
 
-def _load_manifest_context() -> dict[str, dict]:
+def _load_manifest_context(db: Path = DB) -> dict[str, dict]:
     contexts: dict[str, dict] = {}
-    manifests_dir = DB / "manifests"
+    manifests_dir = db / "manifests"
     for manifest_path in sorted(manifests_dir.glob("*.json")):
         if manifest_path.name == "keywords.json":
             continue
@@ -258,8 +258,8 @@ def _reset_wiki_dir(path: Path) -> None:
         wiki_file.unlink()
 
 
-def build_extraction(cards: list[dict]) -> dict:
-    manifest_context = _load_manifest_context()
+def build_extraction(cards: list[dict], *, db: Path = DB) -> dict:
+    manifest_context = _load_manifest_context(db)
     nodes: dict[str, dict] = {}
     edges: list[dict] = []
     semantic_buckets: dict[str, set[str]] = defaultdict(set)
@@ -287,7 +287,7 @@ def build_extraction(cards: list[dict]) -> dict:
         pid = _slug(protocol_name, prefix="protocol_")
         nodes[pid] = _node(pid, protocol_name, "ProtocolContext", "DB/index.json")
         edges.append(_edge("horus_db", pid, "contains_protocol_context", "DB/index.json"))
-        for manifest_name in manifests:
+        for manifest_name in sorted(manifests):
             mid = _slug(manifest_name, prefix="manifest_")
             nodes.setdefault(mid, _node(mid, manifest_name, "Manifest", f"DB/manifests/{manifest_name}.json"))
             edges.append(_edge(pid, mid, "routes_to_manifest", "DB/index.json"))
@@ -444,11 +444,18 @@ def build_extraction(cards: list[dict]) -> dict:
     }
 
 
-def main() -> int:
-    OUT.mkdir(parents=True, exist_ok=True)
-    cards = _load_cards()
-    extraction = build_extraction(cards)
-    (OUT / ".graphify_extract.json").write_text(json.dumps(extraction, indent=2), encoding="utf-8")
+def build_db_graph(
+    *,
+    db: Path = DB,
+    out: Path = OUT,
+    root: Path = ROOT,
+    emit=print,
+) -> dict[str, int | str]:
+    """Build DB graph artifacts into `out` and return summary counts."""
+    out.mkdir(parents=True, exist_ok=True)
+    cards = _load_cards(db)
+    extraction = build_extraction(cards, db=db)
+    (out / ".graphify_extract.json").write_text(json.dumps(extraction, indent=2), encoding="utf-8")
 
     graph = build.build([extraction], directed=True)
     communities = cluster.cluster(graph)
@@ -475,10 +482,10 @@ def main() -> int:
     }
     token_cost = {"input": 0, "output": 0}
 
-    export.to_json(graph, communities, str(OUT / "graph.json"), force=True)
-    graph_data = json.loads((OUT / "graph.json").read_text(encoding="utf-8"))
+    export.to_json(graph, communities, str(out / "graph.json"), force=True)
+    graph_data = json.loads((out / "graph.json").read_text(encoding="utf-8"))
     graph_data["edges"] = graph_data.get("links", [])
-    (OUT / "graph.json").write_text(json.dumps(graph_data, indent=2), encoding="utf-8")
+    (out / "graph.json").write_text(json.dumps(graph_data, indent=2), encoding="utf-8")
 
     graph_report = report.generate(
         graph,
@@ -489,11 +496,11 @@ def main() -> int:
         surprises,
         detection,
         token_cost,
-        str(DB),
+        str(db),
         suggested_questions=questions,
     )
-    (OUT / "GRAPH_REPORT.md").write_text(graph_report, encoding="utf-8")
-    wiki_dir = OUT / "wiki"
+    (out / "GRAPH_REPORT.md").write_text(graph_report, encoding="utf-8")
+    wiki_dir = out / "wiki"
     _reset_wiki_dir(wiki_dir)
     wiki_communities = _curate_wiki_communities(communities, community_labels, cohesion)
     wiki_labels = {cid: community_labels[cid] for cid in wiki_communities}
@@ -504,13 +511,26 @@ def main() -> int:
         graphify_version = version("graphifyy")
     except PackageNotFoundError:
         graphify_version = "unknown"
-    (OUT / ".graphify_version").write_text(graphify_version, encoding="utf-8")
-    (ROOT / ".graphify-version").write_text(graphify_version, encoding="utf-8")
+    (out / ".graphify_version").write_text(graphify_version, encoding="utf-8")
+    root.mkdir(parents=True, exist_ok=True)
+    (root / ".graphify-version").write_text(graphify_version, encoding="utf-8")
 
-    print(f"DB graph: {graph.number_of_nodes()} nodes, {graph.number_of_edges()} edges")
-    print(f"Communities: {len(communities)}")
-    print(f"Wiki articles: {wiki_count} ({len(wiki_communities)} curated communities)")
-    print(f"Graphify version: {graphify_version}")
+    emit(f"DB graph: {graph.number_of_nodes()} nodes, {graph.number_of_edges()} edges")
+    emit(f"Communities: {len(communities)}")
+    emit(f"Wiki articles: {wiki_count} ({len(wiki_communities)} curated communities)")
+    emit(f"Graphify version: {graphify_version}")
+    return {
+        "nodes": graph.number_of_nodes(),
+        "edges": graph.number_of_edges(),
+        "communities": len(communities),
+        "wiki_articles": wiki_count,
+        "curated_communities": len(wiki_communities),
+        "graphify_version": graphify_version,
+    }
+
+
+def main() -> int:
+    build_db_graph()
     return 0
 
 

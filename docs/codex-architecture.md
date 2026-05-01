@@ -302,6 +302,7 @@ The repo's concrete sharded audit loop is implemented in scripts, not just in pr
    - groups surviving cards by category tags
    - splits large groups into multiple shards
    - duplicates critical cards into every shard
+   - emits a critical-only shard when no regular cards survive
 
 3. `merge_shard_findings.py`
    - merges `03-findings-shard-*.md`

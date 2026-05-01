@@ -58,6 +58,10 @@ class TestBundles(unittest.TestCase):
         self.assertEqual(bundle["meta"]["criticalCardIds"], ["critical"])
         shard_ids = [card_id for shard in bundle["shards"] for card_id in shard["cardIds"]]
         self.assertEqual(sorted(shard_ids), ["shared", "token-1"])
+        for shard in bundle["shards"]:
+            self.assertEqual(shard["criticalCardIds"], ["critical"])
+            self.assertEqual(shard["criticalCardCount"], 1)
+            self.assertEqual(shard["effectiveCardCount"], shard["regularCardCount"] + 1)
 
     def test_build_partition_bundles_writes_protocol_shard_file(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -99,6 +103,7 @@ class TestBundles(unittest.TestCase):
         self.assertEqual(bundle["meta"]["totalCards"], 2)
         self.assertEqual(bundle["meta"]["criticalCards"], 1)
         self.assertEqual(bundle["shards"][0]["cardIds"], ["oracle-1"])
+        self.assertEqual(bundle["shards"][0]["criticalCardIds"], ["access-1"])
         self.assertTrue(any("custom" in line for line in emitted))
 
 

@@ -11,7 +11,7 @@ Horus is a security knowledge system built so multiple agent runtimes can work f
 [![Manifests](https://img.shields.io/badge/manifests-14-orange)](DB/manifests)
 [![Hunt Cards](https://img.shields.io/badge/hunt%20cards-1%2C362-red)](DB/manifests/huntcards)
 [![Graph](https://img.shields.io/badge/graph-5%2C270%20nodes-informational)](DB/graphify-out/graph.json)
-[![Agents](https://img.shields.io/badge/agents-37-blueviolet)](.github/agents)
+[![Agents](https://img.shields.io/badge/agents-38-blueviolet)](.github/agents)
 [![Reports](https://img.shields.io/badge/raw%20reports-22%2C200%2B-yellow)](reports)
 
 </div>
@@ -252,7 +252,7 @@ Normal maintenance rule:
 |---|---|---|
 | Orchestration | `audit-orchestrator`, `audit-context-building`, `system-synthesizer` | Coordinate the full audit lifecycle |
 | Invariants | `invariant-writer`, `invariant-reviewer`, `invariant-indexer` | Define and harden expected system properties |
-| Discovery | `invariant-catcher`, `protocol-reasoning`, `missing-validation-reasoning` | Find issues using DB lookup and reasoning |
+| Discovery | `invariant-catcher`, `protocol-reasoning`, `finding-chain-synthesizer`, `missing-validation-reasoning` | Find issues using DB lookup, reasoning, and confirmed-finding composition |
 | Multi-persona | `persona-bfs`, `persona-dfs`, `persona-mirror`, `persona-state-machine` | Attack the same target from different analysis styles |
 | Proof / Reporting | `poc-writing`, `issue-writer`, `report-aggregator` | Prove and package findings |
 | Formal verification | `chimera-setup`, `medusa-fuzzing`, `halmos-verification`, `certora-verification` | Produce harnesses and formal specs |

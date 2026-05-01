@@ -46,7 +46,7 @@ gh repo clone calc1f4r/Horus reports/<CATEGORY> \
 
 ## 3. Emulating the Agent System & Skills
 
-Horus contains 37 specialized audit workflows and tools. When running an audit phase or performing targeted discovery, you must leverage Gemini's skill system and sub-agents:
+Horus contains 38 specialized audit workflows and tools. When running an audit phase or performing targeted discovery, you must leverage Gemini's skill system and sub-agents:
 
 1. **Activate Skills:** Use the `activate_skill` tool to dynamically load expert procedural guidance. For example, if asked to run an audit phase or generate formal verification, call `activate_skill` with the appropriate name (e.g., `invariant-writer`, `protocol-reasoning`, `audit-orchestrator`). These skills are mapped from the repository's `.agents/skills/` directory.
 2. **Sub-Agents:** 

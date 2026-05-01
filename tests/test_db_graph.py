@@ -52,7 +52,7 @@ class TestDbGraphBuilder(unittest.TestCase):
         ]
 
         original_loader = graph_builder._load_manifest_context
-        graph_builder._load_manifest_context = lambda: {
+        graph_builder._load_manifest_context = lambda db=graph_builder.DB: {
             "oracle-flash-loan-001": {
                 "manifest": "oracle",
                 "file": "DB/oracle/example.md",
@@ -145,6 +145,46 @@ class TestDbGraphBuilder(unittest.TestCase):
             self.assertFalse((wiki_dir / "index.md").exists())
             self.assertFalse((wiki_dir / "oracle.md").exists())
             self.assertTrue((wiki_dir / ".keep").exists())
+
+    def test_build_db_graph_writes_to_custom_output_dir(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            db = root / "DB"
+            huntcards = db / "manifests" / "huntcards"
+            huntcards.mkdir(parents=True)
+            (db / "manifests" / "oracle.json").write_text(
+                '{"meta":{"category":"oracle","totalPatterns":0,"fileCount":0},"files":[]}',
+                encoding="utf-8",
+            )
+            (huntcards / "all-huntcards.json").write_text(
+                """
+                {
+                  "cards": [
+                    {
+                      "id": "oracle-stale-001",
+                      "title": "Oracle Stale Price",
+                      "severity": "HIGH",
+                      "grep": "latestRoundData|updatedAt",
+                      "cat": ["oracle"],
+                      "ref": "DB/oracle/example.md",
+                      "graphHints": {"variants": ["oracle stale price"]}
+                    }
+                  ]
+                }
+                """,
+                encoding="utf-8",
+            )
+
+            out = root / "graph-out"
+            emitted = []
+            result = graph_builder.build_db_graph(db=db, out=out, root=root, emit=emitted.append)
+
+            self.assertTrue((out / "graph.json").exists())
+            self.assertTrue((out / "GRAPH_REPORT.md").exists())
+            self.assertTrue((out / ".graphify_version").exists())
+            self.assertTrue((root / ".graphify-version").exists())
+            self.assertGreaterEqual(result["nodes"], 1)
+            self.assertTrue(any("DB graph:" in line for line in emitted))
 
 
 if __name__ == "__main__":

@@ -4,7 +4,8 @@ Partition Hunt Cards into Shards for Parallel Fan-Out
 =====================================================
 Takes grep-pruned hunt card hits and partitions into shards of 50-80 cards,
 grouped by category tag. neverPrune cards are separated as a critical set
-to be duplicated into every shard.
+to be duplicated into every regular shard. If only neverPrune cards survive,
+the output includes a critical-only shard so the safety-net review still runs.
 
 Usage:
     python3 scripts/partition_shards.py <hunt_card_hits_json> [options]
@@ -19,75 +20,13 @@ import argparse
 import json
 import os
 import sys
-from collections import defaultdict
+
+from horus_retrieval.sharding import partition_hunt_cards
 
 
 def partition(hits, max_shard_size=80, min_group_size=20):
     """Partition surviving cards into shards by category tag."""
-    # Separate critical (neverPrune) cards
-    critical = [h for h in hits if h.get("neverPrune", False)]
-    regular = [h for h in hits if not h.get("neverPrune", False)]
-
-    # Group by primary cat tag
-    groups = defaultdict(list)
-    for card in regular:
-        cats = card.get("cat", ["general"])
-        primary = cats[0] if cats else "general"
-        groups[primary].append(card)
-
-    shards = []
-    small_groups = []
-
-    for cat_name, cards in sorted(groups.items(), key=lambda x: -len(x[1])):
-        if len(cards) > max_shard_size:
-            # Split large groups
-            for i in range(0, len(cards), 60):
-                chunk = cards[i:i + 60]
-                suffix = f"-{i // 60 + 1}" if len(cards) > 60 else ""
-                shards.append({
-                    "id": f"shard-{len(shards) + 1}-{cat_name}{suffix}",
-                    "cardCount": len(chunk),
-                    "categories": [cat_name],
-                    "cardIds": [c["id"] for c in chunk],
-                })
-        elif len(cards) < min_group_size:
-            small_groups.append((cat_name, cards))
-        else:
-            shards.append({
-                "id": f"shard-{len(shards) + 1}-{cat_name}",
-                "cardCount": len(cards),
-                "categories": [cat_name],
-                "cardIds": [c["id"] for c in cards],
-            })
-
-    # Merge small groups
-    if small_groups:
-        merged_cards, merged_cats = [], []
-        for cat_name, cards in small_groups:
-            merged_cards.extend(cards)
-            merged_cats.append(cat_name)
-            if len(merged_cards) >= 50:
-                shards.append({
-                    "id": f"shard-{len(shards) + 1}-{'_'.join(merged_cats[:3])}",
-                    "cardCount": len(merged_cards),
-                    "categories": merged_cats[:],
-                    "cardIds": [c["id"] for c in merged_cards],
-                })
-                merged_cards, merged_cats = [], []
-        if merged_cards:
-            if shards and len(merged_cards) < 15:
-                shards[-1]["cardCount"] += len(merged_cards)
-                shards[-1]["categories"].extend(merged_cats)
-                shards[-1]["cardIds"].extend([c["id"] for c in merged_cards])
-            else:
-                shards.append({
-                    "id": f"shard-{len(shards) + 1}-misc",
-                    "cardCount": len(merged_cards),
-                    "categories": merged_cats,
-                    "cardIds": [c["id"] for c in merged_cards],
-                })
-
-    return shards, critical
+    return partition_hunt_cards(hits, max_shard_size, min_group_size)
 
 
 def main():
@@ -112,6 +51,7 @@ def main():
         "totalSurvivingCards": len(hits),
         "criticalCards": len(critical),
         "criticalCardIds": [c["id"] for c in critical],
+        "criticalSet": critical,
         "shardCount": len(shards),
         "shards": shards,
     }

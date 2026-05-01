@@ -338,5 +338,109 @@ class TestRequiredFrontmatterFields(unittest.TestCase):
             self.assertIn(field, qc.REQUIRED_FM_FIELDS)
 
 
+class TestPartitionBundleValidation(unittest.TestCase):
+
+    def test_valid_partition_bundle_passes(self):
+        bundle = {
+            "meta": {
+                "totalCards": 3,
+                "criticalCards": 1,
+                "shardCount": 1,
+                "criticalCardIds": ["critical-1"],
+            },
+            "shards": [
+                {
+                    "id": "shard-1-oracle",
+                    "cardCount": 2,
+                    "regularCardCount": 2,
+                    "criticalCardCount": 1,
+                    "effectiveCardCount": 3,
+                    "categories": ["oracle"],
+                    "cardIds": ["regular-1", "regular-2"],
+                    "criticalCardIds": ["critical-1"],
+                }
+            ],
+        }
+
+        self.assertEqual(qc.validate_partition_bundle_data(bundle), [])
+
+    def test_partition_bundle_requires_critical_ids_on_each_shard(self):
+        bundle = {
+            "meta": {
+                "totalCards": 2,
+                "criticalCards": 1,
+                "shardCount": 1,
+                "criticalCardIds": ["critical-1"],
+            },
+            "shards": [
+                {
+                    "id": "shard-1-oracle",
+                    "cardCount": 1,
+                    "regularCardCount": 1,
+                    "criticalCardCount": 1,
+                    "effectiveCardCount": 2,
+                    "categories": ["oracle"],
+                    "cardIds": ["regular-1"],
+                    "criticalCardIds": [],
+                }
+            ],
+        }
+
+        issues = qc.validate_partition_bundle_data(bundle)
+
+        self.assertTrue(any("does not carry the full criticalCardIds set" in msg for _level, msg in issues))
+
+    def test_partition_bundle_rejects_duplicate_regular_ids(self):
+        bundle = {
+            "meta": {
+                "totalCards": 2,
+                "criticalCards": 0,
+                "shardCount": 2,
+                "criticalCardIds": [],
+            },
+            "shards": [
+                {
+                    "id": "shard-1",
+                    "cardCount": 1,
+                    "regularCardCount": 1,
+                    "criticalCardCount": 0,
+                    "effectiveCardCount": 1,
+                    "categories": ["oracle"],
+                    "cardIds": ["regular-1"],
+                    "criticalCardIds": [],
+                },
+                {
+                    "id": "shard-2",
+                    "cardCount": 1,
+                    "regularCardCount": 1,
+                    "criticalCardCount": 0,
+                    "effectiveCardCount": 1,
+                    "categories": ["defi"],
+                    "cardIds": ["regular-1"],
+                    "criticalCardIds": [],
+                },
+            ],
+        }
+
+        issues = qc.validate_partition_bundle_data(bundle)
+
+        self.assertTrue(any("duplicate regular card IDs" in msg for _level, msg in issues))
+
+    def test_partition_bundle_rejects_non_actionable_total(self):
+        bundle = {
+            "meta": {
+                "totalCards": 1,
+                "criticalCards": 0,
+                "shardCount": 0,
+                "criticalCardIds": [],
+            },
+            "shards": [],
+        }
+
+        issues = qc.validate_partition_bundle_data(bundle)
+
+        self.assertTrue(any("no shards are actionable" in msg for _level, msg in issues))
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
