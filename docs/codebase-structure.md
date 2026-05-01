@@ -153,7 +153,7 @@ Horus/
 │   └── ...                                #   additional utility scripts
 │
 ├── .github/
-│   ├── agents/                            # 37 generated GitHub-facing audit agents
+│   ├── agents/                            # 38 generated GitHub-facing audit agents
 │   │   ├── audit-orchestrator.md          #   Entry point — 11-phase pipeline
 │   │   ├── audit-context-building.md      #   Line-by-line codebase analysis
 │   │   ├── function-analyzer.md           #   Per-contract function analysis

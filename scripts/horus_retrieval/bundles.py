@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Callable
 
 from .protocol_context import bundle_manifest_mapping
+from .sharding import partition_hunt_cards
 from .taxonomy import GENERAL_SUBCATEGORIES
 
 
@@ -52,66 +53,11 @@ def build_protocol_bundle(protocol_name, manifest_list, cards_by_manifest, *, ma
     if not protocol_cards:
         return None
 
-    critical_cards = [c for c in protocol_cards if c.get("neverPrune", False)]
-    regular_cards = [c for c in protocol_cards if not c.get("neverPrune", False)]
-
-    groups = defaultdict(list)
-    for card in regular_cards:
-        primary_cat = card.get("cat", ["general"])[0] if card.get("cat") else "general"
-        groups[primary_cat].append(card)
-
-    shards = []
-    small_groups = []
-
-    for cat_name, cards in sorted(groups.items(), key=lambda x: -len(x[1])):
-        if len(cards) > max_shard_size:
-            for i in range(0, len(cards), 60):
-                chunk = cards[i:i + 60]
-                suffix = f"-{i // 60 + 1}" if len(cards) > 60 else ""
-                shards.append({
-                    "id": f"shard-{len(shards) + 1}-{cat_name}{suffix}",
-                    "cardCount": len(chunk),
-                    "categories": [cat_name],
-                    "cardIds": [c["id"] for c in chunk],
-                })
-        elif len(cards) < min_group_size:
-            small_groups.append((cat_name, cards))
-        else:
-            shards.append({
-                "id": f"shard-{len(shards) + 1}-{cat_name}",
-                "cardCount": len(cards),
-                "categories": [cat_name],
-                "cardIds": [c["id"] for c in cards],
-            })
-
-    if small_groups:
-        merged_cards = []
-        merged_cats = []
-        for cat_name, cards in small_groups:
-            merged_cards.extend(cards)
-            merged_cats.append(cat_name)
-            if len(merged_cards) >= 50:
-                shards.append({
-                    "id": f"shard-{len(shards) + 1}-{'_'.join(merged_cats[:3])}",
-                    "cardCount": len(merged_cards),
-                    "categories": merged_cats[:],
-                    "cardIds": [c["id"] for c in merged_cards],
-                })
-                merged_cards = []
-                merged_cats = []
-
-        if merged_cards:
-            if shards and len(merged_cards) < 15:
-                shards[-1]["cardCount"] += len(merged_cards)
-                shards[-1]["categories"].extend(merged_cats)
-                shards[-1]["cardIds"].extend([c["id"] for c in merged_cards])
-            else:
-                shards.append({
-                    "id": f"shard-{len(shards) + 1}-misc",
-                    "cardCount": len(merged_cards),
-                    "categories": merged_cats,
-                    "cardIds": [c["id"] for c in merged_cards],
-                })
+    shards, critical_cards = partition_hunt_cards(
+        protocol_cards,
+        max_shard_size=max_shard_size,
+        min_group_size=min_group_size,
+    )
 
     return {
         "meta": {

@@ -183,6 +183,12 @@ def select_best_grep_keywords(keywords, max_count=6):
     return [kw for _, kw in scored[:max_count]]
 
 
+def build_grep_pattern(keywords):
+    """Build a safe regex alternation from literal code/search keywords."""
+    escaped = [re.escape(keyword) for keyword in keywords if keyword]
+    return "|".join(escaped)
+
+
 def _extract_detect_from_content(file_path, line_start, line_end, title, *, db_root=DEFAULT_DB_DIR):
     """Extract the first meaningful prose sentence from DB Markdown content."""
     try:
@@ -303,7 +309,7 @@ def build_huntcard(pattern, file_path, manifest_name="", *, db_root=DEFAULT_DB_D
         }
         grep_keywords = [w for w in title_words if w.lower() not in stop_words][:4]
 
-    grep_pattern = "|".join(grep_keywords) if grep_keywords else ""
+    grep_pattern = build_grep_pattern(grep_keywords) if grep_keywords else ""
 
     root_cause = pattern.get("rootCause", "")
     detect = truncate_to_sentence(root_cause)

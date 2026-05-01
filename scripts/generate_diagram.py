@@ -4,6 +4,8 @@
 import json, random
 from pathlib import Path
 
+random.seed(0)
+
 _id = 100000
 def uid():
     global _id; _id += 1; return f"el_{_id}"
@@ -76,7 +78,7 @@ E.extend(box(P, 10, CW, 55,
     "VULNERABILITY DATABASE — COMPLETE ARCHITECTURE & AGENTIC WORKFLOW",
     bg="#1a1a2e", stroke="#1a1a2e", sz=24, color="#e0e0ff", bold=True))
 _, t = mk_text(P+100, 72, CW-200, 18,
-    "4-Tier Search · 14 Manifests · 1,972 Patterns · 1,362 Hunt Cards · 11-Phase Audit Pipeline · 37 Agents",
+    "4-Tier Search + Graph Expansion · 14 Manifests · 1,972 Patterns · 1,362 Hunt Cards · 11-Phase Audit Pipeline · 38 Agents",
     sz=13, color="#888")
 E.append(t)
 
@@ -109,22 +111,24 @@ for i, a in enumerate([
     E.extend(box(ax, BY+190, abw, 45, a, bg="#e8f5e9", sz=13))
     E.extend(mk_arrow(ax+abw//2, BY+235, ax+abw//2, BY+275, "#43A047"))
 
-# Row 3  –  4 scripts
+# Row 3  –  5 scripts
 E.extend(badge(P+40, BY+272, 200, "Processing Scripts", bg="#66BB6A"))
+script_w = (CW - 240) // 5
 for i, s in enumerate([
     "solodit_fetcher.py\n(API Fetcher)",
     "classify_and_group.py\n(Classifier)",
     "generate_entries.py\n(Entry Generator)",
-    "generate_manifests.py\n(Manifest Builder)"]):
-    sx = P+40 + i*(bw+40)
-    E.extend(box(sx, BY+310, bw, 55, s, bg="#fff3e0", sz=12))
+    "generate_manifests.py\n(Manifest Builder)",
+    "build_db_graph.py\n(Graph Builder)"]):
+    sx = P+40 + i*(script_w+40)
+    E.extend(box(sx, BY+310, script_w, 55, s, bg="#fff3e0", sz=12))
 
 # ═══════════════════════════════════════════════════════════════════
 # C : 4-TIER DB   y 570 → 980
 # ═══════════════════════════════════════════════════════════════════
 CY2 = 570; CH2 = 410
 rid, r = mk_rect(P, CY2, CW, CH2, stroke="#1976D2", dash=True, bg="transparent"); E.append(r)
-E.extend(badge(P+5, CY2-13, 450, "② VULNERABILITY DATABASE — 4-TIER SEARCH", bg="#1976D2"))
+E.extend(badge(P+5, CY2-13, 520, "② VULNERABILITY DATABASE — 4-TIER SEARCH + GRAPH", bg="#1976D2"))
 
 TW = 550
 for i, (lbl, bg2, desc) in enumerate([
@@ -134,15 +138,17 @@ for i, (lbl, bg2, desc) in enumerate([
      "1,362 compressed cards — grep patterns, micro-directives, neverPrune"),
     ("TIER 2 → Manifests  (manifests/*.json)",     "#64B5F6",
      "14 manifests — pattern indexes with lineStart/lineEnd, codeKeywords, rootCause"),
+    ("TIER 2.5 → Graph  (graphify-out/graph.json)", "#5BA7E8",
+     "Additive related-card expansion — never removes baseline router or hunt-card matches"),
     ("TIER 3 → Entries  (DB/**/*.md)",             "#42A5F5",
      "Full vuln content — YAML frontmatter, vulnerable/secure patterns, targeted reads only"),
 ]):
-    ty = CY2+40 + i*90
-    tc = "#fff" if i==3 else "#1e1e1e"
-    E.extend(box(P+30, ty, TW, 50, lbl, bg=bg2, stroke="#1976D2", sz=14, color=tc, bold=True))
-    _, t = mk_text(P+30, ty+52, TW, 16, desc, sz=11, color="#555", align="left"); E.append(t)
+    ty = CY2+40 + i*70
+    tc = "#fff" if i==4 else "#1e1e1e"
+    E.extend(box(P+30, ty, TW, 45, lbl, bg=bg2, stroke="#1976D2", sz=13, color=tc, bold=True))
+    _, t = mk_text(P+30, ty+47, TW, 16, desc, sz=11, color="#555", align="left"); E.append(t)
     if i > 0:
-        E.extend(mk_arrow(P+305, ty-20, P+305, ty, "#1976D2", sw=3))
+        E.extend(mk_arrow(P+305, ty-25, P+305, ty, "#1976D2", sw=3))
 
 # Manifest list (right side)
 MX = P + TW + 80
@@ -195,7 +201,7 @@ phases = [
     ("Phase 1\nReconnaissance",      "#FFF3E0", "Protocol detection → Scope definition → Manifest resolution",                          "(self — orchestrator)"),
     ("Phase 2\nContext Building",    "#FFF3E0", "Deep line-by-line codebase analysis → produces 01-context.md",                          "🤖 audit-context-building"),
     ("Phase 3\nInvariant Extraction","#FFF3E0", "Extract all system invariants from context → produces 02-invariants.md",                "🤖 invariant-writer"),
-    ("Phase 4\nDB-Powered Hunting",  "#FFECB3", "Grep-prune hunt cards → Partition shards → Parallel scan → 03-findings-raw.md",        "🤖 N × invariant-catcher  (→ see ⑤)"),
+    ("Phase 4\nDB-Powered Hunting",  "#FFECB3", "Graph expansion → Grep-prune with error retention → Partition shards → 03-findings-raw.md", "🤖 N × invariant-catcher  (→ see ⑤)"),
     ("Phase 4a\nReasoning Discovery","#FFECB3", "Domain decomposition → Spawns domain sub-agents → 04a-reasoning-findings.md",          "🤖 protocol-reasoning"),
     ("Phase 5\nValidation Gaps",     "#FFF3E0", "Specialized input validation scanning → 04-validation-findings.md",                    "🤖 missing-validation-reasoning"),
     ("Phase 6\nTriage & PoC",        "#FFCCBC", "Severity scoring + Exploit PoC writing → 05-findings-triaged.md",                      "🤖 poc-writing"),
@@ -241,16 +247,21 @@ post = [
     ("✏️ issue-writer Agent",         "Polishes raw findings into platform-ready\nsubmission format",                "→ Formatted issue markdown",   "#FFEBEE","#C62828"),
     ("🏛️ sherlock-judging Agent",     "Validates findings against Sherlock\njudging criteria",                       "→ 06-sherlock-validation.md",  "#E8EAF6","#283593"),
     ("⚖️ cantina-judge Agent",        "Validates findings against Cantina\ncontest standards",                       "→ 07-cantina-validation.md",   "#E8EAF6","#283593"),
+    ("⚖️ judge-orchestrator Agent",   "Runs Sherlock, Cantina, and Code4rena\njudges in consensus mode",              "→ judge consensus report",     "#E8EAF6","#283593"),
+    ("📊 report-aggregator Agent",    "Assembles judge-verified findings into\na publication-ready report",            "→ CONFIRMED-REPORT.md",        "#E8EAF6","#283593"),
     ("🔬 medusa-fuzzing Agent",       "Generates Medusa stateful fuzzing\nharnesses from invariant specs",           "→ fuzzing/ directory",         "#E0F7FA","#00695C"),
+    ("🧪 chimera-setup Agent",        "Scaffolds Chimera property suites for\nEchidna, Medusa, Foundry, Halmos",        "→ test/recon/ harness",        "#E0F7FA","#00695C"),
     ("📐 certora-verification Agent", "Generates Certora CVL formal\nverification specs",                           "→ certora/ directory",         "#E0F7FA","#00695C"),
+    ("🧬 certora-mutation-testing",   "Runs Certora/Gambit mutation campaigns\nagainst invariant specs",               "→ mutation triage report",     "#E0F7FA","#00695C"),
+    ("🎭 multi-persona-orchestrator", "Runs BFS/DFS/state/mirror/persona\ncross-checking discovery passes",          "→ persona findings",           "#F3E5F5","#7E57C2"),
 ]
-col_w = (CW - 100) // 2
+col_w = (CW - 120) // 3
 for i, (name, desc, out, bg, sc) in enumerate(post):
-    col = i % 2
-    row = i // 2
-    px = P+30 + col*(col_w+40)
-    py = EY+45 + row*170
-    E.extend(box(px, py, col_w, 145, f"{name}\n\n{desc}\n\n{out}", bg=bg, stroke=sc, sz=13))
+    col = i % 3
+    row = i // 3
+    px = P+30 + col*(col_w+30)
+    py = EY+45 + row*120
+    E.extend(box(px, py, col_w, 95, f"{name}\n\n{desc}\n{out}", bg=bg, stroke=sc, sz=11))
 
 # ═══════════════════════════════════════════════════════════════════
 # F : FAN-OUT DETAIL   y 2560 → 3120
@@ -261,12 +272,12 @@ E.extend(badge(P+5, FY-13, 510, "⑤ PHASE 4 DETAIL — PARALLEL FAN-OUT HUNTING
 
 # Steps 1-3 stacked vertically
 steps = [
-    ("Step 1 → Load Hunt Cards  (all-huntcards.json · 451 cards · ~55K tokens)",
+    ("Step 1 → Load Hunt Cards  (all-huntcards.json · 1,362 cards)",
      "Each card: { id, title, cat, grep, check[], antipattern, securePattern, ref, lines, neverPrune }"),
-    ("Step 2 → Grep-Prune Target Code  (grep_prune.py · removes ~60-80% of cards)",
-     "grep -rn \"card.grep\" <target_path> — cards with zero hits removed (except neverPrune=true)"),
+    ("Step 2 → Graph Expand + Grep-Prune  (grep_prune.py · keeps searchError cards)",
+     "card.grep over target code — zero-hit cards pruned except neverPrune or search execution errors"),
     ("Step 3 → Partition into Shards  (partition_shards.py · 50-80 cards per shard)",
-     "Group surviving cards by category tag — neverPrune cards duplicated into EVERY shard"),
+     "Group regular cards by category; attach neverPrune cards to every shard and critical-only fallback"),
 ]
 for i, (lbl, desc) in enumerate(steps):
     sy = FY+40 + i*80
@@ -288,7 +299,7 @@ for i in range(num):
 
 # Warning
 _, t = mk_text(P+40, SHY+58, CW-80, 16,
-    "⚠️ neverPrune=true cards duplicated into EVERY shard — CRITICAL safety net for must-check patterns",
+    "⚠️ neverPrune=true cards attach to every shard; if only critical cards survive, emit a critical-only shard",
     sz=12, color="#D32F2F")
 E.append(t)
 
@@ -449,6 +460,7 @@ diagram = {
 out = str(Path(__file__).resolve().parent.parent / "docs" / "architecture.excalidraw")
 with open(out, "w") as f:
     json.dump(diagram, f, indent=2)
+    f.write("\n")
 
 print(f"✅ {out}")
 print(f"   Elements: {len(E)}")

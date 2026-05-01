@@ -10,10 +10,13 @@ Usage:
     python3 scripts/grep_prune.py <target_path> <huntcards_json> [options]
 
 Options:
-    --language sol|rs|go|all   File extension filter (default: auto-detect)
+    --language sol|rs|go|move|cairo|vy|all
+                               File extension filter (default: auto-detect)
     --output <path>            Output path (default: audit-output/hunt-card-hits.json)
 
 Output: hunt-card-hits.json with surviving cards + grep hit locations.
+Cards whose search command errors are retained with `searchError` for manual
+review instead of being silently pruned.
 """
 
 import argparse
@@ -26,19 +29,30 @@ import sys
 from pathlib import Path
 
 
+LANGUAGE_PATTERNS = {
+    "sol": "*.sol",
+    "rs": "*.rs",
+    "go": "*.go",
+    "move": "*.move",
+    "cairo": "*.cairo",
+    "vy": "*.vy",
+}
+
+
 def detect_language(target_path):
     """Auto-detect primary language from file extensions."""
     ext_counts = {}
+    tracked_exts = {pattern.replace("*", "") for pattern in LANGUAGE_PATTERNS.values()}
     for root, _, files in os.walk(target_path):
         # Skip common non-source dirs
         if any(skip in root for skip in ["/node_modules/", "/lib/", "/.git/", "/test/", "/tests/"]):
             continue
         for f in files:
             ext = Path(f).suffix
-            if ext in {".sol", ".rs", ".go", ".move"}:
+            if ext in tracked_exts:
                 ext_counts[ext] = ext_counts.get(ext, 0) + 1
     if not ext_counts:
-        return ["*.sol", "*.rs", "*.go"]  # fallback: all
+        return list(LANGUAGE_PATTERNS.values())
     # Return top extensions
     sorted_exts = sorted(ext_counts.items(), key=lambda x: -x[1])
     return [f"*{ext}" for ext, _ in sorted_exts[:2]]
@@ -62,9 +76,14 @@ def build_search_command(grep_pattern, target_path, include_patterns):
 
 def grep_card(card, target_path, include_patterns):
     """Run grep for a single card's pattern. Returns list of file:line hits."""
+    return search_card(card, target_path, include_patterns)["hits"]
+
+
+def search_card(card, target_path, include_patterns):
+    """Run grep for a card and return hit locations plus any execution error."""
     grep_pattern = card.get("grep", "")
     if not grep_pattern:
-        return []
+        return {"hits": [], "error": None}
 
     try:
         result = subprocess.run(
@@ -78,17 +97,22 @@ def grep_card(card, target_path, include_patterns):
                 parts = line.split(":", 2)
                 if len(parts) >= 2:
                     hits.append(f"{parts[0]}:{parts[1]}")
-            return hits
-    except (subprocess.TimeoutExpired, FileNotFoundError):
-        pass
-    return []
+            return {"hits": hits, "error": None}
+        if result.returncode in (0, 1):
+            return {"hits": [], "error": None}
+        detail = result.stderr.strip() or result.stdout.strip() or f"search exited with {result.returncode}"
+        return {"hits": [], "error": detail}
+    except subprocess.TimeoutExpired:
+        return {"hits": [], "error": "search timed out after 10 seconds"}
+    except FileNotFoundError as exc:
+        return {"hits": [], "error": str(exc)}
 
 
 def main():
     parser = argparse.ArgumentParser(description="Grep-prune hunt cards against a target codebase")
     parser.add_argument("target_path", help="Path to the target codebase")
     parser.add_argument("huntcards_json", help="Path to hunt cards JSON file")
-    parser.add_argument("--language", choices=["sol", "rs", "go", "all"], default=None,
+    parser.add_argument("--language", choices=[*LANGUAGE_PATTERNS, "all"], default=None,
                         help="File extension filter (default: auto-detect)")
     parser.add_argument("--output", default="audit-output/hunt-card-hits.json",
                         help="Output path (default: audit-output/hunt-card-hits.json)")
@@ -104,9 +128,9 @@ def main():
 
     # Determine file extensions
     if args.language == "all":
-        include_patterns = ["*.sol", "*.rs", "*.go", "*.move"]
+        include_patterns = list(LANGUAGE_PATTERNS.values())
     elif args.language:
-        include_patterns = [f"*.{args.language}"]
+        include_patterns = [LANGUAGE_PATTERNS[args.language]]
     else:
         include_patterns = detect_language(args.target_path)
 
@@ -123,14 +147,17 @@ def main():
     surviving = []
     pruned = 0
     never_prune_count = 0
+    search_error_count = 0
 
     for i, card in enumerate(cards):
         card_id = card.get("id", f"unknown-{i}")
         is_never_prune = card.get("neverPrune", False)
 
-        hits = grep_card(card, args.target_path, include_patterns)
+        search_result = search_card(card, args.target_path, include_patterns)
+        hits = search_result["hits"]
+        search_error = search_result["error"]
 
-        if hits or is_never_prune:
+        if hits or is_never_prune or search_error:
             entry = {
                 "id": card_id,
                 "title": card.get("title", ""),
@@ -154,6 +181,9 @@ def main():
             ]:
                 if field in card:
                     entry[field] = card[field]
+            if search_error:
+                entry["searchError"] = search_error
+                search_error_count += 1
             surviving.append(entry)
             if is_never_prune and not hits:
                 never_prune_count += 1
@@ -171,6 +201,7 @@ def main():
         "survivingCards": len(surviving),
         "prunedCards": pruned,
         "neverPruneCards": never_prune_count,
+        "searchErrorCards": search_error_count,
         "targetPath": args.target_path,
         "fileFilter": include_patterns,
         "hits": surviving,
@@ -180,6 +211,8 @@ def main():
 
     print(f"\nResults:")
     print(f"  Surviving: {len(surviving)} cards ({never_prune_count} via neverPrune)")
+    if search_error_count:
+        print(f"  Search errors: {search_error_count} cards kept for manual review")
     print(f"  Pruned:    {pruned} cards")
     print(f"  Written:   {args.output}")
 

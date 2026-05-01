@@ -68,6 +68,7 @@ FLOW_GROUPS = {
     "Discovery": [
         "invariant-catcher",
         "protocol-reasoning",
+        "finding-chain-synthesizer",
         "missing-validation-reasoning",
         "multi-persona-orchestrator",
         "persona-bfs",
@@ -781,6 +782,29 @@ def check_github_resource_surface(
     return issues
 
 
+def sync_github_resource_surface(
+    *,
+    source_root: Path = CLAUDE_ROOT / "resources",
+    github_root: Path = GITHUB_RESOURCES_ROOT,
+) -> int:
+    """Copy GitHub shared resource mirrors from Claude resources."""
+    if github_root.exists():
+        shutil.rmtree(github_root)
+    github_root.mkdir(parents=True, exist_ok=True)
+
+    count = 0
+    if not source_root.exists():
+        return count
+
+    for source_path in sorted(path for path in source_root.rglob("*") if path.is_file()):
+        rel_path = source_path.relative_to(source_root)
+        dest_path = github_root / rel_path
+        dest_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source_path, dest_path)
+        count += 1
+    return count
+
+
 def check_github_agent_outputs() -> int:
     issues = check_github_agent_surface()
     issues.extend(check_github_resource_surface())
@@ -820,8 +844,9 @@ def main() -> int:
     if args.check_github_agents:
         return check_github_agent_outputs()
     if args.sync_github_agents:
-        count = sync_github_agent_surface()
-        print(f"Wrote {count} GitHub agent mirror files.")
+        agent_count = sync_github_agent_surface()
+        resource_count = sync_github_resource_surface()
+        print(f"Wrote {agent_count} GitHub agent mirror files and {resource_count} resource files.")
         return 0
 
     if CODEX_ROOT.exists():

@@ -170,12 +170,14 @@ git clone -b reports/erc4626 --single-branch https://github.com/calc1f4r/Horus.g
 3. Load enriched hunt cards for resolved manifests plus graph-expanded cards
 4. For each card, grep target code: `grep -rn "card.grep" <target_path>`
 5. Cards with `neverPrune: true` always survive (CRITICAL safety net)
-6. Prune cards with zero grep hits (removes ~60-80% of patterns)
-7. PARTITION surviving cards into shards of 50-80 cards (grouped by cat tag)
+6. Cards with search execution errors survive with `searchError` for manual review
+7. Prune cards with zero grep hits (removes ~60-80% of patterns)
+8. PARTITION surviving cards into shards of 50-80 cards (grouped by cat tag)
    - neverPrune cards are duplicated into every shard
-8. SPAWN one sub-agent per shard (parallel) — each gets shard cards + full target code
-9. Per-shard: PASS 1 (micro-directives) + PASS 2 (evidence lookup for true/likely positives)
-10. MERGE all shard findings → deduplicate by root cause → 03-findings-raw.md
+   - if only neverPrune cards survive, emit a critical-only shard so the safety-net review still runs
+9. SPAWN one sub-agent per shard (parallel) — each gets shard cards + full target code
+10. Per-shard: PASS 1 (micro-directives) + PASS 2 (evidence lookup for true/likely positives)
+11. MERGE all shard findings → deduplicate by root cause → 03-findings-raw.md
 ```
 
 ---

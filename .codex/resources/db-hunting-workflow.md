@@ -93,6 +93,7 @@ grep -rn "card.grep" <path> --include="*.sol" --include="*.rs" --include="*.go" 
 
 Rules:
 - Cards with `neverPrune: true` ALWAYS survive, even with zero hits
+- Cards with search execution errors survive with `searchError` and require manual review
 - Typically eliminates 60-80% of cards
 - Output: `audit-output/hunt-card-hits.json`
 
@@ -114,6 +115,7 @@ DB/manifests/bundles/<protocol_type>-shards.json
 
 Rules:
 - `neverPrune` cards → "critical set" duplicated to EVERY shard
+- If only `neverPrune` cards survive, the partition output contains a `shard-1-critical` critical-only shard so the safety-net review still runs
 - Large groups (>80 cards) → split into sub-shards of ~60
 - Small groups (<20 cards) → merged into combined shards
 - Output: `audit-output/hunt-card-shards.json`

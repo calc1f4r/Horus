@@ -37,6 +37,7 @@ All agents live in `.claude/agents/`. The entry point for a full audit is `audit
 | `system-synthesizer` | Synthesizes per-contract context into global context document |
 | `multi-persona-orchestrator` | 6 parallel auditing personas with cross-verification |
 | `protocol-reasoning` | Deep reasoning-based vulnerability discovery |
+| `finding-chain-synthesizer` | Chains confirmed findings into emergent multi-step exploit candidates |
 | `missing-validation-reasoning` | Input validation and hygiene scanner |
 | `invariant-writer` / `invariant-reviewer` | Invariant extraction and hardening |
 | `invariant-catcher` | DB-powered vulnerability pattern hunting |
