@@ -1,0 +1,1705 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Solflare MetaMask Snaps - Solflare, Sui, Aptos | Consensys Diligence</title>
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+      <meta name="description" content="Executive Summary This report presents the results of our engagement with Solflare Wallet to review three MetaMask Snaps, the aptos-snap for Rise Wallet, the solana-snap for Solflare, and the sui-snap for Elli Wallet.
+The review was conducted from Aug 15, 2023 to July 25, 2023. A total of 9 person-days were spent.
+Scope The review focused on the following repositories and commit hashes:
+solflare-snap@792fcb2a253c572677271044ece061daae81ce41 sui-snap@39740383fd11174a406a1a27e15c92f277d00779 aptos-snap@36145fbb8f4963eb02cff26a549ac348a34d8cb3 The dapp wallets interfacing with the snap are not in scope of this review.">
+
+    <link href="/tachyons.min.css" rel="stylesheet">
+    <link href="/style.css" rel="stylesheet">
+    <link href="/highlight.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.10.1/css/all.css" crossorigin="anonymous">
+    <link rel="canonical" href="https://diligence.security/audits/2023/08/solflare-metamask-snaps-solflare-sui-aptos/">
+    <link rel="shortcut icon" type="image/png" href="/images/icon/favicon.png">
+    <link rel="nokia-touch-icon" href="/images/icon/favicon.png">
+    <link rel="apple-touch-icon-precomposed" href="/images/icon/favicon.png" sizes="1x1">
+    
+<style>
+ 
+.menu-container {
+    position: relative;
+    margin-left: 10px;
+    float: right;
+}
+
+ 
+.menu-toggle {
+    background: white;
+    color: #333;
+    border: none;
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+ 
+.menu-box {
+    display: none;
+    position: absolute;
+    top: 25px;
+    right: 0;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    padding: 5px;
+    min-width: 250px;
+    z-index: 1000;
+}
+
+ 
+.menu-box button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.menu-box button:hover {
+    background: #f0f0f0;
+}
+
+ 
+.icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+}
+</style>
+<script type="text/javascript" id="interactive-report-tools" defer>
+const getStructuredFinding = (elem, options) => {
+  const is = elem.closest(".issue");
+  const heading = is.querySelector("h3");
+  const title = Array.from(heading.childNodes)
+          .map(node => node.nodeName === "SPAN" ? "" : node.textContent.trim())
+          .join(" ")
+          .replace(/\s+/g, " ")
+          .trim()
+
+  function formatText(elem){
+      return Array.from(elem.childNodes)
+          .map(node => {
+              switch(node.nodeName){
+                  case "CODE":
+                      return `\`${node.textContent.trim()}\``;
+                  case "H4":
+                      return  `#### ${node.textContent.trim()}`;
+              }
+              return node.textContent.trim();
+          })
+          .join("\n")
+          
+          .trim()
+  }
+
+  const finding = {
+      id: title.substring(0, title.indexOf(' ')),
+      title: title.substring(title.indexOf(' ') + 1),
+      severity: heading.querySelector(".severity")?.textContent.trim().toLowerCase() || undefined,
+      state: heading.querySelector(".state")?.textContent.trim().toLowerCase() || undefined,
+      url: document.location.href.split("#",1)[0] + "#" + heading.id,
+  }
+  if(options?.withBody){
+      finding.body = formatText(is.querySelector("h4").closest("div"));
+  }
+  return finding;
+}
+const getAllFindings = (options) => Array.from(document.querySelectorAll(".issue")).map(iss => getStructuredFinding(iss, options));
+function exportCsv(fileName) {
+  const data = getAllFindings()
+  const keys = Object.keys(data[0]);
+  const csvRows = [];
+  csvRows.push(keys.join(','));
+  data.forEach(row => {
+      const values = keys.map(key => {
+          const value = row[key];
+          if(value === undefined) return "";
+          return `"${value}"`;
+      });
+      csvRows.push(values.join(','));
+  });
+  const csvData = csvRows.join('\n');
+  const blob = new Blob([csvData], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName || `${document.location.pathname.split("/").filter((e) => e).pop()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function exportJson(fileName) {
+  const blob = new Blob([JSON.stringify(getAllFindings())], { type: 'text/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName || `${document.location.pathname.split("/").filter((e) => e).pop()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function getOrSetGithubRepo(force) {
+  function parseGitHubRepo(input) {
+      if(!input) return;
+      const urlMatch = input.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/?$/);
+      if (urlMatch) return `${urlMatch[1]}/${urlMatch[2]}`;
+      
+      const directMatch = input.match(/^([^\/]+)\/([^\/]+)$/);
+      return directMatch ? input : null;
+  }
+  function isValidGitHubRepo(input) {
+      if(!input) return false;
+      
+      
+      
+      
+      
+      const githubNameRegex = /^(?![-.])(?!.*[_.-]{2})[a-zA-Z0-9.-]{1,100}(?<![-.])$/;
+      if (typeof input !== 'string') return false;
+      const parts = input.split('/');
+      
+      if (parts.length !== 2) return false;
+      const [org, repo] = parts;
+      return githubNameRegex.test(org) && githubNameRegex.test(repo);
+  }
+  closeAllMenus();
+  let repo = sessionStorage.getItem("user_gh_repo");
+  if (force || !isValidGitHubRepo(repo)) {
+      repo = parseGitHubRepo(prompt("Enter the GitHub repository name (owner/repo):", "https://github.com/organisation/repo"));
+
+      if (repo) {
+          if(!isValidGitHubRepo(repo)){
+              alert(`Error: '${repo}' is not a valid GitHub repo.`);
+          } else {
+              sessionStorage.setItem("user_gh_repo", repo);
+          }
+      }
+  }
+  return repo;
+}
+
+function exportToGitHub(elem) {
+  closeAllMenus();
+  const repo = getOrSetGithubRepo();
+  if(!repo) return;
+  const baseUrl = `https:\/\/github.com/${repo}/issues/new`;
+  const is = getStructuredFinding(elem);
+  const labels = undefined;
+
+  const params = new URLSearchParams({
+      title: `[${capitalizeFirstLetter(is.severity)}] [${is.id}] ${is.title}`,
+      body: `[<img width="200" alt="get in touch with Consensys Diligence" src="https:\/\/user-images.githubusercontent.com/2865694/56826101-91dcf380-685b-11e9-937c-af49c2510aa0.png">](https:\/\/diligence.security)
+<sub>[[ 🌐 ](https:\/\/diligence.security) [ 📩 ](mailto:diligence@diligence.security) [ 🔥 ](https:\/\/consensysdiligence.github.io/diligence/)]</sub>
+_______
+
+**Severity**: ${capitalizeFirstLetter(is.severity)}
+**Finding**: 👉 [${is.id} - ${is.title}](${is.url})
+
+`,
+      labels: labels && labels.join(',') || "bug,security,audit",
+      milestone: "diligence-audit",
+      assignee: ""
+  });
+
+  const issueUrl = `${baseUrl}?${params.toString()}`;
+  window.open(issueUrl, "_blank");
+}
+function exportToClipboard(elem, options){
+  closeAllMenus();
+  const is = getStructuredFinding(elem, {withBody:true});
+  let data = "";
+  switch (options?.format){
+      case "text":
+          data = `[${capitalizeFirstLetter(is.severity)}] [${is.id}] ${is.title}
+
+**Reference**: ${is.url}
+
+${is.body}
+`
+          break;
+      default:
+          data = JSON.stringify(is);
+  }
+  navigator.clipboard.writeText(data)
+}
+function capitalizeFirstLetter(string) {
+  return string ? string.charAt(0).toUpperCase() + string.slice(1) : "None";
+}
+function closeAllMenus() {
+  document.querySelectorAll(".menu-box").forEach(menu => {
+      menu.style.display = "none";
+  });
+}
+document.addEventListener("DOMContentLoaded", function () {
+  // Toggle menu visibility
+  document.querySelectorAll(".menu-toggle").forEach(button => {
+      button.addEventListener("click", function (event) {
+          const menu = this.nextElementSibling;
+          menu.style.display = menu.style.display === "block" ? "none" : "block";
+          event.stopPropagation(); 
+      });
+  });
+
+  
+  document.addEventListener("click", function () {
+      document.querySelectorAll(".menu-box").forEach(menu => {
+          menu.style.display = "none";
+      });
+  });
+
+  
+  document.querySelectorAll(".menu-box").forEach(menu => {
+      menu.addEventListener("click", function (event) {
+          event.stopPropagation();
+      });
+  });
+});
+</script>
+<link rel="alternate" type="application/rss+xml" href="https://diligence.security/index.xml" title="Consensys Diligence" />
+    <meta itemprop="name" content="Solflare MetaMask Snaps - Solflare, Sui, Aptos">
+<meta itemprop="description" content="Executive Summary This report presents the results of our engagement with Solflare Wallet to review three MetaMask Snaps, the aptos-snap for Rise Wallet, the solana-snap for Solflare, and the sui-snap for Elli Wallet.
+The review was conducted from Aug 15, 2023 to July 25, 2023. A total of 9 person-days were spent.
+Scope The review focused on the following repositories and commit hashes:
+solflare-snap@792fcb2a253c572677271044ece061daae81ce41 sui-snap@39740383fd11174a406a1a27e15c92f277d00779 aptos-snap@36145fbb8f4963eb02cff26a549ac348a34d8cb3 The dapp wallets interfacing with the snap are not in scope of this review.">
+
+
+<meta itemprop="datePublished" content="2023-08-21T10:55:22&#43;02:00" />
+<meta itemprop="dateModified" content="2023-08-21T10:55:22&#43;02:00" />
+<meta itemprop="wordCount" content="5526">
+
+
+
+    <meta itemprop="keywords" content="" />
+
+    <meta property="og:title" content="Solflare MetaMask Snaps - Solflare, Sui, Aptos | Consensys Diligence" />
+    <meta property="og:description" content="Executive Summary This report presents the results of our engagement with Solflare Wallet to review three MetaMask Snaps, the aptos-snap for Rise Wallet, the solana-snap for Solflare, and the sui-snap for Elli Wallet.
+The review was conducted from Aug 15, 2023 to July 25, 2023. A total of 9 person-days were spent.
+Scope The review focused on the following repositories and commit hashes:
+solflare-snap@792fcb2a253c572677271044ece061daae81ce41 sui-snap@39740383fd11174a406a1a27e15c92f277d00779 aptos-snap@36145fbb8f4963eb02cff26a549ac348a34d8cb3 The dapp wallets interfacing with the snap are not in scope of this review." />
+    
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://diligence.security/audits/2023/08/solflare-metamask-snaps-solflare-sui-aptos/" />
+<meta property="article:published_time" content="2023-08-21T10:55:22+02:00" />
+<meta property="article:modified_time" content="2023-08-21T10:55:22+02:00" /><meta property="og:site_name" content="Consensys Diligence" />
+<meta name="twitter:title" content="Solflare MetaMask Snaps - Solflare, Sui, Aptos | Consensys Diligence"/>
+<meta name="twitter:description" content="Executive Summary This report presents the results of our engagement with Solflare Wallet to review three MetaMask Snaps, the aptos-snap for Rise Wallet, the solana-snap for Solflare, and the sui-snap for Elli Wallet.
+The review was conducted from Aug 15, 2023 to July 25, 2023. A total of 9 person-days were spent.
+Scope The review focused on the following repositories and commit hashes:
+solflare-snap@792fcb2a253c572677271044ece061daae81ce41 sui-snap@39740383fd11174a406a1a27e15c92f277d00779 aptos-snap@36145fbb8f4963eb02cff26a549ac348a34d8cb3 The dapp wallets interfacing with the snap are not in scope of this review."/><meta name="twitter:card" content="summary"/>
+<meta name="twitter:site" content="@ConsensysAudits"/>
+    <meta name="twitter:creator" content="@ConsensysAudits"/>
+
+      
+      <script type="text/javascript" id="hs-script-loader" async defer src="//js.hs-scripts.com/4795067.js"></script>
+      
+      <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-P5Z4ZWH');</script>
+      
+      <script type="text/javascript" id="reload-pathfix">
+        let lastSegment = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1); 
+        if(lastSegment && lastSegment.length !==0 && lastSegment.indexOf(".") === -1){
+          
+          window.location.pathname += "/";  
+        }
+      </script>
+
+    
+  </head>
+  <body
+    
+    
+    
+    
+    
+    
+    
+    
+  >
+    <header class="header">
+  <nav class="db dt-l w-100 border-box pa4 ph5-l deli-nav">
+    <a class="db dtc-l v-mid mid-gray link dim w-100 w-25-l tc tl-l mb2 mb0-l dili-logo" href="/" title="Home">
+      
+        <img class="logo " src="/images/logo/logo.svg" alt="Consensys Diligence">
+      
+    </a>
+    <div class="dili_menu_hambuger"></div>
+    <div class="db dtc-l v-mid w-100 w-75-l tc tr-l dili-header-menu">
+      <div class="dili-header-menu-inner">
+        <a id="audits" class="link dim light-gray f6 f5-l dib mr3 mr4-l" href="/audits/" title="Audits">Audits</a>
+        <a id="fuzzing" class="link dim light-gray f6 f5-l dib mr3 mr4-l" href="/fuzzing/" title="Fuzzing">Fuzzing</a>
+        <a id="scribble" class="link dim light-gray f6 f5-l dib mr3 mr4-l" href="/scribble/" title="Scribble">Scribble</a>
+        <a id="blog" class="link dim light-gray f6 f5-l dib mr3 mr4-l" href="/blog/" title="Blog">Blog</a>
+        <a id="tools" class="link dim light-gray f6 f5-l dib mr3 mr4-l" href="/tools/" title="Tools">Tools</a>
+        <a id="research" class="link dim light-gray f6 f5-l dib mr3 mr4-l" href="/research/" title="Research">Research</a>
+        <a id="about" class="link dim light-gray f6 f5-l dib mr3 mr4-l" href="/about/" title="About">About</a>
+        <a id="contact" class="link dim light-gray f6 f5-l dib" href="/contact/" title="Contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+    <main role="main">
+      <div class="dili-navigator-page">
+    <div class="dili-blog-hero">
+        <div class="dili-hero-bg-mixin" style="background-image: url('/images/audit_report/feature-hero.png');" ></div>
+        <div class="dili-container">
+            <div class="dili-blog-hero-inner">
+                <div class="item-eyebrow"></div>
+                <h1 class="item-title">Solflare MetaMask Snaps - Solflare, Sui, Aptos</h1>
+            </div>
+        </div>
+    </div>
+    <article class="">
+
+
+    <div class="dili-navigator-wrapper">
+            <div class="dili-navigator-sidebar">
+
+                <ul class="dili-navigator-sidebar-inner">
+                <li>
+                    <a href="#executive-summary">1 Executive Summary</a>
+                </li>
+                <li>
+                    <a href="#scope">2 Scope</a>
+                    <ul>
+                    <li>
+                        <a href="#objectives">2.1 Objectives</a>
+                    </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#snap-outlines">3 Snap Outlines</a>
+                    <ul>
+                    <li>
+                        <a href="#details-solflare-snap">3.1 Details: Solflare Snap</a>
+                    </li>
+                    <li>
+                        <a href="#details-sui-snap">3.2 Details: Sui Snap</a>
+                    </li>
+                    <li>
+                        <a href="#details-aptos-snap">3.3 Details: Aptos Snap</a>
+                    </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#findings">4 Findings</a>
+                    <ul>
+                    <li>
+                        <a href="#dapp-may-force-a-sign-approval-dialog-without-showing-the-message-to-be-signed">4.1 Dapp May Force a Sign Approval Dialog Without Showing the Message to Be Signed <span class="severity major">Major</span> <span class="state">&#10003;&nbsp;Fixed</span></a>
+                    </li>
+                    <li>
+                        <a href="#ctrlcharmarkdown-injection-in-rendersigntransaction-rendersignalltransactions">4.2 CtrlChar/Markdown Injection in <code>renderSignTransaction</code>, <code>renderSignAllTransactions</code> <span class="severity major">Major</span> <span class="state">&#10003;&nbsp;Fixed</span></a>
+                    </li>
+                    <li>
+                        <a href="#insufficient-input-validation-derivekeypair">4.3 Insufficient Input Validation <code>deriveKeyPair()</code> <span class="severity medium">Medium</span></a>
+                    </li>
+                    <li>
+                        <a href="#dapp-may-suppress-user-confirmation-on-request-to-extract-pubkey-may-extract-any-net-key">4.4 Dapp May Suppress User Confirmation on Request to Extract Pubkey; May Extract Any Net-Key <span class="severity medium">Medium</span></a>
+                    </li>
+                    <li>
+                        <a href="#production-builds-allow-development-and-localhost-origins-snap-does-not-enforce-transport-security">4.5 Production Builds Allow Development and Localhost Origins; Snap Does Not Enforce Transport Security <span class="severity medium">Medium</span> <span class="state no-check">&nbsp;Partially Addressed</span></a>
+                    </li>
+                    <li>
+                        <a href="#misleading-html-entity-and-function-name-getprivkey">4.6 Misleading HTML Entity and Function Name <code>getPrivkey</code> <span class="severity minor">Minor</span> <span class="state">&#10003;&nbsp;Fixed</span></a>
+                    </li>
+                    <li>
+                        <a href="#use-of-outdated-snapconfigjson-instead-of-snapconfigjs">4.7 Use of Outdated <code>snap.config.json</code> Instead of <code>snap.config.js</code> <span class="severity minor">Minor</span> <span class="state">&#10003;&nbsp;Fixed</span></a>
+                    </li>
+                    <li>
+                        <a href="#inconsistent-or-blank-fields-in-packagejson">4.8 Inconsistent or Blank Fields in <code>package.json</code> <span class="severity minor">Minor</span> <span class="state">&#10003;&nbsp;Fixed</span></a>
+                    </li>
+                    <li>
+                        <a href="#consider-using-metamaskdetect-provider">4.9 Consider Using <code>@metamask/detect-provider</code></a>
+                    </li>
+                    <li>
+                        <a href="#consider-prefixing-rpc-calls-with-solana_-sui_-aptos_">4.10 Consider Prefixing RPC Calls With <code>solana_*</code>, <code>sui_*</code>, <code>aptos_*</code></a>
+                    </li>
+                    <li>
+                        <a href="#consider-moving-to-typescript">4.11 Consider Moving to TypeScript</a>
+                    </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#appendix---files-in-scope">Appendix 1 - Files in Scope</a>
+                </li>
+                <li>
+                    <a href="#appendix---disclosure">Appendix 2 - Disclosure</a>
+                    <ul>
+                    <li>
+                        <a href="#purpose-of-reports">A.2.1 Purpose of Reports</a>
+                    </li>
+                    <li>
+                        <a href="#links-to-other-web-sites-from-this-web-site">A.2.2 Links to Other Web Sites from This Web Site</a>
+                    </li>
+                    <li>
+                        <a href="#timeliness-of-content">A.2.3 Timeliness of Content</a>
+                    </li>
+                </li>
+                </ul>
+            </div>
+            <div class="dili-navigator-content richtext">
+                <aside class="summary summary-cta-side">
+                    
+                    
+                    <table>
+                        <tr>
+                            <th align="left">Date</th>
+                            <td align="left">August 2023</td>
+                        </tr>
+                        
+                        <tr>
+                            <th align="left">Auditors</th>
+                            <td align="left" class="mw5">Martin Ortner
+                        </tr>
+                        
+                        <tr class="noprint">
+                            <th align="left">Download</th>
+                            <td align="left">
+                                <a onclick="exportJson()" title="↓ JSON"><i class="far fa-file-code"></i> JSON</a><br/>
+                                <a onclick="exportCsv()" title="↓ CSV"><i class="far fa-file-excel"></i> CSV</a><br/><a href="/audits/2023/08/solflare-metamask-snaps-solflare-sui-aptos/solflare-wallet-snaps-audit-2023-08-final.pdf" title="↓ PDF"><i class="far fa-file-pdf"></i> PDF</a>
+                            </td>
+                        </tr>
+                    </table>
+                </aside><h2 id="executive-summary">1 Executive Summary</h2>
+<p>This report presents the results of our engagement with <strong>Solflare Wallet</strong> to review three <strong>MetaMask Snaps</strong>, the <strong>aptos-snap</strong> for Rise Wallet, the <strong>solana-snap</strong> for Solflare, and the <strong>sui-snap</strong> for Elli Wallet.</p>
+<p>The review was conducted from <strong>Aug 15, 2023</strong> to <strong>July 25, 2023</strong>. A total of 9 person-days were spent.</p>
+<h2 id="scope">2 Scope</h2>
+<p>The review focused on the following repositories and commit hashes:</p>
+<ul>
+<li><a href="https://github.com/solflare-wallet/solflare-snap/tree/792fcb2a253c572677271044ece061daae81ce41">solflare-snap@792fcb2a253c572677271044ece061daae81ce41</a></li>
+<li><a href="https://github.com/solflare-wallet/sui-snap/tree/39740383fd11174a406a1a27e15c92f277d00779">sui-snap@39740383fd11174a406a1a27e15c92f277d00779</a></li>
+<li><a href="https://github.com/solflare-wallet/aptos-snap/tree/36145fbb8f4963eb02cff26a549ac348a34d8cb3">aptos-snap@36145fbb8f4963eb02cff26a549ac348a34d8cb3</a></li>
+</ul>
+<p>The dapp wallets interfacing with the snap are not in scope of this review.</p>
+<p>The list of files in scope can be found in the <a href="#appendix---files-in-scope">Appendix</a>.</p>
+<h3 id="objectives">2.1 Objectives</h3>
+<p>Together with the client, we identified the following priorities for our review:</p>
+<ol>
+<li>Correctness of the implementation, consistent with the intended functionality and without unintended edge cases.</li>
+<li>Identify vulnerabilities particular to the <a href="https://docs.metamask.io/snaps">MetaMask Snaps</a> SDK integration in coherence with the MetaMask Snap Threat Model describing a Snap as an extension of the MetaMask Wallet Trust Module.</li>
+</ol>
+
+
+<p><h2 id="snap-outlines">3 Snap Outlines</h2>
+<ul>
+<li>The three snaps share certain parts of the codebase (duplications) and expose similar functionality to dapps.
+<ul>
+<li><code>ui.js</code> - identical</li>
+<li><code>privateKey.js</code> - identical (ex. coinId)</li>
+<li><code>index.js</code> - logically similar: diff coinSpecifics, origin checks</li>
+<li><code>utils.js</code> - aptos with additional functions: hex2bytes, bytes2hex</li>
+<li>auxfiles: logically similar</li>
+</ul>
+</li>
+<li>The three snaps individually request sensitive BIP32 Entropy (<a href="https://github.com/satoshilabs/slips/blob/master/slip-0044.md">SLIP-44</a>), effectively managing the following coins private root key:
+<ul>
+<li><code>m/44'/501'</code> (Solana)</li>
+<li><code>m/44/784'</code> (Sui)</li>
+<li><code>m/44'/637'</code> (Aptos)</li>
+</ul>
+</li>
+<li>Connected dapps can communicate with the snap via MetaMask snap RPC. Dapp origins are enforced as follows:
+<ul>
+<li>Solana: localhost, *solflare.com, *solfalre.dev</li>
+<li>Sui: localhost, *elliwallet.dev</li>
+<li>Aptos: localhost, *risewallet.dev</li>
+</ul>
+</li>
+<li>Other snaps cannot directly communicate with one of the three snaps under review.</li>
+<li>The public key is exposed to connected dapps without additional user confirmation if the dapp chooses so.</li>
+<li>The private key can not be exported to the RPC origin.</li>
+<li>Transactions/Messages are signed within the realm of the snap.</li>
+<li>The snap may display custom MetaMask dialogs.</li>
+</ul>
+<h3 id="details-solflare-snap">3.1 Details: Solflare Snap</h3>
+<pre tabindex="0"><code>[🚀 == FsChecks == ]
+    ℹ️  undefined
+    🔺 - no linter config
+[🚀 == Manifest == ]
+    🔺 - bundle (dist/bundle.js) does not not exist!
+🚨 -- Manifest errors --
+    🔺 Error: Failed to read Snap bundle file: ENOENT: no such file or directory, open &#39;/Users/tintin/workspace/solidity/solflare-wallet-snaps-audit-2023-08/solflare-snap/dist/bundle.js&#39;
+    🔺 - package.json: metamask template package.conf repo.url not correct &#39;undefined&#39;
+----%&lt;---- raw permissions
+🌐 : https://docs.metamask.io/snaps/reference/rpc-api/#wallet_requestsnaps
+endowment:rpc { dapps: true, snaps: false }
+snap_dialog {}
+snap_getBip32Entropy [ { path: [ &#39;m&#39;, &#34;44&#39;&#34;, &#34;501&#39;&#34; ], curve: &#39;ed25519&#39; } ]
+----&gt;%---- raw permissions
+🚜 [endowment:rpc]
+    ❗- endowment:rpc.dapps - snap can communicate with websites/dapps; check origin for internal api calls!
+       🔸  src/index.js
+🚜 [snap_dialog]
+    ☝️ - snap_dialog - Displays a dialog in the MetaMask UI. There are three types of dialogs with different parameters and return types.
+    ⚠️ - this method renders Markdown! check for ctrlchar/markdown/injection
+       🔸  src/ui.js
+🚜 [snap_getBip32Entropy]
+    ✨ - snap_getBip32Entropy - Gets the SLIP-10 key for the path and curve specified by the method name.
+       ⚠️ - If you call this method, you receive the user&#39;s parent key for the derivation path they request. You&#39;re managing the user&#39;s keys and assets on their behalf. Their safety is your responsibility.
+       🔸  src/privateKey.js
+🌲 - Package Depenencies:
+      - @babel/runtime:^7.21.5
+      - @metamask/key-tree:^7.0.0                (🔺 looks like devDependency 👀)
+      - @metamask/snaps-ui:^0.32.2               (🔺 looks like devDependency 👀)
+      - bs58:^5.0.0
+      - tweetnacl:^1.0.3
+[🚀 == Bundle == ]
+    🟢 Package.json OK
+⚠️  Package.json Warnings:
+    🔺 missing keywords
+    🔺 missing bugs
+    🔺 missing homepage
+    🔺 missing repository
+</code></pre><h3 id="details-sui-snap">3.2 Details: Sui Snap</h3>
+<pre tabindex="0"><code>[🚀 == FsChecks == ]
+    ℹ️  undefined
+    🔺 - no linter config
+[🚀 == Manifest == ]
+    🔺 - bundle (dist/bundle.js) does not not exist!
+🚨 -- Manifest errors --
+    🔺 Error: Failed to read Snap bundle file: ENOENT: no such file or directory, open &#39;/Users/tintin/workspace/solidity/solflare-wallet-snaps-audit-2023-08/sui-snap/dist/bundle.js&#39;
+    🔺 - package.json: metamask template package.conf repo.url not correct &#39;undefined&#39;
+----%&lt;---- raw permissions
+🌐 : https://docs.metamask.io/snaps/reference/rpc-api/#wallet_requestsnaps
+endowment:rpc { dapps: true, snaps: false }
+snap_dialog {}
+snap_getBip32Entropy [ { path: [ &#39;m&#39;, &#34;44&#39;&#34;, &#34;784&#39;&#34; ], curve: &#39;ed25519&#39; } ]
+----&gt;%---- raw permissions
+🚜 [endowment:rpc]
+    ❗- endowment:rpc.dapps - snap can communicate with websites/dapps; check origin for internal api calls!
+       🔸  src/index.js
+🚜 [snap_dialog]
+    ☝️ - snap_dialog - Displays a dialog in the MetaMask UI. There are three types of dialogs with different parameters and return types.
+    ⚠️ - this method renders Markdown! check for ctrlchar/markdown/injection
+       🔸  src/ui.js
+🚜 [snap_getBip32Entropy]
+    ✨ - snap_getBip32Entropy - Gets the SLIP-10 key for the path and curve specified by the method name.
+       ⚠️ - If you call this method, you receive the user&#39;s parent key for the derivation path they request. You&#39;re managing the user&#39;s keys and assets on their behalf. Their safety is your responsibility.
+       🔸  src/privateKey.js
+🌲 - Package Depenencies:
+      - @babel/runtime:^7.21.5
+      - @metamask/key-tree:^7.0.0                (🔺 looks like devDependency 👀)
+      - @metamask/snaps-ui:^0.32.2               (🔺 looks like devDependency 👀)
+      - @noble/hashes:^1.3.1
+      - base64-js:^1.5.1
+      - tweetnacl:^1.0.3
+[🚀 == Bundle == ]
+    🟢 Package.json OK
+⚠️  Package.json Warnings:
+    🔺 missing keywords
+    🔺 missing bugs
+    🔺 missing homepage
+    🔺 missing repository
+</code></pre><h3 id="details-aptos-snap">3.3 Details: Aptos Snap</h3>
+<pre tabindex="0"><code>[🚀 == FsChecks == ]
+    ℹ️  undefined
+    🔺 - no linter config
+[🚀 == Manifest == ]
+    🔺 - bundle (dist/bundle.js) does not not exist!
+🚨 -- Manifest errors --
+    🔺 Error: Failed to read Snap bundle file: ENOENT: no such file or directory, open &#39;/Users/tintin/workspace/solidity/solflare-wallet-snaps-audit-2023-08/aptos-snap/dist/bundle.js&#39;
+    🔺 - package.json: metamask template package.conf repo.url not correct &#39;undefined&#39;
+----%&lt;---- raw permissions
+🌐 : https://docs.metamask.io/snaps/reference/rpc-api/#wallet_requestsnaps
+endowment:rpc { dapps: true, snaps: false }
+snap_dialog {}
+snap_getBip32Entropy [ { path: [ &#39;m&#39;, &#34;44&#39;&#34;, &#34;637&#39;&#34; ], curve: &#39;ed25519&#39; } ]
+----&gt;%---- raw permissions
+🚜 [endowment:rpc]
+    ❗- endowment:rpc.dapps - snap can communicate with websites/dapps; check origin for internal api calls!
+       🔸  src/index.js
+🚜 [snap_dialog]
+    ☝️ - snap_dialog - Displays a dialog in the MetaMask UI. There are three types of dialogs with different parameters and return types.
+    ⚠️ - this method renders Markdown! check for ctrlchar/markdown/injection
+       🔸  src/ui.js
+🚜 [snap_getBip32Entropy]
+    ✨ - snap_getBip32Entropy - Gets the SLIP-10 key for the path and curve specified by the method name.
+       ⚠️ - If you call this method, you receive the user&#39;s parent key for the derivation path they request. You&#39;re managing the user&#39;s keys and assets on their behalf. Their safety is your responsibility.
+       🔸  src/privateKey.js
+🌲 - Package Depenencies:
+      - @babel/runtime:^7.21.5
+      - @metamask/key-tree:^7.0.0                (🔺 looks like devDependency 👀)
+      - @metamask/snaps-ui:^0.32.2               (🔺 looks like devDependency 👀)
+      - tweetnacl:^1.0.3
+[🚀 == Bundle == ]
+    🟢 Package.json OK
+⚠️  Package.json Warnings:
+    🔺 missing keywords
+    🔺 missing bugs
+    🔺 missing homepage
+    🔺 missing repository
+</code></pre>
+
+<h2 id="findings">4 Findings</h2>
+   
+    <p>Each issue has an assigned severity:</p>
+
+    <ul>
+        <li><span class="severity critical">Critical</span> issues are directly exploitable security vulnerabilities that need to be fixed.</li>
+        <li><span class="severity major">Major</span> issues are security vulnerabilities that may not be directly exploitable or may require certain conditions in order to be exploited. All major issues should be addressed.</li>
+        <li><span class="severity medium">Medium</span> issues are objective in nature but are not security vulnerabilities. These should be addressed unless there is a clear reason not to.</li>
+        <li><span class="severity minor">Minor</span> issues are subjective in nature. They are typically suggestions around best practices or readability. Code maintainers should use their own judgment as to whether to address such issues.</li>
+        <li>Issues without a severity are general recommendations or optional improvements. They are not related to security or correctness and may be addressed at the discretion of the maintainer.</li>
+    </ul><div class="issue">
+            <a class="anchor" href="#dapp-may-force-a-sign-approval-dialog-without-showing-the-message-to-be-signed" data-issue-url="https://github.com/ConsenSysDiligence/solflare-wallet-snaps-audit-2023-08/issues/12">
+                <h3 id="dapp-may-force-a-sign-approval-dialog-without-showing-the-message-to-be-signed">4.1 Dapp May Force a Sign Approval Dialog Without Showing the Message to Be Signed <span class="severity major">Major</span> <span class="state">&#10003;&nbsp;Fixed</span></h3>
+            </a>
+           
+            <div class="menu-container noprint">
+                <button class="menu-toggle">...</button>
+                <div class="menu-box">
+                    <button class="github-export" onclick="exportToGitHub(this)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Export to GitHub ...
+                    </button>
+                    <button class="github-reset" onclick="getOrSetGithubRepo(true)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Set external GitHub Repo ...
+                    </button>
+                    <button class="json-export" onclick="exportToClipboard(this)">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (json)
+                    </button>
+                    <button class="text-export" onclick="exportToClipboard(this, {format:'text'})">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (text)
+                    </button>
+                </div>
+            </div>
+           
+                <div class="resolution">
+                    <h4>Resolution</h4>
+                    <div>
+                        <p>Addressed by always displaying the raw message to be signed to the user. This allows them to independently verify that this is indeed what they want to sign off on. Additionally, the client provided the following statement and changesets addressing the finding:</p>
+<blockquote>
+<p>4.1 - always display raw transaction payload</p>
+</blockquote>
+<p>Changesets:</p>
+<ul>
+<li><a href="https://github.com/solflare-wallet/solflare-snap/commit/95370989eaf7a010099b17edf283d9bf34017a82">solflare-wallet/solflare-snap@<code>9537098</code></a></li>
+<li><a href="https://github.com/solflare-wallet/aptos-snap/commit/b857c16b873c730a38a6762a8c6f28b7b6c73c14">solflare-wallet/aptos-snap@<code>b857c16</code></a></li>
+<li><a href="https://github.com/solflare-wallet/sui-snap/commit/d28c4e3bd1f33fb6d38da28f62ff965e27aa9b17">solflare-wallet/sui-snap@<code>d28c4e3</code></a></li>
+</ul>
+
+                    </div>
+                </div>
+           
+
+            <div><h4 id="description">Description</h4>
+<p>With the <code>request.params.displayMessage</code> parameter in requests to <code>signTransaction</code> and <code>signAllTransactions</code> the dapp controls if the message to be signed is displayed to the user or not. Allowing the dapp to control if the data to be signed is displayed to the user is dangerous as the dapp may silently ask for a signature to sign data the user did not intend to sign. This has potential to undermine security controls and procedures implemented by MetaMask which generally enforce clarity of what data the user is requested to sign.</p>
+<p>Note that the snap as an extension to the MetaMask trust module should not have to trust the dapp that is requesting signature.</p>
+<h4 id="examples">Examples</h4>
+<p>Affects all snaps under review.</p>
+<h5 id="solflare-snap">Solflare Snap</h5>
+<p><strong>../aptos-snap/src/index.js:L39-L51</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="n">const</span> <span class="p">{</span> <span class="n">derivationPath</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">simulationResult</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">displayMessage</span> <span class="o">=</span> <span class="kc">true</span> <span class="p">}</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">params</span> <span class="o">||</span> <span class="p">{};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">assertInput</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsString</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertInput</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsString</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsArray</span><span class="p">(</span><span class="n">simulationResult</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertAllStrings</span><span class="p">(</span><span class="n">simulationResult</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsBoolean</span><span class="p">(</span><span class="n">displayMessage</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">const</span> <span class="n">accepted</span> <span class="o">=</span> <span class="n">await</span> <span class="n">renderSignTransaction</span><span class="p">(</span><span class="n">dappHost</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">simulationResult</span><span class="p">,</span> <span class="n">displayMessage</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertConfirmation</span><span class="p">(</span><span class="n">accepted</span><span class="p">);</span>
+</span></span></code></pre></div><p><strong>../aptos-snap/src/ui.js:L28-L33</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl">    <span class="n">text</span><span class="p">(</span><span class="n">host</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...(</span><span class="n">simulationResultItems</span><span class="p">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">displayMessage</span> <span class="o">?</span> <span class="p">[</span><span class="n">divider</span><span class="p">()]</span> <span class="o">:</span> <span class="p">[]),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span><span class="n">simulationResultItems</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...(</span><span class="n">displayMessage</span> <span class="o">?</span> <span class="p">[</span><span class="n">copyable</span><span class="p">(</span><span class="n">message</span><span class="p">)]</span> <span class="o">:</span> <span class="p">[])</span>
+</span></span><span class="line"><span class="cl">  <span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="recommendation">Recommendation</h4>
+<p>In accordance with how MetaMask signing works, it is highly recommended to remove the <code>displayMessage</code> toggle and <strong>consistently</strong> enforce the message to be signed to be displayed. Else, there is no way for the user to verify if they are signing the correct data/transaction.</p>
+</div>
+        </div><div class="issue">
+            <a class="anchor" href="#ctrlcharmarkdown-injection-in-rendersigntransaction-rendersignalltransactions" data-issue-url="https://github.com/ConsenSysDiligence/solflare-wallet-snaps-audit-2023-08/issues/11">
+                <h3 id="ctrlcharmarkdown-injection-in-rendersigntransaction-rendersignalltransactions">4.2 CtrlChar/Markdown Injection in <code>renderSignTransaction</code>, <code>renderSignAllTransactions</code> <span class="severity major">Major</span> <span class="state">&#10003;&nbsp;Fixed</span></h3>
+            </a>
+           
+            <div class="menu-container noprint">
+                <button class="menu-toggle">...</button>
+                <div class="menu-box">
+                    <button class="github-export" onclick="exportToGitHub(this)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Export to GitHub ...
+                    </button>
+                    <button class="github-reset" onclick="getOrSetGithubRepo(true)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Set external GitHub Repo ...
+                    </button>
+                    <button class="json-export" onclick="exportToClipboard(this)">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (json)
+                    </button>
+                    <button class="text-export" onclick="exportToClipboard(this, {format:'text'})">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (text)
+                    </button>
+                </div>
+            </div>
+           
+                <div class="resolution">
+                    <h4>Resolution</h4>
+                    <div>
+                        <p>The identified vulnerability has been remedied by excluding the simulation result from the dialog. It is essential to emphasize that the extension should ideally generate the simulation result as a validated source of information. The transmission of this information from a less trustworthy entity (even though it pertains to the dapp linked to the snap) to be displayed within the secure context of a snap, influencing users to endorse raw data based on this simulation result, may inherently introduce security risks. Eliminating the simulation result parameter from the RPC request effectively mitigates this specific injection opportunity. Additionally, the client has furnished the subsequent statement and alterations to address the aforementioned issue:</p>
+<blockquote>
+<p>4.2 - fully remove simulation results. This removes the possibility to inject markdown or control characters in unsafe places. Given the multi-entrypoint argument and the lack of a straightforward way to parse and simulate transactions within the snap, we think raw transaction payloads provide an undeniable source of truth and let users parse those transactions with external tools. It is on our roadmap to see how this can be improved in the future</p>
+</blockquote>
+<p>Changesets:</p>
+<ul>
+<li><a href="https://github.com/solflare-wallet/solflare-snap/commit/95370989eaf7a010099b17edf283d9bf34017a82">solflare-wallet/solflare-snap@<code>9537098</code></a></li>
+<li><a href="https://github.com/solflare-wallet/aptos-snap/commit/b857c16b873c730a38a6762a8c6f28b7b6c73c14">solflare-wallet/aptos-snap@<code>b857c16</code></a></li>
+<li><a href="https://github.com/solflare-wallet/sui-snap/commit/d28c4e3bd1f33fb6d38da28f62ff965e27aa9b17">solflare-wallet/sui-snap@<code>d28c4e3</code></a></li>
+</ul>
+
+                    </div>
+                </div>
+           
+
+            <div><h4 id="description">Description</h4>
+<p>On certain occasions, the snap may need to present a dialog to the user to request confirmation for an action or data verification. This step is crucial as dapps are not always trusted, and it&rsquo;s essential to prevent scenarios where they can silently sign data or perform critical operations using the user&rsquo;s keys without explicit permission. To create custom user-facing dialogs, MetaMask provides the Snaps UI package, equipped with style-specific components. However, some of these components have been found to have unintended side-effects.</p>
+<p>For instance, the <code>text()</code> component can render Markdown or allow for control character injections.</p>
+<p>In the code snippet provided below, please note that <code>request.params</code> is considered untrusted. For example, <code>request.params.simulationResult[]</code> may contain Markdown renderable strings or Control Characters that can disrupt the context of the user-displayed message.</p>
+<ul>
+<li><code>request.params.origin</code> is validated via <code>(new URL(dappOrigin))?.host</code>; However, note, that the dapp may misrepresent the original origin!</li>
+<li><code>requests.params.message</code> is safely put into a <code>copyable</code></li>
+<li><code>request.params.simulationResult</code> is <strong>unchecked</strong></li>
+</ul>
+<p>Please also note that the user might decide whether to sign or reject the transaction based on the simulation that is being displayed. This simulation result, however, is directly provided by the dapp which is less trusted than the metamask security module/snap. This might lead to users signing data based on potentially false information if the dapp provides malicious information. It should, therefore, be considered to generate the simulation information within the snap itself!</p>
+<h4 id="examples">Examples</h4>
+<p>This affects all snaps under review.</p>
+<h5 id="solflare-snap">Solflare Snap</h5>
+<ul>
+<li><code>signTransaction</code></li>
+</ul>
+<p><strong>../solflare-snap/src/index.js:L41-L53</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="n">const</span> <span class="p">{</span> <span class="n">derivationPath</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">simulationResult</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">displayMessage</span> <span class="o">=</span> <span class="kc">true</span> <span class="p">}</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">params</span> <span class="o">||</span> <span class="p">{};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">assertInput</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsString</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertInput</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsString</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsArray</span><span class="p">(</span><span class="n">simulationResult</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertAllStrings</span><span class="p">(</span><span class="n">simulationResult</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsBoolean</span><span class="p">(</span><span class="n">displayMessage</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">const</span> <span class="n">accepted</span> <span class="o">=</span> <span class="n">await</span> <span class="n">renderSignTransaction</span><span class="p">(</span><span class="n">dappHost</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">simulationResult</span><span class="p">,</span> <span class="n">displayMessage</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertConfirmation</span><span class="p">(</span><span class="n">accepted</span><span class="p">);</span>
+</span></span></code></pre></div><p><strong>../solflare-snap/src/ui.js:L19-L35</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="n">export</span> <span class="kd">function</span> <span class="nf">renderSignTransaction</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">simulationResult</span><span class="p">,</span> <span class="n">displayMessage</span> <span class="o">=</span> <span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">const</span> <span class="n">simulationResultItems</span> <span class="o">=</span> <span class="n">simulationResult</span><span class="p">.</span><span class="n">map</span><span class="p">((</span><span class="n">item</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">text</span><span class="p">(</span><span class="n">item</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">snap</span><span class="p">.</span><span class="n">request</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">    <span class="n">method</span><span class="o">:</span> <span class="s">&#39;snap_dialog&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">params</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">type</span><span class="o">:</span> <span class="s">&#39;confirmation&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="n">content</span><span class="o">:</span> <span class="n">panel</span><span class="p">([</span>
+</span></span><span class="line"><span class="cl">        <span class="n">heading</span><span class="p">(</span><span class="s">&#39;Sign transaction&#39;</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="n">text</span><span class="p">(</span><span class="n">host</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">...(</span><span class="n">simulationResultItems</span><span class="p">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">displayMessage</span> <span class="o">?</span> <span class="p">[</span><span class="n">divider</span><span class="p">()]</span> <span class="o">:</span> <span class="p">[]),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">...</span><span class="n">simulationResultItems</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">...(</span><span class="n">displayMessage</span> <span class="o">?</span> <span class="p">[</span><span class="n">copyable</span><span class="p">(</span><span class="n">message</span><span class="p">)]</span> <span class="o">:</span> <span class="p">[])</span>
+</span></span><span class="line"><span class="cl">      <span class="p">])</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">});</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><ul>
+<li><code>renderSignAllTransactions</code></li>
+</ul>
+<p><strong>../solflare-snap/src/ui.js:L51-L55</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">simulationResults</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">forEach</span><span class="p">((</span><span class="n">item</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">uiElements</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">text</span><span class="p">(</span><span class="n">item</span><span class="p">)));</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">displayMessage</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">uiElements</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">copyable</span><span class="p">(</span><span class="n">messages</span><span class="p">[</span><span class="n">i</span><span class="p">]));</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h5 id="sui-snap">Sui Snap</h5>
+<p><strong>../sui-snap/src/index.js:L41-L52</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="n">const</span> <span class="p">{</span> <span class="n">derivationPath</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">simulationResult</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">displayMessage</span> <span class="o">=</span> <span class="kc">true</span> <span class="p">}</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">params</span> <span class="o">||</span> <span class="p">{};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">assertInput</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsString</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertInput</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsString</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsArray</span><span class="p">(</span><span class="n">simulationResult</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertAllStrings</span><span class="p">(</span><span class="n">simulationResult</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsBoolean</span><span class="p">(</span><span class="n">displayMessage</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">const</span> <span class="n">accepted</span> <span class="o">=</span> <span class="n">await</span> <span class="n">renderSignTransaction</span><span class="p">(</span><span class="n">dappHost</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">simulationResult</span><span class="p">,</span> <span class="n">displayMessage</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertConfirmation</span><span class="p">(</span><span class="n">accepted</span><span class="p">);</span>
+</span></span></code></pre></div><p><strong>../sui-snap/src/index.js:L64-L77</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="n">const</span> <span class="p">{</span> <span class="n">derivationPath</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">simulationResults</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">displayMessage</span> <span class="o">=</span> <span class="kc">true</span> <span class="p">}</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">params</span> <span class="o">||</span> <span class="p">{};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">assertInput</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsString</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertInput</span><span class="p">(</span><span class="n">messages</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsArray</span><span class="p">(</span><span class="n">messages</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertInput</span><span class="p">(</span><span class="n">messages</span><span class="p">.</span><span class="n">length</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertAllStrings</span><span class="p">(</span><span class="n">messages</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsArray</span><span class="p">(</span><span class="n">simulationResults</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertInput</span><span class="p">(</span><span class="n">messages</span><span class="p">.</span><span class="n">length</span> <span class="o">===</span> <span class="n">simulationResults</span><span class="p">.</span><span class="n">length</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsBoolean</span><span class="p">(</span><span class="n">displayMessage</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">const</span> <span class="n">accepted</span> <span class="o">=</span> <span class="n">await</span> <span class="n">renderSignAllTransactions</span><span class="p">(</span><span class="n">dappHost</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">simulationResults</span><span class="p">,</span> <span class="n">displayMessage</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertConfirmation</span><span class="p">(</span><span class="n">accepted</span><span class="p">);</span>
+</span></span></code></pre></div><h5 id="aptos-snap">Aptos Snap</h5>
+<p><strong>../aptos-snap/src/index.js:L39-L50</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="n">const</span> <span class="p">{</span> <span class="n">derivationPath</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">simulationResult</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">displayMessage</span> <span class="o">=</span> <span class="kc">true</span> <span class="p">}</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">params</span> <span class="o">||</span> <span class="p">{};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">assertInput</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsString</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertInput</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsString</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsArray</span><span class="p">(</span><span class="n">simulationResult</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertAllStrings</span><span class="p">(</span><span class="n">simulationResult</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsBoolean</span><span class="p">(</span><span class="n">displayMessage</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">const</span> <span class="n">accepted</span> <span class="o">=</span> <span class="n">await</span> <span class="n">renderSignTransaction</span><span class="p">(</span><span class="n">dappHost</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">simulationResult</span><span class="p">,</span> <span class="n">displayMessage</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertConfirmation</span><span class="p">(</span><span class="n">accepted</span><span class="p">);</span>
+</span></span></code></pre></div><p><strong>../aptos-snap/src/index.js:L62-L75</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="n">const</span> <span class="p">{</span> <span class="n">derivationPath</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">simulationResults</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">displayMessage</span> <span class="o">=</span> <span class="kc">true</span> <span class="p">}</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">params</span> <span class="o">||</span> <span class="p">{};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">assertInput</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsString</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertInput</span><span class="p">(</span><span class="n">messages</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsArray</span><span class="p">(</span><span class="n">messages</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertInput</span><span class="p">(</span><span class="n">messages</span><span class="p">.</span><span class="n">length</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertAllStrings</span><span class="p">(</span><span class="n">messages</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsArray</span><span class="p">(</span><span class="n">simulationResults</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertInput</span><span class="p">(</span><span class="n">messages</span><span class="p">.</span><span class="n">length</span> <span class="o">===</span> <span class="n">simulationResults</span><span class="p">.</span><span class="n">length</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertIsBoolean</span><span class="p">(</span><span class="n">displayMessage</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">const</span> <span class="n">accepted</span> <span class="o">=</span> <span class="n">await</span> <span class="n">renderSignAllTransactions</span><span class="p">(</span><span class="n">dappHost</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">simulationResults</span><span class="p">,</span> <span class="n">displayMessage</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">assertConfirmation</span><span class="p">(</span><span class="n">accepted</span><span class="p">);</span>
+</span></span></code></pre></div><h4 id="recommendation">Recommendation</h4>
+<p>Validate inputs. Encode data in a safe way to be displayed to the user. Show the original data provided within a pre-text or code block (copyable). Show derived or decoded information (token recipient) as additional information to the user. If possible, generate a trusted simulation result within the snap.</p>
+</div>
+        </div><div class="issue">
+            <a class="anchor" href="#insufficient-input-validation-derivekeypair" data-issue-url="https://github.com/ConsenSysDiligence/solflare-wallet-snaps-audit-2023-08/issues/10">
+                <h3 id="insufficient-input-validation-derivekeypair">4.3 Insufficient Input Validation <code>deriveKeyPair()</code> <span class="severity medium">Medium</span></h3>
+            </a>
+           
+            <div class="menu-container noprint">
+                <button class="menu-toggle">...</button>
+                <div class="menu-box">
+                    <button class="github-export" onclick="exportToGitHub(this)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Export to GitHub ...
+                    </button>
+                    <button class="github-reset" onclick="getOrSetGithubRepo(true)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Set external GitHub Repo ...
+                    </button>
+                    <button class="json-export" onclick="exportToClipboard(this)">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (json)
+                    </button>
+                    <button class="text-export" onclick="exportToClipboard(this, {format:'text'})">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (text)
+                    </button>
+                </div>
+            </div>
+           
+                <div class="resolution">
+                    <h4>Resolution</h4>
+                    <div>
+                        <p>The client has issued the following statement:</p>
+<blockquote>
+<p>Solflare Comment/Background</p>
+<p>We have inspected the @metamask/key-tree library and made sure that all incorrect inputs throw errors. This is the reason why we didn’t duplicate the checks. The reason why we supply full paths is because the APIs of our Wallet forward full paths
+and to avoid sensitive splitting of paths in various places.</p>
+<p>Solflare Resolution</p>
+<p>We respect the recommendation, but due to architectural decisions up the stack, we would like to keep the deriveKeyPair() API as-is.</p>
+</blockquote>
+<p>Statement from the Assessment Team:</p>
+<p>The principle of defense in depth necessitates comprehensive scrutiny across all layers of the system. It is unwise to rely solely on a third-party library to handle error propagation, as you lack control over the underlying codebase. We strongly advocate for the pervasive implementation of input validation mechanisms in adherence to secure coding practices, thereby fortifying the defense in depth strategy. Given that this module pertains to wallet trust, it is imperative that coding standards adhere to the highest levels of security, even if it results in redundant checks. Prioritizing safety over convenience is paramount.</p>
+<p>Regarding the API design, we acknowledge the intent for code reuse. Nevertheless, we propose the adoption of a well-defined API structure that employs structured data instead of parseable strings. This approach enhances security and simplifies maintenance, mitigating potential complications.</p>
+
+                    </div>
+                </div>
+           
+
+            <div><h4 id="description">Description</h4>
+<p><code>path</code> is checked for correct type: <code>string</code></p>
+<p><strong>../solflare-snap/src/index.js:L23-L30</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="kr">case</span> <span class="s">&#39;getPublicKey&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">const</span> <span class="p">{</span> <span class="n">derivationPath</span><span class="p">,</span> <span class="n">confirm</span> <span class="o">=</span> <span class="kc">false</span> <span class="p">}</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">params</span> <span class="o">||</span> <span class="p">{};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">assertInput</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">assertIsString</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">assertIsBoolean</span><span class="p">(</span><span class="n">confirm</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">const</span> <span class="n">keyPair</span> <span class="o">=</span> <span class="n">await</span> <span class="n">deriveKeyPair</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span></code></pre></div><p>but is not checked for valid key derivation path format which may lead to unexpected outcomes or unhandled exceptions.</p>
+<p><strong>../solflare-snap/src/privateKey.js:L20-L20</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="n">const</span> <span class="n">segments</span> <span class="o">=</span> <span class="n">path</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">).</span><span class="n">slice</span><span class="p">(</span><span class="mi">3</span><span class="p">).</span><span class="n">filter</span><span class="p">(</span><span class="n">Boolean</span><span class="p">);</span>
+</span></span></code></pre></div><p>For example, the function allows non alpha-num <code>0-9+'</code>, <code>slip:x</code> prefixes, or empty elements (<code>&quot;m/44'/784'&quot;.split(&quot;/&quot;).slice(3).filter(Boolean) =&gt; []</code>).</p>
+<p>Affects all snaps under review.</p>
+<h4 id="recommendation">Recommendation</h4>
+<p>In general, the API design should be re-designed with the RPC functions receiving and validating only the last part of the key part, enforcing the format to be valid for the use case.</p>
+</div>
+        </div><div class="issue">
+            <a class="anchor" href="#dapp-may-suppress-user-confirmation-on-request-to-extract-pubkey-may-extract-any-net-key" data-issue-url="https://github.com/ConsenSysDiligence/solflare-wallet-snaps-audit-2023-08/issues/9">
+                <h3 id="dapp-may-suppress-user-confirmation-on-request-to-extract-pubkey-may-extract-any-net-key">4.4 Dapp May Suppress User Confirmation on Request to Extract Pubkey; May Extract Any Net-Key <span class="severity medium">Medium</span></h3>
+            </a>
+           
+            <div class="menu-container noprint">
+                <button class="menu-toggle">...</button>
+                <div class="menu-box">
+                    <button class="github-export" onclick="exportToGitHub(this)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Export to GitHub ...
+                    </button>
+                    <button class="github-reset" onclick="getOrSetGithubRepo(true)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Set external GitHub Repo ...
+                    </button>
+                    <button class="json-export" onclick="exportToClipboard(this)">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (json)
+                    </button>
+                    <button class="text-export" onclick="exportToClipboard(this, {format:'text'})">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (text)
+                    </button>
+                </div>
+            </div>
+           
+                <div class="resolution">
+                    <h4>Resolution</h4>
+                    <div>
+                        <p>The client has issued the following statement:</p>
+<blockquote>
+<p>Solflare Resolution</p>
+<p>Given that arbitrary dApps can not suppress user confirmation (facilitated by the Wallet),
+that essential wallet flows are enabled by the feature and the comparison with the security
+model of a hardware wallet, Solflare would like to retain the functionality.</p>
+</blockquote>
+<p>Statement from the Assessment Team:</p>
+<p>As discussed, it&rsquo;s crucial to recognize that the snap represents the trusted component in this configuration, while the dapp&rsquo;s trustworthiness may not always be guaranteed. It&rsquo;s imperative that your dapp does not assume control over the user&rsquo;s trust solely by displaying a confirmation message. The ideal approach should align with the security controls employed by the MetaMask (MM) implementation, which consists of (1) establishing a connection between MM and the website and (2) granting explicit approval for all accounts accessible by the website. This is in stark contrast to assuming that connecting the snap to a dapp implicitly authorizes the dapp to enumerate all accounts managed by the snap. Such a deviation from the MM design not only strays from user expectations but also introduces security concerns. It&rsquo;s worth noting that we have also reported this issue to the MM Development Team, as it necessitates a more comprehensive solution.</p>
+<p>Recommendation: The dapp should not exert control over the presentation of dialogs to the user. Users must always remain cognizant of every action occurring within the trust module boundary (the snap). There should be no provision for &ldquo;silent&rdquo; execution of trust module actions, thereby ensuring transparency and user awareness at all times.</p>
+
+                    </div>
+                </div>
+           
+
+            <div><h4 id="description">Description</h4>
+<p>With the <code>request.params.confirm</code> parameter in requests to signTransaction and signAllTransactions the dapp controls if the user is requested confirmation to return the public key. If the dapp sets <code>confirm=false</code> the user will not be informed that the dapp accessed their pubkey information (any account).  Allowing the dapp to control if the user is asked to extract certain (derived) information from the snap is intransparent and may leak sensitive information. Especially in a setting where the snap is gatekeeping access to user specific information.</p>
+<h4 id="examples">Examples</h4>
+<p>Affects all snaps under review.</p>
+<p><strong>../solflare-snap/src/index.js:L23-L36</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="kr">case</span> <span class="s">&#39;getPublicKey&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">const</span> <span class="p">{</span> <span class="n">derivationPath</span><span class="p">,</span> <span class="n">confirm</span> <span class="o">=</span> <span class="kc">false</span> <span class="p">}</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">params</span> <span class="o">||</span> <span class="p">{};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">assertInput</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">assertIsString</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">assertIsBoolean</span><span class="p">(</span><span class="n">confirm</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">const</span> <span class="n">keyPair</span> <span class="o">=</span> <span class="n">await</span> <span class="n">deriveKeyPair</span><span class="p">(</span><span class="n">derivationPath</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">const</span> <span class="n">pubkey</span> <span class="o">=</span> <span class="n">bs58</span><span class="p">.</span><span class="nb">encode</span><span class="p">(</span><span class="n">keyPair</span><span class="p">.</span><span class="n">publicKey</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">confirm</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">const</span> <span class="n">accepted</span> <span class="o">=</span> <span class="n">await</span> <span class="n">renderGetPublicKey</span><span class="p">(</span><span class="n">dappHost</span><span class="p">,</span> <span class="n">pubkey</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">assertConfirmation</span><span class="p">(</span><span class="n">accepted</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></code></pre></div><h4 id="recommendation">Recommendation</h4>
+<p>The snap should strictly enforce user confirmation on the first time the pubkey is requested from an origin. A potentially untrusted dapp (even though origin restricted; a dapp might turn malicious and should therefore be treated as untrusted) should never be able to silently dictate what security measures be enabled with a snap request.</p>
+</div>
+        </div><div class="issue">
+            <a class="anchor" href="#production-builds-allow-development-and-localhost-origins-snap-does-not-enforce-transport-security" data-issue-url="https://github.com/ConsenSysDiligence/solflare-wallet-snaps-audit-2023-08/issues/8">
+                <h3 id="production-builds-allow-development-and-localhost-origins-snap-does-not-enforce-transport-security">4.5 Production Builds Allow Development and Localhost Origins; Snap Does Not Enforce Transport Security <span class="severity medium">Medium</span> <span class="state no-check">&nbsp;Partially Addressed</span></h3>
+            </a>
+           
+            <div class="menu-container noprint">
+                <button class="menu-toggle">...</button>
+                <div class="menu-box">
+                    <button class="github-export" onclick="exportToGitHub(this)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Export to GitHub ...
+                    </button>
+                    <button class="github-reset" onclick="getOrSetGithubRepo(true)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Set external GitHub Repo ...
+                    </button>
+                    <button class="json-export" onclick="exportToClipboard(this)">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (json)
+                    </button>
+                    <button class="text-export" onclick="exportToClipboard(this, {format:'text'})">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (text)
+                    </button>
+                </div>
+            </div>
+           
+                <div class="resolution">
+                    <h4>Resolution</h4>
+                    <div>
+                        <p>The client has issued the following statement:</p>
+<blockquote>
+<p>Solflare Comment/Background</p>
+<p>When implementing RPC access restrictions, our assumption was that MetaMask will
+always forward valid domains as the origin thus making <code>http꞉//..solflare.com</code> not possible.</p>
+<p>Solflare Resolution</p>
+<p>Solflare will implement enforcing Transport Security by removing the option to proceed
+with the <code>http</code> protocol.
+Solflare will be deploying a development build snap under a different package name that
+will allow the localhost origin. This development snap does not need to be in the allow list and
+we can consume it purely through Flask.
+We would need to keep both *solflare.com and *solflare.dev origins as these represent
+our production and staging environments and we would like to retain the possibility of using the
+production snap with our staging environment.
+The reason that subdomains are wildcarded is that we are going to make dApp specific
+changes and deploy them on different subdomains (for example - a swap dApp would not want
+to have a widget with swap inside of it). We don’t consider this a major risk as our processes
+around DNS management are very strict and limited</p>
+</blockquote>
+<p>Changesets:</p>
+<ul>
+<li><a href="https://github.com/solflare-wallet/solflare-snap/commit/749d2b03e94b6589779a3e01c5e8958f32b1d0ca">solflare-wallet/solflare-snap@<code>749d2b0</code></a></li>
+<li><a href="https://github.com/solflare-wallet/aptos-snap/commit/eef10b55dc31cfd9493ddd555d7b836b2342f5af">solflare-wallet/aptos-snap@<code>eef10b5</code></a></li>
+<li><a href="https://github.com/solflare-wallet/sui-snap/commit/898295fc3bb7c9d80d2c0803d9d382502a8640f9">solflare-wallet/sui-snap@<code>898295f</code></a></li>
+</ul>
+<p>Statement from the Assessment Team:</p>
+<p>The core tenet here is a robust defense-in-depth strategy that operates on the premise of making no assumptions. We must underscore the criticality of this principle in the context of trust module code. The same level of scrutiny should apply to wildcard origins. The rationale is rooted in the potential vulnerabilities associated with subdomain takeover scenarios, such as Azure instance compromise or DNS hijacking, among others. If an attacker can manipulate a subdomain, leading users to visit a site like malicious.solflare.com, there is a substantial risk of successfully conducting phishing attacks, potentially tricking users into permitting dapp actions on the snap. This not only jeopardizes user funds but also poses a severe threat to your organization&rsquo;s reputation. It falls squarely on your shoulders to ensure that such scenarios do not materialize through robust security controls.</p>
+<p>Recommendation: To mitigate these risks, it is imperative to maintain a curated list of official production hosts and validate requests against these origins. For development builds of the extension, you may consider allowing dev and wildcard hosts. However, when introducing new subdomains, it is crucial to manage them meticulously and refrain from merely deploying new subdomain websites, as this approach can become challenging to control. Ultimately, the decision rests with your organization regarding the level of risk tolerance. Based on experience, we would strongly advise against taking unnecessary risks in this regard.</p>
+
+                    </div>
+                </div>
+           
+
+            <div><h4 id="description">Description</h4>
+<p>The snaps RPC access is restricted to certain origins only. However, there is no logic that disables development/test domains from origin checks in production builds.</p>
+<p>This means, that, any localhost app is allowed to connect to snap (any port, not hardcoded to snap id; should not allow dev domain). The origin enforcing regex allows non-transport security-enabled connections, i.e. <code>http://wallet.solflare.com</code> is allowed while it should be enforced as <code>https://wallet.solflare.com</code>. Furthermore, the origin check allows potentially insecure subdomains, i.e. <code>https://beta.test.solflare.com</code>. Additionally, invalid domains are allowed as well, i.e. <code>http://..solflare.com</code></p>
+<h4 id="examples">Examples</h4>
+<h5 id="solflare-snap">Solflare Snap</h5>
+<p><strong>../solflare-snap/src/index.js:L7-L17</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="n">module</span><span class="p">.</span><span class="n">exports</span><span class="p">.</span><span class="n">onRpcRequest</span> <span class="o">=</span> <span class="n">async</span> <span class="p">({</span> <span class="nb">origin</span><span class="p">,</span> <span class="n">request</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="o">!</span><span class="nb">origin</span> <span class="o">||</span>
+</span></span><span class="line"><span class="cl">    <span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="o">!</span><span class="nb">origin</span><span class="p">.</span><span class="kr">match</span><span class="p">(</span><span class="o">/^</span><span class="n">https</span><span class="o">?:</span><span class="err">\</span><span class="o">/</span><span class="err">\</span><span class="o">/</span><span class="n">localhost</span><span class="o">:</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="p">]{</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">}</span><span class="err">$</span><span class="o">/</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">      <span class="o">!</span><span class="nb">origin</span><span class="p">.</span><span class="kr">match</span><span class="p">(</span><span class="o">/^</span><span class="n">https</span><span class="o">?:</span><span class="err">\</span><span class="o">/</span><span class="err">\</span><span class="o">/</span><span class="p">(</span><span class="o">?:</span><span class="err">\</span><span class="n">S</span><span class="o">+</span><span class="err">\</span><span class="p">.)</span><span class="o">?</span><span class="n">solflare</span><span class="err">\</span><span class="p">.</span><span class="n">com</span><span class="err">$</span><span class="o">/</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">      <span class="o">!</span><span class="nb">origin</span><span class="p">.</span><span class="kr">match</span><span class="p">(</span><span class="o">/^</span><span class="n">https</span><span class="o">?:</span><span class="err">\</span><span class="o">/</span><span class="err">\</span><span class="o">/</span><span class="p">(</span><span class="o">?:</span><span class="err">\</span><span class="n">S</span><span class="o">+</span><span class="err">\</span><span class="p">.)</span><span class="o">?</span><span class="n">solflare</span><span class="err">\</span><span class="p">.</span><span class="n">dev</span><span class="err">$</span><span class="o">/</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">throw</span> <span class="k">new</span> <span class="n">Error</span><span class="p">(</span><span class="s">&#39;Invalid origin&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></code></pre></div><h5 id="aptos-snap">Aptos Snap</h5>
+<p><strong>../aptos-snap/src/index.js:L6-L15</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="n">module</span><span class="p">.</span><span class="n">exports</span><span class="p">.</span><span class="n">onRpcRequest</span> <span class="o">=</span> <span class="n">async</span> <span class="p">({</span> <span class="nb">origin</span><span class="p">,</span> <span class="n">request</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="o">!</span><span class="nb">origin</span> <span class="o">||</span>
+</span></span><span class="line"><span class="cl">    <span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="o">!</span><span class="nb">origin</span><span class="p">.</span><span class="kr">match</span><span class="p">(</span><span class="o">/^</span><span class="n">https</span><span class="o">?:</span><span class="err">\</span><span class="o">/</span><span class="err">\</span><span class="o">/</span><span class="n">localhost</span><span class="o">:</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="p">]{</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">}</span><span class="err">$</span><span class="o">/</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">      <span class="o">!</span><span class="nb">origin</span><span class="p">.</span><span class="kr">match</span><span class="p">(</span><span class="o">/^</span><span class="n">https</span><span class="o">?:</span><span class="err">\</span><span class="o">/</span><span class="err">\</span><span class="o">/</span><span class="p">(</span><span class="o">?:</span><span class="err">\</span><span class="n">S</span><span class="o">+</span><span class="err">\</span><span class="p">.)</span><span class="o">?</span><span class="n">risewallet</span><span class="err">\</span><span class="p">.</span><span class="n">dev</span><span class="err">$</span><span class="o">/</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">throw</span> <span class="k">new</span> <span class="n">Error</span><span class="p">(</span><span class="s">&#39;Invalid origin&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></code></pre></div><h5 id="sui-snap">Sui Snap</h5>
+<p><strong>../sui-snap/src/index.js:L8-L17</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="n">module</span><span class="p">.</span><span class="n">exports</span><span class="p">.</span><span class="n">onRpcRequest</span> <span class="o">=</span> <span class="n">async</span> <span class="p">({</span> <span class="nb">origin</span><span class="p">,</span> <span class="n">request</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="o">!</span><span class="nb">origin</span> <span class="o">||</span>
+</span></span><span class="line"><span class="cl">    <span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="o">!</span><span class="nb">origin</span><span class="p">.</span><span class="kr">match</span><span class="p">(</span><span class="o">/^</span><span class="n">https</span><span class="o">?:</span><span class="err">\</span><span class="o">/</span><span class="err">\</span><span class="o">/</span><span class="n">localhost</span><span class="o">:</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="p">]{</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">}</span><span class="err">$</span><span class="o">/</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">      <span class="o">!</span><span class="nb">origin</span><span class="p">.</span><span class="kr">match</span><span class="p">(</span><span class="o">/^</span><span class="n">https</span><span class="o">?:</span><span class="err">\</span><span class="o">/</span><span class="err">\</span><span class="o">/</span><span class="p">(</span><span class="o">?:</span><span class="err">\</span><span class="n">S</span><span class="o">+</span><span class="err">\</span><span class="p">.)</span><span class="o">?</span><span class="n">elliwallet</span><span class="err">\</span><span class="p">.</span><span class="n">dev</span><span class="err">$</span><span class="o">/</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">throw</span> <span class="k">new</span> <span class="n">Error</span><span class="p">(</span><span class="s">&#39;Invalid origin&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></code></pre></div><h4 id="recommendation">Recommendation</h4>
+<p>Implement logic that removes development/localhost origin from the allow list for production builds. Employ strict checks on the format of provided origin. Do not by default allow all subdomains.</p>
+</div>
+        </div><div class="issue">
+            <a class="anchor" href="#misleading-html-entity-and-function-name-getprivkey" data-issue-url="https://github.com/ConsenSysDiligence/solflare-wallet-snaps-audit-2023-08/issues/6">
+                <h3 id="misleading-html-entity-and-function-name-getprivkey">4.6 Misleading HTML Entity and Function Name <code>getPrivkey</code> <span class="severity minor">Minor</span> <span class="state">&#10003;&nbsp;Fixed</span></h3>
+            </a>
+           
+            <div class="menu-container noprint">
+                <button class="menu-toggle">...</button>
+                <div class="menu-box">
+                    <button class="github-export" onclick="exportToGitHub(this)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Export to GitHub ...
+                    </button>
+                    <button class="github-reset" onclick="getOrSetGithubRepo(true)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Set external GitHub Repo ...
+                    </button>
+                    <button class="json-export" onclick="exportToClipboard(this)">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (json)
+                    </button>
+                    <button class="text-export" onclick="exportToClipboard(this, {format:'text'})">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (text)
+                    </button>
+                </div>
+            </div>
+           
+                <div class="resolution">
+                    <h4>Resolution</h4>
+                    <div>
+                        <p>Addressed by following renaming traces of &ldquo;private key&rdquo;. Additionally, the client has issued the following statement:</p>
+<blockquote>
+<p>Solflare Comment/Background</p>
+<p>The index.html file is used for testing and naming hasn’t been updated since the snap
+was initially developed. This file doesn’t compile into the bundle.</p>
+<p>Solflare Resolution</p>
+<p>Solflare will be renaming the function</p>
+</blockquote>
+<p>Changesets:</p>
+<ul>
+<li><a href="https://github.com/solflare-wallet/solflare-snap/commit/aa629cbd1ab8ce1ab22d521b5958d46dd7ae5d4c">solflare-wallet/solflare-snap@<code>aa629cb</code></a></li>
+<li><a href="https://github.com/solflare-wallet/aptos-snap/commit/e603b9f89bb35f50bfdd9872769c7ca00fb702a3">solflare-wallet/aptos-snap@<code>e603b9f</code></a></li>
+<li><a href="https://github.com/solflare-wallet/sui-snap/commit/5cbd0971daa49bcaa8817d867553c194bb0d469d">solflare-wallet/sui-snap@<code>5cbd097</code></a></li>
+</ul>
+
+                    </div>
+                </div>
+           
+
+            <div><h4 id="description">Description</h4>
+<p>Several lines in the code refer to a private key while the functionality always returns a public key. I.e. <code>getPrivkey</code> actually calls <code>getPublicKey</code>.</p>
+<p><strong>../solflare-snap/index.html:L17-L21</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="n">const</span> <span class="n">getPrivkeyButton</span> <span class="o">=</span> <span class="n">document</span><span class="p">.</span><span class="n">querySelector</span><span class="p">(</span><span class="s">&#39;button.getPrivkey&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">connectButton</span><span class="p">.</span><span class="n">addEventListener</span><span class="p">(</span><span class="s">&#39;click&#39;</span><span class="p">,</span> <span class="n">connect</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">getPrivkeyButton</span><span class="p">.</span><span class="n">addEventListener</span><span class="p">(</span><span class="s">&#39;click&#39;</span><span class="p">,</span> <span class="n">getPrivkey</span><span class="p">)</span>
+</span></span></code></pre></div><p><strong>../solflare-snap/index.html:L30-L50</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="n">async</span> <span class="kd">function</span> <span class="nf">getPrivkey</span> <span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">const</span> <span class="n">response</span> <span class="o">=</span> <span class="n">await</span> <span class="n">ethereum</span><span class="p">.</span><span class="n">request</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">      <span class="n">method</span><span class="o">:</span> <span class="s">&#39;wallet_invokeSnap&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="n">params</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">snapId</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">request</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="n">method</span><span class="o">:</span> <span class="s">&#39;getPublicKey&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="n">params</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">derivationPath</span><span class="o">:</span> <span class="err">`</span><span class="n">m</span><span class="o">/</span><span class="mi">44</span><span class="s">&#39;/501&#39;</span><span class="o">/</span><span class="mi">0</span><span class="s">&#39;/0&#39;</span><span class="err">`</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">confirm</span><span class="o">:</span> <span class="kc">true</span>
+</span></span><span class="line"><span class="cl">          <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">})</span>
+</span></span><span class="line"><span class="cl">    <span class="n">console</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="n">response</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">console</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">alert</span><span class="p">(</span><span class="s">&#39;Problem happened: &#39;</span> <span class="o">+</span> <span class="n">err</span><span class="p">.</span><span class="n">message</span> <span class="o">||</span> <span class="n">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Affects all snaps under review.</p>
+<h4 id="recommendation">Recommendation</h4>
+<p>Never return or extract a private key from the snap. Rename the variables in code to accurately reflect what type of data is being handled.</p>
+</div>
+        </div><div class="issue">
+            <a class="anchor" href="#use-of-outdated-snapconfigjson-instead-of-snapconfigjs" data-issue-url="https://github.com/ConsenSysDiligence/solflare-wallet-snaps-audit-2023-08/issues/3">
+                <h3 id="use-of-outdated-snapconfigjson-instead-of-snapconfigjs">4.7 Use of Outdated <code>snap.config.json</code> Instead of <code>snap.config.js</code> <span class="severity minor">Minor</span> <span class="state">&#10003;&nbsp;Fixed</span></h3>
+            </a>
+           
+            <div class="menu-container noprint">
+                <button class="menu-toggle">...</button>
+                <div class="menu-box">
+                    <button class="github-export" onclick="exportToGitHub(this)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Export to GitHub ...
+                    </button>
+                    <button class="github-reset" onclick="getOrSetGithubRepo(true)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Set external GitHub Repo ...
+                    </button>
+                    <button class="json-export" onclick="exportToClipboard(this)">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (json)
+                    </button>
+                    <button class="text-export" onclick="exportToClipboard(this, {format:'text'})">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (text)
+                    </button>
+                </div>
+            </div>
+           
+                <div class="resolution">
+                    <h4>Resolution</h4>
+                    <div>
+                        <p>Addressed by switching to the <code>snap.config.js</code>. Additionally, the client has issued the following statement:</p>
+<blockquote>
+<p>Solflare Resolution</p>
+<p>Solflare will be moving to snap.config.js</p>
+</blockquote>
+<p>Changesets:</p>
+<ul>
+<li><a href="https://github.com/solflare-wallet/solflare-snap/commit/5228b37414b93ec81835d1dc0e8e8a32f8c84b1c">solflare-wallet/solflare-snap@<code>5228b37</code></a></li>
+<li><a href="https://github.com/solflare-wallet/aptos-snap/commit/62ec7b45b4cbd54b9747318447610283eda8ea00">solflare-wallet/aptos-snap@<code>62ec7b4</code></a></li>
+<li><a href="https://github.com/solflare-wallet/sui-snap/commit/34207231b655bc1f834cecf15e327bffd19390c2">solflare-wallet/sui-snap@<code>3420723</code></a></li>
+</ul>
+
+                    </div>
+                </div>
+           
+
+            <div><h4 id="description">Description</h4>
+<p>According to the <a href="https://github.com/MetaMask/snaps/tree/main/packages/snaps-cli#configuration">MetaMask-CLI Documentation</a> the use of <code>snap.config.json</code> is discouraged and projects should switch to <code>snap.config.js</code> instead.</div>
+        </div><div class="issue">
+            <a class="anchor" href="#inconsistent-or-blank-fields-in-packagejson" data-issue-url="https://github.com/ConsenSysDiligence/solflare-wallet-snaps-audit-2023-08/issues/2">
+                <h3 id="inconsistent-or-blank-fields-in-packagejson">4.8 Inconsistent or Blank Fields in <code>package.json</code> <span class="severity minor">Minor</span> <span class="state">&#10003;&nbsp;Fixed</span></h3>
+            </a>
+           
+            <div class="menu-container noprint">
+                <button class="menu-toggle">...</button>
+                <div class="menu-box">
+                    <button class="github-export" onclick="exportToGitHub(this)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Export to GitHub ...
+                    </button>
+                    <button class="github-reset" onclick="getOrSetGithubRepo(true)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Set external GitHub Repo ...
+                    </button>
+                    <button class="json-export" onclick="exportToClipboard(this)">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (json)
+                    </button>
+                    <button class="text-export" onclick="exportToClipboard(this, {format:'text'})">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (text)
+                    </button>
+                </div>
+            </div>
+           
+                <div class="resolution">
+                    <h4>Resolution</h4>
+                    <div>
+                        <p>Addressed by switching to the <code>snap.config.js</code>. Additionally, the client has issued the following statement:</p>
+<blockquote>
+<p>Solflare Resolution</p>
+<p>Solflare will be adding missing information</p>
+</blockquote>
+<p>Changesets:</p>
+<ul>
+<li><a href="https://github.com/solflare-wallet/solflare-snap/commit/f91a27d90dae692f26691f3d27efb6afa58a2e8e">solflare-wallet/solflare-snap@<code>f91a27d</code></a></li>
+<li><a href="https://github.com/solflare-wallet/aptos-snap/commit/cb61e41373baa06d8155ed0559f6d0392012ffe5">solflare-wallet/aptos-snap@<code>cb61e41</code></a></li>
+<li><a href="https://github.com/solflare-wallet/sui-snap/commit/98194638d1028020fc6776874059fac07a202b79">solflare-wallet/sui-snap@<code>9819463</code></a></li>
+</ul>
+
+                    </div>
+                </div>
+           
+
+            <div><h4 id="description">Description</h4>
+<p>The <code>package.json</code> file serves as a critical source of information for users, developers, and security analysts. Neglecting to provide complete and accurate metadata in this file can lead to misunderstandings, vulnerabilities, and potential exploitation. By meticulously filling out fields like <code>bugs</code>, <code>homepage</code>, <code>repository</code>, <code>author</code>, and <code>description</code>, developers can enhance transparency, facilitate collaboration, and minimize security risks associated with incomplete or misleading project information.</p>
+<p><strong>../solflare-snap/package.json:L2-L13</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="s">&#34;name&#34;</span><span class="o">:</span> <span class="s">&#34;@solflare-wallet/solana-snap&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="s">&#34;version&#34;</span><span class="o">:</span> <span class="s">&#34;1.0.0&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="s">&#34;description&#34;</span><span class="o">:</span> <span class="s">&#34;&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="s">&#34;main&#34;</span><span class="o">:</span> <span class="s">&#34;src/index.js&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="s">&#34;scripts&#34;</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="s">&#34;start&#34;</span><span class="o">:</span> <span class="s">&#34;mm-snap build &amp;&amp; mm-snap serve&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="s">&#34;build&#34;</span><span class="o">:</span> <span class="s">&#34;mm-snap build&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="s">&#34;deploy&#34;</span><span class="o">:</span> <span class="s">&#34;npm run build &amp;&amp; npm publish&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">},</span>
+</span></span><span class="line"><span class="cl"><span class="s">&#34;author&#34;</span><span class="o">:</span> <span class="s">&#34;&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="s">&#34;license&#34;</span><span class="o">:</span> <span class="s">&#34;ISC&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="s">&#34;files&#34;</span><span class="o">:</span> <span class="p">[</span>
+</span></span></code></pre></div><p>Affects all snaps under review.</p>
+<h4 id="recommendation">Recommendation</h4>
+<p>Provide meta information for bugs, homepage, repository, author (non-blank), description (non-blank).</p>
+</div>
+        </div><div class="issue">
+            <a class="anchor" href="#consider-using-metamaskdetect-provider" data-issue-url="https://github.com/ConsenSysDiligence/solflare-wallet-snaps-audit-2023-08/issues/7">
+                <h3 id="consider-using-metamaskdetect-provider">4.9 Consider Using <code>@metamask/detect-provider</code></h3>
+            </a>
+           
+            <div class="menu-container noprint">
+                <button class="menu-toggle">...</button>
+                <div class="menu-box">
+                    <button class="github-export" onclick="exportToGitHub(this)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Export to GitHub ...
+                    </button>
+                    <button class="github-reset" onclick="getOrSetGithubRepo(true)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Set external GitHub Repo ...
+                    </button>
+                    <button class="json-export" onclick="exportToClipboard(this)">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (json)
+                    </button>
+                    <button class="text-export" onclick="exportToClipboard(this, {format:'text'})">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (text)
+                    </button>
+                </div>
+            </div>
+           
+                <div class="resolution">
+                    <h4>Resolution</h4>
+                    <div>
+                        <p>The client has issued the following statement:</p>
+<blockquote>
+<p>Solflare Comment/Background</p>
+<p>The index.html file is used for testing and naming hasn’t been updated since the snap
+was initially developed. This file doesn’t compile into the bundle.</p>
+<p>Solflare Resolution</p>
+<p>Since this is just a testing file and we use proper detection mechanisms in the Wallet,
+Solflare will not implement a fix in the helper file.</p>
+</blockquote>
+
+                    </div>
+                </div>
+           
+
+            <div><h4 id="description">Description</h4>
+<p>Consider using the Metamask provided library <code>@metamask/detect-provider</code> for inpage metamask/flask detection.</p>
+<p><strong>../solflare-snap/index.html:L23-L28</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="n">async</span> <span class="kd">function</span> <span class="nf">connect</span> <span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">await</span> <span class="n">ethereum</span><span class="p">.</span><span class="n">request</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">    <span class="n">method</span><span class="o">:</span> <span class="s">&#39;wallet_requestSnaps&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">params</span><span class="o">:</span> <span class="p">{</span> <span class="p">[</span><span class="n">snapId</span><span class="p">]</span><span class="o">:</span> <span class="p">{}</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">})</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div></div>
+        </div><div class="issue">
+            <a class="anchor" href="#consider-prefixing-rpc-calls-with-solana_-sui_-aptos_" data-issue-url="https://github.com/ConsenSysDiligence/solflare-wallet-snaps-audit-2023-08/issues/5">
+                <h3 id="consider-prefixing-rpc-calls-with-solana_-sui_-aptos_">4.10 Consider Prefixing RPC Calls With <code>solana_*</code>, <code>sui_*</code>, <code>aptos_*</code></h3>
+            </a>
+           
+            <div class="menu-container noprint">
+                <button class="menu-toggle">...</button>
+                <div class="menu-box">
+                    <button class="github-export" onclick="exportToGitHub(this)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Export to GitHub ...
+                    </button>
+                    <button class="github-reset" onclick="getOrSetGithubRepo(true)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Set external GitHub Repo ...
+                    </button>
+                    <button class="json-export" onclick="exportToClipboard(this)">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (json)
+                    </button>
+                    <button class="text-export" onclick="exportToClipboard(this, {format:'text'})">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (text)
+                    </button>
+                </div>
+            </div>
+           
+                <div class="resolution">
+                    <h4>Resolution</h4>
+                    <div>
+                        <p>The client has issued the following statement:</p>
+<blockquote>
+<p>Solflare Comment/Background</p>
+<p>The naming convention we have adopted was based on the structure of snap method
+invocations. Namely, when a snap invocation is happening, the wallet_invokeSnap method is
+called with a strictly specified snapId (which we consider scope) and the request method. Our
+thinking is that prefixing the methods in addition to explicitly stating the snapId might lead to
+unnecessary duplication.</p>
+<p>Solflare Resolution</p>
+<p>Solflare will not implement prefixes to both avoid naming duplication and because our
+wallets share a common architecture/codebase and are scoped by the snapId, we would like to
+avoid needing to call different methods for different wallets</p>
+</blockquote>
+
+                    </div>
+                </div>
+           
+
+            <div><h4 id="description">Description</h4>
+<p>APIs (Application Programming Interfaces) play a crucial role in modern software development, enabling interoperability and communication between different software components. One often overlooked aspect of API design is the naming of API functions. Poorly named API functions can lead to security vulnerabilities and confusion, compromising user information integrity and security.</p>
+<p>Consider prefixing the RPC method handlers with the respective protocols they are serving.</p>
+</div>
+        </div><div class="issue">
+            <a class="anchor" href="#consider-moving-to-typescript" data-issue-url="https://github.com/ConsenSysDiligence/solflare-wallet-snaps-audit-2023-08/issues/1">
+                <h3 id="consider-moving-to-typescript">4.11 Consider Moving to TypeScript</h3>
+            </a>
+           
+            <div class="menu-container noprint">
+                <button class="menu-toggle">...</button>
+                <div class="menu-box">
+                    <button class="github-export" onclick="exportToGitHub(this)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Export to GitHub ...
+                    </button>
+                    <button class="github-reset" onclick="getOrSetGithubRepo(true)">
+                        <i class="fab fa-github" style="margin-right:10px"></i>Set external GitHub Repo ...
+                    </button>
+                    <button class="json-export" onclick="exportToClipboard(this)">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (json)
+                    </button>
+                    <button class="text-export" onclick="exportToClipboard(this, {format:'text'})">
+                        <i class="far fa-clipboard" style="margin-right:12px"></i>Export to Clipboard (text)
+                    </button>
+                </div>
+            </div>
+           
+                <div class="resolution">
+                    <h4>Resolution</h4>
+                    <div>
+                        <p>The client has issued the following statement:</p>
+<blockquote>
+<p>Solflare Comment/Background</p>
+<p>Only comment is that we began developing snaps before there was a way to write them
+in TypeScript. Also, the initial audit was done on a JavaScript codebase and in the benefit of
+reducing the gap audit and saving time we opted to stay in JavaScript. We definitely recognize
+all the TypeScript benefits, especially as most of our stack is written in TypeScript.</p>
+<p>Solflare Resolution</p>
+<p>It is definitely on our roadmap to migrate to TypeScript.</p>
+</blockquote>
+
+                    </div>
+                </div>
+           
+
+            <div><h4 id="description">Description</h4>
+<p>JavaScript, as a dynamically typed language, lacks the stringent type checks and static analysis that can catch a wide range of programming errors during compile time. While JavaScript is widely adopted due to its simplicity and ubiquity, it poses certain security challenges that could be mitigated by transitioning to TypeScript.</p>
+<ol>
+<li>
+<p>Type-Related Vulnerabilities:
+JavaScript&rsquo;s loose typing allows developers to perform operations on variables without explicit type declarations. This freedom can inadvertently lead to vulnerabilities such as type coercion attacks, where an attacker manipulates input data to trigger unintended behaviors. TypeScript enforces strong typing, which can catch type-related issues early in the development process, reducing the risk of such vulnerabilities.</p>
+</li>
+<li>
+<p>Null and Undefined Errors:
+JavaScript&rsquo;s permissiveness with null and undefined values can lead to runtime errors and crashes. Insecure access to null or undefined properties can open doors to injection attacks, privilege escalation, or application crashes. TypeScript&rsquo;s strict null checks force developers to handle these cases explicitly, minimizing the chances of overlooking critical input validation</p>
+</li>
+<li>
+<p>Misconfigured Objects and Inheritance:
+JavaScript&rsquo;s prototype-based inheritance can lead to unforeseen object interactions and security breaches when not carefully managed. TypeScript&rsquo;s class-based object-oriented approach enhances code organization and provides better control over inheritance, reducing the likelihood of unexpected security vulnerabilities.</p>
+</li>
+<li>
+<p>Reduced Maintenance Complexity:
+Maintaining a JavaScript codebase can become increasingly complex as a project grows. With TypeScript, the inclusion of type annotations and stricter rules aids in code comprehension, refactoring, and identifying security vulnerabilities. This streamlined development process indirectly contributes to a more secure software ecosystem.</p>
+</li>
+</ol>
+<p>Remember, this project is implementing an extension to the MetaMask Trust Module. As such, we recommend implementing compile time security controls by moving the codebase to TypeScript with strict linting rules enabled.</p>
+</div>
+        </div></p>
+<p>
+<h2 id="appendix---files-in-scope">Appendix 1 - Files in Scope</h2>
+  <p>This review covered the following files:</p>
+  <table>
+  <thead>
+  <tr>
+  <th>File</th>
+  <th>SHA-1 hash</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+  <td></td>
+  <td></td>
+  </tr>
+  <tr>
+  <td>aptos-snap/index.html</td>
+  <td><code>5e3a44cb5b21a1d500aff78c66918137502f5952</code></td>
+  </tr>
+  <tr>
+  <td>aptos-snap/logo.svg</td>
+  <td><code>7e9ca06eddd17aef8b58abf8f77bf631e1e1fbf2</code></td>
+  </tr>
+  <tr>
+  <td>aptos-snap/src/index.js</td>
+  <td><code>cee7e6cb64a8df7e9739d79f05de5a9a9d70adb6</code></td>
+  </tr>
+  <tr>
+  <td>aptos-snap/src/privateKey.js</td>
+  <td><code>b31c752080e5a8ab20a7bba74845a52fde37aa7b</code></td>
+  </tr>
+  <tr>
+  <td>aptos-snap/src/ui.js</td>
+  <td><code>1242056e76afe38d9d086a82d92de0f939672682</code></td>
+  </tr>
+  <tr>
+  <td>aptos-snap/src/utils.js</td>
+  <td><code>3bba0e810a3ff1f28e7a3d75a2a2bcbb10adb112</code></td>
+  </tr>
+  <tr>
+  <td>sui-snap/index.html</td>
+  <td><code>e23de59c3a1baf10b1293ff37a751336d17a7901</code></td>
+  </tr>
+  <tr>
+  <td>sui-snap/logo.svg</td>
+  <td><code>2ad0ad0e48b5371ccbb2f87db5850c5f379c9164</code></td>
+  </tr>
+  <tr>
+  <td>sui-snap/src/index.js</td>
+  <td><code>956e011716598fb3f27254f3eec87f79ce662823</code></td>
+  </tr>
+  <tr>
+  <td>sui-snap/src/privateKey.js</td>
+  <td><code>38d4814835c1c70e7f6a664e5054d69002576e21</code></td>
+  </tr>
+  <tr>
+  <td>sui-snap/src/ui.js</td>
+  <td><code>1242056e76afe38d9d086a82d92de0f939672682</code></td>
+  </tr>
+  <tr>
+  <td>sui-snap/src/utils.js</td>
+  <td><code>3bba0e810a3ff1f28e7a3d75a2a2bcbb10adb112</code></td>
+  </tr>
+  <tr>
+  <td>solflare-snap/index.html</td>
+  <td><code>9128e7eb26165bb90d7deb50f94e39b68f3ff32d</code></td>
+  </tr>
+  <tr>
+  <td>solflare-snap/logo.svg</td>
+  <td><code>6041863b433142dc5f14d9477c2555e0ed383c8f</code></td>
+  </tr>
+  <tr>
+  <td>solflare-snap/src/index.js</td>
+  <td><code>4497a4b0b8a53929aae134964ad148904cc77b67</code></td>
+  </tr>
+  <tr>
+  <td>solflare-snap/src/privateKey.js</td>
+  <td><code>42818b4ff1e78e9fc83e3202cc15a35b7a17e78d</code></td>
+  </tr>
+  <tr>
+  <td>solflare-snap/src/ui.js</td>
+  <td><code>1242056e76afe38d9d086a82d92de0f939672682</code></td>
+  </tr>
+  <tr>
+  <td>solflare-snap/src/utils.js</td>
+  <td><code>41e9e87cdd5ae877e2d579e51e2620e4dde0160a</code></td>
+  </tr>
+  </tbody>
+  </table>
+</p>
+<h2 id="appendix---disclosure">Appendix 2 - Disclosure</h2>
+<p>Consensys Diligence (&ldquo;CD&rdquo;) typically receives compensation from one or more clients (the &ldquo;Clients&rdquo;) for performing the analysis contained in these reports (the &ldquo;Reports&rdquo;). The Reports may be distributed through other means, including via Consensys publications and other distributions.</p>
+<p>The Reports are not an endorsement or indictment of any particular project or team, and the Reports do not guarantee the security of any particular project. This Report does not consider, and should not be interpreted as considering or having any bearing on, the potential economics of a token, token sale or any other product, service or other asset. Cryptographic tokens are emergent technologies and carry with them high levels of technical risk and uncertainty. No Report provides any warranty or representation to any third party in any respect, including regarding the bug-free nature of code, the business model or proprietors of any such business model, and the legal compliance of any such business. No third party should rely on the Reports in any way, including for the purpose of making any decisions to buy or sell any token, product, service or other asset. Specifically, for the avoidance of doubt, this Report does not constitute investment advice, is not intended to be relied upon as investment advice, is not an endorsement of this project or team, and it is not a guarantee as to the absolute security of the project. CD owes no duty to any third party by virtue of publishing these Reports.</p>
+<h3 id="purpose-of-reports">A.2.1 Purpose of Reports</h3>
+<p>The Reports and the analysis described therein are created solely for Clients and published with their consent. The scope of our review is limited to a review of code and only the code we note as being within the scope of our review within this report. Any Solidity code itself presents unique and unquantifiable risks as the Solidity language itself remains under development and is subject to unknown risks and flaws. The review does not extend to the compiler layer, or any other areas beyond specified code that could present security risks. Cryptographic tokens are emergent technologies and carry with them high levels of technical risk and uncertainty. In some instances, we may perform penetration testing or infrastructure assessments depending on the scope of the particular engagement.</p>
+<p>CD makes the Reports available to parties other than the Clients (i.e., &ldquo;third parties&rdquo;) on its website. CD hopes that by making these analyses publicly available, it can help the blockchain ecosystem develop technical best practices in this rapidly evolving area of innovation.</p>
+<h3 id="links-to-other-web-sites-from-this-web-site">A.2.2 Links to Other Web Sites from This Web Site</h3>
+<p>You may, through hypertext or other computer links, gain access to web sites operated by persons other than Consensys and CD. Such hyperlinks are provided for your reference and convenience only, and are the exclusive responsibility of such web sites&rsquo; owners. You agree that Consensys and CD are not responsible for the content or operation of such Web sites, and that Consensys and CD shall have no liability to you or any other person or entity for the use of third party Web sites. Except as described below, a hyperlink from this web Site to another web site does not imply or mean that Consensys and CD endorses the content on that Web site or the operator or operations of that site. You are solely responsible for determining the extent to which you may use any content at any other web sites to which you link from the Reports. Consensys and CD assumes no responsibility for the use of third-party software on the Web Site and shall have no liability whatsoever to any person or entity for the accuracy or completeness of any outcome generated by such software.</p>
+<h3 id="timeliness-of-content">A.2.3 Timeliness of Content</h3>
+<p>The content contained in the Reports is current as of the date appearing on the Report and is subject to change without notice unless indicated otherwise, by Consensys and CD.</p>
+
+</div>
+        </div>
+    </article>
+</div>
+
+    </main>
+    
+<footer class="footer">
+    
+    <div class="dili-contact-block">
+        <div class="dili-container">
+            <div class="item-outer">
+                <div class="item-logo">
+                    <img class="logo" src="/images/home/icon-ili-xs.png" alt="">
+                </div>
+                <div class="item-title">
+                    
+                        Request a Security Review Today
+                    
+                </div>
+                <div class="item-description">
+                    Get in touch with our team to request a quote for a smart contract audit.
+                </div>
+                <div class="item-action">
+                    <a class="btn-primary" href="/contact/">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <form action="" class="dili-newsletter-form-block">
+        <div class="dili-newsletter-block">
+            <div class="dili-container">
+              <div class="dili-newsletter-wrapper">
+                <div class="dili-menu-side">
+                    <div class="item-logo">
+                        <img class="logo" src="/images/home/icon-ili-outline-white.svg" alt="">
+                    </div>
+                    <div class="item-menu-list">
+                        <a class="link" href="/audits/" title="Audits">Audits</a>
+                        <a class="link" href="/fuzzing/" title="Fuzzing">Fuzzing</a>
+                        <a class="link" href="/scribble/" title="Scribble">Scribble</a>
+                        <a class="link" href="/blog/" title="Blog">Blog</a>
+                        <a class="link" href="/tools/" title="Tools">Tools</a>
+                        <a class="link" href="/research/" title="Research">Research</a>
+                        <a class="link" href="/about/" title="About">About</a>
+                        <a class="link" href="/contact/" title="Contact">Contact</a>
+                        <a class="link" target="_blank"  href="https://consensys.io/open-roles/?discipline=32525" title="Careers">Careers</a>
+                        <a class="link" href="/privacy-policy/" title="Privacy Policy">Privacy Policy</a>
+                    </div>
+                </div>
+                <div class="dili-newsletter-form">
+                    <div class="newsletter-title">
+                        Subscribe to Our Newsletter
+                    </div>
+                    <div class="newsletter-description">
+                        Stay up-to-date on our latest offerings, tools, and the world of blockchain security.
+                    </div>
+                    <div class="newsletter-hubspot-wrapper">
+                        <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/v2.js"></script>
+                        <script>
+                        hbspt.forms.create({
+                            portalId: "4795067",
+                            formId: "2112c777-481a-4672-8788-9fd6a239e3fe",
+                            onFormSubmitted: function () {
+                                
+                                
+                                
+                                
+                                dataLayer.push({
+                                    'event': 'newsletter_signup_form_submitted',
+                                });
+                            },
+                        });
+                        </script>
+                    </div>
+                </div>
+              </div>
+            </div>
+        </div>
+    </form>
+    <div class="dili-powered-by">
+        <a href="https://consensys.io">
+            <img class="logo" width="234" height="32" src="/images/home/powered-by.svg" alt="">
+        </a>
+    </div>
+</footer>
+
+    <script src="/js/jquery-3.5.1.min.js"></script>
+<script src="/js/owl.carousel.min.js"></script>
+<script src="/js/clipboard.min.js"></script>
+<script src="/js/autoload.js"></script>
+
+    
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P5Z4ZWH"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    
+    <script>
+      $('.expandable .expander').click(function (e) {
+        $(this).children().toggle();
+        $(this).next('.expandable-content').toggle();
+        e.preventDefault();
+      });
+    </script>
+    <script>(function(){
+      var s=document.createElement('script');
+      e = !document.body ? document.querySelector('head'):document.body;
+      s.src='https://acsbapp.com/apps/app/dist/js/app.js';
+      s.defer=true;
+      s.onload=function(){
+        acsbJS.init({
+          statementLink     : '',
+          feedbackLink      : '',
+          footerHtml        : '',
+          hideMobile        : false,
+          hideTrigger       : false,
+          language          : 'en',
+          position          : 'right',
+          leadColor         : '#146ff8',
+          triggerColor      : '#2c6fdd',
+          triggerRadius     : '50%',
+          triggerPositionX  : 'right',
+          triggerPositionY  : 'bottom',
+          triggerIcon       : 'settings2',
+          triggerSize       : 'medium',
+          triggerOffsetX    : 20,
+          triggerOffsetY    : 20,
+          mobile            : {
+            triggerSize       : 'small',
+            triggerPositionX  : 'right',
+            triggerPositionY  : 'bottom',
+            triggerOffsetX    : 10,
+            triggerOffsetY    : 10,
+            triggerRadius     : '50%'
+          }
+        });
+      };
+      e.appendChild(s);}());
+    </script>
+    <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=7639035f-fcd3-4945-9f72-69d9406876e8"></script>
+    <script>
+      zE('webWidget', 'hide')
+      if("") {
+        zE('webWidget', 'show')
+      }
+    </script>
+  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d90d31ddc4b5795',t:'MTc3Mjk2MjI2Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"31f851bb697b44fca8a7948d2f16e6cd","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
