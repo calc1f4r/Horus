@@ -1,0 +1,118 @@
+---
+# Core Classification
+protocol: INIT Capital
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 29601
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2023-12-initcapital
+source_link: https://code4rena.com/reports/2023-12-initcapital
+github_link: https://github.com/code-423n4/2023-12-initcapital-findings/issues/9
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - lending
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - rvierdiiev
+  - ladboy233
+---
+
+## Vulnerability Title
+
+[M-10] Lack of way to handle not fully repaid bad debt after liquidation after the lending pool share or WLP are fully seized
+
+### Overview
+
+
+Summary:
+
+A bug has been found in the code where a user with bad debt may have their share or WLP seized by a liquidator. However, the code does not account for the remaining debt, leading to a permanent bad debt. This can also cause issues with the totalAssets and total debt calculations, preventing other users from borrowing from the protocol. To mitigate this issue, the code should be updated to handle partially repaid bad debt and potentially add a function to donate or socialize the bad debt as a loss. This bug has been confirmed by the INIT team.
+
+### Original Finding Content
+
+
+When user has bad debt, user's borrow credit > collateral credit. Liqudiator can step in and liquidate and seize user's share or seize user WLP and repay the debt.
+
+While the liquidate function aims to let liqudiator take the min share available for bad debt repayment.
+
+```solidity
+// take min of what's available (for bad debt repayment)
+shares = shares.min(IPosManager(POS_MANAGER).getCollAmt(_posId, _poolOut)); // take min of what's available
+_require(shares >= _minShares, Errors.SLIPPAGE_CONTROL);
+```
+
+After the user's pool share is transferred out, or after user's WLP is seized, the rest of unpaid debt becomes bad debt permanently. For example, user's borrow 1000 USDT and has debt 1000 USDT. His share is only worth 500 USD as collateral price drops. Because the code lets liquidator take min of what's available for both lending pool share and take min of what's available (for bad debt repayment) for WLP amount. The liqudiator can repay 800 USD and seize share of 500 USD. However, there are 200 USD remaining debt. When other liquidators (even this liquidator belongs to protocol) writes to repay and erase the rest 200 USD bad debt, he cannot because [removeCollateralTo validates share > 0, if share is 0, revert](https://github.com/code-423n4/2023-12-initcapital/blob/a53e401529451b208095b3af11862984d0b32177/contracts/core/PosManager.sol#L235).
+
+```solidity
+_require(_shares > 0, Errors.ZERO_VALUE);
+```
+
+If the underlying collateral is WLP, the second liquidation aims to write off bad debt does not work as well because if all WLP is transfered out, calling [\_harvest and unwrap again is likely to revert](https://github.com/code-423n4/2023-12-initcapital/blob/a53e401529451b208095b3af11862984d0b32177/contracts/core/PosManager.sol#L265).
+
+```solidity
+_harvest(_posId, _wLp, _tokenId);
+IBaseWrapLp(_wLp).unwrap(_tokenId, _amt, _receiver);
+```
+
+The bad permanently inflates the totalAssets() in lending pool and inflates the total debt to not let other users borrow from protocol because of the borrow cap checks.
+
+Also, the lender suffers the loss because if the bad debt is not repaid, the lender that deposit cash into the lending pool is lost.
+
+### Recommended Mitigation Steps
+
+Add a way to handle not fully repaid bad debt after liquidation after the lending pool share or WLP is fully seized.
+
+Add a function to donate to the lending pool to let user supply asset or add a function to socialize the bad debt as loss explicilty.
+
+**[fez-init (INIT) confirmed](https://github.com/code-423n4/2023-12-initcapital-findings/issues/9#issuecomment-1869836241)**
+
+***
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | INIT Capital |
+| Report Date | N/A |
+| Finders | rvierdiiev, ladboy233 |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2023-12-initcapital
+- **GitHub**: https://github.com/code-423n4/2023-12-initcapital-findings/issues/9
+- **Contest**: https://code4rena.com/reports/2023-12-initcapital
+
+### Keywords for Search
+
+`vulnerability`
+

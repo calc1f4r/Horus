@@ -1,0 +1,128 @@
+---
+# Core Classification
+protocol: Ajna #2
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 27658
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/114
+source_link: none
+github_link: https://github.com/sherlock-audit/2023-09-ajna-judging/issues/49
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - 0xkaden
+---
+
+## Vulnerability Title
+
+M-6: lenderKick incorrectly sets LUP
+
+### Overview
+
+
+This bug report is related to the `KickerActions.lenderKick` method in the `2023-09-ajna-judging` project on GitHub. It was found by 0xkaden and involves an incorrect calculation of the Lender Utilization Point (LUP) when a lender attempts to withdraw their position. This incorrect calculation results in an incorrect interest rate calculation, which could have a large impact on the project.
+
+The code snippet shows two lines from the project. The first is from `KickerActions.sol` and calculates the LUP as if the lender had withdrawn their position. The second is from `Pool.sol` and uses this incorrect LUP to update the interest rate.
+
+The bug has been classified as a medium severity issue, since it leads to an incorrect interest rate calculation. It is recommended that the actual LUP is calculated separately from the simulated LUP in order to fix this issue.
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2023-09-ajna-judging/issues/49 
+
+## Found by 
+0xkaden
+
+`KickerActions.lenderKick` retrieves what the LUP would be if the lender's deposit were removed to validate collateralization of the borrower being kicked. The method doesn't actually add to the deposit but returns the incorrect LUP where it is later incorrectly used to update the interest rate.
+
+## Vulnerability Detail
+
+In `KickerActions.lenderKick`, we compute the `entitledAmount` of quote tokens if the lender were to withdraw their whole position. We pass this value as `additionalDebt_` to `_kick` where it allows us to compute what the LUP would be if the lender removed their position. The function then proceeds to validate that the new LUP would leave the borrower undercollateralized, and if so, kick that borrower. 
+
+The problem is that we then return the computed LUP even though we aren't actually removing the lender's quote tokens. In `Pool.lenderKick`, we then pass this incorrect LUP to `_updateInterestState` where it is used to incorrectly update the `lupt0DebtEma`, which is used to calculate the interest rate, leading to an incorrect rate.
+
+## Impact
+
+Broken core invariant related to interest rate calculation. Impact on interest rate is dependent upon size of lender's position relative to total deposit size.
+
+## Code Snippet
+
+https://github.com/sherlock-audit/2023-09-ajna/blob/main/ajna-core/src/libraries/external/KickerActions.sol#L296
+```solidity
+// add amount to remove to pool debt in order to calculate proposed LUP
+// for regular kick this is the currrent LUP in pool
+// for provisional kick this simulates LUP movement with additional debt
+kickResult_.lup = Deposits.getLup(deposits_, poolState_.debt + additionalDebt_);
+```
+
+https://github.com/sherlock-audit/2023-09-ajna/blob/main/ajna-core/src/base/Pool.sol#L363
+```solidity
+_updateInterestState(poolState, result.lup);
+```
+
+## Tool used
+
+Manual Review
+
+## Recommendation
+
+Calculate the actual LUP as `kickResult_.lup`, then calculate the simulated LUP separately with an unrelated variable.
+
+
+
+## Discussion
+
+**ith-harvey**
+
+Does not meet validity criteria for `Medium`. Will fix it.
+
+**neeksec**
+
+Keep `Medium` since this issue leads to an incorrect interest rate.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Sherlock |
+| Protocol | Ajna #2 |
+| Report Date | N/A |
+| Finders | 0xkaden |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2023-09-ajna-judging/issues/49
+- **Contest**: https://app.sherlock.xyz/audits/contests/114
+
+### Keywords for Search
+
+`vulnerability`
+

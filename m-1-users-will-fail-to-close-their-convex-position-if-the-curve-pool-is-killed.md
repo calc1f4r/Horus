@@ -1,0 +1,152 @@
+---
+# Core Classification
+protocol: Blueberry Update #3
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 24321
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/104
+source_link: none
+github_link: https://github.com/sherlock-audit/2023-07-blueberry-judging/issues/15
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - rwa
+  - leveraged_farming
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - Arz
+---
+
+## Vulnerability Title
+
+M-1: Users will fail to close their Convex position if the Curve pool is killed
+
+### Overview
+
+
+This bug report is about the issue where users will fail to close their Convex position if the Curve pool is killed. This issue was found by Arz and can be found at https://github.com/sherlock-audit/2023-07-blueberry-judging/issues/15. The problem arises when the Curve pool is killed (paused), so if self.is_killed in the curve pool contract is true, calling remove_liquidity_one_coin() function will always revert and closePositionFarm() function will be DOS'ed. This means users will be unable to repay their debt, resulting in their assets being liquidated. The code snippet in the report shows how the remove_liquidity_one_coin() is called when the user calls closePositionFarm() in the ConvexSpell. The recommendation is to add an isKilled check in the ConvexSpell like there is in the CurveSpell. Two comments were left on this issue during the judging contest, one was invalid because the case where a Curve pool is killed is handled by withdrawing liquidity using remove_liquidity function and the other was that it is up to the developer to decide if they want to fix it or not.
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2023-07-blueberry-judging/issues/15 
+
+## Found by 
+Arz
+
+If the Curve pool that the ConvexSpell.sol uses becomes killed, users will be unable to close their position because remove_liquidity_one_coin() will revert. Users will be unable to repay their debt so their assets will be liquidated.
+
+## Vulnerability Detail
+
+ConvexSpell.sol::closePositionFarm() is used to close an existing liquidity position. After the collateral is taken and the rewards are swapped, _removeLiquidity() is called which removes liquidity from a Curve pool by calling remove_liquidity_one_coin(). 
+
+
+The problem arises when the Curve pool is killed(paused) so if self.is_killed in the curve pool contract is true, calling remove_liquidity_one_coin() function will always revert and closePositionFarm() function will be DOS'ed
+
+
+Note: This issue was submitted in the [previous contest](https://github.com/sherlock-audit/2023-04-blueberry-judging/issues/64) however only the CurveSpell got fixed but not the ConvexSpell.
+
+
+## Impact
+
+When user's position is about to be liquidated, if the closePositionFarm() function is DOS'ed,users will be unable to repay their debt, resulting in the users losing their funds
+
+## Code Snippet
+
+https://github.com/sherlock-audit/2023-07-blueberry/blob/7c7e1c4a8f3012d1afd2e598b656010bb9127836/blueberry-core/contracts/spell/ConvexSpell.sol#L261-L265
+
+```solidity
+
+260: /// Removes liquidity from the Curve pool for the specified token.
+261: ICurvePool(pool).remove_liquidity_one_coin(
+262:     amountPosRemove,
+263:     int128(tokenIndex),
+264:     param.amountOutMin
+265: );
+
+```
+
+As you can see, remove_liquidity_one_coin() is called when the user calls closePositionFarm() in the ConvexSpell
+
+
+https://github.com/curvefi/curve-contract/blob/b0bbf77f8f93c9c5f4e415bce9cd71f0cdee960e/contracts/pools/3pool/StableSwap3Pool.vy#L670-L674
+
+```python
+670: def remove_liquidity_one_coin(_token_amount: uint256, i: int128, min_amount: uint256):
+671:     """
+672:     Remove _amount of liquidity all in a form of coin i
+673:     """
+674:     assert not self.is_killed  # dev: is killed
+```
+
+
+The problem is that remove_liquidity_one_coin() checks if self.is_killed is true so if the Curve pool is killed then this will revert and the user wont be able to close his position.
+
+
+## Tool used
+
+Manual Review
+
+## Recommendation
+
+When killed, it is only possible for existing LPs to remove liquidity via remove_liquidity so there should be the same isKilled check in the ConvexSpell like there is in the CurveSpell
+
+
+
+## Discussion
+
+**sherlock-admin2**
+
+2 comment(s) were left on this issue during the judging contest.
+
+**0xyPhilic** commented:
+> invalid because the case where a Curve pool is killed is handled by withdrawing liquidity using remove_liquidity function
+
+**darkart** commented:
+>  If its already been accepted its up to the DEV to decide if he wants to fix it or no
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Sherlock |
+| Protocol | Blueberry Update #3 |
+| Report Date | N/A |
+| Finders | Arz |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2023-07-blueberry-judging/issues/15
+- **Contest**: https://app.sherlock.xyz/audits/contests/104
+
+### Keywords for Search
+
+`vulnerability`
+

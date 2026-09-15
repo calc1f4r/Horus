@@ -1,0 +1,103 @@
+---
+# Core Classification
+protocol: RFX Contracts
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 51987
+audit_firm: Halborn
+contest_link: https://www.halborn.com/audits/rfx-exchange/rfx-contracts
+source_link: https://www.halborn.com/audits/rfx-exchange/rfx-contracts
+github_link: none
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - Halborn
+---
+
+## Vulnerability Title
+
+Non-updated borrowing factor leads to fee miscalculations
+
+### Overview
+
+
+This bug report describes an issue where the `CUMULATIVE_BORROWING_FACTOR` is not consistently updated when users deposit or withdraw funds. This can result in incorrect borrowing fees being charged. The affected functions are `executeDeposit` and `executeWithdrawal`. The recommended solution is to update the funding and borrowing state before modifying the pool amount. This issue has been solved in RFX2.1 by the RFX team.
+
+### Original Finding Content
+
+##### Description
+
+When a position is updated, the `updateFundingAndBorrowingState`function is triggered to adjust the `CUMULATIVE_BORROWING_FACTOR`. This factor is updated based on the latest borrowing rate (i.e.: borrowing factor per second) and the elapsed time since the last update. The borrowing rate itself depends on the percentage of the pool's liquidity that is currently borrowed: the higher the borrowed percentage, the higher the rate. By updating the `CUMULATIVE_BORROWING_FACTOR`before making any state changes that could influence the rate, the system ensures that borrowing fees are calculated accurately.
+
+  
+
+However, this process is not consistently applied throughout the code. When users withdraw or deposit funds, they alter the borrowing rate: withdrawals increase it, while deposits decrease it. Since the `CUMULATIVE_BORROWING_FACTOR`is not updated during a deposit or withdrawal, the next time it is updated (e.g.: when increasing / decreasing a position), the borrowing fees will be miscalculated because the rate will use the new value instead of the actual value that was present during the elapsed time. The described situation can result in excessive fees being charged if a withdrawal occurs, or insufficient fees being charged if a deposit occurs. The affected functions are the following:
+
+* `ExecuteDepositUtils.executeDeposit`
+* `ExecuteWithdrawalUtils.executeWithdrawal`
+
+##### BVSS
+
+[AO:A/AC:L/AX:L/R:N/S:U/C:N/A:N/I:H/D:N/Y:M (8.8)](/bvss?q=AO:A/AC:L/AX:L/R:N/S:U/C:N/A:N/I:H/D:N/Y:M)
+
+##### Recommendation
+
+Update the funding and borrowing state in the `executeDeposit`and `executeWithdrawal`functions before modifying the pool amount.
+
+##### Remediation
+
+**SOLVED**: The **RFX team** solved the issue when refactoring the codebase to v2.1.
+
+##### Remediation Comment
+
+Fixed/Refactored in RFX2.1
+
+##### Remediation Hash
+
+<https://github.com/relative-finance/rfx-contracts/tree/develop-v2>
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Halborn |
+| Protocol | RFX Contracts |
+| Report Date | N/A |
+| Finders | Halborn |
+
+### Source Links
+
+- **Source**: https://www.halborn.com/audits/rfx-exchange/rfx-contracts
+- **GitHub**: N/A
+- **Contest**: https://www.halborn.com/audits/rfx-exchange/rfx-contracts
+
+### Keywords for Search
+
+`vulnerability`
+

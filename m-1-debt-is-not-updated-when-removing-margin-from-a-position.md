@@ -1,0 +1,122 @@
+---
+# Core Classification
+protocol: Unstoppable
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 20674
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/95
+source_link: none
+github_link: https://github.com/sherlock-audit/2023-06-unstoppable-judging/issues/9
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - stopthecap
+---
+
+## Vulnerability Title
+
+M-1: Debt is not updated when removing margin from a position
+
+### Overview
+
+
+This bug report is about debt not being updated when removing margin from a position. The trader is allowed to remove margin/collateral from their positions, but the total debt is not updated when checking whether the position is liquidable. This means that a trader can remove collateral from a liquidable position, which is not ideal. The issue was found by stopthecap and was manually reviewed. The code snippet used is available on the Github page and the recommendation is to call `_update_debt` at the beginning of the remove margin function. The issue has been discussed on the Unstoppable-DeFi Github page.
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2023-06-unstoppable-judging/issues/9 
+
+## Found by 
+stopthecap
+## Summary
+Debt is not updated when removing margin from a position
+
+
+## Vulnerability Detail
+Traders are allowed to remove margin/collateral from their positions:
+https://github.com/sherlock-audit/2023-06-unstoppable/blob/94a68e49971bc6942c75da76720f7170d46c0150/unstoppable-dex-audit/contracts/margin-dex/Vault.vy#L528-L546
+
+as you can see, the position can only have collateral removed if it is not liquidable:
+https://github.com/sherlock-audit/2023-06-unstoppable/blob/94a68e49971bc6942c75da76720f7170d46c0150/unstoppable-dex-audit/contracts/margin-dex/Vault.vy#L487
+
+The problem is that the total `total_debt_shares[_debt_token]` is not updated when checking whether the positon is liquidable neither when calling `remove_margin`  You can see on the following links the progression of the function calls to calculate whether a position is liquidable or not:
+ 
+https://github.com/sherlock-audit/2023-06-unstoppable/blob/94a68e49971bc6942c75da76720f7170d46c0150/unstoppable-dex-audit/contracts/margin-dex/Vault.vy#L444
+
+https://github.com/sherlock-audit/2023-06-unstoppable/blob/94a68e49971bc6942c75da76720f7170d46c0150/unstoppable-dex-audit/contracts/margin-dex/Vault.vy#L1142
+
+https://github.com/sherlock-audit/2023-06-unstoppable/blob/94a68e49971bc6942c75da76720f7170d46c0150/unstoppable-dex-audit/contracts/margin-dex/Vault.vy#L1099
+
+https://github.com/sherlock-audit/2023-06-unstoppable/blob/94a68e49971bc6942c75da76720f7170d46c0150/unstoppable-dex-audit/contracts/margin-dex/Vault.vy#L1111
+
+https://github.com/sherlock-audit/2023-06-unstoppable/blob/94a68e49971bc6942c75da76720f7170d46c0150/unstoppable-dex-audit/contracts/margin-dex/Vault.vy#L1117C16-L1117C16
+
+As seen, `total_debt_shares[_debt_token]` is not updated to the current `total_debt_shares[_debt_token]` by calling `_update_debt` and therefore a stale `total_debt_shares[_debt_token]` is used to calculate whether a position is liquidable. Allowing positions that are in fact liquidable remove margin because the debt is not updated.
+
+## Impact
+Not updating the debt before removing collateral (margin) from your position does allow a trader to remove collateral from a liquidable position
+## Code Snippet
+https://github.com/sherlock-audit/2023-06-unstoppable/blob/94a68e49971bc6942c75da76720f7170d46c0150/unstoppable-dex-audit/contracts/margin-dex/Vault.vy#L528-L546
+
+https://github.com/sherlock-audit/2023-06-unstoppable/blob/94a68e49971bc6942c75da76720f7170d46c0150/unstoppable-dex-audit/contracts/margin-dex/Vault.vy#L1117C16-L1117C16
+## Tool used
+
+Manual Review
+
+## Recommendation
+Call `_update_debt` at the beginning of the remove margin function
+
+
+
+## Discussion
+
+**Unstoppable-DeFi**
+
+https://github.com/Unstoppable-DeFi/unstoppable-dex-audit/pull/1
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Sherlock |
+| Protocol | Unstoppable |
+| Report Date | N/A |
+| Finders | stopthecap |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2023-06-unstoppable-judging/issues/9
+- **Contest**: https://app.sherlock.xyz/audits/contests/95
+
+### Keywords for Search
+
+`vulnerability`
+

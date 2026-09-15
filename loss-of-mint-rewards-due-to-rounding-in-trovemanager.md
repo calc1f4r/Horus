@@ -1,0 +1,115 @@
+---
+# Core Classification
+protocol: Bima
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 46263
+audit_firm: Cantina
+contest_link: https://cantina.xyz/portfolio/4e5e0166-4fc7-4b58-bfd3-18c61593278a
+source_link: https://cdn.cantina.xyz/reports/cantina_competition_bima_december2024.pdf
+github_link: none
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 4
+finders:
+  - pkqs90
+  - santipu
+  - XDZIBECX
+  - Spearmint
+---
+
+## Vulnerability Title
+
+Loss of mint rewards due to rounding in TroveManager 
+
+### Overview
+
+
+This bug report discusses an issue with the TroveManager contract in the Trove system. The problem is that users who mint debt through this contract are receiving unfair amounts of mint rewards due to a precision loss that occurs during the calculation process. This happens because the debt amounts are divided by a constant value, which leads to a significant loss of precision. As a result, some users are not receiving any mint rewards when they mint small amounts of debt. This is considered unfair because those users have still contributed to the system by minting debt, but they are not receiving any rewards for it. The recommendation to fix this issue is to change the data type of certain variables in the contract to allow for higher values and remove the precision loss. 
+
+### Original Finding Content
+
+## Context: TroveManager.sol#L1203
+
+## Description
+
+Users that mint debt through TroveManager will get an unfair amount of mint rewards due to precision loss happening at `_updateMintVolume`. Users can mint some debt in TroveManager through the functions `openTrove` and `updateTroveFromAdjustment`. These two functions are calling `_updateMintVolume` to accrue some rewards to the user who is taking the debt.
+
+```solidity
+function _updateMintVolume(address account, uint256 initialAmount) internal {
+    uint32 amount = SafeCast.toUint32(initialAmount / VOLUME_MULTIPLIER); // <<<
+    (uint256 week, uint256 day) = getWeekAndDay();
+    totalMints[week][day] += amount;
+    // ...
+}
+```
+
+The variable `initialAmount` is the amount of debt that is minted by the borrower, and it gets divided by `VOLUME_MULTIPLIER`, which is a constant with the value of `1e20`:
+
+```solidity
+// volume-based amounts are divided by this value to allow storing as uint32
+uint256 constant VOLUME_MULTIPLIER = 1e20;
+```
+
+This constant is used to downscale the debt amounts so they can be stored in a `uint32` variable. However, this will cause a huge precision loss that will lead to some users not receiving any mint rewards when they mint an amount of debt lower than 100 USBD.
+
+## Example Scenario
+
+Imagine the following scenario:
+- Bob opens a Trove to mint 200 USBD.
+- Alice opens a Trove to mint 90 USBD.
+- A day later, Alice adjusts the Trove to get 90 USBD more.
+- A few days later, Alice adjusts the Trove again to mint 90 USBD of extra debt.
+
+After the week is over and mint rewards have to be distributed, Bob will receive all the mint rewards while Alice will receive none. This is unfair because Alice has minted more debt overall, but it hasn’t been saved in the rewards mechanism due to this precision loss.
+
+Users who mint an amount of debt lower than 100 USBD at a time won’t receive any mint rewards. Also, users who mint different amounts of debt will receive the same amounts of rewards as if they got the same debt. For example, Alice and Bob would have received the same rewards if they minted 100 and 199 USBD.
+
+## Recommendation
+
+To mitigate this issue, it is recommended to change the data type of `totalMints` and `VolumeData.amount` from `uint32` to `uint256` to allow storing higher values. This would allow us to remove entirely the variable `VOLUME_MULTIPLIER`, and thus remove the precision loss as a whole.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Cantina |
+| Protocol | Bima |
+| Report Date | N/A |
+| Finders | pkqs90, santipu, XDZIBECX, Spearmint |
+
+### Source Links
+
+- **Source**: https://cdn.cantina.xyz/reports/cantina_competition_bima_december2024.pdf
+- **GitHub**: N/A
+- **Contest**: https://cantina.xyz/portfolio/4e5e0166-4fc7-4b58-bfd3-18c61593278a
+
+### Keywords for Search
+
+`vulnerability`
+

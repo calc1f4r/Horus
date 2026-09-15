@@ -1,0 +1,135 @@
+---
+# Core Classification
+protocol: Morpho
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 16228
+audit_firm: Spearbit
+contest_link: https://github.com/spearbit/portfolio/blob/master/pdfs/Morpho-Av3-Spearbit-Security-Review.pdf
+source_link: https://github.com/spearbit/portfolio/blob/master/pdfs/Morpho-Av3-Spearbit-Security-Review.pdf
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - cdp
+  - derivatives
+  - dexes
+  - services
+  - yield_aggregator
+
+# Audit Details
+report_date: unknown
+finders_count: 5
+finders:
+  - EBaizel
+  - JayJonah8
+  - Christoph Michel
+  - Datapunk
+  - Emanuele Ricci
+---
+
+## Vulnerability Title
+
+A high value of _defaultIterations could make the withdrawal and repay operations revert because of OOG
+
+### Overview
+
+
+The bug report is about the maxIterations parameter that is used in the supplyLogic and borrowLogic functions of PositionsManager.sol and MatchingEngine.sol. It is used as the maximum number of iterations that the matching engine can do to match suppliers/borrowers during promotion/demotion operations. The problem is that if the matching engine cannot match enough balance, it could revert because of OOG (Out of Gas) if the maxIterations parameter is set too high. This is especially a problem for withdraw and repay operations, as Morpho is forcing the number of operations and could cause them to always revert if the matching engine does not match enough balance in time. 
+
+Morpho's recommendation is to consider stress testing the correct value to be used for _defaultIterations.repay and _defaultIterations.withdraw to prevent those operations from reverting because of OOG. Morpho is also conducting studies on the matching efficiency given a max iterations as well as the gas consumed, which should give them the appropriate max iterations to set. Spearbit has acknowledged the recommendation.
+
+### Original Finding Content
+
+## Severity: Medium Risk
+
+## Context
+- PositionsManager.sol#L146-L147
+- PositionsManager.sol#L176-L178
+- MatchingEngine.sol#L128-L158
+
+## Description
+When the user executes some actions, they can specify their own `maxIterations` parameter. The user `maxIterations` parameter is directly used in `supplyLogic` and `borrowLogic`. 
+
+In the `withdrawLogic`, Morpho recalculates the `maxIterations` to be used internally as `Math.max(_defaultIterations.withdraw, maxIterations)` and in `repayLogic`, it directly uses `_defaultIterations.repay` as the maximum number of iterations. 
+
+This parameter is used as the maximum number of iterations that the matching engine can perform to match suppliers/borrowers during promotion/demotion operations.
+
+### Function
+```solidity
+function _promoteOrDemote(
+    LogarithmicBuckets.Buckets storage poolBuckets,
+    LogarithmicBuckets.Buckets storage p2pBuckets,
+    Types.MatchingEngineVars memory vars
+) internal returns (uint256 processed, uint256 iterationsDone) {
+    if (vars.maxIterations == 0) return (0, 0);
+    uint256 remaining = vars.amount;
+    // matching engine code...
+    for (; iterationsDone < vars.maxIterations && remaining != 0; ++iterationsDone) {
+        // matching engine code
+        (onPool, inP2P, remaining) = vars.step(...);
+        // matching engine code...
+    }
+    // matching engine code...
+}
+```
+
+As you can see, the iteration continues until the matching engine has matched enough balance, or the iterations have reached the maximum number of iterations. If the matching engine cannot match enough balance, it could revert because of Out Of Gas (OOG) if `vars.maxIterations` is a high value. 
+
+For the supply or borrow operations, the user is responsible for the specified number of iterations that might be done during the matching process. In that case, if the operations revert because of OOG, it’s not an issue per se. 
+
+The problem arises for withdraw and repay operations where Morpho imposes a strict number of operations, potentially causing all those transactions to revert if the matching engine doesn’t match enough balance in time. 
+
+Keep in mind that even if the transaction does not revert during the `_promoteOrDemote` logic, it could revert during the following operations simply because the `_promoteOrDemote` has consumed enough gas, leaving insufficient gas for the subsequent operations.
+
+## Recommendation
+Consider stress testing the correct value to be used for `_defaultIterations.repay` and `_defaultIterations.withdraw` to prevent these operations from reverting due to OOG.
+
+## Morpho
+We are conducting studies on matching efficiency given a max iterations, as well as the gas consumed. This study should provide us with the appropriate max iterations that we should set.
+
+## Spearbit
+Acknowledged.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Spearbit |
+| Protocol | Morpho |
+| Report Date | N/A |
+| Finders | EBaizel, JayJonah8, Christoph Michel, Datapunk, Emanuele Ricci |
+
+### Source Links
+
+- **Source**: https://github.com/spearbit/portfolio/blob/master/pdfs/Morpho-Av3-Spearbit-Security-Review.pdf
+- **GitHub**: N/A
+- **Contest**: https://github.com/spearbit/portfolio/blob/master/pdfs/Morpho-Av3-Spearbit-Security-Review.pdf
+
+### Keywords for Search
+
+`vulnerability`
+

@@ -1,0 +1,127 @@
+---
+# Core Classification
+protocol: g8keep_2024-12-12
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 45312
+audit_firm: Pashov Audit Group
+contest_link: none
+source_link: https://github.com/pashov/audits/blob/master/team/md/g8keep-security-review_2024-12-12.md
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - Pashov Audit Group
+---
+
+## Vulnerability Title
+
+[M-04] Liquidity shortfall during failed migration
+
+### Overview
+
+
+The bug report discusses a problem in the code for the g8keepBondingCurve smart contract. This bug can potentially impact the liquidity balance of the contract, which is used for buying and selling tokens. The issue occurs when the `_migrateToken` function is called and fails, but buying and selling remains available. If the `_curveSell` function is then called with certain conditions, it could use the wrong reserve for processing the sale, leading to a compromised migration state. To fix this, the report recommends implementing additional checks to ensure that the liquidity levels meet a certain minimum before proceeding with the migration. This will prevent the bug from occurring and ensure that the migration is successful. 
+
+### Original Finding Content
+
+## Severity
+
+**Impact:** High
+
+**Likelihood:** Low
+
+## Description
+
+When `reserves0` or the native token reaches the value of `MIGRATION_MINIMUM_LIQUIDITY` and the volume is met, it is possible to execute `_migrateToken`:
+
+```solidity
+File: g8keepBondingCurve.sol
+509:         if (curveLiquidityMet && curveVolumeMet && !migrationFailed) {
+510:             _migrateToken(0);
+511:         }
+```
+
+The problem is that if the migration fails, buying and selling remain available. If the `_curveSell` function is called with `curveLiquidityMet` set to true, it could utilize the `bReserve` for processing the sale. This situation might lead to a scenario where the sale occurs under the `bReserves`, potentially impacting the liquidity balance.
+
+```solidity
+File: g8keepBondingCurve.sol
+708:         if (remainingToSell > 0) {
+709:             Reserves storage sellFromReserves = aReserve;
+710:@>>          if (curveLiquidityMet) {
+711:@>>              sellFromReserves = bReserve;
+712:@>>          }
+713:             uint112 reserve0 = sellFromReserves.reserve0;
+714:             uint112 reserve1 = sellFromReserves.reserve1;
+715:
+716:             uint112 amountToSell = remainingToSell;
+717:             if (classA < amountToSell) {
+718:                 revert InsufficientBalance();
+719:             } else {
+720:                 classA -= amountToSell;
+721:             }
+722:
+723:             uint112 reserve0Out = _getAmountOut(amountToSell, reserve1, reserve0);
+724:             amountOut += reserve0Out;
+725:@>>          sellFromReserves.reserve0 -= reserve0Out;
+726:             sellFromReserves.reserve1 += amountToSell;
+727:         }
+```
+
+Consider the following scenario:
+
+1. The curve is configured and ready for migration, but an error or condition leads to a failed migration.
+2. Users, reacting to the failed migration, might sell tokens, which reduces the native token/ETH liquidity below the required `MIGRATION_MINIMUM_LIQUIDITY`.
+3. Subsequently, the `executeMigration` function is called again, and this time the migration succeeds. However, due to the reduced liquidity from the user sales, the migration occurs with less liquidity than initially intended, potentially below the `MIGRATION_MINIMUM_LIQUIDITY`.
+
+This could result in a compromised migration state where the expected liquidity guarantees are not met.
+
+## Recommendations
+
+Implement additional checks in the `executeMigration` function to ensure that liquidity levels meet or exceed the `MIGRATION_MINIMUM_LIQUIDITY` before proceeding with the migration.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Pashov Audit Group |
+| Protocol | g8keep_2024-12-12 |
+| Report Date | N/A |
+| Finders | Pashov Audit Group |
+
+### Source Links
+
+- **Source**: https://github.com/pashov/audits/blob/master/team/md/g8keep-security-review_2024-12-12.md
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+

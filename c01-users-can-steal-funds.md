@@ -1,0 +1,99 @@
+---
+# Core Classification
+protocol: Aave Protocol Audit
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 11592
+audit_firm: OpenZeppelin
+contest_link: none
+source_link: https://blog.openzeppelin.com/aave-protocol-audit/
+github_link: none
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - dexes
+  - cdp
+  - services
+  - indexes
+  - rwa
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - OpenZeppelin
+---
+
+## Vulnerability Title
+
+[C01] Users can steal funds
+
+### Overview
+
+
+A bug was reported in the Aave platform that allowed malicious users to unlock and withdraw any collateral, even if it was required to secure a loan. This was possible by depositing assets into a reserve with the `_useAsCollateral` flag set to true, receiving aTokens in exchange, and then borrowing assets from a different reserve, using the original deposits as collateral. The malicious user would then deposit any number of assets (even zero) into the initial reserve with the `_useAsCollateral` flag set to `false`. This would allow them to transfer their `aTokens` to a fresh account, and then redeem (or sell) the `aTokens` to receive their original collateral, effectively stealing from the lending pool.
+
+The bug was fixed in Merge Request #38, where users can no longer choose whether deposits are considered collateral. Instead, when the user’s balance in the reserve is zero, the `deposit` function will now default to mark the next deposit in the reserve as collateral. Users can opt-out by calling the `setUserUseReserveAsCollateral` function of the `LendingPool` contract, which performs the appropriate solvency checks. Additionally, the event `ReserveUsedAsCollateralEnabled` should be emitted in the `deposit` function after calling the `setUserUseReserveAsCollateral` function of the `LendingPoolCore` contract. It is recommended that this scenario is better documented to avoid unexpected behaviors in the future.
+
+### Original Finding Content
+
+Whenever users deposit assets into a particular reserve, they choose whether the assets can be used as collateral against future loans, in addition to earning interest. This decision is [stored as a flag in a `UserReserveData` object](https://gitlab.com/aave-tech/dlp/contracts/tree/1f8e5e65a99a887a5a13ad9af6486ebf93f57d02/contracts/lendingpool/LendingPool.sol#L104) that handles the association between a particular account and reserve contract. However, if the user already has deposits in the same reserve, the existing flag is simply overwritten. This can be leveraged by malicious users to unlock and withdraw any collateral, even if it is required to secure a loan.
+
+
+The identified attack vector goes as follows:
+
+
+1. A user [deposits assets](https://gitlab.com/aave-tech/dlp/contracts/tree/1f8e5e65a99a887a5a13ad9af6486ebf93f57d02/contracts/lendingpool/LendingPool.sol#L90) into a reserve with the `_useAsCollateral` flag set to true, [receiving aTokens](https://gitlab.com/aave-tech/dlp/contracts/tree/1f8e5e65a99a887a5a13ad9af6486ebf93f57d02/contracts/lendingpool/LendingPool.sol#L108) in exchange.
+2. They [borrow assets](https://gitlab.com/aave-tech/dlp/contracts/tree/1f8e5e65a99a887a5a13ad9af6486ebf93f57d02/contracts/lendingpool/LendingPool.sol#L175) from a different reserve, using the original deposits as collateral. At this stage, they cannot transfer their `aTokens`, since the [`balanceDecreaseAllowed` function](https://gitlab.com/aave-tech/dlp/contracts/tree/1f8e5e65a99a887a5a13ad9af6486ebf93f57d02/contracts/lendingpool/LendingPoolDataProvider.sol#L160) would return `false`, causing the [`isTransferAllowed` check](https://gitlab.com/aave-tech/dlp/contracts/tree/1f8e5e65a99a887a5a13ad9af6486ebf93f57d02/contracts/tokenization/AToken.sol#L146-150) to fail.
+3. Next, they deposit any number of assets (even zero) into the initial reserve with the `_useAsCollateral` flag set to `false`.
+4. Now the user can successfully transfer their `aTokens` to a fresh account, since the `balanceDecreaseAllowed` function will [bypass the insolvency check](https://gitlab.com/aave-tech/dlp/contracts/tree/1f8e5e65a99a887a5a13ad9af6486ebf93f57d02/contracts/lendingpool/LendingPoolDataProvider.sol#L170-172) and return `true`.
+5. They can now [redeem](https://gitlab.com/aave-tech/dlp/contracts/tree/1f8e5e65a99a887a5a13ad9af6486ebf93f57d02/contracts/tokenization/AToken.sol#L73) (or sell) the `aTokens` to receive their original collateral. At this point they have taken a loan with no collateral, effectively stealing from the lending pool.
+
+
+Consider preventing users from setting the `_useAsCollateral` flag to `false` when their existing deposits in the reserve are required to secure an outstanding loan. Once the fix is applied, related unit tests are in order to avoid reintroducing this critical issue in future modifications to the code base.
+
+
+**Update**: *Fixed in [MR#38](https://gitlab.com/aave-tech/dlp/contracts/merge_requests/38/diffs). Users can no longer choose whether deposits are considered collateral. Instead, when the user’s balance in the reserve is zero, the `deposit` function will now default to mark the next deposit in the reserve as collateral. Users can opt-out by calling the `setUserUseReserveAsCollateral` function of the `LendingPool` contract, which performs the appropriate solvency checks. We suggest better documenting this scenario to avoid unexpected behaviors. Additionally, the event `ReserveUsedAsCollateralEnabled` should be emitted in the `deposit` function after calling the `setUserUseReserveAsCollateral` function of the `LendingPoolCore` contract.*
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | OpenZeppelin |
+| Protocol | Aave Protocol Audit |
+| Report Date | N/A |
+| Finders | OpenZeppelin |
+
+### Source Links
+
+- **Source**: https://blog.openzeppelin.com/aave-protocol-audit/
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+

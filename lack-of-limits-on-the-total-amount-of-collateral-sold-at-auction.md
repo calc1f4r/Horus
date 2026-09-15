@@ -1,0 +1,94 @@
+---
+# Core Classification
+protocol: Yield V2
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 16986
+audit_firm: TrailOfBits
+contest_link: https://github.com/trailofbits/publications/blob/master/reviews/YieldV2.pdf
+source_link: https://github.com/trailofbits/publications/blob/master/reviews/YieldV2.pdf
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - Natalie Chin
+  - Maximilian Krüger
+---
+
+## Vulnerability Title
+
+Lack of limits on the total amount of collateral sold at auction
+
+### Overview
+
+
+The Yield Protocol auction system is vulnerable to catastrophic losses of collateral due to a lack of limits on the amount of collateral that can be auctioned off at once. This could be caused by a temporary oracle failure, which would cause a majority of the vaults to become undercollateralized and trigger auctions of their collateral. This could lead to the system losing the majority of its collateral and entering an undercollateralized state from which it cannot recover. 
+
+To prevent this, it is recommended that global and type-specific limits be introduced for the amount of collateral that can be auctioned off at once. These limits should protect the protocol from total liquidation caused by bugs while still providing enough liquidation throughput to accommodate all possible price changes. Additionally, wherever possible, limits for the system’s variables should be introduced to ensure they remain within the expected ranges and minimize the impact of bugs or attacks against the system.
+
+### Original Finding Content
+
+## Diﬃculty: Low
+
+## Type: Timing
+
+## Description
+MakerDAO’s Dutch auction system imposes limits on the amount of collateral that can be auctioned oﬀ at once (both the total amount and the amount of each collateral type). If the MakerDAO system experienced a temporary oracle failure, these limits would prevent a catastrophic loss of all collateral. The Yield Protocol auction system is similar to MakerDAO’s but lacks such limits, meaning that all of its collateral could be auctioned oﬀ for below-market prices.
+
+## Exploit Scenario
+The oracle price feeds (or other components of the system) experience an attack or another issue. The incident causes a majority of the vaults to become undercollateralized, triggering auctions of those vaults’ collateral. The protocol then loses the majority of its collateral, which is auctioned oﬀ for below-market prices, and enters an undercollateralized state from which it cannot recover.
+
+## Recommendations
+**Short term:** Introduce global and type-speciﬁc limits on the amount of collateral that can be auctioned oﬀ at the same time. Ensure that these limits protect the protocol from total liquidation caused by bugs while providing enough liquidation throughput to accommodate all possible price changes.
+
+**Long term:** Wherever possible, introduce limits for the system’s variables to ensure that they remain within the expected ranges. These limits will minimize the impact of bugs or attacks against the system.
+
+## Trail of Bits
+Yield V2  
+PUBLIC
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | TrailOfBits |
+| Protocol | Yield V2 |
+| Report Date | N/A |
+| Finders | Natalie Chin, Maximilian Krüger |
+
+### Source Links
+
+- **Source**: https://github.com/trailofbits/publications/blob/master/reviews/YieldV2.pdf
+- **GitHub**: N/A
+- **Contest**: https://github.com/trailofbits/publications/blob/master/reviews/YieldV2.pdf
+
+### Keywords for Search
+
+`vulnerability`
+

@@ -1,0 +1,157 @@
+---
+# Core Classification
+protocol: Cooler
+chain: everychain
+category: uncategorized
+vulnerability_type: weird_erc20
+
+# Attack Vector Details
+attack_type: weird_erc20
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 6282
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/36
+source_link: none
+github_link: https://github.com/sherlock-audit/2023-01-cooler-judging/issues/320
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.80
+financial_impact: medium
+
+# Scoring
+quality_score: 4
+rarity_score: 4
+
+# Context Tags
+tags:
+  - weird_erc20
+  - revert_on_0_transfer
+
+protocol_categories:
+  - dexes
+  - cdp
+  - services
+  - cross_chain
+  - nft_lending
+
+# Audit Details
+report_date: unknown
+finders_count: 4
+finders:
+  - csanuragjain
+  - Allarious
+  - hansfriese
+  - cccz
+---
+
+## Vulnerability Title
+
+M-1: `Cooler.roll()` wouldn't work as expected when `newCollateral = 0`.
+
+### Overview
+
+
+The bug report is about the `Cooler.roll()` function, which is used to increase the loan duration by transferring the additional collateral. The issue arises when `newCollateral = 0`, which can happen when the borrower has repaid most of the debts and the amount is very small. In this case, the transfer of 0 collateral will cause some tokens to revert and the `roll()` function will not work as expected.
+
+There are two impacts of this issue. Firstly, when the borrower tries to extend the loan using `roll()`, it will revert with the weird tokens when `newCollateral = 0`. Secondly, after the borrower notices he cannot repay anymore, he can call `roll()` again when `newCollateral = 0`. In this case, the borrower does not lose anything but the lender must wait for `req.duration` again to default the loan.
+
+The code snippet for this issue can be found at https://github.com/sherlock-audit/2023-01-cooler/blob/main/src/Cooler.sol#L146. The issue was found by hansfriese, cccz, Allarious, and csanuragjain through manual review.
+
+The recommendation is to handle it differently when `newCollateral = 0` and revert when `newCollateral = 0`. The sponsor commented that it was a good spot and a niche case.
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2023-01-cooler-judging/issues/320 
+
+## Found by 
+hansfriese, cccz, Allarious, csanuragjain
+
+
+
+## Summary
+`Cooler.roll()` is used to increase the loan duration by transferring the additional collateral.
+
+But there will be some problems when `newCollateral = 0`.
+
+## Vulnerability Detail
+```solidity
+    function roll (uint256 loanID) external {
+        Loan storage loan = loans[loanID];
+        Request memory req = loan.request;
+
+        if (block.timestamp > loan.expiry) 
+            revert Default();
+
+        if (!loan.rollable)
+            revert NotRollable();
+
+        uint256 newCollateral = collateralFor(loan.amount, req.loanToCollateral) - loan.collateral;
+        uint256 newDebt = interestFor(loan.amount, req.interest, req.duration);
+
+        loan.amount += newDebt;
+        loan.expiry += req.duration;
+        loan.collateral += newCollateral;
+        
+        collateral.transferFrom(msg.sender, address(this), newCollateral); //@audit 0 amount
+    }
+```
+
+In `roll()`, it transfers the `newCollateral` amount of collateral to the contract.
+
+After the borrower repaid most of the debts, `loan.amount` might be very small and `newCollateral` for the original interest might be 0 because of the rounding issue.
+
+Then as we can see from this [one](https://github.com/d-xo/weird-erc20#revert-on-zero-value-transfers), some tokens might revert for 0 amount and `roll()` wouldn't work as expected.
+
+## Impact
+There will be 2 impacts.
+
+1. When the borrower tries to extend the loan using `roll()`, it will revert with the weird tokens when `newCollateral = 0`.
+2. After the borrower noticed he couldn't repay anymore(so the lender will default the loan), the borrower can call `roll()` again when `newCollateral = 0`.
+In this case, the borrower doesn't lose anything but the lender must wait for `req.duration` again to default the loan.
+
+## Code Snippet
+https://github.com/sherlock-audit/2023-01-cooler/blob/main/src/Cooler.sol#L146
+
+## Tool used
+Manual Review
+
+## Recommendation
+I think we should handle it differently when `newCollateral = 0`.
+
+According to impact 2, I think it would be good to revert when `newCollateral = 0`.
+
+## Discussion
+
+**hrishibhat**
+
+Sponsor comment: 
+
+> Good spot. Niche case.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 4/5 |
+| Rarity Score | 4/5 |
+| Audit Firm | Sherlock |
+| Protocol | Cooler |
+| Report Date | N/A |
+| Finders | csanuragjain, Allarious, hansfriese, cccz |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2023-01-cooler-judging/issues/320
+- **Contest**: https://app.sherlock.xyz/audits/contests/36
+
+### Keywords for Search
+
+`Weird ERC20, Revert On 0 Transfer`
+

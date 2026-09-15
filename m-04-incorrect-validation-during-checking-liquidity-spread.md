@@ -1,0 +1,113 @@
+---
+# Core Classification
+protocol: Panoptic
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 33680
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2024-04-panoptic
+source_link: https://code4rena.com/reports/2024-04-panoptic
+github_link: https://github.com/code-423n4/2024-04-panoptic-findings/issues/479
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - KupiaSec
+---
+
+## Vulnerability Title
+
+[M-04] Incorrect validation during checking liquidity spread
+
+### Overview
+
+
+This bug report states that there is an issue with incorrect validation in a protocol that allows option buyers to not pay the premium. This occurs when a long leg is minted or a short leg is burned and the protocol checks the liquidity spread, but ignores the validation when the net liquidity is zero. This means that when a user mints a long leg for the entire selling amount, the liquidity spread is not checked, allowing the option buyer to not pay the premium. The recommended mitigation steps include adding a check to revert when the net liquidity is zero and the total liquidity is positive. This bug has been confirmed by the Panoptic team.
+
+### Original Finding Content
+
+
+### Impact
+
+Because of incorrect validation, it allows option buyers not to pay premium.
+
+### Proof of Concept
+
+When long leg is minted or short leg is burnt, the protocol checks liquidity spread by calculating `TotalLiquidity / NetLiquidity` and allows it not exceed `9`.<br>
+However in the check function, the validation is ignored when `NetLiquidity` is zero.
+
+This means when a user mints long leg that buys whole selling amount, the liquidity spread is not checked.<br>
+This issue allows the option buyer not to pay premium, and here is why:
+
+1.  When options are minted, last accumulated premium is stored to `s_grossPremiumLast`. Refer to `_updateSettlementPostMint` function of `PanopticPool` contract.
+2.  When options are burned, new accumulated premium is fetched and calculates the premium by multiplying liquidity with difference in accumulated premium. Refer to `_updateSettlementPostBurn` function of `PanopticPool` contract.
+3.  However, when a long leg of T(total liquidity) amount is minted, N becomes zero.
+4.  Later, when the minted long leg is burnt, premium values are not updated in SFPM, because N is zero. Refer to [SFPM:L1085](https://github.com/code-423n4/2024-04-panoptic/blob/833312ebd600665b577fbd9c03ffa0daf250ed24/contracts/SemiFungiblePositionManager.sol#L1085-L1094).
+
+Since there is no difference in owed premium value, the option buyer will not pay the premium when burning the option.
+
+### Recommended Mitigation Steps
+
+When checking liquidity spread, it should revert when N is zero and T is positive:
+
+```solidity
++   if(netLiquidity == 0 && totalLiquidity > 0) revert;
+    if(netLiquidity == 0) return;
+```
+
+### Assessed type
+
+Context
+
+**[dyedm1 (Panoptic) confirmed](https://github.com/code-423n4/2024-04-panoptic-findings/issues/479#event-12628350143)**
+
+
+
+***
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Panoptic |
+| Report Date | N/A |
+| Finders | KupiaSec |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2024-04-panoptic
+- **GitHub**: https://github.com/code-423n4/2024-04-panoptic-findings/issues/479
+- **Contest**: https://code4rena.com/reports/2024-04-panoptic
+
+### Keywords for Search
+
+`vulnerability`
+
