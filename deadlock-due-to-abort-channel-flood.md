@@ -1,0 +1,101 @@
+---
+# Core Classification
+protocol: Sei OCC
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 47436
+audit_firm: OtterSec
+contest_link: https://www.sei.io/
+source_link: https://www.sei.io/
+github_link: https://github.com/sei-protocol
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 3
+finders:
+  - Naoya Okanami
+  - James
+  - Tuyết
+---
+
+## Vulnerability Title
+
+Deadlock Due To Abort Channel Flood
+
+### Overview
+
+
+The report describes a bug related to the abortCh channel in the scheduler task. This channel is used to signal and manage abort events during task execution. However, the channel has a limited buffer size, which can lead to a deadlock if it becomes full. This issue is worsened by the use of panic for abort event management. To fix this bug, a dedicated goroutine should be implemented to consume and manage abort events from the channel. This will prevent the channel from being blocked and mitigate the risk of potential deadlocks. The bug has been resolved in versions acda002a and fe7c7b1. 
+
+### Original Finding Content
+
+## Abort Channel
+
+The abort channel signals abort events when specific conditions arise during task execution. These events are vital for controlling the execution flow and maintaining system correctness, especially in multi-version concurrency control scenarios. The abort channel is initialized with a buffer size limit, enabling it to store a defined number of abort events before causing the sender to block.
+
+> _sei-cosmos/tasks/scheduler.go_  
+> // prepareTask initializes the context and version stores for a task  
+> func (s *scheduler) prepareTask(task *deliverTxTask) {  
+> ctx := task.Ctx.WithTxIndex(task.Index)  
+> _, span := s.traceSpan(ctx, "SchedulerPrepare", task)  
+> defer span.End()  
+> // initialize the context  
+> abortCh := make(chan occ.Abort, len(s.multiVersionStores))  
+> [...]  
+> }
+
+Hence, a deadlock may occur if the buffer becomes full. This problem worsens with the utilization of panic for abort event management. If panic handlers recover silently and resume normal transaction execution, or try to access storage or execute operations that might induce additional abort events, the channel may quickly reach its capacity.
+
+## Remediation
+
+Implement a dedicated goroutine tasked with consuming abort events from the abort channel and managing them accordingly. This goroutine will prevent the channel from being blocked by a buildup of abort events, thereby mitigating the risk of potential deadlocks.
+
+## Patch
+
+Resolved in acda002 and fe7c7b1.
+
+© 2024 Otter Audits LLC. All Rights Reserved. 10/16
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | OtterSec |
+| Protocol | Sei OCC |
+| Report Date | N/A |
+| Finders | Naoya Okanami, James, Tuyết |
+
+### Source Links
+
+- **Source**: https://www.sei.io/
+- **GitHub**: https://github.com/sei-protocol
+- **Contest**: https://www.sei.io/
+
+### Keywords for Search
+
+`vulnerability`
+

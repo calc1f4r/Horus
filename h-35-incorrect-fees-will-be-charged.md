@@ -1,0 +1,168 @@
+---
+# Core Classification
+protocol: Astaria
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 3673
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/8
+source_link: none
+github_link: https://github.com/sherlock-audit/2022-10-astaria-judging/issues/36
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - rwa
+  - staking_pool
+  - nft_lending
+  - cdp
+  - dexes
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - csanuragjain
+---
+
+## Vulnerability Title
+
+H-35: Incorrect fees will be charged
+
+### Overview
+
+
+Issue H-35 is a bug found by csanuragjain in the handleIncomingPayment function of the AuctionHouse.sol code in the Astaria project. If the transferAmount is greater than the combined amount of all lien.amounts, then the initiatorPayment is calculated on the full transferAmount, even though only a partial amount was used. This means that an excess initiator fee is charged that was not required, leading to an incorrect fee being charged. This was confirmed by the discussion between IAmTurnipBoy, sherlock-admin, and Evert0x, where the issue was accepted as a valid finding and the escalation was rejected. As a result, the Watsons who escalated the issue will have their escalation amount deducted from their next payout. The recommendation is to calculate the exact amount of transfer amount required for the transaction and calculate the initiator fee based on this amount.
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2022-10-astaria-judging/issues/36 
+
+## Found by 
+csanuragjain
+
+## Summary
+If user has provided transferAmount which is greater than all lien.amount combined then initiatorPayment will be incorrect since it is charged on full amount when only partial was used as shown in poc
+
+## Vulnerability Detail
+1. Observe the _handleIncomingPayment function
+2. Lets say transferAmount was 1000
+3. initiatorPayment is calculated on this full transferAmount
+
+```python
+uint256 initiatorPayment = transferAmount.mulDivDown(
+      auction.initiatorFee,
+      100
+    ); 
+```
+
+4. Now all lien are iterated and lien.amount is kept on deducting from transferAmount until all lien are navigated
+
+```python
+if (transferAmount >= lien.amount) {
+          payment = lien.amount;
+          transferAmount -= payment;
+        } else {
+          payment = transferAmount;
+          transferAmount = 0;
+        }
+
+        if (payment > 0) {
+          LIEN_TOKEN.makePayment(tokenId, payment, lien.position, payer);
+        }
+      }
+```
+
+5. Lets say after loop completes the transferAmount is still left as 100 
+6. This means only 400 transferAmount was used but fees was deducted on full amount 500
+
+## Impact
+Excess initiator fees will be deducted which was not required
+
+## Code Snippet
+https://github.com/sherlock-audit/2022-10-astaria/blob/main/lib/astaria-gpl/src/AuctionHouse.sol#L276
+
+## Tool used
+Manual Review
+
+## Recommendation
+Calculate the exact amount of transfer amount required for the transaction and calculate the initiator fee based on this amount
+
+## Discussion
+
+**IAmTurnipBoy**
+
+Escalate for 1 USDC
+
+The fee is not the problem, so this report is invalid. The issue is that the payment isn't working as intended and that sometimes it doesn't take as much as it should. See #107.
+
+**sherlock-admin**
+
+ > Escalate for 1 USDC
+> 
+> The fee is not the problem, so this report is invalid. The issue is that the payment isn't working as intended and that sometimes it doesn't take as much as it should. See #107.
+
+You've created a valid escalation for 1 USDC!
+
+To remove the escalation from consideration: Delete your comment.
+To change the amount you've staked on this escalation: Edit your comment **(do not create a new comment)**.
+
+You may delete or edit your escalation comment anytime before the 48-hour escalation window closes. After that, the escalation becomes final.
+
+**Evert0x**
+
+Escalation rejected.
+
+This is a valid finding as fees are too high - Fees should be calculated based on the actual amount used as the repayment
+
+**sherlock-admin**
+
+> Escalation rejected.
+> 
+> This is a valid finding as fees are too high - Fees should be calculated based on the actual amount used as the repayment
+
+This issue's escalations have been rejected!
+
+Watsons who escalated this issue will have their escalation amount deducted from their next payout.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Sherlock |
+| Protocol | Astaria |
+| Report Date | N/A |
+| Finders | csanuragjain |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2022-10-astaria-judging/issues/36
+- **Contest**: https://app.sherlock.xyz/audits/contests/8
+
+### Keywords for Search
+
+`vulnerability`
+
