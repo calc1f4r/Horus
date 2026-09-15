@@ -1,0 +1,145 @@
+---
+# Core Classification
+protocol: LI.FI
+chain: everychain
+category: uncategorized
+vulnerability_type: allowance
+
+# Attack Vector Details
+attack_type: allowance
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 7043
+audit_firm: Spearbit
+contest_link: https://github.com/spearbit/portfolio/blob/master/pdfs/LIFI-Spearbit-Security-Review.pdf
+source_link: https://github.com/spearbit/portfolio/blob/master/pdfs/LIFI-Spearbit-Security-Review.pdf
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 1.00
+financial_impact: medium
+
+# Scoring
+quality_score: 5
+rarity_score: 4
+
+# Context Tags
+tags:
+  - allowance
+
+protocol_categories:
+  - dexes
+  - bridge
+  - services
+  - cross_chain
+  - liquidity_manager
+
+# Audit Details
+report_date: unknown
+finders_count: 3
+finders:
+  - Jonah1005
+  - DefSec
+  - Gerard Persoon
+---
+
+## Vulnerability Title
+
+LibSwap may pull tokens that are different from the specified asset
+
+### Overview
+
+
+This bug report is about a vulnerability in the LibSwap.sol code, which is part of the LiFi protocol. The vulnerability is that users can build a calldata to swap a different asset than what was specified, which could result in tokens being swept from the LiFi protocol. The code in question is located on lines 30-55 in LibSwap.sol. The recommendation is to clear the allowance after the external call is made. The LiFi Team acknowledges the risk but encourages users to utilize their API and pass the correct calldata rather than strictly checking it at the contract level.
+
+### Original Finding Content
+
+## Security Report
+
+## Severity
+**Medium Risk**
+
+## Context
+**LibSwap.sol**#L30-L55
+
+## Description
+`LibSwap.swap` is responsible for executing swaps. It is designed to swap one asset at a time. The `_swapData.callData` is provided by the user, and the LiFi protocol only checks its signature. As a result, users can build calldata to swap a different asset as specified.
+
+For example, users can set `fromAssetId = dai` while providing `addLiquidity(usdc, dai, ...)` as call data. The Uniswap router would then pull `usdc` and `dai` at the same time. If there are remaining tokens left in the LiFi protocol, users can sweep tokens from the protocol.
+
+```solidity
+library LibSwap {
+    function swap(bytes32 transactionId, SwapData calldata _swapData) internal {
+        ...
+        if (!LibAsset.isNativeAsset(fromAssetId)) {
+            LibAsset.maxApproveERC20(IERC20(fromAssetId), _swapData.approveTo, fromAmount);
+            if (toDeposit != 0) {
+                LibAsset.transferFromERC20(fromAssetId, msg.sender, address(this), toDeposit);
+            }
+        } else {
+            nativeValue = fromAmount;
+        }
+        // solhint-disable-next-line avoid-low-level-calls
+        (bool success, bytes memory res) = _swapData.callTo.call{ value: nativeValue }(_swapData.callData);
+        if (!success) {
+            string memory reason = LibUtil.getRevertMsg(res);
+            revert(reason);
+        }
+    }
+}
+```
+
+## Recommendation
+Recommend clearing the allowance after the external call.
+
+```solidity
+if (!LibAsset.isNativeAsset(fromAssetId)) {
+    LibAsset.maxApproveERC20(IERC20(fromAssetId), _swapData.approveTo, fromAmount);
+    if (toDeposit != 0) {
+        LibAsset.transferFromERC20(fromAssetId, msg.sender, address(this), toDeposit);
+    }
+} else {
+    nativeValue = fromAmount;
+}
+// solhint-disable-next-line avoid-low-level-calls
+(bool success, bytes memory res) = _swapData.callTo.call{ value: nativeValue }(_swapData.callData);
+// @audit: clear the allowance
+IERC20(fromAssetId).safeApprove(_swapData.approveTo, 0);
+if (!success) {
+    string memory reason = LibUtil.getRevertMsg(res);
+    revert(reason);
+}
+```
+
+## LiFi's Position
+The LiFi Team claims that they acknowledge the risk but will encourage the user to utilize their API and pass the correct calldata rather than strictly checking this at the contract level.
+
+## Spearbit's Position
+Acknowledged.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 5/5 |
+| Rarity Score | 4/5 |
+| Audit Firm | Spearbit |
+| Protocol | LI.FI |
+| Report Date | N/A |
+| Finders | Jonah1005, DefSec, Gerard Persoon |
+
+### Source Links
+
+- **Source**: https://github.com/spearbit/portfolio/blob/master/pdfs/LIFI-Spearbit-Security-Review.pdf
+- **GitHub**: N/A
+- **Contest**: https://github.com/spearbit/portfolio/blob/master/pdfs/LIFI-Spearbit-Security-Review.pdf
+
+### Keywords for Search
+
+`Allowance`
+

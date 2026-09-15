@@ -1,0 +1,87 @@
+---
+# Core Classification
+protocol: Omni Network
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 53595
+audit_firm: SigmaPrime
+contest_link: https://github.com/sigp/public-audits/blob/master/reports/omni-network/Sigma_Prime_Omni_Network_Omni_Chain_2_Security_Assessment_Report_v2_1.pdf
+source_link: https://github.com/sigp/public-audits/blob/master/reports/omni-network/Sigma_Prime_Omni_Network_Omni_Chain_2_Security_Assessment_Report_v2_1.pdf
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - Sigma Prime
+---
+
+## Vulnerability Title
+
+Lost Bridged Funds When Pausing ACTION_WITHDRAW
+
+### Overview
+
+
+This bug report discusses an issue with the Omni bridges, which are used to transfer OMNI tokens between different blockchains. The problem occurs when the `withdraw()` function is paused, which prevents bridged tokens from being transferred back to their original chain. This can result in the tokens becoming permanently lost. To avoid this, the report recommends pausing the `ACTION_DEPOSIT` action before pausing `ACTION_WITHDRAW`, and making sure any pending `withdraw()` requests are completed before pausing. Alternatively, the team suggests implementing a new system to allow users to retry bridging if it fails. The Omni team has acknowledged the issue and plans to address it in their offchain code.
+
+### Original Finding Content
+
+## Description
+Pausing `ACTION_WITHDRAW` in the Omni bridges can lead to bridged funds becoming permanently lost. When a user calls `bridge()` to bridge OMNI tokens, an XMsg is sent to the destination chain to call the destination chain bridge’s `withdraw()` function. 
+
+However, if the `withdraw()` function is paused by pausing the `ACTION_WITHDRAW` action, the XMsg will fail to be executed, causing any bridged tokens to be permanently lost. In this case, there is no way to recover the bridged tokens, even if OMNI is being bridged to the Omni chain, as the `OmniBridgeNative.claimable` mapping is not updated when `ACTION_WITHDRAW` is paused.
+
+## Recommendations
+- Ensure that `ACTION_DEPOSIT` is paused on the source chain bridge before pausing `ACTION_WITHDRAW` on the destination chain bridge. 
+- Also, ensure that any pending `withdraw()` XMsgs are executed before pausing `ACTION_WITHDRAW`.
+- Alternatively, a similar mechanism to the `OmniGasPump.owed` mapping can be implemented in both bridge contracts to allow users to retry bridging if it fails.
+
+## Resolution
+The Omni team has acknowledged this issue with the following comment:
+
+"We are aware of this issue and intend to add checks to our [offchain code] to prevent unsafe pause states."
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | SigmaPrime |
+| Protocol | Omni Network |
+| Report Date | N/A |
+| Finders | Sigma Prime |
+
+### Source Links
+
+- **Source**: https://github.com/sigp/public-audits/blob/master/reports/omni-network/Sigma_Prime_Omni_Network_Omni_Chain_2_Security_Assessment_Report_v2_1.pdf
+- **GitHub**: N/A
+- **Contest**: https://github.com/sigp/public-audits/blob/master/reports/omni-network/Sigma_Prime_Omni_Network_Omni_Chain_2_Security_Assessment_Report_v2_1.pdf
+
+### Keywords for Search
+
+`vulnerability`
+
