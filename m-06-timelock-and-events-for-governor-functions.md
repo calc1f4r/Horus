@@ -1,0 +1,104 @@
+---
+# Core Classification
+protocol: Overlay Protocol
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 1069
+audit_firm: Code4rena
+contest_link: https://code4rena.com/contests/2021-11-overlay-protocol-contest
+source_link: https://code4rena.com/reports/2021-11-overlay
+github_link: https://github.com/code-423n4/2021-11-overlay-findings/issues/120
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - liquid_staking
+  - dexes
+  - yield
+  - payments
+  - oracle
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - pauliax
+---
+
+## Vulnerability Title
+
+[M-06] Timelock and events for governor functions
+
+### Overview
+
+
+This bug report is about a vulnerability in contracts that contain functions that change important parameters of the system. These functions do not emit events, nor are they timelocked, which means that users do not have time to adjust to changes. This vulnerability was previously assigned a severity of Medium. The recommended mitigation steps are to use a timelock for critical params of the system and to emit events to inform the outside world. This will give users time to adjust to changes.
+
+### Original Finding Content
+
+_Submitted by pauliax_
+
+#### Impact
+
+There are contracts that contain functions that change important parameters of the system, e.g. `OverlayV1Mothership` has `setOVL`, `initializeMarket`, `disableMarket`, `enableMarket`, `initializeCollateral`, `enableCollateral`, `disableCollateral`, `adjustGlobalParams`. None of these functions emit events, nor they are timelocked. Usually, it is a good practice to give time for users to react and adjust to changes.
+
+A similar issue was submitted in a previous contest and assigned a severity of Medium: <https://github.com/code-423n4/2021-09-swivel-findings/issues/101>
+
+#### Recommended Mitigation Steps
+
+Consider using a timelock for critical params of the system and emitting events to inform the outside world.
+
+**[realisation (Overlay) commented](https://github.com/code-423n4/2021-11-overlay-findings/issues/120#issuecomment-978096272):**
+ > The plan has been to have a timelock at some point in the protocol. Probably on whatever is the admin for the mothership. But this just had to be evaluated. It might be on the market contract itself, or on the addresses granted the role of admin.
+
+**[mikeyrf (Overlay) commented](https://github.com/code-423n4/2021-11-overlay-findings/issues/120#issuecomment-987979184):**
+ > duplicate #64 
+
+**[dmvt (judge) commented](https://github.com/code-423n4/2021-11-overlay-findings/issues/120#issuecomment-997204779):**
+ > I'm removing the duplicate in this case because issue #64 refers exclusively to the events. This issue is focused primarily on the lack of governance timelock, which has traditionally been considered a medium severity issue.
+
+
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Overlay Protocol |
+| Report Date | N/A |
+| Finders | pauliax |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2021-11-overlay
+- **GitHub**: https://github.com/code-423n4/2021-11-overlay-findings/issues/120
+- **Contest**: https://code4rena.com/contests/2021-11-overlay-protocol-contest
+
+### Keywords for Search
+
+`vulnerability`
+
