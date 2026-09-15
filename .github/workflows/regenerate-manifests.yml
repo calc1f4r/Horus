@@ -1,0 +1,86 @@
+name: Regenerate Manifests & Sync to Master
+
+# Runs on every push to the hunt-cards working branch.
+# Job 1 (regenerate): rebuilds DB/index.json + DB/manifests/ (including hunt
+#   cards) and DB/graphify-out/ only when vulnerability .md files or retrieval
+#   generator scripts change.
+# Job 2 (sync-to-master): always runs after Job 1 and pushes the curated
+#   public-facing subset of the repo to the master branch.
+
+on:
+  push:
+    branches:
+      - hunt-cards
+
+permissions:
+  contents: write
+
+jobs:
+  # ── Job 1: Regenerate manifests, hunt cards, and DB graph ────────────────
+  regenerate:
+    name: Regenerate manifests
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.diff.outputs.changed }}
+
+    steps:
+      - name: Checkout hunt-cards
+        uses: actions/checkout@v4
+        with:
+          ref: hunt-cards
+
+      - name: Detect manifest-affecting file changes
+        id: check_paths
+        run: |
+          # Compare pushed commits; || true so the step never fails on first push
+          CHANGED=$(git diff --name-only \
+            ${{ github.event.before }} ${{ github.sha }} 2>/dev/null \
+            | grep -E '^DB/.*\.md$|^scripts/generate_manifests\.py$|^scripts/horus_retrieval/.*\.py$|^scripts/generate_micro_directives\.py$' \
+            | wc -l || echo 0)
+          echo "paths_changed=$CHANGED" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Python
+        if: steps.check_paths.outputs.paths_changed != '0'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        if: steps.check_paths.outputs.paths_changed != '0'
+        run: pip install -r requirements.txt
+
+      - name: Run manifest & hunt-card generator
+        if: steps.check_paths.outputs.paths_changed != '0'
+        run: |
+          python3 scripts/generate_manifests.py
+          python3 scripts/generate_micro_directives.py
+          python3 scripts/build_db_graph.py
+
+      - name: Detect generated changes
+        id: diff
+        if: steps.check_paths.outputs.paths_changed != '0'
+        run: |
+          git diff --quiet DB/index.json DB/manifests/ DB/graphify-out/ \
+            && echo "changed=false" >> "$GITHUB_OUTPUT" \
+            || echo "changed=true"  >> "$GITHUB_OUTPUT"
+
+      - name: Commit & push updated retrieval artifacts
+        if: >
+          steps.check_paths.outputs.paths_changed != '0' &&
+          steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # graph.json is gitignored (rebuilt on demand via `horus db graph`);
+          # -f would be needed to add it, which we deliberately do not do.
+          git add DB/index.json DB/manifests/ DB/graphify-out/
+          git commit -m "chore: regenerate retrieval artifacts [skip ci]"
+          git push
+
+  # ── Job 2: Sync curated subset → master ──────────────────────────────────
+  sync-to-master:
+    needs: regenerate
+    uses: ./.github/workflows/reusable-sync-to-master.yml
+    with:
+      source_branch: hunt-cards
+      commit_message_prefix: 'sync'
