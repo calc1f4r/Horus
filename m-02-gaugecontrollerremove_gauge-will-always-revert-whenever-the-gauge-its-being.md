@@ -1,0 +1,160 @@
+---
+# Core Classification
+protocol: Canto
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 31918
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2024-03-neobase
+source_link: https://code4rena.com/reports/2024-03-neobase
+github_link: https://github.com/code-423n4/2024-03-neobase-findings/issues/22
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - dexes
+  - cdp
+  - yield
+  - services
+  - cross_chain
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - said
+  - Arabadzhiev
+---
+
+## Vulnerability Title
+
+[M-02] `GaugeController::remove_gauge` will always revert whenever the gauge it's being called or has any weight attached to it
+
+### Overview
+
+
+The `GaugeController::remove_gauge` function has a bug that causes it to always fail when removing gauges with a weight value that is not equal to 0. This is because the function erases the gauge type of the gauge being removed before making necessary calculations, resulting in an underflow error. A possible solution is to call the `_remove_gauge_weight` function before erasing the gauge type. This bug is categorized as an under/overflow issue and has been confirmed by the reviewer.
+
+### Original Finding Content
+
+
+`GaugeController::remove_gauge` will always revert when it is called for gauges with weight that is `!= 0`.
+
+### Proof of Concept
+
+The current implementation of the `GaugeController::remove_gauge` function has a major flaw within it. Because it erases the gauge type of the gauge being removed prior to calling `_remove_gauge_weight`, it will always revert whenever it is called for gauges that have a weight value different from `0`. This is due to the fact that in `_remove_gauge_weight` there are subtractions being made to gauge type mappings (where the gauge type key being used will be `-1`, since the gauge type for the gauge has already been erased) using values from gauge mappings.
+
+```solidity
+    function _remove_gauge_weight(address _gauge) internal {
+        int128 gauge_type = gauge_types_[_gauge] - 1;
+        uint256 next_time = ((block.timestamp + WEEK) / WEEK) * WEEK;
+
+        uint256 old_weight_bias = _get_weight(_gauge);
+        uint256 old_weight_slope = points_weight[_gauge][next_time].slope;
+        uint256 old_sum_bias = _get_sum(gauge_type);
+
+        points_weight[_gauge][next_time].bias = 0;
+        points_weight[_gauge][next_time].slope = 0;
+
+        uint256 new_sum = old_sum_bias - old_weight_bias;
+        points_sum[gauge_type][next_time].bias = new_sum;
+        points_sum[gauge_type][next_time].slope -= old_weight_slope;
+        // We have to cancel all slope changes (gauge specific and global) that were caused by this gauge
+        // This is not very efficient, but does the job for a governance function that is called very rarely
+        for (uint256 i; i < 263; ++i) {
+            uint256 time_to_check = next_time + i * WEEK;
+            uint256 gauge_weight_change = changes_weight[_gauge][time_to_check];
+            if (gauge_weight_change > 0) {
+                changes_weight[_gauge][time_to_check] = 0;
+                changes_sum[gauge_type][time_to_check] -= gauge_weight_change;
+            }
+        }
+    }
+```
+
+Although an argument can be made that this issue can be avoided by calling `GaugeController::remove_gauge_weight` prior to calling `GaugeController::remove_gauge`, it can still prove to be quite problematic in an event where an urgent removal of a given gauge is required. The initial `remove_gauge` call for doing so gets reverted, since the governance didn't know about the issue and the proper way of bypass it up until that point. In that case, a separate new governance proposal will have to be executed in order to remove the gauge, which will take a significant amount of time.
+
+The following short coded PoC demonstrates the issue:
+
+```solidity
+    function testRemoveGaugeArithmeticUnderflow() public {
+        uint256 v = 10 ether;
+        vm.deal(gov, v);
+        vm.startPrank(gov);
+        ve.createLock{value: v}(v);
+
+        gc.add_gauge(gauge1, 0);
+
+        gc.vote_for_gauge_weights(gauge1, 10000);
+
+        vm.expectRevert(abi.encodeWithSignature("Panic(uint256)", 0x11)); // arithmetic error panic code
+        gc.remove_gauge(gauge1);
+    }
+```
+
+### Recommended Mitigation Steps
+
+Call `_remove_gauge_weight` prior to erasing the gauge type of the gauge:
+
+```diff
+    function remove_gauge(address _gauge) external onlyGovernance {
+        require(gauge_types_[_gauge] != 0, "Invalid gauge address");
+-       gauge_types_[_gauge] = 0;
+-       _remove_gauge_weight(_gauge);
++       _remove_gauge_weight(_gauge);
++       gauge_types_[_gauge] = 0;
+        emit GaugeRemoved(_gauge);
+    }   
+```
+
+### Assessed type
+
+Under/Overflow
+
+**[zjesko (Neobase) confirmed](https://github.com/code-423n4/2024-03-neobase-findings/issues/22#issuecomment-2040757439)**
+
+***
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Canto |
+| Report Date | N/A |
+| Finders | said, Arabadzhiev |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2024-03-neobase
+- **GitHub**: https://github.com/code-423n4/2024-03-neobase-findings/issues/22
+- **Contest**: https://code4rena.com/reports/2024-03-neobase
+
+### Keywords for Search
+
+`vulnerability`
+

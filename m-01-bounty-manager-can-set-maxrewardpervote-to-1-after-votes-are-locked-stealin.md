@@ -1,0 +1,111 @@
+---
+# Core Classification
+protocol: Stakedao
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 18779
+audit_firm: ZachObront
+contest_link: none
+source_link: https://github.com/solodit/solodit_content/blob/main/reports/ZachObront/2023-05-26-StakeDao.md
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - Zach Obront
+---
+
+## Vulnerability Title
+
+[M-01] Bounty manager can set `maxRewardPerVote` to 1 after votes are locked, stealing free votes
+
+### Overview
+
+
+This bug report is about a flaw in the code that calculates the amount to be paid for a `claim` when using the minimum value of `bias * rewardPerVote` and `bias * maxRewardPerVote`. This flaw allows managers to reduce the bounty payouts to almost 0 after votes have already been locked. 
+
+To demonstrate the flaw, a proof of concept was provided. It explains how a manager can start a new bribe with a large total bounty and large `maxRewardPerVote`, and then reduce `maxRewardPerVote` to 1 the day before the first period begins. This would result in users being paid only `bias * 1`, which is effectively 0. After the two periods, the manager can call `closeBounty()` to be refunded almost the full amount. 
+
+The recommendation provided is that `maxRewardPerVote` should only be allowed to be increased midstream, similar to `numberOfPeriods` and `totalRewardAmount`. This could be done by changing the argument to `_increasedMaxRewardPerVote` and adding it to the existing value, or simply by comparing the new and old value and requiring that `new >= old`. The recommendation has been acknowledged.
+
+### Original Finding Content
+
+When the amount to pay for a `claim` is calculated, we use the minimum value of `bias * rewardPerVote` and `bias * maxRewardPerVote`.
+
+```solidity
+// Compute the reward amount based on
+// Reward / Total Votes.
+amount = _bias.mulWad(rewardPerVote[_bountyId]);
+
+// Compute the reward amount based on
+// the max price to pay.
+uint256 _amountWithMaxPrice = _bias.mulWad(bounty.maxRewardPerVote);
+
+// Distribute the _min between the amount based on votes, and price.
+amount = FixedPointMathLib.min(amount, _amountWithMaxPrice);
+```
+
+Since `maxRewardPerVote` is a value that managers can edit at any time, this allows them to effectively reduce the bounty payouts to ~0 after votes have already been locked.
+
+**Proof of Concept**
+
+1. A manager starts a new bribe for their gauge with 2 periods, a large total bounty, and a large `maxRewardPerVote`.
+2. Users lock in their votes on Curve, which can't be changed for 10 days.
+3. The day before the first period begins, the manager calls `increaseBountyDuration()` with `_newMaxPricePerVote = 1`.
+4. When users claim, they will be paid only `bias * 1`, which is effectively 0.
+5. After the two periods, the manager calls `closeBounty()` to be refunded almost the full amount.
+
+**Recommendation**
+
+`maxRewardPerVote` should only be allowed to be increased midstream, similar to `numberOfPeriods` and `totalRewardAmount`.
+
+This could be done by changing the argument to `_increasedMaxRewardPerVote` and adding it to the existing value, or simply by comparing the new and old value and requiring that `new >= old`.
+
+**Review**
+
+Acknowledged.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | ZachObront |
+| Protocol | Stakedao |
+| Report Date | N/A |
+| Finders | Zach Obront |
+
+### Source Links
+
+- **Source**: https://github.com/solodit/solodit_content/blob/main/reports/ZachObront/2023-05-26-StakeDao.md
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+
