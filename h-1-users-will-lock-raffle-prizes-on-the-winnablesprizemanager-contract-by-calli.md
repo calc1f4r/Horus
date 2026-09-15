@@ -1,0 +1,187 @@
+---
+# Core Classification
+protocol: Winnables Raffles
+chain: everychain
+category: oracle
+vulnerability_type: chainlink
+
+# Attack Vector Details
+attack_type: chainlink
+affected_component: oracle
+
+# Source Information
+source: solodit
+solodit_id: 38402
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/516
+source_link: none
+github_link: https://github.com/sherlock-audit/2024-08-winnables-raffles-judging/issues/50
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+  - chainlink
+  - cross_chain
+  - validation
+
+protocol_categories:
+  - cross_chain
+
+# Audit Details
+report_date: unknown
+finders_count: 48
+finders:
+  - shaflow01
+  - 0xAadi
+  - S3v3ru5
+  - 0xrex
+  - dany.armstrong90
+---
+
+## Vulnerability Title
+
+H-1: Users will lock raffle prizes on the `WinnablesPrizeManager` contract by calling `WinnablesTicketManager::propagateRaffleWinner` with wrong CCIP inputs
+
+### Overview
+
+
+The WinnablesTicketManager::propagateRaffleWinner function has a vulnerability where incorrect inputs can lead to assets being permanently locked in the WinnablesPrizeManager contract. This is due to a lack of input validation for the address prizeManager and uint64 chainSelector parameters. This can be exploited by a user calling the function with incorrect values, preventing the assets from being unlocked. The impact of this vulnerability is that the raffle winner will not be able to retrieve their reward. The root cause of this issue is the design of the function, which does not validate the inputs before changing the state of the raffle. To mitigate this issue, input validation should be implemented. 
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2024-08-winnables-raffles-judging/issues/50 
+
+## Found by 
+0rpse, 0x0bserver, 0x73696d616f, 0xAadi, 0xbrivan, 0xrex, CatchEmAll, DrasticWatermelon, Feder, Galturok, IMAFVCKINSTARRRRRR, KungFuPanda, Oblivionis, Offensive021, Oxsadeeq, PNS, PTolev, Paradox, Penaldo, PeterSR, S3v3ru5, SadBase, SovaSlava, Trooper, Waydou, akiro, araj, dany.armstrong90, dimulski, dinkras\_, durov, dy, gajiknownnothing, iamnmt, irresponsible, jennifer37, joshuajee, matejdb, neko\_nyaa, ogKapten, philmnds, rsam\_eth, sakshamguruji, shaflow01, shikhar, tofunmi, turvec, utsav
+### Summary
+
+The [`WinnablesTicketManager::propagateRaffleWinner`](https://github.com/sherlock-audit/2024-08-winnables-raffles/blob/main/public-contracts/contracts/WinnablesTicketManager.sol#L334) function is vulnerable to misuse, where incorrect CCIP inputs can lead to assets being permanently locked in the `WinnablesPrizeManager` contract. The function does not have input validation for the `address prizeManager` and `uint64 chainSelector` parameters. If called with incorrect values, it will fail to send the message to `WinnablesPrizeManager`, resulting in the assets not being unlocked.
+
+
+### Root Cause
+
+The root cause of the issue lies in the design of the `propagateRaffleWinner` function:
+1. The function is responsible for sending a message to WinnablesPrizeManager to unlock the raffle assets.
+2. The function is marked as external, so anyone can call it.
+3. The function receives `address prizeManager` and `uint64 chainSelector` as inputs, which are responsible for sending the message to the `WinnablesPrizeManager` contract for it to unlock the assets previously locked for the raffle.
+4. The inputs forementioned are not validated, meaning users can call the function with wrong values.
+5. This cannot be undone, as the function [changes the state of the raffle](https://github.com/sherlock-audit/2024-08-winnables-raffles/blob/main/public-contracts/contracts/WinnablesTicketManager.sol#L337) in a way that [prevents the function from being called again](https://github.com/sherlock-audit/2024-08-winnables-raffles/blob/main/public-contracts/contracts/WinnablesTicketManager.sol#L336).
+
+
+### Internal pre-conditions
+
+A raffle must have been won by a player.
+
+
+### External pre-conditions
+
+A user must call `WinnablesTicketManager::propagateRaffleWinner` with incorrect input values.
+
+
+### Attack Path
+
+1. A user wins the raffle.
+2. Some user calls `WinnablesTicketManager::propagateRaffleWinner` and provides incorrect inputs for prizeManager and chainSelector.
+3. The propagateRaffleWinner function fails to send the correct message to WinnablesPrizeManager due to the parameter mismatch.
+4. As a result, the assets associated with the raffle remain locked and cannot be retrieved by the raffle winner.
+
+
+### Impact
+
+This vulnerability completely disrupts the protocol, as it becomes impossible to retrieve the reward of the raffle.
+
+
+### PoC
+
+The test below, which is an edited version of [this existing test](https://github.com/sherlock-audit/2024-08-winnables-raffles/blob/main/public-contracts/test/TicketManager.js#L786), shows that the function call will be successful with a random chainSelector
+
+```javascript
+    it('Should be able to propagate when the winner is drawn', async () => {
+@>    const { events } = await (await manager.propagateRaffleWinner(counterpartContractAddress, 9846, 1)).wait();
+      expect(events).to.have.lengthOf(3);
+      const ccipEvent = ccipRouter.interface.parseLog(events[0]);
+      expect(ccipEvent.args.receiver).to.eq('0x' + counterpartContractAddress.toLowerCase().slice(-40).padStart(64, '0'));
+      expect(ccipEvent.args.data).to.have.lengthOf(108);
+      const drawnWinner = ethers.utils.getAddress('0x' + ccipEvent.args.data.slice(-40));
+      expect(buyers.find(b => b.address === drawnWinner)).to.not.be.undefined;
+      expect(ccipEvent.args.data.slice(0, 68)).to.eq('0x010000000000000000000000000000000000000000000000000000000000000001');
+    });
+```
+
+### Mitigation
+
+Implement input validation to ensure that `prizeManager` and `chainSelector` are correct before proceeding with the propagation.
+
+
+
+## Discussion
+
+**matejdrazic**
+
+It does not make any sense to group lack of access control on `cancelRaffle` issues with this issue. It should be grouped with #57 .
+
+**Brivan-26**
+
+@matejdrazic I believe it does make sense.
+The same root cause (lack of the **same** inputs validation) and the same impact
+
+**matejdrazic**
+
+@Brivan-26 hey - but its 2 different functions. By following that logic you can group all same type issues into one. So if there were more access control issues on the contract they would be grouped here?
+That is not right.
+
+Also they do not have the same root? They have the same type of root cause and thats lack of access control.
+
+**Brivan-26**
+
+@matejdrazic 
+> So if there were more access control issues on the contract they would be grouped here?
+
+Actually, yes, there were many contests before that had the same access control across multiple contracts even and they are grouped into one report because submitting multiple reports about the same break across different functions is kind of redundant.
+
+Concerning this issue: 
+- The root cause is a lack of input validation for `prizeManager` and `chainSelector`, not access control as anyone can call this function
+- the impact is the message will not reach the destination chain and loss of funds will occur
+
+Concerning `cancelRaffle`:
+- The root cause is the same as the previous one, lack of input validation for `prizeManager` and `chainSelector`
+- The impact is the same, the message will not reach the destination chain and loss of funds will occur
+
+It is still kind of subjective, it can be a separate report(and I'm okay with that) but it makes sense to group two issues into one single report given the above facts. 
+
+**sherlock-admin2**
+
+The protocol team fixed this issue in the following PRs/commits:
+https://github.com/Winnables/public-contracts/pull/22
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Sherlock |
+| Protocol | Winnables Raffles |
+| Report Date | N/A |
+| Finders | shaflow01, 0xAadi, S3v3ru5, 0xrex, dany.armstrong90, SovaSlava, Paradox, iamnmt, jennifer37, akiro, shikhar, Feder, Offensive021, Galturok, dinkras\_, IMAFVCKINSTARRRRRR, joshuajee, gajiknownnothing, KungFuPa, CatchEmAll, DrasticWatermelon, Penaldo, PNS, Waydou, tofunmi, dy, Trooper, SadBase, ogKapten, 0xbrivan, 0rpse, durov, 0x73696d616f, PeterSR, turvec, rsam\_eth, philmnds, sakshamguruji, utsav, Oxsadeeq, araj, dimulski, PTolev, matejdb, Oblivionis, irresponsible, 0x0bserver, neko\_nyaa |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2024-08-winnables-raffles-judging/issues/50
+- **Contest**: https://app.sherlock.xyz/audits/contests/516
+
+### Keywords for Search
+
+`Chainlink, Cross Chain, Validation`
+

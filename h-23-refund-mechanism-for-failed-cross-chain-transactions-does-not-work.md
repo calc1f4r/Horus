@@ -1,0 +1,169 @@
+---
+# Core Classification
+protocol: Tapioca DAO
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 27513
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2023-07-tapioca
+source_link: https://code4rena.com/reports/2023-07-tapioca
+github_link: https://github.com/code-423n4/2023-07-tapioca-findings/issues/1163
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - cross_chain
+
+# Audit Details
+report_date: unknown
+finders_count: 7
+finders:
+  - cergyk
+  - Kaysoft
+  - peakbolt
+  - 1
+  - 2
+---
+
+## Vulnerability Title
+
+[H-23] Refund mechanism for failed cross-chain transactions does not work
+
+### Overview
+
+
+A bug has been identified in the refund mechanism of the `USDO` and `TOFT` modules, which is triggered when `module.delegatecall()` fails. This mechanism is supposed to return funds to the user when the execution on the destination chain fails, however, it has been found that the revert will also reverse the refund even when the revert is forwarded. This means that the funds are permanently locked up in the contract and there is no way to recover them.
+
+To prove this bug, a `revert()` was added in the `leverageUpInternal()` within the `USDOLeverageModule.sol#L197`, to simulate a permanent failure for the remote execution at the destination chain. This was followed by adding a `console.log` to the `singularity.test.ts#L4113` and then running the test case `'should bounce between 2 chains'` under `'multiHopBuyCollateral()'` tests in `singularity.test.ts`. This showed that the `deployer.address` failed to receive the refund amount.
+
+To mitigate this issue, a 'pull' mechanism should be implemented for users to withdraw the refund instead of 'pushing' to the user. This can be done by using a new state variable within `USDO` and `TOFT` to store the refund amount for the transaction with the corresponding `payloadHash` for `failedMessages` mapping. Additionally, checks must be implemented to ensure that if user withdraws the refund, the corresponding `failedMessages` entry is cleared so that the user cannot retry the transaction again. Similarly, if `retryMessage()` is used to re-execute the transaction successfully, the refund amount in the new state variable should be cleared.
+
+### Original Finding Content
+
+
+<https://github.com/Tapioca-DAO/tapioca-bar-audit/blob/2286f80f928f41c8bc189d0657d74ba83286c668/contracts/usd0/modules/USDOLeverageModule.sol#L180-L185> 
+
+<https://github.com/Tapioca-DAO/tapioca-bar-audit/blob/2286f80f928f41c8bc189d0657d74ba83286c668/contracts/usd0/modules/USDOMarketModule.sol#L178-L186> 
+
+<https://github.com/Tapioca-DAO/tapioca-bar-audit/blob/2286f80f928f41c8bc189d0657d74ba83286c668/contracts/usd0/modules/USDOOptionsModule.sol#L187-L197> 
+
+<https://github.com/Tapioca-DAO/tapiocaz-audit/blob/bcf61f79464cfdc0484aa272f9f6e28d5de36a8f/contracts/tOFT/modules/BaseTOFTLeverageModule.sol#L195-L200> 
+
+<https://github.com/Tapioca-DAO/tapiocaz-audit/blob/bcf61f79464cfdc0484aa272f9f6e28d5de36a8f/contracts/tOFT/modules/BaseTOFTMarketModule.sol#L170-L175> 
+
+<https://github.com/Tapioca-DAO/tapiocaz-audit/blob/bcf61f79464cfdc0484aa272f9f6e28d5de36a8f/contracts/tOFT/modules/BaseTOFTOptionsModule.sol#L202-L212> 
+
+<https://github.com/Tapioca-DAO/tapiocaz-audit/blob/bcf61f79464cfdc0484aa272f9f6e28d5de36a8f/contracts/tOFT/modules/BaseTOFTStrategyModule.sol#L163-L168>
+
+There is a refund mechanism in `USDO` and `TOFT` modules that will return funds when the execution on the destination chain fails.
+
+It happens when `module.delegatecall()` fails, where the following code (see below) will trigger a refund of the bridged fund to the user. After that a revert is then 'forwarded' to the main executor contract (`BaseUSDO` or `BaseTOFT`).
+
+However, the issue is that the revert will also reverse the refund even when the revert is forwarded.
+
+<https://github.com/Tapioca-DAO/tapioca-bar-audit/blob/2286f80f928f41c8bc189d0657d74ba83286c668/contracts/usd0/modules/USDOLeverageModule.sol#L180-L185>
+
+```Solidity
+        if (!success) {
+            if (balanceAfter - balanceBefore >= amount) {
+                IERC20(address(this)).safeTransfer(leverageFor, amount);
+            }
+
+            //@audit - this revert will actually reverse the refund before this
+            revert(_getRevertMsg(reason)); //forward revert because it's handled by the main executor
+        }
+```
+
+Although the main executor contract will `_storeFailedMessage()` to allow users to `retryMessage()` and re-execute the failed transaction, it will not go through if the error is permanent. That means the `retryMessage()` will also revert and there is no way to recover the funds.
+
+### Impact
+
+User will lose their bridged fund if the cross chain execution encounters a permanent error, which will permanently lock up the bridged funds in the contract as there is no way to recover it.
+
+### Proof of Concept
+
+1.  Add a `revert()` in `leverageUpInternal()` within `USDOLeverageModule.sol#L197` as follows, to simulate a permanent failure for the remote execution at destination chain.
+
+<https://github.com/Tapioca-DAO/tapioca-bar-audit/blob/2286f80f928f41c8bc189d0657d74ba83286c668/contracts/usd0/modules/USDOLeverageModule.sol#L197>.
+
+```Solidity
+function leverageUpInternal(
+        uint256 amount,
+        IUSDOBase.ILeverageSwapData memory swapData,
+        IUSDOBase.ILeverageExternalContractsData memory externalData,
+        IUSDOBase.ILeverageLZData memory lzData,
+        address leverageFor
+    ) public payable {
+
+        //@audit - to simulate a permanent failure for this remote execution (e.g. issue with swap)
+        revert();
+
+        ...
+    }
+```
+
+2.  Add the following `console.log` to [singularity.test.ts#L4113](https://github.com/Tapioca-DAO/tapioca-bar-audit/blob/2286f80f928f41c8bc189d0657d74ba83286c668/test/singularity.test.ts#L4113)
+
+```Solidity
+            console.log("USDO_10 balance for deployer.address (expected to be equal to 10000000000000000000) : ", await USDO_10.balanceOf(deployer.address));
+```
+
+3.  Run the test case `'should bounce between 2 chains'` under `'multiHopBuyCollateral()'` tests in `singularity.test.ts`. It will show that the `deployer.address` fails to receive the refund amount.
+
+### Recommended Mitigation Steps
+
+Implement a 'pull' mechanism for users to withdraw the refund instead of 'pushing' to the user.
+
+That can be done by using a a new state variable within `USDO` and `TOFT` to store the refund amount for the transaction with the corresponding `payloadHash` for `failedMessages` mapping.
+
+Checks must be implemented to ensure that if user withdraws the refund, the corresponding `failedMessages` entry is cleared so that the user cannot retry the transaction again.
+
+Similarly, if `retryMessage()` is used to re-execute the transaction successfully, the refund amount in the new state variable should be cleared.
+
+**[0xRektora (Tapioca) confirmed via duplicate issue #1410](https://github.com/code-423n4/2023-07-tapioca-findings/issues/1410)**
+
+***
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Tapioca DAO |
+| Report Date | N/A |
+| Finders | cergyk, Kaysoft, peakbolt, 1, 2, windhustler, xuwinnie |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2023-07-tapioca
+- **GitHub**: https://github.com/code-423n4/2023-07-tapioca-findings/issues/1163
+- **Contest**: https://code4rena.com/reports/2023-07-tapioca
+
+### Keywords for Search
+
+`vulnerability`
+
