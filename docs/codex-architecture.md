@@ -180,6 +180,13 @@ It emits:
 - `wiki/index.md`: agent-crawlable curated community index
 - `.graphify_version`: pinned graphify package version
 
+The repository currently pins Graphify `0.9.61`. Its canonical node-link edge
+key is `links`; `edges` is read only as a compatibility fallback for older
+artifacts. Graphify v0.9 also changed symbol IDs to include the full
+repository-relative path without the extension. Horus's blockchain extractor
+uses `graphify.ids.make_id` and the same project-relative source paths so merged
+AST and Graphify nodes share one identity contract.
+
 The DB graph is built from generated hunt cards plus manifest/frontmatter
 metadata. It includes `HuntCard`, `DBEntry`, `Category`, `Manifest`,
 `ProtocolContext`, `RootCauseFamily`, `AttackType`, `AffectedComponent`,
@@ -191,7 +198,8 @@ The graph JSON and report preserve the full graph/community set. The wiki is
 intentionally bounded to multi-node communities plus god-node articles so normal
 graph rebuilds do not create hundreds of singleton community pages.
 
-`graph.json` always means graphify node-link JSON. Raw extraction JSON such as
+`graph.json` always means Graphify node-link JSON with `nodes`, `links`, and
+top-level `hyperedges`. Raw extraction JSON such as
 `.graphify_extract.json` is an intermediate file and must be converted before it
 is served by graphify CLI/MCP. Audit-time graph finalization is handled by:
 
@@ -245,10 +253,12 @@ Examples:
 
 ```bash
 graphify query "oracle staleness" --graph DB/graphify-out/graph.json --budget 2000
-graphify path "oracle" "flash-loan" --graph DB/graphify-out/graph.json
+graphify path "oracle" "flash-loan" --graph DB/graphify-out/graph.json --undirected
 ```
 
 The graph layer should expand candidate hunt cards and related vulnerability concepts through semantic edges such as root-cause family, attack type, affected component, graph hints, protocol context, report evidence, and `related_variant`. It should not prune away the baseline manifest or hunt-card set.
+Graphify 0.9 follows edge direction for `path` by default; DB concept discovery
+uses `--undirected`, while code call-path analysis should retain the directed default.
 
 ### Tier 2: Manifests
 

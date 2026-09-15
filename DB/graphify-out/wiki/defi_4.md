@@ -1,53 +1,67 @@
-# defi
+# defi 4
 
-> 71 nodes · cohesion 0.38
+> 81 nodes · cohesion 0.46
 
 ## Key Concepts
 
-- **Liquidation Evasion — Borrower Makes Their Own Position Unliquidatable** (81 connections) — `DB/lending/liquidation/liquidation-evasion-dos.md`
-- **6. ERC-721 Standard Compliance Issues** (71 connections) — `DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md`
-- **9. Flash Loan & Pool Token Theft** (69 connections) — `DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md`
-- **10. NFT Wrap/Unwrap Airdrop & ID Swap Exploitation** (67 connections) — `DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md`
-- **2. Residual Allowance & Vault Deposit Exploitation** (67 connections) — `DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md`
-- **5. Gnosis Safe Guard Bypass via Fallback Handler** (67 connections) — `DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md`
-- **8. Merkle Criteria Resolution & Order Matching Bypass** (67 connections) — `DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md`
-- **Vulnerability Title** (67 connections) — `DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md`
-- **1.1 Using `transferFrom` Instead of `safeTransferFrom`** (67 connections) — `DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md`
-- **1.2 Using `_mint` Instead of `_safeMint`** (67 connections) — `DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md`
-- **3. Marketplace Fee Bypass & Royalty Calculation Errors** (65 connections) — `DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md`
-- **6. Auction Manipulation, Frontrunning & Debt Shortfall** (65 connections) — `DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md`
-- **3. Approval and Access Control Issues** (65 connections) — `DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md`
-- **4.1 Double Voting Through Self-Delegation** (65 connections) — `DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md`
-- **4.2 Delegation Disables NFT Transfers** (65 connections) — `DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md`
-- **4.3 Double Voting via Managed NFTs** (65 connections) — `DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md`
-- **8. Self-Transfer Edge Cases** (65 connections) — `DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md`
-- **7. NFT Bridge One-Way Lock & Migration Burn** (63 connections) — `DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md`
-- **4. NFT Rental Griefing via Callback Revert & Blocklist [HIGH]** (61 connections) — `DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md`
-- **safeTransferFrom** (60 connections) — `DB/cosmos/app-chain/dos/griefing-revert-dos.md`
-- **5. Royalty Manipulation** (59 connections) — `DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md`
-- **2. Reentrancy via NFT Callbacks** (49 connections) — `DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md`
-- **7. NFT Liquidation and Collateral Issues** (47 connections) — `DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md`
-- **multiple** (44 connections) — `DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md`
-- **1. Reentrancy via onERC721Received / safeMint Callbacks** (39 connections) — `DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md`
-- *... and 46 more nodes in this community*
+- **data_manipulation** (334 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **reentrancy** (262 connections) — `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
+- **callback_reentrancy** (222 connections) — `DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md`
+- **staking** (146 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **liquidity_pool** (140 connections) — `DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md`
+- **_convertToShares** (126 connections) — `DB/general/vault-inflation-attack/defihacklabs-vault-inflation-patterns.md`
+- **share_calculation** (124 connections) — `DB/general/vault-inflation-attack/vault-inflation-attack.md`
+- **rewards** (116 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **_beforeTokenTransfer** (104 connections) — `DB/bnb-chain/defi/launchpool-deposit-validation.md`
+- **vault** (100 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **_afterTokenTransfer** (92 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **1. First Depositor / Inflation Attack [CRITICAL]** (83 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **4. Stale Reward Accumulator State** (79 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **13. Missing Slippage Protection in Yield Operations** (77 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **14. Incorrect Share Calculation on Edge Cases** (75 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **23. Yield Aggregator Fund Isolation Failures** (75 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **15. Reward Lockup on Period Transitions** (73 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **22. Emergency Withdrawal Accounting Errors** (73 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **16. Vault Accounting Desync** (71 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **18. Deposit/Withdrawal Same-Block Arbitrage** (71 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **19. Strategy Migration Token Loss** (71 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **20. Compound Interest Manipulation** (71 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **21. Time-Weighted Voting Power Exploitation** (71 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **_getUserManagerState** (70 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- **_setTreasuryRewardCutRate** (70 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
+- *... and 56 more nodes in this community*
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [general](general.md) (85 shared connections)
+- [general 4](general_4.md) (51 shared connections)
+- [token](token.md) (44 shared connections)
+- [access-control](access-control.md) (37 shared connections)
+- [amm](amm.md) (33 shared connections)
+- [defi](defi.md) (30 shared connections)
+- [defi 7](defi_7.md) (22 shared connections)
+- [proxy 2](proxy_2.md) (21 shared connections)
+- [bridge](bridge.md) (21 shared connections)
+- [solana](solana.md) (20 shared connections)
+- [defi 5](defi_5.md) (20 shared connections)
+- [zk-rollup](zk-rollup.md) (16 shared connections)
 
 ## Source Files
 
-- `DB/cosmos/app-chain/dos/griefing-revert-dos.md`
-- `DB/general/nft-marketplace/NFT_MARKETPLACE_VULNERABILITIES.md`
-- `DB/lending/liquidation/liquidation-evasion-dos.md`
-- `DB/tokens/erc721/ERC721_NFT_VULNERABILITIES.md`
+- `DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md`
+- `DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md`
+- `DB/bnb-chain/defi/launchpool-deposit-validation.md`
+- `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
+- `DB/general/vault-inflation-attack/defihacklabs-vault-inflation-patterns.md`
+- `DB/general/vault-inflation-attack/vault-inflation-attack.md`
+- `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
 
 ## Audit Trail
 
-- EXTRACTED: 114 (11%)
-- INFERRED: 889 (89%)
+- EXTRACTED: 1037 (50%)
+- INFERRED: 1048 (50%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

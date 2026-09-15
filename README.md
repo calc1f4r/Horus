@@ -6,7 +6,7 @@
 
 Look up what is already known to be broken. Scan your codebase against every recorded attack pattern. Run a full contest-grade audit with proof and judging built in.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![DB Entries](https://img.shields.io/badge/entries-337-brightgreen)](DB)
 [![Patterns](https://img.shields.io/badge/patterns-2%2C002-brightgreen)](DB/manifests)
 [![Hunt Cards](https://img.shields.io/badge/hunt%20cards-1%2C560-red)](DB/manifests/huntcards)
@@ -96,4 +96,4 @@ horus db graph
 
 ## License
 
-MIT. See [`LICENSE`](LICENSE).
+Apache License 2.0. See [`LICENSE`](LICENSE).

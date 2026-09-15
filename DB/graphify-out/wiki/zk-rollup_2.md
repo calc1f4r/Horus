@@ -1,52 +1,63 @@
-# zk-rollup
+# zk-rollup 2
 
-> 79 nodes · cohesion 0.36
+> 144 nodes · cohesion 0.14
 
 ## Key Concepts
 
-- **Fee Theft and Manipulation** (85 connections) — `DB/zk-rollup/gas-accounting.md`
-- **Gas Calculation Errors** (83 connections) — `DB/zk-rollup/gas-accounting.md`
-- **Pattern 1: Paymaster Refunds spentOnPubdata Instead of Burning** (83 connections) — `DB/zk-rollup/gas-accounting.md`
-- **Pattern 3: Gas Calculation Uses Unchecked Free Variables** (83 connections) — `DB/zk-rollup/gas-accounting.md`
-- **Pattern 4: Burning User Gas in sendCompressedBytecode** (83 connections) — `DB/zk-rollup/gas-accounting.md`
-- **Pattern 5: Incorrect commitScalar Underpays Sequencer** (83 connections) — `DB/zk-rollup/gas-accounting.md`
-- **Pattern 6: Batch Fees Multiplier Cap Bypassed with Multiple Calls** (83 connections) — `DB/zk-rollup/gas-accounting.md`
-- **Pattern 2: Operator Steals All Gas Provided for L1→L2 Transactions** (81 connections) — `DB/zk-rollup/gas-accounting.md`
-- **Pattern 7: Bytecode Compression Bypass Completeness Checks** (81 connections) — `DB/zk-rollup/gas-accounting.md`
-- **Pattern 3: Address Aliasing Locks ETH** (81 connections) — `DB/zk-rollup/l1-l2-messaging.md`
-- **Pattern 6: CrossDomainMessenger Cannot Guarantee Replayability** (81 connections) — `DB/zk-rollup/l1-l2-messaging.md`
-- **L1 → L2 Transaction Failures** (79 connections) — `DB/zk-rollup/l1-l2-messaging.md`
-- **L2 → L1 Withdrawal Issues** (79 connections) — `DB/zk-rollup/l1-l2-messaging.md`
-- **Pattern 1: Loss of Funds When L1→L2 Transaction Fails in Bootloader** (79 connections) — `DB/zk-rollup/l1-l2-messaging.md`
-- **Pattern 2: MsgValueSimulator Non-Zero Value Calls Sender Itself** (79 connections) — `DB/zk-rollup/l1-l2-messaging.md`
-- **Pattern 5: Paymaster Refunds spentOnPubdata to User** (79 connections) — `DB/zk-rollup/l1-l2-messaging.md`
-- **Pattern 4: Attacker Fills L2ToL1MessagePasser Merkle Tree** (77 connections) — `DB/zk-rollup/l1-l2-messaging.md`
-- **5. Gas Payment Issues** (59 connections) — `DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md`
-- **4. Handle Function Vulnerabilities** (55 connections) — `DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md`
-- **1. ISM Validation Vulnerabilities [HIGH]** (53 connections) — `DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md`
-- **3. Router Configuration Issues** (53 connections) — `DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md`
-- **2. Message Replay Attacks** (49 connections) — `DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md`
-- **bootloader** (34 connections) — `DB/zk-rollup/gas-accounting.md`
-- **Mailbox** (26 connections) — `DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md`
-- **requestL2Transaction** (20 connections) — `DB/zk-rollup/gas-accounting.md`
-- *... and 54 more nodes in this community*
+- **Move Merkle Proof Verification Vulnerabilities [CRITICAL]** (73 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
+- **Pattern 1: Merkle Proof Replay via Missing Index in Hash — move-merkle-001** (65 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
+- **Missing PIL / AIR Constraints** (63 connections) — `DB/zk-rollup/circuit-constraints.md`
+- **Pattern 7: JALR imm_sign Unconstrained (RISC-V zkVM)** (63 connections) — `DB/zk-rollup/circuit-constraints.md`
+- **Pattern 8: Bitmap Claim Tracking Overflow — move-merkle-008 [CRITICAL]** (63 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
+- **Pattern 1: Missing PIL Constraint for SMT Inclusion** (61 connections) — `DB/zk-rollup/circuit-constraints.md`
+- **Pattern 6: partial_sha256_var_interstitial Hash Collision (Undersized Input)** (61 connections) — `DB/zk-rollup/circuit-constraints.md`
+- **Pattern 7: Odd-Length Proof Padding Bypass — move-merkle-007 [CRITICAL]** (61 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
+- **proof_forgery** (60 connections) — `DB/general/restaking/EIGENPOD_BEACON_CHAIN_VULNERABILITIES.md`
+- **Pattern 2: Underconstrained Carry Value in Binary State Machine** (59 connections) — `DB/zk-rollup/circuit-constraints.md`
+- **Pattern 5: SHA256 AIR Unconstrained final_hash at Last Block** (59 connections) — `DB/zk-rollup/circuit-constraints.md`
+- **Pattern 2: Flawed Merkle Proof Verification Logic — move-merkle-002** (59 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
+- **Pattern 3: Missing Range Constraint on Division Remainder (zkEVM Opcode)** (57 connections) — `DB/zk-rollup/circuit-constraints.md`
+- **Pattern 4: IsLtArraySubAir Soundness Issue (RISC-V Circuit)** (57 connections) — `DB/zk-rollup/circuit-constraints.md`
+- **Cryptographic Weaknesses in Proof Systems** (57 connections) — `DB/zk-rollup/proof-verification.md`
+- **Pattern 6: Resource Index Collision Enabling Claim Spoofing — move-merkle-006 [CRITICAL]** (57 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
+- **Pattern 1: Missing On-Chain ZK Proof Verification** (55 connections) — `DB/zk-rollup/proof-verification.md`
+- **1. 51% Attack via Arbitrary Execution [CRITICAL]** (55 connections) — `DB/general/dao-governance-vulnerabilities/governance-takeover.md`
+- **Pattern 2: Incorrect Randomness Computation Allows Proof Forgery** (53 connections) — `DB/zk-rollup/proof-verification.md`
+- **5. Unrestricted Deployment/Election Takeover** (53 connections) — `DB/general/dao-governance-vulnerabilities/governance-takeover.md`
+- **Pattern 3: Unchecked Merkle Verification Return Value — move-merkle-003** (53 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
+- **Pattern 4: Fee Bypass at Maximum Fee Setting — move-merkle-004** (53 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
+- **Pattern 5: Missing Domain Separation Between Leaf and Internal Nodes — move-merkle-005 [CRITICAL]** (53 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
+- **Pattern 3: Plonk/Groth16 Verifiers Accept Untrusted Recursion VK Root** (51 connections) — `DB/zk-rollup/proof-verification.md`
+- **Pattern 4: Weak Fiat-Shamir in LogUp Phase Enables Backdoored Circuits** (51 connections) — `DB/zk-rollup/proof-verification.md`
+- *... and 119 more nodes in this community*
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [access-control](access-control.md) (35 shared connections)
+- [general 2](general_2.md) (21 shared connections)
+- [general 4](general_4.md) (14 shared connections)
+- [general](general.md) (8 shared connections)
+- [governance](governance.md) (8 shared connections)
+- [defi 8](defi_8.md) (6 shared connections)
+- [defi 6](defi_6.md) (5 shared connections)
+- [proxy](proxy.md) (3 shared connections)
+- [cosmos 7](cosmos_7.md) (1 shared connections)
 
 ## Source Files
 
-- `DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md`
-- `DB/zk-rollup/gas-accounting.md`
-- `DB/zk-rollup/l1-l2-messaging.md`
+- `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
+- `DB/general/dao-governance-vulnerabilities/governance-takeover.md`
+- `DB/general/restaking/EIGENPOD_BEACON_CHAIN_VULNERABILITIES.md`
+- `DB/oracle/chainlink/CHAINLINK_VRF_VULNERABILITIES.md`
+- `DB/zk-rollup/circuit-constraints.md`
+- `DB/zk-rollup/proof-verification.md`
 
 ## Audit Trail
 
-- EXTRACTED: 452 (38%)
-- INFERRED: 748 (62%)
+- EXTRACTED: 601 (38%)
+- INFERRED: 989 (62%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

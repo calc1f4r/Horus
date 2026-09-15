@@ -1,6 +1,6 @@
-# proxy
+# proxy 2
 
-> 47 nodes · cohesion 0.34
+> 51 nodes · cohesion 0.29
 
 ## Key Concepts
 
@@ -27,13 +27,19 @@
 - **lending_liquidation** (14 connections) — `DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md`
 - **social_token_trading** (14 connections) — `DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md`
 - **curve lp oracle** (14 connections) — `DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md`
+- **Compiler-Level Vulnerability Patterns** (13 connections) — `DB/unique/defihacklabs/compiler-level-vulnerabilities.md`
 - **DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md** (7 connections) — `DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md`
-- **oracle_manipulation** (6 connections) — `DB/unique/amm/constantproduct/SENTIMENT_CURVE_READONLY_REENTRANCY.md`
-- *... and 22 more nodes in this community*
+- *... and 26 more nodes in this community*
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [defi 4](defi_4.md) (21 shared connections)
+- [bridge](bridge.md) (5 shared connections)
+- [general 6](general_6.md) (2 shared connections)
+- [defi 7](defi_7.md) (1 shared connections)
+- [defi](defi.md) (1 shared connections)
+- [cosmos 5](cosmos_5.md) (1 shared connections)
+- [cosmos 7](cosmos_7.md) (1 shared connections)
 
 ## Source Files
 
@@ -42,13 +48,14 @@
 - `DB/general/reentrancy/defihacklabs-reentrancy-2023-patterns.md`
 - `DB/general/stablecoin-vulnerabilities/STABLECOIN_VULNERABILITIES.md`
 - `DB/unique/amm/constantproduct/SENTIMENT_CURVE_READONLY_REENTRANCY.md`
+- `DB/unique/defihacklabs/compiler-level-vulnerabilities.md`
 
 ## Audit Trail
 
-- EXTRACTED: 116 (29%)
-- INFERRED: 282 (71%)
+- EXTRACTED: 121 (30%)
+- INFERRED: 286 (70%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

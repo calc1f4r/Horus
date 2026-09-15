@@ -189,7 +189,17 @@ def graph_artifact_hashes(root: Path) -> dict[str, str]:
     hashes = {}
     for path in sorted(selected):
         rel = path.relative_to(root).as_posix()
-        hashes[rel] = hashlib.sha256(path.read_bytes()).hexdigest()
+        data = path.read_bytes()
+        if rel == "graph.json":
+            # `built_at_commit` reflects git detection at the *out* directory
+            # the caller passed to build_db_graph(), not DB content. The
+            # freshness self-check always rebuilds into a non-git tempdir, so
+            # this field would otherwise never match a real on-disk build and
+            # every run would be flagged stale regardless of actual drift.
+            payload = json.loads(data)
+            payload.pop("built_at_commit", None)
+            data = json.dumps(payload, sort_keys=True).encode("utf-8")
+        hashes[rel] = hashlib.sha256(data).hexdigest()
     return hashes
 
 
@@ -279,7 +289,18 @@ def main() -> int:
         ("Python compile", [sys.executable, "-m", "py_compile", "scripts/db_quality_check.py", "scripts/build_db_graph.py", "scripts/finalize_audit_graph.py"]),
         ("DB quality check", [sys.executable, "scripts/db_quality_check.py"]),
         ("Graphify topic query", ["graphify", "query", "oracle flash loan", "--graph", "DB/graphify-out/graph.json", "--budget", "1000"]),
-        ("Graphify path query", ["graphify", "path", "oracle", "flash-loan", "--graph", "DB/graphify-out/graph.json"]),
+        (
+            "Graphify path query",
+            [
+                "graphify",
+                "path",
+                "oracle",
+                "flash-loan",
+                "--graph",
+                "DB/graphify-out/graph.json",
+                "--undirected",
+            ],
+        ),
         ("Codex sync check", [sys.executable, "scripts/sync_codex_compat.py", "--check"]),
     ]
 

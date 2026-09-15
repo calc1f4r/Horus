@@ -1,57 +1,66 @@
-# general
+# general 2
 
-> 83 nodes · cohesion 0.47
+> 103 nodes · cohesion 0.30
 
 ## Key Concepts
 
-- **Move Event Emission, Configuration & Upgrade Safety Vulnerabilities [MEDIUM]** (81 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- **Pattern 1: Missing Events for Critical State Changes — move-evtcfg-001 [MEDIUM]** (79 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- **Move State Management & Data Integrity Vulnerabilities [HIGH]** (77 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
-- **Pattern 10: Two-Step Ownership Transfer Missing — move-evtcfg-010 [MEDIUM]** (75 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- **Pattern 9: Version Check Missing in Upgrade-Sensitive Functions — move-evtcfg-009 [MEDIUM]** (75 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- **Pattern 7: Missing Approval Revocation Function — move-evtcfg-007 [MEDIUM]** (73 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- **Pattern 8: Dispatchable Token Store Missing withdraw/deposit Implementation — move-evtcfg-008 [MEDIUM]** (73 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- **Pattern 1: Local Copy Mutation Without Write-Back — move-state-001 [HIGH]** (73 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
-- **Pattern 11: Reentrancy via External Module Callback — move-evtcfg-011 [MEDIUM]** (71 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- **Pattern 12: Hardcoded Batch Parameters in Event Emission — move-evtcfg-012 [MEDIUM]** (71 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- **Pattern 13: Assertion Inconsistency Between Getter and Setter — move-evtcfg-013 [MEDIUM]** (71 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- **Pattern 2: Misleading Event Type in Emissions — move-evtcfg-002 [MEDIUM]** (71 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- **Pattern 3: Event Emission on No-Op State Change — move-evtcfg-003 [MEDIUM]** (71 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- **Pattern 4: Fee Annotation Mismatch with Actual Calculation — move-evtcfg-004 [MEDIUM]** (71 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- **Pattern 5: Liquidation Bonus Configuration Exceeding Bounds — move-evtcfg-005 [MEDIUM]** (71 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- **Pattern 6: Cooldown Bypass via Timestamp Manipulation — move-evtcfg-006 [MEDIUM]** (71 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- **Pattern 10: Last Modifier Tracking Failure — move-state-010 [HIGH]** (69 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
-- **Pattern 14: Inability to Withdraw Collected Fees — move-evtcfg-014 [MEDIUM]** (67 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- **Pattern 15: Front-Running Public Validation for Initialization — move-evtcfg-015 [MEDIUM]** (65 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- **Pattern 11: Pause State Allowing Partial Operations — move-state-011 [HIGH]** (65 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
-- **Pattern 2: Variable Shadowing Zeroing State Values — move-state-002 [HIGH]** (65 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
-- **Pattern 3: Investor Count Arithmetic Mismatch — move-state-003 [HIGH]** (65 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
-- **Pattern 4: Wallet Balance Tracking Desync — move-state-004 [HIGH]** (65 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
-- **Pattern 5: Resource Attribute Cleanup on Removal — move-state-005 [HIGH]** (65 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
-- **Pattern 6: Group ID Reuse After Deletion — move-state-006 [HIGH]** (65 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
-- *... and 58 more nodes in this community*
+- **fund_theft** (152 connections) — `DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md`
+- **1. Cross-Chain Replay Attacks [HIGH]** (103 connections) — `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
+- **7. Message Ordering & Timing** (87 connections) — `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
+- **Move Cross-Chain and Bridge Vulnerabilities [CRITICAL]** (85 connections) — `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- **6. Slippage & MEV Issues** (83 connections) — `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
+- **Pattern 1: Payload Front-Running via Public Validation — move-bridge-001** (83 connections) — `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- **Pattern 9: Transceiver ID Overflow Past Bitmap Limit — move-bridge-009 [CRITICAL]** (81 connections) — `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- **2. Signature Validation Issues** (79 connections) — `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
+- **Pattern 10: Inconsistent Deadline Checks Across Chains — move-bridge-010 [CRITICAL]** (79 connections) — `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- **Pattern 8: Cross-Chain Replay from Missing Chain ID — move-bridge-008 [CRITICAL]** (79 connections) — `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- **Pattern 7: Missing Version Check in Admin Functions — move-bridge-007 [CRITICAL]** (77 connections) — `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- **Pattern 11: Zero-Value Burn Without Supply Validation — move-bridge-011 [CRITICAL]** (75 connections) — `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- **Pattern 2: Missing Validator Set Integrity Checks — move-bridge-002** (75 connections) — `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- **Pattern 3: Cross-Chain Message Validation Bypass — move-bridge-003** (75 connections) — `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- **Pattern 4: Unrestricted Cross-Chain Message Sending — move-bridge-004** (75 connections) — `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- **Pattern 5: Signature Replay in Cross-Chain Claims — move-bridge-005** (75 connections) — `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- **Pattern 6: Fund Loss via Object ID Transfer — move-bridge-006** (75 connections) — `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- **3. Token Bridging Issues** (73 connections) — `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
+- **5. Access Control Vulnerabilities** (71 connections) — `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
+- **10. Blocklist Iterator State Bug [HIGH]** (71 connections) — `DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- **9. Epoch Transition Failure via Duplicate PubKey [HIGH]** (71 connections) — `DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- **Pattern 12: Deserialization Access Control Bypass — move-bridge-012 [CRITICAL]** (67 connections) — `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- **11. Cross-Chain Flow Rate Direction Mismatch [HIGH]** (67 connections) — `DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- **4. Sequencer & L2 Specific Issues** (65 connections) — `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
+- **1. EVM State Persistence Despite Sui Failure [HIGH]** (65 connections) — `DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- *... and 78 more nodes in this community*
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [access-control](access-control.md) (45 shared connections)
+- [zk-rollup](zk-rollup.md) (32 shared connections)
+- [zk-rollup 2](zk-rollup_2.md) (21 shared connections)
+- [bridge 2](bridge_2.md) (13 shared connections)
+- [cosmos](cosmos.md) (13 shared connections)
+- [general 4](general_4.md) (12 shared connections)
+- [zk-rollup 3](zk-rollup_3.md) (9 shared connections)
+- [zk-rollup 5](zk-rollup_5.md) (8 shared connections)
+- [defi 4](defi_4.md) (7 shared connections)
+- [proxy](proxy.md) (7 shared connections)
+- [zk-rollup 4](zk-rollup_4.md) (5 shared connections)
+- [access-control 3](access-control_3.md) (4 shared connections)
 
 ## Source Files
 
-- `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
-- `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
-- `DB/cosmos/app-chain/rewards/reward-distribution-failures.md`
-- `DB/general/access-control/defihacklabs-access-control-2024-2025.md`
-- `DB/general/bonding-curve/BONDING_CURVE_MISC_VULNERABILITIES.md`
-- `DB/general/reentrancy/reentrancy.md`
-- `DB/general/restaking/RESTAKING_REWARD_DISTRIBUTION_VULNERABILITIES.md`
-- `DB/general/restaking/RESTAKING_SLASHING_VULNERABILITIES.md`
+- `DB/Sui-Move-specific/MOVE_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- `DB/Sui-Move-specific/SUI_CROSS_CHAIN_BRIDGE_VULNERABILITIES.md`
+- `DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md`
+- `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
+- `DB/general/arbitrary-call/arbitrary-external-call-vulnerabilities.md`
+- `DB/unique/amm/constantproduct/BURVE_UNRESTRICTED_CALLBACK.md`
 
 ## Audit Trail
 
-- EXTRACTED: 567 (33%)
-- INFERRED: 1150 (67%)
+- EXTRACTED: 663 (37%)
+- INFERRED: 1113 (63%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

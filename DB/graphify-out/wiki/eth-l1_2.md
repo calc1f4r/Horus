@@ -1,50 +1,55 @@
-# eth-l1
+# eth-l1 2
 
-> 26 nodes · cohesion 0.43
+> 68 nodes · cohesion 0.10
 
 ## Key Concepts
 
-- **Detection & Hunt Strategy** (49 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **Real Reports** (49 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **Vulnerable Code Pattern (generic)** (49 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **fee_caps** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **intrinsic_gas** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **nonce_checks** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **txpool_validation** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **eip_violation** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **mempool_dos** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **spam_tx_acceptance** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **state_root_divergence** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **eip2681 nonce upper bound violation** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **intrinsic gas txpool vs evm mismatch** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **missing block gas limit check in txpool** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **sendrawtransaction fee check bypass** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **spam tx acceptance** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **state root divergence** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **validation logic duplicated and diverged** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **wrong nonce execution state root mismatch** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **reports/eth-l1-clients_findings/37695-bc-insight-executing-transaction-that-has-a-wrong-nonce-might-triggered-a-chain-split-due-to-m.md** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **reports/eth-l1-clients_findings/38015-bc-insight-violation-of-eip-2681-in-create-transaction.md** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **reports/eth-l1-clients_findings/38278-bc-low-potential-dos-to-mempool-due-to-missing-gas-limit-check.md** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **reports/eth-l1-clients_findings/38427-bc-low-discrepancy-in-intrinsic-gas-calculation-between-txpool-and-evm-execution.md** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **reports/eth-l1-clients_findings/38554-bc-low-incorrect-transaction-fee-check-in-sendrawtransaction.md** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- **validation_logic_duplicated_and_diverged** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
-- *... and 1 more nodes in this community*
+- **Similar Reports** (53 connections) — `DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md`
+- **Vulnerable Code Pattern (generic)** (53 connections) — `DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md`
+- **Detection & Hunt Strategy** (51 connections) — `DB/eth-l1-clients/p2p/gossipsub-malformed-message.md`
+- **Real Report** (49 connections) — `DB/eth-l1-clients/p2p/gossipsub-malformed-message.md`
+- **sBTC Signer Set Liveness Sabotage via wsts Signing-Round Manipulation** (47 connections) — `DB/unique/l1-misc/stacks/sbtc-signer-liveness-wsts-round-sabotage.md`
+- **Avalanche Bridge & Node Validation Gaps (Receipt Queue, Fee Caps, Warp Signatures)** (31 connections) — `DB/unique/l1-misc/avalanche-node-validation.md`
+- **resource_exhaustion** (16 connections) — `DB/cosmos/app-chain/node/p2p-bandwidth-amplification.md`
+- **connection_setup** (4 connections) — `DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md`
+- **gossipsub_topic_params** (4 connections) — `DB/eth-l1-clients/p2p/gossipsub-malformed-message.md`
+- **invalid_message_handling** (4 connections) — `DB/eth-l1-clients/p2p/gossipsub-malformed-message.md`
+- **p2p_request_handlers** (4 connections) — `DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md`
+- **peer_management** (4 connections) — `DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md`
+- **peer_scoring** (4 connections) — `DB/eth-l1-clients/p2p/gossipsub-malformed-message.md`
+- **rate_limiting** (4 connections) — `DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md`
+- **connection_flood** (4 connections) — `DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md`
+- **invalid_message_spam** (4 connections) — `DB/eth-l1-clients/p2p/gossipsub-malformed-message.md`
+- **oom_crash** (4 connections) — `DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md`
+- **penalty_bypass** (4 connections) — `DB/eth-l1-clients/p2p/gossipsub-malformed-message.md`
+- **request_amplification** (4 connections) — `DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md`
+- **evil client fast crash via unthrottled requests** (4 connections) — `DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md`
+- **getblockheaders large range oom** (4 connections) — `DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md`
+- **gossipsub penalty bypass** (4 connections) — `DB/eth-l1-clients/p2p/gossipsub-malformed-message.md`
+- **gossipsub topic params** (4 connections) — `DB/eth-l1-clients/p2p/gossipsub-malformed-message.md`
+- **handshake tcp flood no ip ratelimit** (4 connections) — `DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md`
+- **invalid message spam** (4 connections) — `DB/eth-l1-clients/p2p/gossipsub-malformed-message.md`
+- *... and 43 more nodes in this community*
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [bnb 2](bnb_2.md) (7 shared connections)
+- [substrate](substrate.md) (7 shared connections)
 
 ## Source Files
 
-- `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- `DB/cosmos/app-chain/node/p2p-bandwidth-amplification.md`
+- `DB/eth-l1-clients/p2p/gossipsub-malformed-message.md`
+- `DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md`
+- `DB/unique/l1-misc/avalanche-node-validation.md`
+- `DB/unique/l1-misc/stacks/sbtc-signer-liveness-wsts-round-sabotage.md`
 
 ## Audit Trail
 
-- EXTRACTED: 57 (40%)
-- INFERRED: 84 (60%)
+- EXTRACTED: 82 (34%)
+- INFERRED: 162 (66%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

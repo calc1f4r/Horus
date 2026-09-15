@@ -123,7 +123,7 @@ For each confirmed finding:
    code references, and identifier-like keywords.
 2. Query `DB/graphify-out/graph.json` for the nearest relevant hunt-card nodes:
    use `graphify query "<category or root cause>" --graph DB/graphify-out/graph.json`
-   and, where two concrete nodes are known, `graphify path "<term>" "<hunt card title>" --graph ...`.
+   and, where two concrete nodes are known, `graphify path "<term>" "<hunt card title>" --graph ... --undirected`.
 3. Treat missing graph matches or a category-to-card path longer than 3 hops as
    an unverified coverage-review candidate. Graph distance alone does not prove
    a DB gap; record the evidence examined and any unresolved coverage question.

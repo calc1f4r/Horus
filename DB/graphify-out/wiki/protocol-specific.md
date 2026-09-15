@@ -1,35 +1,35 @@
 # protocol-specific
 
-> 256 nodes · cohesion 0.10
+> 48 nodes · cohesion 0.08
 
 ## Key Concepts
 
-- **data_manipulation** (334 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **reentrancy** (262 connections) — `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
-- **state_manipulation** (244 connections) — `DB/general/flash-loan/flash-loan-attack-patterns.md`
-- **callback_reentrancy** (222 connections) — `DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md`
-- **staking** (146 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **liquidity_pool** (140 connections) — `DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md`
-- **_convertToShares** (126 connections) — `DB/general/vault-inflation-attack/defihacklabs-vault-inflation-patterns.md`
-- **share_calculation** (124 connections) — `DB/general/vault-inflation-attack/vault-inflation-attack.md`
-- **rewards** (116 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **Attack Cost Analysis** (107 connections) — `DB/general/vault-inflation-attack/vault-inflation-attack.md`
-- **Known Exploits & Findings** (107 connections) — `DB/general/vault-inflation-attack/vault-inflation-attack.md`
-- **_beforeTokenTransfer** (104 connections) — `DB/bnb-chain/defi/launchpool-deposit-validation.md`
-- **vault** (100 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **_afterTokenTransfer** (92 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **1. First Depositor / Inflation Attack [CRITICAL]** (83 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **10. Liquid Staking: Share Rounding Direction [HIGH]** (81 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
-- **4. Stale Reward Accumulator State** (79 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **13. Missing Slippage Protection in Yield Operations** (77 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **15. Exchange Rate Manipulation at Low TVL [HIGH]** (77 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
-- **14. Incorrect Share Calculation on Edge Cases** (75 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **23. Yield Aggregator Fund Isolation Failures** (75 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **12. Order Book: Partial Fill Tracking [HIGH]** (75 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
-- **7. Reward Period Boundary Errors [HIGH]** (75 connections) — `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
-- **15. Reward Lockup on Period Transitions** (73 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- **22. Emergency Withdrawal Accounting Errors** (73 connections) — `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- *... and 231 more nodes in this community*
+- **Exited Delegators Drain Future VTHO Rewards via Off-By-One Claim Window** (37 connections) — `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
+- **Double Effective-Stake Decrement on Validator Exit Permanently Freezes Unstake** (35 connections) — `DB/unique/l1-misc/vechain/vechain-double-effective-stake-decrement-unstake-freeze.md`
+- **Delegating to a Pending Validator Skips the First Reward Period** (27 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
+- **effective stake checkpoints** (4 connections) — `DB/unique/l1-misc/vechain/vechain-double-effective-stake-decrement-unstake-freeze.md`
+- **last claimed period cursor** (4 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
+- **delegation reward claim-window computation** (2 connections) — `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
+- **effective-stake checkpoint accounting across delegation/validator exit flows** (2 connections) — `DB/unique/l1-misc/vechain/vechain-double-effective-stake-decrement-unstake-freeze.md`
+- **reward cursor initialization on delegation** (2 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
+- **boundary condition error** (2 connections) — `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
+- **claimable delegation periods** (2 connections) — `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
+- **completed periods snapshot** (2 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
+- **cursor over start boundary** (2 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
+- **delegation exit claimed through end** (2 connections) — `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
+- **delegation status state machine** (2 connections) — `DB/unique/l1-misc/vechain/vechain-double-effective-stake-decrement-unstake-freeze.md`
+- **delegation to pending validator** (2 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
+- **duplicate state mutation** (2 connections) — `DB/unique/l1-misc/vechain/vechain-double-effective-stake-decrement-unstake-freeze.md`
+- **duplicated effective stake decrement** (2 connections) — `DB/unique/l1-misc/vechain/vechain-double-effective-stake-decrement-unstake-freeze.md`
+- **end period sentinel (type(uint32) max)** (2 connections) — `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
+- **last claimed period init** (2 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
+- **pending validator status** (2 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
+- **period range arithmetic** (2 connections) — `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
+- **plus one off by one** (2 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
+- **solidity panic 0x11 arithmetic underflow** (2 connections) — `DB/unique/l1-misc/vechain/vechain-double-effective-stake-decrement-unstake-freeze.md`
+- **start period derivation** (2 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
+- **strict inequality claim window** (2 connections) — `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
+- *... and 23 more nodes in this community*
 
 ## Relationships
 
@@ -37,32 +37,16 @@
 
 ## Source Files
 
-- `DB/Sui-Move-specific/SUI_MOVE_ACCESS_CONTROL_VALIDATION_VULNERABILITIES.md`
-- `DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
-- `DB/Sui-Move-specific/SUI_MOVE_DEFI_LOGIC_VULNERABILITIES.md`
-- `DB/Sui-Move-specific/movement-l1/CELESTIA_BLOB_ORDER_MANIPULATION.md`
-- `DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md`
-- `DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md`
-- `DB/bnb-chain/defi/launchpool-deposit-validation.md`
-- `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
-- `DB/general/flash-loan/flash-loan-attack-patterns.md`
-- `DB/general/reentrancy/defi-reentrancy-patterns.md`
-- `DB/general/reentrancy/defihacklabs-reentrancy-2024-patterns.md`
-- `DB/general/vault-inflation-attack/defihacklabs-vault-inflation-patterns.md`
-- `DB/general/vault-inflation-attack/vault-inflation-attack.md`
-- `DB/general/yield-strategy-vulnerabilities/yield-strategy-vulnerabilities.md`
-- `DB/tokens/erc20/ERC20_TOKEN_VULNERABILITIES.md`
-- `DB/unique/amm/constantproduct/STAKEHOUSE_REENTRANCY_FUND_FREEZE.md`
-- `DB/unique/defihacklabs/compiler-level-vulnerabilities.md`
-- `DB/unique/l1-misc/flare/fassets-collateral-pool-unverified-reward-claim.md`
-- `DB/unique/l1-misc/polygon-bor-heimdall-validation.md`
+- `DB/unique/l1-misc/vechain/vechain-double-effective-stake-decrement-unstake-freeze.md`
+- `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
+- `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
 
 ## Audit Trail
 
-- EXTRACTED: 1711 (44%)
-- INFERRED: 2221 (56%)
+- EXTRACTED: 15 (16%)
+- INFERRED: 80 (84%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

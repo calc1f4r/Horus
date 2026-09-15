@@ -69,6 +69,8 @@ def extract_file(
         ExtractionResult — empty if language is unsupported or grammar missing.
     """
     file_path = Path(file_path)
+    if project_root is None:
+        project_root = file_path.parent
     if language is None:
         language = detect_language(file_path, project_root)
     if language is None:

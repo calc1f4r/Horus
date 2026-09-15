@@ -22,7 +22,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from horus_graphify_blockchain.extractor import extract_file, extract_directory
-from horus_graphify_blockchain.schema import ExtractionResult
+from horus_graphify_blockchain.schema import ExtractionResult, make_node_id
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -166,3 +166,29 @@ class TestDirectoryExtraction:
         # Should not raise
         _ = json.dumps(data)
         assert is_valid_graphify_json(data)
+
+    def test_ids_use_the_full_project_relative_path(self, tmp_path):
+        first = tmp_path / "src" / "v1" / "Token.sol"
+        second = tmp_path / "src" / "v2" / "Token.sol"
+        first.parent.mkdir(parents=True)
+        second.parent.mkdir(parents=True)
+        source = "contract Token { function transfer() public {} }\n"
+        first.write_text(source, encoding="utf-8")
+        second.write_text(source, encoding="utf-8")
+
+        result = extract_directory(tmp_path)
+        module_ids = {
+            node.id
+            for node in result.nodes
+            if node.node_kind == "Module" and node.label == "Token"
+        }
+
+        assert "src_v1_token_token" in module_ids
+        assert "src_v2_token_token" in module_ids
+
+
+def test_make_node_id_matches_graphify_0_9_contract():
+    assert (
+        make_node_id("src/auth/session.sol", "ValidateToken")
+        == "src_auth_session_validatetoken"
+    )

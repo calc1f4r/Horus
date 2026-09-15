@@ -1,55 +1,69 @@
 # zk-rollup
 
-> 145 nodes · cohesion 0.14
+> 147 nodes · cohesion 0.17
 
 ## Key Concepts
 
-- **Move Merkle Proof Verification Vulnerabilities [CRITICAL]** (73 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
-- **Pattern 1: Merkle Proof Replay via Missing Index in Hash — move-merkle-001** (65 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
-- **Pattern 8: Bitmap Claim Tracking Overflow — move-merkle-008 [CRITICAL]** (63 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
-- **Missing PIL / AIR Constraints** (63 connections) — `DB/zk-rollup/circuit-constraints.md`
-- **Pattern 7: JALR imm_sign Unconstrained (RISC-V zkVM)** (63 connections) — `DB/zk-rollup/circuit-constraints.md`
-- **Pattern 7: Odd-Length Proof Padding Bypass — move-merkle-007 [CRITICAL]** (61 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
-- **Pattern 1: Missing PIL Constraint for SMT Inclusion** (61 connections) — `DB/zk-rollup/circuit-constraints.md`
-- **Pattern 6: partial_sha256_var_interstitial Hash Collision (Undersized Input)** (61 connections) — `DB/zk-rollup/circuit-constraints.md`
-- **proof_forgery** (60 connections) — `DB/general/restaking/EIGENPOD_BEACON_CHAIN_VULNERABILITIES.md`
-- **Pattern 2: Flawed Merkle Proof Verification Logic — move-merkle-002** (59 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
-- **Pattern 2: Underconstrained Carry Value in Binary State Machine** (59 connections) — `DB/zk-rollup/circuit-constraints.md`
-- **Pattern 5: SHA256 AIR Unconstrained final_hash at Last Block** (59 connections) — `DB/zk-rollup/circuit-constraints.md`
-- **Pattern 6: Resource Index Collision Enabling Claim Spoofing — move-merkle-006 [CRITICAL]** (57 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
-- **Pattern 3: Missing Range Constraint on Division Remainder (zkEVM Opcode)** (57 connections) — `DB/zk-rollup/circuit-constraints.md`
-- **Pattern 4: IsLtArraySubAir Soundness Issue (RISC-V Circuit)** (57 connections) — `DB/zk-rollup/circuit-constraints.md`
-- **Cryptographic Weaknesses in Proof Systems** (57 connections) — `DB/zk-rollup/proof-verification.md`
-- **1. 51% Attack via Arbitrary Execution [CRITICAL]** (55 connections) — `DB/general/dao-governance-vulnerabilities/governance-takeover.md`
-- **Pattern 1: Missing On-Chain ZK Proof Verification** (55 connections) — `DB/zk-rollup/proof-verification.md`
-- **5. Unrestricted Deployment/Election Takeover** (53 connections) — `DB/general/dao-governance-vulnerabilities/governance-takeover.md`
-- **Pattern 3: Unchecked Merkle Verification Return Value — move-merkle-003** (53 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
-- **Pattern 4: Fee Bypass at Maximum Fee Setting — move-merkle-004** (53 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
-- **Pattern 5: Missing Domain Separation Between Leaf and Internal Nodes — move-merkle-005 [CRITICAL]** (53 connections) — `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
-- **Pattern 2: Incorrect Randomness Computation Allows Proof Forgery** (53 connections) — `DB/zk-rollup/proof-verification.md`
-- **2. Loss of Veto Power Enabling Takeover** (51 connections) — `DB/general/dao-governance-vulnerabilities/governance-takeover.md`
-- **3. Centralized Governance Control** (51 connections) — `DB/general/dao-governance-vulnerabilities/governance-takeover.md`
-- *... and 120 more nodes in this community*
+- **Sequencer Economic Issues** (111 connections) — `DB/zk-rollup/sequencer-issues.md`
+- **Message Channel DoS and Censorship** (107 connections) — `DB/zk-rollup/bridge-vulnerabilities.md`
+- **Pattern 1: Token Bridge Reentrancy Corrupts Accounting** (103 connections) — `DB/zk-rollup/bridge-vulnerabilities.md`
+- **Pattern 1: Access-Controlled Functions Fail During Sequencer Downtime** (97 connections) — `DB/zk-rollup/sequencer-issues.md`
+- **Pattern 2: Dutch Auctions and Options Expire at Bad Prices During Downtime** (97 connections) — `DB/zk-rollup/sequencer-issues.md`
+- **Pattern 3: Linea / Sequencer Censorship Locking User Funds** (97 connections) — `DB/zk-rollup/sequencer-issues.md`
+- **Pattern 2: Wrong Token Order in Bridge Causes Incorrect Routing** (95 connections) — `DB/zk-rollup/bridge-vulnerabilities.md`
+- **Pattern 4: Sequencer Underpaid Due to Incorrect commitScalar** (95 connections) — `DB/zk-rollup/sequencer-issues.md`
+- **Pattern 5: Front-Running finalizeBlocks in Decentralized Sequencer Mode** (95 connections) — `DB/zk-rollup/sequencer-issues.md`
+- **Protocol Functions Breaking During Sequencer Downtime** (95 connections) — `DB/zk-rollup/sequencer-issues.md`
+- **Pattern 3: Router Signatures Replay Across Chains** (89 connections) — `DB/zk-rollup/bridge-vulnerabilities.md`
+- **Pattern 4: Wrong ERC1155 Selector Locks Tokens in Bridge** (89 connections) — `DB/zk-rollup/bridge-vulnerabilities.md`
+- **Pattern 5: USDC Blacklist Permanently Locks Bridge Funds** (89 connections) — `DB/zk-rollup/bridge-vulnerabilities.md`
+- **Pattern 6: Single Reverting Withdrawal Blocks Entire Queue** (89 connections) — `DB/zk-rollup/bridge-vulnerabilities.md`
+- **Token Accounting and Token Mapping Errors** (89 connections) — `DB/zk-rollup/bridge-vulnerabilities.md`
+- **Batch Hashing and Commitment Bugs** (77 connections) — `DB/zk-rollup/batch-processing.md`
+- **Pattern 1: Batcher Frame Decoding Inconsistency Causes Consensus Split** (75 connections) — `DB/zk-rollup/batch-processing.md`
+- **Pattern 2: EIP-4844 Blob Incompatibility Halts Block Processing** (75 connections) — `DB/zk-rollup/batch-processing.md`
+- **Pattern 3: Rollup Cannot Split Batches Across Blobs → Block Stuffing** (75 connections) — `DB/zk-rollup/batch-processing.md`
+- **Pattern 4: Malformed Blob Transaction Crashes Validator Nodes** (75 connections) — `DB/zk-rollup/batch-processing.md`
+- **Pattern 5: Memory Corruption Causing Incorrect Batch Hashes (Scroll)** (75 connections) — `DB/zk-rollup/batch-processing.md`
+- **Pattern 6: Incorrect basefee Calculation on Taiko Rollup** (75 connections) — `DB/zk-rollup/batch-processing.md`
+- **Pattern 7: inChallenge Incorrectly Reset in revertBatch** (75 connections) — `DB/zk-rollup/batch-processing.md`
+- **3. Message Replay Attacks** (71 connections) — `DB/bridge/wormhole/wormhole-integration-vulnerabilities.md`
+- **1. VAA Parsing Vulnerabilities [HIGH]** (69 connections) — `DB/bridge/wormhole/wormhole-integration-vulnerabilities.md`
+- *... and 122 more nodes in this community*
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [oracle](oracle.md) (49 shared connections)
+- [general 2](general_2.md) (32 shared connections)
+- [defi 8](defi_8.md) (31 shared connections)
+- [bridge](bridge.md) (17 shared connections)
+- [defi 4](defi_4.md) (16 shared connections)
+- [bridge 2](bridge_2.md) (15 shared connections)
+- [zk-rollup 3](zk-rollup_3.md) (15 shared connections)
+- [general](general.md) (8 shared connections)
+- [token](token.md) (6 shared connections)
+- [defi](defi.md) (3 shared connections)
+- [zk-rollup 5](zk-rollup_5.md) (2 shared connections)
+- [defi 7](defi_7.md) (1 shared connections)
 
 ## Source Files
 
-- `DB/Sui-Move-specific/MOVE_MERKLE_VERIFICATION_VULNERABILITIES.md`
-- `DB/general/dao-governance-vulnerabilities/governance-takeover.md`
-- `DB/general/restaking/EIGENPOD_BEACON_CHAIN_VULNERABILITIES.md`
-- `DB/oracle/chainlink/CHAINLINK_VRF_VULNERABILITIES.md`
-- `DB/zk-rollup/circuit-constraints.md`
-- `DB/zk-rollup/proof-verification.md`
+- `DB/account-abstraction/aa-signature-replay-attacks.md`
+- `DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md`
+- `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
+- `DB/bridge/wormhole/wormhole-integration-vulnerabilities.md`
+- `DB/general/bridge/cross-chain-bridge-vulnerabilities.md`
+- `DB/zk-rollup/batch-processing.md`
+- `DB/zk-rollup/bridge-vulnerabilities.md`
+- `DB/zk-rollup/l1-l2-messaging.md`
+- `DB/zk-rollup/sequencer-issues.md`
 
 ## Audit Trail
 
-- EXTRACTED: 601 (38%)
-- INFERRED: 991 (62%)
+- EXTRACTED: 744 (37%)
+- INFERRED: 1278 (63%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

@@ -80,7 +80,7 @@ If both files exist:
 1. **Query the DB graph** for neighbors of each target topic/protocol-type keyword within distance 2:
    ```bash
    # Via MCP server if running:
-   graphify path "<topic>" "<neighbor-topic>" --graph DB/graphify-out/graph.json
+   graphify path "<topic>" "<neighbor-topic>" --graph DB/graphify-out/graph.json --undirected
    # Or read DB/graphify-out/graph.json and traverse adjacency directly
    ```
 

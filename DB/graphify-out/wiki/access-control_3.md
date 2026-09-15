@@ -1,69 +1,60 @@
-# access-control
+# access-control 3
 
-> 120 nodes · cohesion 0.02
+> 74 nodes · cohesion 0.24
 
 ## Key Concepts
 
-- **Horus Vulnerability DB** (101 connections) — `DB`
-- **general-defi** (6 connections) — `DB/manifests/general-defi.json`
-- **tokens** (6 connections) — `DB/manifests/tokens.json`
-- **lending_protocol** (6 connections) — `DB/index.json`
-- **bridge** (5 connections) — `DB/manifests/bridge.json`
-- **general-security** (5 connections) — `DB/manifests/general-security.json`
-- **oracle** (5 connections) — `DB/manifests/oracle.json`
-- **vault_yield** (5 connections) — `DB/index.json`
-- **general-infrastructure** (4 connections) — `DB/manifests/general-infrastructure.json`
-- **bnb_chain_l1** (4 connections) — `DB/index.json`
-- **dex_amm** (4 connections) — `DB/index.json`
-- **eth_l1_client** (4 connections) — `DB/index.json`
-- **l2_rollup** (4 connections) — `DB/index.json`
-- **perpetuals_derivatives** (4 connections) — `DB/index.json`
-- **smart_account_aa** (4 connections) — `DB/index.json`
-- **staking_liquid_staking** (4 connections) — `DB/index.json`
-- **substrate_parachain** (4 connections) — `DB/index.json`
-- **sui_move** (4 connections) — `DB/index.json`
-- **token_launch** (4 connections) — `DB/index.json`
-- **cross_chain_bridge** (3 connections) — `DB/index.json`
-- **nft_marketplace** (3 connections) — `DB/index.json`
-- **amm** (2 connections) — `DB/manifests/amm.json`
-- **cosmos** (2 connections) — `DB/manifests/cosmos.json`
-- **general-governance** (2 connections) — `DB/manifests/general-governance.json`
-- **cosmos_appchain** (2 connections) — `DB/index.json`
-- *... and 95 more nodes in this community*
+- **1. Public Mint + Public Burn on Token Contract (SafeMoon $8.9M)** (71 connections) — `DB/general/access-control/defihacklabs-access-control-2023-patterns.md`
+- **2. Public Fee Transfer Function on DEX Pair (LeetSwap $630K)** (65 connections) — `DB/general/access-control/defihacklabs-access-control-2023-patterns.md`
+- **3. Aggregator Arbitrary-Sender Swap (SwapX $1M)** (65 connections) — `DB/general/access-control/defihacklabs-access-control-2023-patterns.md`
+- **Secure Implementations** (65 connections) — `DB/general/access-control/defihacklabs-access-control-2023-patterns.md`
+- **4. Token Lock/Claim with Migration Vulnerability (SHIDO $230K)** (63 connections) — `DB/general/access-control/defihacklabs-access-control-2023-patterns.md`
+- **5. Router/Bot Authorization Failures (Maestro $630K, UniBot $84K)** (63 connections) — `DB/general/access-control/defihacklabs-access-control-2023-patterns.md`
+- **5. Flash Loan + Spot Price (CompounderFinance $27.2M, Gamma $6.3M, Allbridge $550K)** (55 connections) — `DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md`
+- **2. Concentrated Liquidity Bin Manipulation (Jimbo $8M)** (53 connections) — `DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md`
+- **3. Curve LP Token Price Manipulation (Zunami $2M)** (53 connections) — `DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md`
+- **Secure Implementations** (51 connections) — `DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md`
+- **1. Unvalidated callTo/callData in Swap/Route Structs [CRITICAL]** (49 connections) — `DB/general/arbitrary-call/defihacklabs-arbitrary-call-2024-2025.md`
+- **1. Low-Cost Oracle Reporter Manipulation (BonqDAO $88M)** (49 connections) — `DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md`
+- **4. vToken Collateral Oracle Manipulation (0vix $2M)** (49 connections) — `DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md`
+- **6. Lending Protocol Oracle Manipulation (RodeoFinance $888K)** (49 connections) — `DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md`
+- **2. Unrestricted External Call Actions (OPERATION_CALL) [CRITICAL]** (47 connections) — `DB/general/arbitrary-call/defihacklabs-arbitrary-call-2024-2025.md`
+- **4. Yul Integer Overflow Calldata Corruption [CRITICAL]** (47 connections) — `DB/general/arbitrary-call/defihacklabs-arbitrary-call-2024-2025.md`
+- **5. Unverified Aggregator Proxy Forwarding [CRITICAL]** (47 connections) — `DB/general/arbitrary-call/defihacklabs-arbitrary-call-2024-2025.md`
+- **Root Cause Analysis** (45 connections) — `DB/general/arbitrary-call/dex-aggregator-unvalidated-call-data.md`
+- **3. Bridge Signer Validation Bypass [CRITICAL]** (43 connections) — `DB/general/arbitrary-call/defihacklabs-arbitrary-call-2024-2025.md`
+- **Rug Pull & Malicious Contract Detection Patterns** (29 connections) — `DB/general/malicious/rug-pull-detection-patterns.md`
+- **dex_pair** (26 connections) — `DB/general/access-control/defihacklabs-access-control-2023-patterns.md`
+- **bridge_gateway** (22 connections) — `DB/general/access-control/defihacklabs-access-control-2023-patterns.md`
+- **flash loan price manipulation** (18 connections) — `DB/oracle/price-manipulation/defihacklabs-flashloan-oracle-2022-patterns.md`
+- **balancer_pool** (14 connections) — `DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md`
+- **curve_pool** (14 connections) — `DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md`
+- *... and 49 more nodes in this community*
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [access-control](access-control.md) (34 shared connections)
+- [defi 5](defi_5.md) (16 shared connections)
+- [oracle](oracle.md) (16 shared connections)
+- [amm](amm.md) (11 shared connections)
+- [general 2](general_2.md) (4 shared connections)
+- [cosmos 7](cosmos_7.md) (1 shared connections)
 
 ## Source Files
 
-- `DB`
-- `DB/index.json`
-- `DB/manifests/account-abstraction.json`
-- `DB/manifests/amm.json`
-- `DB/manifests/bnb-chain.json`
-- `DB/manifests/bridge.json`
-- `DB/manifests/cosmos.json`
-- `DB/manifests/eth-l1-clients.json`
-- `DB/manifests/general-defi.json`
-- `DB/manifests/general-governance.json`
-- `DB/manifests/general-infrastructure.json`
-- `DB/manifests/general-security.json`
-- `DB/manifests/lending.json`
-- `DB/manifests/oracle.json`
-- `DB/manifests/solana.json`
-- `DB/manifests/substrate.json`
-- `DB/manifests/sui-move.json`
-- `DB/manifests/tokens.json`
-- `DB/manifests/unique.json`
-- `DB/manifests/zk-rollup.json`
+- `DB/general/access-control/defihacklabs-access-control-2023-patterns.md`
+- `DB/general/arbitrary-call/defihacklabs-arbitrary-call-2024-2025.md`
+- `DB/general/arbitrary-call/dex-aggregator-unvalidated-call-data.md`
+- `DB/general/malicious/rug-pull-detection-patterns.md`
+- `DB/oracle/price-manipulation/defihacklabs-flashloan-oracle-2022-patterns.md`
+- `DB/oracle/price-manipulation/defihacklabs-oracle-manipulation-2023-patterns.md`
 
 ## Audit Trail
 
-- EXTRACTED: 147 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 228 (32%)
+- INFERRED: 494 (68%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

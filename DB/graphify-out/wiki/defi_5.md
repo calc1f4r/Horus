@@ -1,53 +1,65 @@
-# defi
+# defi 5
 
-> 50 nodes · cohesion 0.35
+> 74 nodes · cohesion 0.42
 
 ## Key Concepts
 
-- **11. Fee-on-Transfer Token Accounting Mismatch** (57 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **1. Fee Calculated on Wrong Base Amount [HIGH]** (49 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **10. Fee Reward Dust Permanently Stuck in Contract** (49 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **2. Last Buy Fee Mismatch on Bonding Curve** (49 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **3. Swap Fee Omitted in Order Reflections** (49 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **4. Inconsistent Fee Between Quoter and Execution** (49 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **5. Expansion Mint Precision Loss Causes DOS** (49 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **7. Invariant Rounding Direction Mismatch** (49 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **8. Underpriced Quote via Integer Division Truncation** (49 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **6. Root/Exponent Library Truncation Compounds Error** (45 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **9. Invariant Check Invalidated by Rent Inclusion** (45 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **integer_division** (34 connections) — `DB/general/rounding-precision-loss/rounding-precision-loss.md`
-- **Vulnerability Title** (29 connections) — `DB/general/bonding-curve/BONDING_CURVE_SLIPPAGE_PROTECTION_VULNERABILITIES.md`
-- **fee_on_transfer** (26 connections) — `DB/cosmos/app-chain/tokens/token-handling-vulnerabilities.md`
-- **reward_distribution** (24 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **_validateBondingCurveBuy** (24 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **fee_calculation** (22 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **precision** (22 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **rounding** (22 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **swap_fee** (22 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **computeEffectiveFee** (22 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **cumulativeFeePerToken** (22 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **_getQuoteAmount** (22 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **fee calculation rounding** (18 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- **DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md** (11 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- *... and 25 more nodes in this community*
+- **5. Self-Transfer Edge Cases** (85 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **3. ERC777/ERC667 Callback Reentrancy** (81 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **6. Low/No Decimals Token Issues** (79 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **Vulnerable Pattern (Rebasing Staking) [HIGH]** (79 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **token_transfer** (78 connections) — `DB/general/fee-on-transfer-tokens/fee-on-transfer-tokens.md`
+- **Vulnerable Pattern Example (AMM Pair with Reflection Token) [CRITICAL]** (73 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **fee on transfer** (70 connections) — `DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md`
+- **7. Pausable/Blacklistable Token Risks** (69 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **Attack Scenario (AES Pattern)** (69 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **Attack Scenario (BEVO Pattern - Real Exploit)** (69 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **Attack Scenario (FloorDAO Pattern)** (69 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **Real Attack Code (AES - $60K Loss) [HIGH]** (69 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **Complex Attack (HODL Capital - $300K Loss) [HIGH]** (67 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **Real Attack Code (BEVO - $45K Loss) [HIGH]** (67 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **Vulnerable Pattern (Deflationary + Skim Loop) [HIGH]** (67 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **Real Attack Code (KRC - $26K Loss - 2025) [HIGH]** (65 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **Real Attack Code (TINU - $22K Loss) [HIGH]** (63 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **Sheep Token Attack (Burn Manipulation - $600K) [HIGH]** (63 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **Real Attack Code (BGLD - $18K Loss) [HIGH]** (61 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **Real Attack Code (JumpFarm - $10.9K Loss) [HIGH]** (61 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **DPPFlashLoanCall** (60 connections) — `DB/general/token-compatibility/defihacklabs-reflection-token-2023-2024-patterns.md`
+- **Real Attack Code (HeavensGate - $142K Loss) [HIGH]** (59 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **Real Attack Code (FloorDAO - $40K Loss) [HIGH]** (57 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **balance_tracking** (48 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- **lending_pool** (48 connections) — `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- *... and 49 more nodes in this community*
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [defi 4](defi_4.md) (20 shared connections)
+- [cosmos 2](cosmos_2.md) (20 shared connections)
+- [token](token.md) (17 shared connections)
+- [access-control 3](access-control_3.md) (16 shared connections)
+- [governance](governance.md) (11 shared connections)
+- [defi 9](defi_9.md) (10 shared connections)
+- [amm 3](amm_3.md) (7 shared connections)
+- [defi 6](defi_6.md) (6 shared connections)
+- [defi 8](defi_8.md) (6 shared connections)
+- [defi](defi.md) (3 shared connections)
+- [bridge](bridge.md) (2 shared connections)
+- [access-control](access-control.md) (1 shared connections)
 
 ## Source Files
 
-- `DB/cosmos/app-chain/tokens/token-handling-vulnerabilities.md`
-- `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
-- `DB/general/bonding-curve/BONDING_CURVE_SLIPPAGE_PROTECTION_VULNERABILITIES.md`
-- `DB/general/rounding-precision-loss/rounding-precision-loss.md`
+- `DB/amm/concentrated-liquidity/v4-hook-token-compatibility.md`
+- `DB/general/fee-on-transfer-tokens/fee-on-transfer-tokens.md`
+- `DB/general/token-compatibility/defihacklabs-reflection-token-2023-2024-patterns.md`
+- `DB/general/token-compatibility/non-standard-token-vulnerabilities.md`
+- `DB/oracle/chainlink/CHAINLINK_CCIP_VULNERABILITIES.md`
 
 ## Audit Trail
 
-- EXTRACTED: 132 (29%)
-- INFERRED: 328 (71%)
+- EXTRACTED: 375 (30%)
+- INFERRED: 891 (70%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

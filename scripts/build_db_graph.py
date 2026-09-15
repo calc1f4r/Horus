@@ -156,6 +156,18 @@ def _community_labels(cards: list[dict]) -> dict[str, str]:
     return labels
 
 
+def _unique_community_labels(labels: dict[int, str]) -> dict[int, str]:
+    """Make display labels unique so Graphify wiki links resolve exactly."""
+    occurrences: Counter[str] = Counter()
+    unique: dict[int, str] = {}
+    for cid in sorted(labels):
+        label = labels[cid]
+        occurrences[label] += 1
+        suffix = occurrences[label]
+        unique[cid] = label if suffix == 1 else f"{label} {suffix}"
+    return unique
+
+
 def _add_semantic_node(
     nodes: dict[str, dict],
     edges: list[dict],
@@ -170,9 +182,16 @@ def _add_semantic_node(
 ) -> None:
     if not label:
         return
+    broad = _is_broad_semantic(label, kind)
+    # Do not materialize short/generic semantic hints as isolated nodes: newer
+    # Graphify query ranking can otherwise choose one over the connected concept
+    # with the same label. Structural routing nodes are created elsewhere and
+    # remain available even when deliberately disconnected from hunt cards.
+    if broad and kind not in BROAD_NODE_KINDS:
+        return
     node_id = _slug(label, prefix=f"{kind.lower()}_")
     nodes.setdefault(node_id, _node(node_id, label, kind, source_file))
-    if _is_broad_semantic(label, kind):
+    if broad:
         return
     edges.append(_edge(card_id, node_id, relation, source_file, confidence=confidence))
     edges.append(_edge(node_id, card_id, f"expands_to_{relation}", source_file, confidence=confidence))
@@ -462,7 +481,11 @@ def build_db_graph(
     extraction = build_extraction(cards, db=db)
     (out / ".graphify_extract.json").write_text(json.dumps(extraction, indent=2), encoding="utf-8")
 
-    graph = build.build([extraction], directed=True)
+    # The DB generator already assigns stable, domain-specific IDs and creates
+    # each node once. Graphify 0.9 enables fuzzy entity deduplication by default;
+    # applying it here collapses distinct hunt cards with similar titles. Keep
+    # Graphify's build/validation path while disabling that redundant pass.
+    graph = build.build([extraction], directed=True, dedup=False)
     communities = cluster.cluster(graph)
     cohesion = cluster.score_all(graph, communities)
     gods = analyze.god_nodes(graph, top_n=15)
@@ -480,6 +503,7 @@ def build_db_graph(
                 cat_counts[label] += 3
         community_labels[cid] = cat_counts.most_common(1)[0][0] if cat_counts else f"DB Community {cid}"
 
+    community_labels = _unique_community_labels(community_labels)
     questions = analyze.suggest_questions(graph, communities, community_labels)
     detection = {
         "total_files": len({c.get("ref") for c in cards if c.get("ref")}),
@@ -487,10 +511,15 @@ def build_db_graph(
     }
     token_cost = {"input": 0, "output": 0}
 
-    export.to_json(graph, communities, str(out / "graph.json"), force=True)
-    graph_data = json.loads((out / "graph.json").read_text(encoding="utf-8"))
-    graph_data["edges"] = graph_data.get("links", [])
-    (out / "graph.json").write_text(json.dumps(graph_data, indent=2), encoding="utf-8")
+    written = export.to_json(
+        graph,
+        communities,
+        str(out / "graph.json"),
+        force=True,
+        community_labels=community_labels,
+    )
+    if not written:
+        raise RuntimeError("Graphify refused to write graph.json")
 
     graph_report = report.generate(
         graph,

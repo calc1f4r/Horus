@@ -1,69 +1,71 @@
 # substrate
 
-> 408 nodes · cohesion 0.02
+> 77 nodes · cohesion 0.07
 
 ## Key Concepts
 
-- **single_contract** (86 connections) — `DB/amm/concentrated-liquidity/slippage-sandwich-frontrun.md`
-- **Ibc Packet Channel Handling** (65 connections) — `DB/cosmos/app-chain/ibc/packet-channel-handling.md`
-- **Error Reporting** (63 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **Error Reporting** (63 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **3. Lifecycle Init Error** (61 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **Validation Missing** (57 connections) — `DB/cosmos/app-chain/fund-safety/missing-validation.md`
-- **Keywords** (57 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **Amm Dex Liquidity** (55 connections) — `DB/cosmos/app-chain/liquidity/amm-dex-pool-math.md`
-- **Vault Deposit Accounting** (55 connections) — `DB/cosmos/app-chain/fund-safety/deposit-withdrawal-accounting.md`
-- **Lending Liquidation** (55 connections) — `DB/cosmos/app-chain/lending/liquidation-collateral-accounting.md`
 - **Token Issuance** (55 connections) — `DB/substrate/pallets/token-balance-accounting.md`
-- **Fee Incentive Distribution** (53 connections) — `DB/cosmos/app-chain/rewards/fee-incentive-distribution.md`
-- **Similar Reports** (53 connections) — `DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md`
-- **Vulnerable Code Pattern (generic)** (53 connections) — `DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md`
-- **Validation Missing** (53 connections) — `DB/substrate/pallets/missing-validation.md`
 - **Dos Unbounded** (53 connections) — `DB/substrate/pallets/unbounded-iteration-dos.md`
-- **Error Handling State Consistency** (51 connections) — `DB/cosmos/app-chain/fund-safety/error-handling-state-consistency.md`
-- **Lsd Delegation Rewards** (51 connections) — `DB/cosmos/app-chain/staking/lsd-delegation-rewards.md`
-- **Token Denom** (51 connections) — `DB/cosmos/app-chain/tokens/token-denom-handling.md`
-- **9. Lifecycle Version Compat** (51 connections) — `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- **Detection & Hunt Strategy** (51 connections) — `DB/eth-l1-clients/p2p/gossipsub-malformed-message.md`
 - **Lazy EMA Oracle Diverges from Omnipool Spot Price via Un-Hooked Reserve Changes** (51 connections) — `DB/substrate/oracle/ema-oracle-manipulation.md`
 - **Lending Liquidation** (51 connections) — `DB/substrate/pallets/lending-liquidation.md`
 - **Vault Deposit Accounting** (51 connections) — `DB/substrate/pallets/vault-deposit-accounting.md`
-- **multi_contract** (50 connections) — `DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md`
-- *... and 383 more nodes in this community*
+- **Missing Point-at-Infinity and Canonicality Checks in sr25519 Signature Verification** (47 connections) — `DB/substrate/crypto/sr25519-signature-verification.md`
+- **Error Handling** (39 connections) — `DB/substrate/pallets/error-handling-state-consistency.md`
+- **Fee Handling** (35 connections) — `DB/substrate/pallets/fee-handling.md`
+- **Staking Ledger Relock of Already-Spent Unlocked Chunks (Double Spend)** (33 connections) — `DB/substrate/pallets/staking-unlock-relock-double-spend.md`
+- **reports/substrate-l1_findings/hydradx-c4-2401.md** (16 connections) — `DB/substrate/amm/omnipool-liquidity-math.md`
+- **reports/substrate-l1_findings/chainflip-backend-audits-2023-04-trailofbits-securityreview-pdf.md** (8 connections) — `DB/substrate/pallets/missing-validation.md`
+- **reports/substrate-l1_findings/composable-audits-halborn-audit20210229-pallets-core-pdf.md** (8 connections) — `DB/substrate/oracle/ema-oracle-manipulation.md`
+- **reports/substrate-l1_findings/composable-halborn-core.md** (8 connections) — `DB/substrate/oracle/ema-oracle-manipulation.md`
+- **reports/substrate-l1_findings/starlay-oak-wasm.md** (8 connections) — `DB/substrate/crypto/sr25519-signature-verification.md`
+- **reports/substrate-l1_findings/chainflip-backend-audits-multisig-kudelski-q1-2022-pdf.md** (6 connections) — `DB/substrate/crypto/sr25519-signature-verification.md`
+- **reports/substrate-l1_findings/composable-audits-solana-restaking-vaults-restaking-vaults-audit-pdf.md** (6 connections) — `DB/substrate/pallets/missing-validation.md`
+- **lending pallets and liquidation logic** (4 connections) — `DB/cosmos/app-chain/lending/liquidation-collateral-accounting.md`
+- **vault/staking衍生 deposit flows** (4 connections) — `DB/cosmos/app-chain/fund-safety/deposit-withdrawal-accounting.md`
+- **incomplete failure handling** (4 connections) — `DB/cosmos/app-chain/fund-safety/error-handling-state-consistency.md`
+- **lending pallets and liquidation logic** (4 connections) — `DB/cosmos/app-chain/lending/liquidation-collateral-accounting.md`
+- **liquidation accounting gap** (4 connections) — `DB/cosmos/app-chain/lending/liquidation-collateral-accounting.md`
+- **price move + liquidate** (4 connections) — `DB/cosmos/app-chain/lending/liquidation-collateral-accounting.md`
+- **share accounting gap** (4 connections) — `DB/cosmos/app-chain/fund-safety/deposit-withdrawal-accounting.md`
+- **reports/substrate-l1_findings/acala-c4-2401.md** (4 connections) — `DB/substrate/pallets/fee-handling.md`
+- **reports/substrate-l1_findings/audit-reports-snowbridge-2024-02-12-audit-report-snowbridge-extension-v1-1-pdf.md** (4 connections) — `DB/substrate/pallets/error-handling-state-consistency.md`
+- *... and 52 more nodes in this community*
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [cosmos 7](cosmos_7.md) (57 shared connections)
+- [defi](defi.md) (11 shared connections)
+- [substrate 2](substrate_2.md) (7 shared connections)
+- [eth-l1 2](eth-l1_2.md) (7 shared connections)
+- [substrate 3](substrate_3.md) (5 shared connections)
+- [zk-rollup 4](zk-rollup_4.md) (5 shared connections)
+- [bnb 2](bnb_2.md) (2 shared connections)
+- [defi 4](defi_4.md) (1 shared connections)
 
 ## Source Files
 
-- `DB/amm/concentrated-liquidity/slippage-sandwich-frontrun.md`
-- `DB/bnb-chain/consensus/geth-inherited-bsc-audit-findings.md`
-- `DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md`
-- `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
-- `DB/cosmos/app-chain/access-control/key-management.md`
-- `DB/cosmos/app-chain/consensus/consensus-finality-vulnerabilities.md`
 - `DB/cosmos/app-chain/fund-safety/deposit-withdrawal-accounting.md`
 - `DB/cosmos/app-chain/fund-safety/error-handling-state-consistency.md`
-- `DB/cosmos/app-chain/fund-safety/missing-validation.md`
-- `DB/cosmos/app-chain/ibc/ics20v2-transfer-validation.md`
-- `DB/cosmos/app-chain/ibc/packet-channel-handling.md`
 - `DB/cosmos/app-chain/lending/liquidation-collateral-accounting.md`
-- `DB/cosmos/app-chain/lifecycle/upgrade-migration-vulnerabilities.md`
-- `DB/cosmos/app-chain/liquidity/amm-dex-pool-math.md`
 - `DB/cosmos/app-chain/node/p2p-bandwidth-amplification.md`
-- `DB/cosmos/app-chain/rewards/fee-incentive-distribution.md`
-- `DB/cosmos/app-chain/staking/lsd-delegation-rewards.md`
-- `DB/cosmos/app-chain/tokens/token-denom-handling.md`
-- `DB/cosmos/app-chain/wasm/cosmwasm-contract-bugs.md`
-- `DB/eth-l1-clients/p2p/gossipsub-malformed-message.md`
+- `DB/substrate/amm/omnipool-liquidity-math.md`
+- `DB/substrate/crypto/sr25519-signature-verification.md`
+- `DB/substrate/oracle/ema-oracle-manipulation.md`
+- `DB/substrate/pallets/error-handling-state-consistency.md`
+- `DB/substrate/pallets/fee-handling.md`
+- `DB/substrate/pallets/lending-liquidation.md`
+- `DB/substrate/pallets/missing-validation.md`
+- `DB/substrate/pallets/staking-unlock-relock-double-spend.md`
+- `DB/substrate/pallets/token-balance-accounting.md`
+- `DB/substrate/pallets/unbounded-iteration-dos.md`
+- `DB/substrate/pallets/vault-deposit-accounting.md`
 
 ## Audit Trail
 
-- EXTRACTED: 315 (17%)
-- INFERRED: 1557 (83%)
+- EXTRACTED: 43 (14%)
+- INFERRED: 265 (86%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

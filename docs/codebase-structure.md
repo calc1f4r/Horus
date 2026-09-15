@@ -215,7 +215,7 @@ Horus/
 │   ├── db-guide.md                        #   DB entry conventions & search workflows
 │   └── codebase-structure.md              #   This file
 ├── CONTRIBUTING.md                        # Contribution guidelines
-├── LICENSE                                # MIT License
+├── LICENSE                                # Apache License 2.0
 └── README.md                              # Project overview and quick start
 ```
 
