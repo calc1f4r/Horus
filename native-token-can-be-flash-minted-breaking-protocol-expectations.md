@@ -1,0 +1,103 @@
+---
+# Core Classification
+protocol: Optimism Interop
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 50080
+audit_firm: Spearbit
+contest_link: https://github.com/spearbit/portfolio/blob/master/pdfs/OptimismInterop-Spearbit-Security-Review-February-2025.pdf
+source_link: https://github.com/spearbit/portfolio/blob/master/pdfs/OptimismInterop-Spearbit-Security-Review-February-2025.pdf
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 4
+finders:
+  - Zach Obront
+  - Phaze
+  - Rvierdiiev
+  - RustyRabbit
+---
+
+## Vulnerability Title
+
+Native token can be flash minted, breaking protocol expectations
+
+### Overview
+
+
+The bug report describes a medium risk issue where the current interop contracts allow users to "flash mint" ETH, resulting in a temporary hold of more ETH than the total supply in existence. This breaks important app layer assumptions and can affect the composability with other contracts. The report suggests that this issue can be replicated by performing certain actions on two separate chains in the same block. The recommendation for fixing this bug is yet to be determined, but it has been acknowledged by the relevant teams. 
+
+### Original Finding Content
+
+## Security Audit Report
+
+## Severity: Medium Risk
+
+### Context
+(No context files were provided by the reviewer)
+
+### Description
+Protocols have been designed with the assumption that there is a fixed amount of ETH in existence. For example, ETH balances are often stored as `uint96` on the knowledge that it will be impossible to overflow. The current interop contracts break this invariant by allowing users to "flash mint" ETH by calling `relayERC20()` before `sendERC20()` on the `SuperchainWETH.sol` contract. If they perform this action on two separate chains in the same block, this cycle will net out to being accepted, but will allow the caller to temporarily hold up to `type(uint248).max` of ETH mid execution.
+
+While flash minting is a common practice with some ERC20s, it is assumed that for ETH, there is an upper bound to flash loans of the total supply in existence. Because `type(uint248).max` of ETH will be placed in the `ETHLiquidity` contract, this assumption is no longer true, and users temporarily hold far more than the total amount of ETH in existence. This can result in important app layer assumptions being broken, breaking composability with L1 contracts.
+
+### Proof of Concept
+We can imagine the following scenario:
+- A user uses the `L2ToL2CrossDomainMessenger` to call `relayETH()` on the `SuperchainWETH` contract on Chain A. This gives them access to the requested WETH, but requires a sending transaction from Chain B to be valid.
+- They perform any actions they would like with this ETH and then call `sendETH()` to send the funds back to Chain B, all in the same transaction.
+- Meanwhile, on Chain B, they perform the same two actions (relay and then send).
+- In both cases, ETH was flash minted by calling `relay` before `send`, but was valid due to the timestamp invariant.
+
+### Recommendation
+TBD.
+
+### OP Labs
+Acknowledged. Cycles are disallowed by the protocol. It may happen temporarily during execution, but should never happen if the sequencer checks the messages.
+
+### Cantina Managed
+Acknowledged.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Spearbit |
+| Protocol | Optimism Interop |
+| Report Date | N/A |
+| Finders | Zach Obront, Phaze, Rvierdiiev, RustyRabbit |
+
+### Source Links
+
+- **Source**: https://github.com/spearbit/portfolio/blob/master/pdfs/OptimismInterop-Spearbit-Security-Review-February-2025.pdf
+- **GitHub**: N/A
+- **Contest**: https://github.com/spearbit/portfolio/blob/master/pdfs/OptimismInterop-Spearbit-Security-Review-February-2025.pdf
+
+### Keywords for Search
+
+`vulnerability`
+
