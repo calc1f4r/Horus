@@ -1,0 +1,126 @@
+---
+# Core Classification
+protocol: Pantheonecosystem
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 44096
+audit_firm: Shieldify
+contest_link: none
+source_link: https://github.com/shieldify-security/audits-portfolio-md/blob/main/PantheonEcosystem-Security-Review.md
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - Shieldify Security
+---
+
+## Vulnerability Title
+
+[M-01] Permanent `Fees` Loss if The Owner Forget to Executed `setFeeAddress()` Function
+
+### Overview
+
+
+The report describes a bug in the `PANTHEON.sol` contract, which is used to store tax fees when the `mint()` or `redeem()` functions are called. The bug is that if the contract owner forgets to set the `FEE_ADDRESS` variable, the fees will be sent to the zero address, resulting in a loss of fees for the protocol. The affected code is located in lines 35-38 of the contract. The recommendation is to pre-set the `FEE_ADDRESS` in the constructor to avoid this issue. The team has acknowledged the bug and will work to fix it.
+
+### Original Finding Content
+
+## Severity
+
+Medium
+
+## Description
+
+The `FEE_ADDRESS` address in `PANTHEON.sol` contract is used to store `4%` tax fees when the user calls `mint()` or `redeem()` functions. This `4%` fee is distributed as follows:
+
+- `3%` will be used to incentivize `liquidity` providers manually through bribes.
+- `1%` is the `pantheon team` profit.
+
+The impact is a loss of liquidity and Pantheon team fees.
+
+In case the owner of the contract forgets to call `setFeeAddress()` function, `FEE_ADDRESS` storage variable will be initialized by default to `address(0x0)`. Therefore when someone calls `mint()` or `redeem()` functions the fees will be sent to the zero address, which is a loss of tax fees for the protocol.
+
+## Location of Affected Code
+
+File: [`PANTHEON.sol#L35-L38`](https://github.com/MikeDamiani/PANTHEON/blob/55f4902535cdbb038b21e8c1c9cfb4582cbf354d/PANTHEON.sol#L35-L38)
+
+```solidity
+address payable private FEE_ADDRESS;
+...
+function setFeeAddress(address _address) external onlyOwner {
+  require(_address != address(0x0));
+  FEE_ADDRESS = payable(_address);
+}
+```
+
+## Recommendation
+
+It is recommended to pre-set the `FEE_ADDRESS` in the constructor as follows:
+
+```diff
+- address payable private FEE_ADDRESS;
++ address payable public feeAddress;
+
++ error ZeroAddressNotAllowed();
+
+constructor(address _feeAddress) payable ERC20("Pantheon", "PANTHEON") {
++ if(_feeAddress == address(0)) revert ZeroAddressNotAllowed();
+
+  _mint(msg.sender, msg.value * MIN);
+  totalEth = msg.value;
+
++ feeAddress = payable(_feeAddress);
+
+  transfer(0x000000000000000000000000000000000000dEaD, 10000);
+}
+```
+
+## Team Response
+
+Acknowledged, will be mitigated.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Shieldify |
+| Protocol | Pantheonecosystem |
+| Report Date | N/A |
+| Finders | Shieldify Security |
+
+### Source Links
+
+- **Source**: https://github.com/shieldify-security/audits-portfolio-md/blob/main/PantheonEcosystem-Security-Review.md
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+

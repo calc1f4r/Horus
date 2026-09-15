@@ -1,0 +1,134 @@
+---
+# Core Classification
+protocol: Polynomial Protocol
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 20250
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2023-03-polynomial
+source_link: https://code4rena.com/reports/2023-03-polynomial
+github_link: https://github.com/code-423n4/2023-03-polynomial-findings/issues/112
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - KIntern\_NA
+---
+
+## Vulnerability Title
+
+[M-13] Attacker can transfer all SUSD’s balance of LiquidityPool as margin to Synthetix perpetual market, and break the actions of users until the pool is rebalanced by the authority
+
+### Overview
+
+
+This bug report is about an issue found in the `LiquidityPool` contract. The `_hedge` function in the contract transfers margin of a certain size for every trade, regardless of whether the size of the pool's perpetual position increases or decreases. An attacker can exploit this by repeating open and close a position in 1 transaction, causing the pool to transfer all its SUSD tokens as margin to the Synthetix perpetual market. This can lead to users' actions being broken due to the lack of SUSD in the pool until it is rebalanced by the authority. Furthermore, the attacker can front-run to break the actions of important specific users.
+
+The recommended mitigation steps are to calculate the `marginRequired` (which can be positive or negative) from the new perpetual size and the remaining margin. This should be done in a similar way to the `rebalanceMargin` function.
+
+The severity of this issue was initially disagreed with, but was later increased to medium after a discussion with the sponsor. It is considered a valid issue, although it will not be fixed.
+
+### Original Finding Content
+
+
+Contract `LiquidityPool` will transfer margin of size delta for every trade, and this margin is always > 0. Then attacker can repeat open and close a position in 1 transaction, to make the pool transfer all its SUSD tokens to Synthetix perpetual market as margin, even the perpetual size of `LiquidityPool` will not change after that. Then many actions of users which need SUSD of the pool such as withdrawing liquidity tokens, opening short positions, closing long positions... can't be executed until the pool is rebalanced by the authority.
+
+### Proof of concept
+
+Let's take a look at function `_hedge` in contract `LiquidityPool`:
+
+```solidity
+function _hedge(int256 size, bool isLiquidation) internal returns (uint256 hedgingFees) {
+    ...
+    uint256 marginRequired = _calculateMargin(hedgingSize) + hedgingFees;
+    usedFunds += int256(marginRequired);
+    require(usedFunds <= 0 || totalFunds >= uint256(usedFunds));
+
+    perpMarket.transferMargin(int256(marginRequired));
+    ...
+```
+
+In this function, `marginRequired` is always > 0, since it is the required margin for the independant `hedgingSize`.
+
+Even the size of pool's perpetual position increases or decreases (sometimes it doesn't need to transfer more positive margin), it always transfer this amount of SUSD as margin to Synthetix perpetual market.
+
+Then attacker can make the pool transfer all its SUSD tokens as margin by repeating open and close a position, although it will not change the pool's perpetual size after that. It leads to users' actions can be broken because of the lack of SUSD in LiquidityPool, until the pool is rebalanced by the authority. Furthermore, the attacker can front-run to break the actions of important specific users.
+
+### Recommended Mitigation Steps
+
+Calculate `marginRequired` (can be positive or negative) from the new perpetual size  and the remaining margin. I advise you to use the similar calculation from the function `rebalanceMargin`.
+
+**[mubaris (Polynomial) disagreed with severity and commented](https://github.com/code-423n4/2023-03-polynomial-findings/issues/112#issuecomment-1495952003):**
+ > The entire action of the pool will be watched by a keeper bot to call `rebalanceMargin()` anytime required. I disagree with the severity of this issue.
+
+**[Dravee (judge) decreased severity to Low/Non-Critical and commented](https://github.com/code-423n4/2023-03-polynomial-findings/issues/112#issuecomment-1500901346):**
+ > > *Furthermore, the attacker can front-run to break the actions of important specific users.*
+> 
+> Optimism, no front-running. 
+> 
+> Assets aren't at risk and this can't really be considered a real grief attack either if this is just a random act. 
+> 
+> Lack of coded POC too to prove that this could actually be done for cheap or not by the attacker. Hand-waved arguments.
+> 
+> Will downgrade to QA.
+
+**[duc (warden) commented](https://github.com/code-423n4/2023-03-polynomial-findings/issues/112#issuecomment-1536546711):**
+ > This issue highlights the problem that the LiquidityPool contract always adds margin for every trade, even if sizeDelta is decreased. The marginRequired should be calculated correctly, similar to the rebalanceMargin function, to prevent the transferred margin from growing too high.
+ > 
+> Therefore, the attacker can conduct a grief attack by repeatedly opening and closing a position in 1 transaction, causing the LiquidityPool to transfer more margin than it actually needs. I am aware that a keeper bot will be used to call rebalanceMargin() whenever necessary, but bot's action can't guarantee flawless performance indefinitely. So within the scope of the smart contract, I think this issue deserves to be considered a valid medium.
+
+**[Dravee (judge) increased severity to Medium and commented](https://github.com/code-423n4/2023-03-polynomial-findings/issues/112#issuecomment-1540459576):**
+ > Talked with the sponsor.<br>
+> This issue can indeed be considered valid, but will be a no-fix.<br>
+> Still a nice-to-have on the final report.
+
+
+
+***
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Polynomial Protocol |
+| Report Date | N/A |
+| Finders | KIntern\_NA |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2023-03-polynomial
+- **GitHub**: https://github.com/code-423n4/2023-03-polynomial-findings/issues/112
+- **Contest**: https://code4rena.com/reports/2023-03-polynomial
+
+### Keywords for Search
+
+`vulnerability`
+
