@@ -1,0 +1,149 @@
+---
+# Core Classification
+protocol: Qoda DAO
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 51661
+audit_firm: Halborn
+contest_link: https://www.halborn.com/audits/steadily-consulting-inc/qoda-dao
+source_link: https://www.halborn.com/audits/steadily-consulting-inc/qoda-dao
+github_link: none
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - Halborn
+---
+
+## Vulnerability Title
+
+Wrong logic in overriding `\_update` function is blocking all mint and burn operations
+
+### Overview
+
+
+Summary: The OpenZeppelin v5.x contracts introduced a function called `_update` which is used to update balances in various operations of a common ERC-20 token. However, in the QodaToken contract, which inherits from the OpenZeppelin contract, the overriding of this function is causing an issue where all mint and burn operations are being blocked. This is not standard practice and could be a vulnerability. To reproduce the issue, a test was run and the stack trace showed that the transfer to the zero address was being blocked. The recommendation is to not forbid transfers to or from the zero address when overriding the `_update` function. The issue has been addressed by refactoring or removing the affected functions in the QodaToken contract. The commit hash for the remediation is `144cab46e7b09ac62604dd83996db4e6a2c5f083`.
+
+### Original Finding Content
+
+##### Description
+
+Introduced by the `OpenZeppelin's` contracts v5.x, the `_update` function is responsible for updating balances in the various state-changing operations of a common ERC-20 token, such as `transfer`, `transferFrom`, `_mint` and `_burn`. It is advised by the official documentation of the `ERC20.sol` contract (**version 5**) that custom logic in the transfer mechanisms should be implemented by overriding the `_update` function.
+
+The `QodaToken` contract is inheriting from the aforementioned `ERC20 v5.x` by `OpenZeppelin`, and is implementing custom logic on transfers, such as fees and other conditions, by overriding the `_update` function. The head of the function is as follows:
+
+**- Function** `_update` **- src/QodaToken.sol [Lines: 257-261]**
+
+```
+    function _update(address from, address to, uint256 amount) internal override {
+        require(from != address(0), "ERC20: transfer from the zero address");
+        require(to != address(0), "ERC20: transfer to the zero address");
+        require(!blacklisted[from], "Sender blacklisted");
+        require(!blacklisted[to], "Receiver blacklisted");
+```
+
+  
+
+From the code snippet provided, it is possible to state that the overriding logic is effectively **blocking all mint and burn operations**, by requiring that both `to` and `from` parameters are different from the `address(0)`.
+
+While this could be due to a design decision, it is not standard practice to block all minting and burning functionalities, that in the presented scenario are only callable through `super._update`, by calling the parent `_upgrade`, non-modified function in the `ERC20` contract.
+
+##### Proof of Concept
+
+To reproduce this vulnerability, it was simulated a `burn` transaction, that will fail because the overriding `_update` function is blocking all `mint` and `burn` operations.
+
+  
+
+**- Forge test**
+
+```
+    function test_QodaToken_Impossible_to_burn_tokens() public {
+        vm.startPrank(seraph);
+        /// expect to revert as custom implementation
+        /// in the overriding `_update` function
+        /// is blocking all transfers to address(0)
+        vm.expectRevert();
+        qoda_token.burn(seraph, 1 ether);
+        vm.stopPrank();
+    }
+```
+
+  
+
+**- Stack traces**
+
+```
+  [11802] Halborn_QodaToken_test_Unit::test_QodaToken_Impossible_to_burn_tokens()
+    ├─ [0] VM::startPrank(0x4CCeBa2d7D2B4fdcE4304d3e09a1fea9fbEb1528)
+    │   └─ ← [Return] 
+    ├─ [0] VM::expectRevert(custom error f4844814:)
+    │   └─ ← [Return] 
+    ├─ [682] QodaToken::burn(0x4CCeBa2d7D2B4fdcE4304d3e09a1fea9fbEb1528, 1000000000000000000 [1e18])
+    │   └─ ← [Revert] revert: ERC20: transfer to the zero address
+    ├─ [0] VM::stopPrank()
+    │   └─ ← [Return] 
+    └─ ← [Stop] 
+```
+
+##### BVSS
+
+[AO:A/AC:L/AX:L/C:N/I:M/A:N/D:L/Y:N/R:N/S:C (7.0)](/bvss?q=AO:A/AC:L/AX:L/C:N/I:M/A:N/D:L/Y:N/R:N/S:C)
+
+##### Recommendation
+
+Do not forbid transfers `from` or `to` the `address(0)` when overriding the `_update` function.
+
+  
+
+### Remediation Plan
+
+**SOLVED:** The issue was addressed by refactoring or removing the affected functions in the QodaToken.sol contract. The commit hash is `144cab46e7b09ac62604dd83996db4e6a2c5f083`.
+
+##### Remediation Hash
+
+<https://github.com/GoSteadily/qoda-dao/commit/144cab46e7b09ac62604dd83996db4e6a2c5f083>
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Halborn |
+| Protocol | Qoda DAO |
+| Report Date | N/A |
+| Finders | Halborn |
+
+### Source Links
+
+- **Source**: https://www.halborn.com/audits/steadily-consulting-inc/qoda-dao
+- **GitHub**: N/A
+- **Contest**: https://www.halborn.com/audits/steadily-consulting-inc/qoda-dao
+
+### Keywords for Search
+
+`vulnerability`
+
