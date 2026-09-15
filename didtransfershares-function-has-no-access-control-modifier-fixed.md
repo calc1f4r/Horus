@@ -1,0 +1,144 @@
+---
+# Core Classification
+protocol: Forta Delegated Staking
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 13221
+audit_firm: ConsenSys
+contest_link: none
+source_link: https://consensys.net/diligence/audits/2022/11/forta-delegated-staking/
+github_link: none
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.80
+financial_impact: high
+
+# Scoring
+quality_score: 4
+rarity_score: 1
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - liquid_staking
+  - dexes
+  - cdp
+  - services
+  - cross_chain
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - George Kobakhidze
+  -  Tejaswa Rastogi
+
+---
+
+## Vulnerability Title
+
+didTransferShares function has no access control modifier ✓ Fixed
+
+### Overview
+
+
+The Forta project has identified a vulnerability in its staking contract, the FortaStaking contract. This contract is responsible for transferring staked tokens (shares) and allocating rewards to the token holders. To enable this, the FortaStaking contract implements a _beforeTokenTransfer() function that calls the StakeAllocator.didTransferShares() to transfer the underlying allocation. This function has an external visibility, meaning anyone can call it with whatever parameters they want. This can lead to abuse of the function, as there is no access control modifier to allow only the staking contract to call it. As a result, any user can call didTransferShares() with their own address as the recipient and any address they want as the sender, and the call will succeed. To resolve this issue, the Forta team has restricted the concerned function to be only called by STAKING_CONTRACT_ROLE in a pull request with the final commit hash of 97fbd425b64d793252f39d94b378e2655286d947. This will ensure that only the staking contract can call the didTransferShares() function, and other users will not be able to abuse the function.
+
+### Original Finding Content
+
+#### Resolution
+
+
+
+The concerned function has now been restricted to be only called by `STAKING_CONTRACT_ROLE` in a pull request [146](https://github.com/forta-network/forta-contracts/pull/146/files) with final commit hash as `97fbd425b64d793252f39d94b378e2655286d947`
+
+
+#### Description
+
+
+The staked tokens (shares) in Forta are meant to be transferable. Similarly, the rewards allocation for these shares for delegated staking is meant to be transferable as well. This allocation for the shares' owner is tracked in the `StakeAllocator`. To enable this, the Forta staking contract `FortaStaking` implements a `_beforeTokenTransfer()` function that calls `_allocator.didTransferShares()` when it is appropriate to transfer the underlying allocation.
+
+
+**code/contracts/components/staking/FortaStaking.sol:L572-L585**
+
+
+
+```
+function \_beforeTokenTransfer(
+    address operator,
+    address from,
+    address to,
+    uint256[] memory ids,
+    uint256[] memory amounts,
+    bytes memory data
+) internal virtual override {
+    for (uint256 i = 0; i < ids.length; i++) {
+        if (FortaStakingUtils.isActive(ids[i])) {
+            uint8 subjectType = FortaStakingUtils.subjectTypeOfShares(ids[i]);
+            if (subjectType == DELEGATOR\_NODE\_RUNNER\_SUBJECT && to != address(0) && from != address(0)) {
+                \_allocator.didTransferShares(ids[i], subjectType, from, to, amounts[i]);
+            }
+
+```
+Due to this, the `StakeAllocator.didTransferShares()` has an `external` visibility so it can be called from the `FortaStaking` contract to perform transfers. However, there is no access control modifier to allow *only*
+the staking contract to call this. Therefore, anyone can call this function with whatever parameters they want.
+
+
+**code/contracts/components/staking/allocation/StakeAllocator.sol:L341-L349**
+
+
+
+```
+function didTransferShares(
+    uint256 sharesId,
+    uint8 subjectType,
+    address from,
+    address to,
+    uint256 sharesAmount
+) external {
+    \_rewardsDistributor.didTransferShares(sharesId, subjectType, from, to, sharesAmount);
+}
+
+```
+Since the allocation isn’t represented as a token standard and is tracked directly in the `StakeAllocator` and `RewardsDistributor`, it lacks many standard checks that would prevent abuse of the function. For example, this function does not have a check for allowance or `msg.sender==from`, so any user could call `didTransferShares()` with `to` being their address and `from` being any address they want to transfer allocation from, and the call would succeed.
+
+
+#### Recommendation
+
+
+Apply access control modifiers as appropriate for this contract, for example `onlyRole()`.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 4/5 |
+| Rarity Score | 1/5 |
+| Audit Firm | ConsenSys |
+| Protocol | Forta Delegated Staking |
+| Report Date | N/A |
+| Finders | George Kobakhidze,  Tejaswa Rastogi
+ |
+
+### Source Links
+
+- **Source**: https://consensys.net/diligence/audits/2022/11/forta-delegated-staking/
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+
