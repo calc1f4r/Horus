@@ -1,0 +1,164 @@
+---
+# Core Classification
+protocol: Isomorph
+chain: everychain
+category: logic
+vulnerability_type: business_logic
+
+# Attack Vector Details
+attack_type: business_logic
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 5702
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/22
+source_link: none
+github_link: https://github.com/sherlock-audit/2022-11-isomorph-judging/issues/158
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.80
+financial_impact: medium
+
+# Scoring
+quality_score: 4
+rarity_score: 2
+
+# Context Tags
+tags:
+  - business_logic
+
+protocol_categories:
+  - liquid_staking
+  - yield
+  - synthetics
+  - privacy
+
+# Audit Details
+report_date: unknown
+finders_count: 10
+finders:
+  - HollaDieWaldfee
+  - 0x52
+  - Jeiwan
+  - bin2chen
+  - KingNFT
+---
+
+## Vulnerability Title
+
+M-10: Vault_Base_ERC20#_updateVirtualPrice calculates interest incorrectly if updated frequently
+
+### Overview
+
+
+Issue M-10 is a bug in the Vault_Base_ERC20#_updateVirtualPrice function found by multiple users on the Sherlock Audit Github. The issue is that the function updates the time to an incorrect timestamp, which can be abused to lower the effective interest rate. 
+
+The issue is that when _updateVirtualPrice is called with block.timestamp, due to truncation threeMinuteDelta is always rounded down. This means that if there has been 1.99 3-minute intervals it will truncate to 1, updating the interest by only a single increment but pushing the new time forward 359 seconds. When called again it will use the last timestamp as the starting point, so 179 seconds worth of interest have been permanently lost. 
+
+The impact of this bug is that interest calculations will be incorrect if they are updated frequently, which can be abused by users with large amounts of debt to halve their accumulated interest. To fix this, it is recommended that the code should truncate the time to the closest 3-minute interval before updating the interest. The bug has been fixed and the code snippet can be found on the Sherlock Audit Github.
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2022-11-isomorph-judging/issues/158 
+
+## Found by 
+bin2chen, HollaDieWaldfee, Jeiwan, hansfriese, libratus, rvierdiiev, wagmi, 0x52, KingNFT, Atarpara
+
+## Summary
+
+Updating the virtual price of an asset happens in discrete increments of 3 minutes. This is done to reduce the chance of DOS loops. The issue is that it updates the time to an incorrect timestamp. It should update to the truncated 3 minute interval but instead updates to the current timestamp. The result is that the interest calculation can be abused to lower effective interest rate.
+
+## Vulnerability Detail
+
+    function _updateVirtualPrice(uint256 _currentBlockTime, address _collateralAddress) internal { 
+        (   ,
+            ,
+            ,
+            uint256 interestPer3Min,
+            uint256 lastUpdateTime,
+            uint256 virtualPrice,
+
+        ) = _getCollateral(_collateralAddress);
+        uint256 timeDelta = _currentBlockTime - lastUpdateTime;
+        //exit gracefully if two users call the function for the same collateral in the same 3min period
+        //@audit increments 
+        uint256 threeMinuteDelta = timeDelta / 180; 
+        if(threeMinuteDelta > 0) {
+            for (uint256 i = 0; i < threeMinuteDelta; i++ ){
+            virtualPrice = (virtualPrice * interestPer3Min) / LOAN_SCALE; 
+            }
+            collateralBook.vaultUpdateVirtualPriceAndTime(_collateralAddress, virtualPrice, _currentBlockTime);
+        }
+    }
+
+_updateVirtualPrice is used to update the interest calculations for the specified collateral and is always called with block.timestamp. Due to truncation threeMinuteDelta is always rounded down, that is if there has been 1.99 3-minute intervals it will truncate to 1. The issue is that in the collateralBook#vaultUpdateVirtualPriceAndTime subcall the time is updated to block.timestamp (_currentBlockTime). 
+
+Example:
+lastUpdateTime = 1000 and block.timestamp (_currentBlockTime) = 1359.
+
+timeDelta = 1359 - 1000 = 359
+
+threeMinuteDelta = 359 / 180 = 1
+
+This updates the interest by only as single increment but pushes the new time forward 359 seconds. When called again it will use 1359 as lastUpdateTime which means that 179 seconds worth of interest have been permanently lost. Users with large loan positions could abuse this to effectively halve their interest accumulation. Given how cheap optimism transactions are it is highly likely this could be exploited profitably with a bot.
+
+## Impact
+
+Interest calculations will be incorrect if they are updated frequently, which can be abused by users with large amounts of debt to halve their accumulated interest
+
+## Code Snippet
+
+https://github.com/sherlock-audit/2022-11-isomorph/blob/main/contracts/Isomorph/contracts/Vault_Base_ERC20.sol#L203-L221
+
+## Tool used
+
+Manual Review
+
+## Recommendation
+
+Before updating the interest time it should first truncate it to the closest 3-minute interval:
+
+        if(threeMinuteDelta > 0) {
+            for (uint256 i = 0; i < threeMinuteDelta; i++ ){
+                virtualPrice = (virtualPrice * interestPer3Min) / LOAN_SCALE; 
+            }
+    +       _currentBlockTime = (_currentBlockTime / 180) * 180;
+            collateralBook.vaultUpdateVirtualPriceAndTime(_collateralAddress, virtualPrice, _currentBlockTime);
+        }
+
+## Discussion
+
+**kree-dotcom**
+
+Sponsor confirmed, will fix.
+
+**kree-dotcom**
+
+Fixed https://github.com/kree-dotcom/isomorph/commit/ae410496c024af5b061cf85997f225ae46fd56e6
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 4/5 |
+| Rarity Score | 2/5 |
+| Audit Firm | Sherlock |
+| Protocol | Isomorph |
+| Report Date | N/A |
+| Finders | HollaDieWaldfee, 0x52, Jeiwan, bin2chen, KingNFT, Atarpara, hansfriese, wagmi, rvierdiiev, libratus |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2022-11-isomorph-judging/issues/158
+- **Contest**: https://app.sherlock.xyz/audits/contests/22
+
+### Keywords for Search
+
+`Business Logic`
+

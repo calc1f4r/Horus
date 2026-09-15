@@ -1,0 +1,109 @@
+---
+# Core Classification
+protocol: Blueberry Staking
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 55658
+audit_firm: 0x52
+contest_link: none
+source_link: https://github.com/solodit/solodit_content/blob/main/reports/0x52/2024-03-27-Blueberry-Staking.md
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - @IAm0x52
+---
+
+## Vulnerability Title
+
+[M-03] Rewards will be permanently lost for ibToken with no deposits
+
+### Overview
+
+
+The bug report is about a problem in a code called BlueberryStaking.sol. The code has a function that distributes rewards based on the number of tokens deposited and the time elapsed. However, if no tokens are deposited, the timestamp is still updated, causing all rewards during this period to be lost. Additionally, rewards are added at the same time tokens are allowed to be deposited, resulting in a guaranteed loss of some rewards. The bug has been fixed in a recent code update.
+
+### Original Finding Content
+
+**Details**
+
+[BlueberryStaking.sol#L482-L485](https://github.com/Blueberryfi/blueberry-staking/blob/efaf7fc690e38914ba475d5ac61a4d0bd3f45c0d/src/BlueberryStaking.sol#L482-L485)
+
+    function rewardPerToken(address _ibToken) public view returns (uint256) {
+        if (totalSupply[_ibToken] == 0) {
+            return rewardPerTokenStored[_ibToken];
+        }
+
+[BlueberryStaking.sol#L782-L790](https://github.com/Blueberryfi/blueberry-staking/blob/efaf7fc690e38914ba475d5ac61a4d0bd3f45c0d/src/BlueberryStaking.sol#L782-L790)
+
+    rewardPerTokenStored[_ibToken] = rewardPerToken(_ibToken);
+    lastUpdateTime[_ibToken] = lastTimeRewardApplicable(_ibToken);
+
+    if (_user != address(0)) {
+        rewards[_user][_ibToken] = _earned(_user, _ibToken);
+        userRewardPerTokenPaid[_user][_ibToken] = rewardPerTokenStored[
+            _ibToken
+        ];
+    }
+
+When distributing rewards, the reward rate and elapsed time are used to determine the number of tokens to distribute. If no ibTokens are deposited, rewards cannot be distributed, however the timestamp in this scenario is still updated. This leads all rewards during this period to be lost.
+
+Additionally rewards are added at the same time that ibTokens are registered and allowed to be deposited. This causes a guaranteed loss of some rewards for every ibToken. The longer it goes before the first deposit the more tokens that are lost.
+
+**Lines of Code**
+
+[BlueberryStaking.sol#L777-L791](https://github.com/Blueberryfi/blueberry-staking/blob/efaf7fc690e38914ba475d5ac61a4d0bd3f45c0d/src/BlueberryStaking.sol#L777-L791)
+
+**Recommendation**
+
+The timestamp should not be updated for an ibToken if there is none of that token deposited.
+
+**Remediation**
+
+Fixed in [PR#29](https://github.com/Blueberryfi/blueberry-staking/pull/29) as recommended.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | 0x52 |
+| Protocol | Blueberry Staking |
+| Report Date | N/A |
+| Finders | @IAm0x52 |
+
+### Source Links
+
+- **Source**: https://github.com/solodit/solodit_content/blob/main/reports/0x52/2024-03-27-Blueberry-Staking.md
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+

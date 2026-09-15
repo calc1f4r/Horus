@@ -1,0 +1,89 @@
+---
+# Core Classification
+protocol: Adrena
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 46792
+audit_firm: OtterSec
+contest_link: https://www.adrena.xyz/
+source_link: https://www.adrena.xyz/
+github_link: https://github.com/AdrenaDEX/adrena
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - Robert Chen
+  - Tamta Topuria
+---
+
+## Vulnerability Title
+
+Reward Claim Post Expiry Of Locked Stake
+
+### Overview
+
+
+This bug report describes two issues with the staking rewards system. The first issue is that users can continue to claim rewards after their locked stake has expired, resulting in an unfair distribution of rewards. The second issue is that rewards for genesis stakes can be minted indefinitely, potentially inflating the supply of LM tokens. The suggested fix is to restrict users from claiming additional rewards after their locked stake has expired. The issue has been resolved in versions 0.06565ea and fab7c76.
+
+### Original Finding Content
+
+## Staking Rewards and Expiry
+
+It is possible to still qualify for the staking rewards after the locked stake expires. `claim_stakes` does not check if the locked stake has expired before processing rewards for resolved rounds. When processing resolved rounds, the function only checks if the stake qualifies for rewards based on its amount and not its expiry status. Consequently, a user may continue to claim rewards from rounds that occurred after the locked stake's expiry date. Thus, users may unfairly receive additional staking rewards even after their locked stake period has ended, resulting in a disproportionate distribution of rewards and potentially depleting the reward pool faster than intended.
+
+Similarly, LM tokens for genesis stakes may be minted in excess. The rewards for genesis stakes are calculated based on the current time and the `genesis_claim_time`. There is no check to cap the genesis staker rewards to the maximum period (180 days). Therefore, users may continue to claim extra rewards for genesis stakes indefinitely, resulting in the over-minting of LM tokens (exceeding `CAMPAIGN_REWARDS_ADX_AMOUNT`). This will result in the minting of more LM tokens than allocated for the genesis rewards campaign, inflating the LM tokens supply.
+
+## Remediation
+
+Ensure users are restricted from claiming any additional rewards after the locked stake expires.
+
+## Patch
+
+Resolved in a 06565e and fab7c76.
+
+© 2024 Otter Audits LLC. All Rights Reserved. 22/59
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | OtterSec |
+| Protocol | Adrena |
+| Report Date | N/A |
+| Finders | Robert Chen, Tamta Topuria |
+
+### Source Links
+
+- **Source**: https://www.adrena.xyz/
+- **GitHub**: https://github.com/AdrenaDEX/adrena
+- **Contest**: https://www.adrena.xyz/
+
+### Keywords for Search
+
+`vulnerability`
+

@@ -1,0 +1,121 @@
+---
+# Core Classification
+protocol: Peapods
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 52786
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/749
+source_link: none
+github_link: https://github.com/sherlock-audit/2025-01-peapods-finance-judging/issues/517
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 9
+finders:
+  - 0xAadi
+  - cu5t0mPe0
+  - pkqs90
+  - fibonacci
+  - queen
+---
+
+## Vulnerability Title
+
+M-34: Improper Handling of Paused Tokens in `TokenRewards._resetExcluded()` Function
+
+### Overview
+
+
+The function `_resetExcluded` in the `TokenRewards` contract does not properly handle paused tokens in the `REWARDS_WHITELISTER`. This can lead to incorrect reward calculations for stakers. The code needs to be modified to check for paused tokens and skip updating their excluded rewards. 
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2025-01-peapods-finance-judging/issues/517 
+
+## Found by 
+0xAadi, X77, ZoA, cu5t0mPe0, fibonacci, pkqs90, prosper, queen, silver\_eth
+
+## Summary
+The function `_resetExcluded` in `TokenRewards` contract does not properly handle tokens that have been paused in the `REWARDS_WHITELISTER`. As a result, the excluded rewards for paused tokens may still be updated, which can lead to inconsistent or incorrect reward calculations for stakers.
+
+## Vulnerability Detail
+In the `_resetExcluded` function, there is a loop that iterates over all rewards tokens. Inside the loop, the function checks if each reward token has been paused by the `REWARDS_WHITELISTER`. However, the logic fails to take into account the paused state of tokens. Specifically, the `REWARDS_WHITELISTER.paused(_token)` check is not used to skip the update of the excluded rewards for tokens that are paused.
+
+Here is the problematic code:
+
+```solidity
+for (uint256 _i; _i < _allRewardsTokens.length; _i++) {
+@>  address _token = _allRewardsTokens[_i]; // @audit REWARDS_WHITELISTER paused not considered
+    rewards[_token][_wallet].excluded = _cumulativeRewards(_token, shares[_wallet], true);
+}
+```
+https://github.com/sherlock-audit/2025-01-peapods-finance/blob/main/contracts/contracts/TokenRewards.sol#L258C5-L263C6
+
+In this loop, the function attempts to update the excluded rewards for each token, but it does not consider whether the token has been paused. If a token is paused, the excluded reward calculation should be skipped to avoid improper reward distribution.
+
+## Impact
+-	Inaccurate reward distribution: If paused tokens are not properly handled, users could receive incorrect reward amounts, either by having their excluded rewards incorrectly updated or by missing out on rewards for paused tokens while performing [`setShares()`](https://github.com/sherlock-audit/2025-01-peapods-finance/blob/main/contracts/contracts/TokenRewards.sol#L97).
+
+## Code Snippet
+https://github.com/sherlock-audit/2025-01-peapods-finance/blob/main/contracts/contracts/TokenRewards.sol#L258C5-L263C6
+
+## Tool used 
+Manual Review
+
+## Recommendation
+-	Add the check for paused tokens in the loop to prevent updating rewards for paused tokens.
+-	Modify the _resetExcluded function to respect the paused state of tokens as follows:
+```diff
+for (uint256 _i; _i < _allRewardsTokens.length; _i++) {
+    address _token = _allRewardsTokens[_i];
++   if (REWARDS_WHITELISTER.paused(_token)) {
++       continue;  // Skip paused tokens
++   }
+    rewards[_token][_wallet].excluded = _cumulativeRewards(_token, shares[_wallet], true);
+}
+```
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Sherlock |
+| Protocol | Peapods |
+| Report Date | N/A |
+| Finders | 0xAadi, cu5t0mPe0, pkqs90, fibonacci, queen, ZoA, X77, silver\_eth, prosper |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2025-01-peapods-finance-judging/issues/517
+- **Contest**: https://app.sherlock.xyz/audits/contests/749
+
+### Keywords for Search
+
+`vulnerability`
+

@@ -1,0 +1,175 @@
+---
+# Core Classification
+protocol: UXD Protocol
+chain: everychain
+category: uncategorized
+vulnerability_type: wrong_math
+
+# Attack Vector Details
+attack_type: wrong_math
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 6269
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/33
+source_link: none
+github_link: https://github.com/sherlock-audit/2023-01-uxd-judging/issues/271
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.80
+financial_impact: medium
+
+# Scoring
+quality_score: 4
+rarity_score: 4
+
+# Context Tags
+tags:
+  - wrong_math
+
+protocol_categories:
+  - liquid_staking
+  - services
+  - derivatives
+  - yield_aggregator
+  - cross_chain
+
+# Audit Details
+report_date: unknown
+finders_count: 8
+finders:
+  - keccak123
+  - 0x52
+  - cccz
+  - Jeiwan
+  - berndartmueller
+---
+
+## Vulnerability Title
+
+M-11: PerpDepository#_placePerpOrder miscalculates fees paid when shorting
+
+### Overview
+
+
+This bug report is about an issue found in the PerpDepository#_placePerpOrder function of the Sherlock Audit project. The issue is that the function miscalculates the fees paid when shorting, as the fee percentage is being applied incorrectly. The code snippet provided shows that the fee amount is calculated using the quote amount returned when opening the new position, which already has the fees taken. This means that the fee percentage is being applied incorrectly. 
+
+The impact of this issue is that totalFeesPaid will be inaccurate, which could lead to disparities in other contracts depending on how it is used. The bug was found by a group of people including Jeiwan, 0x52, berndartmueller, cccz, rvierdiiev, GimelSec, peanuts, and keccak123 and was found using manual review. 
+
+The recommendation given is to rewrite the function _calculatePerpOrderFeeAmount to correctly calculate the fees paid. The code snippet provided shows what the rewritten function should look like.
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2023-01-uxd-judging/issues/271 
+
+## Found by 
+Jeiwan, 0x52, berndartmueller, cccz, rvierdiiev, GimelSec, peanuts, keccak123
+
+## Summary
+
+PerpDepository#_placePerpOrder calculates the fee as a percentage of the quoteToken received. The issue is that this amount already has the fees taken so the fee percentage is being applied incorrectly.
+
+## Vulnerability Detail
+
+    function _placePerpOrder(
+        uint256 amount,
+        bool isShort,
+        bool amountIsInput,
+        uint160 sqrtPriceLimit
+    ) private returns (uint256, uint256) {
+        uint256 upperBound = 0; // 0 = no limit, limit set by sqrtPriceLimit
+
+        IClearingHouse.OpenPositionParams memory params = IClearingHouse
+            .OpenPositionParams({
+                baseToken: market,
+                isBaseToQuote: isShort, // true for short
+                isExactInput: amountIsInput, // we specify exact input amount
+                amount: amount, // collateral amount - fees
+                oppositeAmountBound: upperBound, // output upper bound
+                // solhint-disable-next-line not-rely-on-time
+                deadline: block.timestamp,
+                sqrtPriceLimitX96: sqrtPriceLimit, // max slippage
+                referralCode: 0x0
+            });
+
+        (uint256 baseAmount, uint256 quoteAmount) = clearingHouse.openPosition(
+            params
+        );
+
+        uint256 feeAmount = _calculatePerpOrderFeeAmount(quoteAmount);
+        totalFeesPaid += feeAmount;
+
+        emit PositionOpened(isShort, amount, amountIsInput, sqrtPriceLimit);
+        return (baseAmount, quoteAmount);
+    }
+
+    function _calculatePerpOrderFeeAmount(uint256 amount)
+        internal
+        view
+        returns (uint256)
+    {
+        return amount.mulWadUp(getExchangeFeeWad());
+    }
+
+When calculating fees, `PerpDepository#_placePerpOrder` use the quote amount retuned when opening the new position. It always uses exactIn which means that for shorts the amount of baseAsset being sold is specified. The result is that quote amount returned is already less the fees. If we look at how the fee is calculated we can see that it is incorrect.
+
+Example:
+Imagine the market price of ETH is $1000 and there is a market fee of 1%. The 1 ETH is sold and the contract receives 990 USD. Using the math above it would calculated the fee as $99 (990 * 1%) but actually the fee is $100.
+
+It have submitted this as a medium because it is not clear from the given contracts what the fee totals are used for and I cannot fully assess the implications of the fee value being incorrect.
+
+## Impact
+
+totalFeesPaid will be inaccurate which could lead to disparities in other contracts depending on how it is used
+
+## Code Snippet
+
+https://github.com/sherlock-audit/2023-01-uxd/blob/main/contracts/integrations/perp/PerpDepository.sol#L804-L810
+
+## Tool used
+
+Manual Review
+
+## Recommendation
+
+Rewrite _calculatePerpOrderFeeAmount to correctly calculate the fees paid:
+
+    -   function _calculatePerpOrderFeeAmount(uint256 amount)
+    +   function _calculatePerpOrderFeeAmount(uint256 amount, bool isShort)
+            internal
+            view
+            returns (uint256)
+        {
+    +       if (isShort) {
+    +           return amount.divWadDown(WAD - getExchangeFeeWad()) - amount;
+    +       } else {
+                return amount.mulWadUp(getExchangeFeeWad());
+    +       }
+        }
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 4/5 |
+| Rarity Score | 4/5 |
+| Audit Firm | Sherlock |
+| Protocol | UXD Protocol |
+| Report Date | N/A |
+| Finders | keccak123, 0x52, cccz, Jeiwan, berndartmueller, peanuts, rvierdiiev, GimelSec |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2023-01-uxd-judging/issues/271
+- **Contest**: https://app.sherlock.xyz/audits/contests/33
+
+### Keywords for Search
+
+`Wrong Math`
+

@@ -1,0 +1,143 @@
+---
+# Core Classification
+protocol: Super DCA Liquidity Network
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 63420
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/1171
+source_link: none
+github_link: https://github.com/sherlock-audit/2025-09-super-dca-judging/issues/662
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 24
+finders:
+  - illoy\_sci
+  - jayjoshix
+  - Aamirusmani1552
+  - 0xDaniel\_eth
+  - lucky-gru
+---
+
+## Vulnerability Title
+
+H-2: Attackers will steal rewards from legitimate pools by making duplicate pools for listed token.
+
+### Overview
+
+
+This bug report discusses an issue found in the SuperDCAGauge.sol contract, where the per-token reward accrual function can be exploited by attackers to steal rewards from legitimate pools. This is due to the lack of validation for pool legitimacy, allowing attackers to create unlisted pools and divert rewards meant for listed pools. The attack path involves identifying a listed token with an existing legitimate pool, creating a new malicious pool for the same pair, adding minimal liquidity, and repeatedly adding and removing liquidity to maximize reward theft. The impact of this bug is a complete loss of community rewards for legitimate pools, potentially leading to reduced incentives and loss of trust. To mitigate this issue, the protocol team has fixed it in the SuperDCAGauge.sol contract and suggests adding pool-specific validation or minimum liquidity checks in the future. 
+
+### Original Finding Content
+
+
+Source: https://github.com/sherlock-audit/2025-09-super-dca-judging/issues/662 
+
+## Found by 
+0xB4nkz, 0xBoraichoT, 0xDaniel\_eth, 8olidity, Aamirusmani1552, BADROBINX, BengalCatBalu, JeRRy0422, Kirkeelee, Ollam, PolarizedLight, francoHacker, harry, illoy\_sci, ivanalexandur, jayjoshix, lucky-gru, maigadoh, nganhg, silver\_eth, techOptimizor, v10g1, vinica\_boy, y4y
+
+### Summary
+
+The per-token reward accrual without pool validation will cause reward theft for legitimate pools as attackers will create malicious pools and trigger reward distribution.
+
+
+
+### Root Cause
+
+In SuperDCAGauge.sol, the `_handleDistributionAndSettlement `function accrues rewards globally per token via `staking.accrueReward(otherToken)` without validating if the specific pool is legitimately listed. Since Uniswap V4 allows multiple pools for the same token pair (e.g., USDC/SuperDCA with different fees or configurations), and the listing contract (SuperDCAListing.sol) only permits one listing per non-SuperDCA token, attackers can create unlisted pools using the same hook to siphon rewards meant for listed pools.
+
+https://github.com/sherlock-audit/2025-09-super-dca/blob/main/super-dca-gauge/src/SuperDCAGauge.sol#L323-L367
+
+
+
+### Internal Pre-conditions
+
+- At least one token (e.g., USDC) must be listed via the SuperDCAListing contract for a legitimate pool.
+- The SuperDCAGauge hook must be deployed and configured with staking and listing contracts.
+- The staking contract must have accrued rewards for the listed token.
+
+### External Pre-conditions
+
+- No minimum liquidity checks in the hook's _handleDistributionAndSettlement (only enforced during listing).
+
+### Attack Path
+
+1. Attacker identifies a listed token (e.g., USDC) with an existing legitimate pool (e.g., USDC/SuperDCA with dynamic fee).
+2. Attacker creates a new malicious pool for the same pair (USDC/SuperDCA) using the same SuperDCAGauge hook, with minimal or zero liquidity (bypassing listing requirements).
+3. Attacker adds minimal liquidity to the malicious pool, triggering `_beforeAddLiquidity `which calls `_handleDistributionAndSettlement`.
+4. In `_handleDistributionAndSettlement`, rewards are accrued for the token (USDC) globally, and the community share is donated to the malicious pool (since it has liquidity).
+5. Attacker removes liquidity from the malicious pool, triggering `_beforeRemoveLiquidity `again, potentially accruing more rewards.
+6. Attacker repeats add/remove operations to maximize reward theft, then withdraws the donated rewards from the malicious pool.
+
+### Impact
+
+Legitimate pools suffer a complete loss of community rewards, as rewards are diverted to the attacker's malicious pool. The protocol's reward distribution mechanism is undermined, potentially leading to reduced incentives for legitimate liquidity providers and loss of trust.
+
+
+
+### PoC
+
+_No response_
+
+### Mitigation
+
+Add pool-specific validation in `_handleDistributionAndSettlement `to check if the pool is listed before accruing rewards. For example, query the listing contract per pool key/ID or enforce that only listed pools can trigger reward distribution. Alternatively, modify the staking contract to accrue rewards per-pool instead of per-token, or add minimum liquidity checks in the hook. Ensure the listing contract tracks pools by key/ID rather than just tokens.
+
+
+
+## Discussion
+
+**sherlock-admin2**
+
+The protocol team fixed this issue in the following PRs/commits:
+https://github.com/Super-DCA-Tech/super-dca-gauge/pull/37
+
+
+
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Sherlock |
+| Protocol | Super DCA Liquidity Network |
+| Report Date | N/A |
+| Finders | illoy\_sci, jayjoshix, Aamirusmani1552, 0xDaniel\_eth, lucky-gru, silver\_eth, francoHacker, nganhg, PolarizedLight, ivanalexur, BengalCatBalu, vinica\_boy, maigadoh, Kirkeelee, y4y, v10g1, Ollam, BADROBINX, 8olidity, harry, 0xB4nkz, 0xBoraichoT, JeRRy0422, techOptimizor |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2025-09-super-dca-judging/issues/662
+- **Contest**: https://app.sherlock.xyz/audits/contests/1171
+
+### Keywords for Search
+
+`vulnerability`
+
