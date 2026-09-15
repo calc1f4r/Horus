@@ -1,65 +1,72 @@
-# defi
+# defi 2
 
-> 213 nodes · cohesion 0.09
+> 138 nodes · cohesion 0.12
 
 ## Key Concepts
 
-- **Rounding-Direction Errors and Missing Swap Guards Drain the Omnipool** (81 connections) — `DB/substrate/amm/omnipool-liquidity-math.md`
-- **6. Exchange Rate Manipulation** (79 connections) — `DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md`
-- **Arith Rounding** (77 connections) — `DB/cosmos/app-chain/timing/rounding-precision.md`
-- **Example 1: Division Before Multiplication (MEDIUM - Virtuals Protocol) [HIGH]** (73 connections) — `DB/general/rounding-precision-loss/rounding-precision-loss.md`
-- **Example 2: Rounding Causes Locked Funds (HIGH - Fabric) [HIGH]** (73 connections) — `DB/general/rounding-precision-loss/rounding-precision-loss.md`
-- **Example 3: Share Calculation Rounding (MEDIUM - ERC4626) [HIGH]** (73 connections) — `DB/general/rounding-precision-loss/rounding-precision-loss.md`
-- **Fix 2: Use High-Precision Libraries** (73 connections) — `DB/general/rounding-precision-loss/rounding-precision-loss.md`
-- **Fix 4: Round Up When Appropriate** (73 connections) — `DB/general/rounding-precision-loss/rounding-precision-loss.md`
-- **Fix 5: Virtual Shares/Offset (ERC4626)** (73 connections) — `DB/general/rounding-precision-loss/rounding-precision-loss.md`
-- **Keywords** (73 connections) — `DB/general/rounding-precision-loss/rounding-precision-loss.md`
-- **2. Accounting Integer Underflow** (71 connections) — `DB/cosmos/app-chain/accounting/integer-precision-vulnerabilities.md`
-- **Keywords** (71 connections) — `DB/cosmos/app-chain/accounting/integer-precision-vulnerabilities.md`
-- **1. First Depositor / Inflation Attack Vulnerabilities [CRITICAL]** (71 connections) — `DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md`
-- **10. Access Control & State Management** (69 connections) — `DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md`
-- **3. LiquidityIndex Inflation via Recursive Flash Loans [CRITICAL]** (65 connections) — `DB/general/precision/defihacklabs-precision-share-manipulation-2024-2025.md`
-- **4. Scaling Factor Precision Loss in StableMath [CRITICAL]** (65 connections) — `DB/general/precision/defihacklabs-precision-share-manipulation-2024-2025.md`
-- **10. Share Price Inflation / First-Depositor Attack** (65 connections) — `DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
-- **5. Slippage Protection Issues** (65 connections) — `DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md`
-- **8. Reentrancy Vulnerabilities** (65 connections) — `DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md`
-- **1. Accounting Integer Overflow [HIGH]** (63 connections) — `DB/cosmos/app-chain/accounting/integer-precision-vulnerabilities.md`
-- **3. Accounting Unsafe Casting** (63 connections) — `DB/cosmos/app-chain/accounting/integer-precision-vulnerabilities.md`
-- **14. Reward Period Miscalculation** (63 connections) — `DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
-- **2. ERC4626 Compliance Issues** (63 connections) — `DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md`
-- **4. Fee Handling Vulnerabilities** (63 connections) — `DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md`
-- **1. CLMM Sqrt-Price Overflow [HIGH]** (61 connections) — `DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
-- *... and 188 more nodes in this community*
+- **Data Validation [HIGH]** (83 connections) — `DB/cosmos/app-chain/mev/frontrunning-mev-vulnerabilities.md`
+- **Keywords** (83 connections) — `DB/cosmos/app-chain/mev/frontrunning-mev-vulnerabilities.md`
+- **Vulnerability Title** (81 connections) — `DB/general/bonding-curve/SANDWICH_ATTACK_MEV_BONDING_CURVE_VULNERABILITIES.md`
+- **2. Mev Slippage Exploit** (71 connections) — `DB/cosmos/app-chain/mev/frontrunning-mev-vulnerabilities.md`
+- **3. Mev Sandwich** (71 connections) — `DB/cosmos/app-chain/mev/frontrunning-mev-vulnerabilities.md`
+- **2. Oracle Price Manipulation** (69 connections) — `DB/cosmos/app-chain/oracle/oracle-price-vulnerabilities.md`
+- **1. Oracle Stale Price [HIGH]** (65 connections) — `DB/cosmos/app-chain/oracle/oracle-price-vulnerabilities.md`
+- **Keywords** (63 connections) — `DB/cosmos/app-chain/oracle/oracle-price-vulnerabilities.md`
+- **5. Mev Arbitrage** (61 connections) — `DB/cosmos/app-chain/mev/frontrunning-mev-vulnerabilities.md`
+- **7. Mev Jit Liquidity** (61 connections) — `DB/cosmos/app-chain/mev/frontrunning-mev-vulnerabilities.md`
+- **1. Mev Staking Frontrun [HIGH]** (57 connections) — `DB/cosmos/app-chain/mev/frontrunning-mev-vulnerabilities.md`
+- **5. Oracle Frontrunning** (57 connections) — `DB/cosmos/app-chain/oracle/oracle-price-vulnerabilities.md`
+- **Umee Security Assessment** (57 connections) — `DB/cosmos/app-chain/oracle/oracle-price-vulnerabilities.md`
+- **11. Fee-on-Transfer Token Accounting Mismatch** (57 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
+- **3. Oracle Dos** (49 connections) — `DB/cosmos/app-chain/oracle/oracle-price-vulnerabilities.md`
+- **1. Fee Calculated on Wrong Base Amount [HIGH]** (49 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
+- **10. Fee Reward Dust Permanently Stuck in Contract** (49 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
+- **2. Last Buy Fee Mismatch on Bonding Curve** (49 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
+- **3. Swap Fee Omitted in Order Reflections** (49 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
+- **4. Inconsistent Fee Between Quoter and Execution** (49 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
+- **5. Expansion Mint Precision Loss Causes DOS** (49 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
+- **7. Invariant Rounding Direction Mismatch** (49 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
+- **8. Underpriced Quote via Integer Division Truncation** (49 connections) — `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
+- **Vulnerability Title** (47 connections) — `DB/amm/concentrated-liquidity/slippage-sandwich-frontrun.md`
+- **4. Mev Block Stuffing** (47 connections) — `DB/cosmos/app-chain/mev/frontrunning-mev-vulnerabilities.md`
+- *... and 113 more nodes in this community*
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [cosmos 6](cosmos_6.md) (39 shared connections)
+- [cosmos 10](cosmos_10.md) (27 shared connections)
+- [cosmos 5](cosmos_5.md) (25 shared connections)
+- [cosmos 2](cosmos_2.md) (21 shared connections)
+- [cosmos 8](cosmos_8.md) (18 shared connections)
+- [cosmos 3](cosmos_3.md) (18 shared connections)
+- [cosmos 4](cosmos_4.md) (13 shared connections)
+- [cosmos 9](cosmos_9.md) (11 shared connections)
+- [cosmos 12](cosmos_12.md) (8 shared connections)
+- [defi](defi.md) (7 shared connections)
+- [cosmos 7](cosmos_7.md) (4 shared connections)
+- [defi 7](defi_7.md) (4 shared connections)
 
 ## Source Files
 
-- `DB/Sui-Move-specific/SUI_MOVE_ARITHMETIC_PRECISION_VULNERABILITIES.md`
-- `DB/amm/concentrated-liquidity/dos-arithmetic-initialization.md`
-- `DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md`
-- `DB/amm/constantproduct/defihacklabs-amm-calculation-errors.md`
-- `DB/cosmos/app-chain/accounting/integer-precision-vulnerabilities.md`
-- `DB/cosmos/app-chain/timing/rounding-precision.md`
-- `DB/general/integer-overflow/defihacklabs-overflow-patterns.md`
-- `DB/general/precision/defihacklabs-precision-share-manipulation-2024-2025.md`
+- `DB/amm/concentrated-liquidity/slippage-sandwich-frontrun.md`
+- `DB/cosmos/app-chain/accounting/exchange-rate-vulnerabilities.md`
+- `DB/cosmos/app-chain/fund-safety/fund-locking-insolvency.md`
+- `DB/cosmos/app-chain/fund-safety/fund-theft-vulnerabilities.md`
+- `DB/cosmos/app-chain/mev/frontrunning-mev-vulnerabilities.md`
+- `DB/cosmos/app-chain/oracle/oracle-price-vulnerabilities.md`
+- `DB/cosmos/app-chain/tokens/token-handling-vulnerabilities.md`
+- `DB/general/bonding-curve/BONDING_CURVE_FEE_ROUNDING_VULNERABILITIES.md`
+- `DB/general/bonding-curve/BONDING_CURVE_SLIPPAGE_PROTECTION_VULNERABILITIES.md`
+- `DB/general/bonding-curve/SANDWICH_ATTACK_MEV_BONDING_CURVE_VULNERABILITIES.md`
 - `DB/general/rounding-precision-loss/rounding-precision-loss.md`
-- `DB/general/vault-inflation-attack/defihacklabs-vault-inflation-patterns.md`
-- `DB/general/vault-inflation-attack/vault-inflation-attack.md`
-- `DB/substrate/amm/omnipool-liquidity-math.md`
-- `DB/substrate/pallets/rounding-issuance-math.md`
-- `DB/tokens/erc4626/ERC4626_VAULT_VULNERABILITIES.md`
-- `DB/unique/erc4626/CONVERTTOSHARES_MANIPULATION_DOS.md`
-- `DB/unique/erc4626/CROSS_CONTRACT_REENTRANCY_YIELD_TOKEN_THEFT.md`
+- `DB/general/validation/slippage-input-validation-vulnerabilities.md`
 
 ## Audit Trail
 
-- EXTRACTED: 478 (21%)
-- INFERRED: 1750 (79%)
+- EXTRACTED: 231 (17%)
+- INFERRED: 1112 (83%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

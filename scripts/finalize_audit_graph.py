@@ -4,7 +4,8 @@
 Graphify produces two different JSON shapes:
 
 - .graphify_extract.json: extraction JSON with nodes/edges.
-- graph.json: NetworkX node-link JSON with nodes/links.
+- graph.json: NetworkX node-link JSON with nodes/links. `links` is canonical;
+  `edges` is accepted only when reading legacy Graphify/Horus artifacts.
 
 Audit agents and Graphify CLI/MCP expect the second shape whenever a file is
 named graph.json. This script converts and merges inputs so Phase 0 cannot
@@ -18,7 +19,6 @@ import json
 import shutil
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -65,12 +65,15 @@ def normalize_edge(edge: dict[str, Any]) -> dict[str, Any]:
     target = edge.get("target")
     if source is None or target is None:
         raise ValueError("edge is missing source or target")
+    confidence = str(edge.get("confidence") or "EXTRACTED")
+    default_scores = {"EXTRACTED": 1.0, "INFERRED": 0.55, "AMBIGUOUS": 0.2}
     return {
         **edge,
         "source": str(source),
         "target": str(target),
         "relation": str(edge.get("relation") or edge.get("type") or "references"),
-        "confidence": str(edge.get("confidence") or "EXTRACTED"),
+        "confidence": confidence,
+        "confidence_score": float(edge.get("confidence_score", default_scores.get(confidence, 1.0))),
         "source_file": str(edge.get("source_file") or "unknown"),
     }
 
@@ -89,10 +92,12 @@ def normalize_extraction(data: dict[str, Any]) -> dict[str, Any]:
     for edge in edge_list(data):
         normalized_edges.append(normalize_edge(edge))
 
+    nested_graph = data.get("graph") if isinstance(data.get("graph"), dict) else {}
+    hyperedges = data.get("hyperedges", nested_graph.get("hyperedges", []))
     return {
         "nodes": normalized_nodes,
         "edges": normalized_edges,
-        "hyperedges": data.get("hyperedges", []) if isinstance(data.get("hyperedges", []), list) else [],
+        "hyperedges": hyperedges if isinstance(hyperedges, list) else [],
         "input_tokens": data.get("input_tokens", 0),
         "output_tokens": data.get("output_tokens", 0),
     }
@@ -160,23 +165,50 @@ def merge_extractions(base: dict[str, Any], extra: dict[str, Any] | None) -> dic
     }
 
 
-def write_node_link_graph(extraction: dict[str, Any], out: Path) -> None:
-    graph = build.build([extraction], directed=True)
+def write_node_link_graph(
+    extraction: dict[str, Any],
+    out: Path,
+    *,
+    source_root: Path | None = None,
+    built_at_commit: str | None = None,
+) -> None:
+    # merge_extractions() has already deduplicated by exact ID. A fuzzy pass at
+    # this boundary can merge distinct same-named contract symbols, so leave it
+    # disabled and let Graphify normalize/validate the extraction schema.
+    graph = build.build(
+        [extraction],
+        directed=True,
+        dedup=False,
+        root=source_root,
+    )
     communities = cluster.cluster(graph)
     out.parent.mkdir(parents=True, exist_ok=True)
-
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp_out = Path(tmp) / "graph.json"
-        export.to_json(graph, communities, str(tmp_out), force=True)
-        graph_data = load_json(tmp_out)
-
-    if "links" not in graph_data and "edges" in graph_data:
-        graph_data["links"] = graph_data["edges"]
-    if "edges" not in graph_data and "links" in graph_data:
-        graph_data["edges"] = graph_data["links"]
-
+    written = export.to_json(
+        graph,
+        communities,
+        str(out),
+        force=True,
+        built_at_commit=built_at_commit,
+    )
+    if not written:
+        raise RuntimeError("Graphify refused to write the finalized graph")
+    graph_data = load_json(out)
     validate_node_link_graph(graph_data)
-    out.write_text(json.dumps(graph_data, indent=2), encoding="utf-8")
+
+
+def git_head(root: Path) -> str | None:
+    """Return the target repository commit used to build an audit graph."""
+    result = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        timeout=10,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip() or None
 
 
 def validate_node_link_graph(data: dict[str, Any]) -> None:
@@ -244,7 +276,12 @@ def main() -> int:
                 blockchain = load_graphify_input(blockchain_path)
 
         merged = merge_extractions(base, blockchain)
-        write_node_link_graph(merged, out)
+        write_node_link_graph(
+            merged,
+            out,
+            source_root=codebase,
+            built_at_commit=git_head(codebase),
+        )
 
         print(f"Base graph source: {base_file}")
         if blockchain is not None:

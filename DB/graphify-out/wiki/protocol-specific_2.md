@@ -1,69 +1,49 @@
-# protocol-specific
+# protocol-specific 2
 
-> 163 nodes · cohesion 0.06
+> 21 nodes · cohesion 0.21
 
 ## Key Concepts
 
-- **unassessed** (78 connections) — `DB/cosmos/app-chain/access-control/key-management.md`
-- **Da Blob Consensus** (61 connections) — `DB/Sui-Move-specific/movement-l1/da-blob-handling.md`
-- **Move Module Bugs** (61 connections) — `DB/Sui-Move-specific/movement-l1/move-module-bugs.md`
-- **Vechain Contracts** (61 connections) — `DB/unique/l1-misc/vechain/contracts-staking.md`
-- **Fassets Vault Flare** (61 connections) — `DB/unique/l1-misc/flare/fassets-vault-agent.md`
-- **L1 Math Generic** (61 connections) — `DB/unique/l1-misc/generic/l1-arith.md`
-- **L1 Bridge Generic** (61 connections) — `DB/unique/l1-misc/generic/l1-bridges.md`
 - **L1 Consensus Generic** (61 connections) — `DB/unique/l1-misc/generic/l1-consensus.md`
-- **L1 Dos Generic** (61 connections) — `DB/unique/l1-misc/generic/l1-dos-vectors.md`
 - **L1 Misc Generic** (61 connections) — `DB/unique/l1-misc/generic/l1-misc.md`
 - **L1 Staking Generic** (61 connections) — `DB/unique/l1-misc/generic/l1-staking.md`
-- **Polygon Bor** (59 connections) — `DB/unique/l1-misc/polygon/bor-heimdall.md`
-- **Near Novel** (57 connections) — `DB/unique/l1-misc/near/chain-bugs.md`
-- **Vechain Consensus Nodes** (51 connections) — `DB/unique/l1-misc/vechain/node-consensus-endpoints.md`
-- **Staking Rewards Plume** (51 connections) — `DB/unique/l1-misc/plume/staking-reward-accounting.md`
-- **Misc Plume** (49 connections) — `DB/unique/l1-misc/plume/misc-findings.md`
-- **Aptos Move Core** (49 connections) — `DB/unique/l1-misc/aptos/move-vm-core.md`
-- **Rwa Token Plume** (49 connections) — `DB/unique/l1-misc/plume/rwa-token-deposit.md`
-- **Stacks Signer Stx** (49 connections) — `DB/unique/l1-misc/stacks/stacks-signer-clarity.md`
-- **Flare Misc** (47 connections) — `DB/unique/l1-misc/flare/misc-findings.md`
-- **varies** (38 connections) — `DB/Sui-Move-specific/movement-l1/da-blob-handling.md`
-- **see pattern key** (38 connections) — `DB/Sui-Move-specific/movement-l1/da-blob-handling.md`
-- **varies by finding** (38 connections) — `DB/Sui-Move-specific/movement-l1/da-blob-handling.md`
-- **see pattern_key** (38 connections) — `DB/Sui-Move-specific/movement-l1/da-blob-handling.md`
-- **accounting** (18 connections) — `DB/cosmos/app-chain/bridge/cross-chain-bridge-vulnerabilities.md`
-- *... and 138 more nodes in this community*
+- **reports/other-l1_findings/audit-reports-dusk-2024-09-20-audit-report-rusk-consensus-pdf.md** (4 connections) — `DB/unique/l1-misc/generic/l1-consensus.md`
+- **reports/other-l1_findings/audit-reports-milkyway-2023-12-12-audit-report-milkyway-staking-v1-0-pdf.md** (4 connections) — `DB/unique/l1-misc/generic/l1-consensus.md`
+- **reports/other-l1_findings/audit-reports-milkyway-2025-05-15-audit-report-milkyway-staking-updates-v1-0-pdf.md** (4 connections) — `DB/unique/l1-misc/generic/l1-misc.md`
+- **l1 consensus generic** (2 connections) — `DB/unique/l1-misc/generic/l1-consensus.md`
+- **l1 misc generic** (2 connections) — `DB/unique/l1-misc/generic/l1-misc.md`
+- **l1 staking generic** (2 connections) — `DB/unique/l1-misc/generic/l1-staking.md`
+- **l1 consensus generic** (2 connections) — `DB/unique/l1-misc/generic/l1-consensus.md`
+- **l1 misc generic** (2 connections) — `DB/unique/l1-misc/generic/l1-misc.md`
+- **l1 staking generic** (2 connections) — `DB/unique/l1-misc/generic/l1-staking.md`
+- **reports/other-l1_findings/audit-reports-animoca-2025-06-24-audit-report-animoca-staking-pool-v1-2-pdf.md** (2 connections) — `DB/unique/l1-misc/generic/l1-misc.md`
+- **reports/other-l1_findings/audit-reports-risk-harbor-2022-03-22-audit-report-risk-harbor-v1-0-pdf.md** (2 connections) — `DB/unique/l1-misc/generic/l1-misc.md`
+- **reports/other-l1_findings/public-audits-reports-mantle-review-pdf.md** (2 connections) — `DB/unique/l1-misc/generic/l1-consensus.md`
+- **reports/other-l1_findings/public-audits-reports-recall-sigma-prime-recall-staking-security-assessment-report-v2-0-pdf.md** (2 connections) — `DB/unique/l1-misc/generic/l1-staking.md`
+- **reports/other-l1_findings/public-audits-reports-sushi-bentobox-strategies-staking-contract-review-pdf.md** (2 connections) — `DB/unique/l1-misc/generic/l1-staking.md`
+- **reports/other-l1_findings/publications-audit-reports-peckshield-audit-report-coin98staking-v1-0-pdf.md** (2 connections) — `DB/unique/l1-misc/generic/l1-staking.md`
+- **DB/unique/l1-misc/generic/l1-consensus.md** (1 connections) — `DB/unique/l1-misc/generic/l1-consensus.md`
+- **DB/unique/l1-misc/generic/l1-misc.md** (1 connections) — `DB/unique/l1-misc/generic/l1-misc.md`
+- **DB/unique/l1-misc/generic/l1-staking.md** (1 connections) — `DB/unique/l1-misc/generic/l1-staking.md`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [protocol-specific 5](protocol-specific_5.md) (7 shared connections)
+- [protocol-specific 4](protocol-specific_4.md) (6 shared connections)
+- [cosmos 7](cosmos_7.md) (3 shared connections)
 
 ## Source Files
 
-- `DB/Sui-Move-specific/movement-l1/da-blob-handling.md`
-- `DB/Sui-Move-specific/movement-l1/move-module-bugs.md`
-- `DB/cosmos/app-chain/access-control/key-management.md`
-- `DB/cosmos/app-chain/bridge/cross-chain-bridge-vulnerabilities.md`
-- `DB/unique/l1-misc/aptos/move-vm-core.md`
-- `DB/unique/l1-misc/flare/fassets-vault-agent.md`
-- `DB/unique/l1-misc/flare/misc-findings.md`
-- `DB/unique/l1-misc/generic/l1-arith.md`
-- `DB/unique/l1-misc/generic/l1-bridges.md`
 - `DB/unique/l1-misc/generic/l1-consensus.md`
-- `DB/unique/l1-misc/generic/l1-dos-vectors.md`
 - `DB/unique/l1-misc/generic/l1-misc.md`
 - `DB/unique/l1-misc/generic/l1-staking.md`
-- `DB/unique/l1-misc/near/chain-bugs.md`
-- `DB/unique/l1-misc/plume/misc-findings.md`
-- `DB/unique/l1-misc/plume/rwa-token-deposit.md`
-- `DB/unique/l1-misc/plume/staking-reward-accounting.md`
-- `DB/unique/l1-misc/polygon/bor-heimdall.md`
-- `DB/unique/l1-misc/stacks/stacks-signer-clarity.md`
-- `DB/unique/l1-misc/vechain/contracts-staking.md`
 
 ## Audit Trail
 
-- EXTRACTED: 133 (17%)
-- INFERRED: 663 (83%)
+- EXTRACTED: 15 (14%)
+- INFERRED: 96 (86%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

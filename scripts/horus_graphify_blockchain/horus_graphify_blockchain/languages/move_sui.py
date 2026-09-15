@@ -19,7 +19,14 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from ..schema import Edge, ExtractionResult, Hyperedge, Node, make_node_id
+from ..schema import (
+    Edge,
+    ExtractionResult,
+    Hyperedge,
+    Node,
+    make_node_id,
+    project_relative_source,
+)
 
 
 def _load_parser():
@@ -54,8 +61,8 @@ def _node_text(node, src: bytes) -> str:
     return src[node.start_byte:node.end_byte].decode("utf-8", errors="replace").strip()
 
 
-def _loc(node) -> dict:
-    return {"line": node.start_point[0] + 1, "col": node.start_point[1]}
+def _loc(node) -> str:
+    return f"L{node.start_point[0] + 1}"
 
 
 def _child_by_type(node, *types):
@@ -74,12 +81,12 @@ def _iter_nodes_by_type(node, target_type: str):
 
 def extract(file_path: str, project_root: Optional[str] = None) -> ExtractionResult:
     parser = _get_parser()
+    rel_path = project_relative_source(file_path, project_root)
     if parser is None:
-        return _regex_fallback(file_path)
+        return _regex_fallback(file_path, rel_path=rel_path)
 
     src = Path(file_path).read_bytes()
     tree = parser.parse(src)
-    rel_path = file_path
     result = ExtractionResult()
 
     fn_names: dict[str, str] = {}  # name → node_id
@@ -198,10 +205,10 @@ def _detect_hot_potato(result: ExtractionResult, src: bytes, rel_path: str):
         ))
 
 
-def _regex_fallback(file_path: str) -> ExtractionResult:
+def _regex_fallback(file_path: str, *, rel_path: str | None = None) -> ExtractionResult:
     result = ExtractionResult()
     src = Path(file_path).read_text(errors="ignore")
-    rel_path = file_path
+    rel_path = rel_path or project_relative_source(file_path, None)
 
     for m in re.finditer(r'\bmodule\s+([\w:]+)\s*\{', src):
         mod_name = m.group(1).split("::")[-1]
@@ -209,7 +216,7 @@ def _regex_fallback(file_path: str) -> ExtractionResult:
         result.nodes.append(Node(
             id=mod_id, label=mod_name, node_kind="Module",
             source_file=rel_path,
-            source_location={"line": src[:m.start()].count("\n") + 1, "col": 0},
+            source_location=f"L{src[:m.start()].count(chr(10)) + 1}",
         ))
 
     for m in re.finditer(r'\bpublic\s+(?:entry\s+)?fun\s+(\w+)\s*[<(]', src):
@@ -218,7 +225,7 @@ def _regex_fallback(file_path: str) -> ExtractionResult:
         result.nodes.append(Node(
             id=fn_id, label=fn_name, node_kind="Function",
             source_file=rel_path,
-            source_location={"line": src[:m.start()].count("\n") + 1, "col": 0},
+            source_location=f"L{src[:m.start()].count(chr(10)) + 1}",
         ))
 
     for m in re.finditer(r'\bstruct\s+(\w+)\b', src):
@@ -227,7 +234,7 @@ def _regex_fallback(file_path: str) -> ExtractionResult:
         result.nodes.append(Node(
             id=st_id, label=st_name, node_kind="Struct",
             source_file=rel_path,
-            source_location={"line": src[:m.start()].count("\n") + 1, "col": 0},
+            source_location=f"L{src[:m.start()].count(chr(10)) + 1}",
         ))
 
     return result

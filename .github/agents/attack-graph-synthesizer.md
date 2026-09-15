@@ -69,7 +69,8 @@ ERROR: Graph artifact not found. Phase 0 must complete before attack-graph-synth
 
 Read `graph.json`. Parse into working memory:
 - `nodes`: list of objects with `id`, `label`, `node_kind`
-- `edges`: list of objects with `source`, `target`, `relation`
+- `links`: canonical list of objects with `source`, `target`, `relation`;
+  accept `edges` only as a legacy fallback and bind the selected list to `links`
 - `hyperedges`: list of objects with `id`, `label`, `nodes`, `relation`
 
 Read `02-invariants-reviewed.md`. Extract the invariants list (look for numbered/bulleted invariants with severity markers).
@@ -107,11 +108,11 @@ For each `(entry_point, mutable_state)` pair:
 ```python
 from collections import deque
 
-def bfs_paths(entry_id, target_id, edges, max_depth=5):
+def bfs_paths(entry_id, target_id, links, max_depth=5):
     """Return all simple paths from entry_id to target_id up to max_depth."""
-    # Adjacency: group edges by source
+    # Adjacency: group canonical node-link records by source
     adj = {}
-    for e in edges:
+    for e in links:
         adj.setdefault(e["source"], []).append(e)
     
     queue = deque([([entry_id], {entry_id})])

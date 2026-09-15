@@ -1,51 +1,63 @@
-# defi
+# defi 6
 
-> 32 nodes · cohesion 0.76
+> 65 nodes · cohesion 0.22
 
 ## Key Concepts
 
-- **Fix 1: User-Specified Minimum Output** (51 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **Fix 2: Maximum Shares for Withdrawals** (51 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **Fix 3: User-Provided Deadline** (51 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **Fix 4: Minimum Enforcement for Protocol Operations** (51 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **Fix 5: Bidirectional Liquidity Protection** (51 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **Example 3: Missing Withdrawal Slippage Protection (MEDIUM - Sentiment V2) [HIGH]** (43 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **Example 4: block.timestamp as Deadline (MEDIUM - Particle Protocol) [HIGH]** (43 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **Example 5: Zero Slippage in Leverage Operations (HIGH - Peapods) [HIGH]** (43 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **Example 1: Unused Slippage Parameters (HIGH - Vader Protocol) [HIGH]** (41 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **Example 2: Zero Slippage in Swap Operations (MEDIUM - Kaizen) [HIGH]** (41 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **amountOutMinimum** (22 connections) — `DB/amm/concentrated-liquidity/slippage-sandwich-frontrun.md`
-- **slippage_tolerance** (22 connections) — `DB/amm/concentrated-liquidity/slippage-sandwich-frontrun.md`
-- **swap_liquidity_operations** (20 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **mev_sandwich_attack** (20 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **mev sandwich attack** (20 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **missing slippage protection** (20 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **buyNSendToVoltTreasury** (20 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **_removeLeverage** (20 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **swap_liquidity_operations** (20 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **swap liquidity operations** (16 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **amount out minimum** (12 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **reports/yield_protocol_findings/h-06-no-slippage-checks-when-removing-leverage.md** (12 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **reports/yield_protocol_findings/h-31-unused-slippage-params.md** (12 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **reports/yield_protocol_findings/m-01-voltburnbuynsendtovolttreasury-function-is-subjected-to-a-sandwich-attack.md** (12 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- **reports/yield_protocol_findings/m-15-lack-of-slippage-protection-during-withdrawal-in-superpool-and-pool-contrac.md** (12 connections) — `DB/general/slippage-protection/slippage-protection.md`
-- *... and 7 more nodes in this community*
+- **1. First Depositor / Donation Attacks [HIGH]** (83 connections) — `DB/general/restaking/LRT_SHARE_ACCOUNTING_VULNERABILITIES.md`
+- **7. Rounding and Precision Failures** (81 connections) — `DB/general/restaking/LRT_SHARE_ACCOUNTING_VULNERABILITIES.md`
+- **6. Supply Inflation via Unaccounted Operations** (77 connections) — `DB/general/restaking/LRT_SHARE_ACCOUNTING_VULNERABILITIES.md`
+- **2. TVL Calculation Errors** (75 connections) — `DB/general/restaking/LRT_SHARE_ACCOUNTING_VULNERABILITIES.md`
+- **5. Slashing-Induced Accounting Breakage** (75 connections) — `DB/general/restaking/LRT_SHARE_ACCOUNTING_VULNERABILITIES.md`
+- **3. Transfer-Before-Calculation (CEI Violations)** (67 connections) — `DB/general/restaking/LRT_SHARE_ACCOUNTING_VULNERABILITIES.md`
+- **4. Share Accounting Desynchronization** (67 connections) — `DB/general/restaking/LRT_SHARE_ACCOUNTING_VULNERABILITIES.md`
+- **1. Liquidation Mechanism Failures [CRITICAL]** (65 connections) — `DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md`
+- **3. Position & Leverage Accounting Bugs** (61 connections) — `DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md`
+- **6. LP Vault Exploitation** (61 connections) — `DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md`
+- **2. Funding Rate Vulnerabilities** (59 connections) — `DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md`
+- **4. Order Execution Vulnerabilities** (59 connections) — `DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md`
+- **7. Bad Debt & Protocol Insolvency** (57 connections) — `DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md`
+- **5. Fee & Reward System Exploits** (55 connections) — `DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md`
+- **vault_accounting** (28 connections) — `DB/general/restaking/LRT_SHARE_ACCOUNTING_VULNERABILITIES.md`
+- **liquidation_engine** (22 connections) — `DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md`
+- **donation_attack** (18 connections) — `DB/general/vault-inflation-attack/vault-inflation-attack.md`
+- **funding_rate** (14 connections) — `DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md`
+- **order_execution** (14 connections) — `DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md`
+- **position_engine** (14 connections) — `DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md`
+- **supply_tracking** (14 connections) — `DB/general/restaking/LRT_SHARE_ACCOUNTING_VULNERABILITIES.md`
+- **tvl_calculation** (14 connections) — `DB/general/restaking/LRT_SHARE_ACCOUNTING_VULNERABILITIES.md`
+- **missing mechanism validation** (14 connections) — `DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md`
+- **perpetual position engine** (14 connections) — `DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md`
+- **perpetual protocol logic error** (14 connections) — `DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md`
+- *... and 40 more nodes in this community*
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [amm 3](amm_3.md) (49 shared connections)
+- [lending](lending.md) (32 shared connections)
+- [general](general.md) (16 shared connections)
+- [defi 4](defi_4.md) (14 shared connections)
+- [cosmos 6](cosmos_6.md) (8 shared connections)
+- [general 4](general_4.md) (7 shared connections)
+- [access-control](access-control.md) (6 shared connections)
+- [defi 5](defi_5.md) (6 shared connections)
+- [defi 3](defi_3.md) (6 shared connections)
+- [zk-rollup 2](zk-rollup_2.md) (5 shared connections)
+- [oracle](oracle.md) (4 shared connections)
+- [cosmos 7](cosmos_7.md) (1 shared connections)
 
 ## Source Files
 
-- `DB/amm/concentrated-liquidity/slippage-sandwich-frontrun.md`
-- `DB/general/slippage-protection/slippage-protection.md`
+- `DB/general/perpetuals-derivatives/PERPETUALS_DERIVATIVES_VULNERABILITIES.md`
+- `DB/general/restaking/LRT_SHARE_ACCOUNTING_VULNERABILITIES.md`
+- `DB/general/vault-inflation-attack/vault-inflation-attack.md`
 
 ## Audit Trail
 
-- EXTRACTED: 50 (13%)
-- INFERRED: 328 (87%)
+- EXTRACTED: 188 (31%)
+- INFERRED: 425 (69%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

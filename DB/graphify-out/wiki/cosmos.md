@@ -1,69 +1,74 @@
 # cosmos
 
-> 876 nodes · cohesion 0.03
+> 150 nodes · cohesion 0.17
 
 ## Key Concepts
 
-- **_checkOnERC721Received** (130 connections) — `DB/cosmos/app-chain/fund-safety/fund-theft-vulnerabilities.md`
-- **Slashing Evasion & Frontrunning Vulnerabilities [HIGH]** (127 connections) — `DB/cosmos/app-chain/slashing/slashing-evasion-frontrunning.md`
-- **Description** (121 connections) — `DB/cosmos/app-chain/slashing/slashing-evasion-frontrunning.md`
-- **6. Slashing Queued Excluded** (115 connections) — `DB/cosmos/app-chain/slashing/slashing-evasion-frontrunning.md`
-- **SyncStateDBWithAccount** (114 connections) — `DB/cosmos/app-chain/accounting/balance-tracking-errors.md`
-- **3. Validation State Check Missing** (113 connections) — `DB/cosmos/app-chain/validation/input-validation-vulnerabilities.md`
-- **5. Deposit Queue Processing Errors** (109 connections) — `DB/cosmos/app-chain/staking/stake-deposit-vulnerabilities.md`
-- **Description** (105 connections) — `DB/cosmos/app-chain/slashing/slashing-evasion-frontrunning.md`
-- **Severity: High Risk** (103 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
-- **Keywords** (103 connections) — `DB/cosmos/app-chain/validation/input-validation-vulnerabilities.md`
-- **4. Staking Balance Desynchronization** (103 connections) — `DB/cosmos/app-chain/staking/stake-deposit-vulnerabilities.md`
-- **Keywords** (101 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
-- **3. Slashing Delegation Bypass** (101 connections) — `DB/cosmos/app-chain/slashing/slashing-evasion-frontrunning.md`
-- **11. Token Denom Handling** (101 connections) — `DB/cosmos/app-chain/tokens/token-handling-vulnerabilities.md`
-- **staking_logic** (100 connections) — `DB/cosmos/app-chain/staking/delegation-redelegation-vulnerabilities.md`
-- **Description** (99 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
-- **1. Validation Zero Check Missing [HIGH]** (99 connections) — `DB/cosmos/app-chain/validation/input-validation-vulnerabilities.md`
-- **1. Slashing Frontrun Exit** (99 connections) — `DB/cosmos/app-chain/slashing/slashing-evasion-frontrunning.md`
-- **8. Funds Missing Slippage** (97 connections) — `DB/cosmos/app-chain/fund-safety/fund-theft-vulnerabilities.md`
-- **2. Slashing Cooldown Exploit** (97 connections) — `DB/cosmos/app-chain/slashing/slashing-evasion-frontrunning.md`
-- **_initValidatorScore** (96 connections) — `DB/cosmos/app-chain/governance/governance-voting-vulnerabilities.md`
-- **9. Validation Incorrect Check** (95 connections) — `DB/cosmos/app-chain/validation/input-validation-vulnerabilities.md`
-- **5. Slashing Pending Operations** (95 connections) — `DB/cosmos/app-chain/slashing/slashing-accounting-errors.md`
-- **7. Token Nft Handling** (95 connections) — `DB/cosmos/app-chain/tokens/token-handling-vulnerabilities.md`
-- **1. Access Missing Control [HIGH]** (93 connections) — `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
-- *... and 851 more nodes in this community*
+- **Severity: Medium Risk** (97 connections) — `DB/cosmos/app-chain/consensus/consensus-finality-vulnerabilities.md`
+- **Keywords** (89 connections) — `DB/cosmos/app-chain/consensus/consensus-finality-vulnerabilities.md`
+- **Diﬃculty: High** (87 connections) — `DB/cosmos/app-chain/signature/signature-replay-vulnerabilities.md`
+- **8. Consensus Equivocation** (83 connections) — `DB/cosmos/app-chain/consensus/consensus-finality-vulnerabilities.md`
+- **1. Governance Voting Power Manipulation [HIGH]** (83 connections) — `DB/cosmos/app-chain/governance/governance-voting-vulnerabilities.md`
+- **Keywords** (83 connections) — `DB/cosmos/app-chain/governance/governance-voting-vulnerabilities.md`
+- **1. Signature Verification Missing [HIGH]** (83 connections) — `DB/cosmos/app-chain/signature/signature-replay-vulnerabilities.md`
+- **8. Signature Malleability** (83 connections) — `DB/cosmos/app-chain/signature/signature-replay-vulnerabilities.md`
+- **Keywords** (83 connections) — `DB/cosmos/app-chain/signature/signature-replay-vulnerabilities.md`
+- **8. Governance Voting Zero Weight** (81 connections) — `DB/cosmos/app-chain/governance/governance-voting-vulnerabilities.md`
+- **2. Governance Proposal Exploit** (77 connections) — `DB/cosmos/app-chain/governance/governance-voting-vulnerabilities.md`
+- **Error Reporting** (77 connections) — `DB/cosmos/app-chain/state-management/state-store-vulnerabilities.md`
+- **Keywords** (77 connections) — `DB/cosmos/app-chain/state-management/state-store-vulnerabilities.md`
+- **Medium Risk Severity Report** (77 connections) — `DB/cosmos/app-chain/state-management/state-store-vulnerabilities.md`
+- **argmaxBlockByStake** (76 connections) — `DB/cosmos/app-chain/consensus/consensus-finality-vulnerabilities.md`
+- **Keywords** (75 connections) — `DB/cosmos/app-chain/abci-lifecycle/abci-lifecycle-vulnerabilities.md`
+- **4. Consensus Vote Extension** (75 connections) — `DB/cosmos/app-chain/consensus/consensus-finality-vulnerabilities.md`
+- **4. Governance Voting Lock** (73 connections) — `DB/cosmos/app-chain/governance/governance-voting-vulnerabilities.md`
+- **9. Governance Parameter Change** (73 connections) — `DB/cosmos/app-chain/governance/governance-voting-vulnerabilities.md`
+- **Diﬃculty: High** (73 connections) — `DB/cosmos/app-chain/governance/governance-voting-vulnerabilities.md`
+- **10. Governance Timelock Bypass** (71 connections) — `DB/cosmos/app-chain/governance/governance-voting-vulnerabilities.md`
+- **Diﬃculty: High** (67 connections) — `DB/cosmos/app-chain/consensus/consensus-finality-vulnerabilities.md`
+- **1. Consensus Proposer Dos [HIGH]** (65 connections) — `DB/cosmos/app-chain/consensus/consensus-finality-vulnerabilities.md`
+- **Diﬃculty: Medium** (65 connections) — `DB/cosmos/app-chain/consensus/consensus-finality-vulnerabilities.md`
+- **Recommendation** (65 connections) — `DB/cosmos/app-chain/governance/governance-voting-vulnerabilities.md`
+- *... and 125 more nodes in this community*
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [cosmos 3](cosmos_3.md) (64 shared connections)
+- [cosmos 10](cosmos_10.md) (34 shared connections)
+- [cosmos 14](cosmos_14.md) (28 shared connections)
+- [cosmos 4](cosmos_4.md) (27 shared connections)
+- [cosmos 11](cosmos_11.md) (26 shared connections)
+- [cosmos 5](cosmos_5.md) (20 shared connections)
+- [cosmos 19](cosmos_19.md) (18 shared connections)
+- [defi](defi.md) (18 shared connections)
+- [cosmos 6](cosmos_6.md) (17 shared connections)
+- [cosmos 18](cosmos_18.md) (14 shared connections)
+- [cosmos 17](cosmos_17.md) (13 shared connections)
+- [general 2](general_2.md) (13 shared connections)
 
 ## Source Files
 
-- `DB/amm/concentrated-liquidity/slippage-sandwich-frontrun.md`
+- `DB/bridge/custom/cross-chain-general-vulnerabilities.md`
 - `DB/cosmos/app-chain/abci-lifecycle/abci-lifecycle-vulnerabilities.md`
-- `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
-- `DB/cosmos/app-chain/accounting/balance-tracking-errors.md`
 - `DB/cosmos/app-chain/accounting/exchange-rate-vulnerabilities.md`
 - `DB/cosmos/app-chain/accounting/integer-precision-vulnerabilities.md`
-- `DB/cosmos/app-chain/bridge/cross-chain-bridge-vulnerabilities.md`
-- `DB/cosmos/app-chain/btc-staking/btc-staking-vulnerabilities.md`
 - `DB/cosmos/app-chain/consensus/consensus-finality-vulnerabilities.md`
 - `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
-- `DB/cosmos/app-chain/dos/gas-resource-exhaustion.md`
-- `DB/cosmos/app-chain/dos/griefing-revert-dos.md`
-- `DB/cosmos/app-chain/evm/evm-gas-handling-vulnerabilities.md`
 - `DB/cosmos/app-chain/evm/precompile-state-vulnerabilities.md`
-- `DB/cosmos/app-chain/fund-safety/fund-locking-insolvency.md`
 - `DB/cosmos/app-chain/fund-safety/fund-theft-vulnerabilities.md`
 - `DB/cosmos/app-chain/governance/governance-voting-vulnerabilities.md`
-- `DB/cosmos/app-chain/hooks-callbacks/hook-callback-vulnerabilities.md`
-- `DB/cosmos/app-chain/ibc/ibc-protocol-vulnerabilities.md`
-- `DB/cosmos/app-chain/infrastructure/security-infrastructure-vulnerabilities.md`
+- `DB/cosmos/app-chain/signature/signature-replay-vulnerabilities.md`
+- `DB/cosmos/app-chain/slashing/slashing-accounting-errors.md`
+- `DB/cosmos/app-chain/staking/stake-deposit-vulnerabilities.md`
+- `DB/cosmos/app-chain/state-management/state-store-vulnerabilities.md`
+- `DB/general/dao-governance-vulnerabilities/voting-power-manipulation.md`
 
 ## Audit Trail
 
-- EXTRACTED: 1094 (10%)
-- INFERRED: 10194 (90%)
+- EXTRACTED: 191 (9%)
+- INFERRED: 2023 (91%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

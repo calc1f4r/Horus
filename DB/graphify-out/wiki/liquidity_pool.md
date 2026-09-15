@@ -2,30 +2,33 @@
 
 > God node · 140 connections · `DB/amm/constantproduct/CONSTANT_PRODUCT_AMM_VULNERABILITIES.md`
 
+**Community:** [defi 4](defi_4.md)
+
 ## Connections by Relation
 
 ### expands_to_affects_component
-- [[1. First Depositor / Inflation Attack [CRITICAL]]] `EXTRACTED`
-- [[4. Stale Reward Accumulator State]] `EXTRACTED`
-- [[13. Missing Slippage Protection in Yield Operations]] `EXTRACTED`
-- [[14. Incorrect Share Calculation on Edge Cases]] `EXTRACTED`
-- [[23. Yield Aggregator Fund Isolation Failures]] `EXTRACTED`
-- [[15. Reward Lockup on Period Transitions]] `EXTRACTED`
-- [[22. Emergency Withdrawal Accounting Errors]] `EXTRACTED`
-- [[16. Vault Accounting Desync]] `EXTRACTED`
-- [[18. Deposit/Withdrawal Same-Block Arbitrage]] `EXTRACTED`
-- [[19. Strategy Migration Token Loss]] `EXTRACTED`
-- [[20. Compound Interest Manipulation]] `EXTRACTED`
-- [[21. Time-Weighted Voting Power Exploitation]] `EXTRACTED`
-- [[9. Factory & Pool Creation Attacks]] `EXTRACTED`
-- [[7. Read-Only Reentrancy in Oracle Integration]] `EXTRACTED`
-- [[34. First Depositor Market Bricking]] `EXTRACTED`
-- [[9. Reward Multiplication via Merge Operations]] `EXTRACTED`
-- [[2. Exchange Rate Manipulation via Donation]] `EXTRACTED`
-- [[Factory Reorg Attacks]] `EXTRACTED`
-- [[Pattern 1: questFactory Reorg Attack]] `EXTRACTED`
-- [[Pattern 2: Stealing Liquidity Pool Funds via Reorg]] `EXTRACTED`
+- 1. First Depositor / Inflation Attack \[CRITICAL\] `EXTRACTED`
+- 4. Stale Reward Accumulator State `EXTRACTED`
+- 13. Missing Slippage Protection in Yield Operations `EXTRACTED`
+- 14. Incorrect Share Calculation on Edge Cases `EXTRACTED`
+- 23. Yield Aggregator Fund Isolation Failures `EXTRACTED`
+- 15. Reward Lockup on Period Transitions `EXTRACTED`
+- 22. Emergency Withdrawal Accounting Errors `EXTRACTED`
+- 16. Vault Accounting Desync `EXTRACTED`
+- 18. Deposit/Withdrawal Same-Block Arbitrage `EXTRACTED`
+- 19. Strategy Migration Token Loss `EXTRACTED`
+- 20. Compound Interest Manipulation `EXTRACTED`
+- 21. Time-Weighted Voting Power Exploitation `EXTRACTED`
+- 9. Factory & Pool Creation Attacks `EXTRACTED`
+- 34. First Depositor Market Bricking `EXTRACTED`
+- 7. Read-Only Reentrancy in Oracle Integration `EXTRACTED`
+- 9. Reward Multiplication via Merge Operations `EXTRACTED`
+- Factory Reorg Attacks `EXTRACTED`
+- Pattern 1: questFactory Reorg Attack `EXTRACTED`
+- Pattern 2: Stealing Liquidity Pool Funds via Reorg `EXTRACTED`
+- Pattern 3: General Factory.create Reorg (Multiple Protocols) `EXTRACTED`
+- *…and 50 more `expands_to_affects_component` connection(s) not listed (lowest-degree first to go)*
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

@@ -1,33 +1,35 @@
-# eth-l1
+# eth-l1 3
 
-> 24 nodes · cohesion 0.46
+> 26 nodes · cohesion 0.43
 
 ## Key Concepts
 
-- **Detection & Hunt Strategy** (45 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **Vulnerable Code Pattern (generic)** (45 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **Related files in corpus (L2 geth forks — same class check)** (43 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **host_allowlist** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **middleware** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **rpc_http_server** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **dns_rebinding** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **same_origin_bypass** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **unauthenticated_rpc** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **browser same origin policy bypass** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **debug api remote abuse** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **dns rebind localhost bypass** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **missing origin check on local service** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **no host header check on rpc requests** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **rpc host header gap** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **rpc http server** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **same origin bypass** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **reports/eth-l1-clients_findings/go-ethereum-security-md.md** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **reports/eth-l1-clients_findings/publications-astria-geth-zellic-audit-report-pdf.md** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **reports/eth-l1-clients_findings/publications-facet-geth-zellic-audit-report-pdf.md** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **reports/eth-l1-clients_findings/publications-reviews-2025-03-offchain-geth-14-4-securityreview-pdf.md** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **missing_origin_check_on_local_service** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **reports/eth-l1-clients_findings/37104-bc-insight-reth-rpc-is-vulnerable-to-dns-rebinding-attacks.md** (4 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
-- **DB/eth-l1-clients/execution/rpc-dns-rebinding.md** (3 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **Detection & Hunt Strategy** (49 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **Real Reports** (49 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **Vulnerable Code Pattern (generic)** (49 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **fee_caps** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **intrinsic_gas** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **nonce_checks** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **txpool_validation** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **eip_violation** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **mempool_dos** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **spam_tx_acceptance** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **state_root_divergence** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **eip2681 nonce upper bound violation** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **intrinsic gas txpool vs evm mismatch** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **missing block gas limit check in txpool** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **sendrawtransaction fee check bypass** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **spam tx acceptance** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **state root divergence** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **validation logic duplicated and diverged** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **wrong nonce execution state root mismatch** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **reports/eth-l1-clients_findings/37695-bc-insight-executing-transaction-that-has-a-wrong-nonce-might-triggered-a-chain-split-due-to-m.md** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **reports/eth-l1-clients_findings/38015-bc-insight-violation-of-eip-2681-in-create-transaction.md** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **reports/eth-l1-clients_findings/38278-bc-low-potential-dos-to-mempool-due-to-missing-gas-limit-check.md** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **reports/eth-l1-clients_findings/38427-bc-low-discrepancy-in-intrinsic-gas-calculation-between-txpool-and-evm-execution.md** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **reports/eth-l1-clients_findings/38554-bc-low-incorrect-transaction-fee-check-in-sendrawtransaction.md** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- **validation_logic_duplicated_and_diverged** (6 connections) — `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
+- *... and 1 more nodes in this community*
 
 ## Relationships
 
@@ -35,14 +37,14 @@
 
 ## Source Files
 
-- `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- `DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md`
 
 ## Audit Trail
 
-- EXTRACTED: 45 (35%)
-- INFERRED: 82 (65%)
+- EXTRACTED: 57 (40%)
+- INFERRED: 84 (60%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

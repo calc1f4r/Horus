@@ -8,10 +8,11 @@ graph.json — use graphify merge-graphs to combine with graphify's own output).
 
 from __future__ import annotations
 
-import re
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Optional
+
+from graphify.ids import make_id as graphify_make_id
 
 # ── Node kinds ──────────────────────────────────────────────────────────────
 
@@ -26,10 +27,9 @@ NODE_KINDS = {
     "Constant",     # top-level constant or enum value
 }
 
-# ── Edge relations (graphify-compatible, with blockchain extensions) ─────────
-# graphify's upstream accepted types: calls|implements|references|cites|
-#   conceptually_related_to|shares_data_with|semantically_similar_to|rationale_for
-# We add blockchain-specific relations; graphify treats unknown types as metadata.
+# ── Edge relations (Graphify-compatible blockchain vocabulary) ────────────────
+# Graphify keeps `relation` open-ended. These domain relations remain metadata
+# on canonical node-link records and can be filtered by CLI/MCP consumers.
 
 EDGE_RELATIONS = {
     "calls",          # function A calls function B
@@ -52,7 +52,7 @@ class Node:
     node_kind: str = "Function"
     file_type: str = "code"
     source_file: str = ""
-    source_location: Optional[dict] = None
+    source_location: Optional[str] = None
     source_url: Optional[str] = None
     captured_at: Optional[str] = None
     author: Optional[str] = None
@@ -70,7 +70,7 @@ class Edge:
     confidence: str = "EXTRACTED"
     confidence_score: float = 1.0
     source_file: str = ""
-    source_location: Optional[dict] = None
+    source_location: Optional[str] = None
     weight: float = 1.0
     unresolved: bool = False
 
@@ -122,10 +122,26 @@ class ExtractionResult:
 
 def make_node_id(file_path: str, entity_name: str) -> str:
     """
-    Deterministic node ID matching graphify's convention:
-    {stem}_{entity} — lowercase, [a-z0-9_] only, no chunk numbers.
+    Deterministic node ID matching Graphify 0.9's convention.
+
+    The stem is the full project-relative path with its extension removed, not
+    merely the filename. Delegating normalization to Graphify keeps Unicode and
+    punctuation behavior identical to the upstream AST extractors.
     """
-    stem = Path(file_path).stem
-    stem = re.sub(r"[^a-z0-9]", "_", stem.lower()).strip("_")
-    entity = re.sub(r"[^a-z0-9]", "_", entity_name.lower()).strip("_")
-    return f"{stem}_{entity}"
+    path = Path(file_path)
+    stem = path.with_suffix("").as_posix() if path.name else ""
+    return graphify_make_id(stem, entity_name)
+
+
+def project_relative_source(file_path: str | Path, project_root: str | Path | None) -> str:
+    """Return a portable source path suitable for Graphify IDs and metadata."""
+    path = Path(file_path)
+    if project_root is None:
+        return path.name if path.is_absolute() else path.as_posix()
+
+    root = Path(project_root).resolve()
+    resolved = path.resolve()
+    try:
+        return resolved.relative_to(root).as_posix()
+    except ValueError as exc:
+        raise ValueError(f"{resolved} is outside project root {root}") from exc

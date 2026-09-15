@@ -17,12 +17,20 @@ audit-output/graph/
 
 ## graph.json Schema
 
-Produced by graphify and/or `graphify merge-graphs`. Must conform to:
+Produced by Graphify 0.9.x and/or `graphify merge-graphs`. It uses NetworkX
+node-link JSON and must conform to:
 - `nodes`: list of `{id, label, node_kind, ...metadata}`
-- `edges`: list of `{source, target, relation, confidence, confidence_score}`
+- `links`: canonical list of `{source, target, relation, confidence, confidence_score}`
 - `hyperedges`: list of `{id, label, nodes, relation}`
 
-Node ID convention: `{filename_stem}_{entity_name}` — lowercase, `[a-z0-9_]` only. No chunk suffixes.
+Read-only consumers may accept `edges` as a legacy fallback, but new artifacts
+must write `links` only. Do not duplicate the full edge list under both keys.
+
+Node IDs follow Graphify's v0.9 contract: `{full_repo_relative_path_without_extension}_{entity_name}`,
+normalized by `graphify.ids.make_id`. Every directory segment is retained, so
+`src/v1/Token.sol` and `src/v2/Token.sol` cannot collide. No chunk suffixes.
+Treat IDs as build-local identifiers: query by label/source metadata and do not
+persist them across a Graphify schema migration.
 
 ## coverage.jsonl Format
 

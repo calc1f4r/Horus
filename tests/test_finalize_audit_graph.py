@@ -62,10 +62,44 @@ class TestFinalizeAuditGraph(unittest.TestCase):
 
             data = json.loads(out.read_text(encoding="utf-8"))
             self.assertIn("links", data)
-            self.assertIn("edges", data)
+            self.assertNotIn("edges", data)
             self.assertGreaterEqual(len(data["nodes"]), 2)
             self.assertGreaterEqual(len(data["links"]), 1)
+            self.assertEqual(data["links"][0]["confidence_score"], 1.0)
             json_graph.node_link_graph(data, edges="links")
+
+    def test_nested_hyperedges_survive_legacy_node_link_input(self):
+        graph_data = {
+            "directed": True,
+            "multigraph": False,
+            "graph": {
+                "hyperedges": [
+                    {
+                        "id": "access_flow",
+                        "label": "Access flow",
+                        "nodes": ["a", "b"],
+                        "relation": "participate_in",
+                    }
+                ]
+            },
+            "nodes": [
+                {"id": "a", "label": "A", "file_type": "code", "source_file": "src/a.sol"},
+                {"id": "b", "label": "B", "file_type": "code", "source_file": "src/b.sol"},
+            ],
+            "links": [
+                {
+                    "source": "a",
+                    "target": "b",
+                    "relation": "calls",
+                    "confidence": "EXTRACTED",
+                    "source_file": "src/a.sol",
+                }
+            ],
+        }
+
+        loaded = finalizer.normalize_extraction(graph_data)
+
+        self.assertEqual(loaded["hyperedges"][0]["id"], "access_flow")
 
 
 if __name__ == "__main__":

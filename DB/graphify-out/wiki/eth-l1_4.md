@@ -1,27 +1,33 @@
-# eth-l1
+# eth-l1 4
 
-> 18 nodes · cohesion 0.42
+> 24 nodes · cohesion 0.46
 
 ## Key Concepts
 
-- **Real Reports** (33 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **Vulnerable Code Pattern (generic)** (33 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **gossip_decoding** (4 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **reqresp_encoding** (4 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **snappy_framing** (4 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **integrity_check_bypass** (4 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **resource_waste** (4 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **spec_divergence** (4 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **corrupted gossip deserialization cost** (4 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **integrity check bypass** (4 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **missing integrity check in decoder** (4 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **non minimal varint length accepted or rejected** (4 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **snappy framing gap** (4 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **uncompressed chunk checksum not verified** (4 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **reports/eth-l1-clients_findings/37246-bc-low-lodestar-snappy-checksum-issue.md** (4 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **reports/eth-l1-clients_findings/37594-sc-insight-nimbus-incorrectly-rejects-non-minimally-encoded-snappy-data-lengths-due-to-spec.md** (4 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **missing_integrity_check_in_decoder** (4 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
-- **DB/eth-l1-clients/p2p/snappy-decompression-DoS.md** (2 connections) — `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
+- **Detection & Hunt Strategy** (45 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **Vulnerable Code Pattern (generic)** (45 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **Related files in corpus (L2 geth forks — same class check)** (43 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **host_allowlist** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **middleware** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **rpc_http_server** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **dns_rebinding** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **same_origin_bypass** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **unauthenticated_rpc** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **browser same origin policy bypass** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **debug api remote abuse** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **dns rebind localhost bypass** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **missing origin check on local service** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **no host header check on rpc requests** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **rpc host header gap** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **rpc http server** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **same origin bypass** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **reports/eth-l1-clients_findings/go-ethereum-security-md.md** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **reports/eth-l1-clients_findings/publications-astria-geth-zellic-audit-report-pdf.md** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **reports/eth-l1-clients_findings/publications-facet-geth-zellic-audit-report-pdf.md** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **reports/eth-l1-clients_findings/publications-reviews-2025-03-offchain-geth-14-4-securityreview-pdf.md** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **missing_origin_check_on_local_service** (6 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **reports/eth-l1-clients_findings/37104-bc-insight-reth-rpc-is-vulnerable-to-dns-rebinding-attacks.md** (4 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
+- **DB/eth-l1-clients/execution/rpc-dns-rebinding.md** (3 connections) — `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
 
 ## Relationships
 
@@ -29,14 +35,14 @@
 
 ## Source Files
 
-- `DB/eth-l1-clients/p2p/snappy-decompression-DoS.md`
+- `DB/eth-l1-clients/execution/rpc-dns-rebinding.md`
 
 ## Audit Trail
 
-- EXTRACTED: 30 (47%)
-- INFERRED: 34 (53%)
+- EXTRACTED: 45 (35%)
+- INFERRED: 82 (65%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

@@ -2,10 +2,15 @@
 
 Tree-sitter-backed blockchain DSL extractor for Horus graph workflows.
 
-The CLI emits graphify-compatible JSON with `nodes`, `edges`, and `hyperedges`
-arrays. It is intentionally additive: when a grammar package is unavailable,
-the extractor falls back to conservative regex extraction so Phase 0 can still
-produce useful codebase graph context.
+The CLI emits Graphify 0.9-compatible extraction JSON with `nodes`, `edges`, and
+`hyperedges` arrays. This intermediate schema is finalized into node-link JSON,
+where the canonical edge key is `links`. It is intentionally additive: when a
+grammar package is unavailable, the extractor falls back to conservative regex
+extraction so Phase 0 can still produce useful codebase graph context.
+
+Node IDs use the full project-relative source path without its extension, then
+delegate normalization to `graphify.ids.make_id`. This matches Graphify v0.9 and
+prevents same-named contracts in different directories from colliding.
 
 ## Install
 

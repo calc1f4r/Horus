@@ -65,7 +65,7 @@ It must not replace the router/manifests/hunt-card path.
 
 ```bash
 graphify query "oracle staleness" --graph DB/graphify-out/graph.json --budget 2000
-graphify path "oracle" "flash-loan" --graph DB/graphify-out/graph.json
+graphify path "oracle" "flash-loan" --graph DB/graphify-out/graph.json --undirected
 ```
 
 ---

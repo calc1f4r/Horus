@@ -1,35 +1,28 @@
-# protocol-specific
+# protocol-specific 3
 
-> 48 nodes · cohesion 0.08
+> 19 nodes · cohesion 0.20
 
 ## Key Concepts
 
-- **Exited Delegators Drain Future VTHO Rewards via Off-By-One Claim Window** (37 connections) — `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
-- **Double Effective-Stake Decrement on Validator Exit Permanently Freezes Unstake** (35 connections) — `DB/unique/l1-misc/vechain/vechain-double-effective-stake-decrement-unstake-freeze.md`
-- **Delegating to a Pending Validator Skips the First Reward Period** (27 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
-- **effective stake checkpoints** (4 connections) — `DB/unique/l1-misc/vechain/vechain-double-effective-stake-decrement-unstake-freeze.md`
-- **last claimed period cursor** (4 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
-- **delegation reward claim-window computation** (2 connections) — `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
-- **effective-stake checkpoint accounting across delegation/validator exit flows** (2 connections) — `DB/unique/l1-misc/vechain/vechain-double-effective-stake-decrement-unstake-freeze.md`
-- **reward cursor initialization on delegation** (2 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
-- **boundary condition error** (2 connections) — `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
-- **claimable delegation periods** (2 connections) — `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
-- **completed periods snapshot** (2 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
-- **cursor over start boundary** (2 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
-- **delegation exit claimed through end** (2 connections) — `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
-- **delegation status state machine** (2 connections) — `DB/unique/l1-misc/vechain/vechain-double-effective-stake-decrement-unstake-freeze.md`
-- **delegation to pending validator** (2 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
-- **duplicate state mutation** (2 connections) — `DB/unique/l1-misc/vechain/vechain-double-effective-stake-decrement-unstake-freeze.md`
-- **duplicated effective stake decrement** (2 connections) — `DB/unique/l1-misc/vechain/vechain-double-effective-stake-decrement-unstake-freeze.md`
-- **end period sentinel (type(uint32) max)** (2 connections) — `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
-- **last claimed period init** (2 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
-- **pending validator status** (2 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
-- **period range arithmetic** (2 connections) — `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
-- **plus one off by one** (2 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
-- **solidity panic 0x11 arithmetic underflow** (2 connections) — `DB/unique/l1-misc/vechain/vechain-double-effective-stake-decrement-unstake-freeze.md`
-- **start period derivation** (2 connections) — `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
-- **strict inequality claim window** (2 connections) — `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
-- *... and 23 more nodes in this community*
+- **Native Builtin Gas Undercharge After HAYABUSA Fork (native_isEndorsed et al.)** (35 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **native builtin gas accounting during PoA→PoS transition** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **resource_mispricing** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **endorsement balance check** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **env use gas explicit charging** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **fork conditional code paths (pre post hayabusa)** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **missing sload charge** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **native builtin gas metering** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **native is endorsed** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **post fork extra storage reads** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **thor sload gas thor get balance gas constants** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **unmetered native operation** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **reports/vechain-l1_findings/55711-sc-insight-redundant-gas-charge-in-native-addvalidation-function-leads-to-unnecessary-gas-cost.md** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **reports/vechain-l1_findings/56187-bc-insight-brittle-hardcoded-gas-metering-model.md** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **reports/vechain-l1_findings/56454-bc-insight-gas-undercharging-threatens-hayabusa-network-upgrade.md** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **reports/vechain-l1_findings/56513-bc-insight-during-the-call-to-native-issuance-there-s-a-missing-gas-charge-before-call-to-calc.md** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **reports/vechain-l1_findings/56629-bc-insight-there-is-an-issue-in-mapping-gas-undercharge-and-is-enables-30-extra-node-work-per.md** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **unmetered_native_operation** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md** (1 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
 
 ## Relationships
 
@@ -37,16 +30,14 @@
 
 ## Source Files
 
-- `DB/unique/l1-misc/vechain/vechain-double-effective-stake-decrement-unstake-freeze.md`
-- `DB/unique/l1-misc/vechain/vechain-pending-validator-first-period-reward-loss.md`
-- `DB/unique/l1-misc/vechain/vechain-post-exit-delegation-reward-drain-off-by-one.md`
+- `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
 
 ## Audit Trail
 
-- EXTRACTED: 15 (16%)
-- INFERRED: 80 (84%)
+- EXTRACTED: 7 (20%)
+- INFERRED: 28 (80%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

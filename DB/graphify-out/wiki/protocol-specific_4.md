@@ -1,43 +1,49 @@
-# protocol-specific
+# protocol-specific 4
 
-> 19 nodes · cohesion 0.20
+> 18 nodes · cohesion 0.22
 
 ## Key Concepts
 
-- **Native Builtin Gas Undercharge After HAYABUSA Fork (native_isEndorsed et al.)** (35 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **native builtin gas accounting during PoA→PoS transition** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **resource_mispricing** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **endorsement balance check** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **env use gas explicit charging** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **fork conditional code paths (pre post hayabusa)** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **missing sload charge** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **native builtin gas metering** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **native is endorsed** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **post fork extra storage reads** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **thor sload gas thor get balance gas constants** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **unmetered native operation** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **reports/vechain-l1_findings/55711-sc-insight-redundant-gas-charge-in-native-addvalidation-function-leads-to-unnecessary-gas-cost.md** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **reports/vechain-l1_findings/56187-bc-insight-brittle-hardcoded-gas-metering-model.md** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **reports/vechain-l1_findings/56454-bc-insight-gas-undercharging-threatens-hayabusa-network-upgrade.md** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **reports/vechain-l1_findings/56513-bc-insight-during-the-call-to-native-issuance-there-s-a-missing-gas-charge-before-call-to-calc.md** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **reports/vechain-l1_findings/56629-bc-insight-there-is-an-issue-in-mapping-gas-undercharge-and-is-enables-30-extra-node-work-per.md** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **unmetered_native_operation** (2 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
-- **DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md** (1 connections) — `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- **Vechain Contracts** (61 connections) — `DB/unique/l1-misc/vechain/contracts-staking.md`
+- **Vechain Consensus Nodes** (51 connections) — `DB/unique/l1-misc/vechain/node-consensus-endpoints.md`
+- **accounting** (18 connections) — `DB/cosmos/app-chain/bridge/cross-chain-bridge-vulnerabilities.md`
+- **vechain consensus nodes** (2 connections) — `DB/unique/l1-misc/vechain/node-consensus-endpoints.md`
+- **vechain contracts** (2 connections) — `DB/unique/l1-misc/vechain/contracts-staking.md`
+- **vechain consensus nodes** (2 connections) — `DB/unique/l1-misc/vechain/node-consensus-endpoints.md`
+- **reports/vechain-l1_findings/59316-sc-high-off-by-one-unlocks-infinite-vtho-reward-drain-from-ghost-stakes.md** (2 connections) — `DB/unique/l1-misc/vechain/contracts-staking.md`
+- **reports/vechain-l1_findings/59361-sc-high-off-by-one-in-claimabledelegationperiods-allows-claimrewards-to-pay-for-periods-after.md** (2 connections) — `DB/unique/l1-misc/vechain/contracts-staking.md`
+- **reports/vechain-l1_findings/59386-sc-high-fund-freeze-from-double-stake-subtraction-when-validator-exits.md** (2 connections) — `DB/unique/l1-misc/vechain/node-consensus-endpoints.md`
+- **reports/vechain-l1_findings/59615-sc-high-off-by-one-error-in-period-boundary-check-allows-theft-of-unclaimed-yield-after-delega.md** (2 connections) — `DB/unique/l1-misc/vechain/contracts-staking.md`
+- **reports/vechain-l1_findings/59665-sc-high-delegators-can-claim-rewards-beyond-delegation-end.md** (2 connections) — `DB/unique/l1-misc/vechain/contracts-staking.md`
+- **reports/vechain-l1_findings/59709-sc-high-post-exit-rewards-overpayment-theft-of-unclaimed-yield-due-to-misclamped-claim-window.md** (2 connections) — `DB/unique/l1-misc/vechain/contracts-staking.md`
+- **reports/vechain-l1_findings/59723-sc-high-double-decrease-after-exit-validator-exited-leads-to-underflow-and-permanent-freeze.md** (2 connections) — `DB/unique/l1-misc/vechain/node-consensus-endpoints.md`
+- **reports/vechain-l1_findings/59742-sc-high-user-funds-get-stucked-in-the-contract-when-validators-exits.md** (2 connections) — `DB/unique/l1-misc/vechain/node-consensus-endpoints.md`
+- **reports/vechain-l1_findings/59756-sc-high-exiting-delegators-stakes-can-be-bricked-permanently-by-the-validator-signaling-an-exi.md** (2 connections) — `DB/unique/l1-misc/vechain/node-consensus-endpoints.md`
+- **reports/vechain-l1_findings/60080-sc-high-unstake-exit-requests-can-either-lock-funds-or-silently-double-deduct-effective-stake.md** (2 connections) — `DB/unique/l1-misc/vechain/node-consensus-endpoints.md`
+- **DB/unique/l1-misc/vechain/contracts-staking.md** (1 connections) — `DB/unique/l1-misc/vechain/contracts-staking.md`
+- **DB/unique/l1-misc/vechain/node-consensus-endpoints.md** (1 connections) — `DB/unique/l1-misc/vechain/node-consensus-endpoints.md`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [protocol-specific 2](protocol-specific_2.md) (6 shared connections)
+- [protocol-specific 5](protocol-specific_5.md) (4 shared connections)
+- [cosmos 7](cosmos_7.md) (3 shared connections)
+- [cosmos 4](cosmos_4.md) (2 shared connections)
+- [cosmos 5](cosmos_5.md) (1 shared connections)
+- [cosmos 17](cosmos_17.md) (1 shared connections)
 
 ## Source Files
 
-- `DB/unique/l1-misc/vechain/vechain-native-builtin-gas-undercharge-post-fork.md`
+- `DB/cosmos/app-chain/bridge/cross-chain-bridge-vulnerabilities.md`
+- `DB/unique/l1-misc/vechain/contracts-staking.md`
+- `DB/unique/l1-misc/vechain/node-consensus-endpoints.md`
 
 ## Audit Trail
 
-- EXTRACTED: 7 (20%)
-- INFERRED: 28 (80%)
+- EXTRACTED: 10 (13%)
+- INFERRED: 69 (87%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

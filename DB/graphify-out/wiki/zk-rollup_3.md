@@ -1,52 +1,59 @@
-# zk-rollup
+# zk-rollup 3
 
-> 75 nodes · cohesion 0.27
+> 81 nodes · cohesion 0.35
 
 ## Key Concepts
 
-- **CREATE / CREATE2 / CREATE3 Incompatibilities** (71 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **msg.sender and Context Differences** (71 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **Opcode and Precompile Divergences** (71 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **Pattern 1: CREATE2 Address Derivation Differs on ZKSync** (71 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **Pattern 2: ecrecover Discrepancy in delegatecall Context on ZKSync** (71 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **Pattern 3: Unauthorized Precompile Authorization Bypass via delegatecall** (71 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **Pattern 4: Nonce Doesn't Increment for Reverted Child Deployments** (71 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **Pattern 5: block.number Returns L1 Block Number on Arbitrum (Not L2)** (71 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **Bytecode Compression** (69 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **Untested Runtime Upgrades Shift Layout/Indices and Strand Bridge Funds** (67 connections) — `DB/substrate/lifecycle/runtime-upgrade-storage-migration.md`
-- **Factory Reorg Attacks** (57 connections) — `DB/zk-rollup/reorg-attacks.md`
-- **Pattern 1: questFactory Reorg Attack** (57 connections) — `DB/zk-rollup/reorg-attacks.md`
-- **Pattern 2: Stealing Liquidity Pool Funds via Reorg** (57 connections) — `DB/zk-rollup/reorg-attacks.md`
-- **Pattern 3: General Factory.create Reorg (Multiple Protocols)** (57 connections) — `DB/zk-rollup/reorg-attacks.md`
-- **Pattern 4: CREATE vs CREATE2 Reorg Risk Comparison [CRITICAL]** (57 connections) — `DB/zk-rollup/reorg-attacks.md`
+- **Fee Theft and Manipulation** (85 connections) — `DB/zk-rollup/gas-accounting.md`
+- **Gas Calculation Errors** (83 connections) — `DB/zk-rollup/gas-accounting.md`
+- **Pattern 1: Paymaster Refunds spentOnPubdata Instead of Burning** (83 connections) — `DB/zk-rollup/gas-accounting.md`
+- **Pattern 3: Gas Calculation Uses Unchecked Free Variables** (83 connections) — `DB/zk-rollup/gas-accounting.md`
+- **Pattern 4: Burning User Gas in sendCompressedBytecode** (83 connections) — `DB/zk-rollup/gas-accounting.md`
+- **Pattern 5: Incorrect commitScalar Underpays Sequencer** (83 connections) — `DB/zk-rollup/gas-accounting.md`
+- **Pattern 6: Batch Fees Multiplier Cap Bypassed with Multiple Calls** (83 connections) — `DB/zk-rollup/gas-accounting.md`
+- **Pattern 2: Operator Steals All Gas Provided for L1→L2 Transactions** (81 connections) — `DB/zk-rollup/gas-accounting.md`
+- **Pattern 7: Bytecode Compression Bypass Completeness Checks** (81 connections) — `DB/zk-rollup/gas-accounting.md`
+- **Pattern 3: Address Aliasing Locks ETH** (81 connections) — `DB/zk-rollup/l1-l2-messaging.md`
+- **Pattern 6: CrossDomainMessenger Cannot Guarantee Replayability** (81 connections) — `DB/zk-rollup/l1-l2-messaging.md`
+- **L1 → L2 Transaction Failures** (79 connections) — `DB/zk-rollup/l1-l2-messaging.md`
+- **L2 → L1 Withdrawal Issues** (79 connections) — `DB/zk-rollup/l1-l2-messaging.md`
+- **Pattern 1: Loss of Funds When L1→L2 Transaction Fails in Bootloader** (79 connections) — `DB/zk-rollup/l1-l2-messaging.md`
+- **Pattern 2: MsgValueSimulator Non-Zero Value Calls Sender Itself** (79 connections) — `DB/zk-rollup/l1-l2-messaging.md`
+- **Pattern 5: Paymaster Refunds spentOnPubdata to User** (79 connections) — `DB/zk-rollup/l1-l2-messaging.md`
+- **Pattern 4: Attacker Fills L2ToL1MessagePasser Merkle Tree** (77 connections) — `DB/zk-rollup/l1-l2-messaging.md`
+- **5. Gas Payment Issues** (59 connections) — `DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md`
+- **4. Handle Function Vulnerabilities** (55 connections) — `DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md`
+- **1. ISM Validation Vulnerabilities [HIGH]** (53 connections) — `DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md`
+- **3. Router Configuration Issues** (53 connections) — `DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md`
+- **2. Message Replay Attacks** (49 connections) — `DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md`
 - **bytecode_compression** (36 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **address_collision** (28 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **reports/zk_rollup_findings/m-08-factorycreate-is-vulnerable-to-reorg-attacks.md** (22 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **state_corruption** (20 connections) — `DB/substrate/lifecycle/runtime-upgrade-storage-migration.md`
-- **bytecode_compressor** (18 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **create2_opcode** (18 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **create_opcode** (18 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **ecrecover_precompile** (18 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **extcodehash** (18 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- **msg_sender** (18 connections) — `DB/zk-rollup/evm-incompatibilities.md`
-- *... and 50 more nodes in this community*
+- **bootloader** (34 connections) — `DB/zk-rollup/gas-accounting.md`
+- **Mailbox** (26 connections) — `DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md`
+- *... and 56 more nodes in this community*
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [bridge](bridge.md) (17 shared connections)
+- [bridge 2](bridge_2.md) (16 shared connections)
+- [zk-rollup](zk-rollup.md) (15 shared connections)
+- [zk-rollup 4](zk-rollup_4.md) (11 shared connections)
+- [general 2](general_2.md) (9 shared connections)
+- [general](general.md) (9 shared connections)
+- [cosmos 7](cosmos_7.md) (1 shared connections)
 
 ## Source Files
 
-- `DB/substrate/lifecycle/runtime-upgrade-storage-migration.md`
+- `DB/bridge/hyperlane/hyperlane-integration-vulnerabilities.md`
 - `DB/zk-rollup/evm-incompatibilities.md`
-- `DB/zk-rollup/reorg-attacks.md`
+- `DB/zk-rollup/gas-accounting.md`
+- `DB/zk-rollup/l1-l2-messaging.md`
 
 ## Audit Trail
 
-- EXTRACTED: 313 (40%)
-- INFERRED: 464 (60%)
+- EXTRACTED: 452 (37%)
+- INFERRED: 768 (63%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

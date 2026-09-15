@@ -208,7 +208,7 @@ class is known:
 
 ```bash
 graphify query "<topic>" --graph DB/graphify-out/graph.json --budget 2000
-graphify path "<topic>" "<candidate>" --graph DB/graphify-out/graph.json
+graphify path "<topic>" "<candidate>" --graph DB/graphify-out/graph.json --undirected
 ```
 
 Agents use it to pull neighboring hunt cards and related concepts into the

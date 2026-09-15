@@ -5,6 +5,8 @@ import os
 import sys
 import tempfile
 import unittest
+import json
+from importlib.metadata import version
 from pathlib import Path
 
 
@@ -13,7 +15,17 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 import build_db_graph as graph_builder  # noqa: E402
 
 
+ROOT = Path(__file__).resolve().parents[1]
+
+
 class TestDbGraphBuilder(unittest.TestCase):
+
+    def test_graphify_runtime_matches_repository_pin(self):
+        pin = (ROOT / ".graphify-version").read_text(encoding="utf-8").strip()
+        requirements = (ROOT / "requirements-dev.txt").read_text(encoding="utf-8")
+
+        self.assertEqual(version("graphifyy"), pin)
+        self.assertIn(f"graphifyy=={pin}", requirements.splitlines())
 
     def test_build_extraction_adds_semantic_nodes_and_related_edges(self):
         cards = [
@@ -139,6 +151,14 @@ class TestDbGraphBuilder(unittest.TestCase):
 
         self.assertEqual(set(curated), {2})
 
+    def test_community_labels_are_unique_and_stable(self):
+        labels = {3: "oracle", 1: "oracle", 2: "bridge", 4: "oracle"}
+
+        unique = graph_builder._unique_community_labels(labels)
+
+        self.assertEqual(unique, {1: "oracle", 2: "bridge", 3: "oracle 2", 4: "oracle 3"})
+        self.assertEqual(len(set(unique.values())), len(unique))
+
     def test_reset_wiki_dir_removes_only_markdown_files(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             wiki_dir = Path(tmpdir)
@@ -191,6 +211,12 @@ class TestDbGraphBuilder(unittest.TestCase):
             self.assertTrue((root / ".graphify-version").exists())
             self.assertGreaterEqual(result["nodes"], 1)
             self.assertTrue(any("DB graph:" in line for line in emitted))
+
+            graph_data = json.loads((out / "graph.json").read_text(encoding="utf-8"))
+            self.assertIn("links", graph_data)
+            self.assertNotIn("edges", graph_data)
+            self.assertTrue(all("norm_label" in node for node in graph_data["nodes"]))
+            self.assertTrue(all("community_name" in node for node in graph_data["nodes"]))
 
 
 if __name__ == "__main__":

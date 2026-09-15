@@ -21,7 +21,14 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from ..schema import Edge, ExtractionResult, Hyperedge, Node, make_node_id
+from ..schema import (
+    Edge,
+    ExtractionResult,
+    Hyperedge,
+    Node,
+    make_node_id,
+    project_relative_source,
+)
 
 # ── Grammar bootstrap ─────────────────────────────────────────────────────────
 
@@ -62,8 +69,8 @@ def _node_text(node, src: bytes) -> str:
     return src[node.start_byte:node.end_byte].decode("utf-8", errors="replace").strip()
 
 
-def _loc(node) -> dict:
-    return {"line": node.start_point[0] + 1, "col": node.start_point[1]}
+def _loc(node) -> str:
+    return f"L{node.start_point[0] + 1}"
 
 
 def _child_by_type(node, *types):
@@ -93,14 +100,14 @@ def extract(file_path: str, project_root: Optional[str] = None) -> ExtractionRes
     """Extract nodes + edges from a Solidity source file."""
     parser = _get_parser()
     result = ExtractionResult()
+    rel_path = project_relative_source(file_path, project_root)
 
     if parser is None:
         # Graceful fallback: emit nodes only via regex (no edges)
-        return _regex_fallback(file_path)
+        return _regex_fallback(file_path, rel_path=rel_path)
 
     src = Path(file_path).read_bytes()
     tree = parser.parse(src)
-    rel_path = file_path
 
     # Track top-level names for same-file call resolution
     module_names: dict[str, str] = {}    # name → node_id
@@ -401,19 +408,19 @@ def _add_modifier_hyperedges(result: ExtractionResult, rel_path: str):
 
 # ── Regex fallback (when tree-sitter unavailable) ─────────────────────────────
 
-def _regex_fallback(file_path: str) -> ExtractionResult:
+def _regex_fallback(file_path: str, *, rel_path: str | None = None) -> ExtractionResult:
     """
     Emit coarse nodes via regex when tree-sitter is unavailable.
     Produces INFERRED edges with lower confidence.
     Covers contract names, state vars, functions, modifiers, and events.
     """
     result = ExtractionResult()
-    rel_path = file_path
+    rel_path = rel_path or project_relative_source(file_path, None)
     src = Path(file_path).read_text(errors="ignore")
     contract_names: list[tuple[str, str]] = []
 
-    def line_for(offset: int) -> dict:
-        return {"line": src[:offset].count("\n") + 1, "col": 0}
+    def line_for(offset: int) -> str:
+        return f"L{src[:offset].count(chr(10)) + 1}"
 
     for m in re.finditer(
         r'\bcontract\s+(\w+)(?:\s+is\s+([^{]+))?\s*\{', src

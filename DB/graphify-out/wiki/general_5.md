@@ -1,4 +1,4 @@
-# general
+# general 5
 
 > 36 nodes · cohesion 0.64
 
@@ -33,7 +33,9 @@
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [access-control](access-control.md) (14 shared connections)
+- [defi 4](defi_4.md) (10 shared connections)
+- [general 3](general_3.md) (4 shared connections)
 
 ## Source Files
 
@@ -49,4 +51,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

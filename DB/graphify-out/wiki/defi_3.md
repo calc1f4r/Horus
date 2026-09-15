@@ -1,61 +1,71 @@
-# defi
+# defi 3
 
-> 179 nodes · cohesion 0.11
+> 120 nodes · cohesion 0.25
 
 ## Key Concepts
 
-- **Sequencer Economic Issues** (111 connections) — `DB/zk-rollup/sequencer-issues.md`
-- **Pattern 1: Access-Controlled Functions Fail During Sequencer Downtime** (97 connections) — `DB/zk-rollup/sequencer-issues.md`
-- **Pattern 2: Dutch Auctions and Options Expire at Bad Prices During Downtime** (97 connections) — `DB/zk-rollup/sequencer-issues.md`
-- **Pattern 3: Linea / Sequencer Censorship Locking User Funds** (97 connections) — `DB/zk-rollup/sequencer-issues.md`
-- **Pattern 4: Sequencer Underpaid Due to Incorrect commitScalar** (95 connections) — `DB/zk-rollup/sequencer-issues.md`
-- **Pattern 5: Front-Running finalizeBlocks in Decentralized Sequencer Mode** (95 connections) — `DB/zk-rollup/sequencer-issues.md`
-- **Protocol Functions Breaking During Sequencer Downtime** (95 connections) — `DB/zk-rollup/sequencer-issues.md`
-- **1. LST Oracle Manipulation via Upgradeable Proxies [HIGH]** (89 connections) — `DB/general/restaking/LRT_EXCHANGE_RATE_ORACLE_VULNERABILITIES.md`
-- **2. Exchange Rate Sandwich / Frontrunning** (85 connections) — `DB/general/restaking/LRT_EXCHANGE_RATE_ORACLE_VULNERABILITIES.md`
-- **1. Sandwich / Front-Running Reward Claims [HIGH]** (85 connections) — `DB/general/restaking/RESTAKING_REWARD_DISTRIBUTION_VULNERABILITIES.md`
-- **4. Exchange Rate Calculation Errors** (79 connections) — `DB/general/restaking/LRT_EXCHANGE_RATE_ORACLE_VULNERABILITIES.md`
-- **6. Share Value Appreciation Blocking Settlement** (77 connections) — `DB/general/restaking/LRT_EXCHANGE_RATE_ORACLE_VULNERABILITIES.md`
-- **2. msg.sender Confusion in Reward Re-Staking** (77 connections) — `DB/general/restaking/RESTAKING_REWARD_DISTRIBUTION_VULNERABILITIES.md`
-- **Batch Hashing and Commitment Bugs** (77 connections) — `DB/zk-rollup/batch-processing.md`
-- **3. Stale or Divergent Rate Providers** (75 connections) — `DB/general/restaking/LRT_EXCHANGE_RATE_ORACLE_VULNERABILITIES.md`
-- **5. Withdrawal Pricing During Beacon Chain Exits** (75 connections) — `DB/general/restaking/LRT_EXCHANGE_RATE_ORACLE_VULNERABILITIES.md`
-- **3. Reward Accounting Double-Counting** (75 connections) — `DB/general/restaking/RESTAKING_REWARD_DISTRIBUTION_VULNERABILITIES.md`
-- **Pattern 1: Batcher Frame Decoding Inconsistency Causes Consensus Split** (75 connections) — `DB/zk-rollup/batch-processing.md`
-- **Pattern 2: EIP-4844 Blob Incompatibility Halts Block Processing** (75 connections) — `DB/zk-rollup/batch-processing.md`
-- **Pattern 3: Rollup Cannot Split Batches Across Blobs → Block Stuffing** (75 connections) — `DB/zk-rollup/batch-processing.md`
-- **Pattern 4: Malformed Blob Transaction Crashes Validator Nodes** (75 connections) — `DB/zk-rollup/batch-processing.md`
-- **Pattern 5: Memory Corruption Causing Incorrect Batch Hashes (Scroll)** (75 connections) — `DB/zk-rollup/batch-processing.md`
-- **Pattern 6: Incorrect basefee Calculation on Taiko Rollup** (75 connections) — `DB/zk-rollup/batch-processing.md`
-- **Pattern 7: inChallenge Incorrectly Reset in revertBatch** (75 connections) — `DB/zk-rollup/batch-processing.md`
-- **5. Rewards Lost — Missing Implementations** (73 connections) — `DB/general/restaking/RESTAKING_REWARD_DISTRIBUTION_VULNERABILITIES.md`
-- *... and 154 more nodes in this community*
+- **Move Event Emission, Configuration & Upgrade Safety Vulnerabilities [MEDIUM]** (81 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- **Pattern 1: Missing Events for Critical State Changes — move-evtcfg-001 [MEDIUM]** (79 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- **Move State Management & Data Integrity Vulnerabilities [HIGH]** (77 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
+- **Pattern 10: Two-Step Ownership Transfer Missing — move-evtcfg-010 [MEDIUM]** (75 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- **Pattern 9: Version Check Missing in Upgrade-Sensitive Functions — move-evtcfg-009 [MEDIUM]** (75 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- **Pattern 7: Missing Approval Revocation Function — move-evtcfg-007 [MEDIUM]** (73 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- **Pattern 8: Dispatchable Token Store Missing withdraw/deposit Implementation — move-evtcfg-008 [MEDIUM]** (73 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- **Pattern 1: Local Copy Mutation Without Write-Back — move-state-001 [HIGH]** (73 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
+- **Pattern 11: Reentrancy via External Module Callback — move-evtcfg-011 [MEDIUM]** (71 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- **Pattern 12: Hardcoded Batch Parameters in Event Emission — move-evtcfg-012 [MEDIUM]** (71 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- **Pattern 13: Assertion Inconsistency Between Getter and Setter — move-evtcfg-013 [MEDIUM]** (71 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- **Pattern 2: Misleading Event Type in Emissions — move-evtcfg-002 [MEDIUM]** (71 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- **Pattern 3: Event Emission on No-Op State Change — move-evtcfg-003 [MEDIUM]** (71 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- **Pattern 4: Fee Annotation Mismatch with Actual Calculation — move-evtcfg-004 [MEDIUM]** (71 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- **Pattern 5: Liquidation Bonus Configuration Exceeding Bounds — move-evtcfg-005 [MEDIUM]** (71 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- **Pattern 6: Cooldown Bypass via Timestamp Manipulation — move-evtcfg-006 [MEDIUM]** (71 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- **Pattern 10: Last Modifier Tracking Failure — move-state-010 [HIGH]** (69 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
+- **Pattern 14: Inability to Withdraw Collected Fees — move-evtcfg-014 [MEDIUM]** (67 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- **Pattern 15: Front-Running Public Validation for Initialization — move-evtcfg-015 [MEDIUM]** (65 connections) — `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- **Pattern 11: Pause State Allowing Partial Operations — move-state-011 [HIGH]** (65 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
+- **Pattern 2: Variable Shadowing Zeroing State Values — move-state-002 [HIGH]** (65 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
+- **Pattern 3: Investor Count Arithmetic Mismatch — move-state-003 [HIGH]** (65 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
+- **Pattern 4: Wallet Balance Tracking Desync — move-state-004 [HIGH]** (65 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
+- **Pattern 5: Resource Attribute Cleanup on Removal — move-state-005 [HIGH]** (65 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
+- **Pattern 6: Group ID Reuse After Deletion — move-state-006 [HIGH]** (65 connections) — `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
+- *... and 95 more nodes in this community*
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [access-control](access-control.md) (39 shared connections)
+- [general 4](general_4.md) (26 shared connections)
+- [defi 8](defi_8.md) (19 shared connections)
+- [defi 9](defi_9.md) (18 shared connections)
+- [defi 4](defi_4.md) (16 shared connections)
+- [general](general.md) (13 shared connections)
+- [cosmos 6](cosmos_6.md) (7 shared connections)
+- [defi 6](defi_6.md) (6 shared connections)
+- [bridge](bridge.md) (5 shared connections)
+- [cosmos 7](cosmos_7.md) (4 shared connections)
+- [oracle](oracle.md) (2 shared connections)
+- [cosmos](cosmos.md) (1 shared connections)
 
 ## Source Files
 
-- `DB/amm/concentrated-liquidity/price-oracle-manipulation.md`
-- `DB/general/bonding-curve/BONDING_CURVE_MATH_FORMULA_VULNERABILITIES.md`
+- `DB/Sui-Move-specific/MOVE_EVENT_CONFIGURATION_VULNERABILITIES.md`
+- `DB/Sui-Move-specific/MOVE_STATE_MANAGEMENT_VULNERABILITIES.md`
+- `DB/cosmos/app-chain/rewards/reward-distribution-failures.md`
+- `DB/general/access-control/defihacklabs-access-control-2024-2025.md`
+- `DB/general/bonding-curve/BONDING_CURVE_MISC_VULNERABILITIES.md`
+- `DB/general/reentrancy/reentrancy.md`
 - `DB/general/restaking/LRT_EXCHANGE_RATE_ORACLE_VULNERABILITIES.md`
 - `DB/general/restaking/RESTAKING_OPERATOR_DELEGATION_VULNERABILITIES.md`
 - `DB/general/restaking/RESTAKING_REWARD_DISTRIBUTION_VULNERABILITIES.md`
-- `DB/oracle/price-manipulation/defihacklabs-flashloan-oracle-2022-patterns.md`
-- `DB/oracle/price-manipulation/flash-loan-oracle-manipulation.md`
-- `DB/unique/defihacklabs/defihacklabs-novel-attack-patterns-2025-2026.md`
+- `DB/general/restaking/RESTAKING_SLASHING_VULNERABILITIES.md`
 - `DB/unique/l1-misc/stacks/sbtc-coordinator-unvalidated-transaction-drain.md`
-- `DB/zk-rollup/batch-processing.md`
-- `DB/zk-rollup/l1-l2-messaging.md`
-- `DB/zk-rollup/sequencer-issues.md`
 
 ## Audit Trail
 
-- EXTRACTED: 702 (34%)
-- INFERRED: 1379 (66%)
+- EXTRACTED: 677 (35%)
+- INFERRED: 1273 (65%)
 - AMBIGUOUS: 0 (0%)
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

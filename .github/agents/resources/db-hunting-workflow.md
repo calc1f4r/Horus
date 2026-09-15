@@ -20,7 +20,7 @@ graph when `DB/graphify-out/graph.json` exists.
 
 ```bash
 graphify query "<protocol type or vulnerability topic>" --graph DB/graphify-out/graph.json --budget 2000
-graphify path "<topic>" "<candidate hunt card title>" --graph DB/graphify-out/graph.json
+graphify path "<topic>" "<candidate hunt card title>" --graph DB/graphify-out/graph.json --undirected
 ```
 
 Use the query output to add related hunt cards within roughly 2 hops of the

@@ -33,7 +33,12 @@
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [governance](governance.md) (11 shared connections)
+- [general 2](general_2.md) (7 shared connections)
+- [zk-rollup 2](zk-rollup_2.md) (3 shared connections)
+- [account-abstraction](account-abstraction.md) (2 shared connections)
+- [cosmos 7](cosmos_7.md) (1 shared connections)
+- [cosmos 14](cosmos_14.md) (1 shared connections)
 
 ## Source Files
 
@@ -51,4 +56,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

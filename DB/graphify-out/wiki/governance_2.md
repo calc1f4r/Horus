@@ -1,4 +1,4 @@
-# governance
+# governance 2
 
 > 30 nodes · cohesion 0.48
 
@@ -47,4 +47,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [[index]] to navigate.*
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
