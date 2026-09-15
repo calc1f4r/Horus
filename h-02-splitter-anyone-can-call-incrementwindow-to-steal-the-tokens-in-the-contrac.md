@@ -1,0 +1,132 @@
+---
+# Core Classification
+protocol: Joyn
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 1753
+audit_firm: Code4rena
+contest_link: https://code4rena.com/contests/2022-03-joyn-contest
+source_link: https://code4rena.com/reports/2022-03-joyn
+github_link: https://github.com/code-423n4/2022-03-joyn-findings/issues/3
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - dexes
+  - cdp
+  - services
+  - cross_chain
+  - leveraged_farming
+
+# Audit Details
+report_date: unknown
+finders_count: 10
+finders:
+  - wuwe1
+  - cccz
+  - leastwood
+  - hickuphh3
+  - Ruhum
+---
+
+## Vulnerability Title
+
+[H-02] Splitter: Anyone can call incrementWindow to steal the tokens in the contract
+
+### Overview
+
+
+The Splitter contract is vulnerable to a fake RoyaltyVault contract that can call the incrementWindow function, allowing a malicious user to steal tokens from the contract. This vulnerability is located in the Splitter contract's incrementWindow function at lines 149-169. The malicious user can call the claim or claimForAllWindows functions to steal the tokens in the contract. The recommended mitigation steps to prevent this vulnerability is to add the onlyRoyaltyVault modifier to the incrementWindow function of the Splitter contract to ensure that only RoyaltyVault contracts with a specific address can call this function.
+
+### Original Finding Content
+
+_Submitted by cccz, also found by hickuphh3, kirk-baird, leastwood, pedroais, rayn, Ruhum, saian, WatchPug, and wuwe1_
+
+In general, the Splitter contract's incrementWindow function is only called when tokens are transfer to the contract, ensuring that the number of tokens stored in balanceForWindow is equal to the contract balance.
+However, anyone can use a fake RoyaltyVault contract to call the incrementWindow function of the Splitter contract, so that the amount of tokens stored in balanceForWindow is greater than the contract balance, after which the verified user can call the claim or claimForAllWindows functions to steal the tokens in the contract.
+
+        function incrementWindow(uint256 royaltyAmount) public returns (bool) {
+            uint256 wethBalance;
+
+            require(
+                IRoyaltyVault(msg.sender).supportsInterface(IID_IROYALTY),
+                "Royalty Vault not supported"
+            );
+            require(
+                IRoyaltyVault(msg.sender).getSplitter() == address(this),
+                "Unauthorised to increment window"
+            );
+
+            wethBalance = IERC20(splitAsset).balanceOf(address(this));
+            require(wethBalance >= royaltyAmount, "Insufficient funds");
+
+            require(royaltyAmount > 0, "No additional funds for window");
+            balanceForWindow.push(royaltyAmount);
+            currentWindow += 1;
+            emit WindowIncremented(currentWindow, royaltyAmount);
+            return true;
+        }
+
+### Proof of Concept
+
+<https://github.com/code-423n4/2022-03-joyn/blob/main/splits/contracts/Splitter.sol#L149-L169>
+
+
+### Recommended Mitigation Steps
+
+Add the onlyRoyaltyVault modifier to the incrementWindow function of the Splitter contract to ensure that only RoyaltyVault contracts with a specific address can call this function.
+
+
+**[sofianeOuafir (Joyn) confirmed and commented](https://github.com/code-423n4/2022-03-joyn-findings/issues/3#issuecomment-1099540074):**
+ > This is a high-risk issue and we intend to solve it. The mitigation provided looks good too and will be considered when fixing this issue 👍 
+
+**[deluca-mike (judge) commented](https://github.com/code-423n4/2022-03-joyn-findings/issues/3#issuecomment-1105975952):**
+ > See a detailed exploit and recommended solution at #21
+
+
+
+***
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Joyn |
+| Report Date | N/A |
+| Finders | wuwe1, cccz, leastwood, hickuphh3, Ruhum, WatchPug, rayn, pedroais, kirk-baird, saian |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2022-03-joyn
+- **GitHub**: https://github.com/code-423n4/2022-03-joyn-findings/issues/3
+- **Contest**: https://code4rena.com/contests/2022-03-joyn-contest
+
+### Keywords for Search
+
+`vulnerability`
+
