@@ -1,0 +1,386 @@
+[
+ {
+  "file": "zeitgeist-audit-chaintroopers-audit-report-of-zeitgeist-pm-2022-pdf.md",
+  "findings": [
+   {
+    "line": 42,
+    "severity": "high",
+    "title": "5.1 High Severity Findings ........................................................................... 15",
+    "excerpt": "5.1 High Severity Findings ........................................................................... 15 \n5.1.1 [authorized] Lack of support for common authorized user in \nmultiple markets at \"authorize_market_outcome\" call .......................... 15 \n5.1.2 [prediction-markets] A permissionless market can be rejected in \n\"reject_market\" ............................................................................................ 19 \n5.1.3 [prediction-markets] Market state is ignored in \"Report\" function\n 23 \n5.1.4 [prediction-markets] Missing transactional annotation in \n\"create_categorical_market\" ...................................................................... 28"
+   },
+   {
+    "line": 51,
+    "severity": "medium",
+    "title": "5.2 Medium Severity Findings .................................................................... 31",
+    "excerpt": "5.2 Medium Severity Findings .................................................................... 31 \n\n \n 3 | Page \n5.2.1 [prediction-markets] Market state ignored in \"reject_market\" \nfunction ........................................................................................................ 31 \n5.2.2 [prediction-markets] Reject market does not manage the related \noutcome assets ........................................................................................... 35 \n5.2.3 [swaps ] Minimum amount not required in \"pool_join_subsidy\"\n 39"
+   },
+   {
+    "line": 61,
+    "severity": "low",
+    "title": "5.3 Low Severity Findings ........................................................................... 43",
+    "excerpt": "5.3 Low Severity Findings ........................................................................... 43 \n5.3.1 [prediction-markets] Admin functions without \"deposit_event\" 43 \n5.3.2 [swaps ] User defined market type in \"admin_set_pool_as_stale\" \nat \"swaps\" .................................................................................................... 47 \n5.3.3 [prediction-markets] Minimum amount n ot required in \n\"buy_complete_set\" .................................................................................... 51 \n5.3.4 [swaps ] Admin functions without \"deposit_event\" at \"swaps ... 55"
+   },
+   {
+    "line": 68,
+    "severity": "informational",
+    "title": "5.4 Informational Findings .......................................................................... 59",
+    "excerpt": "5.4 Informational Findings .......................................................................... 59 \n5.4.1 [prediction-markets] Unlisted dispatch function \n\"deploy_swap_pool_and_additional_liquidity\" ........................................ 59 \n5.4.2 [prediction-markets] Market Period Upper Limits not checked 64 \n5.4.3 [prediction-markets] Incorrect start range in \n\"admin_move_market_to_closed\" ............................................................. 68 \n6 Retest Results ................................................................................................... 71 \n Retest of ............................................................................................................ 71"
+   },
+   {
+    "line": 76,
+    "severity": "high",
+    "title": "6.1 High Severity Findings ........................................................................... 71",
+    "excerpt": "6.1 High Severity Findings ........................................................................... 71 \n6.1.1 [authorized] Lack of support for common authorized user in \nmultiple markets at \"authorize_market_outcome\" call .......................... 71 \n6.1.2 [prediction-markets] A permissionless market can be rejected in \n\"reject_market\" ............................................................................................ 73 \n6.1.3 [prediction-markets] Market state is ignored in \"Report\" function\n 74 \n6.1.4 [prediction-markets] Missing transactional annotation in \n\"create_categorical_market\" ...................................................................... 76 \n6.2 Retest of Medium Severity Findings .................................................... 77 \n\n \n 4 | Page \n6.2.1 [prediction-markets] Market state ignored in \"reject_market\" \nfunction ........................................................................................................ 77 \n6.2.2 [prediction-markets] Reject market does not manage the related \noutcome assets ........................................................................................... 78 \n6.2.3 [swaps ] Minimum amount not requi"
+   },
+   {
+    "line": 126,
+    "severity": "informational",
+    "title": "informational issues of no-risk.",
+    "excerpt": "informational issues of no-risk. \n \nAll the identified vulnerabilities are presented in the report, including their impact \nand the proposed mitigation strategy, and are ordered by their severity. A \nretesting phase was carried out on May 14th, 2022, and June 28th, 2022, and the \nresults are presented in Section 6. \n \n  \n0 1 2 3 4 5\nHIGH\nMEDIUM\nLOW\nINFO\nTotal Findings\n\n \n 6 | Page \n1.2 Assessment Results \nThe assessment results revealed that the in-scope application components were \nmainly vulnerable to four (4) Business Logic and Data Validation issues of HIGH \nrisk. Regarding the Business Logic issues, it was identified that the \"authorized\" \npallet was not able to handle cases in which the same user was authorized to \nresolve disputes in multiple markets (\u20185.1.1 - [authorized] Lack of support for \ncommon authorized user in multiple markets at \"authorize_market_outcome\" call\u2019). In \nthese cases, it was not possible for this user to update the outcome of any of the \ndisputed markets except from the last one, leading to a denial-of-service (DoS) \nvulnerability. Furthermore, another business logic issue was found to affect the \n\u201creport\u201d functionality, which did not take into account "
+   },
+   {
+    "line": 374,
+    "severity": "low",
+    "title": "Low 0.1-3.9",
+    "excerpt": "Low 0.1-3.9"
+   },
+   {
+    "line": 375,
+    "severity": "medium",
+    "title": "Medium 4.0-6.9",
+    "excerpt": "Medium 4.0-6.9"
+   },
+   {
+    "line": 376,
+    "severity": "high",
+    "title": "High 7.0-8.9",
+    "excerpt": "High 7.0-8.9"
+   },
+   {
+    "line": 377,
+    "severity": "critical",
+    "title": "Critical 9.0-10.0",
+    "excerpt": "Critical 9.0-10.0 \nIssues reported in this document contain a CVSS Score section, this code is \nprovided as an aid to help verify the logic of the team behind the evaluation of a \nsaid issue. A CVSS calculator can be found in the following URL: \nhttps://nvd.nist.gov/vuln-metrics/cvss/v3-calculator \n  \n\n \n 15 | Page \n5 Identified Findings"
+   },
+   {
+    "line": 387,
+    "severity": "high",
+    "title": "5.1 High Severity Findings",
+    "excerpt": "5.1 High Severity Findings \n5.1.1 [authorized] Lack of support for common authorized user in multiple \nmarkets at \"authorize_market_outcome\" call \n \nDescription \n \nIt was identified that the authorized pallet is not able to handle cases in which a \nuser is authorized in multiple markets. The specific pallet in one of the available \narbitration systems for resolving disputes between shareholders and their \nbrokers. It offers authorized resolution of disputes, by allowing the authorized \nuser to provide the outcome of the disputed market.  \nIn the examined implementation, it was found that the user who requests to \nresolve a dispute using this pallet does not need to provide a market identifier. \nInstead, the market identifier is located automatically by iterating on the stored \nrecords. However, this operation cannot handle cases in which the same user is \nalso authorized to resolve disputes in more than one markets. \nMore precisely, the issue is located at the \" authorize_market_outcome\u201d \nfunctionality. The market identifier is located using the \" markets.iter().find()\" \noperation. The first market that is found with that account identifier is taken \ninto consideration for setting "
+   },
+   {
+    "line": 484,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nIt is recommended to add support for having a common authorized user \nbetween multiple markets.  \nThe user should be able to select the market by providing the market identifier \nas a parameter to the \u201cauthorize_market_outcome\u201c functionality. \n \nCVSS Score \n\n \n 18 | Page \nAV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H/E:P/RL:X/RC:C/CR:X/IR:X/AR:X/MAV:X/MA\nC:X/MPR:X/MUI:X/MS:X/MC:X/MI:X/MA:X \n \n  \n\n \n 19 | Page \n5.1.2 [prediction-markets] A permissionless market can be rejected in \n\"reject_market\" \n \nDescription \n \nIt was identified that the user with the \u201cApproval Origin\u201d can reject a market that \nis permissionless.  The \u201cApproval Origin\u201d is a custom origin that can be used to \nperform authorization checks inside functions of specific modules in the \nruntime. In the specific case, the \u201cApproval Origin\u201d is a privilege of the advisory \ncommittee. The committee is the on-chain governing body of Zeitgeist that is \nresponsible for maintaining a list of high-quality markets and slash low quality \nmarkets.  \nNormally, the \"reject_market\" function is designed to reject a \u201cProposed\u201d market \nof \u201cAdvised\u201d type that is waiting for approval from the advisory committee. \nHowever, it was fou"
+   },
+   {
+    "line": 606,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nIt is recommended to validate if the market type is \u201cAdvised\u201d. For example: \nensure!(m.creation== MarketCreation::Advised, \nError::<T>::MarketIsNotAdvised); \n \nCVSS Score \n\n \n 22 | Page \nAV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H/E:P/RL:X/RC:C/CR:X/IR:X/AR:X/MAV:X/MA\nC:X/MPR:X/MUI:X/MS:X/MC:X/MI:X/MA:X \n \n  \n\n \n 23 | Page \n5.1.3 [prediction-markets] Market state is ignored in \"Report\" function \n \nDescription \n \nIt was identified that the \u201creport\u201d functionality does not take into account the \nstate of the market (e.g., if the market is still in Proposed state). Prediction \nmarkets are speculative markets that trade on future outcomes. While a \nprediction market is active, traders can permissionlessly trade on outcome \nassets. However, when the market has reached the end of its period, selected \nusers are able to provide the final outcome of the market.  \nThe report functionality is designed for this purpose; to allow users to set the \noutcome of a market. However, it was found that there is no check to verify if \nthe market was \u201cActive\u201d: \nFile: zeitgeist/zrml/prediction-markets/src/lib.rs \n927:         /// Reports the outcome of a market. \n928:         /// \n929:         #[p"
+   },
+   {
+    "line": 783,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nIt is recommended to validate if the market type is not in \u201cProposed\u201d state. For \nexample: \nensure!(m.status == MarketStatus:: Active, Error::<T>:: \nMarketIsNotActive); \n \n \n \nCVSS Score \nAV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N/E:P/RL:X/RC:C/CR:X/IR:X/AR:X/MAV:X/MA\nC:X/MPR:X/MUI:X/MS:X/MC:X/MI:X/MA:X \n \n  \n\n \n 28 | Page \n5.1.4 [prediction-markets] Missing transactional annotation in \n\"create_categorical_market\" \n \nDescription \n \nIt was identified that the publicly available dispatch call which is provided for \ncreating categorical markets is not marked as transactional. Substrate uses Rust \nmacros to aggregate the logic derived from pallets that are implemented for a \nruntime. The transactional macro can be used to execute the annotated runtime \nfunction in a new storage transaction. It provides a convenient way to make \nruntime functions atomic, as all changes to storage performed by the annotated \nfunction will be discarded if it returns an error, or committed otherwise. \nThe issue exists at the \"create_categorical_market\" functionality: \nFile: zeitgeist/zrml/prediction-markets/src/lib.rs \n377:         #[pallet::weight(T::WeightInfo::create_categorical_market())] \n378"
+   },
+   {
+    "line": 905,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nIt is advisable to add the \u201ctransactional\u201d macro label: \n#[transactional] \n \nCVSS Score \nAV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N/E:P/RL:X/RC:C/CR:X/IR:X/AR:X/MAV:X/MA\nC:X/MPR:X/MUI:X/MS:X/MC:X/MI:X/MA:X \n \n  \n\n \n 31 | Page"
+   },
+   {
+    "line": 917,
+    "severity": "medium",
+    "title": "5.2 Medium Severity Findings",
+    "excerpt": "5.2 Medium Severity Findings \n5.2.1 [prediction-markets] Market state ignored in \"reject_market\" function \n \nDescription \n \nIt was identified that the reject function does not take into account the state \nof the market (e.g., if the market is not in Proposed state).  \nNormally, the \"reject_market\" function is designed to reject a \u201c Proposed\u201d \nmarket of \u201cAdvised\u201d type that is waiting for approval from the advisory \ncommittee. However, it was found that no check is performed to validate the \nmarket status.  \nAs a result, a market in \u201cReported\u201d state can also be rejected using this \nfunctionality. \nFile: zeitgeist/zrml/prediction-markets/src/lib.rs \n907:         /// Rejects a market that is waiting for approval from the \nadvisory committee. \n908:         #[pallet::weight(T::WeightInfo::reject_market())] \n909:         pub fn reject_market(origin: OriginFor<T>, market_id: \nMarketIdOf<T>) -> DispatchResult { \n910:             T::ApprovalOrigin::ensure_origin(origin)?; \n911:  \n912:             let market = T::MarketCommons::market(&market_id)?; \n913:             let creator = market.creator; \n914:             let (imbalance, _) = \nCurrencyOf::<T>::slash_reserved_named( \n915:              "
+   },
+   {
+    "line": 1019,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nIt is recommended to validate if the market state is in \u201cProposed\u201d state. For \nexample: \nensure!(m.status == MarketStatus::Proposed, \nError::<T>::MarketIsNotProposed); \n \n \nCVSS Score \n\n \n 34 | Page \nAV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N/E:P/RL:X/RC:C/CR:X/IR:X/AR:X/MAV:X/MAC\n:X/MPR:X/MUI:X/MS:X/MC:X/MI:X/MA:X \n \n  \n\n \n 35 | Page \n5.2.2 [prediction-markets] Reject market does not manage the related \noutcome assets \n \nDescription \n \nIt was identified that when the \"reject_market\" is used, the related outcome \nassets are not removed. Normally, the \"reject_market\" function is designed to \nreject a \u201cProposed\u201d market that is waiting for approval from the advisory \ncommittee. Advised markets that are in Proposed state shouldn't have any \nrelated outcome assets. However, as it was identified in issues 5.1.2, 5.1.3 and \n5.2.1 this is possible.  \nFile: zeitgeist/zrml/prediction-markets/src/lib.rs \n907:         /// Rejects a market that is waiting for approval from the \nadvisory committee. \n908:         #[pallet::weight(T::WeightInfo::reject_market())] \n909:         pub fn reject_market(origin: OriginFor<T>, market_id: \nMarketIdOf<T>) -> DispatchResult { \n910:             T::Ap"
+   },
+   {
+    "line": 1166,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nIt is advisable to also remove any related outcome assets, in a similar way to \n\u201cadmin_destroy_market\u201d.  \nIt should be noted that this issue can be fixed by mitigating 5.1.2, 5.1.3 and 5.2.1. \n \nCVSS Score \nAV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N/E:P/RL:X/RC:C/CR:X/IR:X/AR:X/MAV:X/MAC\n:X/MPR:X/MUI:X/MS:X/MC:X/MI:X/MA:X \n \n  \n\n \n 39 | Page \n5.2.3 [swaps ] Minimum amount not required in \"pool_join_subsidy\" \n \nDescription \n \nIt was identified that no minimum amount is required in the publicly available \ndispatch functionality which is provided to join a subsidy pool. In general, the \ncreated pools allow the liquidity providers to deposit full outcome shares and \nearn fees. In the specific case, the functionality is used to add a subsidy to a pool \nthat uses the Rikiddo scoring rule. The provided parameter is the amount of the \nbase currency that would be reserved to be added as subsidy on pool activation. \nHowever, it was found that this amount can be zero. \nThe issue exists at the \"pool_join_subsidy \" function: \nFile: /zeitgeist/zrml/swaps/src/lib.rs \n387:         /// Pool - Add subsidy to a pool that uses the Rikiddo scoring \nrule. \n388:         /// \n389:         /// Res"
+   },
+   {
+    "line": 1286,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nIt is advisable to ensure that the provided amount in the \"pool_join_subsidy \" \nfunction is bigger than zero. \n \nensure!(amount > 0, Error::<T>:: NotEnoughAssets); \n \n\n \n 42 | Page \n \n \nCVSS Score \nAV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N/E:P/RL:X/RC:C/CR:X/IR:X/AR:X/MAV:X/MAC\n:X/MPR:X/MUI:X/MS:X/MC:X/MI:X/MA:X \n  \n\n \n 43 | Page"
+   },
+   {
+    "line": 1304,
+    "severity": "low",
+    "title": "5.3 Low Severity Findings",
+    "excerpt": "5.3 Low Severity Findings \n5.3.1 [prediction-markets] Admin functions without \"deposit_event\" \n \nDescription \n \nIt was found that certain admin functions do not utilize the \"deposit_event\". The \ncorresponding events are also missing. A pallet can emit events when it wants \nto notify external entities about changes or conditions in the runtime to external \nentities like users, chain explorers, or dApps. \nThe available events are the following: \nFile: zeitgeist/zrml/prediction-markets/src/lib.rs \n1239:     #[pallet::event] \n1240:     #[pallet::generate_deposit(fn deposit_event)] \n1241:     pub enum Event<T> \n1242:     where \n1243:         T: Config, \n1244:     { \n1245:         /// Custom addition block initialization logic wasn't \nsuccessful \n1246:         BadOnInitialize, \n1247:         /// A complete set of assets has been bought \\[market_id, \namount_per_asset, buyer\\] \n1248:         BoughtCompleteSet(MarketIdOf<T>, BalanceOf<T>, <T as \nframe_system::Config>::AccountId), \n1249:         /// A market has been approved \\[market_id, new_market_status\\] \n1250:         MarketApproved(MarketIdOf<T>, MarketStatus), \n1251:         /// A market has been created \\[market_id, creator\\] \n1252: "
+   },
+   {
+    "line": 1412,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nIt is recommended to emit an event related to this administrative functionality. \nFor example: \nSelf::deposit_event(Event::MarketResolved(marketid, resolved_outcome)); \nSelf::deposit_event(Event::MarketClosed(marketid)); \n \n\n \n 46 | Page \n \n \nCVSS Score \nAV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N/E:P/RL:X/RC:C/CR:X/IR:X/AR:X/MAV:X/MA\nC:X/MPR:X/MUI:X/MS:X/MC:X/MI:X/MA:X \n \n  \n\n \n 47 | Page \n5.3.2 [swaps ] User defined market type in \"admin_set_pool_as_stale\" at \n\"swaps\" \n \nDescription \n \nIt was identified that the market type is provided at \"admin_set_pool_as_stale\" \nand at \"set_pool_as_stale\" functionalities. However, this information could be \nstored in the pool entity in order to avoid later taking security decisions on user \nprovided parameters. \nInitially, the root user calls the \"admin_set_pool_as_stale\" function with the \nmarket type, the pool id and the outcome report as parameters: \nFile: zeitgeist/zrml/swaps/src/lib.rs \n085:     #[pallet::call] \n086:     impl<T: Config> Pallet<T> { \n087:         #[pallet::weight(T::WeightInfo::admin_set_pool_as_stale())] \n088:         #[frame_support::transactional] \n089:         pub fn admin_set_pool_as_stale( \n090:             o"
+   },
+   {
+    "line": 1559,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nIt is recommended to maintain and retrieve the market type in the same way as \nthe \"pool_account_id\" is retrieved.  \n \nCVSS Score \nAV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N/E:P/RL:X/RC:C/CR:X/IR:X/AR:X/MAV:X/MA\nC:X/MPR:X/MUI:X/MS:X/MC:X/MI:X/MA:X \n  \n\n \n 51 | Page \n5.3.3 [prediction-markets] Minimum amount not required in \n\"buy_complete_set\" \n \nDescription \n \nIt was identified that no minimum amount is required in the publicly available \ndispatch functionality which is provided to buy a complete set of outcome \nshares of a market. Normally, when calling this function on a categorical market \nwith five different outcomes, five different shares will be transf erred to the \ncallee. However, it was found that a user can issue requests for zero amounts. \nThe issue exists at the \"buy_complete_set()\" function: \nFile: zeitgeist/zrml/prediction-markets/src/lib.rs \n278:         /// Buys the complete set of outcome shares of a market. For \nexample, when calling this \n279:         /// function on a categorical market with five different \noutcomes, five different shares \n280:         /// will be transferred to the callee. \n281:         /// \n282:         /// The amount of each share wi"
+   },
+   {
+    "line": 1699,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nIt is advisable to ensure that the amount is bigger than zero. \n \nensure!(amount > 0, Error::<T>:: NotEnoughAssets); \n \n \nCVSS Score \nAV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N/E:P/RL:X/RC:C/CR:X/IR:X/AR:X/MAV:X/MA\nC:X/MPR:X/MUI:X/MS:X/MC:X/MI:X/MA:X \n  \n\n \n 55 | Page \n5.3.4 [swaps ] Admin functions without \"deposit_event\" at \"swaps \n \nDescription \n \nIt was found that certain admin functions do not utilize the \"deposit_event\". The \ncorresponding events are also missing. A pallet can emit events when it wants \nto notify external entities about changes or conditions in the runtime to external \nentities like users, chain explorers, or dApps. \nMore precisely, the admin function \" admin_set_pool_as_stale\" does not send \nthe event. The issue exists at the following location: \nFile: /zrml/swaps/src/lib.rs \n085:     #[pallet::call] \n086:     impl<T: Config> Pallet<T> { \n087:         #[pallet::weight(T::WeightInfo::admin_set_pool_as_stale())] \n088:         #[frame_support::transactional] \n089:         pub fn admin_set_pool_as_stale( \n090:             origin: OriginFor<T>, \n091:             market_type: MarketType, \n092:             pool_id: PoolId, \n093:             outcome_report:"
+   },
+   {
+    "line": 1854,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nIt is recommended to emit an event related to this administrative functionality. \nFor example: \nSelf::deposit_event(Event::PoolStale(poolid)); \n \n \nCVSS Score \nAV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N/E:P/RL:X/RC:C/CR:X/IR:X/AR:X/MAV:X/MA\nC:X/MPR:X/MUI:X/MS:X/MC:X/MI:X/MA:X \n \n  \n\n \n 59 | Page"
+   },
+   {
+    "line": 1868,
+    "severity": "informational",
+    "title": "5.4 Informational Findings",
+    "excerpt": "5.4 Informational Findings \n5.4.1 [prediction-markets] Unlisted dispatch function \n\"deploy_swap_pool_and_additional_liquidity\" \n \nDescription \n \nIt was identified that one of the available functions is not listed in the available \nPublic Dispatches. Substrate uses Rust macros to aggregate the logic derived \nfrom pallets that are implemented for a runtime. In Substrate, the \u201c#[pallet::call]\u201d \nmacro allows the developers to create dispatchable functions which will \ngenerate associated items from the \u201cimpl\u201d code blocks. However, in the specific \ncase it was found that one of the available functions is not included in the \ndocumentation of the examined pallet. \nMore precisely, according to the pallet documentation, the available Public \nDispatches are the following: \nFile: zeitgeist/zrml/prediction-markets/src/lib.rs \n23: //! #### Public Dispatches \n24: //! \n25: //! - `buy_complete_set` - Buys a complete set of outcome assets for a \nmarket. \n26: //! - `cancel_pending_market` - Allows the proposer of a market that \nis currently in a `Proposed` state to cancel the market proposal. \n27: //! - `create_categorical_market` - Creates a new categorical market. \n28: //! - `create_cpmm_market_an"
+   },
+   {
+    "line": 2066,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nIt is advisable to update the documentation and add the specific functionality. \n\n \n 64 | Page \nCVSS Score \nAV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N/E:P/RL:X/RC:C/CR:X/IR:X/AR:X/MAV:X/MA\nC:X/MPR:X/MUI:X/MS:X/MC:X/MI:X/MA:X \n \n \n5.4.2 [prediction-markets] Market Period Upper Limits not checked \n \nDescription \n \nThe team identified that no upper limits are defined for the \"range.end\" value of \nthe Market Period. A user can create a Market with the higher possible value \nwhich is \"u64:MAX\". However, due to other calculations that take place at the \n\"Report\" functionality, reporting can be impossible due to overflow issues. \nThe issue exists at the following location: \nFile: zeitgeist/zrml/prediction-markets/src/lib.rs \n931:         pub fn report( \n932:             origin: OriginFor<T>, \n933:             market_id: MarketIdOf<T>, \n934:             outcome: OutcomeReport, \n935:         ) -> DispatchResult { \n... \n948:                 let mut should_check_origin = false; \n949:                 match market.period { \n... \n955:                     MarketPeriod::Timestamp(ref range) => { \n956:                         let rp_moment: MomentOf<T> =  \nT::ReportingPeriod::get().into();"
+   },
+   {
+    "line": 2192,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nIt is advisable to set upper limits on market creation for the Blocks or the \nTimestamp \"range.end\" parameter, that will take into account the \n\"ReportingPeriod\". \nCVSS Score \nAV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N/E:P/RL:X/RC:C/CR:X/IR:X/AR:X/MAV:X/MA\nC:X/MPR:X/MUI:X/MS:X/MC:X/MI:X/MA:X \n \n \n \n  \n\n \n 68 | Page \n5.4.3 [prediction-markets] Incorrect start range in \n\"admin_move_market_to_closed\" \n \nDescription \n \nIt was found that the \"admin_move_market_to_closed\" does not handle cases \nwhere the \"current_block\" or the \" T::MarketCommons::now()\" is smaller than \nthe \"range.start\" value. As a result, it is possible that when the admin uses the \nspecific functionality, the market that will be mutated will have an invalid range. \nThe issue exists at the following location: \nFile: zeitgeist/zrml/prediction-markets/src/lib.rs \n193:         \n#[pallet::weight(T::WeightInfo::admin_move_market_to_closed())] \n194:         pub fn admin_move_market_to_closed( \n195:             origin: OriginFor<T>, \n196:             market_id: MarketIdOf<T>, \n197:         ) -> DispatchResult { \n198:             T::CloseOrigin::ensure_origin(origin)?; \n199:             T::MarketCommons::mutate_market"
+   },
+   {
+    "line": 2278,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \n\n \n 70 | Page \nIf the market range is used in a future security decision, it is advisable to always \nvalidate the market range for such cases or change the specific functionality to \nset a valid range.  \nCVSS Score \nAV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N/E:P/RL:X/RC:C/CR:X/IR:X/AR:X/MAV:X/MA\nC:X/MPR:X/MUI:X/MS:X/MC:X/MI:X/MA:X \n \n\n \n 71 | Page \n6 Retest Results \n6.1 Retest of High Severity Findings \n6.1.1 [authorized] Lack of support for common authorized user in multiple \nmarkets at \"authorize_market_outcome\" call \nTested on 2022-05-18 by Chaintroopers and the issue was found to be fixed. \n\u00a7 github pull #574  \n\u00a7 commit ids \"141642a9ad6381ed5b37e2fc576d4892369ca279\"): \nFile: zeitgeist/zrml/authorized/src/lib.rs \n52:         pub fn authorize_market_outcome( \n53:             origin: OriginFor<T>, \n54:             market_id: MarketIdOf<T>, \n55:             outcome: OutcomeReport, \n56:         ) -> DispatchResult { \n57:             let who = ensure_signed(origin)?; \n58:             let market = T::MarketCommons::market(&market_id)?; \n59:             ensure!(market.status == MarketStatus::Disputed, \nError::<T>::MarketIsNotDisputed); \n60:             ensure!(market.matches_o"
+   }
+  ]
+ },
+ {
+  "file": "chainflip-backend-audits-multisig-kudelski-q1-2022-pdf.md",
+  "findings": [
+   {
+    "line": 152,
+    "severity": "medium",
+    "title": "Medium Low Informational",
+    "excerpt": "Medium Low Informational\nIssue Severity Distribution"
+   },
+   {
+    "line": 154,
+    "severity": "medium",
+    "title": "Medium Low Informational",
+    "excerpt": "Medium Low Informational\n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 7 of 31\nFor public release \n1.4 Issue Summary List \nThe following security issues were found: \nID SEVERITY FINDING STATUS \nKS-CFR-F-01 Medium Possible DoS Attack in FROST KeyGen Remediated \nKS-CFR-F-02 Medium Unsuccessful Zeroization of Random Values Remediated \nKS-CFR-F-03 Medium Secret Key Shares Stored in Cleartext in \nDatabase \nAcknowledged \nKS-CFR-F-04 Medium Various Vulnerabilities Found by cargo-\naudit \nAcknowledged \nKS-CFR-F-05 Medium Use of Outdated, Unmaintained, or \nDeprecated Crates \nAcknowledged \nKS-CFR-F-06 Low 64-bit Values Clipped to 32-bit Values Remediated \nKS-CFR-F-07 Low Hash Values Not Mapped to Correct Group Acknowledged \n \nThe following are non-security observations related to general design and optimization: \nID SEVERITY FINDING STATUS \nKS-CFR-O-01 Informational Parameters Control Left to Blockchain \nGovernance Layer"
+   },
+   {
+    "line": 182,
+    "severity": "informational",
+    "title": "Informational",
+    "excerpt": "Informational \nKS-CFR-O-02 Informational On the Constraint of Public Key x-\nCoordinate"
+   },
+   {
+    "line": 185,
+    "severity": "informational",
+    "title": "Informational",
+    "excerpt": "Informational \nKS-CFR-O-03 Informational Whitepaper is Outdated Informational \nKS-CFR-O-04 Informational On Error Management Informational \nKS-CFR-O-05 Informational Compilation Error in cargo test Informational \nKS-CFR-O-06 Informational Test can_subscribe_infura Fails Informational \nKS-CFR-O-07 Informational Warnings from cargo clippy Informational \n  \n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 8 of 31\nFor public release \n2. METHODOLOGY \nFor this  engagement, Kudelski used a methodology that is described at high -level in this \nsection. This is broken up into the following phases.  \n \nFigure 2 Methodology Flow \n2.1 Kickoff \nThe project was kicked off when all of the sales activities had been concluded. We set up a \nkickoff meeting where project stakeholders were gathered to discuss the project as well as the \nresponsibilities of participants. During this meeting we verif ied the scope of the engagement \nand discussed the project activities. It was an opportunity for both sides to ask questions and \nget to know each other. By the end of the kickoff there was an understanding of the following:  \n\u2022 Designated points of contact \n\u2022"
+   },
+   {
+    "line": 349,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation  \nIdeally, ZKP s should be added (and checked) for all the coefficients,  not only for the low \ndegree one. However, this would probably be too expensive.  A simple modification of the \nprotocol to mitigate the effects of the possibility of a DoS attack is as follows: \n1) Before Step 4 of Round 1, each participant i also computes a commitment of all their \nsecret polynomial, for example as H(a1,0 || \u2026 || a i,(t-1)), where H is a secure \nhash function, and || denotes concatenation of strings which represent unique \nencodings of the coefficients. This value is also broadcast together with the others at \nstep 4. \n2) At the end of the DKG protocol, a test round is performed where the participants sign \na dummy \u201cOK\u201d mess age and verify that the signature is valid.  If the verification fails, \neach participant is required to reveal their secret polynomials (as they would be \ninvalidated anyway), so that the culprit can be identified and banned from the next \niteration of the protocol. \nAnother simple extra verification step (which can be performed locally by each party  without \nmodifying the exchanged elements, so it does not add too much overhead) is the following: At \ns"
+   },
+   {
+    "line": 406,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation  \nWe recommend removing the need for the copy variable. This should be faster than zeroizing \nthe copy before the end of the function. \n \nStatus Details \nClient corrected the problem in PR #1437. \n  \n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 14 of 31\nFor public release \n3.3 Secret Key Shares Stored in Cleartext in Database \nFinding ID: KS-CFR-F-04 \nSeverity: Medium \nStatus: Acknowledged \nLocation:  src/multisig/client/key_store.rs @ line 37 \n \nDescription and Impact Summary \nThe KeyDB stores key share in clear. \n    // Save `key` under key `key_id` overwriting if exists \n    pub fn set_key(&mut self, key_id: KeyId, key: KeygenResultInfo) { \n        self.db.update_key(&key_id, &key); \n        self.keys.insert(key_id, key); \n    } \nAn attacker with access to the node machine could recover the secret share of the node."
+   },
+   {
+    "line": 434,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation  \nWe recommend encrypting and authenticating shares before storing them in the database. \n \nStatus Details \nThe client roadmap contains the key database encryption at rest. \n  \n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 15 of 31\nFor public release \n3.4 Various Vulnerabilities Found by cargo-audit \nFinding ID: KS-CFR-F-04 \nSeverity: Medium \nStatus: Acknowledged \nLocation:  various \n \nDescription and Impact Summary \nThe automated tool cargo-audit finds the following vulnerabilities in the dependencies used \nby the project: \n\u2022 https://rustsec.org/advisories/RUSTSEC-2020-0159 \nCrate:         chrono \nVersion:       0.4.19 \nTitle:         Potential segfault in `localtime_r` invocations \nDate:          2020-11-10 \nID:            RUSTSEC-2020-0159 \nURL:           https://rustsec.org/advisories/RUSTSEC-2020-0159 \nSolution:      No safe upgrade is available! \nDependency tree:  \nchrono 0.4.19 \n\u2022 https://rustsec.org/advisories/RUSTSEC-2021-0079 \nCrate:         hyper \nVersion:       0.10.16 \nTitle:         Integer overflow in `hyper`'s parsing of the `Transfer-\nEncoding` header leads to data loss \nDate:          2021-07-07 \nID"
+   },
+   {
+    "line": 533,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation  \nWe recommend following cargo-audit\u2019s pointers to proposed solutions where applicable. \n \nStatus Details \nAcknowledged by the client. \n  \n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 17 of 31\nFor public release \n3.5 Use of Outdated, Unmaintained, or Deprecated Crates \nFinding ID: KS-CFR-F-05 \nSeverity: Medium \nStatus: Acknowledged \nLocation:  Cargo.toml \n \nDescription and Impact Summary \ncargo-audit shows that the following crates are either deprecated or unmaintained. \nDeprecated and unmaintained dependencies can create security issues due to unpatched \nvulnerabilities that remain persistent in the code. The impact of these vulnerabilities could be \nsevere depending on the location and criticality of the functions used. \n\u2022 tempdir \nCrate:         tempdir \nVersion:       0.3.7 \nWarning:       unmaintained \nTitle:         `tempdir` crate has been deprecated; use `tempfile` \ninstead \nDate:          2018-02-13 \nID:            RUSTSEC-2018-0017 \nURL:           https://rustsec.org/advisories/RUSTSEC-2018-0017 \n\u2022 net2 \nCrate:         net2 \nVersion:       0.2.37 \nWarning:       unmaintained \nTitle:         `net2` crate ha"
+   },
+   {
+    "line": 600,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation  \nAlternatives should be used if possible. \n \nStatus Details \nAcknowledged by the client. \n \n  \n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 19 of 31\nFor public release \n3.6 64-bit Values Clipped to 32-bit Values \nFinding ID: KS-CFR-F-06 \nSeverity: Low \nStatus: Remediated \nLocation:  src/multisig/crypto.rs @ line 141 \nsrc/multisig/client/common/broadcast_verification.rs @ line 50 \n \nDescription and Impact Summary \nFor example: \n    pub fn from_usize(a: usize) -> Self { \n        Scalar(ECScalar::from_bigint(&BigInt::from(a as u32))) \n    } \nThis might lead to unexpected behavior."
+   },
+   {
+    "line": 627,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation  \nWe recommend using the usize type. \n \nStatus Details \nCorrected by the client in PR #1438. \n  \n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 20 of 31\nFor public release \n3.7 Hash Values Not Mapped to Correct Group \nFinding ID: KS-CFR-F-07 \nSeverity: Low \nStatus: Acknowledged \nLocation:  src/multisig/client/keygen/keygen_frost.rs @ line 78 \n  src/multisig/client/signing/frost.rs @ line 151 \n \nDescription and Impact Summary \nHash values (256 bits) should map to elements of Zq or Z*q but this reduction is not performed."
+   },
+   {
+    "line": 649,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation  \nWe recommend mapping hash values to correct ranges by using procedures to avoid modular \nbias, as explained for example at https://research.kudelskisecurity.com/2020/07/28/the-\ndefinitive-guide-to-modulo-bias-and-how-to-avoid-it/ . More in detail, the recommended \nprocedure (also suggested for example in https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-\nto-curve/ ) is to perform a modular reduction of a larger value, in order to reduce the bias to a \nnegligible amount. Compared to rejection sampling, this has the advantage that the procedure \nis guaranteed to halt in a predictable time, and it adds little overhead. \n \nStatus Details \nThe Client acknowledges the issue but prefers to maintain the same approach used also in \nBitcoin and other similar secp256k1 applications. The reason is that the order of this curve is \nsufficiently close to 2256 to make any bias unobservable in practice. \n \n  \n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 21 of 31\nFor public release \n4. OTHER OBSERVATIONS \nThis section contains additional observations that are not directly related to the security of the \ncode, and as such have n"
+   },
+   {
+    "line": 677,
+    "severity": "informational",
+    "title": "Observation ID: KS-CFR-O-01",
+    "excerpt": "Observation ID: KS-CFR-O-01 \n \nDescription and Impact Summary \nWe notice that severa l undesirable behaviors are only avoided by the guarantees that the \nhigher level blockchain governance layer explicitly avoids certain configurations. Examples: \n\u2022 A large number of parties will make the validator to crash. This is avoided by a \nmechanism in p lace that ensures that the number of messages processed at each \nstage is no larger than the number of ceremony participants (which is determined by \nthe blockchain rules and limited to some reasonable number, 150 in this case). \n\u2022 Reuse of CeremonyIds is possible, making ceremony context hash not unique. It is \npossible for the blockchain components to request ceremonies with previously used \nceremonies id, but only if the blockchain governance made the chain do so: \ngovernance has total control over the chain\u2019s behavior, it\u2019s a collection of stakeholders \nwho vote to do things, i.e., upgrade the chain's behavior. Another case is if the chain \nlocally reorganizes, e.g., a blockchain node realizes it is on a fork on the chain and \ncorrects its state. According to the Client, neither of these aspects are typical behavior. \nThe Client acknowle"
+   },
+   {
+    "line": 698,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nWe recommend enforcing safeguards at a lower level in order to avoid misconfiguration \nissues. \n  \n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 22 of 31\nFor public release \n4.2 On the Constraint of Public Key x-Coordinate"
+   },
+   {
+    "line": 709,
+    "severity": "informational",
+    "title": "Observation ID: KS-CFR-O-02",
+    "excerpt": "Observation ID: KS-CFR-O-02 \n \nDescription and Impact Summary \nIn src/multisig/client/keygen/keygen_stages.rs :110 the public key coordinate \nx is chosen to be less than the curve order divided by two. This reduces the number of possible \nvalid public keys. \n/// Check if the public key's x coordinate is smaller than \"half secp256k1's order\", \n/// which is a requirement imposed by the Key Manager contract \npub fn is_contract_compatible(pk: &secp256k1::PublicKey) -> bool { \n    let pubkey = cf_chains::eth::AggKey::from(pk); \n \n    let x = BigInt::from_bytes(&pubkey.pub_key_x); \n    let half_order = BigInt::from_bytes(&secp256k1::constants::CURVE_ORDER) / 2 + 1; \n \n    x < half_order \n}"
+   },
+   {
+    "line": 726,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nReducing the entropy pool of allowed keys is in general an undesirable behavior. The need \nfor such requirement should be better documented. \n \nNotes \nThis is a necessity of the client because of the usage of Ethereum ecrecover.   \n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 23 of 31\nFor public release \n4.3 Whitepaper is Outdated"
+   },
+   {
+    "line": 739,
+    "severity": "informational",
+    "title": "Observation ID: KS-CFR-O-03",
+    "excerpt": "Observation ID: KS-CFR-O-03 \n \nDescription and Impact Summary \nThe whitepaper at https://chainflip.io/whitepaper.pdf does not mention the use of FROST."
+   },
+   {
+    "line": 744,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nShould be updated if possible. \n \nNotes \nThe Client confirmed that this document is out of date, as it was written before the decision to \nadopt FROST. The client is working on an updated version. \n  \n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 24 of 31\nFor public release \n4.4 On Error Management"
+   },
+   {
+    "line": 758,
+    "severity": "informational",
+    "title": "Observation ID: KS-CFR-O-04",
+    "excerpt": "Observation ID: KS-CFR-O-04 \n \nDescription and Impact Summary \nError management is sometimes not properly addressed, leaving the application to crash or \npanic on unexpected input rather than trying to recover from the error. Some examples: \n\u2022 Cases where expect/unwrap is called in a function that returns a Result. The \nResult type is not utilized for handling all the errors of the function, causing a panic. \nFor example in src/multisig/client/signing/frost.rs:257 and \nsrc/multisig/db/persistent.rs:67. \n\u2022 In src/multisig/client/state_runner.rs:59, a  request coming from the \nState Chain with a ceremony id different from the one previously set can make the \nvalidator crash. This would make the node to restart, losing all the current ceremony \nstates. The protocol will react by banning or suspending nodes, but this could still lead \nto a temporary DoS. \n\u2022 In general, in most expect, unwrap, and assert calls."
+   },
+   {
+    "line": 774,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nWe recommend trying to recover from errors whenever possible instead of leaving the \nimplementation crash via a panic, particularly if this allows a selective shutdown of validators. \nFurthermore, log these critical events before taking action in a persistent way. \n  \n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 25 of 31\nFor public release \n4.5 Compilation Error in cargo test"
+   },
+   {
+    "line": 786,
+    "severity": "informational",
+    "title": "Observation ID: KS-CFR-O-05",
+    "excerpt": "Observation ID: KS-CFR-O-05 \n \nDescription and Impact Summary \nWhen running cargo test the following error appears:  \nerror: internal compiler error: encountered incremental compilation error \nwith evaluate_obligation(d0144488feafe20e-26a80b73469dc7f0) \n  | \n  = help: This is a known issue with the compiler. Run `cargo clean -p \nchainflip_node` or `cargo clean` to allow your project to compile \n  = note: Please follow the instructions below to create a bug report with \nthe provided information \n  = note: See <https://github.com/rust-lang/rust/issues/84970> for more \ninformation \n \nthread 'rustc' panicked at 'Found unstable fingerprints for \nevaluate_obligation(d0144488feafe20e-26a80b73469dc7f0): \nOk(EvaluatedToOkModuloRegions)', \n/rustc/b3d11f95cc5dd687fdd185ce91e02ebe40e6f46b/compiler/rustc_query_system\n/src/query/plumbing.rs:624:9 \nnote: run with `RUST_BACKTRACE=1` environment variable to display a \nbacktrace \n \nerror: internal compiler error: unexpected panic \n \nnote: the compiler unexpectedly panicked. this is a bug. \n \nnote: we would appreciate a bug report: https://github.com/rust-\nlang/rust/issues/new?labels=C-bug%2C+I-ICE%2C+T-compiler&template=ice.md \n \nnote: rustc 1.55.0-"
+   },
+   {
+    "line": 824,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nA possible solution is to increase the ulimit parameter with ulimit -n 1000000. \n  \n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 26 of 31\nFor public release \n4.6 Test can_subscribe_infura Fails"
+   },
+   {
+    "line": 834,
+    "severity": "informational",
+    "title": "Observation ID: KS-CFR-O-06",
+    "excerpt": "Observation ID: KS-CFR-O-06 \n \nDescription and Impact Summary \nWhen running cargo test: \ntest test_all_key_manager_events ... FAILED \n \nfailures: \n \n---- test_all_key_manager_events stdout ---- \n[DEBG]  chainflip_engine::eth - Connecting new web3 client to \nws://fake.rinkeby.endpoint/flippy1234 \nthread 'test_all_key_manager_events' panicked at 'Couldn't create \nEthRpcClient: at engine/src/eth/mod.rs line 193 column 30 \n \nCaused by: \n    0: IO error: failed to lookup address information: Name or service not \nknown \n    1: failed to lookup address information: Name or service not known', \nengine/tests/can_subscribe_infura.rs:21:10 \nnote: run with `RUST_BACKTRACE=1` environment variable to display a \nbacktrace \n \n \nfailures: \n    test_all_key_manager_events \n \ntest result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered \nout; finished in 0.04s \n \nerror: test failed, to rerun pass '-p chainflip-engine --test \ncan_subscribe_infura'"
+   },
+   {
+    "line": 866,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nDebug the failure. \n \n  \n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 27 of 31\nFor public release \n4.7 Warnings from cargo clippy"
+   },
+   {
+    "line": 877,
+    "severity": "informational",
+    "title": "Observation ID: KS-CFR-O-07",
+    "excerpt": "Observation ID: KS-CFR-O-07 \n \nDescription and Impact Summary \nWhen running cargo clippy we obtained the following warnings: \nwarning: use of irregular braces for `write!` macro \n  --> engine/src/eth/mod.rs:52:10 \n   | \n52 | #[derive(Error, Debug)] \n   |          ^^^^^ \n   | \n   = note: `#[warn(clippy::nonstandard_macro_braces)]` on by default \nhelp: consider writing `Error` \n  --> engine/src/eth/mod.rs:52:10 \n   | \n52 | #[derive(Error, Debug)] \n   |          ^^^^^ \n   = help: for further information visit https://rust-lang.github.io/rust-\nclippy/master/index.html#nonstandard_macro_braces \n   = note: this warning originates in the derive macro `Error` (in Nightly builds, \nrun with -Z macro-backtrace for more info) \n \n \nwarning: local variable doesn't need to be boxed here \n   --> state-chain/pallets/cf-witnesser/src/lib.rs:160:4 \n    | \n160 |             call: Box<<T as Config>::Call>, \n    |             ^^^^ \n    | \n    = note: `#[warn(clippy::boxed_local)]` on by default \n    = help: for further information visit https://rust-lang.github.io/rust-\nclippy/master/index.html#boxed_local \n \nwarning: local variable doesn't need to be boxed here \n   --> state-chain/pallets/cf-witnesser/"
+   },
+   {
+    "line": 929,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation \nDebug these warnings. \n \n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 28 of 31\nFor public release \nAPPENDIX A: ABOUT KUDELSKI SECURITY \nKudelski Security is an innovative, independent Swiss provider of tailored cyber and media \nsecurity solutions to enterprises and public sector institutions. Our team of security experts \ndelivers end-to-end consulting, technology, managed services, and threat intelligence to help \norganizations build and run successful security programs. Our global reach and cyber \nsolutions focus is reinforced by key international partnerships. \nKudelski Security is a division of Kudelski Group. For more information, please visit \nhttps://www.kudelskisecurity.com. \n \nKudelski Security \nRoute de Gen\u00e8ve, 22-24 \n1033 Cheseaux-sur-Lausanne \nSwitzerland \n \nKudelski Security \n5090 North 40th Street \nSuite 450 \nPhoenix, Arizona 85018 \n \nThis report and its content is copyright (c) Nagravision SA, all rights reserved. \n \n \n  \n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 29 of 31\nFor public release \nAPPENDIX B: DOCUMENT HISTORY \nVERSION STATUS DATE AUTHO"
+   },
+   {
+    "line": 1067,
+    "severity": "high",
+    "title": "High The identified issue may be directly exploitable causing an immediate",
+    "excerpt": "High The identified issue may be directly exploitable causing an immediate \nnegative impact on the users, data, and availability of the system for \nmultiple users."
+   },
+   {
+    "line": 1070,
+    "severity": "medium",
+    "title": "Medium The identified issue is not directly exploitable but combined with other",
+    "excerpt": "Medium The identified issue is not directly exploitable but combined with other \nvulnerabilities may allow for exploitation of the system or exploitation \nmay affect singular users. These findings may also increase in severity \nin the future as techniques evolve."
+   },
+   {
+    "line": 1074,
+    "severity": "low",
+    "title": "Low The identified issue is not directly exploitable but raises the attack",
+    "excerpt": "Low The identified issue is not directly exploitable but raises the attack \nsurface of the system. This may be through leaking information that an \nattacker can use to increase the accuracy of their attacks."
+   },
+   {
+    "line": 1077,
+    "severity": "informational",
+    "title": "Informational Informational findings are best practice steps that can be used to harden",
+    "excerpt": "Informational Informational findings are best practice steps that can be used to harden \nthe application and improve processes."
+   }
+  ]
+ },
+ {
+  "file": "composable-audits-solana-restaking-vaults-restaking-vaults-audit-pdf.md",
+  "findings": []
+ },
+ {
+  "file": "audit-reports-snowbridge-2025-01-07-audit-report-snowbridge-updates-3-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 2173,
+    "severity": "low",
+    "title": "low-level",
+    "excerpt": "low-level\n \nfunctionality\n \nfrom\n \ndi\ufb00erent\n \necosystems.\n \nCode\n \nreadability\n \nand\n \nclarity\n \n \nMedium\n \n-\n \nLevel\n \nof\n \ndocumentation\n \n \nHigh\n \nThe\n \nprotocol\n \nand\n \nthe"
+   },
+   {
+    "line": 2227,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n \nTest\n \ncoverage\n \nfor\n \nSolidity\n \ncontracts\n \nreported\n \nby\n \nforge\n \ncoverage\n \nis\n \n72.77%\n.\n \n \nTest\n \ncoverage\n \nfor\n \npallets\n,\n \nprimitives\n,\n \nand"
+   }
+  ]
+ },
+ {
+  "file": "composable-audits-solana-ibc-avs-codezen-pdf.md",
+  "findings": [
+   {
+    "line": 1083,
+    "severity": "gas",
+    "title": "gas.",
+    "excerpt": "gas.\nAs\na\nconsequence,\nit\nwould\nnot\nbe\npossible\nanymore\nto\nexecute\nUpdateState\ntransactions\nleading\nto\na\nstuck\nand\nunrecoverable\nclient.\nRecommendation\nIt\nis\nrecommended\nto\noptimize\nthe\nprune_oldest_consensus_state\nfunction\nto\navoid\nperforming\nunbounded\nloops\nand\nremove\nthe\noldest\nconsensus"
+   }
+  ]
+ }
+]

@@ -1,0 +1,835 @@
+[
+ {
+  "file": "audits-apex-apex-q1-2025-reactor-skyline-critical-path-audit-report-final-pdf.md",
+  "findings": [
+   {
+    "line": 148,
+    "severity": "critical",
+    "title": "critical: the Cardano block indexer, the off-chain batcher component and the bridge smart contracts. We reviewed",
+    "excerpt": "critical: the Cardano block indexer, the off-chain batcher component and the bridge smart contracts. We reviewed\ncorrectness and security properties of the mentioned parts.\nAudit plan\nThe audit was conducted between March 13th, 2025 and April 25th, 2025 by the following personnel:\n\u2022Aleksandar Ignatijevic\n\u2022Simon Noetzlin\n\u2022Carlos Rodriguez\nConclusions\nTheApex ReactorandSkylinebridges connect the Apex Fusion ecosystem\u2014among its constituent chains and\nwith Cardano, respectively. These bridges form a complex system that operates as blockchains with a validator set\nrunning several off-chain components. In this audit, we focused on the parts of the system the development team\nidentified as the highest priority: the Cardano indexer, batcher, and bridge smart contracts.\nThe system is highly asynchronous and distributed; its correct functioning depends on all moving parts working well\ntogether. We dedicated significant time to reasoning through scenarios that could raise safety or liveness issues.\nMost of these were unlikely given the design choices and trust assumptions (e.g., trusted off-chain oracle and batcher\ncomponents, honest behavior of contract administrators, and a designated valid"
+   },
+   {
+    "line": 203,
+    "severity": "critical",
+    "title": "Critical 3",
+    "excerpt": "Critical 3"
+   },
+   {
+    "line": 204,
+    "severity": "high",
+    "title": "High 2",
+    "excerpt": "High 2"
+   },
+   {
+    "line": 205,
+    "severity": "medium",
+    "title": "Medium 7",
+    "excerpt": "Medium 7"
+   },
+   {
+    "line": 206,
+    "severity": "low",
+    "title": "Low 4",
+    "excerpt": "Low 4"
+   },
+   {
+    "line": 207,
+    "severity": "informational",
+    "title": "Informational 14",
+    "excerpt": "Informational 14\nTotal30\n7\n\n\u00a92025 Informal Systems Apex Q1 2025\nSystem Overview\nThe Apex Fusion ecosystem consists of a three-chain architecture designed to optimize scalability, security, and\ndecentralization. Each of these interconnected blockchain networks serve a unique purpose.\nAt its core is thePrime network, the foundational layer that provides security and decentralization. Based on\nCardano, it uses the Ouroboros Proof of Stake (PoS) consensus protocol and an e-UTXO accounting system for\nenergy-efficient, robust security through decentralized liquid staking. The Prime chain is also the exclusive issuer of\nthe APEX token, used for transaction fees, staking rewards, and governance, with token holders voting on proposals.\nSupporting the Prime chain are two Layer 2 solutions:\n1. Vector network: a secondary layer that enhances scalability and performance, designed for high-throughput\napplications and services. The Vector chain uses a UTXO model to deliver high throughput and low latency.\n2. Nexus network: a secondary layer focused on speed and cost-efficiency. It handles smart contract execution\nand complex transactions. The Nexus chain uses an EVM-based framework, making it com"
+   },
+   {
+    "line": 1965,
+    "severity": "gas",
+    "title": "gas costs but also makes the functions vulnerable to liveness issues or even denial-of-service (DoS) attacks.",
+    "excerpt": "gas costs but also makes the functions vulnerable to liveness issues or even denial-of-service (DoS) attacks.\n54\n\n\u00a92025 Informal Systems Apex Q1 2025\nRecommendation\nSimilarly as implemented in PR#94, add validation that checks that arrays have a limited length.\n55\n\n\u00a92025 Informal Systems Apex Q1 2025\nDuplicate validator addresses may inflate quorum requirement\nIDIF-FINDING-015\nSeverityLow\nImpact2 - Medium\nExploitability1 - Low\nTypeImplementation\nStatusPatched Without Reaudit\nInvolved artifacts\nFor Reactor & Skyline:\n\u2022apex-bridge-smartcontracts/contracts/Validators.sol\nDescription\nThe initialize() function in Validators.sol takes as parameter theaddress array _validators with the\naddresses for the validator set of the bridge and connected blochains. The function does not check if the array\ncontains duplicate values, so it is possible to call the function with an array that does not contain unique values, as\nthe test below confirms:\nit(\"Accepts duplicate validator addresses in initialize function\",async function() {\nconst [owner,validator1,validator2] =await ethers.getSigners();\n// Deploy implementation contract\nconstValidators=await ethers.getContractFactory(\"Validators\");\nconstvali"
+   },
+   {
+    "line": 2565,
+    "severity": "gas",
+    "title": "Gas refund for deleting confirmed transactions that have completed lifecycle",
+    "excerpt": "Gas refund for deleting confirmed transactions that have completed lifecycle\nWhen bridging request claims, refund request claims and defund requests are confirmed by a quorum of validators, a\nconfirmed transactions is added to theconfirmedTransactions mapping. The confirmed transactions must remain\nstored until the lifecycle of the batch that includes them is completed (i.e., either the batch successfully execute on\nthe destination chain, or fails or times out). Once the lifecycle of the batch has completed by processing a batch\nexecuted claim, or a batch execution failed claim and the corresponding refund request claims, and no more retries\nneed to be attempted, the confirmed transactions included in the batch might not be needed anymore and could\nbe deleted from the mapping. Deleting the confirmed transactions would have the benefit of receiving gas refunds,\nbecause storage space is freed up.\n73\n\n\u00a92025 Informal Systems Apex Q1 2025\nError handling function not fully tested\nIDIF-FINDING-027\nSeverityInformational\nImpact0 - None\nExploitability0 - None\nTypeImplementation\nStatusAcknowledged\nInvolved artifacts\nFor Reactor & Skyline:\n\u2022cardano-infrastructure/indexer/block_syncer.go\n\u2022carda"
+   },
+   {
+    "line": 3040,
+    "severity": "medium",
+    "title": "medium group of actors",
+    "excerpt": "medium group of actors\nMediumillegitimate actions taken by a medium group of actors;\npossibly coordinated with legitimate actions taken by a\nlarge group of actors\nLowillegitimate actions taken by a large group of actors;\npossibly coordinated with legitimate actions taken by all\nactors\nNone illegitimate actions taken in a coordinated fashion by all\nactors\nSeverity Score\nThe severity score combines the above two sub-scores into a single value, and roughly represents the probability\nof the system suffering a severe impact with time; thus it also represents the measure of the urgency or order in\nwhich vulnerabilities need to be addressed. We assess the severity according to the combination scheme represented\ngraphically below.\nFigure 3: Severity classification\nAs can be seen from the image above, only a combination of high impact with high exploitability results in a Critical\nseverity score; such vulnerabilities need to be addressed ASAP. Accordingly, High severity score receive vulnerabilities\nwith the combination of high impact and medium exploitability, or medium impact, but high exploitability.\n86\n\n\u00a92025 Informal Systems Apex Q1 2025\nSeverityScore Examples\nCriticalHalting of chain "
+   }
+  ]
+ },
+ {
+  "file": "audits-interlay-informal-report-interlay-audit-2021q2-pdf.md",
+  "findings": [
+   {
+    "line": 30,
+    "severity": "informational",
+    "title": "Minor comments 11",
+    "excerpt": "Minor comments 11\nFee / SLA . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11\nVault nomination . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11\nVault-registry . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11\nDocumentation improvements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11\nDocument the reference implementation and specs in the README of thebitcoin crate . . . . . . 11\nFix Broken links . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12\nCode quality improvements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12\nAvoid use of magic numbers . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12\nAvoid redundant and scattered computations and validations . . . . . . . . . . . . . . . . . . . . . . 12\nDiscrepancies with speci\ufb01cation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13\nbitcoin crate . . . . . . . . . . . . "
+   },
+   {
+    "line": 50,
+    "severity": "informational",
+    "title": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20",
+    "excerpt": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20\nIF-INTERLAY-INTERACTION: Interaction between theissue and refund protocols 22\nInvolved artifacts . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22\nDescription . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22\nProblem Scenarios . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22"
+   },
+   {
+    "line": 55,
+    "severity": "informational",
+    "title": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22",
+    "excerpt": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22\nIF-INTERLAY-LIQUIDATION: Liquidation event incentives unclear 24\nInvolved artifacts . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24\n2\n\n\u00a92021 Informal Systems InterBTC Parachain\nDescription . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24\nProblem Scenarios . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24"
+   },
+   {
+    "line": 63,
+    "severity": "informational",
+    "title": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24",
+    "excerpt": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24\nThresholds . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25\nRealistic scenarios . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25\nIncentives . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25\nReconsider Liquidation as Liveness concern . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25\nIF-INTERLAY-NAMING: Documentation and variable naming ofcheck_and_do_reorg function is\nmisleading 26\nInvolved artifacts . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26\nDescription . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26\nProblem Scenarios . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26"
+   },
+   {
+    "line": 73,
+    "severity": "informational",
+    "title": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26",
+    "excerpt": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26\nIF-INTERLAY-NO-BLOCK: Scenario of \u201cno block being recently submitted\u201d (all relayers o\ufb04ine)\nnot handled gracefully 28\nInvolved artifacts . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28\nDescription . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28\nProblem Scenarios . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28"
+   },
+   {
+    "line": 79,
+    "severity": "informational",
+    "title": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28",
+    "excerpt": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28\nIF-INTERLAY-PARSING:raw_block_header parsing occurs at multiple locations, but should be\nmoved to the edge of the program 29\nInvolved artifacts . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29\nDescription . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29\nProblem Scenarios . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29"
+   },
+   {
+    "line": 85,
+    "severity": "informational",
+    "title": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29",
+    "excerpt": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29\nIF-INTERLAY-SPEC: Speci\ufb01cation of Concurrent Behaviors 30\nInvolved artifacts . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30\nDescription . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30\nProtocol Level - System goals (as discussed in the paper) . . . . . . . . . . . . . . . . . . . . . . . . 30\nInvariants . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31\nGlobal invariants between BTC and InterBTC . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31\nProblem Scenarios . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31"
+   },
+   {
+    "line": 93,
+    "severity": "informational",
+    "title": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31",
+    "excerpt": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31\nIF-INTERLAY-STORAGE: Storage updates of Vault struct and cached values are not co-located32\nInvolved artifacts . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32\nDescription . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32\nProblem Scenarios . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33"
+   },
+   {
+    "line": 98,
+    "severity": "informational",
+    "title": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33",
+    "excerpt": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33\nIF-INTERLAY-SUBJECTIVE: \u201cSubjective initialization\u201d condition assumingblock_height is the\ncorrect height for theraw_block_header in relay initialization not speci\ufb01ed 34\nInvolved artifacts . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34\nDescription . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34\nProblem Scenarios . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34"
+   },
+   {
+    "line": 104,
+    "severity": "informational",
+    "title": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34",
+    "excerpt": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34\nIF-INTERLAY-THEFT: Theft by redeeming (replacing) too much 35\nInvolved artifacts . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 35\nDescription . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 35\nProblem Scenarios . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 35"
+   },
+   {
+    "line": 109,
+    "severity": "informational",
+    "title": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 36",
+    "excerpt": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 36\nCollaborative discussion . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 36\n3\n\n\u00a92021 Informal Systems InterBTC Parachain\nIF-INTERLAY-TIMEOUT: Timeouts (and races) on sender chain 37\nInvolved artifacts . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37\nDescription . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37\nProblem Scenarios . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37"
+   },
+   {
+    "line": 118,
+    "severity": "informational",
+    "title": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37",
+    "excerpt": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37\nClarify use cases around timeouts . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37\nTime parameters in the paper . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 38\nIF-INTERLAY-WITNESS: Missing check for illegal encoded witness in transaction parsing 39\nInvolved artifacts . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 39\nDescription . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 39\nProblem Scenarios . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 39"
+   },
+   {
+    "line": 125,
+    "severity": "informational",
+    "title": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 39",
+    "excerpt": "Recommendation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 39\n4\n\n\u00a92021 Informal Systems InterBTC Parachain\nAudit overview\nThe Project\nIn April 2021, Web3 and Interlay engaged Informal Systems to conduct a security audit over the documentation and\nthe current state of the implementation ofinterBTC: a trustless bridge from Bitcoin to Polkadot formerly known as\nPolkaBTC. The bridge protocol is based onXCLAIM. XCLAIM is designed to support issuing, transferring, and\nredeeming Cryptocurrency Backed Assets (CbAs). XCLAIM is intentionally generic in order to support a wide range\nof assets but requires that one side of the bridge allows to execute smart contracts (Polkadot) while the other side\njust needs to provide a history of transaction in the backing currency (bitcoin).\nScope of this report\nThe agreed-upon workplan consisted of the following tasks:\n\u2022 Task 1. Deep dive of the XCLAIM protocol and its sub-protocols\n\u2013on tag 3.1.0\n\u2022 Task 2. Crates to audit (parachain only)\n\u2013bitcoin: on commit e4cb057.\n\u2013btc-relay: on commit e4cb057.\n\u2013vault-registry: on tag 0.7.4\nThis report covers Task 1 and Task 2 that were conducted May 10 through Ju"
+   },
+   {
+    "line": 194,
+    "severity": "high",
+    "title": "high quality of the implementation work, we found seven issues regarding code quality, data representation, code",
+    "excerpt": "high quality of the implementation work, we found seven issues regarding code quality, data representation, code\norganization, and divergence from the speci\ufb01cation. These are detailed in the relevant \ufb01ndings. We also found a\nnumber of minor imperfections, which we note in the minor comments.\nWith one exception, all the \ufb01ndings we identi\ufb01ed during the audit have been resolved at the time this report was last\nupdates. The sole exception is IF-INTERLAY-SPEC, which sets out recommendations towards a more exhaustive\nand formalized speci\ufb01cation.\nFurther Increasing Con\ufb01dence\nThe scope of this audit was limited to manual code review and manual analysis and reconstruction of the protocols.\nTo further increase con\ufb01dence in the protocol and the implementation, we recommend following up with more\nrigorous formal measures, including automated model checking and model-based adversarial testing. Our experience\nshows that incorporating test suites driven by TLA+ models that can lead the implementation into suspected edge\ncases and error scenarios enables discovery of issues that are unlikely to be identi\ufb01ed through manual review.\nIt is our understanding that the Interlay team intends to pursue suc"
+   },
+   {
+    "line": 295,
+    "severity": "informational",
+    "title": "Minor comments",
+    "excerpt": "Minor comments\nNOTE: At the time the report was last updated, the Interlay team has reported having made changes to address\nall of the following comments.\nFee / SLA\nThe speci\ufb01cation of SLA could be made more complete along the following points:\n\u2022 SLA and fee distribution is not so clear in the current documentation. It would be great to make these issues\nmore explicit in speci\ufb01cation to understand incentives.\n\u2022 this seems to be the only place where SLA is updated inredeem, that is, there is no increase on success, like\nin issue.\nIt would be great to have a central list want actions lead to increase/decrease of SLA.\n\u2022 How precisely are SLAs and fees correlated. Is this subject to parameterization? Are there any constraints?\nThe \ufb02ow graphic gives a great overview but is a bit unspeci\ufb01c what events lead to the depicted transfers.\nVault nomination\n\u2022 \u201cOperators are assumed to be trusted by their nominators not to steal Bitcoin backed by nominated collateral.\u201d\nThe incentives of nomination are unclear, and could be clari\ufb01ed.\n\u2022 \u201cOperator and Nominator collateral cannot be withdrawn directly. Rather, withdrawals are subject to an\nunbonding period.\u201d It seems that there is a relation betweenu"
+   },
+   {
+    "line": 652,
+    "severity": "high",
+    "title": "High The issue is an exploitable security vulnerability",
+    "excerpt": "High The issue is an exploitable security vulnerability"
+   },
+   {
+    "line": 653,
+    "severity": "medium",
+    "title": "Medium The issue is a security vulnerability that may not be directly exploitable or may require certain",
+    "excerpt": "Medium The issue is a security vulnerability that may not be directly exploitable or may require certain\ncomplex conditions in order to be exploited"
+   },
+   {
+    "line": 655,
+    "severity": "low",
+    "title": "Low The issue is objective in nature, but the security risk is relatively small or does not represent security",
+    "excerpt": "Low The issue is objective in nature, but the security risk is relatively small or does not represent security\nvulnerability\nRec No security vulnerability or immanent risk is identi\ufb01ed, but an improvement is recommended\n18\n\n\u00a92021 Informal Systems InterBTC Parachain\nIF-INTERLAY-ADTS: Under-utilization of algebraic data\ntypes leads to confusing and error prone code\nSeverity Low\nType Practice\nDi\ufb03culty Easy\nStatus Resolved by interbtc@d3059, interbtc@98900\nInvolved artifacts\n\u2022 bitcoin/src/script.rs#L40-L64\n\u2022 bitcoin/src/address.rs#L34-L51\n\u2022 bitcoin/src/types.rs#L315-L323\n\u2022 bitcoin/src/parser.rst#L322-L326\nDescription\nWe identi\ufb01ed several cases where inapt types were used to encode data, resulting in unclear and error prone code.\nAn illustrative example regards theblock_height and locktime \ufb01elds of theTransaction struct annotated with\nFIXME comments in bitcoin/src/types.rs#L315-L323\n315 /// Bitcoin transaction\n316 #[derive(PartialEq, Debug, Clone)]\n317 pub struct Transaction {\n318 pub version: i32,\n319 pub inputs: Vec<TransactionInput>,\n320 pub outputs: Vec<TransactionOutput>,\n321 pub block_height: Option<u32>, // FIXME: why is this optional?\n322 pub locktime: Option<u32>, // FIXME: why"
+   }
+  ]
+ },
+ {
+  "file": "v4-chain-audits-informal-systems-audit-report-phase-iii-pdf.md",
+  "findings": [
+   {
+    "line": 27,
+    "severity": "informational",
+    "title": "Minor code changes in x/rewards and x/vest modules \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a07",
+    "excerpt": "Minor code changes in x/rewards and x/vest modules \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a07\nMissing validation of x/rewards parameters in MsgUpdateParams\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a08\nDocumentation formulas for calculations in vesting and rewards modules contain errors \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 10\nOptimization of x/rewards transient store RewardShare entries \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 11\nDispatching of delayed messages should be done over cached context \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 13\nDelayed messages dispatching optimization and code simplicity suggestions\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 15\nImprove dispatching of delayed messages design \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 17\nCmdQueryBlockMessageIds validations are missing for block id value \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 19\nEthereum dYdX users could initiate multiple bridge transfers for a very small amount and cause \nbridging DDoS\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0"
+   },
+   {
+    "line": 37,
+    "severity": "informational",
+    "title": "Minor code changes in bridge components\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 23",
+    "excerpt": "Minor code changes in bridge components\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 23\nEvents from events map in bridge manager are not deleted after processing \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 25\nConsensus changes does not make v4 live\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 27\nStruct alignment issues \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 30\nAppendix: Vulnerability Classification ..................................................................... 32\nImpact Score \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 32\nExploitability Score \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 32\nSeverity Score\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0"
+   },
+   {
+    "line": 195,
+    "severity": "critical",
+    "title": "Critical 1",
+    "excerpt": "Critical 1"
+   },
+   {
+    "line": 196,
+    "severity": "high",
+    "title": "High 0",
+    "excerpt": "High 0"
+   },
+   {
+    "line": 197,
+    "severity": "medium",
+    "title": "Medium 3",
+    "excerpt": "Medium 3"
+   },
+   {
+    "line": 198,
+    "severity": "low",
+    "title": "Low 5",
+    "excerpt": "Low 5"
+   },
+   {
+    "line": 199,
+    "severity": "informational",
+    "title": "Informational 4",
+    "excerpt": "Informational 4\nTotal 13\nResolution Status Summary\nResolution Status #\nResolved 2\nRisk-accepted 9\nFunctioning as Designed 2\nTotal 13\n\n\u00a9 2023 Informal Systems dYdX: Rewards, Consensus and Other Changes Q3 2023\nFindings 5\nFindings\nTitle Type Severity Impact Exploitability Issue\nDispatching of \ndelayed messages \nshould be done \nover cached \ncontext\nIMPLEMEN\nTATION\n4 CRITICAL 3 HIGH 3 HIGH https://github.com/\ndydxprotocol/v4-chain/\npull/214\nEvents from \nevents map in \nbridge manager \nare not deleted \nafter processing\nIMPLEMEN\nTATION\n2 MEDIUM 2 MEDIUM 2 MEDIUM \u00a0\nConsensus \nchanges does not \nmake v4 live\nPROTOCOL 2 MEDIUM 3 HIGH 1 LOW \u00a0\nStruct alignment \nissues\nIMPLEMEN\nTATION\n2 MEDIUM 2 MEDIUM 2 MEDIUM"
+   },
+   {
+    "line": 285,
+    "severity": "informational",
+    "title": "Minor code",
+    "excerpt": "Minor code \nchanges in x/\nrewards and x/\nvest modules\nIMPLEMEN\nTATION\n0 \nINFORMATI\nONAL\n0 NONE 0 NONE \u00a0\nDocumentation \nformulas for \ncalculations in \nvesting and \nrewards modules \ncontain errors\nDOCUMENT\nATION\n0 \nINFORMATI\nONAL\n0 NONE 0 NONE \u00a0\nImprove \ndispatching of \ndelayed messages \ndesign\nPROTOCOL 0 \nINFORMATI\nONAL\n0 NONE 0 NONE"
+   },
+   {
+    "line": 315,
+    "severity": "informational",
+    "title": "Minor code",
+    "excerpt": "Minor code \nchanges in bridge \ncomponents\nIMPLEMEN\nTATION\n0 \nINFORMATI\nONAL\n0 NONE 0 NONE \u00a0\n\n\u00a9 2023 Informal Systems dYdX: Rewards, Consensus and Other Changes Q3 2023\nFindings 7\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022"
+   },
+   {
+    "line": 333,
+    "severity": "informational",
+    "title": "Minor code changes in x/rewards and x/vest modules",
+    "excerpt": "Minor code changes in x/rewards and x/vest modules\nTitle Minor code changes in x/rewards and x/vest modules\nProject dYdX: Rewards, Consensus and Other Changes Q3 2023\nType IMPLEMENTATION\nSeverity 0 INFORMATIONAL\nImpact 0 NONE\nExploitability 0 NONE\nIssue \u00a0\nInvolved artifacts\nx/rewards/keeper/keeper.go\nx/feetiers/keeper/keeper.go\nx/vest/keeper/keeper_test.go\nDescription\nHere is the list of aesthetic and minor code improvements found during the code inspection of the dYdX audit of x/\nrewards and x/vest modules. They do not pose a security threat nor do they introduce an issue, but the following \nsuggestions are shared to improve the code readability, keep consistency, optimize, and improve logging.\nfor clarity purposes rename: lowestMakerFee to lowestMakerFeePpm here and rename function name from \nGetLowestMakerFee  to GetLowestMakerFeePpm  and variables name here.\ninstead of creating two BigInt0 objects with lib.BigInt0() , create one and use in this two places for \ncomparing: here and here.\nWrong comment in test. It is not aligned with input values. The vester balance is 2 000 000 not 1 000 000.\nProblem Scenarios\nFindings listed above could not introduce any issues, they are suggest"
+   },
+   {
+    "line": 805,
+    "severity": "informational",
+    "title": "Minor code changes in bridge components",
+    "excerpt": "Minor code changes in bridge components\nTitle Minor code changes in bridge components\nProject dYdX: Rewards, Consensus and Other Changes Q3 2023\nType IMPLEMENTATION\nSeverity 0 INFORMATIONAL\nImpact 0 NONE\nExploitability 0 NONE\nIssue \u00a0\nInvolved artifacts\nx/bridge/types/genesis.go\nx/delaymsg/keeper/dispatch.go\nx/delaymsg/keeper/delayed_message.go\nx/delaymsg/keeper/block_message_ids.go\nprotocol/daemons/bridge/client/client.go\nDescription\nHere is the list of aesthetic and minor code improvements found during the code inspection of the dYdX audit of x/\nbridge and x/delaymsg modules. They do not pose a security threat nor do they introduce an issue, but the \nfollowing suggestions are shared to improve the code readability, keep consistency, optimize, and improve logging.\nConsider introducing the maximum valid value for DelayBlocks  Safety parameter.\nDefaultGenesis bridge state holds either invalid comment or really big value for DelayBlocks  safety \nparameter 86 400 blocks.\nThere is several places in the x/delaymsg  module where the continue and log error approach is \nimplemented or multiple checks in the same flow of execution but we could not see the reasonable \nexplanation:\nwhen execut"
+   },
+   {
+    "line": 1080,
+    "severity": "high",
+    "title": "High Halting of the chain; loss, locking, or unauthorized withdrawal of funds of many users;",
+    "excerpt": "High Halting of the chain; loss, locking, or unauthorized withdrawal of funds of many users; \narbitrary transaction execution; forging of user messages / circumvention of \nauthorization logic"
+   },
+   {
+    "line": 1083,
+    "severity": "medium",
+    "title": "Medium Temporary denial of service / substantial unexpected delays in processing user requests",
+    "excerpt": "Medium Temporary denial of service / substantial unexpected delays in processing user requests \n(e.g. many hours/days); loss, locking, or unauthorized withdrawal of funds of a single \nuser / few users; failures during transaction execution (e.g. out of gas errors); substantial \nincrease in node computational requirements (e.g. 10x)"
+   },
+   {
+    "line": 1087,
+    "severity": "low",
+    "title": "Low Transient unexpected delays in processing user requests (e.g. minutes/a few hours);",
+    "excerpt": "Low Transient unexpected delays in processing user requests (e.g. minutes/a few hours);"
+   },
+   {
+    "line": 1088,
+    "severity": "medium",
+    "title": "Medium increase in node computational requirements (e.g. 2x); any kind of problem that",
+    "excerpt": "Medium increase in node computational requirements (e.g. 2x); any kind of problem that \naffects end users, but can be repaired by manual intervention (e.g. a special transaction)\n\ud83d\udd35\u00a0None Small increase in node computational requirements (e.g. 20%); code inefficiencies; bad \ncode practices; lack/incompleteness of tests; lack/incompleteness of documentation\nExploitability Score\nThe Exploitability score reflects the ease and technical means by which the vulnerability can be exploited; it \nrepresents the characteristics of the vulnerable component. In the below table we list, for each category, examples \nof actions by actors that are enough to trigger the exploit. In the examples below:\nActors\u00a0can be any entity that interacts with the system: other blockchains, system users, validators, relayers, \nbut also uncontrollable phenomena (e.g. network delays or partitions).\nActions\u00a0can be\n\n\u00a9 2023 Informal Systems dYdX: Rewards, Consensus and Other Changes Q3 2023\nAppendix: Vulnerability Classification 33\n\u2022\n\u2022\n\u2022\nlegitimate, e.g. submission of a transaction that follows protocol rules by a user; delegation/\nredelegation/bonding/unbonding; validator downtime; validator voting on a single, but alte"
+   },
+   {
+    "line": 1117,
+    "severity": "high",
+    "title": "High illegitimate actions taken by a small group of actors; possibly coordinated with",
+    "excerpt": "High illegitimate actions taken by a small group of actors; possibly coordinated with \nlegitimate actions taken by a medium group of actors"
+   },
+   {
+    "line": 1119,
+    "severity": "medium",
+    "title": "Medium illegitimate actions taken by a medium group of actors; possibly coordinated with",
+    "excerpt": "Medium illegitimate actions taken by a medium group of actors; possibly coordinated with \nlegitimate actions taken by a large group of actors"
+   },
+   {
+    "line": 1121,
+    "severity": "low",
+    "title": "Low illegitimate actions taken by a large group of actors; possibly coordinated with",
+    "excerpt": "Low illegitimate actions taken by a large group of actors; possibly coordinated with \nlegitimate actions taken by all actors\n\ud83d\udd35\u00a0None illegitimate actions taken in a coordinated fashion by all actors\nSeverity Score\nThe severity score combines the above two sub-scores into a single value, and roughly represents the probability of \nthe system suffering a severe impact with time; thus it also represents the measure of the urgency or order in which \nvulnerabilities need to be addressed. We assess the severity according to the combination scheme represented \ngraphically below.\nAs can be seen from the image above, only a combination of high impact with high exploitability results in a Critical \nseverity score; such vulnerabilities need to be addressed ASAP. Accordingly, High severity score receive \nvulnerabilities with the combination of high impact and medium exploitability, or medium impact, but high \nexploitability.\nSeverity Score Examples\n\ud83d\udd34\u00a0Critical Halting of chain via a submission of a specially crafted transaction\n\n\n\u00a9 2023 Informal Systems dYdX: Rewards, Consensus and Other Changes Q3 2023\nAppendix: Vulnerability Classification 34\nSeverity Score Examples"
+   },
+   {
+    "line": 1140,
+    "severity": "high",
+    "title": "High Permanent loss of user funds via a combination of submitting a specially crafted",
+    "excerpt": "High Permanent loss of user funds via a combination of submitting a specially crafted \ntransaction with delaying of certain messages by a large portion of relayers"
+   },
+   {
+    "line": 1142,
+    "severity": "medium",
+    "title": "Medium Substantial unexpected delays in processing user requests via a combination of",
+    "excerpt": "Medium Substantial unexpected delays in processing user requests via a combination of \ndelaying of certain messages by a large group of relayers with coordinated withdrawal \nof funds by a large group of users"
+   },
+   {
+    "line": 1145,
+    "severity": "low",
+    "title": "Low 2x increase in node computational requirements via coordinated withdrawal of all user",
+    "excerpt": "Low 2x increase in node computational requirements via coordinated withdrawal of all user \ntokens\n\ud83d\udd35Informational Code inefficiencies; bad code practices; lack/incompleteness of tests; lack/\nincompleteness of documentation; any exploit for which a coordinated illegitimate \naction of all actors is necessary"
+   }
+  ]
+ },
+ {
+  "file": "audits-anoma-2024-02-26-namada-masp-final-report-pdf.md",
+  "findings": [
+   {
+    "line": 35,
+    "severity": "informational",
+    "title": "Minor code improvements \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0",
+    "excerpt": "Minor code improvements \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 21\nAppendix: Vulnerability Classification ..................................................................... 22\nImpact Score \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 22\nExploitability Score \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 22\nSeverity Score\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 23\nDisclaimer.................................................................................................................. 25\n\n\u00a9 2024 Informal Systems Namada Multi-asset shielded pool\nAudit Overview 1\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\nAudit Overview\nScope\nIn January and February 2024, Informal Systems conducted a security audit for Heliax. The audit aimed at \ninspecting the correctness and s"
+   },
+   {
+    "line": 102,
+    "severity": "critical",
+    "title": "Critical 2",
+    "excerpt": "Critical 2"
+   },
+   {
+    "line": 103,
+    "severity": "high",
+    "title": "High 0",
+    "excerpt": "High 0"
+   },
+   {
+    "line": 104,
+    "severity": "medium",
+    "title": "Medium 3",
+    "excerpt": "Medium 3"
+   },
+   {
+    "line": 105,
+    "severity": "low",
+    "title": "Low 1",
+    "excerpt": "Low 1"
+   },
+   {
+    "line": 106,
+    "severity": "informational",
+    "title": "Informational 1",
+    "excerpt": "Informational 1\nTotal 7\n\n\u00a9 2024 Informal Systems Namada Multi-asset shielded pool\nSystem Overview 3\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\nSystem Overview\nNamada\u2019s multi-asset shielded pool (MASP) is a type of privacy-focused asset pool that allows for the shielding of \nmultiple types of assets. It provides a way for users to pool their assets together in a way that hides the identities of \nthe individuals involved and the amounts of the assets being traded. It is designed as an extension to the Sapling \ncircuit which adds support for sending arbitrary assets.\nFurthermore, MASP is built with mechanisms to align the incentives of users, rewarding those that contribute to \nshielding by adding assets to the pool.\nThe MASP system is built on top of Anoma\u2019s execution model, which implements a generic computational substrate \nwith WASM-based transactions and validity predicate verification. A validity predicate (VP) is a boolean function \nthat takes four inputs: (i) the transaction itself; (ii) the addresses that are involved with that specific VP; (iii) The \nstorage state before a transaction execution; and (iv) the storage state after the transaction execution.\nThe execution system works as follows:\nWhen a blo"
+   },
+   {
+    "line": 567,
+    "severity": "informational",
+    "title": "Minor code",
+    "excerpt": "Minor code \nimprovements\nAnoma: \nMASP\nIMPLEME\nNTATION\n0 \nINFORMA\nTIONAL\n0 \nNON\nE\n0 NONE ACKNO\nWLEDGE\nD\nhttps://\ngithub.com/\nanoma/\nnamada/\nissues/2722\n\n\u00a9 2024 Informal Systems Namada Multi-asset shielded pool\nFindings 11\n\u2022\nFully transparent transaction can be marked valid in MASP validity \npredicate\nTitle Fully transparent transaction can be marked valid in MASP validity \npredicate\nProject Anoma: MASP\nType IMPLEMENTATION\nSeverity 4 CRITICAL\nImpact 3 HIGH\nExploitability 3 HIGH\nStatus ACKNOWLEDGED\nIssue https://github.com/anoma/namada/issues/2594\nInvolved artifacts\ncrates/namada/src/ledger/native_vp/masp.rs\nDescription\nTo assess the ability of the masp validity predicate to handle transparent transactions, we tried to simulate what \nchecks would be triggered and whether they would prevent such a transaction from being marked valid."
+   },
+   {
+    "line": 874,
+    "severity": "informational",
+    "title": "Minor code improvements",
+    "excerpt": "Minor code improvements\nTitle Minor code improvements\nProject Anoma: MASP\nType IMPLEMENTATION\nSeverity 0 INFORMATIONAL\nImpact 0 NONE\nExploitability 0 NONE\nStatus ACKNOWLEDGED\nIssue https://github.com/anoma/namada/issues/2722\nInvolved artifacts\ncrates/namada/src/ledger/native_vp/masp.rs\nDescription\nThis logging message is about the transfer source address and not the transfer target address.\nWe recommend strengthening this check: at the moment only check that the transparent bundle isn't \nempty, but we recommend checking that the transparent bundle has a non-empty set of transparent inputs.\nThis error message is misleading. It should be: \"Expected transparent inputs in shielding transaction\" if the \nabove recommendation is accepted.\nPotential overflows: \n- The calculation of native rewards could potentially lead to overflow. If the expression (addr_bal / \nnormed_inflation) * new_normed_inflation  , which transforms due to the custom \nmultiplication implementation, produces a value over the limit of Uint, the panic will occur. \n- Potential overflow due to similar reasons detected here also\n- Checked arithmetics should be used in this and this expression also for multiplication.\nComme"
+   },
+   {
+    "line": 930,
+    "severity": "high",
+    "title": "High Halting of the chain; loss, locking, or unauthorized withdrawal of funds of many users;",
+    "excerpt": "High Halting of the chain; loss, locking, or unauthorized withdrawal of funds of many users; \narbitrary transaction execution; forging of user messages / circumvention of \nauthorization logic"
+   },
+   {
+    "line": 933,
+    "severity": "medium",
+    "title": "Medium Temporary denial of service / substantial unexpected delays in processing user requests",
+    "excerpt": "Medium Temporary denial of service / substantial unexpected delays in processing user requests \n(e.g. many hours/days); loss, locking, or unauthorized withdrawal of funds of a single \nuser / few users; failures during transaction execution (e.g. out of gas errors); substantial \nincrease in node computational requirements (e.g. 10x)"
+   },
+   {
+    "line": 937,
+    "severity": "low",
+    "title": "Low Transient unexpected delays in processing user requests (e.g. minutes/a few hours);",
+    "excerpt": "Low Transient unexpected delays in processing user requests (e.g. minutes/a few hours);"
+   },
+   {
+    "line": 938,
+    "severity": "medium",
+    "title": "Medium increase in node computational requirements (e.g. 2x); any kind of problem that",
+    "excerpt": "Medium increase in node computational requirements (e.g. 2x); any kind of problem that \naffects end users, but can be repaired by manual intervention (e.g. a special transaction)\n None Small increase in node computational requirements (e.g. 20%); code inefficiencies; bad \ncode practices; lack/incompleteness of tests; lack/incompleteness of documentation\nExploitability Score\nThe Exploitability score reflects the ease and technical means by which the vulnerability can be exploited; it \nrepresents the characteristics of the vulnerable component. In the below table we list, for each category, examples \nof actions by actors that are enough to trigger the exploit. In the examples below:\nActors\u00a0can be any entity that interacts with the system: other blockchains, system users, validators, relayers, \nbut also uncontrollable phenomena (e.g. network delays or partitions).\nActions\u00a0can be\n\n\u00a9 2024 Informal Systems Namada Multi-asset shielded pool\nAppendix: Vulnerability Classification 23\n\u2022\n\u2022\n\u2022\nlegitimate, e.g. submission of a transaction that follows protocol rules by a user; delegation/\nredelegation/bonding/unbonding; validator downtime; validator voting on a single, but alternative \nblock; del"
+   },
+   {
+    "line": 967,
+    "severity": "high",
+    "title": "High illegitimate actions taken by a small group of actors; possibly coordinated with",
+    "excerpt": "High illegitimate actions taken by a small group of actors; possibly coordinated with \nlegitimate actions taken by a medium group of actors"
+   },
+   {
+    "line": 969,
+    "severity": "medium",
+    "title": "Medium illegitimate actions taken by a medium group of actors; possibly coordinated with",
+    "excerpt": "Medium illegitimate actions taken by a medium group of actors; possibly coordinated with \nlegitimate actions taken by a large group of actors"
+   },
+   {
+    "line": 971,
+    "severity": "low",
+    "title": "Low illegitimate actions taken by a large group of actors; possibly coordinated with",
+    "excerpt": "Low illegitimate actions taken by a large group of actors; possibly coordinated with \nlegitimate actions taken by all actors\n None illegitimate actions taken in a coordinated fashion by all actors\nSeverity Score\nThe severity score combines the above two sub-scores into a single value, and roughly represents the probability of \nthe system suffering a severe impact with time; thus it also represents the measure of the urgency or order in which \nvulnerabilities need to be addressed. We assess the severity according to the combination scheme represented \ngraphically below.\nAs can be seen from the image above, only a combination of high impact with high exploitability results in a Critical \nseverity score; such vulnerabilities need to be addressed ASAP. Accordingly, High severity score receive \nvulnerabilities with the combination of high impact and medium exploitability, or medium impact, but high \nexploitability.\nSeverity Score Examples"
+   },
+   {
+    "line": 984,
+    "severity": "critical",
+    "title": "Critical Halting of chain via a submission of a specially crafted transaction",
+    "excerpt": "Critical Halting of chain via a submission of a specially crafted transaction"
+   },
+   {
+    "line": 985,
+    "severity": "high",
+    "title": "High Permanent loss of user funds via a combination of submitting a specially crafted",
+    "excerpt": "High Permanent loss of user funds via a combination of submitting a specially crafted \ntransaction with delaying of certain messages by a large portion of relayers"
+   },
+   {
+    "line": 987,
+    "severity": "medium",
+    "title": "Medium Substantial unexpected delays in processing user requests via a combination of",
+    "excerpt": "Medium Substantial unexpected delays in processing user requests via a combination of \ndelaying of certain messages by a large group of relayers with coordinated withdrawal \nof funds by a large group of users\n\n\n\u00a9 2024 Informal Systems Namada Multi-asset shielded pool\nAppendix: Vulnerability Classification 24\nSeverity Score Examples"
+   },
+   {
+    "line": 995,
+    "severity": "low",
+    "title": "Low 2x increase in node computational requirements via coordinated withdrawal of all user",
+    "excerpt": "Low 2x increase in node computational requirements via coordinated withdrawal of all user \ntokens"
+   },
+   {
+    "line": 997,
+    "severity": "informational",
+    "title": "Informational Code inefficiencies; bad code practices; lack/incompleteness of tests; lack/",
+    "excerpt": "Informational Code inefficiencies; bad code practices; lack/incompleteness of tests; lack/\nincompleteness of documentation; any exploit for which a coordinated illegitimate \naction of all actors is necessary\n\n\u00a9 2024 Informal Systems Namada Multi-asset shielded pool\nDisclaimer 25\nDisclaimer\nThis report is subject to the terms and conditions (including without limitation, description of services, \nconfidentiality, disclaimer and limitation of liability, etc.) set forth in the associated Services Agreement. This report \nprovided in connection with the Services set forth in the Services Agreement shall be used by the Company only to \nthe extent permitted under the terms and conditions set forth in the Agreement.\nThis audit report is provided on an \u201cas is\u201d basis, with no guarantee of the completeness, accuracy, timeliness or of \nthe results obtained by use of the information provided. Informal has relied upon information and data provided by \nthe client, and is not responsible for any errors or omissions in such information and data or results obtained from \nthe use of that information or conclusions in this report. Informal makes no warranty of any kind, express or \nimplied, regarding "
+   }
+  ]
+ },
+ {
+  "file": "v4-chain-audits-informal-systems-audit-report-2023-q4-pdf.md",
+  "findings": [
+   {
+    "line": 112,
+    "severity": "high",
+    "title": "high load, could potentially offer advantages. It is important to note that the scope of our audit did not explicitly",
+    "excerpt": "high load, could potentially offer advantages. It is important to note that the scope of our audit did not explicitly \ninclude an in-depth examination of these aspects, and thus, we did not have access to information regarding any \nprior efforts or performance benchmarks conducted by the dYdX team in this specific domain. Any potential \nimprovements in the mentioned areas would necessitate a dedicated investigation beyond the parameters of this \naudit time-frame.\nFurther Increasing Confidence\nThe scope of this audit was limited to manual code review and manual analysis and reconstruction of the protocols. \nTo further increase confidence in the protocol and the implementation, we recommend following up with more \nrigorous formal measures, including automated model checking and model-based adversarial testing. Our \nexperience shows that incorporating test suites driven by Quint / TLA+ models that can lead the implementation \ninto suspected edge cases and error scenarios enables discovery of issues that are unlikely to be identified through \nmanual review.\nAs a possible way forward in our partnership, we propose conducting thorough end-to-end testing and/or creating \nquint models for "
+   },
+   {
+    "line": 162,
+    "severity": "critical",
+    "title": "Critical 1",
+    "excerpt": "Critical 1"
+   },
+   {
+    "line": 163,
+    "severity": "high",
+    "title": "High 0",
+    "excerpt": "High 0"
+   },
+   {
+    "line": 164,
+    "severity": "medium",
+    "title": "Medium 2",
+    "excerpt": "Medium 2"
+   },
+   {
+    "line": 165,
+    "severity": "low",
+    "title": "Low 1",
+    "excerpt": "Low 1"
+   },
+   {
+    "line": 166,
+    "severity": "informational",
+    "title": "Informational 3",
+    "excerpt": "Informational 3\nTotal 7\n\n\u00a9 2024 Informal Systems dYdX 2023 Q4: Modules and Conditional Orders\nFindings 4\nFindings\nTitle Type Severity Status Issue\nPotential Chain \nHalt due to Panic \nin ABCI Phases\nIMPLEMENTATION CRITICAL RESOLVED https://\ngithub.com/\ndydxprotocol/\nv4-chain/pull/\n1342\nDeferred \nLiquidation for the \nMost Underwater \nSubaccount\nPROTOCOL\nIMPLEMENTATION\nMEDIUM ACKNOWLEDGED\nFlaws in \nSubaccount \nDetermination for \nLiquidation and \nUse of the \nmath.rand \nPackage\nIMPLEMENTATION\nPROTOCOL\nMEDIUM ACKNOWLEDGED\nOptimizing the \nDetermination of \nUser Fee Tiers\nIMPLEMENTATION LOW ACKNOWLEDGED\nx/stats Module"
+   },
+   {
+    "line": 203,
+    "severity": "informational",
+    "title": "Minor Changes",
+    "excerpt": "Minor Changes\nIMPLEMENTATION INFORMATIONAL ACKNOWLEDGED\nx/clob Module"
+   },
+   {
+    "line": 206,
+    "severity": "informational",
+    "title": "Minor Changes",
+    "excerpt": "Minor Changes\nIMPLEMENTATION INFORMATIONAL ACKNOWLEDGED\nPotential Network \nDegradation \nCaused by Short-\nTerm Order \nSpamming\nPROTOCOL INFORMATIONAL ACKNOWLEDGED\n\n\u00a9 2024 Informal Systems dYdX 2023 Q4: Modules and Conditional Orders\nFindings 5\n\u2022\n1.\n2.\n\u2022\n\u2022\nOptimizing the Determination of User Fee Tiers\nProject dYdX 2023 Q4: dYdX Modules and Conditional Orders\nType IMPLEMENTATION\nSeverity LOW\nImpact LOW\nExploitability LOW\nStatus ACKNOWLEDGED\nIssue \u00a0\nInvolved artifacts\nx/feetiers/keeper/keeper.go\nDescription\nIn getUserFeeTier  function, when determining fee-tier for a user there are two ways of optimizing the speed \nand memory usage:\nAvoid redundant assignments: this could be moved outside of the loop, speeding up the execution of \ndetermining the appropriate fee tier for certain user stats.\nPrecompute values outside the loop: values like bigUserTotalNotional  and len(tiers)  will not \nchange within the loop. It's more efficient to compute these values once before entering the loop.\nProblem Scenarios\nThis function getUserFeeTier  is called from:\nUserFeeTier  query and this is not an issue considering that there won't be a large number of fee-tiers \ndefined in the system and query is ex"
+   },
+   {
+    "line": 271,
+    "severity": "informational",
+    "title": "Minor code improvement: no need for reading the epochInfo  from the store if there are no fills made in",
+    "excerpt": "Minor code improvement: no need for reading the epochInfo  from the store if there are no fills made in \nthe block. Move this line after this condition is checked.\nDefensive coding practice: During the execution of EndBlocker  there are unsafe arithmetic operations \nand possibility of uint  wrap-around: here. Even though it seems this is highly unlikable to happen (since it \nwould consider large trading volumes), we suggest adding a check. If not triggering a panic, at the very least, \nlogging the error is advised.\nRecommendation\nAs explained above.\n\n\u00a9 2024 Informal Systems dYdX 2023 Q4: Modules and Conditional Orders\nFindings 8\n\u2022\n\u2022\n\u2022\nx/clob Module Minor Changes\nProject dYdX 2023 Q4: dYdX Modules and Conditional Orders\nType IMPLEMENTATION\nSeverity INFORMATIONAL\nImpact NONE\nExploitability NONE\nStatus ACKNOWLEDGED\nIssue \u00a0\nInvolved artifacts\nx/clob/keeper/\nDescription\nThere is no need to convert slice collections to a set here and here. It's more efficient to just iterate through \nthe slice and check if orderId  exists. Slice uniqueness is better checked when adding elements to that \ncollection.\nisTakerLiquidation  is already defined at the beginning of the persistMatchedOrders\nfuncti"
+   },
+   {
+    "line": 648,
+    "severity": "high",
+    "title": "High Halting of the chain; loss, locking, or unauthorized withdrawal of funds of many users;",
+    "excerpt": "High Halting of the chain; loss, locking, or unauthorized withdrawal of funds of many users; \narbitrary transaction execution; forging of user messages / circumvention of \nauthorization logic"
+   },
+   {
+    "line": 651,
+    "severity": "medium",
+    "title": "Medium Temporary denial of service / substantial unexpected delays in processing user requests",
+    "excerpt": "Medium Temporary denial of service / substantial unexpected delays in processing user requests \n(e.g. many hours/days); loss, locking, or unauthorized withdrawal of funds of a single \nuser / few users; failures during transaction execution (e.g. out of gas errors); substantial \nincrease in node computational requirements (e.g. 10x)"
+   },
+   {
+    "line": 655,
+    "severity": "low",
+    "title": "Low Transient unexpected delays in processing user requests (e.g. minutes/a few hours);",
+    "excerpt": "Low Transient unexpected delays in processing user requests (e.g. minutes/a few hours);"
+   },
+   {
+    "line": 656,
+    "severity": "medium",
+    "title": "Medium increase in node computational requirements (e.g. 2x); any kind of problem that",
+    "excerpt": "Medium increase in node computational requirements (e.g. 2x); any kind of problem that \naffects end users, but can be repaired by manual intervention (e.g. a special transaction)\n None Small increase in node computational requirements (e.g. 20%); code inefficiencies; bad \ncode practices; lack/incompleteness of tests; lack/incompleteness of documentation\nExploitability Score\nThe Exploitability score reflects the ease and technical means by which the vulnerability can be exploited; it \nrepresents the characteristics of the vulnerable component. In the below table we list, for each category, examples \nof actions by actors that are enough to trigger the exploit. In the examples below:\nActors\u00a0can be any entity that interacts with the system: other blockchains, system users, validators, relayers, \nbut also uncontrollable phenomena (e.g. network delays or partitions).\nActions\u00a0can be\n\n\u00a9 2024 Informal Systems dYdX 2023 Q4: Modules and Conditional Orders\nAppendix: Vulnerability Classification 20\n\u2022\n\u2022\n\u2022\nlegitimate, e.g. submission of a transaction that follows protocol rules by a user; delegation/\nredelegation/bonding/unbonding; validator downtime; validator voting on a single, but alternative"
+   },
+   {
+    "line": 685,
+    "severity": "high",
+    "title": "High illegitimate actions taken by a small group of actors; possibly coordinated with",
+    "excerpt": "High illegitimate actions taken by a small group of actors; possibly coordinated with \nlegitimate actions taken by a medium group of actors"
+   },
+   {
+    "line": 687,
+    "severity": "medium",
+    "title": "Medium illegitimate actions taken by a medium group of actors; possibly coordinated with",
+    "excerpt": "Medium illegitimate actions taken by a medium group of actors; possibly coordinated with \nlegitimate actions taken by a large group of actors"
+   },
+   {
+    "line": 689,
+    "severity": "low",
+    "title": "Low illegitimate actions taken by a large group of actors; possibly coordinated with",
+    "excerpt": "Low illegitimate actions taken by a large group of actors; possibly coordinated with \nlegitimate actions taken by all actors\n None illegitimate actions taken in a coordinated fashion by all actors\nSeverity Score\nThe severity score combines the above two sub-scores into a single value, and roughly represents the probability of \nthe system suffering a severe impact with time; thus it also represents the measure of the urgency or order in which \nvulnerabilities need to be addressed. We assess the severity according to the combination scheme represented \ngraphically below.\nAs can be seen from the image above, only a combination of high impact with high exploitability results in a Critical \nseverity score; such vulnerabilities need to be addressed ASAP. Accordingly, High severity score receive \nvulnerabilities with the combination of high impact and medium exploitability, or medium impact, but high \nexploitability.\nSeverity Score Examples"
+   },
+   {
+    "line": 702,
+    "severity": "critical",
+    "title": "Critical Halting of chain via a submission of a specially crafted transaction",
+    "excerpt": "Critical Halting of chain via a submission of a specially crafted transaction"
+   },
+   {
+    "line": 703,
+    "severity": "high",
+    "title": "High Permanent loss of user funds via a combination of submitting a specially crafted",
+    "excerpt": "High Permanent loss of user funds via a combination of submitting a specially crafted \ntransaction with delaying of certain messages by a large portion of relayers"
+   },
+   {
+    "line": 705,
+    "severity": "medium",
+    "title": "Medium Substantial unexpected delays in processing user requests via a combination of",
+    "excerpt": "Medium Substantial unexpected delays in processing user requests via a combination of \ndelaying of certain messages by a large group of relayers with coordinated withdrawal \nof funds by a large group of users\n\n\n\u00a9 2024 Informal Systems dYdX 2023 Q4: Modules and Conditional Orders\nAppendix: Vulnerability Classification 21\nSeverity Score Examples"
+   },
+   {
+    "line": 713,
+    "severity": "low",
+    "title": "Low 2x increase in node computational requirements via coordinated withdrawal of all user",
+    "excerpt": "Low 2x increase in node computational requirements via coordinated withdrawal of all user \ntokens"
+   },
+   {
+    "line": 715,
+    "severity": "informational",
+    "title": "Informational Code inefficiencies; bad code practices; lack/incompleteness of tests; lack/",
+    "excerpt": "Informational Code inefficiencies; bad code practices; lack/incompleteness of tests; lack/\nincompleteness of documentation; any exploit for which a coordinated illegitimate \naction of all actors is necessary\n\n\u00a9 2024 Informal Systems dYdX 2023 Q4: Modules and Conditional Orders\nDisclaimer 22\nDisclaimer\nThis report is subject to the terms and conditions (including without limitation, description of services, \nconfidentiality, disclaimer and limitation of liability, etc.) set forth in the associated Services Agreement. This report \nprovided in connection with the Services set forth in the Services Agreement shall be used by the Company only to \nthe extent permitted under the terms and conditions set forth in the Agreement.\nThis audit report is provided on an \u201cas is\u201d basis, with no guarantee of the completeness, accuracy, timeliness or of \nthe results obtained by use of the information provided. Informal has relied upon information and data provided by \nthe client, and is not responsible for any errors or omissions in such information and data or results obtained from \nthe use of that information or conclusions in this report. Informal makes no warranty of any kind, express or \nimplied"
+   }
+  ]
+ },
+ {
+  "file": "publicreports-cosmos-audits-a41-supernova-bot-golang-security-audit-report-halborn-final-pdf.md",
+  "findings": [
+   {
+    "line": 30,
+    "severity": "informational",
+    "title": "Recommendation 17",
+    "excerpt": "Recommendation 17\nRemediation Plan 17\n3.2 (HAL-02) LACK OF ERROR CHECKS CAN LEADS TO UNEXCEPTED FAILURES\nON THE BOT - HIGH 18\nDescription 18\nCode Location 18\nRisk Level 19\nProof Of Concept 20"
+   },
+   {
+    "line": 38,
+    "severity": "informational",
+    "title": "Recommendation 20",
+    "excerpt": "Recommendation 20\n1\n\nRemediation Plan 20\n3.3 (HAL-03) ReadHeaderTimeout IS NOT SET IN THE HTTP SERVE - MEDIUM\n21\nDescription 21\nCode Location 21\nRisk Level 21\nProof Of Concept 22"
+   },
+   {
+    "line": 48,
+    "severity": "informational",
+    "title": "Recommendation 22",
+    "excerpt": "Recommendation 22\nRemediation Plan 22\n3.4 (HAL-04) IBC TIMEOUT IS NOT COMPATIBLE WITH THE CHAIN - LOW 23\nDescription 23\nCode Location 23\nRisk Level 23"
+   },
+   {
+    "line": 54,
+    "severity": "informational",
+    "title": "Recommendation 24",
+    "excerpt": "Recommendation 24\nRemediation Plan 24\n3.5 (HAL-05) TEST DOCKER IMAGE RUNNING AS ROOT - LOW 25\nDescription 25\nCode Location 25\nRisk Level 26"
+   },
+   {
+    "line": 60,
+    "severity": "informational",
+    "title": "Recommendation 26",
+    "excerpt": "Recommendation 26\nRemediation Plan 26\n3.6 (HAL-06) USE OF WEAK RANDOM GENERATOR - LOW 27\nDescription 27\nCode Location 27\nRisk Level 27"
+   },
+   {
+    "line": 66,
+    "severity": "informational",
+    "title": "Recommendation 27",
+    "excerpt": "Recommendation 27\n2\n\nRemediation Plan 27\n3.7 (HAL-07) SECRET YAML SHOULD BE ADDED INTO GIT IGNORE - LOW 28\nDescription 28\nCode Location 28\nRisk Level 28"
+   },
+   {
+    "line": 74,
+    "severity": "informational",
+    "title": "Recommendation 28",
+    "excerpt": "Recommendation 28\nRemediation Plan 28\n3.8 (HAL-08) HARDCODED USE OF INSECURE GRPC TRANSPORT - LOW 29\nDescription 29\nCode Location 29\nRisk Level 29\nRecommendations 29\nRemediation Plan 30\n3.9 (HAL-09) LACK OF EXTENSIVE TEST COVERAGE - INFORMATIONAL 31\nDescription 31\nCode Location 31"
+   },
+   {
+    "line": 85,
+    "severity": "informational",
+    "title": "Recommendation 31",
+    "excerpt": "Recommendation 31\nRemediation Plan 31\n3.10 (HAL-10) OPEN TODO IN CODEBASE - INFORMATIONAL 32\nDescription 32\nCode Location 32\nRisk Level 32"
+   },
+   {
+    "line": 91,
+    "severity": "informational",
+    "title": "Recommendation 32",
+    "excerpt": "Recommendation 32\nRemediation Plan 32\n3\n\n3.11 (HAL-11) SPELLING MISTAKES IN THE CODEBASE - INFORMATIONAL 33\nDescription 33\nCode Location 33\nRisk Level 33"
+   },
+   {
+    "line": 99,
+    "severity": "informational",
+    "title": "Recommendation 33",
+    "excerpt": "Recommendation 33\nRemediation Plan 33\n3.12 (HAL-12) VULNERABLE THIRD PARTY PACKAGES - INFORMATIONAL 34\nDescription 34\nPackages 34\nRisk Level 34"
+   },
+   {
+    "line": 105,
+    "severity": "informational",
+    "title": "Recommendation 34",
+    "excerpt": "Recommendation 34\nRemediation Plan 34\n4 AUTOMATED TESTING 35\nDescription 36\nSemgrep - Security Analysis Output Sample 36\nSemgrep Results 36\nGosec - Security Analysis Output Sample 39\nStaticcheck - Security Analysis Output Sample 41\n4\n\nDOCUMENT REVISION HISTORY\nVERSION MODIFICATION DATE AUTHOR\n0.1 Document Creation 11/15/2022 Gokberk Gulgun\n0.2 Document Updates 11/21/2022 Gokberk Gulgun\n0.3 Draft Review 11/23/2022 Gabi Urrutia\n1.0 Remediation Plan 11/25/2022 Gokberk Gulgun\n1.1 Remediation Plan Review 11/28/2022 Gabi Urrutia\nCONTACTS\nCONTACT COMPANY EMAIL\nRob Behnke Halborn Rob.Behnke@halborn.com\nSteven Walbroehl Halborn Steven.Walbroehl@halborn.com\nGabi Urrutia Halborn Gabi.Urrutia@halborn.com\nGokberk Gulgun Halborn Gokberk.Gulgun@halborn.com\n5\n\n6\nEXECUTIVE OVERVIEW\n\n1.1 INTRODUCTION\nA41 Team engaged Halborn to conduct a security audit on their SuperNova\nBot, beginning on November 14th, 2022 and ending on November 23rd, 2022\n. The security assessment was scoped to the code base provided to the\nHalborn team.\n1.2 AUDIT SUMMARY\nThe team at Halborn was provided nearly five weeks for the engagement and\nassigned two full-time security engineers to audit the security of the\nmodules. The se"
+   },
+   {
+    "line": 247,
+    "severity": "high",
+    "title": "High SOLVED - 11/25/2022",
+    "excerpt": "High SOLVED - 11/25/2022\nHAL-03 - ReadHeaderTimeout IS NOT\nSET IN THE HTTP SERVE Medium SOLVED - 11/25/2022\nHAL-04 - IBC TIMEOUT IS NOT\nCOMPATIBLE WITH THE CHAIN Low SOLVED - 11/25/2022\nHAL-05 - TEST DOCKERFILE IS RUNNING\nAS ROOT Low SOLVED - 11/25/2022\nHAL-06 - USE WEAK RANDOM NUMBER\nGENERATOR Low SOLVED - 11/25/2022\nHAL-07 - SECRET YAML SHOULD BE\nADDED INTO GIT IGNORE Low SOLVED - 11/25/2022\nHAL-08 - HARDCODED USE OF INSECURE\nGRPC TRANSPORT Low SOLVED - 11/25/2022\nHAL-09 - LACK OF EXTENSIVE TEST\nCOVERAGE Informational ACKNOWLEDGED\nHAL-10 - OPEN TODO IN CODEBASE Informational SOLVED - 11/25/2022\nHAL-11 - SPELLING MISTAKES IN THE\nCODEBASE Informational SOLVED - 11/25/2022\nHAL-12 - VULNERABLE THIRD PARTY\nPACKAGES Informational ACKNOWLEDGED\n12\nEXECUTIVE OVERVIEW\n\n13\nFINDINGS & TECH\nDETAILS\n\n3.1 (HAL-01) BOT INCONSISTENTLY CAN\nFAIL DUE TO MISSING CHECK - HIGH\nDescription:\nOn the SuperNova Bot , several actions can be completed through the binary.\nIn the Supernova protocol, The oracle module manages the status of the\nzones associated. The status includes the amount of coins delegated to\nthe Zone\u2019s Validator, block height , proof. With UpdateChainState message,\noracle module updates the"
+   },
+   {
+    "line": 387,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nMake sure all errors are handled in transactions.\nListing 4\n1 var (\n2 Err No Su pp ort Ch ai n = sdkerrors . Register ( ModuleName , 0 , \"\n\u00eb this chain is not supported \" )\n3 Er r In v a li d O pe r a to r = sdkerrors . Register ( ModuleName , 1 , \"\n\u00eb invalid operator address \" )\n4 ErrUnknown = sdkerrors . Register ( ModuleName , 2 , \"\n\u00eb unknown error \" )\n5 Er r N o t F o u n d Z o n e I n f o = sdkerrors . Register ( ModuleName , 3 , \"\n\u00eb not found zone info \" )\n6 E r r I n v a l i d K e y M a n a g e r= sdkerrors . Register ( ModuleName , 4 , \"\n\u00eb invalid key manager address \" )\n7 E r r N e g a t i v e B l o c k H e i g h t= sdkerrors . Register ( ModuleName , 5 , \"\n\u00eb blockHeight must be positive \" )\n8 E r r I n v a l i d B l o c k H e i g h t= sdkerrors . Register ( ModuleName , 6 , \"\n\u00eb current block height must be higher than the previous block height\n\u00eb . \")\n9 )\nRemediation Plan:\nSOLVED: The A41 team solved the issue in commit a6a44a376 by adding the\nerror messages.\n17\nFINDINGS & TECH DETAILS\n\n3.2 (HAL-02) LACK OF ERROR CHECKS\nCAN LEADS TO UNEXCEPTED FAILURES ON\nTHE BOT - HIGH\nDescription:\nIn the SuperNova Bot , the following actions can be completed through the\nb"
+   },
+   {
+    "line": 507,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to implement proper error checking to avoid unexpected\ncrashes.\nRemediation Plan:\nSOLVED: The A41 team solved the issue in commit a6a44a376 by adding the\nerror checks.\n20\nFINDINGS & TECH DETAILS\n\n3.3 (HAL-03) ReadHeaderTimeout IS\nNOT SET IN THE HTTP SERVE - MEDIUM\nDescription:\nSlowloris is a type of denial of service (DoS) attack tool which allows\na single machine to take down another machine\u2019s web server with minimal\nbandwidth and side effects on unrelated services and ports. Slowloris\ntries to keep many connections to the target web server open and hold them\nopen as long as possible. It accomplishes this by opening connections\nto the target web server and sending a partial request. Configuring\nReadHeaderTimeout would protect directly against this attack by closing\nthe connection once the deadline is reached. By default, Go does not\ndefine any value meaning there is no timeout.\nCode Location:\n/api/server.go#L54\nListing 8\n1 func ( s Server ) On ( addr string ) {\n2\n3 http . Handle (\" / metrics \" , promhttp . Handler () )\n4 http . Handle (\" / check /\" , NewChkHandler () )\n5 err := http . ListenAndServe ( addr , nil )\n6 utils . CheckErr ( err , \" cann"
+   },
+   {
+    "line": 546,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to define ReadHeaderTimeout in the API.\nRemediation Plan:\nSOLVED: The A41 team solved the issue in commit 5165f8b7e by adding\nReadHeaderTimeout in the API.\n22\nFINDINGS & TECH DETAILS\n\n3.4 (HAL-04) IBC TIMEOUT IS NOT\nCOMPATIBLE WITH THE CHAIN - LOW\nDescription:\nIn the codebase, it is mentioned as This value must be set higher than\nthe IBC timeout , but the value is incompatible with SuperNova Chain. The\nincompatibility can lead to error on the transaction generation.\nCode Location:\n/logic/params.go#L9\nListing 9\n1 package logic\n2\n3 import (\n4 \" time \"\n5 )\n6\n7 const (\n8 ReQueryDelay = time . Second * 1\n9 IBCDelay = time . Second * 30 // This value must be set\n\u00eb higher than the ibc timeout .\n10 )\n11\n12 const (\n13 QueryErrPrefix = \" [ QUERY ERROR ] : \"\n14 )\n15\nRisk Level:\nLikelihood - 1\nImpact - 3\n23\nFINDINGS & TECH DETAILS"
+   },
+   {
+    "line": 585,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nEnsure that IBCDelay is compatible with SuperNova Chain.\nRemediation Plan:\nSOLVED: The A41 team solved the issue in commit 41700f77 by adding IBC\nTimeout as a flag.\n24\nFINDINGS & TECH DETAILS\n\n3.5 (HAL-05) TEST DOCKER IMAGE\nRUNNING AS ROOT - LOW\nDescription:\nDocker containers generally run with root privileges by default. This\nallows for unrestricted container management, meaning a user could in-\nstall system packages, edit configuration files, bind privileged ports,\netc. During static analysis, it was observed that the docker image is\nmaintained through the root user.\nCode Location:\nDockerfile\nListing 10\n1 FROM golang :1.19 - alpine AS builder\n2\n3 FROM builder AS builder - amd64\n4 ARG arch = x86_64\n5\n6 FROM builder AS builder - arm64\n7 ARG arch = aarch64\n8\n9 FROM builder - $TARGETARCH AS release\n10 RUN set - eux ; apk add -- no - cache ca - certificates build - base ;\n11 RUN apk add git\n12 ARG GHTOKEN\n13 RUN git config -- global url . \" https :// $GHTOKEN@github . com / \".\n\u00eb insteadOf \" https :// github . com /\" && go env -w GOPRIVATE = github . com /\n\u00eb Carina - labs\n14 WORKDIR / workspace\n15 COPY . .\n16 ADD https :// github . com / CosmWasm / wasmvm / releases / d"
+   },
+   {
+    "line": 647,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to build the Dockerfile and run the container as a\nnon-root user.\nListing 11: Reference\n1 USER 1001: this is a non - root user UID , and here it is assigned to\n\u00eb the image to run the current container as an unprivileged user .\n\u00eb By doing so , the added security and other restrictions mentioned\n\u00eb above are applied to the container .\nRemediation Plan:\nSOLVED: The A41 team solved the issue in commit 273c89b by changing user\non the Dockerfile.\n26\nFINDINGS & TECH DETAILS\n\n3.6 (HAL-06) USE OF WEAK RANDOM\nGENERATOR - LOW\nDescription:\nWhen a non-cryptographic PRNG is used in a cryptographic context, it can\nexpose the cryptography to certain types of attacks. Often a pseudo-random\nnumber generator (PRNG) is not designed for cryptography. Sometimes a\npoor source of randomness is enough or preferable for algorithms that\nuse random numbers. Weak generators generally take less processing power\nand/or do not use the precious, finite, entropy sources on a system.\nWhile such PRNGs might have very useful features, these same features\ncould be used to break the cryptography.\nCode Location:\n/rpc/types/ws.go#L8-L9\nRisk Level:\nLikelihood - 2\nImpact - 2"
+   },
+   {
+    "line": 677,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nConsider replacing math/rand with crypto/rand.\nRemediation Plan:\nSOLVED: The A41 team solved the issue in commit 138541f by using crypto\n/rand.\n27\nFINDINGS & TECH DETAILS\n\n3.7 (HAL-07) SECRET YAML SHOULD BE\nADDED INTO GIT IGNORE - LOW\nDescription:\n.secret.yml is used to pipe keyring password. A gitignore file specifies\nintentionally untracked files that Git should ignore. All sensitive\ninformation should be added into the gitignore to prevent commit into\nrepository.\nCode Location:\n/.secret.yaml\nListing 12: Reference\n1 pw : masked\nRisk Level:\nLikelihood - 2\nImpact - 2"
+   },
+   {
+    "line": 699,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nConsider removing .secret.yml and adding it to .gitignore.\nRemediation Plan:\nSOLVED: The A41 team solved the issue in commit 8cc34a0d by adding .\nsecret.yml into .gitignore.\n28\nFINDINGS & TECH DETAILS\n\n3.8 (HAL-08) HARDCODED USE OF\nINSECURE GRPC TRANSPORT - LOW\nDescription:\nDuring the code review, it was noted that gRPC client uses a hardcoded\nWithInsecure() transport setting when dialing a remote. This could allow\nman-in-the-middle attacks between the gRPC client and server.\nCode Location:\n/client/nova/query/querier.go#L30\nListing 13\n1 func Ne w No v a Qu e r yC l i en t( grpcAddr string ) * NovaQueryClient {\n2 conn , err := grpc . Dial (\n3 grpcAddr ,\n4 grpc . WithInsecure () ,\n5 )\n6 utils . CheckErr ( err , \" cannot create gRPC connection \" , 0)\n7 return & NovaQueryClient { conn }\n8 }\nRisk Level:\nLikelihood - 1\nImpact - 3\nRecommendations:\nIn the short term, add documentation that explains to end users the\nsimplest mechanism to secure gRPC. In the long term, consider adding a\nconfiguration option that allows you to select gRPC transport as secure\nor non-secure, where secure transport is the default.\n29\nFINDINGS & TECH DETAILS\n\nRemediation Plan:\nSOLVED: The A41 team"
+   },
+   {
+    "line": 750,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nMake sure the coverage report produced via go test -cover covers all\nfunctions.\nRemediation Plan:\nACKNOWLEDGED: The A41 team acknowledged this issue.\n31\nFINDINGS & TECH DETAILS\n\n3.10 (HAL-10) OPEN TODO IN\nCODEBASE - INFORMATIONAL\nDescription:\nOpen To-dos can point to architecture or programming issues that still\nneed to be resolved. Often these kinds of comments indicate areas of\ncomplexity or confusion for developers. This provides value and insight\nto an attacker who aims to cause damage to the protocol.\nCode Location:\nListing 14: Open Todos\n1 ./ logic / tx . go :43: // TODO : Need to implement a\n\u00eb system that can resolve this issue more effectively than simply\n\u00eb showing the log\nRisk Level:\nLikelihood - 1\nImpact - 1"
+   },
+   {
+    "line": 773,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nConsider resolving any pending tasks before deploying the code to a\nproduction context. Use an independent issue tracker or other project\nmanagement software to keep track of development tasks.\nRemediation Plan:\nSOLVED: The A41 team solved the issue in commit 576ac33 by resolving\nto-dos.\n32\nFINDINGS & TECH DETAILS\n\n3.11 (HAL-11) SPELLING MISTAKES IN\nTHE CODEBASE - INFORMATIONAL\nDescription:\nSpelling mistakes were identified within the codebase.\nCode Location:\n/base/tx_test.go#L47\nListing 15: Reference\n1 assert . Errorf ( s. T () , err , \" cannot covert target to\n\u00eb AccAddress \" )\nRisk Level:\nLikelihood - 1\nImpact - 1"
+   },
+   {
+    "line": 795,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended that all filenames and word usage within the code\nbe spelled correctly, as this will avoid confusion during development.\nProper spelling can also help convey a sense of professionalism to the\nvarious project stakeholders.\nRemediation Plan:\nSOLVED: The A41 team solved the issue in commit 4ae5fa by fixing the\ntypo.\n33\nFINDINGS & TECH DETAILS\n\n3.12 (HAL-12) VULNERABLE THIRD\nPARTY PACKAGES - INFORMATIONAL\nDescription:\nDuring the audit, Halborn identified installed 3rd party packages that\ncontain known security vulnerabilities.\nPackages:\nID Package Rating\nCVE-2022-32149 text@v0.3.7 HIGH\nsonatype-2021-0598 tendermint@v0.34.21MEDIUM\nCVE-2022-44797 btcd@v0.22.1 HIGH\nCVE-2022-39389 btcd@v0.22.1 MEDIUM\nRisk Level:\nLikelihood - 1\nImpact - 1"
+   },
+   {
+    "line": 820,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to keep all installed third-party packages up to date\nand apply all security fixes.\nRemediation Plan:\nACKNOWLEDGED: The A41 team acknowledged this issue.\n34\nFINDINGS & TECH DETAILS\n\n35\nAUTOMATED TESTING\n\nDescription:\nHalborn used automated testing techniques to enhance coverage of certain\nareas of the scoped component. Among the tools used were staticcheck,\ngosec, semgrep, unconvert, LGTM and Nancy. After Halborn verified all\nthe contracts and scoped structures in the repository and was able to\ncompile them correctly, these tools were leveraged on scoped structures.\nWith these tools, Halborn can statically verify security related issues\nacross the entire codebase.\nSemgrep - Security Analysis Output Sample:\nListing 16: Rule Set\n1 semgrep -- config \" p/ dgryski . semgrep - go \" x -- exclude = '* _test . go ' --\n\u00eb max - lines - per - finding 1000 -- no - git - ignore -o dgryski . semgrep\n2 semgrep -- config \" p/ owasp - top - ten \" x -- exclude = '* _test . go ' --\n\u00eb max - lines - per - finding 1000 -- no - git - ignore -o owasp - top - ten .\n\u00eb semgrep\n3 semgrep -- config \" p/ r2c - security - audit \" x -- exclude = '* _test . go ' --\n\u00eb max - lines - "
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-astroport-2024-05-22-audit-report-astroport-hub-neutron-migration-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 1360,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\nMost\nfunctions\nand\nstate\nvariables\nare\ndocumented\nwith\nclear\nand\nconcise\ncomments.\nLevel\nof\ndocumentation\nMedium\nDocumentation\nis\navailable\nin\nthe\nREADME\n\ufb01les.\nTest\ncoverage\nMedium\nThe\nfollowing\ntest\ncoverages\nare\ncomputed\nwith\ncargo\ntarpaulin\n:\n\u25cf\ncore1\n:"
+   }
+  ]
+ },
+ {
+  "file": "gaia-contrib-audits-liquid-zellic-audit-25-pdf.md",
+  "findings": [
+   {
+    "line": 92,
+    "severity": "low",
+    "title": "low impact.",
+    "excerpt": "low impact.\nZellic \u00a9 2025 \u2190 Back to Contents Rev. d88f6f9 Page 5 of 21\n\nDRAFT\nCosmos SDK Liquid Staking Module Cosmos Application Security Assessment March 26, 2025\nBreakdown of Finding Impacts\nImpact Level Count\n\u25a0 Critical 0\n\u25a0 High 0\n\u25a0 Medium 2\n\u25a0 Low 1\n\u25a0 Informational 0\nZellic \u00a9 2025 \u2190 Back to Contents Rev. d88f6f9 Page 6 of 21\n\nDRAFT\nCosmos SDK Liquid Staking Module Cosmos Application Security Assessment March 26, 2025\n2. Introduction 2.1. About Cosmos SDK Liquid Staking Module\nThe Hub team at Informal Systems contributed the following description of Cosmos SDK Liquid\nStaking Module:\nIt is an extension that enables liquid staking on the Cosmos Hub. Simply put, LSM allows the\ncreation of semi-fungible liquid staking primitives, known as LSM shares. LSM shares are\nderivatives of delegated shares, linked to a delegator-validator pair, and represent the under-\nlying delegated stake. By issuing LSM shares, the staked ATOM remains slashable while be-\ncoming 'liquid'. LSM shares function as tokens that can be utilized in various DeFi protocols and\ntransferred between users or across chains via IBC. Since they are tied to specific delegator-\nvalidator pairs, LSM shares are non-fungible. "
+   },
+   {
+    "line": 150,
+    "severity": "informational",
+    "title": "Informational.",
+    "excerpt": "Informational.\nZellic organizes its reports such that the most important findings come first in the document, rather\nthan being strictly ordered on impact alone. Thus, we may sometimes emphasize an \"Informational\"\nfinding higher than a \"Low\" finding. The key distinction is that although certain findings may have the\nsame impact rating, their importance may differ. This varies based on various soft factors, like our\nclients\u2019 threat models, their business needs, and so on. We aim to provide useful and actionable\nadvice to our partners considering their long-term goals, rather than a simple list of security issues\nat present.\nZellic \u00a9 2025 \u2190 Back to Contents Rev. d88f6f9 Page 8 of 21\n\nDRAFT\nCosmos SDK Liquid Staking Module Cosmos Application Security Assessment March 26, 2025\n2.3. Scope\nThe engagement involved a review of the following targets:\nCosmos SDK Liquid Staking Module Modules\nType Cosmos\nPlatform Cosmos\nT arget Cosmos SDK\nRepository https:/ /github.com/cosmos/cosmos-sdk\u2197\nVersion 9f2e1dac5d356e12cf43def67c075c8c965e1e6f\nPrograms staking/*\ndistribution/*\nslashing/*\nT arget gaia\nRepository https:/ /github.com/cosmos/gaia\u2197\nVersion f46b6b058caf9b9b2d8780e59e5f7ad30996f5b3\nPrograms"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-dorahacks-2024-03-04-audit-report-dorahacks-quadratic-grant-injective-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 983,
+    "severity": "low",
+    "title": "Low-Medium",
+    "excerpt": "Low-Medium\nThere\nare\noutstanding\nTODOs,\ncommented\ncode,\nmagic\nnumbers,\nand\nprintln!\nstatements\nacross\nthe\ncodebase.\nLevel\nof\ndocumentation"
+   },
+   {
+    "line": 1001,
+    "severity": "low",
+    "title": "Low-Medium",
+    "excerpt": "Low-Medium\nDocumentation\nis\nprovided\nin\nthe\nREADME\n\ufb01le.\nHowever,\nit\nlacks\ndocumentation\nof\nentry\npoints,\nexecution\n\ufb02ows,\nvariables,\nand\nfunctions.\nAdditionally,\nthe\ndocumentation\nmentions\nthat\na\nquadratic\nprogressive\ntax\nis\nimplemented\nin\nthe\nsmart\ncontract,\nwhich\nis\nmisleading\nbecause\nit"
+   },
+   {
+    "line": 1046,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\ncargo\ntarpaulin\nreports\ntest\ncoverage\nof\n83.74%\n.\n8\n\nSummary\nof\nFindings\nNo\nDescription\nSeverity\nStatus\n1\nSignatures\ncan\nbe\nreplayed\nacross\ndi\ufb00erent\nchains,\nnetworks,\nand\ncontract\naddresses\nCritical\nResolved\n2\nSignatures\ncan\nbe\nreplayed\nwithin\none\nhour"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-osmosis-labs-2023-10-09-audit-report-osmosis-transmuter-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 848,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n-\nLevel\nof\ndocumentation\nHigh\nThe\nprovided\ndocumentation\nwas\ncomprehensive.\nAdditional\ndetails\non\nthe\ntype\nof\nexpected\nassets\nand\nthe\nlegacy\nparameters\nrequired\nfor\ncompatibility\nwould\nbe\ndesirable.\nTest\ncoverage\nHigh\nTarpaulin\nreported\ntest\ncoverage\nof\n98.27%\n8"
+   }
+  ]
+ },
+ {
+  "file": "publications-pyth-network-cosmwasm-zellic-audit-report-pdf.md",
+  "findings": [
+   {
+    "line": 86,
+    "severity": "critical",
+    "title": "Critical 0",
+    "excerpt": "Critical 0"
+   },
+   {
+    "line": 87,
+    "severity": "high",
+    "title": "High 0",
+    "excerpt": "High 0"
+   },
+   {
+    "line": 88,
+    "severity": "medium",
+    "title": "Medium 0",
+    "excerpt": "Medium 0"
+   },
+   {
+    "line": 89,
+    "severity": "low",
+    "title": "Low 1",
+    "excerpt": "Low 1"
+   },
+   {
+    "line": 90,
+    "severity": "informational",
+    "title": "Informational 1",
+    "excerpt": "Informational 1\nLow\nInfo\nZellic 4 PythDataAssociation\n\n2 Introduction\n2.1 AboutPythNetwork\nPythNetworkisanoracleprovidingreal-timemarketdatafeedstoanumberofdif-\nferentblockchains. TheoraclecreatespriceupdatesonthePythnetblockchainand\nthensendsthemtootherchainsusingtheWormholenetwork. Thesepriceupdates\ncanthenbesubmittedandverifiedonvarioustargetchains.Thisauditencompasses\nthelogicforreceivingpricesonCosmWasmblockchains.\n2.2 Methodology\nDuringasecurityassessment,Zellicworksthroughstandardphasesofsecurityaudit-\ningincludingbothautomatedtestingandmanualreview. Theseprocessescanvary\nsignificantlyperengagement,butthemajorityofthetimeisspentonathoroughman-\nualreviewoftheentirescope.\nAlongsideavarietyoftoolsandanalyzersusedonanas-neededbasis,Zellicfocuses\nprimarilyonthefollowingclassesofsecurityandreliabilityissues:\nBasiccodingmistakes. Manycriticalvulnerabilitiesinthepasthavebeencausedby\nsimple,surface-levelmistakesthatcouldhaveeasilybeencaughtaheadoftimeby\ncodereview.Dependingontheengagement,wemayalsoemploysophisticatedana-\nlyzerssuchasmodelcheckers,theoremprovers,fuzzers,andsoonasnecessary.We\nalsoperformacursoryreviewofthecodetofamiliarizeourselveswiththecontracts.\nBusinesslogicerrors."
+   }
+  ]
+ },
+ {
+  "file": "celestia-app-docs-audit-sherlock-zk-ism-pdf.md",
+  "findings": [
+   {
+    "line": 66,
+    "severity": "high",
+    "title": "High Medium Low/Info",
+    "excerpt": "High Medium Low/Info\n1 2 4\nIssues Not Fixed and Not Acknowledged"
+   },
+   {
+    "line": 69,
+    "severity": "high",
+    "title": "High Medium Low/Info",
+    "excerpt": "High Medium Low/Info\n0 0 0\n3\n\nIssue H-1: Unbounded memory allocation in StateT\nransitionValues.Unmarshal [RESOLVED]\nSource:\nhttps://github.com/sherlock-audit/2026-01-celestia-zk-ism-verifier-jan-12th/issues/32\nSummary\nAttacker-controlled length prefix in public values deserialization triggers unbounded\nmemory allocation before validation, causing validator crashes and chain halt.\nVulnerability Detail\nThe StateTransitionValues.Unmarshal function deserializes the public_values field from\nMsgUpdateInterchainSecurityModule transactions using a bincode-compatible format\nwith length-prefixed byte arrays. The function reads an 8-byte little-endian unsigned\ninteger from the input buffer to determine the length of the State field, then\nimmediately allocates a byte slice of that size before attempting to read data into it.\nThe issue is that the allocation occurs before any validation against the actual\nremaining bytes in the buffer. An attacker can craft a transaction with a minimal public_\nvalues payload where the first 8 bytes encode an extremely large length value while the\nactual payload contains only a few bytes. When validators process this transaction\nduring block execution, the Go ru"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-dymension-2024-04-30-audit-report-dymension-point-1d-stream-2-virtual-frontier-contract-v1-1-pdf.md",
+  "findings": [
+   {
+    "line": 908,
+    "severity": "low",
+    "title": "Low-Medium",
+    "excerpt": "Low-Medium\n-\nCode\nreadability\nand\nclarity\nHigh\n-\nLevel\nof\ndocumentation\nHigh\n-\nTest\ncoverage"
+   },
+   {
+    "line": 923,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\ngo\ntest\nreports\ntest\ncoverage\nfor\nthe\nx/evm\nmodule\nin\nthe\nethermint\nrepository\nof\n80%.\ngo-acc\nreports\ntest\ncoverage\nfor\nthe\ndymension\nrepository\nof\n63%.\n9\n\nSummary\nof\nFindings\nNo\nDescription\nSeverity\nStatus\n1\nMissing\nrestriction\non\ndirect"
+   }
+  ]
+ }
+]

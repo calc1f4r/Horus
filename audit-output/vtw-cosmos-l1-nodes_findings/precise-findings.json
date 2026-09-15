@@ -1,0 +1,500 @@
+[
+{
+"f": "publicreports-cosmos-audits-a41-supernova-bot-golang-security-audit-report-halborn-final-pdf.md",
+"t": "3.1 (HAL-01) BOT INCONSISTENTLY CAN\nFAIL DUE TO MISSING CHECK - HIGH\nDescription:\nOn the SuperNova Bot , several actions can be completed th",
+"s": "high",
+"p": "3.1 (HAL-01) BOT INCONSISTENTLY CAN\nFAIL DUE TO MISSING CHECK - HIGH\nDescription:\nOn the SuperNova Bot , several actions can be completed through the binary.\nIn the Supernova protocol, The oracle module manages the status of the\nzones associated. The status includes the amount of coins delegated to\nthe Zone\u2019s Validator, block height , proof. With UpdateChainState message,\noracle module updates the status of the zones stored in Oracle with a\nnew status. In the SuperNova Bot, Transaction error is not defined for\nUpdateChainState message by the BOT. The bot can fail silently due to\nmissing contro"
+},
+{
+"f": "publicreports-cosmos-audits-a41-supernova-bot-golang-security-audit-report-halborn-final-pdf.md",
+"t": "3.3 (HAL-03) ReadHeaderTimeout IS\nNOT SET IN THE HTTP SERVE - MEDIUM\nDescription:\nSlowloris is a type of denial of service (DoS) attack tool",
+"s": "medium",
+"p": "3.3 (HAL-03) ReadHeaderTimeout IS\nNOT SET IN THE HTTP SERVE - MEDIUM\nDescription:\nSlowloris is a type of denial of service (DoS) attack tool which allows\na single machine to take down another machine\u2019s web server with minimal\nbandwidth and side effects on unrelated services and ports. Slowloris\ntries to keep many connections to the target web server open and hold them\nopen as long as possible. It accomplishes this by opening connections\nto the target web server and sending a partial request. Configuring\nReadHeaderTimeout would protect directly against this attack by closing\nthe connection once"
+},
+{
+"f": "publicreports-cosmos-audits-a41-supernova-cosmos-security-audit-report-halborn-final-pdf.md",
+"t": "3.2 (HAL-02) UNIQUENESS OF ZONES\nARE NOT VALIDATED - HIGH\nDescription:\nUniqueness of denom is checked with zone ID on the Registered zones",
+"s": "high",
+"p": "3.2 (HAL-02) UNIQUENESS OF ZONES\nARE NOT VALIDATED - HIGH\nDescription:\nUniqueness of denom is checked with zone ID on the Registered zones.\nBaseDenom should be unique for each zone. Even if Its controller privi-\nleged function. One wrong value set on the denom will be resulted with\nthe funds lost. We recommend ensuring that both BaseDenom is unique\nthroughout all host zones before allowing them to be set in the Regis-\nterZone.\nCode Location:\n/x/icacontrol/keeper/msg_server.go, Lines 99\nListing 3\n1 func ( k msgServer ) C h a n g e R e g i s t e r e d Z o n e( goCtx context . Context ,\n\u00eb zone * "
+},
+{
+"f": "publicreports-cosmos-audits-a41-supernova-cosmos-security-audit-report-halborn-final-pdf.md",
+"t": "3.3 (HAL-03) MISSING VALIDATION\nLEADS TO LOST OF FUNDS - HIGH\nDescription:\nOn the minting module, at the beginning of block, every time toke",
+"s": "high",
+"p": "3.3 (HAL-03) MISSING VALIDATION\nLEADS TO LOST OF FUNDS - HIGH\nDescription:\nOn the minting module, at the beginning of block, every time tokens are\nminted depends on the staking amount. However, If the pool does not exist\nor contract address is typed wrongly. Minting module can panic, and the\nchain can halt. On the PoolIncentive module, Pool Contract address is\nnot verified If the distribution operation fails than directly chain will\nhalt with this check.\nCode Location:\n/x/mint/keeper/keeper.go, Lines 175\nListing 4\n1 func ( k Keeper ) d i s t r i b u t e L P I n c e n t i v e P o o l s( ctx sdk"
+},
+{
+"f": "publicreports-cosmos-audits-a41-supernova-cosmos-security-audit-report-halborn-final-pdf.md",
+"t": "3.4 (HAL-04) NON-DETERMINISTIC\nITERATIONS CAN CAUSE CONSENSUS\nFAILURES - HIGH\nDescription:\nIn several instances of the codebase, iterations",
+"s": "high",
+"p": "3.4 (HAL-04) NON-DETERMINISTIC\nITERATIONS CAN CAUSE CONSENSUS\nFAILURES - HIGH\nDescription:\nIn several instances of the codebase, iterations are done over maps.\nSince Go map iterations are non-deterministic, this would cause each\nvalidator to produce a different app hash, causing a consensus failure\nand potentially leading to a chain halt.\nCode Location:\nListing 6\n1 x / gal / keeper / grpc_query . go :111\n2 x / gal / keeper / withdraw . go :78\n3 x / gal / keeper / withdraw . go :135\n4 x / gal / keeper / withdraw . go :156\n5 x / gal / keeper / withdraw . go :170\n6 x / gal / keeper / withdraw . g"
+},
+{
+"f": "publicreports-cosmos-audits-a41-supernova-cosmos-security-audit-report-halborn-final-pdf.md",
+"t": "3.5 (HAL-05) BLOCK HEIGHT IS NOT\nCHECKED WHEN UPDATING STATE -\nMEDIUM\nDescription:\nThe oracle module manages the status of the zones associa",
+"s": "medium",
+"p": "3.5 (HAL-05) BLOCK HEIGHT IS NOT\nCHECKED WHEN UPDATING STATE -\nMEDIUM\nDescription:\nThe oracle module manages the status of the zones associated with the\nSupernova protocol. The status includes the amount of coins delegated to\nthe Zone\u2019s Validator, block height, proof, and so on. This information\nis injected by the bot at a short interval. For the integrity of the\ninformation, the AppHash and block height are provided together. During\nthe code review, It has been observed block height is not checked when\nupdating oracle state.\nCode Location:\n/x/oracle/keeper/msg_server.go, Lines 32\nListing 7\n1 "
+},
+{
+"f": "publicreports-cosmos-audits-a41-supernova-cosmos-security-audit-report-halborn-final-pdf.md",
+"t": "3.7 (HAL-07) MISSING VALIDATION ON\nTHE HOST DENOM AND IBC DENOM -\nMEDIUM\nDescription:\nValidateDenom is the default validation function for H",
+"s": "medium",
+"p": "3.7 (HAL-07) MISSING VALIDATION ON\nTHE HOST DENOM AND IBC DENOM -\nMEDIUM\nDescription:\nValidateDenom is the default validation function for Host.Denom. In the\nparameters, Denom is only checked with the length. The system should\nverify all parameters, even if the controller manages them.\nCode Location:\n/x/icacontrol/types/msgs.go, Lines 50\nListing 9\n1 func ( msg MsgRegisterZone ) ValidateBasic () error {\n2 if strings . TrimSpace ( msg . ZoneId ) == \"\" {\n3 return sdkerrors . Wrapf ( ErrZoneIdNotNil , \" zoneId is not nil\n\u00eb \" )\n4 }\n5\n6 if strings . TrimSpace ( msg . IcaInfo . ConnectionId ) == \"\" {"
+},
+{
+"f": "publicreports-cosmos-audits-a41-supernova-cosmos-security-audit-report-halborn-final-pdf.md",
+"t": "3.8 (HAL-08) MISSING FUNCTIONALITY\nWHEN CONNECTION IS CLOSED - MEDIUM\nDescription:\nWhen the IBC channel connection was closed, the GAL modul",
+"s": "medium",
+"p": "3.8 (HAL-08) MISSING FUNCTIONALITY\nWHEN CONNECTION IS CLOSED - MEDIUM\nDescription:\nWhen the IBC channel connection was closed, the GAL module was unable to\nhandle the workflow over the connection.\nCode Location:\n/x/icacontrol/ibc_mobule.go, Lines 109\nListing 11\n1 func ( im IBCModule ) On C ha n C lo s e Co n f ir m(\n2 ctx sdk . Context ,\n3 portID ,\n4 channelID string ,\n5 ) error {\n6 return nil\n7 }\n8\nRisk Level:\nLikelihood - 3\nImpact - 3\nRecommendation:\nIt is recommended to handle the connection when it is closed and confirmed.\nRemediation Plan:\nRISK ACCEPTED : The A41 team accepted the risk of"
+},
+{
+"f": "publicreports-cosmos-audits-a41-supernova-cosmos-security-audit-report-halborn-final-pdf.md",
+"t": "3.9 (HAL-09) ORACLE STATE IS\nGENERATED INSTEAD OF UPDATE -\nMEDIUM\nDescription:\nThe status of the zones connected to the Supernova protocol i",
+"s": "medium",
+"p": "3.9 (HAL-09) ORACLE STATE IS\nGENERATED INSTEAD OF UPDATE -\nMEDIUM\nDescription:\nThe status of the zones connected to the Supernova protocol is managed by\nthe Oracle module. The status contains information such as block height,\nproof, block size, and the number of coins assigned to the zone validator.\nHowever, when the state is updated, a new state is added instead of an\nupdate. The implementation does not check the uniqueness of the zone ID.\nCode Location:\n/x/oracle/keeper/msg_server.go#L23\nListing 12\n1 func ( server msgServer ) UpdateCha inState ( goctx context . Context ,\n\u00eb state * types . Ms"
+},
+{
+"f": "publicreports-cosmos-audits-a41-supernova-cosmos-security-audit-report-halborn-final-pdf.md",
+"t": "3.10 (HAL-10) NON-DETERMINISTIC\nSYSTEM TIME - MEDIUM\nDescription:\nUsing time.Now() returns the timestamp of the operating system",
+"s": "medium",
+"p": "3.10 (HAL-10) NON-DETERMINISTIC\nSYSTEM TIME - MEDIUM\nDescription:\nUsing time.Now() returns the timestamp of the operating system. Local\nclock times are subjective and therefore non-deterministic. As there may\nbe small discrepancies between the timestamp of various nodes, the chain\nmay not be able to reach consensus. Cosmos SDK had a vulnerability named\njackfruit which may with a consensus halt on the x/authz module. In the\nICAControl module, the transaction send function uses time.Now() on the\ntimestamp.\nCode Location:\n/x/icacontrol/keeper/send_msgs.go#L42\nListing 13\n1 func ( k Keeper ) SendTx"
+},
+{
+"f": "publicreports-cosmos-audits-boostylabs-tricorn-bridge-server-golang-security-assessment-report-halborn-final-pdf.md",
+"t": "4.6 (HAL-06) BRIDGE SUPPORTS UNENCRYPTED TRAFFIC - MEDIUM(6.2) 41\nDescription 41\nCode Location 41\nBVSS 42\nRecommendation 42\nRemediation Plan",
+"s": "medium",
+"p": "4.6 (HAL-06) BRIDGE SUPPORTS UNENCRYPTED TRAFFIC - MEDIUM(6.2) 41\nDescription 41\nCode Location 41\nBVSS 42\nRecommendation 42\nRemediation Plan 42\n4.7 (HAL-07) ADMINISTRATOR LOGIN PROTOCOLS ARE ACCESSIBLE FOR TEST\nSERVER - LOW(3.1) 43\nDescription 43\nCode Location 43\nProof of Concept 45\nBVSS 45\nRecommendation 45\nRemediation Plan 45\n4.8 (HAL-08) UI ELEMENT FOR TRANSACTION FEE IS HARD-CODED - LOW(3.1)\n46\nDescription 46\nCode Location 46\nProof of concept 47\nBVSS 47\nRecommendation 47\nRemediation Plan 47\n4.9 (HAL-09) PRIVATE ETHERSCAN API KEY EXPOSED IN GIT REPOSITORY -\nLOW(2.5) 48\nDescription 48\n3"
+},
+{
+"f": "publicreports-cosmos-audits-boostylabs-tricorn-bridge-server-golang-security-assessment-report-halborn-final-pdf.md",
+"t": "4.1 (HAL-01) PRIVATE SSH KEYS\nCOMMITTED TO GIT REPOSITORY -\nCRITICAL(10)\nDescription:\nPrivate SSH keys are publicly exposed on GitHub",
+"s": "critical",
+"p": "4.1 (HAL-01) PRIVATE SSH KEYS\nCOMMITTED TO GIT REPOSITORY -\nCRITICAL(10)\nDescription:\nPrivate SSH keys are publicly exposed on GitHub.\nCode Location:\nPrivate SSH keys are accessible by browsing the public casper-eth-bridge\nrepository.\nFigure 1 : Private keys are accessible via GitHub\nProof of concept:\n\u2022 A malicious party reads the private keys.\n\u2022 The private keys are used to authenticate to the test server.\n\u2022 With access to the test server, the attacker can access other\nsensitive information such as database passwords, API keys, and\nprivate source code.\n27\nFINDINGS & TECH DETAILS"
+},
+{
+"f": "publicreports-cosmos-audits-boostylabs-tricorn-bridge-server-golang-security-assessment-report-halborn-final-pdf.md",
+"t": "4.2 (HAL-02) PANIC ON EVENT\nPARSING - HIGH (8.4)\nBVSS:\nAO:A/AC:L/AX:M/C:N/I:N/A:C/D:N/Y:N/R:N/S:C (8.4)\nDescription:\nThe code for parsing ev",
+"s": "high",
+"p": "4.2 (HAL-02) PANIC ON EVENT\nPARSING - HIGH (8.4)\nBVSS:\nAO:A/AC:L/AX:M/C:N/I:N/A:C/D:N/Y:N/R:N/S:C (8.4)\nDescription:\nThe code for parsing events into Go data structures can panic under\ncertain circumstances. If the incoming event data is not in the expected\nformat, a nil dereference error can occur, which causes a panic in Go\ncode. If encountered in a production environment, services using this\ncode will crash and require manual restart from an administrator.\nCode Location:\nThe code below performs string slicing without doing bound checks. This\nis the source of the panic error. When an offset "
+},
+{
+"f": "publicreports-cosmos-audits-boostylabs-tricorn-bridge-server-golang-security-assessment-report-halborn-final-pdf.md",
+"t": "4.3 (HAL-03) TOKENID IS HARD-CODED\nIN TRANSFERS - HIGH (7.5)\nDescription:\nThe value for TokenId in transfers is hard-coded",
+"s": "high",
+"p": "4.3 (HAL-03) TOKENID IS HARD-CODED\nIN TRANSFERS - HIGH (7.5)\nDescription:\nThe value for TokenId in transfers is hard-coded. This means that it is\nonly possible to transfer a single ERC-20 \u2018test\u2019 token. As a result, the\nbridge is not fully functional, as there is no way to specify a different\ntoken based on user input.\nCode Location:\nbridge/service.go\nListing 2: Example 1: Building a Bridge In transfer: tokenId is\nhard-coded to the value 1 (Line 400)\n399 tokenTransfer := transfers . TokenTransfer {\n400 TokenID : 1 , // todo : dynamically change .\n401 Amount : * amount ,\n402 Status : transfers ."
+},
+{
+"f": "publicreports-cosmos-audits-boostylabs-tricorn-bridge-server-golang-security-assessment-report-halborn-final-pdf.md",
+"t": "4.6 (HAL-06) BRIDGE SUPPORTS\nUNENCRYPTED TRAFFIC - MEDIUM (6.2)\nDescription:\nThe bridge microservices allow traffic over unencrypted network",
+"s": "medium",
+"p": "4.6 (HAL-06) BRIDGE SUPPORTS\nUNENCRYPTED TRAFFIC - MEDIUM (6.2)\nDescription:\nThe bridge microservices allow traffic over unencrypted network\nconnections. gRPC\u2019s servers are initialized using an optional set of\nserver options. If the Creds option is not specified, the connections\nwill not be encrypted.\nCode Location:\nAn example where the code creates a gRPC server is outlined in the\nfollowing code excerpt:\ninternal/server/grpc/server.go\nListing 8: gRPC server created with NewServer without a Creds option\n39\n40 // NewServer is a constructor for GRPC server .\n41 func NewServer ( logger logger . L"
+},
+{
+"f": "publicreports-cosmos-audits-entangle-blockchain-cosmos-security-assessment-report-halborn-final-pdf.md",
+"t": "4.1 (HAL-01) MISSING CODEC HANDLER\nFOR DISTRIBUTOR MESSAGES -\nCRITICAL(10)\nDescription:\nThe implementation lacks a codec handler registratio",
+"s": "critical",
+"p": "4.1 (HAL-01) MISSING CODEC HANDLER\nFOR DISTRIBUTOR MESSAGES -\nCRITICAL(10)\nDescription:\nThe implementation lacks a codec handler registration for the all dis-\ntributor message in the amino codec. This will lead to issues when\nencoding or decoding messages related to the distributor messages. To\naddress this issue, the distributor messages should be registered in the\nRegisterInterfaces function. This ensures that the amino codec has the\nnecessary handler for encoding and decoding this message type.\nCode Location:\n/x/distributorsauth/types/codec.go\nListing 1\n1 package types\n2\n3 import (\n4 \" gith"
+},
+{
+"f": "publicreports-cosmos-audits-entangle-blockchain-cosmos-security-assessment-report-halborn-final-pdf.md",
+"t": "4.3 (HAL-03) UNHANDLED RETURN IN\nREMOVEADMIN FUNCTION\nIMPLEMENTATION - HIGH (8.1)\nDescription:\nThe RemoveAdmin function is currently set up",
+"s": "high",
+"p": "4.3 (HAL-03) UNHANDLED RETURN IN\nREMOVEADMIN FUNCTION\nIMPLEMENTATION - HIGH (8.1)\nDescription:\nThe RemoveAdmin function is currently set up to remove an admin, but it\ndoes not handle a specific error scenario adequately. This oversight\ncould lead to silent failures in certain cases. In the event of an error\nin address conversion, the function exits silently, leading to a lack of\nclarity about whether the operation succeeded or failed.\nCode Location:\n/x/distributorsauth/keeper/msg_server.go#L74\nListing 4\n1 func ( s msgServer ) RemoveAdmin ( goCtx context . Context , msg * types .\n\u00eb MsgRemoveAdm"
+},
+{
+"f": "publicreports-cosmos-audits-entangle-blockchain-cosmos-security-assessment-report-halborn-final-pdf.md",
+"t": "4.4 (HAL-04) ERROR HANDLING IN\nADDADMIN METHOD OF KEEPER MODULE -\nHIGH (8.1)\nDescription:\nA potential oversight in the error handling mechan",
+"s": "high",
+"p": "4.4 (HAL-04) ERROR HANDLING IN\nADDADMIN METHOD OF KEEPER MODULE -\nHIGH (8.1)\nDescription:\nA potential oversight in the error handling mechanism has been observed in\nthe AddAdmin method within our Keeper module. While the Keeper\u2019s AddAdmin\nfunction correctly handles errors, its caller method in the msgServer\nstruct does not properly handle the error that might be returned.\nThe error returned by Keeper.AddAdmin is not handled in msgServer.AddAdmin\n. This could lead to scenarios where the function fails silently, and\nthe admin is not added, but the caller is unaware of the failure.\nCode Location:"
+},
+{
+"f": "publicreports-cosmos-audits-entangle-blockchain-cosmos-security-assessment-report-halborn-final-pdf.md",
+"t": "4.5 (HAL-05) ERROR HANDLING IN\nREMOVEDISTRIBUTOR METHOD OF\nMSGSERVER - HIGH (8.1)\nDescription:\nAn issue has been identified in the RemoveDis",
+"s": "high",
+"p": "4.5 (HAL-05) ERROR HANDLING IN\nREMOVEDISTRIBUTOR METHOD OF\nMSGSERVER - HIGH (8.1)\nDescription:\nAn issue has been identified in the RemoveDistributor method within the\nmsgServer struct. The method is designed to remove a distributor from\nthe system. However, there is a lack of error handling for the response\nfrom the RemoveDistributor function of the Keeper.\nThe primary concern is the absence of error handling for the Keeper.\nRemoveDistributor call. If an error occurs during the removal process,\nit is not captured or relayed back to the caller. This can lead to silent\nfailures, where the caller"
+},
+{
+"f": "publicreports-cosmos-audits-entangle-blockchain-cosmos-security-assessment-report-halborn-final-pdf.md",
+"t": "4.6 (HAL-06) END DATE IS NOT CHECKED\nON THE PROPOSALS - MEDIUM (5.0)\nDescription:\nThe AddDistributor function in our existing system current",
+"s": "medium",
+"p": "4.6 (HAL-06) END DATE IS NOT CHECKED\nON THE PROPOSALS - MEDIUM (5.0)\nDescription:\nThe AddDistributor function in our existing system currently lacks crit-\nical validation for the EndDate parameter of a distributor. This gap in\nthe validation process can lead to a situation where distributors are\nadded with an EndDate that has already passed.\nCode Location:\n/x/distributorsauth/keeper/msg_server.go#L23\nListing 7\n1 func ( s msgServer ) AddDistributor ( goCtx context . Context , msg *\n\u00eb types . Msg Ad dD is tri bu to r ) (* types . MsgAddDistributorResponse , error )\n\u00eb {\n2 ctx := sdk . UnwrapSD KC"
+},
+{
+"f": "publicreports-cosmos-audits-haqq-coinomics-module-cosmos-security-assessment-report-halborn-final-pdf.md",
+"t": "6.6 Nancy\nAnalysis Output Sample:\n\u2022 No major issues found by Nancy.\n28\nAUTOMATED TESTING",
+"s": "high",
+"p": "6.6 Nancy\nAnalysis Output Sample:\n\u2022 No major issues found by Nancy.\n28\nAUTOMATED TESTING"
+},
+{
+"f": "publicreports-cosmos-audits-haqq-vesting-cosmos-security-assessment-report-halborn-final-pdf.md",
+"t": "4.1 (HAL-01) PROJECT VULNERABLE TO\nBARBERRY VULNERABILITY -\nCRITICAL(9.1)\nDescription:\nThe project is vulnerable to the barberry security is",
+"s": "critical",
+"p": "4.1 (HAL-01) PROJECT VULNERABLE TO\nBARBERRY VULNERABILITY -\nCRITICAL(9.1)\nDescription:\nThe project is vulnerable to the barberry security issue . Cosmos versions\nless than 0.46.13 and 0.47.3 are affected. This issue can lead to a chain\nhalt, and so it is considered to have a critical impact.\nCode Location:\ngo.mod#L8\nListing 1\n1 module github . com / haqq - network / haqq\n2\n3 go 1.19\n4\n5 require (\n6 cosmossdk . io / errors v1 .0.0 - beta .7\n7 cosmossdk . io / math v1 .0.0 - beta .6\n8 github . com / cosmos / cosmos - sdk v0 .46.10\nBVSS:\nAO:A/AC:M/AX:M/C:N/I:C/A:C/D:H/Y:H/R:N/S:C (9.1)\nRecommenda"
+},
+{
+"f": "publicreports-cosmos-audits-sifchain-sifnode-042-upgrade-security-audit-report-halborn-v1-1-pdf.md",
+"t": "3.1 (HAL-01) PRIVILEGED ACCOUNT CAN\nACCESS PEGGED FUNDS - MEDIUM\nDescription:\nThe primary function of Sifchain is to offer a cross-chain dec",
+"s": "medium",
+"p": "3.1 (HAL-01) PRIVILEGED ACCOUNT CAN\nACCESS PEGGED FUNDS - MEDIUM\nDescription:\nThe primary function of Sifchain is to offer a cross-chain decentralized\nexchange. This is achieved by using a decentralized group of \u201coracles\u201d\nthat have special privileges. The Peggy design document states that the\noracles should use a consensus model. And is used for cross-chain swaps\non both the Ethereum and Sif networks, however a single \u201cAdmin\u201d account\nis capable of withdrawing tokens via the RescueCeth functionality. This\nis without consensus or governance, and is entirely unilateral. The risk\nis compounded by "
+},
+{
+"f": "publicreports-cosmos-audits-sifchain-sifnode-042-upgrade-security-audit-report-halborn-v1-1-pdf.md",
+"t": "3.3 (HAL-03) ONLY ADMINS CAN ASSIGN\nORACLES - MEDIUM\nCode Location:\nListing 4: x/oracle/keeper/keeper.go\n178 // P r o c e s s U p d a t e W",
+"s": "medium",
+"p": "3.3 (HAL-03) ONLY ADMINS CAN ASSIGN\nORACLES - MEDIUM\nCode Location:\nListing 4: x/oracle/keeper/keeper.go\n178 // P r o c e s s U p d a t e W h i t e L i s t V a l i d a t o rprocesses the update whitelist\nvalidator from admin\n179 func ( k Keeper ) P r o c e s s U p d a t e W h i t e L i s t V a l i d a t o r( ctx sdk . Context ,\ncosmosSender sdk . AccAddress , validator sdk . ValAddress ,\noperationtype string ) error {\n180 logger := k . Logger ( ctx )\n181 if ! k . IsAdminAccount ( ctx , cosmosSender ) {\n182 logger . Error (\" cosmos sender is not admin account . \")\n183 return types . Er r No t A"
+},
+{
+"f": "publicreports-cosmos-audits-sifchain-sifnode-042-upgrade-security-audit-report-halborn-v1-1-pdf.md",
+"t": "3.6 (HAL-06) SENSITIVE INFORMATION\nIN ENVIRONMENT VARIABLES - MEDIUM\nDescription:\nWhen you store your secret keys in an environment variable",
+"s": "medium",
+"p": "3.6 (HAL-06) SENSITIVE INFORMATION\nIN ENVIRONMENT VARIABLES - MEDIUM\nDescription:\nWhen you store your secret keys in an environment variable, you are prone\nto accidentally exposing them.\nCode Location:\nSignature Go File\nListing 6: cmd/ebrelayer/txs/signature.go\n21 func LoadPrivateKey () ( key * ecdsa . PrivateKey , err error ) {\n22 // Private key for validator 's Ethereum address must be set as\nan environment variable\n23 rawPrivateKey := os . Getenv ( \" E T H E R E U M _ P R I V A T E _ K E Y\" )\n24 ....\nRisk Level:\nLikelihood - 3\nImpact - 3\nRecommendations:\nGiven that the environment is implic"
+},
+{
+"f": "publicreports-cosmos-audits-umee-wasm-integration-cosmos-security-audit-report-halborn-final-pdf.md",
+"t": "3.1 (HAL-01) VULNERABLE WASM SMART\nCONTRACT LEADS TO CHAIN HALT -\nCRITICAL\nDescription:\nA vulnerability in the WASM integration and the auth",
+"s": "critical",
+"p": "3.1 (HAL-01) VULNERABLE WASM SMART\nCONTRACT LEADS TO CHAIN HALT -\nCRITICAL\nDescription:\nA vulnerability in the WASM integration and the authz module in the cosmos\n-sdk has been detected, and was recently exploited to halt another chain\n(JUNO). In the vulnerability, A smart contract abused non-deterministic\nstate in authz grants to save a different hash to all validators.\nJuno Halt Root Cause Steps:\n\u2022 An attacker is deployed a malicious contract on the Juno.\n\u2022 A malicious contract is located on the Mint Scan .\n\u2022 During the review of malicious contract, It has been observed that an\nattacker\u2019s co"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-a41-supernova-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.1 (HAL-01) ACCESS CONTROL NOT\nENFORCED FOR CREATING PAIRS - HIGH\nDescription:\nAs explicated in the provided documentation, the instruction",
+"s": "high",
+"p": "3.1 (HAL-01) ACCESS CONTROL NOT\nENFORCED FOR CREATING PAIRS - HIGH\nDescription:\nAs explicated in the provided documentation, the instruction for pair\ncreation in the factory contract should be only called by the factory\u2019s\nowner.\nHowever, the code does not reflect the documentation because there\nis no check if msg.sender is the factory\u2019s owner in the function\nexecute_create_pair.\nWith this, anyone can create liquidity pools, that should be created by\nthe factory\u2019s owner.\nProof of Concept:\nIn the following link is included a walkthrough video with the proof of\nconcept.\nCode Location:\nFragment of"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-a41-supernova-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.2 (HAL-02) SLIPPAGE NOT\nENFORCED - MEDIUM\nDescription:\nIn the pair liquidity providing functionality in the pair contract, there\nis no max",
+"s": "medium",
+"p": "3.2 (HAL-02) SLIPPAGE NOT\nENFORCED - MEDIUM\nDescription:\nIn the pair liquidity providing functionality in the pair contract, there\nis no maximum threshold being asserted to the liquidity pool. This can\nseverely affect users\u2019 amount of token received in return of the provided\nliquidity.\nIn the code, there is a commented call to a assert_slippage_tolerance\nfunction that has not been implemented.\nCode Location:\nFragment of provide_liquidity:\nListing 2: contracts/pair/contract.rs (Lines 330,331)\n312 if amp == MINIMUM_AMP && !pools [0]. amount . is_zero () && !pools\n\u00eb [1]. amount . is_zero () {\n313"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-astroport-fi-amm-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.1 (HAL-01) ANONYMOUS CONTRACT\nCONFIG MODIFICATION - HIGH\nDescription:\nThe astroport-maker and astroport-generator contracts hold their con",
+"s": "high",
+"p": "3.1 (HAL-01) ANONYMOUS CONTRACT\nCONFIG MODIFICATION - HIGH\nDescription:\nThe astroport-maker and astroport-generator contracts hold their configu-\nrations in storage. Configuration parameters are set with the set_config\n, set_allowed_reward_proxies and set_tokens_per_block functions defined\nin contracts/tokenomics/maker/src/contract.rs and contracts/tokenomics/\ngenerator/src/contract.rs. Because those functions do not verify the\nmessage sender, malicious users can overwrite configuration parameters.\nFor example, overwriting the staking and governance contract addresses\nmay redirect new funds to"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-astroport-fi-amm-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.2 (HAL-02) POSSIBILITY TO CREATE\nPOOLS WITH THE SAME PAIR - HIGH\nDescription:\nexecute_create_pair function in contracts/factory/src/contra",
+"s": "high",
+"p": "3.2 (HAL-02) POSSIBILITY TO CREATE\nPOOLS WITH THE SAME PAIR - HIGH\nDescription:\nexecute_create_pair function in contracts/factory/src/contract.rs allows\nthe possibility to create pools with the same pair, which generates\nunexpected situations, e.g.: a user could withdraw more tokens than his\nfair share and affect other users in the pool.\nThis issue happens because the aforementioned function does not validate\nif pairs in asset_infos have the same value.\nA proof of concept video showing how to exploit this security issue is\nincluded in the report.\nAdditionally, it was found that when exploiting"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-astroport-fi-amm-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.3 (HAL-03) REPEATED POOLS CAN BE\nCREATED - HIGH\nDescription:\nexecute_create_pair function in contracts/factory/src/contract.rs allows\nthe",
+"s": "high",
+"p": "3.3 (HAL-03) REPEATED POOLS CAN BE\nCREATED - HIGH\nDescription:\nexecute_create_pair function in contracts/factory/src/contract.rs allows\nthe possibility to create pools with already existing pairs. This issue\nhappens because pair_key function will consider that two addresses are\ndifferent if they differ just in their upper / lower cases.\nThe situation described above can produce the following consequences:\n\u2022 Potential fixes for HAL-02 can be bypassed and users will be able\nto create pools with the same pair, which generates unexpected\nsituations, e.g.: a user could withdraw more tokens than his"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-astroport-fi-amm-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.4 (HAL-04) ADDING LIQUIDITY TO\nNEW POOLS DOES NOT WORK PROPERLY -\nMEDIUM\nDescription:\nWhen users call provide_liquidity function in contra",
+"s": "medium",
+"p": "3.4 (HAL-04) ADDING LIQUIDITY TO\nNEW POOLS DOES NOT WORK PROPERLY -\nMEDIUM\nDescription:\nWhen users call provide_liquidity function in contracts/pair/src/contract.rs\nor contracts/pair_stable/src/contract.rs to add liquidity to new pools\n(i.e.: pools with no deposits), the assert_slippage_tolerance function\nis triggered and will always panic if slippage is specified at the\nbeginning of the operation. This situation can produce the following\nconsequences:\n\u2022 When legitimate users try to add liquidity to new pools, operations\nwill always panic and make users spend transactions fees needlessly.\n\u2022 To"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-astroport-fi-amm-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.5 (HAL-05) UPDATING A CONFIG\nPARAMETER AFFECTS PAST REWARDS -\nMEDIUM\nDescription:\ntokens_per_block is a configuration parameter of the ast",
+"s": "medium",
+"p": "3.5 (HAL-05) UPDATING A CONFIG\nPARAMETER AFFECTS PAST REWARDS -\nMEDIUM\nDescription:\ntokens_per_block is a configuration parameter of the astroport-generator\ncontract. It is used to calculate the amount of rewards a user is\neligible for. However, if this parameter\u2019s value is modified after\npools are created all rewards will be calculated using the updated value,\nregardless of when deposits were made. For example, if users had deposited\ntokens when tokens_per_block was x and withdrew when tokens_per_block was\ny all their rewards were calculated using value y.\nCode Location:\nListing 9: contracts/"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-astroport-fi-amm-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.8 (HAL-08) OWNER ADDRESS NOT\nTRANSFERABLE - MEDIUM\nDescription:\nSome governance operations on the astroport-generator and astroport\n-maker",
+"s": "medium",
+"p": "3.8 (HAL-08) OWNER ADDRESS NOT\nTRANSFERABLE - MEDIUM\nDescription:\nSome governance operations on the astroport-generator and astroport\n-maker contracts require current contract owner signature. Since\nneither contract implements a governance address transfer function it\nis impossible to assign a new owner in case the current account is\ncompromised.\nCode Location:\nListing 16: tokenomics/generator/src/contract.rs (Lines 45)\n28 #[ cfg_attr ( not ( feature = \" library \") , entry_point ) ]\n29 pub fn instantiate (\n30 deps : DepsMut ,\n31 _env : Env ,\n32 info : MessageInfo ,\n33 msg : InstantiateMsg ,\n34"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-astroport-fi-amm-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.9 (HAL-09) MISCALCULATION OF\nREVERSE SIMULATION IN STABLE\nPAIRS - MEDIUM\nDescription:\nWhen users make reverse simulation queries in stable",
+"s": "medium",
+"p": "3.9 (HAL-09) MISCALCULATION OF\nREVERSE SIMULATION IN STABLE\nPAIRS - MEDIUM\nDescription:\nWhen users make reverse simulation queries in stable pairs,\ncompute_offer_amount function in contracts/pair_stable/src/contract.rs\ncalls calc_amount function with an incorrect ask_amount parameter, i.e.:\nwith commission already deducted . As a consequence, values returned in\nreverse simulation queries will always be lesser than real ones.\nCode Location:\nListing 18: contracts/pair_stable/src/contract.rs (Lines 860)\n853 let gre at er _p rec is io n = offer_precision . max ( ask_precision ) ;\n854 let offer_poo"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-astroport-fi-astral-assembly-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.1 (HAL-01) LACK OF PROPOSAL\nSANITIZATION COULD HARM USERS -\nMEDIUM\nDescription:\nWhen a new proposal is submitted via the submit_proposal f",
+"s": "medium",
+"p": "3.1 (HAL-01) LACK OF PROPOSAL\nSANITIZATION COULD HARM USERS -\nMEDIUM\nDescription:\nWhen a new proposal is submitted via the submit_proposal function in the\nassembly contract, the submitter can introduce a malicious external URL\nthat tricks users into being redirected to a phishing DApp that could\nsteal their funds.\nIt is worth noting that URLs will appear in the official Astroport\nfrontend, so legitimate users will not be aware if those URLs are\nmalicious or not. In addition, unsanitized title and description\nfields could lead to other web application exploits such as Cross-site\nscripting.\nCode"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-astroport-fi-astral-assembly-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.2 (HAL-02) INCONSISTENT XASTRO\nBLOCK HEIGHT SELECTION - MEDIUM\nDescription:\nThe assembly contract uses different block heights when castin",
+"s": "medium",
+"p": "3.2 (HAL-02) INCONSISTENT XASTRO\nBLOCK HEIGHT SELECTION - MEDIUM\nDescription:\nThe assembly contract uses different block heights when casting a vote\nand when calculating the total voting power available for a proposal.\nThis situation could allow proposals to bypass the quorum required for\napproval.\nThe proposal_quorum is defined as the ratio of total votes to total voting\npower. However, the calculation of each vote cast and thus total_votes\nqueries XAstro token in proposal.start_block but total_voting_power does\nso in proposal.start_block - 1 , effectively retrieving different states\nof the X"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-astroport-fi-periphery-contracts-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.2 (HAL-02) PRIVILEGED ADDRESS CAN\nBE TRANSFERRED WITHOUT\nCONFIRMATION - MEDIUM\nDescription:\nAn incorrect use of the handle_update_config f",
+"s": "medium",
+"p": "3.2 (HAL-02) PRIVILEGED ADDRESS CAN\nBE TRANSFERRED WITHOUT\nCONFIRMATION - MEDIUM\nDescription:\nAn incorrect use of the handle_update_config function in contracts can\nset owner to an invalid address and inadvertently lose control of the\ncontracts, which cannot be undone in any way. Currently, the owner of\nthe contracts can change owner address using the aforementioned function\nin a single transaction and without confirmation from the new address.\nThe affected smart contracts are the following:\n\u2022 airdrop\n\u2022 auction\n\u2022 lockdrop\nCode Location:\nListing 2: contracts/airdrop/src/contract.rs (Lines 143)\n"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-brokkr-protocol-p1-contracts-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.2 (HAL-02) BBRO TOKENS ARE LOST\nWHEN UNSTAKING OR CLAIMING\nREWARDS - HIGH\nDescription:\nWhen a user unstake or claim BRO rewards in staking",
+"s": "high",
+"p": "3.2 (HAL-02) BBRO TOKENS ARE LOST\nWHEN UNSTAKING OR CLAIMING\nREWARDS - HIGH\nDescription:\nWhen a user unstake or claim BRO rewards in staking-v1 contract, his in-\nformation is totally removed from STAKERS item if the following conditions\nare true:\n\u2022 Total staked amount is zero\n\u2022 Pending BRO reward is zero\nUnder the mentioned circumstances, the user won\u2019t be able to claim his\nbBRO rewards, even if the amount is greater than zero, i.e.: he totally\nloses all his bBRO tokens.\nCode Location:\nUser\u2019s information is totally removed from STAKERS item when he unstakes:\nListing 4: contracts/staking-v1/src"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-brokkr-protocol-p1-contracts-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.3 (HAL-03) BBRO REWARDS SCHEMA\nCOULD PRODUCE UNFAIR ADVANTAGES -\nHIGH\nDescription:\nWhen users stake, the compute_normal_bbro_reward functi",
+"s": "high",
+"p": "3.3 (HAL-03) BBRO REWARDS SCHEMA\nCOULD PRODUCE UNFAIR ADVANTAGES -\nHIGH\nDescription:\nWhen users stake, the compute_normal_bbro_reward function is called\nto calculate the bBRO rewards accrued. Because of the calcu-\nlation of bbro_reward value depends on the subtraction between\nlast_distribution_block and last_balance_update, it is possible the\nfollowing attack scenario:\nAttack scenario :\n1. Just after a reward distribution, an attacker stakes 10_000000 BRO\n(Block height: 200).\n2. Attacker waits until there is another reward distribution and he\nfront-runs the transaction to additionally stake 80"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-brokkr-protocol-p1-contracts-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.4 (HAL-04) PRICES FROM TWAP\nORACLE CAN BECOME STALE - MEDIUM\nDescription:\nconsult_price function in contracts/oracle/src/queries.rs calcul",
+"s": "medium",
+"p": "3.4 (HAL-04) PRICES FROM TWAP\nORACLE CAN BECOME STALE - MEDIUM\nDescription:\nconsult_price function in contracts/oracle/src/queries.rs calculates the\nreturn value using the price_average stored in oracle contract\u2019s storage\n(PRICE_LAST). However, the function does not previously validate if the\nprice has been updated within a reasonable timeframe.\nAs a consequence, prices calculated in this TWAP oracle can rapidly\nbecome stale if users do not bond tokens frequently enough or if Brokkr\u2019s\noff-chain trigger does not work correctly (out-of-scope for this audit),\nwhich could affect negatively users\u2019 "
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-brokkr-protocol-p1-contracts-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.5 (HAL-05) PRIVILEGED ADDRESS CAN\nBE TRANSFERRED WITHOUT\nCONFIRMATION - MEDIUM\nDescription:\nAn incorrect use of the update_config function",
+"s": "medium",
+"p": "3.5 (HAL-05) PRIVILEGED ADDRESS CAN\nBE TRANSFERRED WITHOUT\nCONFIRMATION - MEDIUM\nDescription:\nAn incorrect use of the update_config function in contracts can set owner\nto an invalid address and inadvertently lose control of the contracts,\nwhich cannot be undone in any way. Currently, the owner of the contracts\ncan change owner address using the aforementioned function in a single\ntransaction and without confirmation from the new address.\nThe affected smart contracts are the following:\n\u2022 airdrop\n\u2022 bonding-v1\n\u2022 oracle\n\u2022 staking-v1\n\u2022 vesting\nCode Location:\nListing 9: contracts/airdrop/src/command"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-brokkr-protocol-p2-contracts-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.1 (HAL-01) PRIVILEGED ADDRESS CAN\nBE TRANSFERRED WITHOUT\nCONFIRMATION - MEDIUM\nDescription:\nIncorrect use of the update_config function in",
+"s": "medium",
+"p": "3.1 (HAL-01) PRIVILEGED ADDRESS CAN\nBE TRANSFERRED WITHOUT\nCONFIRMATION - MEDIUM\nDescription:\nIncorrect use of the update_config function in contracts can set owner to\nhave an invalid address and inadvertently lose control of the contracts,\nwhich cannot be undone in any way. Currently, the contract owner can\nchange the owner address using the aforementioned function in a single\ntransaction and without confirmation from the new address.\nThe affected smart contracts are the following:\n\u2022 epoch-manager\n\u2022 distributor-v1\nCode Location:\nListing 1: contracts/distributor-v1/src/commands.rs (Lines 23-26"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-brokkr-protocol-p3-contracts-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.1 (HAL-01) PRIVILEGED ADDRESS CAN\nBE TRANSFERRED WITHOUT\nCONFIRMATION - MEDIUM\nDescription:\nIncorrect use of the update_config function in",
+"s": "medium",
+"p": "3.1 (HAL-01) PRIVILEGED ADDRESS CAN\nBE TRANSFERRED WITHOUT\nCONFIRMATION - MEDIUM\nDescription:\nIncorrect use of the update_config function in contracts can set the\nowner to have an invalid address and inadvertently lose control of the\ncontracts, which cannot be undone in any way. Currently, the contract\nowner can change the owner address using the aforementioned function in\na single transaction and without confirmation from the new address.\nThe affected smart contracts are the following:\n\u2022 rewards\n\u2022 epoch-manager\n\u2022 token-pool\nCode Location:\nIn the epoch manager contract:\nListing 1: contracts/ep"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "(HAL-17) INADEQUATE TRACKING OF\nPENDING REDELEGATIONS Medium (6.2) SOLVED - 10/19/2023\n(HAL-18) MAX NUMBER OF BID SLOTS\nCOULD BE MODIFIED AF",
+"s": "medium",
+"p": "(HAL-17) INADEQUATE TRACKING OF\nPENDING REDELEGATIONS Medium (6.2) SOLVED - 10/19/2023\n(HAL-18) MAX NUMBER OF BID SLOTS\nCOULD BE MODIFIED AFTER BIDS WERE\nSUBMITTED\nMedium (6.2) RISK ACCEPTED\n(HAL-19) SOME FUNCTIONS RECEIVE\nMULTIPLE NATIVE COINS INSTEAD OF ONE Medium (5.0) SOLVED - 10/24/2023\n(HAL-20) REDELEGATION IS NOT\nRESTRICTED TO ACTIVE VALIDATORS Medium (5.0) SOLVED - 10/20/2023\n(HAL-21) COIN DENOMINATION IS NOT\nCHECKED WHEN REMOVING VALIDATORS Medium (5.0) RISK ACCEPTED\n(HAL-22) INADEQUATE TRACKING OF\nSWAPPED AMOUNTS Medium (5.0) SOLVED - 10/23/2023\n(HAL-23) UNBOND WAIT LISTS CAN BE\nMIGR"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.1 (HAL-01) LOANS CAN BE REPAID\nWITHOUT SPENDING COINS -\nCRITICAL(10)\nDescription:\nThe RepayStableCoin entry point of the krp-cdp-contracts",
+"s": "critical",
+"p": "4.1 (HAL-01) LOANS CAN BE REPAID\nWITHOUT SPENDING COINS -\nCRITICAL(10)\nDescription:\nThe RepayStableCoin entry point of the krp-cdp-contracts/central_control\ncontract allows users to repay their loans.\nThe entry point mentioned is designed to be called by the krp-cdp-\ncontracts/stable_pool contract. However, there is no access control in\nthe repay_stable_coin function to verify this condition.\nAs a consequence, anyone can call this function to repay their loans\nwithout spending coins.\nCode Location:\nThere is no access control in the repay_stable_coin function:\nListing 1: krp-cdp-contracts/contr"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.3 (HAL-03) NO ACCESS CONTROL IN\nWITHDRAW FUNCTION - CRITICAL(10)\nDescription:\nThe WithdrawCollateral entry point of the krp-market-contrac",
+"s": "critical",
+"p": "4.3 (HAL-03) NO ACCESS CONTROL IN\nWITHDRAW FUNCTION - CRITICAL(10)\nDescription:\nThe WithdrawCollateral entry point of the krp-market-contracts/custody_-\nbase and krp-market-contracts/custody_bsei contracts allows a borrower\nto withdraw any amount of previously deposited collateral.\nThis entry point is designed to be called by the krp-market-\ncontracts/overseer contract; however, there is no access control in the\nwithdraw_collateral function to verify that.\nAs a consequence, any attacker could withdraw any amount of collateral\nfrom any other user, since the borrower and amount values are taken "
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.4 (HAL-04) NO ACCESS CONTROL IN\nREPAYMENT ENTRY POINT - CRITICAL(10)\nDescription:\nThe RepayStableFromYieldReserve entry point of the krp-m",
+"s": "critical",
+"p": "4.4 (HAL-04) NO ACCESS CONTROL IN\nREPAYMENT ENTRY POINT - CRITICAL(10)\nDescription:\nThe RepayStableFromYieldReserve entry point of the krp-market-\ncontracts/overseer contract allows a borrower to repay his debt using\nthe stable currency reserve accumulated in the contract.\nThis entry point has no access control, consequently, any user could\nrepay their own debt without spending any coin, using the balance of the\nOverseer contract if it is sufficient.\nCode Location:\nThere is no access control in the repay_stable_from_yield_reserve func-\ntion:\nListing 4: krp-market-contracts/contracts/overseer/s"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.5 (HAL-05) ARBITRARY MINTING OF\nCOINS USING FAKE CW20 TOKENS -\nCRITICAL(10)\nDescription:\nThe MintStableCoin entry point of the krp-cdp-con",
+"s": "critical",
+"p": "4.5 (HAL-05) ARBITRARY MINTING OF\nCOINS USING FAKE CW20 TOKENS -\nCRITICAL(10)\nDescription:\nThe MintStableCoin entry point of the krp-cdp-contracts/custody contract\nmints stable coins to users according to their deposited collaterals.\nThe entry point mentioned is designed to be called by the target collateral\ncontract. However, there is no access control in the mint_stable_coin\nfunction to verify this condition.\nAs a consequence, anyone could call this function to mint coins for\nhimself/herself using a fake CW20 token.\nCode Location:\nThere is no access control in the mint_stable_coin function:\n"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.6 (HAL-06) COLLATERAL BALANCE OF\nLIQUIDATED USERS DOES NOT\nDECREASE - CRITICAL(10)\nDescription:\nIn the liquidate_collateral function from",
+"s": "critical",
+"p": "4.6 (HAL-06) COLLATERAL BALANCE OF\nLIQUIDATED USERS DOES NOT\nDECREASE - CRITICAL(10)\nDescription:\nIn the liquidate_collateral function from the krp-cdp-contracts/central_-\ncontrol contract, when each collateral in the liquidation_amount vector\nis liquidated, the DecreaseBalance message is not called.\nAs a consequence, the collateral balance of the liquidated user won\u2019t\ndecrease and will continue accruing rewards.\nCode Location:\nThe DecreaseBalance message is not called in the liquidate_collateral\nfunction:\nListing 6: krp-cdp-contracts/contracts/central_control/src/contract.rs\n280 for collatera"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.7 (HAL-07) LIQUIDATED LOANS\nWITHOUT AN ADEQUATE REPAYMENT -\nCRITICAL(10)\nDescription:\nIn the liquidate_collateral function from the krp-cd",
+"s": "critical",
+"p": "4.7 (HAL-07) LIQUIDATED LOANS\nWITHOUT AN ADEQUATE REPAYMENT -\nCRITICAL(10)\nDescription:\nIn the liquidate_collateral function from the krp-cdp-contracts/custody\ncontract, there is no validation that info.sender is the krp-cdp-\ncontracts/central_control contract. As a consequence, the coins\nto be used as repayment will only be transferred to the krp-cdp-\ncontracts/stable_pool contract, without further logic to be executed.\nLater, an attacker could force the repayment of those coins to an\narbitrary account, as shown in the following example:\n1. The attacker calls liquidate_collateral function in "
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.8 (HAL-08) ARBITRARY REPAYMENT OF\nCOINS FROM LIQUIDATIONS -\nCRITICAL(10)\nDescription:\nIn the repay_stable_from_liquidation function from t",
+"s": "critical",
+"p": "4.8 (HAL-08) ARBITRARY REPAYMENT OF\nCOINS FROM LIQUIDATIONS -\nCRITICAL(10)\nDescription:\nIn the repay_stable_from_liquidation function from the krp-cdp-\ncontracts/stable_pool contract, there is no validation that info.sender\nis the krp-cdp-contracts/central_control contract. As a consequence, an\nattacker could repay coins to himself after liquidating other users\u2019\nloans, as shown in the following example:\n1. The attacker gets an extremely low loan.\n2. The attacker liquidates some users and forces the transfer of coins\nto the stable_pool contract, as described in the vulnerability (HAL-\n08) ARBIT"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.9 (HAL-09) MISCALCULATION OF MAX\nLOAN TO VALUE WHEN MINTING COINS -\nCRITICAL(9.4)\nDescription:\nIn the mint_stable_coin function from krp-c",
+"s": "critical",
+"p": "4.9 (HAL-09) MISCALCULATION OF MAX\nLOAN TO VALUE WHEN MINTING COINS -\nCRITICAL(9.4)\nDescription:\nIn the mint_stable_coin function from krp-cdp-contracts/central_con-\ntrol contract, the max loan to value is miscalculated because the\ncollaterals_values is increased in every step of the loop instead of\nstoring the temporal value. As a consequence, users can borrow more\ncoins than they should.\nCurrently, the value of collaterals_values is:\ncollaterals_values` \u201c U int256 :: f rompcollateral.1q \u02da price.emv_price;\nHowever, it should be:\ncollaterals_values \u201c U int256 :: f rompcollateral.1q \u02da price.emv"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.10 (HAL-10) COLLATERAL\nLIQUIDATION IS NOT WORKING AS\nEXPECTED - HIGH (7.5)\nDescription:\nThe liquidate_collateral function in the krp-cdp-c",
+"s": "high",
+"p": "4.10 (HAL-10) COLLATERAL\nLIQUIDATION IS NOT WORKING AS\nEXPECTED - HIGH (7.5)\nDescription:\nThe liquidate_collateral function in the krp-cdp-contracts/central_con-\ntrol contract is querying its own balance instead of the balance of krp-\ncdp-contracts/stable_pool contract. As a consequence, some unexpected\nsituations can happen:\n\u2022 Trying to repay with an erroneous amount of stable coins.\n\u2022 Collateral liquidation fails, and the operation is reverted.\nCode Location:\nListing 10: krp-cdp-contracts/contracts/central_control/src/con-\ntract.rs (Line 257)\n255 let pre_balance : Uint256 = query_balance (\n2"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.11 (HAL-11) BID FEE IS NOT SENT -\nHIGH (7.5)\nDescription:\nThe execute_liquidation function in the krp-cdp-contracts/liquidation_-\nqueue an",
+"s": "high",
+"p": "4.11 (HAL-11) BID FEE IS NOT SENT -\nHIGH (7.5)\nDescription:\nThe execute_liquidation function in the krp-cdp-contracts/liquidation_-\nqueue and krp-market-contracts/liquidation_queue contracts is responsible\nfor executing the liquidation of the debt using the previously deposited\nbids.\nThere is an error in the code at the time of sending the bid_fee: the\nzero validation is incorrect, resulting in a situation where the fee will\nonly be sent if it is equal to zero. This validation should incorporate\nthe ! symbol before the condition to make sense.\nCode Location:\nCode fragment of the execute_liquid"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.12 (HAL-12) LIQUIDATOR FEE IS NOT\nSENT - HIGH (7.5)\nDescription:\nThe execute_liquidation function in the krp-cdp-contracts/liquidation_-\nq",
+"s": "high",
+"p": "4.12 (HAL-12) LIQUIDATOR FEE IS NOT\nSENT - HIGH (7.5)\nDescription:\nThe execute_liquidation function in the krp-cdp-contracts/liquidation_-\nqueue and krp-market-contracts/liquidation_queue contracts is responsible\nfor executing the liquidation of the debt using the previously deposited\nbids.\nThere is an error in the code at the time of sending the liquidator_fee:\nthe zero validation is incorrect, resulting in a situation where the\nfee will only be sent if it is equal to zero. This validation should\nincorporate the ! symbol before the condition to make sense.\nCode Location:\nCode fragment of the "
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.14 (HAL-14) REWARDS BONDING\nFUNCTIONALITY IS UNAVAILABLE - HIGH\n(7.5)\nDescription:\nExecuting the ExecuteMsg::BondRewards message in krp-st",
+"s": "high",
+"p": "4.14 (HAL-14) REWARDS BONDING\nFUNCTIONALITY IS UNAVAILABLE - HIGH\n(7.5)\nDescription:\nExecuting the ExecuteMsg::BondRewards message in krp-staking-\ncontracts/basset_sei_hub contract is restricted for only the\nkrp-staking-contracts/basset_sei_rewards_dispatcher contract. However,\nthere is no function in that contract that allows to execute the bond,\nwhich makes the rewards bonding functionality unavailable.\nCode Location:\nThe krp-staking-contracts/basset_sei_rewards_dispatcher contract does\nnot call the ExecuteMsg::BondRewards message:\nListing 14: krp-staking-contracts/contracts/basset_sei_rewar"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.16 (HAL-16) UNCHECKED BALANCE\nCHANGE COULD LEAD TO UNFAIR\nWITHDRAWALS - HIGH (7.1)\nDescription:\nThe process_withdraw_rate function in the",
+"s": "high",
+"p": "4.16 (HAL-16) UNCHECKED BALANCE\nCHANGE COULD LEAD TO UNFAIR\nWITHDRAWALS - HIGH (7.1)\nDescription:\nThe process_withdraw_rate function in the krp-staking-contracts/basset_-\nsei_hub contract is not validating that the value of hub_balance is\ngreater than prev_hub_balance. As a consequence, some edge scenarios\ncould lead to users receiving less than expected when withdrawing. The\nfollowing scenarios could arise in this condition (non-exhaustive list):\n\u2022 Hub contract is migrated and the remaining balance is transferred\nto another address.\n\u2022 Unauthorized transfer of funds out of the hub.\n\u2022 Slashing "
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.17 (HAL-17) INADEQUATE TRACKING OF\nPENDING REDELEGATIONS - MEDIUM (6.2)\nDescription:\nWhen executing the remove_validator function in the k",
+"s": "medium",
+"p": "4.17 (HAL-17) INADEQUATE TRACKING OF\nPENDING REDELEGATIONS - MEDIUM (6.2)\nDescription:\nWhen executing the remove_validator function in the krp-staking-\ncontracts/basset_sei_validators_registry contract and the redelegation\nwas not possible (e.g.: because of can_redelegate.amount), the validator\nis removed from the storage, but there is not an adequate tracking of\npending redelegations to be done later.\nCode Location:\nListing 17: krp-staking-contracts/contracts/basset_sei_validators_reg-\nistry/src/contract.rs (Lines 160-162)\n155 if let Some ( delegation ) = delegate d_amount {\n156 // Terra core"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.20 (HAL-20) REDELEGATION IS NOT\nRESTRICTED TO ACTIVE VALIDATORS -\nMEDIUM (5.0)\nDescription:\nThe execute_redelegate_proxy function in the k",
+"s": "medium",
+"p": "4.20 (HAL-20) REDELEGATION IS NOT\nRESTRICTED TO ACTIVE VALIDATORS -\nMEDIUM (5.0)\nDescription:\nThe execute_redelegate_proxy function in the krp-staking-\ncontracts/basset_sei_hub contract does not restrict that redelegation is\ndone only to active validators, which could create unexpected situations.\nFor example, if the owner mistakenly delegates to a non-active validator\nand wants to fix it by redelegating again to an active validator, he will\nneed to wait a cooldown period (because of consecutive redelegations)\nto carry out this task.\nCode Location:\nListing 20: krp-staking-contracts/contracts/b"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.21 (HAL-21) COIN DENOMINATION IS\nNOT CHECKED WHEN REMOVING\nVALIDATORS - MEDIUM (5.0)\nDescription:\nWhen removing a validator using the remo",
+"s": "medium",
+"p": "4.21 (HAL-21) COIN DENOMINATION IS\nNOT CHECKED WHEN REMOVING\nVALIDATORS - MEDIUM (5.0)\nDescription:\nWhen removing a validator using the remove_validator function in the\nkrp-staking-contracts/basset_sei_validators_registry contract, there is\nno check about coin denomination in the delegated amount (i.e.: coin\nto be redelegated). As a consequence, some unexpected situations could\narise in the protocol, e.g.: removing a validator with delegated native\ncoins different from the target one.\nCode Location:\nThere is no check about coin denomination in the remove_validator func-\ntion:\nListing 21: krp-s"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-kryptonite-protocol-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.22 (HAL-22) INADEQUATE TRACKING\nOF SWAPPED AMOUNTS - MEDIUM (5.0)\nDescription:\nThe swap_denom function in the swap-extension/swap_sparrow",
+"s": "medium",
+"p": "4.22 (HAL-22) INADEQUATE TRACKING\nOF SWAPPED AMOUNTS - MEDIUM (5.0)\nDescription:\nThe swap_denom function in the swap-extension/swap_sparrow contract\nupdates the values of swap_info.total_amount_in and swap_info.\ntotal_amount_out variables whenever there is a swap operation. However,\nthose values have a mix of both coins involved in the swap, so after\nsome operations, it won\u2019t be possible to identify how much comes from\neach one of the coins.\nCode Location:\nListing 22: swap-extension/contracts/swap_sparrow/src/handler.rs\n(Lines 169-170)\n160 // swap\n161 let asset = Asset {\n162 amount : payment ."
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-mars-protocol-core-contracts-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.4 (HAL-04) MARS TOKENS CAN GET\nLOCKED IN CONTRACT WHEN UNSTAKING -\nHIGH\nDescription:\nWhen a user calls execute_unstake function in contrac",
+"s": "high",
+"p": "3.4 (HAL-04) MARS TOKENS CAN GET\nLOCKED IN CONTRACT WHEN UNSTAKING -\nHIGH\nDescription:\nWhen a user calls execute_unstake function in contracts/mars-\nstaking/src/contract.rs with a recipient address in upper case (e.g.:\nTERRA1KG. . . XNL8 ), the claim is stored in CLAIMS with the upper case\naddress as a key.\nAs a consequence, when the recipient tries to claim with execute_claim\nfunction, he won\u2019t be able to do it because the claim is loaded from\nCLAIMS using info.sender as a key, which is always in lower case (e.g.:\nterra1kg. . . xnl8 ), i.e.: his Mars tokens get locked in contract forever.\nCod"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-mars-protocol-core-contracts-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.6 (HAL-06) TOKENS GET LOCKED WHEN\nTRANSFERRING TO UPPER-CASE\nADDRESSES - HIGH\nDescription:\nWhen accounts transfer / send mars-ma-token or",
+"s": "high",
+"p": "3.6 (HAL-06) TOKENS GET LOCKED WHEN\nTRANSFERRING TO UPPER-CASE\nADDRESSES - HIGH\nDescription:\nWhen accounts transfer / send mars-ma-token or mars-xmars-token to a\nrecipient address in upper case (e.g.: TERRA1KG. . . XNL8 ), the new balance\nis stored in BALANCES with the upper case address as a key.\nAs a consequence, when the recipient tries to use his tokens, he won\u2019t\nbe able to do it because the balance is loaded from BALANCES using info.\nsender as a key, which is always in lower case (e.g.: terra1kg. . . xnl8 ),\ni.e.: his tokens get locked forever.\nThe affected smart contracts are the followi"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-mars-protocol-core-contracts-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.7 (HAL-07) POSSIBILITY TO\nLIQUIDATE WHEN COLLATERAL ASSET IS\nUNSET - MEDIUM\nDescription:\nexecute_liquidate function in contracts/mars-red-",
+"s": "medium",
+"p": "3.7 (HAL-07) POSSIBILITY TO\nLIQUIDATE WHEN COLLATERAL ASSET IS\nUNSET - MEDIUM\nDescription:\nexecute_liquidate function in contracts/mars-red-bank/src/contract.rs\ndoes not restrict that liquidations are done using only assets set as\ncollaterals. As a consequence, users are able to liquidate debts using\neven collaterals that borrowers have explicitly unset, which could\naffects borrowers\u2019 lending strategy.\nCode Location:\nexecute_liquidate function does not verify if collateral_asset is set as\ncollateral.\nListing 11: contracts/mars-red-bank/src/contract.rs\n1232 let ( collateral_asset_label , collat"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-mars-protocol-core-contracts-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.10 (HAL-10) RESTRICTION TO NOT\nSWAP MARS TOKENS CAN BE BYPASSED -\nMEDIUM\nDescription:\nexecute_swap_asset_to_uusd function in contracts/mar",
+"s": "medium",
+"p": "3.10 (HAL-10) RESTRICTION TO NOT\nSWAP MARS TOKENS CAN BE BYPASSED -\nMEDIUM\nDescription:\nexecute_swap_asset_to_uusd function in contracts/mars-staking/src/contra-\nct.rs allows users to swap assets apart from Mars token to UST. However,\nthis restriction can be bypassed by sending an AssetInfo with\ncontract_addr = address of Mars tokens in upper-case .\nAs a consequence, an attacker could swap all (or almost all) Mars tokens\nto UST and legitimate users won\u2019t be able to unstake their xMars tokens\nor will receive, in return, much less than expected.\nCode Location:\nListing 14: contracts/mars-staking/"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-mars-protocol-fields-of-mars-cosmwasm-smart-contract-security-audit-final-pdf.md",
+"t": "3.1 (HAL-01) CONFIG PARAMETERS\nVALUE CAN BE CHANGED\nUNRESTRICTEDLY - MEDIUM\nDescription:\ninstantiate and update_config functions in contract",
+"s": "medium",
+"p": "3.1 (HAL-01) CONFIG PARAMETERS\nVALUE CAN BE CHANGED\nUNRESTRICTEDLY - MEDIUM\nDescription:\ninstantiate and update_config functions in contracts/martian-\nfield/src/execute.rs allow contract\u2019s owner to update max_ltv,\nbonus_rate and fee_rate fields with a potential unfair amount. This\nsituation can produce the following consequences:\n\u2022 A malicious (or compromised) owner can change temporarily max_ltvto\nvery low rate e.g., : 0.01 and bonus_rate to e.g., : 0 and liquidate\nall positions, draining users assets.\n\u2022 Owner could mistakenly change max_ltv rate to lower than released\none, which could become"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-nexus-protocol-cosmwasm-smart-contract-security-audit-report-halborn-v1-1-pdf.md",
+"t": "3.3 (HAL-03) NO UPDATE OF LOAN\nREPAYMENT STATE ON REBALANCE\nFUNCTION - HIGH\nDescription:\nThe rebalance function from contracts/basset_vault/",
+"s": "high",
+"p": "3.3 (HAL-03) NO UPDATE OF LOAN\nREPAYMENT STATE ON REBALANCE\nFUNCTION - HIGH\nDescription:\nThe rebalance function from contracts/basset_vault/src/commands.rs never\nresets repaying_loan_state value when loan repayment completes, so its\niteration_index will continue increasing until reaching the maximum number\nof iterations allowed. Once it happens, loan repayments could be wrongly\nmarked as completed or throw error messages, instead of iterating to\nactually complete the repayment.\nIt is important to note that is not possible to revert, undo or correct the\nlogic of the rebalance function, unless t"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-nolus-money-market-cosmwasm-smart-contract-security-assessment-report-halborn-final-pdf.md",
+"t": "4.1 (HAL-01) NO SLIPPAGE\nPROTECTION - MEDIUM (5.0)\nDescription:\nThe exact_amount_in function in the packages/swap/src/trx.rs file does\nnot c",
+"s": "medium",
+"p": "4.1 (HAL-01) NO SLIPPAGE\nPROTECTION - MEDIUM (5.0)\nDescription:\nThe exact_amount_in function in the packages/swap/src/trx.rs file does\nnot consider slippage. This means that the user may not receive the exact\namount of tokens that they expect.\nIn large swap transactions, there is a risk known as \u2018sandwich attacks\u2019.\nThese occur when MEV algorithms on Osmosis purchase significant amounts\nof the asset involved in the swap. This action drives the price of the\nasset up before the swap occurs. These algorithms then sell the asset at\nthis higher price, making a profit. As a result, the user conductin"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-sienna-network-amm-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.1 (HAL-01) SIGNATURE VALIDATION\nCAN BE BYPASSED - HIGH\nDescription:\nensure_correct_signature function in contracts/factory/src/contract.rs",
+"s": "high",
+"p": "3.1 (HAL-01) SIGNATURE VALIDATION\nCAN BE BYPASSED - HIGH\nDescription:\nensure_correct_signature function in contracts/factory/src/contract.rs\nis the responsible to validate temporary signatures in factory contract\nand ensure the following scenarios:\n1. Exchanges can be created by any user through create_exchange func-\ntion in factory contract. Other methods like initializing exchange\ncontract directly would not work because of signature validation.\n2. IDOs can be created by admin or whitelisted users through create_ido\nfunction in factory contract. Other methods like initializing ido\ncontract d"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-sienna-network-amm-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.2 (HAL-02) POSSIBILITY TO CREATE\nPOOLS WITH THE SAME PAIR - HIGH\nDescription:\ninit function in contracts/exchange/src/contract.rs and crea",
+"s": "high",
+"p": "3.2 (HAL-02) POSSIBILITY TO CREATE\nPOOLS WITH THE SAME PAIR - HIGH\nDescription:\ninit function in contracts/exchange/src/contract.rs and create_exchange\nfunction in contracts/factory/src/contract.rs allow the possibility to\ncreate pools with the same pair, which generates unexpected situations,\ne.g.: a user could withdraw more tokens than his fair share and affect\nother users in the pool.\nThis issue happens because when a pair is compared with another one, if\ntheir contract_addr are the same but their token_code_hash differ just in\ntheir upper / lower cases, these pairs will appear as different"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-sienna-network-amm-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.4 (HAL-04) ADDING LIQUIDITY TO\nNEW POOLS DOES NOT WORK PROPERLY -\nMEDIUM\nDescription:\nWhen users call add_liquidity function in contracts/",
+"s": "medium",
+"p": "3.4 (HAL-04) ADDING LIQUIDITY TO\nNEW POOLS DOES NOT WORK PROPERLY -\nMEDIUM\nDescription:\nWhen users call add_liquidity function in contracts/exchange/src/con-\ntract.rs to add liquidity to new pools (i.e.: pools with no deposits),\nthe assert_slippage_tolerance function is triggered and will always panic\nif slippage is specified at the beginning of the operation. This situation\ncan produce the following consequences:\n\u2022 When legitimate users try to add liquidity to new pools, operations\nwill always panic and make users spend transactions fees needlessly.\n\u2022 To force a new pool to work as expected, "
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-sienna-network-amm-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.6 (HAL-06) PRIVILEGED ADDRESS CAN\nBE TRANSFERRED WITHOUT\nCONFIRMATION - MEDIUM\nDescription:\nAn incorrect use of HandleMsg::Admin message i",
+"s": "medium",
+"p": "3.6 (HAL-06) PRIVILEGED ADDRESS CAN\nBE TRANSFERRED WITHOUT\nCONFIRMATION - MEDIUM\nDescription:\nAn incorrect use of HandleMsg::Admin message in contracts/factory/src/-\ncontract.rs can set admin of factory contract to an invalid address and\ninadvertently lose total control of this contract, which cannot be undone\nin any way.\nCurrently, the admin of factory contract can change the admin address\nusing the aforementioned message in a single transaction and without\nconfirmation from the new address.\nCode Location:\nHandleMsg::Admin message in factory is routed to admin_handle function:\nListing 12: con"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-sienna-network-amm-protocol-updated-code-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.1 (HAL-01) POSSIBILITY TO CREATE\nPOOLS WITH THE SAME PAIR - HIGH\nDescription:\nThe AMM module allow users to create pairs (called exchanges",
+"s": "high",
+"p": "3.1 (HAL-01) POSSIBILITY TO CREATE\nPOOLS WITH THE SAME PAIR - HIGH\nDescription:\nThe AMM module allow users to create pairs (called exchanges) from native\nor custom assets by calling create_exchange function on factory contract.\nIt relies on the token_type PartialEq implementation, that allows users\nto pair the same asset twice, which generates unexpected situations,\ne.g.: a user could withdraw more tokens than his fair share and affect\nother users in the pool.\nThe verification asserts that both tokens addresses are not exactly equal,\nbut a lowercase version of the address will be considered di"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-sienna-network-rewards-v3-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.2 (HAL-02) REWARDS CANNOT BE\nCLAIMED WHEN REWARD POOLS ARE\nCLOSED - HIGH\nDescription:\nAccording to the migration flow defined, once a rewa",
+"s": "high",
+"p": "3.2 (HAL-02) REWARDS CANNOT BE\nCLAIMED WHEN REWARD POOLS ARE\nCLOSED - HIGH\nDescription:\nAccording to the migration flow defined, once a reward pool is closed,\nusers should be able to withdraw their stake and claim any remaining\nrewards.\nHowever, when users try to deposit, withdraw or claim in a closed reward\npool, the function force_exit from contracts/rewards/algo.rs is called\nautomatically. This function transfers staked LP tokens to users, but\ndoes not return remaining rewards.\nAs a consequence, users will never be able to claim their rewards because\nwhen a reward pool is closed, it cannot "
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-sienna-network-rewards-v3-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.4 (HAL-04) INSUFFICIENT ACCESS\nCONTROL IN MIGRATION FUNCTIONS -\nHIGH\nDescription:\nhandle_request_migration function in contracts/rewards/m",
+"s": "high",
+"p": "3.4 (HAL-04) INSUFFICIENT ACCESS\nCONTROL IN MIGRATION FUNCTIONS -\nHIGH\nDescription:\nhandle_request_migration function in contracts/rewards/migration.rs and\nhandle_export_state function in contracts/rewards/lib.rs do not have ade-\nquate access controls for migration process, which generates the following\nconsequences:\n\u2022 In handle_request_migration function, previous reward pool address\n(prev) is not restricted; thus, users can execute any potentially\nmalicious message on behalf of current reward pool.\n\u2022 handle_export_state function verifies the value of can_export_state\nfunction before continui"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-sienna-network-rewards-v3-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.5 (HAL-05) PRIVILEGED ADDRESS CAN\nBE TRANSFERRED WITHOUT\nCONFIRMATION - MEDIUM\nDescription:\nAn incorrect use of AuthHandle::ChangeAdmin me",
+"s": "medium",
+"p": "3.5 (HAL-05) PRIVILEGED ADDRESS CAN\nBE TRANSFERRED WITHOUT\nCONFIRMATION - MEDIUM\nDescription:\nAn incorrect use of AuthHandle::ChangeAdmin message in contracts/reward-\ns/auth.rs can set admin of rewards contract to an invalid address and\ninadvertently lose total control of this contract, which cannot be undone\nin any way.\nCurrently, the admin of rewards contract can change the admin address\nusing the aforementioned message in a single transaction and without\nconfirmation from the new address.\nCode Location:\nAuthHandle::ChangeAdmin message in rewards contract is routed to\nchange_admin function:\n"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-stader-labs-lunax-contrracts-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.1 (HAL-01) MANAGER ADDRESS CANNOT\nBE TRANSFERRED - MEDIUM\nDescription:\nThe functions to update the configuration in the contracts within s",
+"s": "medium",
+"p": "3.1 (HAL-01) MANAGER ADDRESS CANNOT\nBE TRANSFERRED - MEDIUM\nDescription:\nThe functions to update the configuration in the contracts within scope\nlacked the option of setting a new manager as a privileged address.\nIf the keys of the manager account were suspected to be compromised,\nor the development team needed to change the address for an operational\nreason, a sizable portion of the contract\u2019s functionality will be rendered\nunusable.\nCode Location:\nListing 1: Affected functions\n1 contracts / airdrops - registry / src / contract . rs :59: pub fn\nu p d a t e _ a i r d r o p _ r e g i s t r y(\n2"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-valkyrie-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.4 (HAL-04) CAMPAIGNS CAN HOST\nMALICIOUS URLS THAT HARM USERS -\nHIGH\nDescription:\nWhen a campaign is created with create_campaign function",
+"s": "high",
+"p": "3.4 (HAL-04) CAMPAIGNS CAN HOST\nMALICIOUS URLS THAT HARM USERS -\nHIGH\nDescription:\nWhen a campaign is created with create_campaign function from\ncontracts/campaign_manager/src/executions.rs or updated with\nupdate_campaign_config function from contracts/campaign/src/exe-\ncutions.rs, creator can introduce a malicious external URL that fools\nusers to be redirected to a phishing DApp that can steal their deposits.\nIt is important to note that URLs will appear in official Valkyrie\nfrontend, so legitimate users won\u2019t be aware whether those URLs are\nmalicious or not.\nAttack scenario :\n1. Malicious cr"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-valkyrie-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.5 (HAL-05) BALANCE DOES NOT UPDATE\nWHEN USERS CLAIM REWARDS - HIGH\nDescription:\nThe claim_participation_reward and claim_referral_reward f",
+"s": "high",
+"p": "3.5 (HAL-05) BALANCE DOES NOT UPDATE\nWHEN USERS CLAIM REWARDS - HIGH\nDescription:\nThe claim_participation_reward and claim_referral_reward functions in\ncontracts/campaign/src/executions.rs allow users to claim their rewards\nwhen they participate or promote campaigns.\nEvery time these functions are called, they do not update total reward\nbalance, which allows other users to participate in campaigns even if\nthere are not enough rewards for them and affects all rewardable ecosystem\nof Valkyrie protocol.\nA proof of concept video showing how to exploit this security issue is\nincluded in the report."
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-valkyrie-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.9 (HAL-09) FUNCTION TO UPDATE\nSTAKING CONFIG DOES NOT WORK\nPROPERLY - MEDIUM\nDescription:\nThe update_staking_config function in contracts/",
+"s": "medium",
+"p": "3.9 (HAL-09) FUNCTION TO UPDATE\nSTAKING CONFIG DOES NOT WORK\nPROPERLY - MEDIUM\nDescription:\nThe update_staking_config function in contracts/governance/src/s-\ntaking/executions.rs is not restricted to be called only by admin\n(Governance contract). Moreover, all changes made are not saved\nappropriately in contract\u2019s storage.\nAs a consequence of malfunction of aforementioned function, admin will\nnever be able to update distributor field for governance contract and\ncould stop receiving rewards adequately.\nCode Location:\nListing 15: contracts/governance/src/staking/executions.rs\n36 pub fn u p d a t"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-valkyrie-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.12 (HAL-12) NOT ENFORCING\nSLIPPAGE TOLERANCE COULD LEAD\nTOKENS LOSS - MEDIUM\nDescription:\nThe auto_stake function from contracts/lp_stakin",
+"s": "medium",
+"p": "3.12 (HAL-12) NOT ENFORCING\nSLIPPAGE TOLERANCE COULD LEAD\nTOKENS LOSS - MEDIUM\nDescription:\nThe auto_stake function from contracts/lp_staking/src/executions.rs does\nnot enforce slippage_tolerance parameter when users provide liquidity to\nlp_staking contract. As a consequence, if a user mistakenly (or fooled by\nan attacker) provides liquidity with an imbalanced asset pair, he could\nlose all his leftover tokens.\nAs an example, if a user provides liquidity of 100 VKR and 254.039006 UST\nfor lp_staking contract, he receives 150.987532 LP.\nOn the other hand, if the user provides liquidity of 100 VKR"
+},
+{
+"f": "publicreports-cosmwasm-smart-contract-audits-valkyrie-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+"t": "3.13 (HAL-13) DISTRIBUTION TIME\nFRAME CAN BE REDUCED\nUNRESTRICTEDLY - MEDIUM\nDescription:\nThe update_distribution function in contracts/dist",
+"s": "medium",
+"p": "3.13 (HAL-13) DISTRIBUTION TIME\nFRAME CAN BE REDUCED\nUNRESTRICTEDLY - MEDIUM\nDescription:\nThe update_distribution function in contracts/distributor/src/execu-\ntions.rs allows admin (Valkyrie team) to change without restrictions\nstart_height and end_height fields. If those changes are made in a wrong\nor malicious manner, can produce the following consequences:\n\u2022 Possibility to transfer an arbitrary amount of VKR tokens from\ndistributor contract, see HAL-06 for more details.\n\u2022 Time frame can be reduced to be less than 4 years (minimum dis-\ntribution time defined in Valkyrie documentation ), whic"
+}
+]

@@ -1,0 +1,125 @@
+[
+ {
+  "file": "hydradx-c4-2401.md",
+  "findings": [
+   {
+    "line": 127,
+    "severity": "high",
+    "title": "High-level considerations for vulnerabilities span the following key areas",
+    "excerpt": "High-level considerations for vulnerabilities span the following key areas\nwhen conducting assessments:\n\u2022 Malicious Input Handling\n\u2022 Escalation of privileges\n\u2022 Arithmetic\nSummary\nScope\nSeverity Criteria\nHydraDX https://code4rena.com/reports/2024-02-hydradx\n5 of 148 09/06/2024, 14:43\n\n\u2022 Gas use\nFor more information regarding the severity criteria referenced throughout\nthe submission review process, please refer to the documentation provided\non the C4 website, speci\ufb01cally our section on Severity Categorization.\nSubmitted by castle_chain, also found by bin2chen\nhttps:/ /github.com/code-423n4/2024-02-hydradx/\nblob/603187123a20e0cb8a7ea85c6a6d718429caad8d/HydraDX-node/\npallets/stableswap/src/lib.rs#L787-L842\nhttps:/ /github.com/code-423n4/2024-02-hydradx/\nblob/603187123a20e0cb8a7ea85c6a6d718429caad8d/HydraDX-node/\nmath/src/stableswap/math.rs#L40-L41\nThis vulnerability has been identi\ufb01ed in the Stableswap pallet that could\npotentially drain all liquidity from all pools without any permissions. This\nvulnerability can be exploited by malicious actors, resulting in signi\ufb01cant\n\ufb01nancial losses for both the protocol and liquidity providers.\nThe vulnerability lies in the buy() function, which c"
+   },
+   {
+    "line": 154,
+    "severity": "high",
+    "title": "High Risk Findings (1)",
+    "excerpt": "High Risk Findings (1)\n[H-01] An attacker possesses the capability to exhaust\nthe entirety of liquidity within the stable swap pools by\nmanipulating the buy function, speci\ufb01cally by setting\nthe asset_in parameter equal to the asset_out\nparameter\nImpact\nProof of Concept\nHydraDX https://code4rena.com/reports/2024-02-hydradx\n6 of 148 09/06/2024, 14:43\n\nsetting asset_in to an asset already present in the pool and subsequently\nsetting asset_out to the same asset. The function does not validate or\nprevent this input, allowing an attacker to receive the entire amount_out\nwithout providing any corresponding amount_in.\nAttack Flow:\n1. The attacker calls the function buy and speci\ufb01es the asset_in equal\nto asset_out, the function has no check that prevents this input to be\npassed.\n2. The function will calculate the amount_in that should be taken out\nfrom the user, so the function will use calculate_in_amount function\nas shown here this function will call\ncalculate_in_given_out_with_fee() function.\n3. The function calculate_in_given_out_with_feehere will call the\nfunction calculate_in_given_out to calculate amount_in, and the\n\ufb01nal amount_in will be the amount calculated plus the fees, and the\n"
+   },
+   {
+    "line": 313,
+    "severity": "medium",
+    "title": "Medium Risk Findings (10)",
+    "excerpt": "Medium Risk Findings (10)\n[M-01] Users can MAKE EMA-Oracle price outdated\nwith direct transfers to StableSwap\nHydraDX https://code4rena.com/reports/2024-02-hydradx\n11 of 148 09/06/2024, 14:43\n\nliquidity pools. It looks for speci\ufb01c operations like exchanges, deposits, and\nwithdrawals to adjust the assets\u2019 exchange rates accordingly. This updating\nprocess is not continuous but occurs when the responsible hooks are called\nby the StableSwap/Omnipool.\nThe system, although thorough, does not account for price update triggers\nin the event of direct asset transfers to Stableswap, as these do not set o\ufb00\nany hooks within the oracle. This lapse means that such direct transfers can\nalter asset prices within the liquidity pools without the oracle\u2019s knowledge,\npotentially leading to misleading exchange rates.\nMoreover, there\u2019s a risk of manipulation by bad actors who might use direct\ntransfers to StableSwap in an e\ufb00ort to sway the arbitrage process, especially\nduring periods of network congestion. Such interference could unjustly\nprevent necessary liquidations within lending protocols.\nThe issue allows a malicious user to change the price of the AMM without\nupdating the oracle.\nThe issue can be "
+   },
+   {
+    "line": 584,
+    "severity": "medium",
+    "title": "medium severity issue.",
+    "excerpt": "medium severity issue.\nJ4X (warden) commented:\n@castlechain - you are correct that the user could use\n`removeliquidityoneasset()` to withdraw his shares, but this would require\nhim to abuse the same issue as the malicious user.\nRegarding the DOS, this issue still leads to a DOS on one of the functions\nof the protocol, which su\ufb03ces medium, as per the severity guidelines\nMed requires \u201cAssets not at direct risk, but the function of the protocol or\nits availability could be impacted\u201d. In this case, the function of\nremove_liquidity_one_asset() is clearly impacted and not usable. I\nmentioned in my issue that the user could be a contract, which is\n1. DOS\nHydraDX https://code4rena.com/reports/2024-02-hydradx\n21 of 148 09/06/2024, 14:43\n\nprogrammed to interact through the remove_liquidity_one_asset()\nfunction. As a lot of the interactions with an AMM are actually contracts\nand not EOA, this is a very usual case. The contract can\u2019t be changed\nlater on so it would never be able to withdraw its shares again, although\nbeing 100% correctly programmed.\nFrom the code, one can see that the intended invariant for the liquidity in\na pool is sharesInPool == 0 || sharesInPool >= MinPoolLiquidty.\nThis i"
+   },
+   {
+    "line": 614,
+    "severity": "medium",
+    "title": "medium severity:",
+    "excerpt": "medium severity:\n1. DOS of the remove_liquidity_one_asset() function.\n2. Breaking of the Pool liquidity invariant.\n2. Broken Invariant"
+   },
+   {
+    "line": 618,
+    "severity": "high",
+    "title": "High - A core invariant of the protocol can be broken for an extended dura",
+    "excerpt": "High - A core invariant of the protocol can be broken for an extended dura"
+   },
+   {
+    "line": 619,
+    "severity": "medium",
+    "title": "Medium - A non-core invariant of the protocol can be broken for an extende",
+    "excerpt": "Medium - A non-core invariant of the protocol can be broken for an extende\n3. Conclusion\n[M-03] No slippage check in remove_liquidity\nHydraDX https://code4rena.com/reports/2024-02-hydradx\n22 of 148 09/06/2024, 14:43\n\nSubmitted by carrotsmuggler, also found by carrotsmuggler (1, 2), erebus,\nQiuhaoLi, Aymen0909, zhaojie, oakcobalt (1, 2), emerald7017, DadeKuma,\nFranfran, J4X (1, 2, 3), 3docSec, and ZanyBonzy\nThe liquidity removal function in the omnipool pallet lacks slippage\ncontrol. There is no minimum_amount_out parameter to ensure that the\nuser gets out at least a certain amount of tokens. This can lead to slippage\nlosses for liquidity providers if malicious users frontrun the liquidity\nwithdrawer.\nDuring liquidity removal, since there are lots of di\ufb00erent fees involved, the\nscenario gets complicated and a POC is used to study the e\ufb00ect further. A\nPOC is presented in the next section, which has ALICE depositing LP of\ntoken_1000 to the pool, the actor LP3 carrying out a swap, and then\nALICE removing liquidity immediately after. In case ALICE receives any\nLRNA tokens, she swaps them out to token_1000. We compare the\namount of token_1000 ALICE would end up with in di\ufb00erent scenarios"
+   },
+   {
+    "line": 893,
+    "severity": "medium",
+    "title": "Medium is more appropriate for missing slippage protection, even if the",
+    "excerpt": "Medium is more appropriate for missing slippage protection, even if the\npotential slippage can be larger here. According to the sponsor, the\nfunction will usually not be used when trading is enabled. However, this is\nnot enforced, so the issue itself is still valid.\nSubmitted by castle_chain\nhttps:/ /github.com/code-423n4/2024-02-hydradx/\nblob/603187123a20e0cb8a7ea85c6a6d718429caad8d/HydraDX-node/\npallets/omnipool/src/lib.rs#L612-L621\nAssessed type\n[M-06] complete liquidity removal will result in\npermanent disable of the liquidity addition and prevent\nminting shares for the liquidity providers.\nHydraDX https://code4rena.com/reports/2024-02-hydradx\n32 of 148 09/06/2024, 14:43\n\nThis vulnerability will lead to prevent any liquidity provider from adding\nliquidity and prevent them from minting new shares; so this is considered a\nhuge loss of funds for the users and the protocol.\n1. No New Liquidity - Users can no longer add liquidity to the pool,\nhindering its growth and potential.\n2. Complete liquidity removal shuts down the pool, preventing any future\nactivity.\n3. Financial losses for the protocol - It loses the bene\ufb01ts of increased\nliquidity and potential fees from user activity.\nAdd"
+   },
+   {
+    "line": 1067,
+    "severity": "medium",
+    "title": "medium for the following reasons:",
+    "excerpt": "medium for the following reasons:\nFirstly, this was marked as a duplicate of Issue #86. However, Issue #86\nhas nothing to do with this \ufb01nding for these reasons:\n\u2022 Issue #86 refers to an issue in the stableswap pallet, not the omnipool.\nThis \ufb01nding, on the other hand, refers to an issue in the omnipool\npallet.\n\u2022 While removing all liquidity from a pool in the stableswap will always\nfail according to Issue #86, removing all liquidity from a pool in the\nomnipool pallet will succeed, but it will cause a permanent DoS\n(Denial-of-Service) attack on the pool by permanently disabling\nliquidity addition due to the division by zero which will throw over\ufb02ow\nerror mentioned in the submitted report and the PoC.\nAs demonstrated, these are two distinct issues. Issue #86 has an impact\nof (temporary) locked funds, according to the judge\u2019s comment:\nThis can lead to (temporary) locked funds in edge cases, so Medium is\nappropriate here.\nIn contrast, my report highlights a permanent DoS impact to the\nfunction add_liquidity, sell,and buy. So the two \ufb01ndings have two\ncompletely di\ufb00erent locations, two di\ufb00erent impacts, and two di\ufb00erent\nHydraDX https://code4rena.com/reports/2024-02-hydradx\n38 of 148 09/06"
+   },
+   {
+    "line": 1962,
+    "severity": "low",
+    "title": "Low Risk and Non-Critical Issues",
+    "excerpt": "Low Risk and Non-Critical Issues\nStapleswap\n1. Liquidity providers can not provide the amount of assets that will\nresult in shares more than the total issuance by calling\nadd_liquidity_shares function, which is considered loss of value\nfor the protocol\nHydraDX https://code4rena.com/reports/2024-02-hydradx\n68 of 148 09/06/2024, 14:43\n\nbe removed.\nCoded PoC\nConsider add this test to the test \ufb01le add_liquidity.rs:\nif shares > share_asset_issuance {\nreturn None;\n        }\n#[test]\nfnadd_liquidity_should_work_correctly_when_fee_is_applied_test\nlet asset_a: AssetId = 1;\nlet asset_b: AssetId = 2;\nlet asset_c: AssetId = 3;\nExtBuilder::default()\n.with_endowed_accounts(vec![\n(BOB, asset_a, 200_000_000_000_000_000_000\n(ALICE, asset_a, 52425995641788588073263117\n(ALICE, asset_b, 52033213790329),\n(ALICE, asset_c, 119135337044269),\n])\n.with_registered_asset(\"one\".as_bytes().to_vec\n.with_registered_asset(\"two\".as_bytes().to_vec\n.with_registered_asset(\"three\".as_bytes().\n.with_pool(\nALICE,\nPoolInfo::<AssetId, u64> {\nassets: vec![asset_a, asset_b, asset_c].\ninitial_amplification: NonZeroU16::\nfinal_amplification: NonZeroU16::\ninitial_block: 0,\nfinal_block: 0,\nfee: Permill::from_float(\n},"
+   },
+   {
+    "line": 2365,
+    "severity": "low",
+    "title": "low fee nature of the omnipool model enables greater decentralization",
+    "excerpt": "low fee nature of the omnipool model enables greater decentralization\nand accessibility for traders compared to order-book based HydraDX\nalternatives.\nSystem Overview\nOmnipool\nHydraDX https://code4rena.com/reports/2024-02-hydradx\n82 of 148 09/06/2024, 14:43\n\nHere\u2019s a breakdown of the key functions:\n\u2022 Protocol Account:\n\u2022 protocol_account(): Returns the protocol account address,\nwhich is used for managing the omnipool\u2019s assets.\n\u2022 Asset Management:\n\u2022 load_asset_state(asset_id): Retrieves the state of an asset,\nincluding its reserve and tradability.\n\u2022 set_asset_state(asset_id, new_state): Sets the new state of\nan asset.\n\u2022 add_asset(asset_id, state): Adds a new asset to the\nomnipool.\n\u2022 update_asset_state(asset_id, delta): Updates the state of\nan asset with the given delta changes.\n\u2022 remove_asset(asset_id): Removes an asset from the omnipool.\n\u2022 allow_assets(asset_in, asset_out): Checks if the given\nassets can be traded based on their tradability.\n\u2022 sell_hub_asset(origin, who, asset_out, amount, limit):\nSwaps hub asset for asset_out.\n\u2022 buy_asset_for_hub_asset(origin, who, asset_out,\namount, limit): Swaps asset for hub asset.\n\u2022 buy_hub_asset(who, asset_in, amount, limit): Buys hub\nasset fr"
+   }
+  ]
+ },
+ {
+  "file": "composable-audits-halborn-audit20221003-pallet-grandpa-light-client-bridge-pdf.md",
+  "findings": [
+   {
+    "line": 30,
+    "severity": "informational",
+    "title": "Recommendation 15",
+    "excerpt": "Recommendation 15\nRemediation Plan 16\n3.2 (HAL-02) GRANDPA JUSTIFICATION - MISSING VOTERS VALIDATION -\nMEDIUM 17\nDescription 17\nCode Location 17\nRisk Level 17"
+   },
+   {
+    "line": 37,
+    "severity": "informational",
+    "title": "Recommendation 17",
+    "excerpt": "Recommendation 17\nRemediation Plan 18\n3.3 (HAL-03) GRANDPA PROVER - DENIAL OF SERVICE - MEDIUM 19\nDescription 19\n1\n\nCode Location 19\nRisk Level 20"
+   },
+   {
+    "line": 45,
+    "severity": "informational",
+    "title": "Recommendation 21",
+    "excerpt": "Recommendation 21\nRemediation Plan 21\n2\n\nDOCUMENT REVISION HISTORY\nVERSION MODIFICATION DATE AUTHOR\n0.1 Document Creation 10/25/2022 Hossam Mohamed\n0.2 Document Edits 10/27/2022 Hossam Mohamed\n0.3 Draft Review 10/27/2022 Gabi Urrutia\n1.0 Remediation Plan 01/13/2023 Hossam Mohamed\n1.1 Remediation Plan Review 01/20/2023 Gabi Urrutia\nCONTACTS\nCONTACT COMPANY EMAIL\nRob Behnke Halborn Rob.Behnke@halborn.com\nSteven Walbroehl Halborn Steven.Walbroehl@halborn.com\nGabi Urrutia Halborn Gabi.Urrutia@halborn.com\nHossam Mohamed Halborn Hossam.Mohamed@halborn.com\n3\n\n4\nEXECUTIVE OVERVIEW\n\n1.1 INTRODUCTION\nComposable engaged Halborn to conduct a security assessment on their\nGrandpa Light Client on October 3rd, 2022 and ending October 27th, 2022.\nGrandpa is the composable\u2019s trustless bridge infrastructure the audit was\nfocused on the Grandpa light client implementation\n1.2 AUDIT SUMMARY\nThe team at Halborn was provided four weeks for the engagement and\nassigned a full-time security engineer to audit the security of the\nGrandpa Light Client in scope. The security engineer is a blockchain\nand smart contract security expert with advanced penetration testing and\nsmart contract hacking skills, and deep "
+   },
+   {
+    "line": 339,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nChecking the members of CommitValidationResult after calling the\nvalidate_commit function, it might look like the following:\nListing 4\n1 match finality_ grandpa :: validate_commit (& self . commit ,\n\u00eb voters , & ancestry_chain ) {\n2 Ok ( ref result ) if result . is_valid () = > {\n3 if co m mi t s _v a l id a t io n. n u m _ d u p l i c a t e d _ p r e c o m m i t s>\n\u00eb 0 { Err ( anyhow! ( \" duplicated commit in grandpa justification : {\n\u00eb result :?} \") ) ?}\n4 if co m mi t s _v a l id a t io n. nu m _i n v al i d _v o t er s> 0 { Err (\n\u00eb anyhow! ( \" invalid voters in grandpa justification : { result :?} \") ) ?}\n5 } ,\n6 err = > {\n7 let result = err ?;\n8 Err ( anyhow! ( \" invalid commit in grandpa\n\u00eb justification : { result :?} \" ) ) ?\n9 } ,\n10 }\n15\nFINDINGS & TECH DETAILS\n\nRemediation Plan:\nSOLVED: The Composable Finance team solved the issue in commit\nbd400dd2183e1462220cb0f82af652e7e177ea9f\n16\nFINDINGS & TECH DETAILS\n\n3.2 (HAL-02) GRANDPA JUSTIFICATION -\nMISSING VOTERS VALIDATION - MEDIUM\nDescription:\nThe verify function within GrandpaJustification initialized a VoterSet\nsupplied directly from AuthorityList. The new function within the\nVoterSet does not check for dup"
+   },
+   {
+    "line": 391,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to validate the authorities and make sure they do not\ncontain duplicates before initializing VoterSet.\n17\nFINDINGS & TECH DETAILS\n\nRemediation Plan:\nSOLVED: The Composable Finance team solved the issue in commit\nbd400dd2183e1462220cb0f82af652e7e177ea9f\n18\nFINDINGS & TECH DETAILS\n\n3.3 (HAL-03) GRANDPA PROVER -\nDENIAL OF SERVICE - MEDIUM\nDescription:\nA possible Denial of Service (DoS) was observed within GrandpaProver\ninside the query_finalized_parachain_headers_with_proof function.\nThe likelihood of this occurring is quite low, as it requires the light\nclient to connect to a malicious RPC or compromise an already connected\nRPC.\nIt is possible to cause a Denial of Service inside the function with two\ndifferent attack vectors, the first one by tricking the function into\nan infinite loop by sending invalid headers. The second is to fill the\nunknown_headers vector and cause the OOM (Out of memory) error.\nCode Location:\nListing 6: prover/src/lib.rs (Lines 121,134,140,133)\n103 pub async fn q u e r y _ f i n a l i z e d _ p a r a c h a i n _ h e a d e r s _ w i t h _ p r o o f<H >(\n104 & self ,\n105 l a t e s t _ f i n a l i z e d _ h a s h: T :: Hash ,\n106"
+   },
+   {
+    "line": 477,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to have a limit for (B; F] which might help mitigate\nthat issue.\nRemediation Plan:\nSOLVED: The Composable Finance team solved the issue in commit\nbd400dd2183e1462220cb0f82af652e7e177ea9f\n21\nFINDINGS & TECH DETAILS\n\nTHANK YOU FOR CHOOSING"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-snowbridge-2024-08-10-audit-report-snowbridge-updates-2-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 963,
+    "severity": "low",
+    "title": "low-level",
+    "excerpt": "low-level\nfunctionality\nfrom\ndi\ufb00erent\necosystems.\nCode\nreadability\nand\nclarity\nMedium\n-\nLevel\nof\ndocumentation\nHigh\nThe\nprotocol\nand\nthe\nmodi\ufb01cations\napplied\nare\nwell\ndocumented.\nTest\ncoverage\nMedium\nTest\ncoverage\nfor\npallets\n,\nprimitives\n,\nand\nruntime-common\nreported\nby\ncargo\ntarpaulin"
+   }
+  ]
+ }
+]

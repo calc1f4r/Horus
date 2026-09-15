@@ -1,0 +1,620 @@
+[
+ {
+  "file": "t3rn-docs-main-static-halborn-sc-security-audit-pdf.md",
+  "findings": [
+   {
+    "line": 31,
+    "severity": "informational",
+    "title": "Recommendation 19",
+    "excerpt": "Recommendation 19\nRemediation Plan 20\n4.2 (HAL-02) DELEGATECALL TO UNTRUSTED CONTRACT IN ESCROWGMP - CRIT-\nICAL(10) 21\nDescription 21\nBVSS 21"
+   },
+   {
+    "line": 37,
+    "severity": "informational",
+    "title": "Recommendation 21",
+    "excerpt": "Recommendation 21\nRemediation Plan 22\n1\n\n4.3 (HAL-03) BYPASSING CLAIM REFUND WAIT PERIOD - CRITICAL(10) 23\nDescription 23\nBVSS 23"
+   },
+   {
+    "line": 44,
+    "severity": "informational",
+    "title": "Recommendation 23",
+    "excerpt": "Recommendation 23\nRemediation Plan 24\n4.4 (HAL-04) ASSET VALIDATION MISSING - HIGH(7.5) 25\nDescription 25\nBVSS 25"
+   },
+   {
+    "line": 49,
+    "severity": "informational",
+    "title": "Recommendation 25",
+    "excerpt": "Recommendation 25\nRemediation Plan 26\n4.5 (HAL-05) POTENTIAL ERC20 TOKEN EXPLOIT - HIGH(7.5) 27\nDescription 27\nBVSS 27"
+   },
+   {
+    "line": 54,
+    "severity": "informational",
+    "title": "Recommendation 28",
+    "excerpt": "Recommendation 28\nRemediation Plan 28\n4.6 (HAL-06) QUORUM CALCULATION ISSUE IN CONSTRUCTOR WITH SINGLE\nCOMMITTEE MEMBER - HIGH(7.0) 29\nDescription 29\nBVSS 29"
+   },
+   {
+    "line": 60,
+    "severity": "informational",
+    "title": "Recommendation 29",
+    "excerpt": "Recommendation 29\nRemediation Plan 30\n4.7 (HAL-07) MISSING VALIDITY CHECK - LOW(2.1) 31\nDescription 31\nBVSS 31"
+   },
+   {
+    "line": 65,
+    "severity": "informational",
+    "title": "Recommendation 31",
+    "excerpt": "Recommendation 31\nRemediation Plan 32\n2\n\n4.8 (HAL-08) REDUNDANT BALANCE CHECK - LOW(2.5) 33\nDescription 33\nBVSS 33"
+   },
+   {
+    "line": 72,
+    "severity": "informational",
+    "title": "Recommendation 33",
+    "excerpt": "Recommendation 33\nRemediation Plan 34\n4.9 (HAL-09) PERMANENT COMMITTEE HASH LOCK - INFORMATIONAL(1.3) 35\nDescription 35\nBVSS 35"
+   },
+   {
+    "line": 77,
+    "severity": "informational",
+    "title": "Recommendation 35",
+    "excerpt": "Recommendation 35\nRemediation Plan 36\n5 REVIEW NOTES 37\n5.1 TRN / t3USD / t3SOL / t3DOT / t3BTC 38\n5.2 EscrowGMP 38\n5.3 LocalExchange 39\n5.4 RemoteOrder 39\n5.5 AttestationsVerifierProofs 40\n6 AUTOMATED TESTING 40\n6.1 STATIC ANALYSIS REPORT 42\nDescription 42\nResults 42\nResults summary 55\n3\n\nDOCUMENT REVISION HISTORY\nVERSION MODIFICATION DATE\n0.1 Document Creation 12/21/2023\n0.2 Draft Review 12/22/2023\n1.0 Remediation Plan 02/12/2024\n1.1 Remediation Plan Review 03/07/2024\n1.2 Remediation Plan Review 03/07/2024\nCONTACTS\nCONTACT COMPANY EMAIL\nRob Behnke Halborn Rob.Behnke@halborn.com\nSteven Walbroehl Halborn Steven.Walbroehl@halborn.com\nGabi Urrutia Halborn Gabi.Urrutia@halborn.com\nFerran Celades Halborn Ferran.Celades@halborn.com\n4\n\n5\nEXECUTIVE OVERVIEW\n\n1.1 INTRODUCTION\nt3rn engaged Halborn to conduct a security assessment on their smart\ncontracts beginning on December 11th, 2023 and ending on December 22nd,\n2023 . The security assessment was scoped to the smart contracts provided\nin the t3rn/guardian GitHub repository. Commit hashes and further details\ncan be found in the Scope section of this report.\n1.2 ASSESSMENT SUMMARY"
+   },
+   {
+    "line": 225,
+    "severity": "low",
+    "title": "Low (AC:L) 1",
+    "excerpt": "Low (AC:L) 1"
+   },
+   {
+    "line": 226,
+    "severity": "medium",
+    "title": "Medium (AC:M) 0.67",
+    "excerpt": "Medium (AC:M) 0.67"
+   },
+   {
+    "line": 227,
+    "severity": "high",
+    "title": "High (AC:H) 0.33",
+    "excerpt": "High (AC:H) 0.33\nAttack Complexity (AX)"
+   },
+   {
+    "line": 229,
+    "severity": "low",
+    "title": "Low (AX:L) 1",
+    "excerpt": "Low (AX:L) 1"
+   },
+   {
+    "line": 230,
+    "severity": "medium",
+    "title": "Medium (AX:M) 0.67",
+    "excerpt": "Medium (AX:M) 0.67"
+   },
+   {
+    "line": 231,
+    "severity": "high",
+    "title": "High (AX:H) 0.33",
+    "excerpt": "High (AX:H) 0.33\nExploitability E is calculated using the following formula:\nE \u201c\n\u017a\nme\n10\nEXECUTIVE OVERVIEW\n\n2.2 IMPACT\nConfidentiality (C):\nMeasures the impact to the confidentiality of the information resources\nmanaged by the contract due to a successfully exploited vulnerability.\nConfidentiality refers to limiting access to authorized users only.\nIntegrity (I):\nMeasures the impact to integrity of a successfully exploited vulnerabil-\nity. Integrity refers to the trustworthiness and veracity of data stored\nand/or processed on-chain. Integrity impact directly affecting Deposit\nor Yield records is excluded.\nAvailability (A):\nMeasures the impact to the availability of the impacted component re-\nsulting from a successfully exploited vulnerability. This metric refers\nto smart contract features and functionality, not state. Availability\nimpact directly affecting Deposit or Yield is excluded.\nDeposit (D):\nMeasures the impact to the deposits made to the contract by either users\nor owners.\nYield (Y):\nMeasures the impact to the yield generated by the contract for either\nusers or owners.\n11\nEXECUTIVE OVERVIEW\n\nMetrics:\nImpact Metric\n(mI) Metric Value Numerical Value\nConfidentiality (C)\nNone "
+   },
+   {
+    "line": 268,
+    "severity": "low",
+    "title": "Low (I:L) 0.25",
+    "excerpt": "Low (I:L) 0.25"
+   },
+   {
+    "line": 269,
+    "severity": "medium",
+    "title": "Medium (I:M) 0.5",
+    "excerpt": "Medium (I:M) 0.5"
+   },
+   {
+    "line": 270,
+    "severity": "high",
+    "title": "High (I:H) 0.75",
+    "excerpt": "High (I:H) 0.75"
+   },
+   {
+    "line": 271,
+    "severity": "critical",
+    "title": "Critical (I:C) 1",
+    "excerpt": "Critical (I:C) 1\nIntegrity (I)\nNone (I:N) 0"
+   },
+   {
+    "line": 274,
+    "severity": "low",
+    "title": "Low (I:L) 0.25",
+    "excerpt": "Low (I:L) 0.25"
+   },
+   {
+    "line": 275,
+    "severity": "medium",
+    "title": "Medium (I:M) 0.5",
+    "excerpt": "Medium (I:M) 0.5"
+   },
+   {
+    "line": 276,
+    "severity": "high",
+    "title": "High (I:H) 0.75",
+    "excerpt": "High (I:H) 0.75"
+   },
+   {
+    "line": 277,
+    "severity": "critical",
+    "title": "Critical (I:C) 1",
+    "excerpt": "Critical (I:C) 1\nAvailability (A)\nNone (A:N) 0"
+   },
+   {
+    "line": 280,
+    "severity": "low",
+    "title": "Low (A:L) 0.25",
+    "excerpt": "Low (A:L) 0.25"
+   },
+   {
+    "line": 281,
+    "severity": "medium",
+    "title": "Medium (A:M) 0.5",
+    "excerpt": "Medium (A:M) 0.5"
+   },
+   {
+    "line": 282,
+    "severity": "high",
+    "title": "High (A:H) 0.75",
+    "excerpt": "High (A:H) 0.75"
+   },
+   {
+    "line": 283,
+    "severity": "critical",
+    "title": "Critical 1",
+    "excerpt": "Critical 1\nDeposit (D)\nNone (D:N) 0"
+   },
+   {
+    "line": 286,
+    "severity": "low",
+    "title": "Low (D:L) 0.25",
+    "excerpt": "Low (D:L) 0.25"
+   },
+   {
+    "line": 287,
+    "severity": "medium",
+    "title": "Medium (D:M) 0.5",
+    "excerpt": "Medium (D:M) 0.5"
+   },
+   {
+    "line": 288,
+    "severity": "high",
+    "title": "High (D:H) 0.75",
+    "excerpt": "High (D:H) 0.75"
+   },
+   {
+    "line": 289,
+    "severity": "critical",
+    "title": "Critical (D:C) 1",
+    "excerpt": "Critical (D:C) 1\nYield (Y)\nNone (Y:N) 0"
+   },
+   {
+    "line": 292,
+    "severity": "low",
+    "title": "Low (Y:L) 0.25",
+    "excerpt": "Low (Y:L) 0.25"
+   },
+   {
+    "line": 293,
+    "severity": "medium",
+    "title": "Medium: (Y:M) 0.5",
+    "excerpt": "Medium: (Y:M) 0.5"
+   },
+   {
+    "line": 294,
+    "severity": "high",
+    "title": "High: (Y:H) 0.75",
+    "excerpt": "High: (Y:H) 0.75"
+   },
+   {
+    "line": 295,
+    "severity": "critical",
+    "title": "Critical (Y:H) 1",
+    "excerpt": "Critical (Y:H) 1\nImpact I is calculated using the following formula:\nI \u201c maxpmIq `\n\u0159 mI \u00b4 maxpmIq\n4\n12\nEXECUTIVE OVERVIEW\n\n2.3 SEVERITY COEFFICIENT\nReversibility (R):\nDescribes the share of the exploited vulnerability effects that can be\nreversed. For upgradeable contracts, assume the contract private key is\navailable.\nScope (S):\nCaptures whether a vulnerability in one vulnerable contract impacts re-\nsources in other contracts.\nCoefficient\n(C) Coefficient Value Numerical Value\nReversibility ( r)\nNone (R:N) 1\nPartial (R:P) 0.5\nFull (R:F) 0.25\nScope ( s) Changed (S:C) 1.25\nUnchanged (S:U) 1\nSeverity Coefficient C is obtained by the following product:\nC \u201c rs\n13\nEXECUTIVE OVERVIEW\n\nThe Vulnerability Severity Score S is obtained by:\nS \u201c minp10, EIC \u02da 10q\nThe score is rounded up to 1 decimal places.\nSeverity Score Value Range"
+   },
+   {
+    "line": 328,
+    "severity": "critical",
+    "title": "Critical 9 - 10",
+    "excerpt": "Critical 9 - 10"
+   },
+   {
+    "line": 329,
+    "severity": "high",
+    "title": "High 7 - 8.9",
+    "excerpt": "High 7 - 8.9"
+   },
+   {
+    "line": 330,
+    "severity": "medium",
+    "title": "Medium 4.5 - 6.9",
+    "excerpt": "Medium 4.5 - 6.9"
+   },
+   {
+    "line": 331,
+    "severity": "low",
+    "title": "Low 2 - 4.4",
+    "excerpt": "Low 2 - 4.4"
+   },
+   {
+    "line": 332,
+    "severity": "informational",
+    "title": "Informational 0 - 1.9",
+    "excerpt": "Informational 0 - 1.9\n14\nEXECUTIVE OVERVIEW\n\n2.4 SCOPE\nThe security assessment was scoped to the following smart contracts:\n\u2022 attestationsVerifierProofs.sol\n\u2022 TRNToken.sol\n\u2022 localExchange.sol\n\u2022 t3USD.sol\n\u2022 t3DotToken.sol\n\u2022 ERC20Mock.sol\n\u2022 escrowGMP.sol\n\u2022 t3SOLToken.sol\n\u2022 remoteOrder.sol\n\u2022 t3BTCToken.sol\nCOMMIT ID: bd784cde3b37773b062288925b2015a0c8a9806b\nOUT-OF-SCOPE:\n\u2022 Third-party libraries and dependencies.\n\u2022 Economic attacks.\nREMEDIATION COMMIT IDs:\n\u2022 8609f3d41577f694d6a8b266e6e7f351c23c8691\n\u2022 69eb56161b5e8f2005da9831db743bb9eab94116\n\u2022 27b50011bdd991c913b3b44b40e2dee2fea54061\n\u2022 cb47d8f4c7ed4027a101ceb79c4f9f7effe60daa\n\u2022 e89b63190c6c6a842d10f9ddc6a5ac34f1e782ac\n\u2022 dbf474829647e9ee14be13453314aa63b1bd7555\n\u2022 54543ff374738c3448792415a77d8ba60789c382\n\u2022 077d90b34310d79f54d7af9e7f7bfb1d1f463798\n\u2022 d4d47859f34a1752e4a39e7f79bdc29ba6ec5f05\nOUT-OF-SCOPE IN REMEDIATION PLAN:\n\u2022 New features after/within the remediation.\n15\nEXECUTIVE OVERVIEW\n\n3. ASSESSMENT SUMMARY & FINDINGS\nOVERVIEW\nCRITICAL HIGH MEDIUM LOW INFORMATIONAL\n3 3 0 2 1\n16"
+   },
+   {
+    "line": 378,
+    "severity": "critical",
+    "title": "Critical (10) SOLVED - 01/09/2024",
+    "excerpt": "Critical (10) SOLVED - 01/09/2024\n(HAL-02) DELEGATECALL TO UNTRUSTED\nCONTRACT IN ESCROWGMP Critical (10) SOLVED - 12/13/2023\n(HAL-03) BYPASSING CLAIM REFUND\nWAIT PERIOD Critical (10) SOLVED - 01/09/2024\n(HAL-04) ASSET VALIDATION MISSING High (7.5) SOLVED - 01/31/2024\n(HAL-05) POTENTIAL ERC20 TOKEN\nEXPLOIT High (7.5) SOLVED - 01/31/2024\n(HAL-06) QUORUM CALCULATION ISSUE\nIN CONSTRUCTOR WITH SINGLE\nCOMMITTEE MEMBER"
+   },
+   {
+    "line": 389,
+    "severity": "high",
+    "title": "High (7.0) SOLVED - 01/09/2024",
+    "excerpt": "High (7.0) SOLVED - 01/09/2024\n(HAL-07) MISSING VALIDITY CHECK Low (2.1) SOLVED - 01/09/2024\n(HAL-08) REDUNDANT BALANCE CHECK Low (2.5) SOLVED - 01/09/2024\n(HAL-09) PERMANENT COMMITTEE HASH\nLOCK\nInformational\n(1.3) SOLVED - 01/09/2024\n17\nEXECUTIVE OVERVIEW\n\n18\nFINDINGS & TECH\nDETAILS\n\n4.1 (HAL-01) REENTRANCY RISK IN\nexecuteLocalOrder WITH\nERC677/ERC223 TOKENS - CRITICAL(10)\nDescription:\nIn the executeLocalOrder function of the LocalExchange contract, there\nexists a potential reentrancy risk when dealing with ERC677, ERC223, or\nsimilar tokens. These token standards implement a callback mechanism that\nis triggered when tokens are transferred to a contract. If the recipient\nof a transfer in executeLocalOrder is a contract, this callback could be\nexploited to re-enter the executeLocalOrder function.\nThis reentrancy risk is particularly concerning because if the allowance\nfor the token is greater than the amount required for a single order, an\nattacker could potentially trigger the same order multiple times. The\ncurrent implementation sets localOrders[local_order_id] = false after the\ntransfer, which leaves a window for reentrancy attacks.\nBVSS:\nAO:A/AC:L/AX:M/C:N/I:C/A:N/D:C/Y:C/R:N/S:"
+   },
+   {
+    "line": 420,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nTo mitigate this reentrancy risk, it is recommended to employ the cause-\neffect pattern by setting localOrders[local_order_id] = false immediately\nafter the order existence check and before any external calls or token\ntransfers. This change ensures that even if a reentrancy occurs, the\nstate change (order execution marking) has already been done, preventing\nrepeated execution of the same order.\nThe revised sequence in executeLocalOrder should be:\n1. Check if the order exists.\n19\nFINDINGS & TECH DETAILS\n\n2. Mark the order as executed ( localOrders[local_order_id] = false).\n3. Proceed with the token transfer and other function logic.\nImplementing this change will protect against reentrancy attacks in sce-\nnarios involving tokens with callback mechanisms, thereby enhancing the\nsecurity of the executeLocalOrder function within the LocalExchange con-\ntract.\nRemediation Plan:\nSOLVED: The issue was solved as suggested on https://github.com/t3rn/\nguardian/pull/178/commits/8609f3d41577f694d6a8b266e6e7f351c23c8691\n20\nFINDINGS & TECH DETAILS\n\n4.2 (HAL-02) DELEGATECALL TO\nUNTRUSTED CONTRACT IN ESCROWGMP -\nCRITICAL(10)\nDescription:\nThe EscrowGMP smart contract contains a critica"
+   },
+   {
+    "line": 464,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nTo mitigate this vulnerability, it is recommended to replace delegatecall\nwith call in both the commitEscrowCall and revertEscrowCall functions.\nThis change will ensure that the executed code operates in the context\nof the calling contract rather than EscrowGMP. Thus, even if the called\ncontract contains malicious code, it will not have direct access to modify\nthe state or access the funds of EscrowGMP.\n21\nFINDINGS & TECH DETAILS\n\nAdditionally, consider implementing a whitelist of trusted contracts or\na mechanism to verify the trustworthiness of the contract being called.\nThis approach can add an extra layer of security by ensuring that only\nvetted and safe contracts can interact with EscrowGMP.\nIt\u2019s important to note that the decision between using call and main-\ntaining delegatecall should be aligned with the intended design and\nfunctionality of the contract. If the design requires preserving the\ncontext of EscrowGMP, then rigorous checks and a system to ensure the\nsafety of the external code must be implemented.\nRemediation Plan:\nSOLVED: The issue was solved as suggested on https://github.com/t3rn/\nguardian/commit/69eb56161b5e8f2005da9831db743bb9eab94116\n22\nFINDI"
+   },
+   {
+    "line": 505,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nTo address this vulnerability, several modifications are recommended:\n1. Change withdrawFromVault to Internal : Restricting the visibil-\nity of withdrawFromVault to internal will prevent direct public\ncalls, ensuring that withdrawals can only occur through the in-\ntended claimRefund or claimPayout functions.\n2. Differentiate Refund and Payout Logic : Modify withdrawFromVault to\naccept an additional parameter or flag that indicates whether the\noperation is a refund or a payout. This modification allows for\ndistinct handling of each case.\n23\nFINDINGS & TECH DETAILS\n\n3. Separate Hash Checks : Implement separate hash checks within\nwithdrawFromVault for refunds and payouts, based on the additional\nparameter/flag. This approach will ensure that an ID marked for\nrefund cannot be used for a payout and vice versa.\n4. Adjust claimRefund and claimPayout Accordingly: Modify claimRefund\nand claimPayout to pass the appropriate flag or parameter to\nwithdrawFromVault, aligning with their respective intended func-\ntionalities.\nThese changes will enforce a clear distinction between refunds and pay-\nouts, ensuring that each process adheres strictly to its defined condi-\ntions and enha"
+   },
+   {
+    "line": 554,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nTo mitigate this vulnerability, the orderMemoryData function should be\nmodified to include validation for the rewardAsset similar to the checks\ndone in remoteBridgeAsset. This can be achieved by incorporating the\nsupportedBridgeAssetsHereToThere mapping within orderMemoryData to ensure\nthat the rewardAsset matches the expected asset.\nThe proposed changes include:\n1. Asset Validation in orderMemoryData: Add a check in orderMemoryData\nto validate that the rewardAsset is a supported bridge as-\nset corresponding to the given asset. This can be done\n25\nFINDINGS & TECH DETAILS\n\nby comparing the rewardAsset with the value obtained from\nsupportedBridgeAssetsHereToThere for the specified asset.\n2. Restrict Direct Access if Necessary : If orderMemoryData is not\nintended for public use, consider changing its visibility to\ninternal to prevent direct calls that bypass the validation logic\nin remoteBridgeAsset.\nBy implementing these changes, the contract will ensure consistency in\nasset handling across different functions, enhancing the security and\nreliability of the RemoteOrder contract\u2019s operations.\nRemediation Plan:\nSOLVED: The issue was solved on https://github.com/t3rn/guar"
+   },
+   {
+    "line": 613,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nTo mitigate this vulnerability, it is recommended to modify the localOrder\nfunction to transfer the ERC20 rewardToken at the time of order creation,\nsimilar to the handling of native tokens. This approach ensures that\nthe reward tokens are securely held within the LocalExchange contract\nuntil the order is executed or refunded. Consequently, the claimRefund\nfunction should also be adjusted to return these tokens to the user if\nthe order is not executed within the specified timeout period.\nThe proposed changes include:\n1. Transfer Reward Tokens on Order Creation : Modify localOrder to\ntransfer the specified rewardToken amount from the user to the\nLocalExchange contract.\n2. Refund Tokens on Claim : Adjust claimRefund to transfer back the\nrewardToken amount to the user if the order times out without being\nexecuted.\nThese modifications will prevent users from unintentionally executing\nold orders due to allowance manipulations and ensure a more secure and\npredictable order management process within the LocalExchange contract.\nRemediation Plan:\nSOLVED: The issue was solved on https://github.com/t3rn/guardian/pull/\n178/commits/e89b63190c6c6a842d10f9ddc6a5ac34f1e782ac\n28\nFIN"
+   },
+   {
+    "line": 654,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nTo mitigate this vulnerability, the constructor logic and\nupdateCommitteeSize should be modified to handle edge cases where the\ninitialCommittee has a minimal number of members. Specifically, for a\ncommittee of one member, the quorum should be set to 1 instead of 0. The\nconstructor logic could be updated with a conditional check to handle\nthis case appropriately.\nThe revised constructor could include the following logic:\n29\nFINDINGS & TECH DETAILS\n\nListing 1\n1 if ( initialC ommittee . length == 1) {\n2 quorum = 1;\n3 } else {\n4 quorum = initialCo mmittee . length * 2 / 3;\n5 }\nThis change ensures that the quorum calculation aligns with the intended\nfunctionality of requiring a majority of the committee members\u2019 attes-\ntations for validation. It prevents the scenario where no signatures\nare required for a quorum, thereby maintaining the integrity of the\nattestation process.\nRemediation Plan:\nSOLVED: The issue was solved as suggested on https://github.com/t3rn/\nguardian/pull/178/commits/dbf474829647e9ee14be13453314aa63b1bd7555\n30\nFINDINGS & TECH DETAILS\n\n4.7 (HAL-07) MISSING VALIDITY\nCHECK - LOW (2.1)\nDescription:\nThe storeEscrowCallOrder function in the EscrowGMP contra"
+   },
+   {
+    "line": 699,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nTo address this vulnerability, it is recommended to implement a validity\ncheck within the storeEscrowCallOrder function. This can be achieved by\nadding a boolean flag or a validity status within the EscrowCall struct\nto indicate whether the data is valid or has been set. Alternatively,\na separate mapping can be used to track whether an id has already been\nassociated with an EscrowCall.\nA possible implementation is as follows:\n1. Add a Validity Flag : Extend the EscrowCall struct to include a\nboolean flag, such as isValid, which indicates whether the data is\n31\nFINDINGS & TECH DETAILS\n\nvalid or initialized.\n2. Check Validity on Insertion : Modify storeEscrowCallOrder to first\ncheck if the EscrowCall for the given id is already marked as valid.\nIf it is, reject the operation to prevent overwriting existing data.\n3. Maintain a Separate Mapping : Alternatively, create a new mapping\n(e.g., mapping(bytes32 => bool)public escrowCallExists) that tracks\nwhether an id has been used. Before storing a new EscrowCall, check\nthis mapping to ensure the id is not already in use.\nBy implementing these checks, the contract can prevent unauthorized over-\nwriting of existing data, thus"
+   },
+   {
+    "line": 747,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nTo address this issue, the ensureBalanceAndAllowance modifier should be\nmodified to remove the user.balance >= amount check for native token\ntransactions. The correct check in this context is to ensure that the\nmsg.value matches the amount required for the transaction, which is\nalready being done with require(msg.value == amount, \" Mismatched deposit\nexecution amount of native\").\nThe modified modifier would look like this:\n33\nFINDINGS & TECH DETAILS\n\nListing 2\n1 modifier e n s u r e B a l a n c e A n d A l l o w a n c e(\n2 address token ,\n3 address user ,\n4 uint256 amount\n5 ) {\n6 // Ensure the user has enough balance and allowance for the\n\u00eb token .\n7 if ( token == address (0) ) {\n8 require ( msg . value == amount , \" Mismatched deposit execution\n\u00eb amount of native \") ;\n9 } else {\n10 require ( IERC20 ( token ) .balanceOf ( user ) >= amount , \"\n\u00eb Insufficient user balance \") ;\n11 require ( IERC20 ( token ) .allowance ( user , address ( this ) ) >=\n\u00eb amount , \" Insufficient user allowance \") ;\n12 }\n13 _;\n14 }\nThis change ensures that the contract correctly checks the amount sent for\nnative token transactions without imposing an unnecessarily high balance\nrequirement on"
+   },
+   {
+    "line": 806,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nTo resolve this issue, the contract needs a mechanism to update the\nnextCommitteeHash independently of the currentCommitteeHash, along with\na validation process for any new committee proposed in the attestation\nbatch. The recommended changes include:\n1. Separate Update Mechanisms : Implement distinct processes for up-\ndating the currentCommitteeHash and nextCommitteeHash. Ensure that\n35\nFINDINGS & TECH DETAILS\n\nnextCommitteeHash can be updated independently, allowing for future\ncommittee transitions.\n2. Committee Validation : Introduce a validation process for any new\ncommittee hash proposed. This could involve signature verification\nor other cryptographic methods to ensure the legitimacy and integrity\nof the new committee.\n3. Conditional Logic Adjustment : Modify the conditional logic in\nreceiveAttestationBatch to prevent setting both hashes to the same\nvalue inadvertently. Ensure that the update of one does not auto-\nmatically lead to the update of the other unless explicitly intended\nand validated.\nBy implementing these changes, the contract will maintain the flexibility\nto transition between committees securely and as intended, ensuring the\nongoing integrity and"
+   },
+   {
+    "line": 879,
+    "severity": "low",
+    "title": "low probability risk of hash collision using a malicious rewardToken",
+    "excerpt": "low probability risk of hash collision using a malicious rewardToken\nthat would lead to the same hash id.\n\u2022 executeLocalOrder will fetch based on the parameters the order id\nand transfer from the caller the amount and reward the caller with\nthe reward amount using different tokens for the order and reward.\n5.4 RemoteOrder\n\u2022 The owner is the deployer, and also sets the escrowGMP address.\n\u2022 assignAttesters is restricted to the owner. It enforces the\nonlyAttesters modifier.\n\u2022 The orderMemoryData function will generate a unique and none re-\nusable id per user/block. storeRemoteOrderPayload will prevent re-\nusage. There is a lot of data that is not taken into consideration\nand hashed.\n\u2022 The remoteBridgeAsset function, does call the orderMemoryData with-\nout giving the mgs.value. However, it is not required as the latter\nis a public function called on the same flow.\n\u2022 The bidFifo allows the first caller for a new/un-used sfxId to be\nset as the orderWinners.\n\u2022 claimRefund will calculate the id based on parameters and trigger\na withdrawFromVault. The withdraw happens to the sender, not the\nactual creator of the order.\n\u2022 The withdrawFromVault function, looks like the hashing chaining\ncould "
+   },
+   {
+    "line": 1256,
+    "severity": "low",
+    "title": "low-level call failed) (node_modules/@openzeppelin/contracts/token/",
+    "excerpt": "low-level call failed) (node_modules/@openzeppelin/contracts/token/\nERC20/utils/SafeERC20.sol#122)- (success,returndata) =\ntarget.call{value: value}(data) (node_modules/@openzeppelin/contrac\nts/utils/Address.sol#135)- IERC20(rewardAsset).safeTransferFrom(msg\n.sender,address(this),maxReward) (contracts/remoteOrder.sol#109)\n- require(bool,string)(escrowGMP.storeRemoteOrderPayload(id,keccak2\n56(bytes)(abi.encode(rewardAsset,maxReward))),Payload already\nstored) (contracts/remoteOrder.sol#111) External calls sending eth:\n- orderMemoryData(input) (contracts/remoteOrder.sol#137)\n- (success,returndata) = target.call{value: value}(data) (node_modu\nles/@openzeppelin/contracts/utils/Address.sol#135)Event emitted\nafter the call(s):\n- OrderCreated(generateId(msg.sender,uint32(block.number)),destinat\nion,asset,targetAccount,amount,rewardAsset,insurance,maxReward,uint\n32(block.number)) (contracts/remoteOrder.sol#139)\nLow\n49\nAUTOMATED TESTING\n\nFinding Impact\nReentrancy in\nAttestationsVerifierProofs.decodeAndProcessPayload(bytes) (contract\ns/attestationsVerifierProofs.sol#286-331):External calls:\n- escrowGMP.commitRemoteBeneficiaryPayload(sfxId,destination)\n(contracts/attestationsVerifierProofs.sol"
+   },
+   {
+    "line": 1503,
+    "severity": "low",
+    "title": "low-level call failed) (node_modules/@openzeppelin/contracts/token/",
+    "excerpt": "low-level call failed) (node_modules/@openzeppelin/contracts/token/\nERC20/utils/SafeERC20.sol#122)- (success,returndata) =\ntarget.call{value: value}(data) (node_modules/@openzeppelin/contrac\nts/utils/Address.sol#135)- IERC20(rewardAsset).safeTransferFrom(msg\n.sender,address(this),maxReward) (contracts/remoteOrder.sol#109)\n- require(bool,string)(escrowGMP.storeRemoteOrderPayload(id,keccak2\n56(bytes)(abi.encode(rewardAsset,maxReward))),Payload already\nstored) (contracts/remoteOrder.sol#111) External calls sending eth:\n- orderMemoryData(input) (contracts/remoteOrder.sol#137)\n- (success,returndata) = target.call{value: value}(data) (node_modu\nles/@openzeppelin/contracts/utils/Address.sol#135)Event emitted\nafter the call(s):\n- OrderCreated(generateId(msg.sender,uint32(block.number)),destinat\nion,asset,targetAccount,amount,rewardAsset,insurance,maxReward,uint\n32(block.number)) (contracts/remoteOrder.sol#139)\nLow\nt3BTC.constructor(string,string).name (contracts/t3BTCToken.sol#11)\nshadows:\n- ERC20.name() (node_modules/@openzeppelin/contracts/token/ERC20/ER\nC20.sol#62-64) (function)\n- IERC20Metadata.name() (node_modules/@openzeppelin/contracts/token\n/ERC20/extensions/IERC20Metadata.sol#17) "
+   }
+  ]
+ },
+ {
+  "file": "manta-veridise-chain.md",
+  "findings": [
+   {
+    "line": 130,
+    "severity": "critical",
+    "title": "Critical-Severity Issues 0 0",
+    "excerpt": "Critical-Severity Issues 0 0"
+   },
+   {
+    "line": 131,
+    "severity": "high",
+    "title": "High-Severity Issues 0 0",
+    "excerpt": "High-Severity Issues 0 0"
+   },
+   {
+    "line": 132,
+    "severity": "medium",
+    "title": "Medium-Severity Issues 7 6",
+    "excerpt": "Medium-Severity Issues 7 6"
+   },
+   {
+    "line": 133,
+    "severity": "low",
+    "title": "Low-Severity Issues 7 7",
+    "excerpt": "Low-Severity Issues 7 7\nWarning-Severity Issues 4 3"
+   },
+   {
+    "line": 135,
+    "severity": "informational",
+    "title": "Informational-Severity Issues 1 0",
+    "excerpt": "Informational-Severity Issues 1 0\nTOTAL 19 16\nTable 2.4:Category Breakdown.\nName Number\nLogic Error 7\nBad Extrensic Weight 4\nConsensus 3\nData Validation 3\nHash Collision 1\nMaintainability 1\nVeridise Audit Report: Manta Network \u00a92023 Veridise Inc.\n\n\n\nAudit Goals and Scope 3\n3.1 Audit Goals\nTheengagementwasscopedtoprovideasecurityassessmentofMantaChain,MantaNetwork\u2019s\nblockchainimplementation.MantaChainisaSubstrate-basedPolkadotparachainthatprovides\na protocol called MantaPay where clients (such as other parachains or end-users) can trade\nand deposit assets privately. The MantaPay protocol consists of two components: an offchain\nprover which generates zero-knowledge proofs and UTXOs, and an on-chain component which\nverifies the proofs and updates the ledger with the transactions. Each component consists of a\nwhitepaper and formal specification; this audit was scoped to assess the on-chain component.\nWith this in mind, we sought to answer the following questions in our audit:\n\u25b6 Arethereanydesignflawswithrespecttotheon-chainpartofMantaPayinthewhitepaper\nor formal specification?\n\u25b6 Does the on-chain component of MantaPay adhere to its whitepaper and formal specifica-\ntion?\n\u25b6 Is Manta Chai"
+   },
+   {
+    "line": 310,
+    "severity": "informational",
+    "title": "Recommendation Similar toschedule_leave_candidates, calculate the weights dynamically",
+    "excerpt": "Recommendation Similar toschedule_leave_candidates, calculate the weights dynamically\nrather than charging a fixed cost.\nDeveloper Response The developers have acknowledged the issue and are determining how\nto address it.\n\u00a92023 Veridise Inc. Veridise Audit Report: Manta Network\n\n4.1 Detailed Description of Issues 11\n1 #[pallet::call_index(12)]\n2 #[pallet::weight(<T as Config>::WeightInfo::go _offline())]\n3 /// Temporarily leave the set of collator candidates without unbonding\n4 pub fn go_offline(origin: OriginFor<T>) -> DispatchResultWithPostInfo {\n5 let collator = ensure _signed(origin)?;\n6 let mut state = <CandidateInfo<T>>::get(&collator).ok _or(Error::<T>::CandidateDNE\n)?;\n7 ensure!(state.is_active(), Error::<T>::AlreadyOffline);\n8 state.go_offline();\n9 let mut candidates = <CandidatePool<T>>::get();\n10 if candidates.remove(&Bond::from_owner(collator.clone())) {\n11 <CandidatePool<T>>::put(candidates);\n12 }\n13 <CandidateInfo<T>>::insert(&collator, state);\n14 Self::deposit_event(Event::CandidateWentOffline {\n15 candidate: collator,\n16 });\n17 Ok(().into())\n18 }\nSnippet 4.1:go_offline calls remove on theCandidatePoolbut charges users a fixed weight in\nWeightInfo::go_offline\nVeridis"
+   },
+   {
+    "line": 371,
+    "severity": "informational",
+    "title": "Recommendation There are a few ways to mitigate this. Protocols like Semaphore maintain",
+    "excerpt": "Recommendation There are a few ways to mitigate this. Protocols like Semaphore maintain\na timeout periodTIMEOUT and associate each root with a timestamp indicating when it was\ncreated. Any root created beforenow() - TIMEOUT is rejected. Another option is to only store\nthe N previously generated roots and only allow a root if it belongs to the set ofN previously\ngenerated roots. The latter option would have the additional benefit of not needing to store\nevery root on chain.\nDeveloper Response The developers acknowledged the issue and will either use a timestamp\nor only maintain the N previously generated roots.\n\u00a92023 Veridise Inc. Veridise Audit Report: Manta Network\n\n4.1 Detailed Description of Issues 13\n4.1.3 V-MANC-VUL-003: MantaPay weights calculated with a small database\nSeverity Medium Commit 45ba60e1d\nType Bad Extrinsic Weight Status Acknowledged\nFile(s) pallets/manta-pay/src/lib.rs\nLocation(s) to_private, to_public, private_transfer\nTransactions to_public, to_private, and private_transfer take as input nullifiers and mem-\nbership proofs and generate UTXOs. These UTXOs are then added to a Merkle tree on the\nledger.\nManta pay shards this Merkle tree into 256 buckets where each"
+   },
+   {
+    "line": 406,
+    "severity": "informational",
+    "title": "Recommendation There are several ways to address this.",
+    "excerpt": "Recommendation There are several ways to address this.\nOne strategy would be to take in an additional parameter that corresponds to the logarithm of\nsize of the Merkle Tree on the ledger. The weight charged can be proportional to this value. In\nthe implementation, this value (technically2value) can be compared against the actual size and\nthe transaction will only proceed if it is larger than or equal to the actual size.\nAnother strategy would be to benchmark the pallets by taking into account the size of the tree\nas well. If we expect Manta-Pay to not exceed more than a billion transactions then maybe\nbenchmark the pallet assuming the current path length is around 24-28.\nDeveloper Response The developers acknowledged that the weights should be recalculated\nwith a more saturated database.\nVeridise Audit Report: Manta Network \u00a92023 Veridise Inc.\n\n14 4 Vulnerability Report\n4.1.4 V-MANC-VUL-004: Total supply of native assets can exceed the set limit\nSeverity Medium Commit 45ba60e1d\nType Logic Error Status Acknowledged\nFile(s) pallets/asset-manager/src/lib.rs\nLocation(s) mint_asset\nOne invariant underlying the correctness of MantaPay is that the total supply of an asset cannot\nexceedthe"
+   },
+   {
+    "line": 441,
+    "severity": "informational",
+    "title": "Recommendation We recommend a similar check be done for Native assets as is done for",
+    "excerpt": "Recommendation We recommend a similar check be done for Native assets as is done for\nNonNative assets to enforce that the total supply cannot exceed the maximum that can be held\nin a given account.\nDeveloper Response The developers have acknowledged the issue and are determining how\nto address it.\n\u00a92023 Veridise Inc. Veridise Audit Report: Manta Network\n\n4.1 Detailed Description of Issues 15\n1 #[test]\n2 fn public_account_issue() {\n3 let mut rng = OsRng;\n4 new_test_ext().execute_with(|| {\n5 let asset_id = NATIVE _ASSET_ID;\n6 let value = 1000 u128;\n7 let id = NATIVE _ASSET_ID;\n8 let metadata = AssetRegistryMetadata {\n9 metadata: AssetStorageMetadata {\n10 name: b\"Calamari\".to _vec(),\n11 symbol: b\"KMA\".to _vec(),\n12 decimals: 12,\n13 is_frozen: false,\n14 },\n15 min_balance: TEST _DEFAULT_ASSET_ED2,\n16 is_sufficient: true,\n17 };\n18 assert_ok!(MantaAssetRegistry::create_asset(\n19 id, metadata.into(), TEST _DEFAULT_ASSET_ED2,\n20 true\n21 ));\n22 assert_ok!(FungibleLedger::<Test>::deposit_minting(id, &ALICE, 2 *value));\n23 assert_ok!(FungibleLedger::<Test>::deposit_minting(id, &MantaPay::account _id\n(), u128::MAX));\n24\n25\n26 let mut utxo_accumulator = UtxoAccumulator::new(UTXO _ACCUMULATOR_MOD"
+   },
+   {
+    "line": 533,
+    "severity": "informational",
+    "title": "Recommendation The main issue with this extrinsic is its interface makes it appear as though",
+    "excerpt": "Recommendation The main issue with this extrinsic is its interface makes it appear as though\nthe metadatamin_balance and is_sufficient could be changed when it actually didn\u2019t. Either\nthe API should be changed to only take the metadata which should be changed, or it should\nappropriately updatemin_balance and is_sufficient.\nDeveloperResponse Thedevelopersacknowledgedthisissueandarediscussingtwopossible\nfixes. The first is to update both parameters in the asset pallet and the second is to change the\ninterface to not allow themin_balance or is_sufficient parameters to be updated.\n\u00a92023 Veridise Inc. Veridise Audit Report: Manta Network\n\n4.1 Detailed Description of Issues 17\n4.1.6 V-MANC-VUL-006: No slashing mechanism for collators\nSeverity Medium Commit 45ba60e1d\nType Consensus Status Acknowledged\nFile(s) parachain-staking\nLocation(s) N/A\nProof of Stake blockchains oftentimes have a slashing mechanism to detect poorly performing\nstakers and punish them. Usually, a large portion of the staker\u2019s stake is taken by the chain as\npunishment for poor performance.\nCurrently, Manta Chain does not have any slashing mechanism. Instead, it uses a combination\nof social pressure and manual slashing"
+   },
+   {
+    "line": 561,
+    "severity": "informational",
+    "title": "Recommendation We recommend that Manta Chain have a slashing mechanism in place to",
+    "excerpt": "Recommendation We recommend that Manta Chain have a slashing mechanism in place to\nswap in if/when the current process is insufficient.\nDeveloper Response The developers acknowledged that there is no slashing mechanism in\nplace and plan to include one in the future if/when the current process stops working.\nVeridise Audit Report: Manta Network \u00a92023 Veridise Inc.\n\n18 4 Vulnerability Report\n4.1.7 V-MANC-VUL-007: Collators given full rewards regardless of quality\nSeverity Medium Commit 45ba60e1d\nType Consensus Status Open\nFile(s) pallets/parachain-staking/src/lib.rs\nLocation(s) pay_one_collator_reward\nManta Chain rewards collators by first allocating a fixed number of points (20) for every block\nthey author and then giving the collator a fixed percentage of those allocated points as rewards.\nHowever, there is no check on the quality of the blocks authored by the collator: an empty block\nwill result in just as many rewards as a full block.\nCurrently, Manta relies on the owners to monitor the blocks on-chain and manually punish\ncollators who perform poorly. However, as the chain grows, this misbehavior may not be easy\nto detect.\nOne relatively simple way to address this issue is to adj"
+   },
+   {
+    "line": 581,
+    "severity": "high",
+    "title": "high quality blocks.",
+    "excerpt": "high quality blocks.\nImpact Collators can effectively steal funds from Manta by authoring low quality blocks (i.e,\nempty or partial blocks) and reaping full rewards."
+   },
+   {
+    "line": 584,
+    "severity": "informational",
+    "title": "Recommendation We recommend the developers adjust the rewards system to either reward",
+    "excerpt": "Recommendation We recommend the developers adjust the rewards system to either reward\nthe collators for high quality blocks or punish them for authoring poor ones.\nDeveloper Response TBD\n\u00a92023 Veridise Inc. Veridise Audit Report: Manta Network\n\n4.1 Detailed Description of Issues 19\n4.1.8 V-MANC-VUL-008: Missing validation in pull_ledger_diff\nSeverity Low Commit 45ba60e1d\nType Data Validation Status Acknowledged\nFile(s) pallets/manta-pay/src/lib.rs\nLocation(s) Line 593\npull_ledger_diff takes as input aCheckpoint which is a struct of two fieldsreceiver_index\nand sender_index and pulls sender and receiver data from the ledger starting atsender_index\n(resp. receiver_index) up till at most sender_index + PULL_MAX_SENDER_UPDATE_SIZE (resp.\nreceiver_index + PULL_MAX_RECEIVER_UPDATE_SIZE). However, there is no check that this sum\ncannot overflow for both the sender and receiver index inpull_senders, pull_receivers,\npull_senders_for_shardand pull_receivers_for_shard.\nImpact If the code is compiled without--releaseflag then a malicious user could crash the\nnode by passing in bad values. If it is built with--release then the call will be reported as\nsuccessful and no senders or receivers will"
+   },
+   {
+    "line": 606,
+    "severity": "informational",
+    "title": "Recommendation We recommend adding bounds checks to be safe and to return an Error.",
+    "excerpt": "Recommendation We recommend adding bounds checks to be safe and to return an Error.\nDeveloper Response The developers are aware and agree that it would be better to check and\nreturn an error.\nVeridise Audit Report: Manta Network \u00a92023 Veridise Inc.\n\n20 4 Vulnerability Report\n4.1.9 V-MANC-VUL-009: increase_count_of_associated_assets can overflow\nSeverity Low Commit 45ba60e1d\nType Logic Error Status Acknowledged\nFile(s) pallets/asset-manager/src/lib.rs\nLocation(s) Line 590\nThe asset_manager pallet maintains a mapping of paraids to a count of assets associated with\nthat paraid. Each paraid can be associated with at most u32::MAX assets. When registering an\nasset or moving its location, the pallet callsincrease_count_of_associated_assets which takes\nasinputaparaidandincrementsthenumberofassetsassociatedwiththatparaid.However,this\nfunction does not check whether increasing the number of assets will result in an overflow.\nImpact If the runtime is compiled using--debug then this can crash the node. However, if\nbuilt under--release then the asset count will go to zero."
+   },
+   {
+    "line": 624,
+    "severity": "informational",
+    "title": "Recommendation Make this function check if the addition will result in an overflow i.e, check",
+    "excerpt": "Recommendation Make this function check if the addition will result in an overflow i.e, check\nif the current count isu32::MAX and return an error.\nDeveloper Response Acknowledged\n\u00a92023 Veridise Inc. Veridise Audit Report: Manta Network\n\n4.1 Detailed Description of Issues 21\n4.1.10 V-MANC-VUL-010: Account checks are incorrect.\nSeverity Low Commit 45ba60e1d\nType Logic Error Status Acknowledged\nFile(s) pallets/manta-pay/src/lib.rs\nLocation(s) check_sink_accounts, check_source_accounts\nWhenvalidatingatransaction,thesourceandsinkaccountsarecheckedby check_sink_accounts\nand check_source_accounts. These functions iterate over pairs(account, value) and check\nthat value can be safely deposited (withdrawn) fromaccount. The logic is correct only if every\naccount only appears in at most one pair. While this is fine for the current APIs, if the APIs\nchange to allow multiple sink or multiple source accounts, then this code needs to be refactored\nor the uniqueness needs to be enforced elsewhere.\nImpact Currently there is no impact since the current APIs only allow one account for the\nsource and sink accounts."
+   },
+   {
+    "line": 643,
+    "severity": "informational",
+    "title": "Recommendation To be safe, we recommend you add additional check in the validation step",
+    "excerpt": "Recommendation To be safe, we recommend you add additional check in the validation step\nto ensure the accounts are distinct for both sources and sinks.\nDeveloper Response The developers acknowledged the issue and plan to add a check during\nvalidation that the accounts are distinct.\nVeridise Audit Report: Manta Network \u00a92023 Veridise Inc.\n\n22 4 Vulnerability Report\n4.1.11 V-MANC-VUL-011: Unstaked user may be selected as collator\nSeverity Low Commit 45ba60e1d\nType Logic Error Status Acknowledged\nFile(s) parachain-staking/lib.rs\nLocation(s) select_top_candidates\nParachains use collators to combine transactions into blocks that are then checked by Validators\non the relay chain. Notably, this allows collators to remain relatively untrusted as validators\nwill ensure blocks were created correctly. On Manta\u2019s chain, collators are selected from a group\nof staked users who receive rewards for creating blocks. Requiring that collators be staked\nprovides additional security guarantees as if a collator does misbehave (e.g. submit no blocks\nfor validation, submit multiple conflicting blocks), governance can step in and slash the user\u2019s\nstaked funds. As such, unstaked collators have less incentiv"
+   },
+   {
+    "line": 688,
+    "severity": "informational",
+    "title": "Recommendation Thedevelopersmaywanttoconsidermaintainingasetof\u201ctrusted\u201dcollators",
+    "excerpt": "Recommendation Thedevelopersmaywanttoconsidermaintainingasetof\u201ctrusted\u201dcollators\nto fall back on in case no staked collators can be found.\n\u00a92023 Veridise Inc. Veridise Audit Report: Manta Network\n\n4.1 Detailed Description of Issues 23\n1 fn select_top_candidates(now: RoundIndex) -> ( u32, u32, BalanceOf<T>) {\n2 let (mut collator_count, mut delegation_count, mut total) =\n3 (0u32, 0 u32, BalanceOf::<T>::zero());\n4 // choose the top TotalSelected qualified candidates, ordered by stake\n5 let collators = Self::compute_top_candidates();\n6 if collators.is_empty() {\n7 // SELECTION FAILED TO SELECT >=1 COLLATOR => select collators from previous\nround\n8 let last_round = now.saturating _sub(1u32);\n9 let mut total_per_candidate: BTreeMap<T::AccountId, BalanceOf<T>> = BTreeMap\n::new();\n10 // set this round AtStake to last round AtStake\n11 for (account, snapshot) in <AtStake<T>>::iter_prefix(last_round) {\n12 collator_count = collator _count.saturating_add(1u32);\n13 delegation_count =\n14 delegation_count.saturating_add(snapshot.delegations.len() as u32 );\n15 total = total.saturating _add(snapshot.total);\n16 total_per_candidate.insert(account.clone(), snapshot.total);\n17 <AtStake<T>>::insert(now, a"
+   },
+   {
+    "line": 780,
+    "severity": "informational",
+    "title": "Recommendation We recommend that a base fee always be charged to prevent spam.",
+    "excerpt": "Recommendation We recommend that a base fee always be charged to prevent spam.\nDeveloperResponse Thedevelopersacknowledgedtheissueanddecidedtochange weigh_multi_assets\nto charge the benchmarked weight of of a single asset execution for any successfully executed\nmultiasset XCM message.\nVeridise Audit Report: Manta Network \u00a92023 Veridise Inc.\n\n26 4 Vulnerability Report\n4.1.13 V-MANC-VUL-013: Missing validation in set_units_per_second\nSeverity Low Commit 45ba60e1d\nType Data Validation Status Acknowledged\nFile(s) pallets/asset-manager/src/lib.rs\nLocation(s) set_units_per_second\nThe asset-managerpallet manages a hashmap calledUnitsPerSecondwhich mapsassetIdsto a\nu128value units_per_secondwhichisusedtodeterminethepricetoperformanXCMtransfer.It\nexposes a function calledset_units_per_secondwhich can be used to set theunits_per_second\nfor a given asset. Theunits_per_second value is used to determine the cost (in terms of the\ncorresponding asset) of purchasing a given weight to perform a transaction. The code snippet\nwhich determines the cost is shown below:\n1 let units_per_second = M::units _per_second(&asset_id).ok_or({\n2 log::debug!(\n3 target: \"FirstAssetTrader::buy _weight\",\n4 \"units_per"
+   },
+   {
+    "line": 827,
+    "severity": "informational",
+    "title": "Recommendation We recommend either changing the type of the storage variable holding",
+    "excerpt": "Recommendation We recommend either changing the type of the storage variable holding\nunits_per_second to be a map of assetId to a value of typeu64 or by validating that the amount\nis sufficiently small.\n\u00a92023 Veridise Inc. Veridise Audit Report: Manta Network\n\n4.1 Detailed Description of Issues 27\nDeveloper Response The developers acknowledged the issue and will fix the weight calcula-\ntion to use saturating arithmetic. That should address this issue.\nVeridise Audit Report: Manta Network \u00a92023 Veridise Inc.\n\n28 4 Vulnerability Report\n4.1.14 V-MANC-VUL-014: Collator is a single point of failure for a round\nSeverity Low Commit 45ba60e1d\nType Consensus Status Acknowledged\nFile(s) N/A\nLocation(s) N/A\nThe Manta parachain uses the Aura consensus mechanism to select collators to author blocks.\nAuraselectsaprimarycollatorforaroundandonlythatcollatorisallowedtoproduceblocksin\nthat round. However, if that collator goes down then no blocks will get produced which makes\nthat collator a single point of failure.\nOtherparachainslikeMoonbeamaddressthisbyselectingmultiplecollatorsinagivenround.\nImpact If a collator goes down, then no blocks will get produced for a given round, thereby\nimpacting the"
+   },
+   {
+    "line": 850,
+    "severity": "informational",
+    "title": "Recommendation WerecommendthatMantauseaconsensusmechanismthatselectsmultiple",
+    "excerpt": "Recommendation WerecommendthatMantauseaconsensusmechanismthatselectsmultiple\ncollators. Ideally, this mechanism would choose geographically separated collators so if one\ncollator goes down the likelihood of the other going down is low.\nDeveloper Response The developers are aware of this issue and have plans in place to move\naway from the Aura consensus mechanism.\n\u00a92023 Veridise Inc. Veridise Audit Report: Manta Network\n\n4.1 Detailed Description of Issues 29\n4.1.15 V-MANC-VUL-015: Unchecked index calculation in spend_all\nSeverity Warning Commit 45ba60e1d\nType Logic Error Status Acknowledged\nFile(s) pallets/manta-pay/src/lib.rs\nLocation(s) spend_all\nThe spend_allfunction in the Manta-Pay pallet does the following:\n1. Adds the nullifier commitments in the TransactionPost to theNulliferCommitmentSet\n2. Insertseach (nullifier, outgoingNote) pairtothe NullifierSetInsertionOrderstructure.\n3. Updates a global variableNullifierSetSize which stores the size of the nullifier commit-\nment set.\nTheindexwherethepairgetsinserted,alongwiththenewnullifiersize,isbasedonacalculation\nindex + i where i is the index of the corresponding SenderPost andindex is the current size of\nthe set. However, this a"
+   },
+   {
+    "line": 875,
+    "severity": "informational",
+    "title": "Recommendation Add an overflow check and return an error.",
+    "excerpt": "Recommendation Add an overflow check and return an error.\nDeveloper Response TBD\nVeridise Audit Report: Manta Network \u00a92023 Veridise Inc.\n\n30 4 Vulnerability Report\n4.1.16 V-MANC-VUL-016: Excess fees not refunded\nSeverity Warning Commit 45ba60e1d\nType Bad Extrinsic Weight Status Intended Behavior\nFile(s) parachain-staking/lib.rs\nLocation(s) (cancel_leave, execute_leave, schedule_leave, join)_candidates\nWhen a substrate extrinsic is created, its weight must be carefully considered to ensure it\ncorrectly reflects the computational cost of the operation as extrinsic weight is directly related\nto the fees that are charged to the user. This weight should capture the maximum number of\ncomputational resources that will be consumed by the extrinsic as excess fees can be returned.\nIn several functions, though, the weights are computed based on the value of an argument\nprovided by the user which might not always reflect the true cost of the computation. For\nexample, consider the following:\n1 #[pallet::call_index(11)]\n2 #[pallet::weight(<T as Config>::WeightInfo::cancel _leave_candidates(*candidate_count)\n)]\n3 /// Cancel open request to leave candidates\n4 /// - only callable by collator accou"
+   },
+   {
+    "line": 920,
+    "severity": "informational",
+    "title": "Recommendation Refund the user additional fees that are not consumed.",
+    "excerpt": "Recommendation Refund the user additional fees that are not consumed.\n\u00a92023 Veridise Inc. Veridise Audit Report: Manta Network\n\n4.1 Detailed Description of Issues 31\nDeveloper Response Since these extrinsics are likely to be executed sparingly and since\nthe additional fees are likely to be small, we feel like the additional computational cost of\ndetermining the excess does not.\nVeridise Audit Report: Manta Network \u00a92023 Veridise Inc.\n\n32 4 Vulnerability Report\n4.1.17 V-MANC-VUL-017: Assets can be registered at unsupported locations\nSeverity Warning Commit 45ba60e1d\nType Data Validation Status Acknowledged\nFile(s) pallets/asset-manager/src/lib.rs\nLocation(s) register_asset\nThe asset-manager pallet allows assets to be registered, managed, and minted. In particular,\nregister_asset takes as input an asset, location, and corresponding asset_metadata and\nregister the asset. Every asset must be associated with a location; however, Manta only supports\nassetsfromspecificlocations.Thecurrentimplementationof asset-managerdoesnotperformany\nvalidationonthelocationspassedinto register_assetpotentiallyallowingassetstoberegistered\nfrom untested locations. The pallet also exposes a method calledupd"
+   },
+   {
+    "line": 944,
+    "severity": "informational",
+    "title": "Recommendation The asset-manager pallet already implements theContains trait which",
+    "excerpt": "Recommendation The asset-manager pallet already implements theContains trait which\nexposes a methodcontainswhich takes as input a location and returns true if and only if the\nlocationissupported.Currentlythatmethodisunusedandcanbeusedtovalidatethelocations\npassed in.\nDeveloper Response The developers acknowledged the issue and plan to add a check in\nregister_asset.\n\u00a92023 Veridise Inc. Veridise Audit Report: Manta Network\n\n4.1 Detailed Description of Issues 33\n4.1.18 V-MANC-VUL-018: Minimum delegator funds is not MinDelegatorStk\nSeverity Warning Commit 45ba60e1d\nType Logic Error Status Acknowledged\nFile(s) parachain-staking/lib.rs\nLocation(s) N/A\nIn the case whereMinDelegation < MinDelegatorStk , it is possible for the delegator\u2019s staked\nfundstobelessthan MinDelegatorStk.Thiscanoccurthroughthefollowingsequenceofcalls:\n1. delegate amount Nfrom delegatorD to candidateC1where N >= MinDelegatorStk\n2. delegate amount M from delegator D to candidate C2 where M < MinDelegatorStk and\nM >= MinDelegation\n3. schedule_leave_candidates and execute_leave_candidates for C1\nThis results inDhaving Mfunds staked, whereM < MinDelegatorStk .\nImpact If MinDelegation is less than MinDelegatorStk, a deleg"
+   },
+   {
+    "line": 970,
+    "severity": "informational",
+    "title": "Recommendation There are two options",
+    "excerpt": "Recommendation There are two options\n1. When starting a runtime, ensure thatMinDelegation >= MinDelegatorStk\n2. Wheneveradelegationisremoved(suchasin execute_leave_candidates),ensurethatthe\nremaining locked funds for the delegator are at leastMinDelegatorStk.\nDeveloper Response The developers acknowledged the issue and are considering removing\nMinDelegation as there is no apparent reason for it being different from MinDelegatorStk.\nVeridise Audit Report: Manta Network \u00a92023 Veridise Inc.\n\n34 4 Vulnerability Report\n4.1.19 V-MANC-VUL-019: Unintended test crashes\nSeverity Info Commit 45ba60e1d\nType Maintainability Status Open\nFile(s) pallets/manta-pay/src/lib/rs\nLocation(s) to_private_should_work\nMany of the manta-pay tests randomly generate an asset id, total supply, and an amount to\nmake private. To ensure the total supply of the asset is greater than the minimum balance, the\nminimum balance is always added to randomly generated total supply as seen in this test:\n1 fn to_private_should_work() {\n2 let mut rng = OsRng;\n3 for _ in 0..RANDOMIZED_TESTS_ITERATIONS {\n4 new_test_ext().execute_with(|| {\n5 let asset_id = rng.gen();\n6 let total_free_supply = rng.gen();\n7 initialize_test(asset_"
+   },
+   {
+    "line": 1006,
+    "severity": "informational",
+    "title": "Recommendation Change the test to generate a value fortotal_free_supply between [0,",
+    "excerpt": "Recommendation Change the test to generate a value fortotal_free_supply between [0,\nu128::MAX - TEST _DEFAULT_ASSET_ED)\nDeveloper Response TBD\n\u00a92023 Veridise Inc. Veridise Audit Report: Manta Network\n\nFuzz Testing 5\n5.1 Methodology\nOur goal was to fuzz test Manta Chain to assess its functional correctness i.e, whether the\nimplementation deviates from the intended behavior. We used afl.rs as our fuzzer and started\nwriting invariants \u2013logical formulas that should hold after every transaction. We then encoded\nthose invariants as assertions in Rust. For each invariant, we wrote a harness which executed a\nrandom sequence of relevant external calls and then asserted the invariant should hold after the\ncalls. We prioritized invariants which had a higher security impact e.g, if violated would allow\nsomeone to steal funds. For all invariants, we ran afl.rs for at least 24 hours for each invariant.\n5.2 Properties Fuzzed\nThe following table describes the invariants we fuzz-tested. The first column states which\nsubsystem (e.g, pallet or xcm) the invarianted is associated with. The second describes the\ninvariantinformallyinEnglishandthelastcolumnnoteswhetherwefoundabugwhenfuzzing\nthe invariant "
+   }
+  ]
+ },
+ {
+  "file": "publicauditreports-nm0286-final-nodle-pdf.md",
+  "findings": [
+   {
+    "line": 92,
+    "severity": "low",
+    "title": "Low Fixed",
+    "excerpt": "Low Fixed\n3 Lack of disabling mechanism in GrantsMigration contract Info Mitigated\n3\n\nNM-0286 Nodle - SECURITY REVIEW\n4 System Overview\nThe reviewed smart contracts are part of Nodle Network\u2019s migration from the Eden parachain on Polkadot to zkSync on Ethereum. These\ncontracts handle both the migration of user grants and the transition of the rewards distribution mechanism, which will be halted on Eden\nparachain and fully transitioned to zkSync.\nThe following subsections provide an overview of the grants migration process and the new rewards distribution system, detailing the main\nuser flows and components associated with each.\n4.1 Grants Migration\nFig. 2: Nodle\u2019s grants migration system overview. The diagram presents only the core flows, excluding standard configuration\nand admin-specific actions.\nThe grants migration goes through the following main steps:\n1. Initiating Grant Migration: Users can initiate the migration of their vesting schedules to zkSync by invoking thebridge_all_vesting_-\nschedules(...) function on the pallet_grants contract on the Eden parachain. This function claims the available tokens and transfers\nthem to the user, then emits an event to initiate the migrat"
+   },
+   {
+    "line": 201,
+    "severity": "high",
+    "title": "High Medium High Critical",
+    "excerpt": "High Medium High Critical"
+   },
+   {
+    "line": 202,
+    "severity": "medium",
+    "title": "Medium Low Medium High",
+    "excerpt": "Medium Low Medium High"
+   },
+   {
+    "line": 203,
+    "severity": "low",
+    "title": "Low Info/Best Practices Low Medium",
+    "excerpt": "Low Info/Best Practices Low Medium\nUndetermined Undetermined Undetermined Undetermined"
+   },
+   {
+    "line": 205,
+    "severity": "low",
+    "title": "Low Medium High",
+    "excerpt": "Low Medium High\nLikelihood\nTo address issues that do not fit a High/Medium/Low severity, Nethermind Security also uses three more finding severities:Informational,\nBest Practices, and Undetermined.\na) Informational findings do not pose any risk to the application, but they carry some information that the audit team intends to pass\nto the client formally;\nb) Best Practice findings are used when some piece of code does not conform with smart contract development best practices;\nc) Undetermined findings are used when we cannot predict the impact or likelihood of the issue.\n7\n\nNM-0286 Nodle - SECURITY REVIEW\n6 Issues\n6.1 [High] User grants migration can be blocked by exploiting the MAX_SCHEDULES limit\nFile(s): Grants.sol\nDescription: The Grants contract manages users\u2019 vesting schedules through thevestingSchedules mapping. The addVestingSchedule(...)\nfunction, which is public, enables anyone to add a vesting schedule for any recipient by specifying parameters such asperiod, start, and\nperPeriodAmount. This function includes a safeguard to ensure that the number of schedules per user does not exceed the predefined\nMAX_SCHEDULES limit, set to 100.\nHowever, because the function is public, "
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-snowbridge-2024-02-12-audit-report-snowbridge-extension-v1-1-pdf.md",
+  "findings": [
+   {
+    "line": 966,
+    "severity": "low",
+    "title": "low-level",
+    "excerpt": "low-level\nfunctionality\nfrom\ndi\ufb00erent\necosystems.\nSolidity\nsmart\ncontracts\nuse\nassembly\nand\nmemory\npointers.\nCode\nreadability\nand\nclarity\nMedium\n-\nLevel\nof\ndocumentation\nMedium\nThe\nprotocol\nis\nwell\ndocumented.\nHowever,\nthere\nis\nlittle\ndocumentation\nof\nintegrations\nwith\nthird-party\ncode.\nTest\ncoverage"
+   },
+   {
+    "line": 1380,
+    "severity": "low",
+    "title": "low-level",
+    "excerpt": "low-level\nSolidity\nAPIs,\nparticularly\nthe\npotential\nfor\ninsu\ufb03cient\ndestinationFee\nleading\nto\nan\nunrecoverable\nloss\nof\nfunds.\nThey\nemphasize\nthat\ntheir\ndesign\ndoes\nnot\nintend\nfor\nusers\nto\ndirectly\nuse\nthe\nsendToken\nAPI.\nTo\nmitigate\nthese\nrisks,\nthe\nclient\nhas\nimplemented"
+   },
+   {
+    "line": 1638,
+    "severity": "low",
+    "title": "low-level",
+    "excerpt": "low-level\nSolidity\nAPIs.\nTo\nmitigate\nthese\nrisks,\nthe\nclient\nhas\nimplemented\nan\no\ufb00-chain\nUX\nlayer\nthat\nserves\nas\nan\nintermediary,\nwhich\nis\ndesigned\nto\nconduct\nmultiple\ncross-chain\nintegrity\nchecks\nprior\nto\nauthorizing\nusers\nto\ntransfer\ntokens\nvia\nthe\nbridge.\nThis"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-zeitgeist-2025-01-02-audit-report-zeitgeist-combinatorial-betting-and-futarchy-security-audit-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 1081,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n-\nLevel\nof\ndocumentation"
+   },
+   {
+    "line": 1086,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\nDetailed\ndocumentation\nis\navailable\nas\nwhitepapers.\nAdditionally,\nextensive\ncomments\nare\npresent\nexplaining\nmost\nof\nthe\ncritical\nfunctions\nand\nlogic.\nTest\ncoverage"
+   },
+   {
+    "line": 1108,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\nIt\nwas\nnot\npossible\nto\ncalculate\ntest\ncoverage\ndue\nto\nerrors\nfrom\nthe\nSubstrate\nframework,\nhowever,\ntest\nscenarios\nwere\nimplemented\nto\nverify\nmost\nof\nthe\npalette\ncode.\nNote\nthat\nin\nzrml/neo-swaps/src/macros\n.rs:100\n,\nthe\nprecision\nvalue\nof\nthe\ninvariant"
+   }
+  ]
+ },
+ {
+  "file": "publicreports-solidity-smart-contract-audits-reef-finance-smartcontract-halborn-report-v1-pdf.md",
+  "findings": [
+   {
+    "line": 52,
+    "severity": "informational",
+    "title": "Recommendation 8",
+    "excerpt": "Recommendation 8 \n3.2  Use Of Block.Timestamp \u2013 Low 8 \nDescription 8"
+   },
+   {
+    "line": 55,
+    "severity": "informational",
+    "title": "Recommendation 9",
+    "excerpt": "Recommendation 9 \n3.3  Ignore Return Values - Informational 9 \nDescription 9"
+   },
+   {
+    "line": 58,
+    "severity": "informational",
+    "title": "Recommendation 10-12",
+    "excerpt": "Recommendation 10-12 \n3.4 Tautology Expressions - Informational 12 \nDescription 12"
+   },
+   {
+    "line": 61,
+    "severity": "informational",
+    "title": "Recommendation 13",
+    "excerpt": "Recommendation 13 \n3.5  Static Analysis - Low 13 \nDescription 13 \nResults 14-17 \n3.6  Erc Conformal Checker -   Informational 17 \nDescription 17"
+   },
+   {
+    "line": 67,
+    "severity": "informational",
+    "title": "Recommendation 17",
+    "excerpt": "Recommendation 17 \n\n \n 3 \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \nDOCUMENT REVISION HISTORY \n \nCONTACTS \n \nCONTACT COMPANY EMAIL \nSteven Walbroehl Halborn Steven.Walbroehl@halborn.com \nRob Behnke Halborn Rob.Behnke@halborn.com \nNishit Majithia Halborn Nishit.Majithia@halborn.com \n \nVERSION MODIFICATION DATE AUTHOR"
+   },
+   {
+    "line": 319,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:  \nAvoid relying on block.timestamp \n \nCode Location: \nMany instances in ReefLiquidityBond.sol(https://github.com/reef-\ndefi/reef-\nprotocol/blob/45579c600e9bd49b4d0a0c495f158535c98ee691/contracts/R\neefLiquidityBond.sol) contract on line number \u2013 85, 86, 87, 102, \n131, 132, 139, 140, 147, 158, 168, 169, 172 \n \n3.3 IGNORE RETURN VALUES \u2013 \nINFORMATIONAL \n \nDescription:  \nThe return value of an external call is not stored in a local or \nstate variable. In contracts ReefBasket.sol, ReefBalancer.sol, \nReefMooniswapV1.sol and ReefVaultsBasket.sol there are few \ninstances where external methods are being called and return \nvalue(bool or uint) are being ignored."
+   },
+   {
+    "line": 338,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation: \nAdd return value check to avoid unexpected crash of the contract. \nReturn value check will help in handling the exceptions better \nway. \n \nCode Locatioin: \nReefBasket.sol: Ignoring boolean return value \n(https://github.com/reef-defi/reef-\nprotocol/blob/45579c600e9bd49b4d0a0c495f158535c98ee691/contracts/ReefBa\nsket.sol#L636) \n\n \n 10 \nFINDINGS & TECH DETAILS \n \n \n \nReefBasket.sol: Ignoring uint return value \n \n(https://github.com/reef-defi/reef-\nprotocol/blob/45579c600e9bd49b4d0a0c495f158535c98ee691/contracts/ReefBa\nsket.sol#L719) \n \n \n \nReefBalancer.sol: Ignoring boolean return value \n \n(https://github.com/reef-defi/reef-\nprotocol/blob/45579c600e9bd49b4d0a0c495f158535c98ee691/contracts/R\neefBalancer.sol#L250) \n \n \n(https://github.com/reef-defi/reef-\nprotocol/blob/45579c600e9bd49b4d0a0c495f158535c98ee691/contracts/R\neefBalancer.sol#L408) \n \n \n \nReefMooniswapV1.sol: Ignoring boolean return values"
+   },
+   {
+    "line": 430,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:  \nCorrect these expressions \n \nCode Location: \nReefBasket.sol: (https://github.com/reef-defi/reef-\nprotocol/blob/45579c600e9bd49b4d0a0c495f158535c98ee691/contracts\n/ReefBasket.sol#L753) \n \nSince _newpercentage variable is declared as type of uint16, it \nwill always >=0 \n \n \nReefVaultsBasket.sol: (https://github.com/reef-defi/reef-\nprotocol/blob/45579c600e9bd49b4d0a0c495f158535c98ee691/contracts\n/ReefVaultsBasket.sol#L699) \n \nSince _newpercentage variable is declared as type of uint16, it \n\n\n \n 13 \nFINDINGS & TECH DETAILS \nwill always >=0 \n \n \n3.5 STATIC ANALYSIS \u2013 LOW \n \nDescription:  \nSlither and MythX has been run on all the scoped contracts \n(ReefBalancer.sol, ReefBasket.sol, ReefMooniswapV1.sol, \nReefLiquidityBond.sol, ReefToken.sol, ReefUniswap.sol and \nReefVaultsBasket.sol)  \n \n\n\n \n 14 \nFINDINGS & TECH DETAILS"
+   }
+  ]
+ }
+]

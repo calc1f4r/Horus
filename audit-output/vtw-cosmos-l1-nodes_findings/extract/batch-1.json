@@ -1,0 +1,763 @@
+[
+ {
+  "file": "publications-babylon-genesis-chain-zellic-audit-report-pdf.md",
+  "findings": [
+   {
+    "line": 210,
+    "severity": "informational",
+    "title": "Informational.",
+    "excerpt": "Informational.\nZellic organizes its reports such that the most important findings come first in the document, rather\nthan being strictly ordered on impact alone. Thus, we may sometimes emphasize an \"Informational\"\nfinding higher than a \"Low\" finding. The key distinction is that although certain findings may have the\nsame impact rating, their importance may differ. This varies based on various soft factors, like our\nclients\u2019 threat models, their business needs, and so on. We aim to provide useful and actionable\nadvice to our partners considering their long-term goals, rather than a simple list of security issues\nat present.\nFinally, Zellic provides a list of miscellaneous observations that do not have security impact or are\nnot directly related to the scoped modules itself. These observations \u2014 found in the Discussion\n(4. \u2197) section of the document \u2014 may include suggestions for improving the codebase, or general\nrecommendations, but do not necessarily convey that we suggest a code change.\nZellic \u00a9 2025 \u2190 Back to Contents Page 10 of 137\n\nBabylon Genesis Chain Blockchain Security Assessment March 26, 2025\n2.3. Scope\nThe engagement involved a review of the following targets:\nBabylon Ge"
+   },
+   {
+    "line": 737,
+    "severity": "low",
+    "title": "low the approach used in CreateBTCDelegation to ensure that any FP with a slashed status is ex-",
+    "excerpt": "low the approach used in CreateBTCDelegation to ensure that any FP with a slashed status is ex-\ncluded from the voting-power update.\nZellic \u00a9 2025 \u2190 Back to Contents Page 30 of 137\n\nBabylon Genesis Chain Blockchain Security Assessment March 26, 2025\nRemediation\nThis issue has been acknowledged by Babylon Labs, and fixes were implemented in the following\ncommits:\n\u2022 7725d4fc \u2197\n\u2022 ab3ee89c \u2197\nThis was remediated by ensuring that the NewFinalityProviderDistInfo function correctly in-\ncludes the slash and jail status when returning FP information.\nZellic \u00a9 2025 \u2190 Back to Contents Page 31 of 137\n\nBabylon Genesis Chain Blockchain Security Assessment March 26, 2025\n3.7. Arbitrary Deduction of T otal Bond Satoshi from Unbonding Delegation Han-\ndling\nT arget babylon/x/finality/keeper/power_dist_change.go, babylon/x/btcstaking/keep-\ner/msg_server.go\nCategory Coding Mistakes Severity Critical\nLikelihood High Impact Critical\nDescription\nThe MsgBTCUndelegate message handler, which supports early unbonding for delegations, allows\nunbonding even when the delegation is in the BTCDelegationStatus_PENDING status rather than\nBTCDelegationStatus_ACTIVED. (Reference \u2197)\nWhen the scheduled block for BTCDele"
+   },
+   {
+    "line": 2887,
+    "severity": "high",
+    "title": "high coverage (75.2%), and the types module is barely tested (4.3%).",
+    "excerpt": "high coverage (75.2%), and the types module is barely tested (4.3%).\nok github.com/babylonlabs-io/babylon/x/btcstaking 1.830s coverage:\n13.9% of statements\nok github.com/babylonlabs-io/babylon/x/btcstaking/keeper 12.753s\ncoverage: 75.2% of statements\nok github.com/babylonlabs-io/babylon/x/btcstaking/types 1.513s coverage:\n4.3% of statements\nAttack surface\nThere are a lot of essential/core messages exposed in BTC staking as it is a crucial part of the node.\nAny issues in MsgCreateBTCDelegation could allow for delegations to be made even to the POS.\nStaking without respecting the invariants on BTC could allow for false power in the staking system.\nAny issues inMsgAddBTCDelegationInclusionProof could also result in the same issues if the proof\nis not correctly validated against the corresponding BTC delegation, or certain issues could allow\nvalid proofs to not be accepted. TheMsgBTCUndelegate issues inBTCUndelegate could result in valid\nunbonding TXs to not be recognized; as such, an unbonded BTC delegation would still count towards\nan FP . Other messages are also exposed, whose failure might result in similar situations.\nZellic \u00a9 2025 \u2190 Back to Contents Page 112 of 137\n\nBabylon Genes"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-babylon-2025-06-12-audit-report-babylon-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 3168,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n \nThe\n \ncodebase\n \ncomprises\n \nseveral\n \ninterconnected\n \ncomponents,\n \nincluding\n \nthe\n \nCosmos\n \nSDK\n \nappchain,\n \nBitcoin\n \nScripts,\n \nintegration\n \nof\n \nthird-party\n \nCosmos\n \nmodules,\n \nand"
+   },
+   {
+    "line": 3223,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n \n-\n \nLevel\n \nof\n \ndocumentation"
+   },
+   {
+    "line": 3234,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n \nThe\n \nclient\n \nprovided\n \ndetailed\n \ndocumentation\n \nand\n \ndiagrams.\n \nTest\n \ncoverage\n \nMedium\n \ngo\n \ntest\n \nreports\n \nthe\n \nfollowing\n \ntest\n \ncoverages\n \nfor\n \nthe"
+   },
+   {
+    "line": 13505,
+    "severity": "informational",
+    "title": "Informational.",
+    "excerpt": "Informational.\n \nRecommendation\n \nWe\n \nrecommend\n \nreturning\n \nan\n \nerror\n \nif\n \nwithdrawAddress\n \nis\n \na\n \nblocked\n \naddress.\n \nStatus:\n \nResolved\n \nThe\n \nclient\n \n\ufb01xed\n \nthe\n \nissue"
+   }
+  ]
+ },
+ {
+  "file": "cosmos-sdk-docs-audits-group-module-audit-pdf.md",
+  "findings": [
+   {
+    "line": 97,
+    "severity": "critical",
+    "title": "critical issues were found. One finding was of medium impact, one was of low impact, and the",
+    "excerpt": "critical issues were found. One finding was of medium impact, one was of low impact, and the\nremaining findings were informational in nature.\nZellic \u00a9 2026 \u2190 Back to Contents Page 5 of 39\n\nCosmos Group Module Blockchain Security Assessment February 11, 2026\nBreakdown of Finding Impacts\nImpact Level Count\n\u25a0 Critical 0\n\u25a0 High 0\n\u25a0 Medium 1\n\u25a0 Low 1\n\u25a0 Informational 6\nZellic \u00a9 2026 \u2190 Back to Contents Page 6 of 39\n\nCosmos Group Module Blockchain Security Assessment February 11, 2026\n2. Introduction 2.1. About Cosmos Group Module\nCosmos Labs contributed the following description of the Cosmos Group module:\nThe Group module provides on-chain multisig and governance capabilities through groups,\ngroup policies, and proposals.\n2.2. Methodology\nDuring a security assessment, Zellic works through standard phases of security auditing, including\nboth automated testing and manual review. These processes can vary significantly per engagement,\nbut the majority of the time is spent on a thorough manual review of the entire scope.\nAlongside a variety of tools and analyzers used on an as-needed basis, Zellic focuses primarily on\nthe following classes of security and reliability issues:\nBasic coding mista"
+   },
+   {
+    "line": 143,
+    "severity": "informational",
+    "title": "Informational.",
+    "excerpt": "Informational.\nZellic organizes its reports such that the most important findings come first in the document, rather\nthan being strictly ordered on impact alone. Thus, we may sometimes emphasize an \"Informational\"\nZellic \u00a9 2026 \u2190 Back to Contents Page 7 of 39\n\nCosmos Group Module Blockchain Security Assessment February 11, 2026\nfinding higher than a \"Low\" finding. The key distinction is that although certain findings may have the\nsame impact rating, their importance may differ. This varies based on various soft factors, like our\nclients\u2019 threat models, their business needs, and so on. We aim to provide useful and actionable\nadvice to our partners considering their long-term goals, rather than a simple list of security issues\nat present.\nZellic \u00a9 2026 \u2190 Back to Contents Page 8 of 39\n\nCosmos Group Module Blockchain Security Assessment February 11, 2026\n2.3. Scope\nThe engagement involved a review of the following targets:\nCosmos Group Module\nType Go\nPlatform Cosmos\nT arget cosmos-sdk\nRepository https:/ /github.com/cosmos/cosmos-sdk\u2197\nVersion 9b6f685ebddccb89747d6f125aa0f53f988db61d\nPrograms types.go\nkeeper/*.go\ninternal/*.go\n2.4. Project Overview\nZellic was contracted to perform a secu"
+   },
+   {
+    "line": 1062,
+    "severity": "critical",
+    "title": "critical issues were found. One finding was of medium impact, one was of low impact, and the",
+    "excerpt": "critical issues were found. One finding was of medium impact, one was of low impact, and the\nremaining findings were informational in nature.\n5.1. Disclaimer\nThis assessment does not provide any warranties about finding all possible issues within its scope;\nin other words, the evaluation results do not guarantee the absence of any subsequent issues. Zel-\nlic, of course, also cannot make guarantees about any code added to the project after the version\nreviewed during our assessment. Furthermore, because a single assessment can never be consid-\nered comprehensive, we always recommend multiple independent assessments paired with a bug\nbounty program.\nFor each finding, Zellic provides a recommended solution. All code samples in these recommen-\ndations are intended to convey how an issue may be resolved (i.e., the idea), but they may not be\ntested or functional code. These recommendations are not exhaustive, and we encourage our part-\nners to consider them as a starting point for further discussion. We are happy to provide additional\nguidance and advice as needed.\nFinally, the contents of this assessment report are for informational purposes only; do not construe\nany information in this"
+   }
+  ]
+ },
+ {
+  "file": "publicauditreports-nm0405-final-gaia-network-token-pdf.md",
+  "findings": [
+   {
+    "line": 247,
+    "severity": "high",
+    "title": "High Medium High Critical",
+    "excerpt": "High Medium High Critical"
+   },
+   {
+    "line": 248,
+    "severity": "medium",
+    "title": "Medium Low Medium High",
+    "excerpt": "Medium Low Medium High"
+   },
+   {
+    "line": 249,
+    "severity": "low",
+    "title": "Low Info/Best Practices Low Medium",
+    "excerpt": "Low Info/Best Practices Low Medium\nUndetermined Undetermined Undetermined Undetermined"
+   },
+   {
+    "line": 251,
+    "severity": "low",
+    "title": "Low Medium High",
+    "excerpt": "Low Medium High\nLikelihood\nTo address issues that do not fit a High/Medium/Low severity, Nethermind also uses three more finding severities: Informational, Best\nPractices, and Undetermined.\na) Informational findings do not pose any risk to the application, but they carry some information that the audit team intends to\nformally pass to the client;\nb) Best Practice findings are used when some piece of code does not conform with smart contract development best practices;\nc) Undetermined findings are used when we cannot predict the impact or likelihood of the issue.\n7\n\nNM-0405 - GAIA NETWORK - SECURITY REVIEW\n6 Issues\n6.1 [Low] Cancellation in GaiaTimelock can\u2019t be called from the GaiaGovernor\nFile(s): GaiaTimelock.sol\nDescription: The cancellation of the proposal is currently done in two places. The first cancellation is reachable by the public function\nGaiaGovernor.cancel(...) and can be called only before the voting period starts. The second proposal cancellation is reachable by\nthe GaiaTimelock.cancel(...) and can be called when the voting period has ended, and the proposal is already in the queue. The\nGaiaGovernor.cancel(...) calls GovernorTimelockControl._cancel(...) which overri"
+   }
+  ]
+ },
+ {
+  "file": "publications-babylon-zellic-audit-report-pdf.md",
+  "findings": [
+   {
+    "line": 156,
+    "severity": "informational",
+    "title": "Informational.",
+    "excerpt": "Informational.\nZellic organizes its reports such that the most important findings come first in the document, rather\nthan being strictly ordered on impact alone. Thus, we may sometimes emphasize an \"Informational\"\nfinding higher than a \"Low\" finding. The key distinction is that although certain findings may have the\nsame impact rating, their importance may differ. This varies based on various soft factors, like our\nclients\u2019 threat models, their business needs, and so on. We aim to provide useful and actionable\nadvice to our partners considering their long-term goals, rather than a simple list of security issues\nat present.\nFinally, Zellic provides a list of miscellaneous observations that do not have security impact or are\nnot directly related to the scoped modules itself. These observations \u2014 found in the Discussion\n(4. \u2197) section of the document \u2014 may include suggestions for improving the codebase, or general\nrecommendations, but do not necessarily convey that we suggest a code change.\nZellic \u00a9 2024 \u2190 Back to Contents Page 8 of 26\n\nBabylon Blockchain Security Assessment June 28, 2024\n2.3. Scope\nThe engagement involved a review of the following targets:\nBabylon Modules\nZellic \u00a9 20"
+   },
+   {
+    "line": 344,
+    "severity": "medium",
+    "title": "medium severity. It is important to note that typical users (i.e., the majority) will not have the technical",
+    "excerpt": "medium severity. It is important to note that typical users (i.e., the majority) will not have the technical\ncapability to do this.\nWith a medium likelihood and medium severity, we determined a medium impact to the user as they\nare unable to withdraw their unbonded BTC.\nRecommendations\nModify the call to withdrawEarlyUnbondedTransaction() in order to pass 0 as the output index.\nAdditionally, the call to withdrawTimelockUnbondedTransaction() must also be modified to pass\nin delegation.stakingTx.outputIndex. This code is in the same function.\nRemediation\nThis issue has been acknowledged by Babylon, and a fix was implemented in commit\n5bb21090 \u2197.\nZellic \u00a9 2024 \u2190 Back to Contents Page 15 of 26\n\nBabylon Blockchain Security Assessment June 28, 2024\n3.3. Use alternative lib\nT arget btc-staking-ts/src/utils/curve.ts\nCategory Code Maturity Severity Informational\nLikelihood Low Impact Informational\nDescription\nIn btc-staking-ts library, it uses ecc from @bitcoinerlab/secp256k1, which is not implemented\nfrom bitcoinjs.\nImpact\nThere is no guarantee that the bitcoinerlab will keep up with any interface changes in the future.\nRecommendations\nUse @bitcoinjs-lib/tiny-secp256k1-asmjs, which convert"
+   }
+  ]
+ },
+ {
+  "file": "publicreports-cosmos-audits-pocket-network-validator-wpokt-golang-security-assessment-report-halborn-final-pdf.md",
+  "findings": [
+   {
+    "line": 32,
+    "severity": "informational",
+    "title": "Recommendation 20",
+    "excerpt": "Recommendation 20\nRemediation Plan 20\n4.2 (HAL-02) LACK OF ERROR HANDLING FOR filter.Next() IN THE\nSyncBlocks FUNCTION - MEDIUM(5.9) 21\nDescription 21\nCode Location 21\nBVSS 22\n1"
+   },
+   {
+    "line": 41,
+    "severity": "informational",
+    "title": "Recommendation 22",
+    "excerpt": "Recommendation 22\nRemediation Plan 22\n4.3 (HAL-03) POTENTIAL RISK OF int64 Nonce OVERFLOW IN FINDNONCE\nFUNCTION OF MintSignerRunner - MEDIUM(5.9) 23\nDescription 23\nCode Location 23\nProof Of Concept 24\nOutput 25\nBVSS 25"
+   },
+   {
+    "line": 50,
+    "severity": "informational",
+    "title": "Recommendation 25",
+    "excerpt": "Recommendation 25\nRemediation Plan 25\n4.4 (HAL-04) UNHANDLED ZERO ADDRESS IN ValidateMint FUNCTION CAN\nLEAD TO UNINTENDED BURN OPERATIONS - LOW(3.8) 26\nDescription 26\nCode Location 26\nBVSS 28"
+   },
+   {
+    "line": 57,
+    "severity": "informational",
+    "title": "Recommendation 28",
+    "excerpt": "Recommendation 28\nRemediation Plan 28\n4.5 (HAL-05) DOCKER IMAGE RUNNING AS ROOT - LOW(3.8) 29\nDescription 29\nCode Location 29\nBVSS 31"
+   },
+   {
+    "line": 63,
+    "severity": "informational",
+    "title": "Recommendation 31",
+    "excerpt": "Recommendation 31\nRemediation Plan 31\n4.6 (HAL-06) GO VERSION 1.18 IS UNSUPPORTED - LOW(3.8) 32\nDescription 32\n2\n\nCode Location 32\nBVSS 32"
+   },
+   {
+    "line": 71,
+    "severity": "informational",
+    "title": "Recommendation 32",
+    "excerpt": "Recommendation 32\nRemediation Plan 32\n4.7 (HAL-07) GO VERSIONS PRIOR TO 1.20 ARE MORE VULNERABLE TO SIDE-\nCHANNEL ATTACKS - LOW(3.8) 33\nDescription 33\nCode Location 33\nBVSS 33"
+   },
+   {
+    "line": 78,
+    "severity": "informational",
+    "title": "Recommendation 33",
+    "excerpt": "Recommendation 33\nRemediation Plan 33\n4.8 (HAL-08) UNCHECKED ERROR RETURN VALUE FOR rand.Read in random-\nString FUNCTION - LOW(3.1) 35\nDescription 35\nCode Location 35\nBVSS 35"
+   },
+   {
+    "line": 85,
+    "severity": "informational",
+    "title": "Recommendation 35",
+    "excerpt": "Recommendation 35\nRemediation Plan 35\n4.9 (HAL-09) INEFFICIENT STRING COMPARISON WITH strings.ToLower OR\nstrings.ToUpper - INFORMATIONAL(0.0) 37\nDescription 37\nCode Location 37\nBVSS 38"
+   },
+   {
+    "line": 92,
+    "severity": "informational",
+    "title": "Recommendation 38",
+    "excerpt": "Recommendation 38\nRemediation Plan 38\n3\n\n4.10 (HAL-10) UNUSED VARIABLES - INFORMATIONAL(0.0) 39\nDescription 39\nCode Location 39\nBVSS 39"
+   },
+   {
+    "line": 100,
+    "severity": "informational",
+    "title": "Recommendation 39",
+    "excerpt": "Recommendation 39\nRemediation Plan 39\n4.11 (HAL-11) UNNECESSARY BOOLEAN COMPARISONS - INFORMATIONAL(0.0)\n40\nDescription 40\nCode Location 40\nBVSS 40"
+   },
+   {
+    "line": 107,
+    "severity": "informational",
+    "title": "Recommendation 40",
+    "excerpt": "Recommendation 40\nRemediation Plan 41\n5 AUTOMATED TESTING 42\n5.1 Description 43\n5.2 Semgrep 43\nSecurity Analysis Output Sample 43\nSemgrep Results 44\n5.3 Gosec 44\nAnalysis Output Sample 44\n5.4 Golang Lint 45\nAnalysis Output Sample 45\n4\n\nDOCUMENT REVISION HISTORY\nVERSION MODIFICATION DATE\n0.1 Document Creation 08/21/2023\n0.2 Draft Version 08/23/2023\n0.3 Draft Review 08/29/2023\n1.0 Remediation Plan 08/30/2023\n1.1 Remediation Plan Review 08/31/2023\nCONTACTS\nCONTACT COMPANY EMAIL\nRob Behnke Halborn Rob.Behnke@halborn.com\nSteven Walbroehl Halborn Steven.Walbroehl@halborn.com\nGabi Urrutia Halborn Gabi.Urrutia@halborn.com\n5\n\n6\nEXECUTIVE OVERVIEW\n\n1.1 INTRODUCTION\nPocket Network engaged Halborn to conduct a security assessment on their\nvalidator codebase beginning on August 21st, 2023 and ending on August\n31st, 2023. The security assessment was scoped to the Validator code\nprovided to the Halborn team.\n1.2 ASSESSMENT SUMMARY\nThe team at Halborn was provided two weeks for the engagement and assigned\ntwo full-time security engineers to verify the security of the merge re-\nquests. The security engineers are blockchain and smart-contract security\nexperts with advanced penetration testing, smart"
+   },
+   {
+    "line": 215,
+    "severity": "low",
+    "title": "Low (AC:L) 1",
+    "excerpt": "Low (AC:L) 1"
+   },
+   {
+    "line": 216,
+    "severity": "medium",
+    "title": "Medium (AC:M) 0.67",
+    "excerpt": "Medium (AC:M) 0.67"
+   },
+   {
+    "line": 217,
+    "severity": "high",
+    "title": "High (AC:H) 0.33",
+    "excerpt": "High (AC:H) 0.33\nAttack Complexity (AX)"
+   },
+   {
+    "line": 219,
+    "severity": "low",
+    "title": "Low (AX:L) 1",
+    "excerpt": "Low (AX:L) 1"
+   },
+   {
+    "line": 220,
+    "severity": "medium",
+    "title": "Medium (AX:M) 0.67",
+    "excerpt": "Medium (AX:M) 0.67"
+   },
+   {
+    "line": 221,
+    "severity": "high",
+    "title": "High (AX:H) 0.33",
+    "excerpt": "High (AX:H) 0.33\nExploitability E is calculated using the following formula:\nE \u201c\n\u017a\nme\n10\nEXECUTIVE OVERVIEW\n\n2.2 IMPACT\nConfidentiality (C):\nMeasures the impact to the confidentiality of the information resources\nmanaged by the contract due to a successfully exploited vulnerability.\nConfidentiality refers to limiting access to authorized users only.\nIntegrity (I):\nMeasures the impact to integrity of a successfully exploited vulnerabil-\nity. Integrity refers to the trustworthiness and veracity of data stored\nand/or processed on-chain. Integrity impact directly affecting Deposit\nor Yield records is excluded.\nAvailability (A):\nMeasures the impact to the availability of the impacted component re-\nsulting from a successfully exploited vulnerability. This metric refers\nto smart contract features and functionality, not state. Availability\nimpact directly affecting Deposit or Yield is excluded.\nDeposit (D):\nMeasures the impact to the deposits made to the contract by either users\nor owners.\nYield (Y):\nMeasures the impact to the yield generated by the contract for either\nusers or owners.\n11\nEXECUTIVE OVERVIEW\n\nMetrics:\nImpact Metric\n(mI) Metric Value Numerical Value\nConfidentiality (C)\nNone "
+   },
+   {
+    "line": 258,
+    "severity": "low",
+    "title": "Low (I:L) 0.25",
+    "excerpt": "Low (I:L) 0.25"
+   },
+   {
+    "line": 259,
+    "severity": "medium",
+    "title": "Medium (I:M) 0.5",
+    "excerpt": "Medium (I:M) 0.5"
+   },
+   {
+    "line": 260,
+    "severity": "high",
+    "title": "High (I:H) 0.75",
+    "excerpt": "High (I:H) 0.75"
+   },
+   {
+    "line": 261,
+    "severity": "critical",
+    "title": "Critical (I:C) 1",
+    "excerpt": "Critical (I:C) 1\nIntegrity (I)\nNone (I:N) 0"
+   },
+   {
+    "line": 264,
+    "severity": "low",
+    "title": "Low (I:L) 0.25",
+    "excerpt": "Low (I:L) 0.25"
+   },
+   {
+    "line": 265,
+    "severity": "medium",
+    "title": "Medium (I:M) 0.5",
+    "excerpt": "Medium (I:M) 0.5"
+   },
+   {
+    "line": 266,
+    "severity": "high",
+    "title": "High (I:H) 0.75",
+    "excerpt": "High (I:H) 0.75"
+   },
+   {
+    "line": 267,
+    "severity": "critical",
+    "title": "Critical (I:C) 1",
+    "excerpt": "Critical (I:C) 1\nAvailability (A)\nNone (A:N) 0"
+   },
+   {
+    "line": 270,
+    "severity": "low",
+    "title": "Low (A:L) 0.25",
+    "excerpt": "Low (A:L) 0.25"
+   },
+   {
+    "line": 271,
+    "severity": "medium",
+    "title": "Medium (A:M) 0.5",
+    "excerpt": "Medium (A:M) 0.5"
+   },
+   {
+    "line": 272,
+    "severity": "high",
+    "title": "High (A:H) 0.75",
+    "excerpt": "High (A:H) 0.75"
+   },
+   {
+    "line": 273,
+    "severity": "critical",
+    "title": "Critical 1",
+    "excerpt": "Critical 1\nDeposit (D)\nNone (D:N) 0"
+   },
+   {
+    "line": 276,
+    "severity": "low",
+    "title": "Low (D:L) 0.25",
+    "excerpt": "Low (D:L) 0.25"
+   },
+   {
+    "line": 277,
+    "severity": "medium",
+    "title": "Medium (D:M) 0.5",
+    "excerpt": "Medium (D:M) 0.5"
+   },
+   {
+    "line": 278,
+    "severity": "high",
+    "title": "High (D:H) 0.75",
+    "excerpt": "High (D:H) 0.75"
+   },
+   {
+    "line": 279,
+    "severity": "critical",
+    "title": "Critical (D:C) 1",
+    "excerpt": "Critical (D:C) 1\nYield (Y)\nNone (Y:N) 0"
+   },
+   {
+    "line": 282,
+    "severity": "low",
+    "title": "Low (Y:L) 0.25",
+    "excerpt": "Low (Y:L) 0.25"
+   },
+   {
+    "line": 283,
+    "severity": "medium",
+    "title": "Medium: (Y:M) 0.5",
+    "excerpt": "Medium: (Y:M) 0.5"
+   },
+   {
+    "line": 284,
+    "severity": "high",
+    "title": "High: (Y:H) 0.75",
+    "excerpt": "High: (Y:H) 0.75"
+   },
+   {
+    "line": 285,
+    "severity": "critical",
+    "title": "Critical (Y:H) 1",
+    "excerpt": "Critical (Y:H) 1\nImpact I is calculated using the following formula:\nI \u201c maxpmIq `\n\u0159 mI \u00b4 maxpmIq\n4\n12\nEXECUTIVE OVERVIEW\n\n2.3 SEVERITY COEFFICIENT\nReversibility (R):\nDescribes the share of the exploited vulnerability effects that can be\nreversed. For upgradeable contracts, assume the contract private key is\navailable.\nScope (S):\nCaptures whether a vulnerability in one vulnerable contract impacts re-\nsources in other contracts.\nCoefficient\n(C) Coefficient Value Numerical Value\nReversibility ( r)\nNone (R:N) 1\nPartial (R:P) 0.5\nFull (R:F) 0.25\nScope ( s) Changed (S:C) 1.25\nUnchanged (S:U) 1\nSeverity Coefficient C is obtained by the following product:\nC \u201c rs\n13\nEXECUTIVE OVERVIEW\n\nThe Vulnerability Severity Score S is obtained by:\nS \u201c minp10, EIC \u02da 10q\nThe score is rounded up to 1 decimal places.\nSeverity Score Value Range"
+   },
+   {
+    "line": 318,
+    "severity": "critical",
+    "title": "Critical 9 - 10",
+    "excerpt": "Critical 9 - 10"
+   },
+   {
+    "line": 319,
+    "severity": "high",
+    "title": "High 7 - 8.9",
+    "excerpt": "High 7 - 8.9"
+   },
+   {
+    "line": 320,
+    "severity": "medium",
+    "title": "Medium 4.5 - 6.9",
+    "excerpt": "Medium 4.5 - 6.9"
+   },
+   {
+    "line": 321,
+    "severity": "low",
+    "title": "Low 2 - 4.4",
+    "excerpt": "Low 2 - 4.4"
+   },
+   {
+    "line": 322,
+    "severity": "informational",
+    "title": "Informational 0 - 1.9",
+    "excerpt": "Informational 0 - 1.9\n14\nEXECUTIVE OVERVIEW\n\n2.4 SCOPE\nIN-SCOPE CODE & COMMIT:\nCode repositories: wpokt-validator\n1. ASSESSED COMMIT ID:\n\u2022 Commit ID: 257a51bc6c51ef8107815870e993eb1f7e44ec78\n2. ASSESSED COMMIT ID:\n\u2022 Commit ID: 04950788585191126fe2e51cf091c740414e7b2b\nREMEDIATION COMMIT IDs & TREE :\nRemediation Tree: wpokt-validator\n\u2022 Commit ID: e0d4ec8ea7bbf2c77e2c4e2aabdae081baec7fc4\n\u2022 bdb5ef0531750d12ae92c170f546b1aad6fbbd3e\n\u2022 5f383e00495fd185eaf7ba4f03172613c035f95e\n\u2022 31987ccf4c9b9d19c408b97424f2bb55b6ce9de1\n\u2022 bd29988867fcdfaceef27f3dcfefc62fac7b8d51\n\u2022 1a8772904d37b96958938b84d72a2d46db7c9806\n\u2022 28f3734e69fa86277339b7616ad228b2888f93c8\n\u2022 181dc4e71d4658cf5b9b0aa2c67fcfbfc65a9d20\n\u2022 0d1c02e3bcf6d72df038bfde6c8e7be80189ad55\n\u2022 781cc109b2ed77615bad524ddb8834009df801a7\n\u2022 28f3734e69fa86277339b7616ad228b2888f93c8\n\u2022 0d1c02e3bcf6d72df038bfde6c8e7be80189ad55\n\u2022 a7bf68e10705cd880dad14d53277dadd586590a5\n15\nEXECUTIVE OVERVIEW\n\n3. ASSESSMENT SUMMARY & FINDINGS\nOVERVIEW\nCRITICAL HIGH MEDIUM LOW INFORMATIONAL\n0 0 3 5 3\n16\nEXECUTIVE OVERVIEW\n\nSECURITY ANALYSIS RISK LEVEL REMEDIATION DATE\n(HAL-01) LACK OF ON-CHAIN\nVERIFICATION FOR numSigners CAN\nLEAD TO INCORRECT STATUS UPDATE"
+   },
+   {
+    "line": 362,
+    "severity": "medium",
+    "title": "Medium (6.3) SOLVED - 08/30/2023",
+    "excerpt": "Medium (6.3) SOLVED - 08/30/2023\n(HAL-02) LACK OF ERROR HANDLING FOR\nfilter.Next() IN THE SyncBlocks\nFUNCTION"
+   },
+   {
+    "line": 366,
+    "severity": "medium",
+    "title": "Medium (5.9) SOLVED - 08/30/2023",
+    "excerpt": "Medium (5.9) SOLVED - 08/30/2023\n(HAL-03) POTENTIAL RISK OF int64\nNonce OVERFLOW IN FINDNONCE\nFUNCTION OF MintSignerRunner"
+   },
+   {
+    "line": 370,
+    "severity": "medium",
+    "title": "Medium (5.9) SOLVED - 08/30/2023",
+    "excerpt": "Medium (5.9) SOLVED - 08/30/2023\n(HAL-04) UNHANDLED ZERO ADDRESS IN\nValidateMint FUNCTION CAN LEAD TO\nUNINTENDED BURN OPERATIONS"
+   },
+   {
+    "line": 374,
+    "severity": "low",
+    "title": "Low (3.8) SOLVED - 08/30/2023",
+    "excerpt": "Low (3.8) SOLVED - 08/30/2023\n(HAL-05) DOCKER IMAGE RUNNING AS\nROOT Low (3.8) SOLVED - 08/30/2023\n(HAL-06) GO VERSION 1.18 IS\nUNSUPPORTED Low (3.8) SOLVED - 08/30/2023\n(HAL-07) GO VERSIONS PRIOR TO 1.20\nARE MORE VULNERABLE TO SIDE-CHANNEL\nATTACKS"
+   },
+   {
+    "line": 382,
+    "severity": "low",
+    "title": "Low (3.8) SOLVED - 08/30/2023",
+    "excerpt": "Low (3.8) SOLVED - 08/30/2023\n(HAL-08) UNCHECKED ERROR RETURN\nVALUE FOR rand.Read in randomString\nFUNCTION"
+   },
+   {
+    "line": 386,
+    "severity": "low",
+    "title": "Low (3.1) SOLVED - 08/30/2023",
+    "excerpt": "Low (3.1) SOLVED - 08/30/2023\n(HAL-09) INEFFICIENT STRING\nCOMPARISON WITH strings.ToLower OR\nstrings.ToUpper\nInformational\n(0.0) SOLVED - 08/30/2023\n(HAL-10) UNUSED VARIABLES Informational\n(0.0) SOLVED - 08/30/2023\n(HAL-11) UNNECESSARY BOOLEAN\nCOMPARISONS\nInformational\n(0.0) SOLVED - 08/30/2023\n17\nEXECUTIVE OVERVIEW\n\n18\nFINDINGS & TECH\nDETAILS\n\n4.1 (HAL-01) LACK OF ON-CHAIN\nVERIFICATION FOR numSigners CAN\nLEAD TO INCORRECT STATUS UPDATE -\nMEDIUM (6.3)\nDescription:\nThe existing architecture of the MintSignerRunner class, written in the\nGo programming language, does not incorporate an on-chain verification\nmechanism for the variable numSigners. The current design relies solely\non the local configuration file to initialize this variable. This ap-\nproach introduces a potential discrepancy between the off-chain numSigners\nand the on-chain validatorCount, particularly when validators are added\nor removed through the smart contract. Such a discrepancy can result\nin incorrect status updates, thereby compromising the integrity of the\nsystem.\nCode Location:\n/eth/signer.go#L378\nListing 1\n1 ...\n2 x := & MintSigne rRunner {\n3 privateKey : privateKey ,\n4 address : strings . ToLower ( address ) ,"
+   },
+   {
+    "line": 444,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nBefore updating the status to models.StatusSigned, query the on-chain\nvalidatorCount to verify the numSigners.\nRemediation Plan:\nSOLVED: The Pocket Network team resolved the issue by querying validator\ncount through on-chain.\nCommit ID: bdb5ef0531750d12ae92c170f546b1aad6fbbd3e\n20\nFINDINGS & TECH DETAILS\n\n4.2 (HAL-02) LACK OF ERROR HANDLING\nFOR filter.Next() IN THE SyncBlocks\nFUNCTION - MEDIUM (5.9)\nDescription:\nThe SyncBlocks function in the MintExecutorRunner class uses a filter to\niterate through mint events. While the function checks for errors when\ncreating the filter, it does not check for errors that might occur during\nthe iteration with filter.Next().\nIf filter.Next() encounters an error, the loop might not iterate through\nall the intended blocks, potentially leading to missed or incomplete\ndata.\nCode Location:\n/audit/eth/executor.go#L105\nListing 2\n1 func ( x * Mi n t Ex e cu t o rR u n ne r) SyncBlocks ( startBlo ckNumber uint64 ,\n\u00eb endBlockNumber uint64 ) bool {\n2 filter , err := x . wpoktContract . FilterMinted (& bind . FilterOpts {\n3 Start : startBlockNumber ,\n4 End : & endBlockNumber ,\n5 Context : context . Background () ,\n6 } , [] common . Address {} ,"
+   },
+   {
+    "line": 494,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nConsider using filter.Error() to check for any errors that might occur\nduring the iteration.\nRemediation Plan:\nSOLVED: The Pocket Network team resolved the issue by adding an error\ncheck.\nCommit ID: 5f383e00495fd185eaf7ba4f03172613c035f95e\n22\nFINDINGS & TECH DETAILS\n\n4.3 (HAL-03) POTENTIAL RISK OF int64\nNonce OVERFLOW IN FINDNONCE FUNCTION\nOF MintSignerRunner - MEDIUM (5.9)\nDescription:\nThe FindNonce function within the MintSignerRunner class utilizes the\nint64 data type for storing and manipulating nonces. While int64 is\ngenerally adequate for most applications, there are edge cases where an\noverflow could occur. Such an overflow is not just a theoretical concern;\nit poses a critical risk that could lead to transaction failures, data\ncorruption.\nThe potential issue with int64 could arise when you are parsing the nonce\nwith strconv.ParseInt(pendingMint.Data.Nonce, 10, 64) . The ParseInt\nfunction will return an error if the number is too large to fit into an\nint64.\nCode Location:\n/eth/signer.go#L107\nListing 3\n1 ...\n2 if len ( pendingMints ) > 0 {\n3 var nonces [] int64\n4\n5 for _ , pendingMint := range pendingMints {\n6 if pendingMint . Data != nil {\n7 nonce , err := st"
+   },
+   {
+    "line": 585,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nConsider switching to Arbitrary-Precision Arithmetic. Transition to using\nbig.Int for all nonce operations to avoid any overflow issues.\nRemediation Plan:\nSOLVED: The Pocket Network team resolved the issue by using big.Int for\nnonce.\nCommit ID: 31987ccf4c9b9d19c408b97424f2bb55b6ce9de1\n25\nFINDINGS & TECH DETAILS\n\n4.4 (HAL-04) UNHANDLED ZERO ADDRESS\nIN ValidateMint FUNCTION CAN LEAD\nTO UNINTENDED BURN OPERATIONS - LOW\n(3.8)\nDescription:\nThe ValidateMint function in the MintSignerRunner class is responsi-\nble for validating various aspects of a minting transaction, includ-\ning the recipient address. However, the function does not currently\ndistinguish between a missing recipient address and a zero address\n(0x0000000000000000000000000000000000000000). In the context of many\nblockchain protocols, sending tokens to a zero address is equivalent to\nburning them, removing them from circulation. The absence of this check\ncould lead to unintended burn operations.\nCode Location:\nListing 6\n1 func ( x * MintSign erRunner ) ValidateMint ( mint * models . Mint , data *\n\u00eb autogen . M i n t C o n t r o l l e r M i n t D a t a) ( bool , error ) {\n2 log . Debug ( \" [ MINT SIGNER ] Vali"
+   },
+   {
+    "line": 683,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nImplement an explicit check for the zero address in the ValidateMint\nfunction. If a zero address is detected, the function should return an\nerror or a boolean flag indicating that the transaction is invalid for\nthe intended operation. This will prevent unintended burn operations and\nimprove the robustness of the minting process.\nRemediation Plan:\nSOLVED: The Pocket Network team resolved the issue by adding a check on\nthe zero address.\nCommit ID: 28f3734e69fa86277339b7616ad228b2888f93c8\n28\nFINDINGS & TECH DETAILS\n\n4.5 (HAL-05) DOCKER IMAGE RUNNING\nAS ROOT - LOW (3.8)\nDescription:\nDocker containers generally run with root privileges by default. This\nallows for unrestricted container management, meaning a user could in-\nstall system packages, edit configuration files, bind privileged ports,\netc. During static analysis, it was observed that the docker image is\nmaintained through the root user.\nCode Location:\nListing 7: Dockerfile\n1 FROM golang :1.19 as base\n2\n3 WORKDIR / app\n4\n5 COPY go . mod go . sum ./\n6 RUN go mod download\n7\n8 # copy the source code\n9 COPY app ./ app\n10 COPY eth ./ eth\n11 COPY pokt ./ pokt\n12 COPY models ./ models\n13 COPY main . go ./\n14 COPY default"
+   },
+   {
+    "line": 798,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to build the Dockerfile and run the container as a\nnon-root user.\nListing 8: Reference\n1 USER 1001: this is a non - root user UID , and here it is assigned to\n\u00eb the image to run the current container as an unprivileged user .\n\u00eb By doing so , the added security and other restrictions mentioned\n\u00eb above are applied to the container .\nRemediation Plan:\nSOLVED: The Pocket Network team resolved the issue by running the con-\ntainer as a non-root user.\nCommit ID: 181dc4e71d4658cf5b9b0aa2c67fcfbfc65a9d20\n31\nFINDINGS & TECH DETAILS\n\n4.6 (HAL-06) GO VERSION 1.18 IS\nUNSUPPORTED - LOW (3.8)\nDescription:\nThe project uses Go version 1.18. This version has been deprecated. See\nthe Go release notes for their policy on supporting major versions of Go.\nCode Location:\ngo.mod\nListing 9\n1 module github . com / dan13ram / wpokt - validator\n2\n3 go 1.18\nBVSS:\nAO:A/AC:L/AX:M/C:M/I:L/A:N/D:N/Y:N/R:N/S:U (3.8)"
+   },
+   {
+    "line": 826,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nUpdate to a supported version of Go in order to receive ongoing security\nupdates.\nRemediation Plan:\nSOLVED: The Pocket Network team resolved the issue by updating the go\nversion.\nCommit ID: 1a8772904d37b96958938b84d72a2d46db7c9806\n32\nFINDINGS & TECH DETAILS\n\n4.7 (HAL-07) GO VERSIONS PRIOR TO\n1.20 ARE MORE VULNERABLE TO\nSIDE-CHANNEL ATTACKS - LOW (3.8)\nDescription:\nGo version 1.20.2 contains security and performance enhancements. Specif-\nically, this release fixes problems in cryptographic libraries. Older\nversions of go are more susceptible to cryptography issues and side-\nchannel attacks on cryptographic implementations.\nCode Location:\ngo.mod\nListing 10\n1 module github . com / dan13ram / wpokt - validator\n2\n3 go 1.18\nBVSS:\nAO:A/AC:L/AX:M/C:M/I:L/A:N/D:N/Y:N/R:N/S:U (3.8)"
+   },
+   {
+    "line": 852,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nUpdate to at least Go v1.20.2.\nRemediation Plan:\nSOLVED: The Pocket Network team resolved the issue by updating the go\nversion.\n33\nFINDINGS & TECH DETAILS\n\nCommit ID: 1a8772904d37b96958938b84d72a2d46db7c9806\n34\nFINDINGS & TECH DETAILS\n\n4.8 (HAL-08) UNCHECKED ERROR RETURN\nVALUE FOR rand.Read in randomString\nFUNCTION - LOW (3.1)\nDescription:\nThe randomString function in app/database.go uses the rand.Read function\nto generate a random byte slice. However, the error return value of\nrand.Read is not checked, which could lead to unpredictable behavior or\ninsecure random strings if the function fails to read random bytes.\nCode Location:\nListing 11\n1 app / database . go :83:11: Error return value of ` rand . Read ` is not\n\u00eb checked ( errcheck )\n2 rand . Read ( bytes )\nBVSS:\nAO:A/AC:L/AX:M/C:L/I:L/A:L/D:N/Y:N/R:N/S:C (3.1)"
+   },
+   {
+    "line": 879,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nAdd error handling to check the return value of rand.Read. If an error\noccurs, handle it appropriately, such as logging the error and returning\nan empty string or propagating the error up to the caller.\nRemediation Plan:\nSOLVED: The Pocket Network team resolved the issue by adding error han-\ndling.\n35\nFINDINGS & TECH DETAILS\n\nCommit ID: 0d1c02e3bcf6d72df038bfde6c8e7be80189ad55\n36\nFINDINGS & TECH DETAILS\n\n4.9 (HAL-09) INEFFICIENT STRING\nCOMPARISON WITH strings.ToLower OR\nstrings.ToUpper - INFORMATIONAL\n(0.0)\nDescription:\nConverting two strings to the same case and comparing them like so :\nListing 12\n1 if strings . ToLower ( s1 ) == strings . ToLower ( s2 ) {\n2 ...\n3 }\nis significantly more expensive than comparing them with strings.EqualFold\n(s1, s2). This is due to memory usage as well as computational complexity.\nstrings.ToLower will have to allocate memory for the new strings, as well\nas convert both strings fully, even if they differ on the very first byte.\nstrings.EqualFold, on the other hand, compares the strings one character\nat a time. It doesn\u2019t need to create two intermediate strings, and can\nreturn as soon as the first non-matching character has been found"
+   },
+   {
+    "line": 926,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nConsider using strings.EqualFold instead toLower comparison.\nRemediation Plan:\nSOLVED: The Pocket Network team resolved the issue by using strings.\nEqualFold.\nCommit ID: 781cc109b2ed77615bad524ddb8834009df801a7\n38\nFINDINGS & TECH DETAILS\n\n4.10 (HAL-10) UNUSED VARIABLES -\nINFORMATIONAL (0.0)\nDescription:\nThe util package contains a variable named passphrase, which is initial-\nized but never used within the package.\nCode Location:\nutil/signer.go#L25\nListing 14\n1 pokt / util / signer . go :20:7:\n2 const legacyCodec bool = false\n3 ^\n4 pokt / util / signer . go :25:5:\n5 var passphrase string = uniuri . NewLen (32)\nBVSS:\nAO:A/AC:L/AX:L/C:N/I:N/A:N/D:N/Y:N/R:N/S:C (0.0)"
+   },
+   {
+    "line": 950,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nConsider deleting unused variables.\nRemediation Plan:\nSOLVED: The Pocket Network team resolved the issue by deleting unused\nvariables.\nCommit ID: a7bf68e10705cd880dad14d53277dadd586590a5\n39\nFINDINGS & TECH DETAILS\n\n4.11 (HAL-11) UNNECESSARY BOOLEAN\nCOMPARISONS - INFORMATIONAL (0.0)\nDescription:\nThe Go codebase contains several instances where boolean variables are\nunnecessarily compared to boolean constants ( true or false).\nCode Location:\nListing 15\n1 eth / executor . go :147:5:\n2 `! app . Config . MintExecutor . Enabled ` ( gosimple )\n3 if app . Config . MintExecutor . Enabled == false {\n4 ^\n5 eth / monitor . go :122:5:\n6 `! app . Config . BurnMonitor . Enabled ` ( gosimple )\n7 if app . Config . BurnMonitor . Enabled == false {\n8 ^\n9 eth / signer . go :327:5:\n10 `! app . Config . MintSigner . Enabled ` ( gosimple )\n11 if app . Config . MintSigner . Enabled == false {\n12\n13 pokt / signer . go :355:5: `! app . Config . BurnSigner . Enabled ` ( gosimple )\n14 if app . Config . BurnSigner . Enabled == false {\nBVSS:\nAO:A/AC:L/AX:L/C:N/I:N/A:N/D:N/Y:N/R:N/S:C (0.0)"
+   },
+   {
+    "line": 982,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nConsider removing the unnecessary comparison to boolean constants.\n\u2022 Before: if app.Config.MintExecutor.Enabled == false {\n40\nFINDINGS & TECH DETAILS\n\n\u2022 After: if !app.Config.MintExecutor.Enabled {\n\u2022 Before: if app.Config.BurnMonitor.Enabled == false {\n\u2022 After: if !app.Config.BurnMonitor.Enabled {\n\u2022 Before: if app.Config.MintSigner.Enabled == false {\n\u2022 After: if !app.Config.MintSigner.Enabled {\nRemediation Plan:\nSOLVED: The Pocket Network team resolved the issue by deleting redundant\ncomparison.\nCommit ID: bd29988867fcdfaceef27f3dcfefc62fac7b8d51\n41\nFINDINGS & TECH DETAILS\n\n42\nAUTOMATED TESTING\n\n5.1 Description\nHalborn used automated testing techniques to enhance coverage of certain\nareas of the scoped component. Among the tools used were staticcheck,\ngosec, semgrep, codeQL and Nancy. After Halborn verified all the contracts\nand scoped structures in the repository and was able to compile them\ncorrectly, these tools were leveraged on scoped structures. With these\ntools, Halborn can statically verify security related issues across the\nentire codebase.\n5.2 Semgrep\nSecurity Analysis Output Sample:\nListing 16: Rule Set\n1 semgrep -- config \" p/ dgryski . semgrep - go \" x/"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-astroport-2025-03-17-audit-report-astroport-pcl-neutron-duality-orderbook-integration-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 1973,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n \n-\n \nLevel\n \nof\n \ndocumentation\n \n \nMedium\n \nThe\n \ncodebase\n \nis\n \nwell-documented,\n \nand\n \nthe\n \nclient\n \nprovided\n \na\n \nvideo\n \ncall\n \nto\n \nexplain\n \nthe"
+   },
+   {
+    "line": 3191,
+    "severity": "gas",
+    "title": "gas-intensive,",
+    "excerpt": "gas-intensive,\n \npotentially\n \nleading\n \nto\n \nout-of-gas\n \nfailures\n \nand\n \nblock\n \nine\ufb03ciencies.\n \nThis\n \nissue\n \nextends\n \nto\n \nall\n \npool\n \noperations\n \nas\n \nthey\n \nsimilarly\n \ndepend"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-mars-2023-01-13-audit-report-mars-outposts-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 756,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n-\nCode readability and clarity"
+   },
+   {
+    "line": 759,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n-\nLevel of documentation\nHigh\nThe Mars team provided su\ufb03cient\ndocumentation including \ufb02ow\ndiagrams and code walk-throughs.\nTest coverage\nHigh\ncargo tarpaulin\nreports 94.31%\ncode coverage.\n10\n\nDetailed Findings\n1.\nDisabled collateral can be re-enabled by depositing on behalf of\nthe user\nSeverity: Critical\nIn\ncontracts/red-bank/src/execute.rs:471\n,\nthe\nuser\u2019s\ncollateral\nto\nmarket\nbit\nis\nautomatically\nset\nif\nthe\nuser\ndeposits\na\ncollateral\nasset.\nAn\nattacker"
+   },
+   {
+    "line": 987,
+    "severity": "gas",
+    "title": "gas-intensive",
+    "excerpt": "gas-intensive\niteration\nthrough\nall\nswap\n11\n\nsteps\nin\norder\nto\nperform\nTWAP\nqueries,\nbut\nroutes\ncan\nbe\noverwritten\nto\nprevent\nrunning\nout\nof gas.\n3.\nRed bank\u2019s markets with an id greater than 128 cannot be used\nSeverity: Major\nThe\nred\nbank\ncontract\ncan\nhandle\nan\ninde\ufb01nite\namount\nof\nMarkets\nthat\nare"
+   }
+  ]
+ },
+ {
+  "file": "publicreports-cosmos-audits-umee-wasm-integration-cosmos-security-audit-report-halborn-final-pdf.md",
+  "findings": [
+   {
+    "line": 31,
+    "severity": "informational",
+    "title": "Recommendation 18",
+    "excerpt": "Recommendation 18\nRemediation Plan 19\n3.2 (HAL-02) WASM CONFIG PARAMETERS ARE NOT COMPATIBLE WITH RECENT\nCOSMWASM SDK - LOW 20\nDescription 20\nCode Location 20\nRisk Level 20"
+   },
+   {
+    "line": 38,
+    "severity": "informational",
+    "title": "Recommendation 20",
+    "excerpt": "Recommendation 20\n1\n\nRemediation Plan 21\n3.3 (HAL-03) NEW QUERIES ARE NOT ADDED INTO THE HANDLER - LOW 22\nDescription 22\nCode Location 22\nRisk Level 23"
+   },
+   {
+    "line": 46,
+    "severity": "informational",
+    "title": "Recommendation 23",
+    "excerpt": "Recommendation 23\nRemediation Plan 23\n3.4 (HAL-04) VULNERABLE 3RD PARTY PACKAGES - INFORMATIONAL 24\nDescription 24\nPackages 24\nRisk Level 24"
+   },
+   {
+    "line": 52,
+    "severity": "informational",
+    "title": "Recommendation 24",
+    "excerpt": "Recommendation 24\nRemediation Plan 24\n3.5 (HAL-05) UNHANDLED ERRORS - INFORMATIONAL 25\nDescription 25\nCode Location 25\nRisk Level 26"
+   },
+   {
+    "line": 58,
+    "severity": "informational",
+    "title": "Recommendation 26",
+    "excerpt": "Recommendation 26\nRemediation Plan 26\n3.6 (HAL-06) DUPLICATED ERROR CHECKS - INFORMATIONAL 27\nDescription 27\nCode Location 27\nRisk Level 28"
+   },
+   {
+    "line": 64,
+    "severity": "informational",
+    "title": "Recommendation 28",
+    "excerpt": "Recommendation 28\nRemediation Plan 28\n3.7 (HAL-07) HTML ESCAPING NOT IMPLEMENTED - INFORMATIONAL 29\n2\n\nDescription 29\nCode Location 29\nRisk Level 29"
+   },
+   {
+    "line": 72,
+    "severity": "informational",
+    "title": "Recommendation 29",
+    "excerpt": "Recommendation 29\nRemediation Plan 30\n3.8 (HAL-08) PANIC IS USED FOR ERROR HANDLING - INFORMATIONAL 31\nDescription 31\nCode Location 31\nRisk Level 32"
+   },
+   {
+    "line": 78,
+    "severity": "informational",
+    "title": "Recommendation 32",
+    "excerpt": "Recommendation 32\nRemediation Plan 32\n3.9 (HAL-09) OPEN TODOs - INFORMATIONAL 33\nDescription 33\nCode Location 33\nTO-DO 33\nRisk Level 33"
+   },
+   {
+    "line": 85,
+    "severity": "informational",
+    "title": "Recommendation 33",
+    "excerpt": "Recommendation 33\nRemediation Plan 34\n4 AUTOMATED TESTING 35\nDescription 36\nSemgrep - Security Analysis Output Sample 36\nSemgrep Results 37\nGosec - Security Analysis Output Sample 38\nStaticcheck - Security Analysis Output Sample 38\nNancy - Security Analysis Output Sample 39\n3\n\n4\n\nDOCUMENT REVISION HISTORY\nVERSION MODIFICATION DATE AUTHOR\n0.1 Document Creation 07/05/2022 Chris Meistre\n0.2 Document Edits 07/28/2022 Gokberk Gulgun\n0.3 Document Review 07/29/2022 Gabi Urrutia\n1.0 Remediation Plan 08/29/2022 Chris Meistre\n1.1 Remediation Plan\nUpdates 08/30/2022 Gokberk Gulgun\n1.2 Remediation Plan Review 08/31/2022 Gabi Urrutia\n5\n\nCONTACTS\nCONTACT COMPANY EMAIL\nRob Behnke Halborn Rob.Behnke@halborn.com\nSteven Walbroehl Halborn Steven.Walbroehl@halborn.com\nGabi Urrutia Halborn Gabi.Urrutia@halborn.com\nGokberk Gulgun Halborn Gokberk.Gulgun@halborn.com\nChris Meistre Halborn Chris.Meistre@halborn.com\nJohn Saigle Halborn John.Saigle@halborn.com\n6\n\n7\nEXECUTIVE OVERVIEW\n\n1.1 INTRODUCTION\nUMEE engaged Halborn to conduct a security audit on their CosmWasm inte-\ngration, beginning on July 5th, 2022 and ending on July 30th, 2022 .The"
+   },
+   {
+    "line": 236,
+    "severity": "low",
+    "title": "Low FUTURE RELEASE",
+    "excerpt": "Low FUTURE RELEASE\nHAL-03 - NEW QUERIES ARE NOT ADDED\nINTO THE HANDLER Low FUTURE RELEASE\nHAL-04 - VULNERABLE 3RD PARTY\nPACKAGES Low FUTURE RELEASE\nHAL-05 - UNHANDLED ERRORS Informational SOLVED - 08/29/2022\nHAL-06 - DUPLICATED ERROR CHECKS Informational SOLVED - 08/29/2022\nHAL-07 - HTML ESCAPING NOT\nIMPLEMENTED Informational SOLVED - 08/29/2022\nHAL-08 - PANIC IS USED FOR ERROR\nHANDLING Informational ACKNOWLEDGED\nHAL-09 - OPEN TODOs Informational ACKNOWLEDGED\n13\nEXECUTIVE OVERVIEW\n\n14\nFINDINGS & TECH\nDETAILS\n\n3.1 (HAL-01) VULNERABLE WASM SMART\nCONTRACT LEADS TO CHAIN HALT -\nCRITICAL\nDescription:\nA vulnerability in the WASM integration and the authz module in the cosmos\n-sdk has been detected, and was recently exploited to halt another chain\n(JUNO). In the vulnerability, A smart contract abused non-deterministic\nstate in authz grants to save a different hash to all validators.\nJuno Halt Root Cause Steps:\n\u2022 An attacker is deployed a malicious contract on the Juno.\n\u2022 A malicious contract is located on the Mint Scan .\n\u2022 During the review of malicious contract, It has been observed that an\nattacker\u2019s contract is calling Authz Module MsgGrant and MsgRevoke.\n15\nFINDINGS & TECH DETAILS\n\n\u2022 "
+   },
+   {
+    "line": 357,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nThe following update has been released for cosmos-sdk & wasm which should\nbe applied before this integration is released publicly:\n18\nFINDINGS & TECH DETAILS\n\nPR 12692\nWasm Fix\nCosmos SDK Update\nTake note that this has been fixed in the latest version of cosmos-sdk &\nwasm, but deploying this upgrade might have unintended consequences.\nRemediation Plan:\nPENDING: The UMEE Team does not allow contracts to be executed without\npermission on the chain, they will consider fixing in the future.\n19\nFINDINGS & TECH DETAILS\n\n3.2 (HAL-02) WASM CONFIG PARAMETERS\nARE NOT COMPATIBLE WITH RECENT\nCOSMWASM SDK - LOW\nDescription:\nDuring the code review, It has been noticed that the pre-defined param-\neters are incompatible with the recent wasmd keeper. From the following\nlink, DefaultCompileCost is incompatible with recent wasmd module. On\nthe other hand, DefaultGasMultiplier is not defined.\nCode Location:\nLocation\nListing 5\n1 const (\n2 // D e f a u l t U m e e W a s m I n s t a n c e C o s tis initially set the same as in\n\u00eb wasmd\n3 D e f a u l t U m e e W a s m I n s t a n c e C o s tuint64 = 60 _000\n4 // D e f a u l t U m e e W a s m C o m p i l e C o s tcost per byte compiled\n5 D e"
+   },
+   {
+    "line": 395,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nEnsure that all selected values are compatible with recent wasmd and will\nnot lead to any inconsistency on the integration.\n20\nFINDINGS & TECH DETAILS\n\nRemediation Plan:\nPENDING: The UMEE Team will fix this issue in a future release.\n21\nFINDINGS & TECH DETAILS\n\n3.3 (HAL-03) NEW QUERIES ARE NOT\nADDED INTO THE HANDLER - LOW\nDescription:\nIn the recent branch, SlashWindow query has been added. SlashWindow\nqueries the current slash window progress of the oracle. However, the\nquery is not added into the wasm handlers.\nCode Location:\nLocation\nListing 6\n1 func ( q querier ) SlashWindow (\n2 goCtx context . Context ,\n3 req * types . QuerySlashWindow ,\n4 ) (* types . QuerySlashWindowResponse , error ) {\n5 if req == nil {\n6 return nil , status . Error ( codes . InvalidArgument , \" empty\n\u00eb request \" )\n7 }\n8\n9 ctx := sdk . UnwrapSD KContext ( goCtx )\n10 params := q . GetParams ( ctx )\n11\n12 slashWindow := params . SlashWindow\n13 votePeriod := params . VotePeriod\n14 currentBlock := uint64 ( ctx . BlockHeight () )\n15 v o t e P e r i o d s P e r S l a s h W i n d o w:= slashWindow / votePeriod\n16\n17 cu r re n t Sl a s hW i n do w:= currentBlock / v o t e P e r i o d s P e r S l a s "
+   },
+   {
+    "line": 446,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to handle all available GRPC queries through wasm.\nRemediation Plan:\nPENDING: The UMEE Team will fix this issue in a future release.\n23\nFINDINGS & TECH DETAILS\n\n3.4 (HAL-04) VULNERABLE 3RD PARTY\nPACKAGES - INFORMATIONAL\nDescription:\nThere are a few 3rd party packages that are being used that contain\nvulnerabilities.\nPackages:\nID Package Rating Description\nsonatype-2021-0598 tendermint MEDIUM Improper Input Validation\nsonatype-2022-3945 go-buffer-poo MEDIUM Integer Overflow or Wraparound\nsonatype-2021-0456 websocket HIGH Uncontrolled Resource Consumption\nsonatype-2021-0076 go-ethereum HIGH Uncontrolled Resource Consumption\nCVE-2022-23328 go-ethereum HIGH Denial of Service attack\nRisk Level:\nLikelihood - 1\nImpact - 2"
+   },
+   {
+    "line": 468,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nWe recommend that all third-party packages that are implemented are kept\nup to date and all security fixes applied.\nRemediation Plan:\nPENDING: The UMEE Team will fix this issue in a future release.\n24\nFINDINGS & TECH DETAILS\n\n3.5 (HAL-05) UNHANDLED ERRORS -\nINFORMATIONAL\nDescription:\nThere are a few instances where error handling has not been implemented\nfor functions that might return an error.\nCode Location:\nprice-feeder/oracle/provider/huobi.go, Lines 384-387\nListing 7: (Line 385)\n384 func ( p * HuobiProvider ) reconnect () error {\n385 p. wsClient . Close ()\n386\n387 p. logger . Debug () . Msg ( \" reconnecting websocket \" )\nprice-feeder/oracle/provider/gate.go, Lines 548-551\nListing 8: (Line 549)\n548 func ( p * GateProvider ) reconnect () error {\n549 p. wsClient . Close ()\n550\n551 p. logger . Debug () . Msg ( \" reconnecting websocket \" )\nprice-feeder/oracle/provider/coinbase.go, Lines 482-485\nListing 9: (Line 483)\n482 func ( p * Coinbase Provider ) reconnect () error {\n483 p. wsClient . Close ()\n484\n485 p. logger . Debug () . Msg ( \" reconnecting websocket \" )\n25\nFINDINGS & TECH DETAILS\n\nprice-feeder/oracle/provider/binance.go, Lines 362-366\nListing 10: (Line 363)"
+   },
+   {
+    "line": 512,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nWe recommend that the appropriate error checking be implemented to avoid\nunexpected crashes.\nRemediation Plan:\nSOLVED: The UMEE Team has implemented the correct error handling on Issue\n1192.\n26\nFINDINGS & TECH DETAILS\n\n3.6 (HAL-06) DUPLICATED ERROR\nCHECKS - INFORMATIONAL\nDescription:\nThere are two instances where an error check is not required, and the\nlogic can be adjusted to only return the value.\nCode Location:\nx/leverage/types/tx.go, Lines 115-121\nListing 11: (Lines 117-120)\n115 func ( msg * Ms g De c o ll a t er a l iz e) ValidateBasic () error {\n116 _ , err := sdk . A c c A d d r e s s F r o m B e c h 3 2( msg . Borrower )\n117 if err != nil {\n118 return err\n119 }\n120 return nil\n121 }\nx/leverage/types/tx.go, Lines 86-92\nListing 12: (Lines 88-91)\n86 func ( msg * MsgCollat eralize ) ValidateBasic () error {\n87 _ , err := sdk . A c c A d d r e s s F r o m B e c h 3 2( msg . Borrower )\n88 if err != nil {\n89 return err\n90 }\n91 return nil\n92 }\n27\nFINDINGS & TECH DETAILS\n\nRisk Level:\nLikelihood - 1\nImpact - 1"
+   },
+   {
+    "line": 551,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nAs the err variable will already be nil if no error has been generated\nby the function, the following piece of code will be sufficient:\nListing 13\n1 _ , err := sdk . A c c A d d r e s s F r o m B e c h 3 2( msg . Borrower )\n2 return err\nRemediation Plan:\nSOLVED: The UMEE Team has implemented the correct error handling on Issue\n1194.\n28\nFINDINGS & TECH DETAILS\n\n3.7 (HAL-07) HTML ESCAPING NOT\nIMPLEMENTED - INFORMATIONAL\nDescription:\nIt was found that Write is being used to generate HTTP responses, instead\nof using the html/template package that handles HTML and other encodings\nmore safely.\nCode Location:\nprice-feeder/router/v1/router.go, Line 113\nListing 14: (Line 113)\n113 _ , _ = w. Write ( gr . Metrics )\nprice-feeder/router/v1/response.go, Line 48\nListing 15: (Line 48)\n48 _ , _ = w . Write ( bz )\nRisk Level:\nLikelihood - 1\nImpact - 1"
+   },
+   {
+    "line": 579,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to use the html/template package when returning data\nback during an HTTP response.\n29\nFINDINGS & TECH DETAILS\n\nRemediation Plan:\nSOLVED: The UMEE Team has implemented the correct error handling on Issue\n1195.\n30\nFINDINGS & TECH DETAILS\n\n3.8 (HAL-08) PANIC IS USED FOR\nERROR HANDLING - INFORMATIONAL\nDescription:\nSeveral instances of the panic function were identified in the codebase.\nThey appear to be used to handle errors. This can cause potential issues,\nas invoking a panic can cause the program to halt execution and crash in\nsome cases. This in turn can negatively impact the availability of the\nsoftware for users.\nCode Location:\nThe following are just a few samples of the usage of panic.\nx/leverage/abci.go, Lines 11-21\nListing 16: (Lines 13,17)\n11 func EndBlocker ( ctx sdk . Context , k keeper . Keeper ) [] abci .\n\u00eb ValidatorUpdate {\n12 if err := k . SweepBadDebts ( ctx ) ; err != nil {\n13 panic ( err )\n14 }\n15\n16 if err := k . Acc ru eA ll Int er es t ( ctx ) ; err != nil {\n17 panic ( err )\n18 }\n19\n20 return [] abci . ValidatorUpdate {}\n21 }\nxx/leverage/keeper/keeper.go, Lines 64-66\nListing 17: (Line 65)\n64 if k . hooks != nil {\n65 panic ( \" leve"
+   },
+   {
+    "line": 626,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nInstead of using panics, custom errors should be defined and handled\naccording to the Cosmos best practices .\nRemediation Plan:\nACKNOWLEDGED: The UMEE Team acknowledged this finding.\n32\nFINDINGS & TECH DETAILS\n\n3.9 (HAL-09) OPEN TODOs -\nINFORMATIONAL\nDescription:\nOpen To-dos can point to architecture or programming issues that still\nneed to be resolved. Often these kinds of comments indicate areas of\ncomplexity or confusion for developers. This provides value and insight\nto an attacker who aims to cause damage to the protocol.\nCode Location:\nTO-DO:\nListing 18: Open Todos\n1 ./ x / leverage / module . go :28: // TODO : Ensure x / leverage\n\u00eb implements simulator and then uncomment .\n2 ./ x / leverage / keeper / interest . go :164: // TODO : use typed events\n3 ./ x / leverage / keeper / interest . go :76: // @todo fix this\n\u00eb when tendermint solves #8773\nRisk Level:\nLikelihood - 1\nImpact - 1"
+   },
+   {
+    "line": 652,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nConsider resolving the To-dos before deploying code to a production\ncontext. Use an independent issue tracker or other project management\nsoftware to track development tasks.\n33\nFINDINGS & TECH DETAILS\n\nRemediation Plan:\nACKNOWLEDGED: The UMEE Team acknowledged this finding.\n34\nFINDINGS & TECH DETAILS\n\n35\nAUTOMATED TESTING\n\nDescription:\nHalborn used automated testing techniques to enhance coverage of certain\nareas of the scoped component. Among the tools used were staticcheck,\ngosec, semgrep, unconvert, LGTM and Nancy. After Halborn verified all\nthe contracts and scoped structures in the repository and was able to\ncompile them correctly, these tools were leveraged on scoped structures.\nWith these tools, Halborn can statically verify security related issues\nacross the entire codebase.\nSemgrep - Security Analysis Output Sample:\nListing 19: Rule Set\n1 semgrep -- config \" p/ dgryski . semgrep - go \" x -- exclude = '* _test . go ' --\n\u00eb max - lines - per - finding 1000 -- no - git - ignore -o dgryski . semgrep\n2 semgrep -- config \" p/ owasp - top - ten \" x -- exclude = '* _test . go ' -- max -\n\u00eb lines - per - finding 1000 -- no - git - ignore -o owasp - top - ten . semgre"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-astroport-2023-07-13-audit-report-astroport-concentrated-liquidity-pool-with-injective-orderbook-integration-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 908,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n-\nLevel\nof\ndocumentation"
+   },
+   {
+    "line": 913,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\nMost\nfunctions\nare\nwell\ndocumented\nwith\nclear\nand\nconcise\ncomments.\nTest\ncoverage"
+   },
+   {
+    "line": 926,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\nThe\nfollowing\ntest\ncoverage\nwas\nreported:\npair_concentrated_inj\n:\n86%\nfee_granter\n:\n85%\ncircular_buffer\n:\n89%\n9\n\nSummary\nof\nFindings\nNo\nDescription\nSeverity\nStatus\n1\nIncorrect\nvalidation\nof\nupdated\nadministrators\nmay\nlead\nto\nexceeding\nthe\nMAX_ADMINS\nlimit\nMinor\nResolved"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-starterra-audit-report-starterra-pdf.md",
+  "findings": [
+   {
+    "line": 410,
+    "severity": "informational",
+    "title": "Informational notes do not have a status, since we consider them optional recommendations.",
+    "excerpt": "Informational notes do not have a status, since we consider them optional recommendations.\nNote,\nthat\naudits\nare\nan\nimportant\nstep\nto\nimprove\nthe\nsecurity\nof\nsmart\ncontracts\nand\ncan\n\ufb01nd\nmany\nissues.\nHowever,\nauditing\ncomplex\ncodebases\nhas\nits\nlimits\nand\na\nremaining\nrisk\nis\npresent (see disclaimer).\nUsers\nof\nthe\nsystem\nshould\nexercise\ncaution."
+   },
+   {
+    "line": 661,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n-\nCode readability and clarity\nHigh\n-\nLevel of Documentation\nMedium\nThe project provides detailed\nuser-facing documentation.\nHowever, the smart contract\narchitecture is not documented in\ndetail and the source code is\nsparsely commented.\nTest Coverage"
+   },
+   {
+    "line": 675,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n-\n9\n\nDetailed Findings\n1.\nWithdrawal of IDO pre-fund contributions will fail in most cases\ndue to funds being deposited in Anchor\nSeverity: Major\nThe\nfunction\nwithdraw_prefund\nin\ncontracts/ido-prefund/src/execute.rs\nwill\nrevert\nin\nmost\ncases\nsince\nmost\nof\nthe\nfunds\nare\nnot\nactually\nstored\nin\nthe\ncontract\nitself\nbut\nare\ndeposited\ninto\nAnchor\nas\nsoon\nas"
+   }
+  ]
+ },
+ {
+  "file": "publicreports-cosmwasm-smart-contract-audits-mars-protocol-fields-of-mars-cosmwasm-smart-contract-security-audit-final-pdf.md",
+  "findings": [
+   {
+    "line": 28,
+    "severity": "informational",
+    "title": "Recommendation 15",
+    "excerpt": "Recommendation 15\nRemediation plan 15\n3.2 (HAL-02) SOME RATES COULD BE SET TO VALUES GREATER THAN 1 - LOW\n16\nDescription 16\nCode Location 16\nRisk Level 17"
+   },
+   {
+    "line": 35,
+    "severity": "informational",
+    "title": "Recommendation 17",
+    "excerpt": "Recommendation 17\nRemediation plan 17\n3.3 (HAL-03) MULTIPLE INSTANCES OF UNCHECKED ARITHMETIC - INFORMA-\nTIONAL 18\nDescription 18\n1\n\nCode Location 18\nRisk Level 18"
+   },
+   {
+    "line": 44,
+    "severity": "informational",
+    "title": "Recommendation 18",
+    "excerpt": "Recommendation 18\nRemediation plan 19\n2\n\nDOCUMENT REVISION HISTORY\nVERSION MODIFICATION DATE AUTHOR\n0.1 Document Creation 01/17/2022 Michal Bazyli\n0.2 Document Updates 01/26/2022 Michal Bazyli\n0.3 Draft Version 01/28/2022 Michal Bazyli\n0.4 Draft Review 01/31/2022 Gabi Urrutia\n1.0 Remediation Plan 02/09/2022 Michal Bazyli\n1.1 Remediation Plan Review 02/09/2022 Gabi Urrutia\nCONTACTS\nCONTACT COMPANY EMAIL\nRob Behnke Halborn Rob.Behnke@halborn.com\nSteven Walbroehl Halborn Steven.Walbroehl@halborn.com\nGabi Urrutia Halborn Gabi.Urrutia@halborn.com\nMichal Bazyli Halborn Michal.Bazyli@halborn.com\n3\n\n4\nEXECUTIVE OVERVIEW\n\n1.1 AUDIT SUMMARY\nMars Protocol engaged Halborn to conduct a security assessment on CosmWasm\nsmart contracts beginning on January 17th, 2022 and ending January 28th,\n2022.\nThe security engineers involved on the audit are blockchain and smart-\ncontract security experts with advanced penetration testing, smart-\ncontract hacking, and deep knowledge of multiple blockchain protocols.\nThe purpose of this audit is to achieve the following:\n\u2022 Ensure that smart contract functions work as intended.\n\u2022 Identify potential security issues with the smart contracts.\nIn summary, Halborn id"
+   },
+   {
+    "line": 299,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nAdd a validation routine inside instantiate and update_config functions\nto ensure that:\n\u2022 Value of fee_rate is lesser than a maximum threshold hardcoded in\ncontract.\n\u2022 Value of max_ltv and bonus_rate is between minimum and maximum values\nhardcoded in the contract.\nRemediation plan:\nSOLVED: The issue was fixed in commit 0f9c959931fcde3ddf5cdb1907c9177f69284e31.\n15\nFINDINGS & TECH DETAILS\n\n3.2 (HAL-02) SOME RATES COULD BE\nSET TO VALUES GREATER THAN 1 - LOW\nDescription:\nThe instantiate and update_config functions in contracts/martian-\nfield/src/execute.rs do not restrict that rates fields are lesser than\n1.\nIf they are not correctly set, some operations will always panic and\nwon\u2019t allow legitimate users to harvest or liquidate; thus generating a\ndenial of service (DoS). The affected fields are the following:\n\u2022 max_ltv\n\u2022 fee_rate\n\u2022 bonus_rate\nCode Location:\nListing 3: contracts/martian-field/src/execute.rs (Line 321)\n314 pub fn update_config ( deps : DepsMut , info : MessageInfo ,\nnew_config : Config ) -> StdResult < Response > {\n315 let config = CONFIG . load ( deps . storage ) ?;\n316\n317 if info . sender != config . governance {\n318 return Err ( StdError :: generic_er"
+   },
+   {
+    "line": 344,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nAdd a validation routine inside instantiate and update_config functions\nto ensure that aforementioned fields are lesser than 1.\nRemediation plan:\nSOLVED: The issue was fixed in the following commits:\n\u2022 2e82ec4798233f14d32a438b5d0238ac1f11583f\n\u2022 816db544f50959de79d09cd03f1bfa15e6ef3c86\n17\nFINDINGS & TECH DETAILS\n\n3.3 (HAL-03) MULTIPLE INSTANCES OF\nUNCHECKED ARITHMETIC -\nINFORMATIONAL\nDescription:\nWhile many instances of checked arithmetic were observed, some calcula-\ntions omitted these checks. The additional verification performed when\nusing the checked functions ensures that under/overflow states are caught\nand handled appropriately.\nWhile these instances were not found to be directly exploitable, they\nshould be reviewed to ensure a defence-in-depth approach is achieved.\nCode Location:\nListing 4: Resources affected\n1 exe cu te _c all ba ck s . rs (# L237 ,390 , 391 ,420 ,478 ,536)\n2 execute . rs (# L175 )\n3 health . rs (# L51 ,52 ,53)\nRisk Level:\nLikelihood - 1\nImpact - 1"
+   },
+   {
+    "line": 372,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nConsider using the checked_add, checked_sub or checked_mul methods in-\nstead of addition, subtraction, and multiplication operators respec-\ntively, in all instances to handle overflows gracefully.\n18\nFINDINGS & TECH DETAILS\n\nRemediation plan:\nSOLVED: Commit ce52053d3a1897b797656a3e60235bdd52147627 fixed the secu-\nrity issue. It is worth noting that there are some arithmetic operations\nlisted above that do not need checked_* methods because they are multipli-\ncations between Uint128 and Decimal, which invoke Uint128::multiply_ratio\nunder the hood:\nListing 5: Resources with no checked_* methods\n1 exe cu te _c all ba ck s . rs (# L390 , 391 ,536)\n2 execute . rs (# L175 )\n3 health . rs (# L51 ,52 ,53)\n19\nFINDINGS & TECH DETAILS\n\nTHANK YOU FOR CHOOSING"
+   }
+  ]
+ },
+ {
+  "file": "audits-thorchain-coinfabrik-thorchain-audit-2024-01-pdf.md",
+  "findings": [
+   {
+    "line": 431,
+    "severity": "critical",
+    "title": "Critical:",
+    "excerpt": "Critical:\nThese\nare\nissues\nthat\nwe\nmanage\nto\nexploit.\nThey\ncompromise\nthe\nsystem\nseriously.\nBlocking\nbugs\nare\nalso\nincluded\nin\nthis\ncategory.\nThey\nmust\nbe\n\ufb01xed\nimmediately\n.\n\u25cf"
+   },
+   {
+    "line": 460,
+    "severity": "high",
+    "title": "High:",
+    "excerpt": "High:\nThese\nrefer\nto\na\nvulnerability\nthat,\nif\nexploited,\ncould\nhave\na\nsubstantial\nimpact,\nbut\nrequires\na\nmore\nextensive\nsetup\nor\neffort\ncompared\nto\ncritical\nissues.\nThese\npose\na\nsigni\ufb01cant\nrisk\nand\ndemand\nimmediate\nattention\n.\n\u25cf"
+   },
+   {
+    "line": 497,
+    "severity": "medium",
+    "title": "Medium:",
+    "excerpt": "Medium:\nThese\nare\npotentially\nexploitable\nissues.\nEven\nthough\nwe\ndid\nnot\nmanage\nto\nexploit\nthem\nor\ntheir\nimpact\nis\nnot\nclear,\nthey\nmight\nrepresent\na\nsecurity\nrisk\nin\nthe\nnear\nfuture.\nWe\nsuggest\n\ufb01xing\nthem\nas\nsoon\nas\npossible\n."
+   },
+   {
+    "line": 538,
+    "severity": "informational",
+    "title": "Minor:",
+    "excerpt": "Minor:\nThese\nissues\nrepresent\nproblems\nthat\nare\nrelatively\nsmall\nor\ndif\ufb01cult\nto\ntake\nadvantage\nof,\nbut\nmight\nbe\nexploited\nin\ncombination\nwith\nother\nissues.\nThese\nkinds\nof\nissues\ndo\nnot\nblock\ndeployments\nin\nproduction\nenvironments.\nThey\nshould\nbe\ntaken\ninto"
+   },
+   {
+    "line": 801,
+    "severity": "medium",
+    "title": "medium.",
+    "excerpt": "medium.\nRecommendation\nImplement\ntimeouts\nand\noptionally,\nsimple\nauthentication\nso\nonly\nauthorized\nclients\ncan\nconnect\nto\nthe\nweb\nserver,\nif\nthe\nnode\nis\nused\nin\na\nshared\nor\npublic\nenvironment.\n1\nhttps://cwe.mitre.org/data/de\ufb01nitions/400.html \nPage\n5\nof\n8\n\n\nTHORChain\nJanuary\n2024"
+   }
+  ]
+ }
+]

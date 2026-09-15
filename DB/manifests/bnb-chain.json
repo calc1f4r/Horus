@@ -1,0 +1,835 @@
+{
+  "meta": {
+    "category": "bnb-chain",
+    "description": "Pattern-level index for bnb-chain vulnerabilities",
+    "fileCount": 5,
+    "totalPatterns": 5,
+    "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
+  },
+  "files": [
+    {
+      "file": "DB/bnb-chain/consensus/geth-inherited-bsc-audit-findings.md",
+      "totalLines": 335,
+      "frontmatter": {
+        "protocol": "go-ethereum",
+        "chain": "bsc",
+        "category": "client_security",
+        "vulnerability_type": "insecure_default_config",
+        "root_cause_family": "insecure_defaults_and_missing_defensive_checks",
+        "pattern_key": "insecure_default | rpc_http_cors | regression_commit | browser_same_origin_bypass",
+        "interaction_scope": "cross_boundary",
+        "involved_contracts": [
+          "go-ethereum rpc/http.go (newCorsHandler)",
+          "vendor/github.com/rs/cors middleware",
+          "p2p rlpx.go (rlpxFrameRW.ReadMsg, readHandshakeMsg)",
+          "eth/downloader.go (qosReduceConfidence)",
+          "core/evm.go (Transfer) + core/tx_pool.go (validateTx)",
+          "internal/jsre/jsre.go (randomSource)",
+          "consensus/ethash (dataset timestamping)"
+        ],
+        "path_keys": [
+          "insecure_default | --rpc HTTP endpoint | rs/cors empty AllowedOrigins -> allow-all",
+          "unbounded_allocation | rlpx frame read | attacker-controlled fsize -> 16.8MB make()",
+          "missing_zero_check | downloader QoS | peers==0 -> panic divide-by-zero",
+          "implicit_validation | block processing | negative tx value only blocked by RLP encoding"
+        ],
+        "attack_type": "configuration_bypass",
+        "affected_component": "rpc_http_interface|p2p_networking|evm_interpreter|block_processing",
+        "primitives": [
+          "cors_default_allow_all",
+          "empty_slice_vs_empty_string_default",
+          "user_controlled_memory_allocation",
+          "unbounded_object_pool (intPool)",
+          "divide_by_zero_panic",
+          "implicit_serialization_validation",
+          "weak_prng_seed_fallback",
+          "data_race_mutex_gap"
+        ],
+        "code_keywords": [
+          "newCorsHandler",
+          "AllowedOrigins",
+          "rpccorsdomain",
+          "rlpxFrameRW",
+          "readInt24",
+          "readHandshakeMsg",
+          "qosReduceConfidence",
+          "rttConfidence",
+          "ErrNegativeValue",
+          "tx.Value().Sign()",
+          "intPool",
+          "randomSource",
+          "crand.Read",
+          "dataset(block uint64)"
+        ],
+        "severity": "high",
+        "impact": "node_compromise|remote_rpc_abuse|dos",
+        "financial_impact": "none",
+        "tags": [
+          "geth",
+          "bsc-geth",
+          "inherited_code",
+          "cors",
+          "same_origin_policy",
+          "rpc",
+          "p2p",
+          "evm",
+          "dos",
+          "regression"
+        ],
+        "language": "go",
+        "version": "go-ethereum <=1.6.x (audited Apr 2017); classes recur in forks incl. bsc"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "bnb-chain-geth-inherited-bsc-audit-findings-geth-inherited-audit-findings--000",
+          "title": "Geth-Inherited Audit Findings Relevant to BSC Clients",
+          "lineStart": 93,
+          "lineEnd": 335,
+          "lineCount": 243,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "AllowedOrigins",
+            "ErrNegativeValue",
+            "Transfer",
+            "XMLHttpRequest",
+            "amount",
+            "cross_boundary",
+            "current.lock",
+            "dataset",
+            "intPool",
+            "newCorsHandler",
+            "path_keys",
+            "qosReduceConfidence",
+            "randomSource",
+            "readHandshakeMsg",
+            "rlpxFrameRW.ReadMsg",
+            "rpccorsdomain",
+            "rlpxFrameRW",
+            "readInt24",
+            "rttConfidence",
+            "tx.Value().Sign()"
+          ],
+          "searchKeywords": [
+            "geth",
+            "inherited",
+            "audit",
+            "findings",
+            "relevant",
+            "bsc",
+            "clients",
+            "newcorshandler",
+            "new cors handler",
+            "allowedorigins",
+            "allowed origins",
+            "rpccorsdomain",
+            "rlpxframerw",
+            "rlpx frame rw",
+            "readint24",
+            "read int24",
+            "readhandshakemsg",
+            "read handshake msg",
+            "qosreduceconfidence",
+            "qos reduce confidence",
+            "rttconfidence",
+            "rtt confidence",
+            "errnegativevalue",
+            "err negative value",
+            "tx.value().sign()",
+            "tx value() sign()",
+            "intpool",
+            "int pool",
+            "randomsource",
+            "random source",
+            "crand.read",
+            "crand read"
+          ],
+          "rootCause": "Security properties delegated to defaults, callers, or serialization rather than enforced locally:\n\n\n\n1. **CORS allow-all default (most serious)** — commit `5e29f4b` (2017-04-12) changed `newCorsHandl",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/bnb-chain_findings/bsc-docs-audits-2017-04-25-geth-audit-truesec-pdf.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "insecure defaults and missing defensive checks",
+              "configuration bypass",
+              "insecure default",
+              "rpc http cors",
+              "regression commit"
+            ],
+            "commonlyComposesWith": [
+              "cors default allow all",
+              "empty slice vs empty string default",
+              "user controlled memory allocation",
+              "unbounded object pool (int pool)",
+              "divide by zero panic"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/bnb-chain/defi/launchpool-deposit-validation.md",
+      "totalLines": 366,
+      "frontmatter": {
+        "protocol": "bscstation-startpools",
+        "chain": "bsc",
+        "category": "business_logic",
+        "vulnerability_type": "internal_ledger_desync",
+        "root_cause_family": "dual_ledger_without_transfer_hook",
+        "pattern_key": "unhooked_lp_transfer | staking LP token | ERC20 transfer of position | withdraw blocked and rewards lost",
+        "interaction_scope": "single_contract_family",
+        "involved_contracts": [
+          "BSCSBaseStartPool (inherits ERC20 \"BSCS-BSCS\"; deposit()/withdraw() with userInfo.amount + _mint/_burn)",
+          "MasterChef-style reward accounting (accTokenPerShare[], rewardDebt[], _updatePool(), addRewardToken(), updateRewardPerBlock())"
+        ],
+        "path_keys": [
+          "unhooked_lp_transfer | transfer()/transferFrom() on LP | _transfer not overridden -> userInfo.amount desync -> withdraw() revert",
+          "reward_config_without_checkpoint | addRewardToken/updateRewardPerBlock | missing _updatePool() -> unfair reward distribution",
+          "non_reverting_unsafe_transfer | raw transfer() calls | ZRX/USDT-style tokens -> silent failure or revert",
+          "unvalidated_admin_args | updateUnstakingFee/updateFeeCollector | fee > 10000 or 0x0 collector -> withdraw revert or fee loss"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "staking position accounting + multi-token reward accrual",
+        "primitives": [
+          "erc20_inherited_position_token",
+          "userInfo_amount_shadow_ledger",
+          "accTokenPerShare_checkpoint",
+          "rewardDebt_migration_on_transfer",
+          "non_compliant_erc20_returns",
+          "precision_factor_per_token",
+          "fee_bps_validation"
+        ],
+        "code_keywords": [
+          "BSCSBaseStartPool",
+          "userInfo",
+          "accTokenPerShare",
+          "rewardDebt",
+          "_updatePool",
+          "addRewardToken",
+          "updateRewardPerBlock",
+          "updateUnstakingFee",
+          "updateFeeCollector",
+          "unStakingFee",
+          "safeERC20Transfer",
+          "collectFee",
+          "emergencyWithdraw",
+          "recoverWrongTokens",
+          "poolCap",
+          "poolLimitPerUser"
+        ],
+        "severity": "medium",
+        "impact": "fund_lock|reward_theft|dos",
+        "financial_impact": "medium",
+        "tags": [
+          "masterchef",
+          "staking-pool",
+          "lp-token",
+          "erc20-position",
+          "reward-accrual",
+          "checkpoint",
+          "deflationary-token",
+          "launchpad",
+          "bscstation",
+          "peckshield"
+        ],
+        "language": "solidity",
+        "version": "audited commit 56bc0d3 (2021); fixes to 1dd2057 (+7d905b7 for _updatePool in addRewardToken)"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "bnb-chain-launchpool-deposit-validation-launchpool-staking-pool-deposi-000",
+          "title": "Launchpool/Staking-Pool Deposit Validation & Dual-Ledger Sync (BSCStation Start Pools)",
+          "lineStart": 92,
+          "lineEnd": 366,
+          "lineCount": 275,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "BSCSBaseStartPool",
+            "ERC20(token).transfer(...",
+            "_beforeTokenTransfer",
+            "_burn(A",
+            "_transfer",
+            "_updatePool",
+            "accTokenPerShare",
+            "addRewardToken",
+            "deposit",
+            "deposit(_amount",
+            "path_keys",
+            "rewardDebt",
+            "rewardPerBlock",
+            "single_contract_family",
+            "strong",
+            "userInfo",
+            "updateRewardPerBlock",
+            "updateUnstakingFee",
+            "updateFeeCollector",
+            "unStakingFee"
+          ],
+          "searchKeywords": [
+            "launchpool",
+            "staking",
+            "pool",
+            "deposit",
+            "validation",
+            "dual",
+            "ledger",
+            "sync",
+            "bscsbasestartpool",
+            "bscsbase start pool",
+            "userinfo",
+            "user info",
+            "acctokenpershare",
+            "acc token per share",
+            "rewarddebt",
+            "reward debt",
+            "_updatepool",
+            "update pool",
+            "addrewardtoken",
+            "add reward token",
+            "updaterewardperblock",
+            "update reward per block",
+            "updateunstakingfee",
+            "update unstaking fee",
+            "updatefeecollector",
+            "update fee collector",
+            "unstakingfee",
+            "un staking fee",
+            "safeerc20transfer",
+            "safe erc20 transfer",
+            "collectfee",
+            "collect fee"
+          ],
+          "rootCause": "1. **PVE-001 (Medium, L-likelihood/H-impact) — unhooked LP transfer.** `deposit()` does `user.amount += _amount; _mint(msg.sender, _amount)`; `withdraw()` does `user.amount -= _amount; _burn(msg.sende",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/bnb-chain_findings/publications-audit-reports-peckshield-audit-report-bscstationstartpools-v1-0-pdf.md",
+              "reports/bnb-chain_findings/publications-audit-reports-peckshield-audit-report-pinksale-subscriptionpool-v1-0-pdf.md",
+              "reports/bnb-chain_findings/publicreports-solidity-smart-contract-audits-bscex-launchpadx-smartcontract-report-halborn-v1-pdf.md",
+              "reports/bnb-chain_findings/publicreports-solidity-smart-contract-audits-bscex-launchpoolx-smartcontract-report-halborn-v1-pdf.md"
+            ],
+            "severityConsensus": "LOW",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "dual ledger without transfer hook",
+              "logical error",
+              "unhooked lp transfer",
+              "staking lp token",
+              "erc20 transfer of position"
+            ],
+            "commonlyComposesWith": [
+              "erc20 inherited position token",
+              "user info amount shadow ledger",
+              "acc token per share checkpoint",
+              "reward debt migration on transfer",
+              "non compliant erc20 returns"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/bnb-chain/defi/pinksale-subscription-access.md",
+      "totalLines": 317,
+      "frontmatter": {
+        "protocol": "pinksale-subscriptionpool",
+        "chain": "bsc",
+        "category": "access_control",
+        "vulnerability_type": "privileged_input_rewrite",
+        "root_cause_family": "ungoverned_admin_rewrite_of_user_state",
+        "pattern_key": "admin_state_rewrite | governance setter | post-commitment user allocations | allocation theft or sale rigging",
+        "interaction_scope": "single_contract_family",
+        "involved_contracts": [
+          "SubscriptionPool (contributeCustomCurrency/contribute, updateCalculatedData, setCalculationStage, setCanFinalize, _lockLiquidity)",
+          "LaunchPadLibrary (addLiquidity, raw IERC20.approve)"
+        ],
+        "path_keys": [
+          "admin_state_rewrite | updateCalculatedData | purchasedOf rewrite -> allocation rigging",
+          "non_compliant_token_transfer | IERC20.approve / contributeCustomCurrency | USDT no-bool / deflationary -> revert or book desync",
+          "missing_event | silent admin setters -> untraceable parameter changes"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "subscription/allocation accounting + liquidity lock flow",
+        "primitives": [
+          "ratio_based_allocation (committed/total committed)",
+          "arbitrary_admin_array_write (users[], amounts[])",
+          "stage_state_machine (calculationStage)",
+          "raw_erc20_approve_assumptions",
+          "balance_delta_bookkeeping",
+          "indexed_event_coverage"
+        ],
+        "code_keywords": [
+          "contributeCustomCurrency",
+          "updateCalculatedData",
+          "purchasedOf",
+          "totalVolumePurchased",
+          "setCalculationStage",
+          "setCanFinalize",
+          "onlyGovernance",
+          "calculationStage",
+          "poolSettings",
+          "poolStates",
+          "_lockLiquidity",
+          "addLiquidity",
+          "safeApprove"
+        ],
+        "severity": "medium",
+        "impact": "allocation_manipulation|fund_loss|book_desync",
+        "financial_impact": "medium",
+        "tags": [
+          "launchpad",
+          "presale",
+          "subscription",
+          "fair-launch",
+          "allocation",
+          "admin-keys",
+          "governance",
+          "deflationary-token",
+          "pinksale",
+          "peckshield"
+        ],
+        "language": "solidity",
+        "version": "audited SubscriptionPool-09072022.sol (MD5 c0412b28); fixed SubscriptionPool-09292022.sol (MD5 799c117f)"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "bnb-chain-pinksale-subscription-access-pinksale-subscriptionpool-admi-000",
+          "title": "PinkSale SubscriptionPool: Admin Allocation Rewrite & Token-Compliance Gaps",
+          "lineStart": 80,
+          "lineEnd": 317,
+          "lineCount": 238,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "CALCULATED",
+            "IERC20(token).approve(...",
+            "IERC20.approve",
+            "LaunchPadLibrary.addLiquidity",
+            "SubscriptionPool::_lockLiquidity",
+            "_lockLiquidity",
+            "addLiquidity",
+            "amount",
+            "calculationStage",
+            "contributeCustomCurrency",
+            "onlyGovernance",
+            "path_keys",
+            "purchasedOf",
+            "safeTransferFrom",
+            "setCalculationStage",
+            "updateCalculatedData",
+            "totalVolumePurchased",
+            "setCanFinalize",
+            "poolSettings",
+            "poolStates"
+          ],
+          "searchKeywords": [
+            "pink",
+            "sale",
+            "subscription",
+            "pool",
+            "admin",
+            "allocation",
+            "rewrite",
+            "token",
+            "compliance",
+            "gaps",
+            "contributecustomcurrency",
+            "contribute custom currency",
+            "updatecalculateddata",
+            "update calculated data",
+            "purchasedof",
+            "purchased of",
+            "totalvolumepurchased",
+            "total volume purchased",
+            "setcalculationstage",
+            "set calculation stage",
+            "setcanfinalize",
+            "set can finalize",
+            "onlygovernance",
+            "only governance",
+            "calculationstage",
+            "calculation stage",
+            "poolsettings",
+            "pool settings",
+            "poolstates",
+            "pool states",
+            "_lockliquidity",
+            "lock liquidity"
+          ],
+          "rootCause": "1. **PVE-004 (Medium) — ungoverned admin keys.** `updateCalculatedData(totalVolumePurchased, users[], amounts[])` (onlyGovernance) overwrites every listed user's `purchasedOf` and the global `totalVol",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/bnb-chain_findings/publications-audit-reports-peckshield-audit-report-pinksale-subscriptionpool-v1-0-pdf.md"
+            ],
+            "severityConsensus": "MEDIUM",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "ungoverned admin rewrite of user state",
+              "logical error",
+              "admin state rewrite",
+              "governance setter",
+              "post commitment user allocations"
+            ],
+            "commonlyComposesWith": [
+              "ratio based allocation (committed total committed)",
+              "arbitrary admin array write (users[]",
+              "amounts[])",
+              "stage state machine (calculation stage)",
+              "raw erc20 approve assumptions"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/bnb-chain/tokens/bnbx-staking-derivative.md",
+      "totalLines": 339,
+      "frontmatter": {
+        "protocol": "stader-labs-bnbx",
+        "chain": "bsc",
+        "category": "arithmetic",
+        "vulnerability_type": "share_mint_accounting_corruption",
+        "root_cause_family": "oracleless_share_minting_with_unsynced_pool_totals",
+        "pattern_key": "stale_pool_total | deposit conversion | operator reward bump | share mint revert or zero shares",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "StakeManager.sol (requestWithdraw, startUndelegation, convertBnbToBnbX, convertBnbXToBnb, getTotalPooledBnb, increaseTotalRedelegated/addRestakingRewards, startDelegation)",
+          "BnbX.sol (ERC20Upgradeable share token, totalSupply, burn)",
+          "TokenHub (cross-chain transferOut to BNB Beacon Chain staking wallet)"
+        ],
+        "path_keys": [
+          "stale_pool_total | startUndelegation (bot) | totalDeposited -= totalBnbToWithdraw -> underflow revert locks exits",
+          "reward_inflation_before_first_deposit | increaseTotalRedelegated -> convertBnbToBnbX | first depositor mints 0 shares",
+          "init_gap | uninitialized implementation | missing _disableInitializers -> takeover risk"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "exchange-rate conversion between BNB and BnbX shares",
+        "primitives": [
+          "share_price_as_totalPooledBnb_over_totalSupply",
+          "operator_adjustable_pool_total (totalRedelegated)",
+          "underflow_revert_as_dos",
+          "zero_share_first_deposit",
+          "reentrancy_resistant_local_caching (bnbXToBurn copied before burn)",
+          "uninitialized_implementation",
+          "cross_chain_transferOut_native_value"
+        ],
+        "code_keywords": [
+          "convertBnbToBnbX",
+          "convertBnbXToBnb",
+          "getTotalPooledBnb",
+          "totalRedelegated",
+          "addRestakingRewards",
+          "increaseTotalRedelegated",
+          "totalDeposited",
+          "totalBnbToWithdraw",
+          "totalBnbXToBurn",
+          "startUndelegation",
+          "requestWithdraw",
+          "startDelegation",
+          "claimWithdraw",
+          "disableInitializers",
+          "setStakeManager",
+          "setBotAddress",
+          "tokenHub"
+        ],
+        "severity": "high",
+        "impact": "exit_dos|zero_share_loss|fund_loss",
+        "financial_impact": "medium",
+        "tags": [
+          "liquid-staking",
+          "bnbx",
+          "stader",
+          "share-minting",
+          "exchange-rate",
+          "first-depositor",
+          "underflow",
+          "upgradeable",
+          "bsc",
+          "halborn"
+        ],
+        "language": "solidity",
+        "version": "audited commit 2ddf3e2c30321587742630de90a1414434ff256f (Jun-Jul 2022); fixed d56ab580231c56531edbb780387e1c711236c85d + 4e04e467"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "bnb-chain-bnbx-staking-derivative-bnbx-liquid-staking-share-acco-000",
+          "title": "BnbX Liquid-Staking Share Accounting (Stader StakeManager)",
+          "lineStart": 86,
+          "lineEnd": 339,
+          "lineCount": 254,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "BnbX",
+            "Initializable",
+            "StakeManager",
+            "_disableInitializers",
+            "addRestakingRewards",
+            "claimWithdraw",
+            "convertBnbToBnbX",
+            "getTotalPooledBnb",
+            "increaseTotalRedelegated",
+            "increaseTotalRedelegated(amount",
+            "initialize(...",
+            "multi_contract",
+            "path_keys",
+            "requestWithdraw",
+            "setBotAddress",
+            "convertBnbXToBnb",
+            "totalRedelegated",
+            "totalDeposited",
+            "totalBnbToWithdraw",
+            "totalBnbXToBurn"
+          ],
+          "searchKeywords": [
+            "bnb",
+            "liquid",
+            "staking",
+            "share",
+            "accounting",
+            "bnb liquid staking share accounting",
+            "bnb liquid",
+            "liquid staking",
+            "staking share",
+            "share accounting",
+            "convertbnbtobnbx",
+            "convert bnb to bnb x",
+            "convertbnbxtobnb",
+            "convert bnb xto bnb",
+            "gettotalpooledbnb",
+            "get total pooled bnb",
+            "totalredelegated",
+            "total redelegated",
+            "addrestakingrewards",
+            "add restaking rewards",
+            "increasetotalredelegated",
+            "increase total redelegated",
+            "totaldeposited",
+            "total deposited",
+            "totalbnbtowithdraw",
+            "total bnb to withdraw",
+            "totalbnbxtoburn",
+            "total bnb xto burn",
+            "startundelegation",
+            "start undelegation",
+            "requestwithdraw",
+            "request withdraw"
+          ],
+          "rootCause": "1. **HAL-01 (HIGH) — underflow via unsynced accumulators.** `requestWithdraw` converts BnbX→BNB using `getTotalPooledBnb() = totalDeposited + totalRedelegated` and accumulates the BNB result into `tot",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/bnb-chain_findings/publicreports-solidity-smart-contract-audits-staderlabs-bnbx-smart-contract-security-audit-report-halborn-final-pdf.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "oracleless share minting with unsynced pool totals",
+              "logical error",
+              "stale pool total",
+              "deposit conversion",
+              "operator reward bump"
+            ],
+            "commonlyComposesWith": [
+              "share price as total pooled bnb over total supply",
+              "operator adjustable pool total (total redelegated)",
+              "underflow revert as dos",
+              "zero share first deposit",
+              "reentrancy resistant local caching (bnb xto burn copied before burn)"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/bnb-chain/tokens/stkbnb-redemption-accounting.md",
+      "totalLines": 326,
+      "frontmatter": {
+        "protocol": "persistence-one-stkbnb",
+        "chain": "bsc",
+        "category": "business_logic",
+        "vulnerability_type": "reserve_accounting_mismatch",
+        "root_cause_family": "wrong_guard_variable_and_unsafe_admin_power",
+        "pattern_key": "wrong_reserve_check | claim payout | contract balance vs claim reserve | withdrawal revert or fund lock",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "StakePool.sol (claimReqs, _claim, _claimReserve, _canBeClaimed)",
+          "FeeVault.sol (claimStkBNB)",
+          "StakeBNBToken.sol (stkBNB, selfDestruct)",
+          "UndelegationHolder.sol (bnbUnbonding view reuse)"
+        ],
+        "path_keys": [
+          "wrong_reserve_check | claim(uint256 index) | _claimReserve vs address(this).balance -> revert on zero-reserve",
+          "admin_fund_lock | claimStkBNB | FeeVault -> StakePool recipient -> permanently locked fees",
+          "unsafe_admin_power | selfDestruct(whenPaused) | DEFAULT_ADMIN_ROLE -> selfdestruct steals all deposited BNB",
+          "unsafe_cast | unbond accounting | uint256 -> int256 casts -> overflow on extreme values",
+          "transfer_gas_limit | _claim payout | payable(msg.sender).transfer -> 2300-gas revert for smart wallets"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "redemption/claim pipeline",
+        "primitives": [
+          "claim_reserve_ledger",
+          "swap_delete_claim_array",
+          "uint256_to_int256_cast",
+          "selfdestruct_with_native_balance",
+          "transfer_2300_gas_stipend",
+          "cross_contract_recipient_validation"
+        ],
+        "code_keywords": [
+          "claimReqs",
+          "weiToReturn",
+          "_claimReserve",
+          "InsufficientFundsToSatisfyClaim",
+          "_canBeClaimed",
+          "claimStkBNB",
+          "selfDestruct",
+          "getStkBNB",
+          "bnbUnbonding",
+          "IndexOutOfBounds",
+          "getPaginatedClaimRequests"
+        ],
+        "severity": "medium",
+        "impact": "fund_lock|dos|admin_fund_loss",
+        "financial_impact": "medium",
+        "tags": [
+          "liquid-staking",
+          "stkbnb",
+          "bnb-staking",
+          "claim",
+          "unbond",
+          "reserve-accounting",
+          "selfdestruct",
+          "feevault",
+          "halborn"
+        ],
+        "language": "solidity",
+        "version": "audited commit bde7ee900aba18aecd0e8e0c0497121540dd5abb (July 2022); fixed d059bccbb368158a63767107b37894d47009c385"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "bnb-chain-stkbnb-redemption-accounting-stkbnb-redemption-claim-accoun-000",
+          "title": "stkBNB Redemption/Claim Accounting (Persistence StakePool)",
+          "lineStart": 81,
+          "lineEnd": 326,
+          "lineCount": 246,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "FeeVault.claimStkBNB",
+            "InsufficientFundsToSatisfyClaim",
+            "StakeBNBToken.selfDestruct(addr",
+            "_bnbToUnbond",
+            "_claim",
+            "_claimReserve",
+            "addr",
+            "address(this).balance",
+            "call",
+            "claim",
+            "claim(index",
+            "claimReqs",
+            "claimReserve",
+            "claimStkBNB",
+            "int256(bnbUnbonding_",
+            "weiToReturn",
+            "_canBeClaimed",
+            "selfDestruct",
+            "getStkBNB",
+            "bnbUnbonding"
+          ],
+          "searchKeywords": [
+            "stk",
+            "bnb",
+            "redemption",
+            "claim",
+            "accounting",
+            "stk bnb redemption claim accounting",
+            "stk bnb",
+            "bnb redemption",
+            "redemption claim",
+            "claim accounting",
+            "claimreqs",
+            "claim reqs",
+            "weitoreturn",
+            "wei to return",
+            "_claimreserve",
+            "claim reserve",
+            "insufficientfundstosatisfyclaim",
+            "insufficient funds to satisfy claim",
+            "_canbeclaimed",
+            "can be claimed",
+            "claimstkbnb",
+            "claim stk bnb",
+            "selfdestruct",
+            "self destruct",
+            "getstkbnb",
+            "get stk bnb",
+            "bnbunbonding",
+            "bnb unbonding",
+            "indexoutofbounds",
+            "index out of bounds",
+            "getpaginatedclaimrequests",
+            "get paginated claim requests"
+          ],
+          "rootCause": "1. **HAL-02 (wrong guard variable)** — `_claim` guards with `address(this).balance < req.weiToReturn` in the description excerpt (the audited snippet shows both forms across revisions), while the stat",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/bnb-chain_findings/publicreports-solidity-smart-contract-audits-persistence-stkbnb-smart-contract-security-audit-report-halborn-final-pdf.md"
+            ],
+            "severityConsensus": "MEDIUM",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "wrong guard variable and unsafe admin power",
+              "logical error",
+              "wrong reserve check",
+              "claim payout",
+              "contract balance vs claim reserve"
+            ],
+            "commonlyComposesWith": [
+              "claim reserve ledger",
+              "swap delete claim array",
+              "uint256 to int256 cast",
+              "selfdestruct with native balance",
+              "transfer 2300 gas stipend"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

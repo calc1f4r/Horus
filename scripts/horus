@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+# horus — Horus audit CLI dispatcher.
+# Routes subcommands to scripts/horus_cli/<module>.py via venv python (post-bootstrap)
+# or system python3 (pre-bootstrap).
+#
+# Order of operations on every invocation:
+#   1. Resolve $HORUS_HOME from $HORUS_HOME env, then state.json, then dispatcher path.
+#   2. Pick interpreter: $HORUS_HOME/.horus/venv/bin/python3 if recorded, else python3.
+#   3. Add $HORUS_HOME/scripts to PYTHONPATH so `python3 -m horus_cli.<mod>` resolves.
+#   4. Dispatch to module with remaining args.
+#
+# State file: $HOME/.horus/state.json
+# Schema:
+#   { "repo_path": "...", "venv_path": "...", "graphify_version": "...",
+#     "installed_at": "...", "schema_version": 1 }
+
+set -euo pipefail
+
+# --- Resolve HORUS_HOME -------------------------------------------------------
+
+resolve_horus_home() {
+    if [ -n "${HORUS_HOME:-}" ]; then
+        echo "$HORUS_HOME"
+        return 0
+    fi
+
+    local state="$HOME/.horus/state.json"
+    if [ -f "$state" ] && command -v python3 >/dev/null 2>&1; then
+        local from_state
+        from_state=$(python3 - "$state" <<'PY' 2>/dev/null || true
+import json, sys
+try:
+    with open(sys.argv[1]) as f:
+        print(json.load(f).get("repo_path", ""))
+except Exception:
+    pass
+PY
+)
+        if [ -n "$from_state" ] && [ -d "$from_state" ]; then
+            echo "$from_state"
+            return 0
+        fi
+    fi
+
+    # Last resort: dispatcher's own location.
+    local script_path
+    script_path=$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")
+    echo "$(cd "$(dirname "$script_path")/.." && pwd)"
+}
+
+HORUS_HOME=$(resolve_horus_home)
+export HORUS_HOME
+
+# --- Pick interpreter ---------------------------------------------------------
+
+pick_python() {
+    local state="$HOME/.horus/state.json"
+    if [ -f "$state" ] && command -v python3 >/dev/null 2>&1; then
+        local vpy
+        vpy=$(python3 - "$state" <<'PY' 2>/dev/null || true
+import json, sys
+try:
+    with open(sys.argv[1]) as f:
+        print(json.load(f).get("venv_path", ""))
+except Exception:
+    pass
+PY
+)
+        if [ -n "$vpy" ] && [ -x "$vpy/bin/python3" ]; then
+            echo "$vpy/bin/python3"
+            return 0
+        fi
+    fi
+    echo "python3"
+}
+
+PY=$(pick_python)
+
+# --- PYTHONPATH so `python3 -m horus_cli.X` resolves -------------------------
+
+export PYTHONPATH="$HORUS_HOME/scripts${PYTHONPATH:+:$PYTHONPATH}"
+
+# --- Help ---------------------------------------------------------------------
+
+print_help() {
+    cat <<'HELP'
+horus — Horus audit CLI
+
+Usage: horus <command> [args...]
+
+Commands:
+  bootstrap                       One-time install (venv, graphify, blockchain extractor, lessons.db)
+  doctor                          Diagnose environment; print fixes for any failure
+  graph init <codebase>           Build Phase 0 graph at <codebase>/audit-output/graph/
+  graph verify                    Validate audit-output/graph/graph.json
+  graph update <codebase>         Incremental graph rebuild
+  db graph                        Rebuild DB knowledge graph
+  install-runtime <claude|codex>  Wire current project for the given runtime
+  update                          Refresh pinned graphify within state.json range
+  uninstall                       Remove ~/.horus, venv, symlinks; preserve lessons.db + audit-output
+
+Options:
+  -h, --help                      Show this help
+
+Environment:
+  HORUS_HOME                      Override Horus repo path; takes precedence over state.json
+
+State:
+  ~/.horus/state.json             Records repo path, venv path, graphify version
+
+HELP
+}
+
+# --- Dispatch -----------------------------------------------------------------
+
+CMD="${1:-}"
+[ $# -gt 0 ] && shift
+
+case "$CMD" in
+    -h|--help|help|"")
+        print_help
+        exit 0
+        ;;
+    bootstrap)        exec "$PY" -m horus_cli.bootstrap "$@" ;;
+    doctor)           exec "$PY" -m horus_cli.doctor "$@" ;;
+    graph)            exec "$PY" -m horus_cli.graph "$@" ;;
+    db)               exec "$PY" -m horus_cli.db "$@" ;;
+    install-runtime)  exec "$PY" -m horus_cli.install_runtime "$@" ;;
+    update)           exec "$PY" -m horus_cli.lifecycle update "$@" ;;
+    uninstall)        exec "$PY" -m horus_cli.lifecycle uninstall "$@" ;;
+    *)
+        echo "horus: unknown command: $CMD" >&2
+        echo "Run 'horus --help' for usage." >&2
+        exit 2
+        ;;
+esac

@@ -1,0 +1,1878 @@
+[
+ {
+  "f": "acala-c4-2401.md",
+  "bytes": 60289,
+  "cls": "text",
+  "nlines": 1487,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/acala-c4-2401.pdf\npages: 52\n---\n\nIntroducing Code4rena Pro League: The elite tier of professional security\nresearchers.Learn more \u2192\nAcala\nFindings & Analysis Report\n2024-05-02\nTable of contents\n\u2022 Overview\n\u2022 About C4\n\u2022 Wardens\n\u2022 Summary\n\u2022 Scope\n\u2022 Severity Criteria\n\u2022 High Risk Findings (3)\n\u2022 [H-01] transfer_share_and_rewards allows for self transfer\n\u2022 [H-02] Early user can break pool via in\ufb02ation attack due to no\nminimum liquidity check in the incentive contract\n\u2022 [H-03] transfer_share_and_rewards can be used to transfer\nout shares without transferring reward debt due to rounding\n\u2022 Medium Risk Findings (4)\n\u2022 [M-01] Claiming rewards while the deduction rate is != 0,\nallows for repeated withdrawal of redistributed rewards\nAcala https://code4rena.com/reports/2024-03-acala\n1 of 52 09/06/2024, 14:14\n\n\u2022 [M-02] Incentive accumulation can be sandwiched w",
+  "headings": [
+   "#[test]",
+   "# Output is of the form ( ${share_balance}, {0: ${reward_debt}} )",
+   "#[test]",
+   "#[test]",
+   "#[test]",
+   "#[pallet::call_index(1)]",
+   "#[pallet::weight(T::WeightInfo::unbond())]",
+   "#[pallet::call_index(2)]",
+   "#[pallet::weight(<T as Config>::WeightInfo::claim_rewards(",
+   "#![cfg_attr(not(feature = \"std\"), no_std)]",
+   "#![allow(clippy::unused_unit)]",
+   "#![allow(clippy::too_many_arguments)]",
+   "#[pallet::hooks]",
+   "#[pallet::compact] amount: Balance, // amount to LP",
+   "#[pallet::compact] amount: Balance,",
+   "#[pallet::call_index(2)]",
+   "#[pallet::weight(<T as Config>::WeightInfo::claim_rewards())]"
+  ],
+  "sevcounts": {
+   "severity": 12,
+   "high": 11,
+   "medium": 5,
+   "low": 11,
+   "critical": 7,
+   "info": 2,
+   "minor": 1
+  }
+ },
+ {
+  "f": "acala-slowmist-2020.md",
+  "bytes": 26283,
+  "cls": "text",
+  "nlines": 556,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/acala-slowmist-2020.pdf\npages: 23\n---\n\n1\nAcala Security Audit Report\n\n1\nContents\n1. Executive Summary...............................................................................................................................................1\n2. Scope of Audit.........................................................................................................................................................3\n3 Coverage....................................................................................................................................................................4\n3.1 Target Code and Revision..........................................................................................................................4\n3.2 Areas of Concern..........................................................................................",
+  "headings": [],
+  "sevcounts": {
+   "medium": 6,
+   "low": 8,
+   "critical": 4,
+   "high": 4
+  }
+ },
+ {
+  "f": "acala-slowmist-2021.md",
+  "bytes": 11677,
+  "cls": "text",
+  "nlines": 268,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/acala-slowmist-2021.pdf\npages: 13\n---\n\n1\nAcala Security Audit Report\n\n1\nContents\n1. Executive Summary...............................................................................................................................................1\n2. Scope of Audit.........................................................................................................................................................3\n3 Coverage....................................................................................................................................................................3\n3.1 Target Code and Revision..........................................................................................................................3\n3.2 Areas of Concern..........................................................................................",
+  "headings": [],
+  "sevcounts": {
+   "low": 7,
+   "medium": 6,
+   "critical": 4,
+   "high": 4,
+   "info": 1
+  }
+ },
+ {
+  "f": "acala-srl-2021-12.md",
+  "bytes": 22633,
+  "cls": "text",
+  "nlines": 401,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/acala-srl-2021-12.pdf\npages: 11\n---\n\n \n \n \nAcala runtime audit \nSecurity review of the Acala runtime implementation  \nv1 .1  \u2013 12. January  202 2 \n \nRegina B\u00edr\u00f3    regina@srlabs.de  \nMostafa Sattari   mostafa@srlabs.de  \nVincent Ulitzsch   vincent@srlabs.de  \n \n \n \nAbstract. This report  describes the results of a thorough, independent \nsecurity assurance review of the Acala runtime .  \nSRLabs conducted a second security audit on the Acala codebase \u2013 6 \nissues  were identified  across several runtime modules, most of which \nare already fixed by the Acala team.  \nWhile the security mindset and the application of best practices \nsignificantly i mproved since the first audit, we further suggest \nconduct ing  thorough internal reviews on the extrinsic weight function  \nimplementation , leveraging continuous fuzz -testing during \ndevelopment,  and i",
+  "headings": [],
+  "sevcounts": {
+   "high": 7,
+   "severity": 4,
+   "moderate": 5,
+   "low": 2
+  }
+ },
+ {
+  "f": "acala-srl-pr2341.md",
+  "bytes": 5348,
+  "cls": "text",
+  "nlines": 113,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/acala-srl-pr2341.pdf\npages: 4\n---\n\n \n \n \n \n \nPR #2341 review  \nA summary of a security review of removing the dex saving \nfunctionalities from the Acala chain, implemented in PR #2341 . \nV1. 1, September  19, 202 2 \n \nMostafa Sattari   mostafa@srlabs.de  \nBruno Prod uit   bruno@srlabs.de  \nRegina B\u00edr\u00f3     regina@srlabs.de  \n \n \n \nContent \n1 Context ................................ ................................ ...........................  2 \n2 Incident overview ................................ ................................ ............ 2 \n3 Proposed fix ................................ ................................ ....................  2 \n4 Current state ................................ ................................ ................... 3 \n5 Conclusion and further recommendations ................................ ........ 3 \n6 Biblio",
+  "headings": [],
+  "sevcounts": {
+   "high": 1
+  }
+ },
+ {
+  "f": "acala-trailofbits.md",
+  "bytes": 66266,
+  "cls": "text",
+  "nlines": 1187,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/acala-trailofbits.pdf\npages: 36\n---\n\n \u00a0\nAcala  \u00a0\nSecurity   Assessment  \u00a0\n16th   February   2021  \u00a0\n \u00a0\n \u00a0\nPrepared   For:   \u00a0\u00a0\nRuitao   Su   |     Acala  \u00a0\nruitao@laminar.one  \u00a0\n \u00a0\nBette   Chen   |    Acala  \u00a0\nbette@laminar.one  \u00a0\n \u00a0\nBryan   Chen   |    Acala  \u00a0\nbryan@laminar.one  \u00a0\n \u00a0\n \u00a0\nPrepared   By:   \u00a0\u00a0\nDominik   Czarnota    |     Trail   of   Bits  \u00a0\ndominik.czarnota@trailofbits.com   \u00a0\u00a0\n \u00a0\nMichael   Colburn    |     Trail   of   Bits  \u00a0\nmichael.colburn@trailofbits.com   \u00a0\u00a0\n \u00a0\nChangelog:   \u00a0\u00a0",
+  "headings": [
+   "#  \u00a0 Title  \u00a0 Type  \u00a0 Severity"
+  ],
+  "sevcounts": {
+   "high": 7,
+   "low": 14,
+   "informational": 20,
+   "severity": 20,
+   "medium": 4,
+   "moderate": 1
+  }
+ },
+ {
+  "f": "alephbft-tob.md",
+  "bytes": 36620,
+  "cls": "text",
+  "nlines": 1013,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/alephbft-tob.pdf\npages: 27\n---\n\nAlephBFTSecurity Assessment\nJune 21, 2021\nPrepared For:\nAdam G\u0105gol |\nCardinal Cryptography & Aleph Zero Foundation\nadam.gagol@cardinals.cc\nPrepared By:\nArtur Cygan |\nTrail of Bits\nartur.cygan@trailofbits.com\nWill Song  |\nTrail of Bits\nwill.song@trailofbits.com\nChangelog:\nJune 21, 2021:\nInitial report draft\nJuly 27, 2021:\nAdded Appendix D: Fix Log\n\n\nExecutive Summary\nProject Dashboard\nEngagement Goals\nCoverage\nRecommendations Summary",
+  "headings": [
+   "#",
+   "#[derive(Debug, Clone, Copy, Eq, PartialEq, Encode, Decode, StdHash)]pub(crate) struct UnitCoord {pub(crate) round: u16,creator: NodeIndex,}",
+   "#[async_trait::async_trait]pub trait Network<H: Hasher, D: Data, S: Signature, MS: PartialMultisignature>: Send {type Error: Debug;/// Send a message to a single node.fn send(&self, data: NetworkData<H, D, S, MS>, node: NodeIndex) -> Result<(),Self::Error>;/// Send a message to all nodes.fn broadcast(&self, data: NetworkData<H, D, S, MS>) -> Result<(), Self::Error>;/// Receive a message from the network.async fn next_event(&mut self) -> Option<NetworkData<H, D, S, MS>>;}",
+   "#![no_main]use libfuzzer_sys::fuzz_target;",
+   "#"
+  ],
+  "sevcounts": {
+   "low": 9,
+   "informational": 28,
+   "severity": 18,
+   "minor": 1,
+   "critical": 1,
+   "high": 10,
+   "medium": 2,
+   "moderate": 1
+  }
+ },
+ {
+  "f": "astar-srl-2403.md",
+  "bytes": 9722,
+  "cls": "text",
+  "nlines": 200,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/astar-srl-2403.pdf\npages: 6\n---\n\n \n \n \nCorporate Design\n2016\nAstar lockdrop precompile review \nThreat model and hacking assessment report  \nV1.2, June 4th, 2024 \n \nHaroon Basheer   haroon@srlabs.de \nRachna Shriwas   rachna@srlabs.de \nRegina Biro     regina@srlabs.de \n \n \n \n \n \nAbstract. This work describes the result of a thorough and independent \nsecurity assurance audit of the performed by Security Research Labs. \nSecurity Research Labs is a consulting firm that has been providing \nspecialized audit services for Substrate-based blockchains since 2019, \nincluding in the Polkadot ecosystem .  \nDuring this study, Astar provided access to relevant GitHub repositories and \nsupported the research team effectively. The code of the lockdrop \nprecompile was verified to assure that the business logic of the product is ",
+  "headings": [],
+  "sevcounts": {
+   "critical": 1,
+   "info": 3,
+   "low": 3,
+   "severity": 4
+  }
+ },
+ {
+  "f": "astar-zellic-2401.md",
+  "bytes": 17631,
+  "cls": "text",
+  "nlines": 315,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/astar-zellic-2401.pdf\npages: 16\n---\n\nPrepared for\nSofiya Vasylyeva\nStake T echnologies Pte. Ltd.\nPrepared by\nSyed Faraz Abrar\nFilippo Cremonese\nZellic\nFebruary 12, 2024\nAstar Network\nAssets Pallet Chain Extension Security Assessment\n\n\nAstar Network Assets Pallet Chain Extension Security Assessment February 12, 2024\nContents About Zellic 4\n1. Overview 4\n1.1. Executive Summary 5\n1.2. Goals of the Assessment 5\n1.3. Non-goals and Limitations 5\n1.4. Results 5\n2. Introduction 6\n2.1. About Astar Network 7\n2.2. Methodology 7\n2.3. Scope 9\n2.4. Project Overview 9\n2.5. Project Timeline 10",
+  "headings": [],
+  "sevcounts": {
+   "low": 10,
+   "critical": 4,
+   "high": 2,
+   "medium": 2,
+   "informational": 4,
+   "severity": 3
+  }
+ },
+ {
+  "f": "audit-reports-bifrost-2024-03-11-audit-report-bifrost-finance-leveraged-staking-v1-0-pdf.md",
+  "bytes": 24972,
+  "cls": "text",
+  "nlines": 3484,
+  "head": "---\nsource_pdf: substrate-l1_findings/audit-reports-bifrost-2024-03-11-audit-report-bifrost-finance-leveraged-staking-v1-0-pdf.pdf\npages: 22\n---\n\nAudit\nReport\nBifrost\nFinance\nLeveraged\nStaking\nv1.0\nMarch\n11,\n2024\n1\n\n\nTable\nof\nContents\nTable\nof\nContents\n2\nLicense\n3\nDisclaimer\n3\nIntroduction",
+  "headings": [],
+  "sevcounts": {
+   "info": 1,
+   "severity": 25,
+   "critical": 1,
+   "minor": 26,
+   "informational": 19,
+   "high": 1,
+   "low": 3,
+   "medium": 3
+  }
+ },
+ {
+  "f": "audit-reports-bifrost-2024-03-11-audit-report-bifrost-finance-leveraged-staking-v1-0-pdf.pdf",
+  "bytes": 1029701,
+  "cls": "binary-pdf",
+  "sibling_md": "audit-reports-bifrost-2024-03-11-audit-report-bifrost-finance-leveraged-staking-v1-0-pdf.md"
+ },
+ {
+  "f": "audit-reports-kilt-2025-03-27-audit-report-kilt-bonding-curve-pallet-v1-0-pdf.md",
+  "bytes": 48065,
+  "cls": "text",
+  "nlines": 8924,
+  "head": "---\nsource_pdf: substrate-l1_findings/audit-reports-kilt-2025-03-27-audit-report-kilt-bonding-curve-pallet-v1-0-pdf.pdf\npages: 30\n---\n\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \nSecurity\n \nAudit\n \nReport",
+  "headings": [
+   "#[test]",
+   "#[test]",
+   "#[test]"
+  ],
+  "sevcounts": {
+   "info": 1,
+   "severity": 21,
+   "critical": 2,
+   "minor": 11,
+   "informational": 25,
+   "high": 4,
+   "low": 1,
+   "medium": 3
+  }
+ },
+ {
+  "f": "audit-reports-kilt-2025-03-27-audit-report-kilt-bonding-curve-pallet-v1-0-pdf.pdf",
+  "bytes": 785596,
+  "cls": "binary-pdf",
+  "sibling_md": "audit-reports-kilt-2025-03-27-audit-report-kilt-bonding-curve-pallet-v1-0-pdf.md"
+ },
+ {
+  "f": "audit-reports-polkadot-2025-06-12-audit-report-polkadot-micro-sr25519-v1-0-pdf.pdf",
+  "bytes": 511902,
+  "cls": "binary-pdf",
+  "sibling_md": "audit-reports-polkadot-2025-06-12-audit-report-polkadot-micro-sr25519-v1-0-pdf.md"
+ },
+ {
+  "f": "audit-reports-polkadot-2025-06-12-differential-fuzz-testing-report-polkadot-micro-sr25519-v1-0-pdf.pdf",
+  "bytes": 575518,
+  "cls": "binary-pdf",
+  "sibling_md": "audit-reports-polkadot-2025-06-12-differential-fuzz-testing-report-polkadot-micro-sr25519-v1-0-pdf.md"
+ },
+ {
+  "f": "audit-reports-polkadot-2025-08-22-audit-report-polkadot-scure-sr25519-v1-5-pdf.pdf",
+  "bytes": 505949,
+  "cls": "binary-pdf",
+  "sibling_md": "audit-reports-polkadot-2025-08-22-audit-report-polkadot-scure-sr25519-v1-5-pdf.md"
+ },
+ {
+  "f": "audit-reports-snowbridge-2024-02-12-audit-report-snowbridge-extension-v1-1-pdf.md",
+  "bytes": 25770,
+  "cls": "text",
+  "nlines": 3808,
+  "head": "---\nsource_pdf: substrate-l1_findings/audit-reports-snowbridge-2024-02-12-audit-report-snowbridge-extension-v1-1-pdf.pdf\npages: 18\n---\n\nAudit\nReport\nSnowbridge\nExtension\nv1.1\nFebruary\n12,\n2024\n1\n\n\nTable\nof\nContents\nTable\nof\nContents\n2\nLicense\n3\nDisclaimer\n3\nIntroduction\n5\nPurpose",
+  "headings": [],
+  "sevcounts": {
+   "critical": 6,
+   "info": 1,
+   "severity": 15,
+   "minor": 14,
+   "informational": 7,
+   "high": 2,
+   "low": 4,
+   "medium": 3
+  }
+ },
+ {
+  "f": "audit-reports-snowbridge-2024-02-12-audit-report-snowbridge-extension-v1-1-pdf.pdf",
+  "bytes": 344899,
+  "cls": "binary-pdf",
+  "sibling_md": "audit-reports-snowbridge-2024-02-12-audit-report-snowbridge-extension-v1-1-pdf.md"
+ },
+ {
+  "f": "audit-reports-snowbridge-2024-05-24-audit-report-snowbridge-v1-1-pdf.md",
+  "bytes": 84936,
+  "cls": "text",
+  "nlines": 12278,
+  "head": "---\nsource_pdf: substrate-l1_findings/audit-reports-snowbridge-2024-05-24-audit-report-snowbridge-v1-1-pdf.pdf\npages: 57\n---\n\nAudit\nReport\nSnowbridge\nv1.1\nMay\n24,\n2024\n1\n\n\nTable\nof\nContents\nTable\nof\nContents\n2\nLicense\n5\nDisclaimer\n5\nIntroduction\n7\nPurpose\nof",
+  "headings": [
+   "#[pallet:constant]",
+   "#[pallet::constant]"
+  ],
+  "sevcounts": {
+   "critical": 19,
+   "info": 1,
+   "severity": 37,
+   "minor": 23,
+   "informational": 27,
+   "high": 32,
+   "low": 25,
+   "medium": 20
+  }
+ },
+ {
+  "f": "audit-reports-snowbridge-2024-05-24-audit-report-snowbridge-v1-1-pdf.pdf",
+  "bytes": 601016,
+  "cls": "binary-pdf",
+  "sibling_md": "audit-reports-snowbridge-2024-05-24-audit-report-snowbridge-v1-1-pdf.md"
+ },
+ {
+  "f": "audit-reports-snowbridge-2024-08-10-audit-report-snowbridge-updates-2-v1-0-pdf.md",
+  "bytes": 9504,
+  "cls": "text",
+  "nlines": 1346,
+  "head": "---\nsource_pdf: substrate-l1_findings/audit-reports-snowbridge-2024-08-10-audit-report-snowbridge-updates-2-v1-0-pdf.pdf\npages: 11\n---\n\nAudit\nReport\nSnowbridge\nUpdates\n2\nv1.0\nAugust\n10,\n2024\n1\n\n\nTable\nof\nContents\nTable\nof\nContents\n2\nLicense\n3\nDisclaimer\n4\nIntroduction\n5",
+  "headings": [],
+  "sevcounts": {
+   "info": 1,
+   "severity": 6,
+   "critical": 1,
+   "minor": 1,
+   "informational": 7,
+   "high": 3,
+   "low": 2,
+   "medium": 2
+  }
+ },
+ {
+  "f": "audit-reports-snowbridge-2024-08-10-audit-report-snowbridge-updates-2-v1-0-pdf.pdf",
+  "bytes": 335485,
+  "cls": "binary-pdf",
+  "sibling_md": "audit-reports-snowbridge-2024-08-10-audit-report-snowbridge-updates-2-v1-0-pdf.md"
+ },
+ {
+  "f": "audit-reports-snowbridge-2024-08-16-audit-report-snowbridge-updates-v1-0-pdf.md",
+  "bytes": 10944,
+  "cls": "text",
+  "nlines": 1586,
+  "head": "---\nsource_pdf: substrate-l1_findings/audit-reports-snowbridge-2024-08-16-audit-report-snowbridge-updates-v1-0-pdf.pdf\npages: 13\n---\n\nAudit\nReport\nSnowbridge\nUpdates\nv1.0\nAugust\n16,\n2024\n1\n\n\nTable\nof\nContents\nTable\nof\nContents\n2\nLicense\n3\nDisclaimer\n3\nIntroduction\n5\nPurpose",
+  "headings": [],
+  "sevcounts": {
+   "info": 1,
+   "severity": 7,
+   "critical": 1,
+   "minor": 5,
+   "informational": 5,
+   "high": 3,
+   "low": 2,
+   "medium": 2
+  }
+ },
+ {
+  "f": "audit-reports-snowbridge-2024-08-16-audit-report-snowbridge-updates-v1-0-pdf.pdf",
+  "bytes": 342754,
+  "cls": "binary-pdf",
+  "sibling_md": "audit-reports-snowbridge-2024-08-16-audit-report-snowbridge-updates-v1-0-pdf.md"
+ },
+ {
+  "f": "audit-reports-snowbridge-2025-01-07-audit-report-snowbridge-updates-3-v1-0-pdf.md",
+  "bytes": 21315,
+  "cls": "text",
+  "nlines": 4773,
+  "head": "---\nsource_pdf: substrate-l1_findings/audit-reports-snowbridge-2025-01-07-audit-report-snowbridge-updates-3-v1-0-pdf.pdf\npages: 15\n---\n\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \nAudit\n \nReport\n \nSnowbridge",
+  "headings": [],
+  "sevcounts": {
+   "info": 1,
+   "severity": 11,
+   "critical": 1,
+   "minor": 5,
+   "informational": 11,
+   "high": 4,
+   "low": 2,
+   "medium": 2
+  }
+ },
+ {
+  "f": "audit-reports-snowbridge-2025-01-07-audit-report-snowbridge-updates-3-v1-0-pdf.pdf",
+  "bytes": 489536,
+  "cls": "binary-pdf",
+  "sibling_md": "audit-reports-snowbridge-2025-01-07-audit-report-snowbridge-updates-3-v1-0-pdf.md"
+ },
+ {
+  "f": "audit-reports-snowbridge-2025-05-06-audit-report-snowbridge-updates-4-v1-0-pdf.md",
+  "bytes": 18714,
+  "cls": "text",
+  "nlines": 4080,
+  "head": "---\nsource_pdf: substrate-l1_findings/audit-reports-snowbridge-2025-05-06-audit-report-snowbridge-updates-4-v1-0-pdf.pdf\npages: 14\n---\n\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \nSecurity\n \nAudit\n \nReport",
+  "headings": [],
+  "sevcounts": {
+   "info": 1,
+   "severity": 10,
+   "critical": 1,
+   "minor": 9,
+   "informational": 9,
+   "high": 4,
+   "low": 2,
+   "medium": 2
+  }
+ },
+ {
+  "f": "audit-reports-snowbridge-2025-05-06-audit-report-snowbridge-updates-4-v1-0-pdf.pdf",
+  "bytes": 499808,
+  "cls": "binary-pdf",
+  "sibling_md": "audit-reports-snowbridge-2025-05-06-audit-report-snowbridge-updates-4-v1-0-pdf.md"
+ },
+ {
+  "f": "audit-reports-snowbridge-2025-05-29-audit-report-snowbridge-v2-v1-0-pdf.md",
+  "bytes": 41561,
+  "cls": "text",
+  "nlines": 8895,
+  "head": "---\nsource_pdf: substrate-l1_findings/audit-reports-snowbridge-2025-05-29-audit-report-snowbridge-v2-v1-0-pdf.pdf\npages: 24\n---\n\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \nSecurity\n \nAudit\n \nReport",
+  "headings": [],
+  "sevcounts": {
+   "info": 2,
+   "severity": 28,
+   "critical": 2,
+   "minor": 11,
+   "informational": 29,
+   "high": 3,
+   "low": 3,
+   "medium": 3
+  }
+ },
+ {
+  "f": "audit-reports-snowbridge-2025-05-29-audit-report-snowbridge-v2-v1-0-pdf.pdf",
+  "bytes": 640610,
+  "cls": "binary-pdf",
+  "sibling_md": "audit-reports-snowbridge-2025-05-29-audit-report-snowbridge-v2-v1-0-pdf.md"
+ },
+ {
+  "f": "audit-reports-snowbridge-2025-12-29-audit-report-snowbridge-fiat-shamir-beefy-changes-v1-0-pdf.md",
+  "bytes": 23221,
+  "cls": "text",
+  "nlines": 5098,
+  "head": "---\nsource_pdf: substrate-l1_findings/audit-reports-snowbridge-2025-12-29-audit-report-snowbridge-fiat-shamir-beefy-changes-v1-0-pdf.pdf\npages: 15\n---\n\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \nSecurity\n \nAudit\n \nReport\n ",
+  "headings": [],
+  "sevcounts": {
+   "info": 1,
+   "severity": 13,
+   "critical": 3,
+   "minor": 3,
+   "informational": 17,
+   "high": 4,
+   "low": 2,
+   "medium": 3
+  }
+ },
+ {
+  "f": "audit-reports-snowbridge-2025-12-29-audit-report-snowbridge-fiat-shamir-beefy-changes-v1-0-pdf.pdf",
+  "bytes": 374053,
+  "cls": "binary-pdf",
+  "sibling_md": "audit-reports-snowbridge-2025-12-29-audit-report-snowbridge-fiat-shamir-beefy-changes-v1-0-pdf.md"
+ },
+ {
+  "f": "audit-reports-zeitgeist-2025-01-02-audit-report-zeitgeist-combinatorial-betting-and-futarchy-security-audit-v1-0-pdf.md",
+  "bytes": 17823,
+  "cls": "text",
+  "nlines": 2504,
+  "head": "---\nsource_pdf: substrate-l1_findings/audit-reports-zeitgeist-2025-01-02-audit-report-zeitgeist-combinatorial-betting-and-futarchy-security-audit-v1-0-pdf.pdf\npages: 16\n---\n\nSecurity\nAudit\nReport\nZeitgeist\nCombinatorial\nBetting\nand\nFutarchy\nSecurity\nAudit\nv1.0\nJanuary\n2,\n2025\n1\n\n\nTable\nof\nContents\nTable\nof\nContents\n2\nLicense",
+  "headings": [],
+  "sevcounts": {
+   "low": 4,
+   "info": 1,
+   "severity": 14,
+   "critical": 2,
+   "minor": 12,
+   "informational": 10,
+   "high": 4,
+   "medium": 4
+  }
+ },
+ {
+  "f": "audit-reports-zeitgeist-2025-01-02-audit-report-zeitgeist-combinatorial-betting-and-futarchy-security-audit-v1-0-pdf.pdf",
+  "bytes": 392027,
+  "cls": "binary-pdf",
+  "sibling_md": "audit-reports-zeitgeist-2025-01-02-audit-report-zeitgeist-combinatorial-betting-and-futarchy-security-audit-v1-0-pdf.md"
+ },
+ {
+  "f": "audits-interlay-informal-report-interlay-audit-2021q2-pdf.md",
+  "bytes": 76964,
+  "cls": "text",
+  "nlines": 1313,
+  "head": "---\nsource_pdf: substrate-l1_findings/audits-interlay-informal-report-interlay-audit-2021q2-pdf.pdf\npages: 39\n---\n\nSecurity Audit Report\nInterBTC Parachain:\nProtocol Design and Source Code\n2021/06/12\nLast revised 2021/09/17\nAuthors: Josef Widder, Shon Feder\n\n\u00a92021 Informal Systems InterBTC Parachain\nContents\nAudit overview 5\nThe Project . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5\nScope of this report . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5\nConducted work . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5\nTimeline . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5\nConclusions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ",
+  "headings": [],
+  "sevcounts": {
+   "minor": 14,
+   "high": 11,
+   "critical": 4,
+   "severity": 15,
+   "medium": 5,
+   "low": 13
+  }
+ },
+ {
+  "f": "audits-interlay-informal-report-interlay-audit-2021q2-pdf.pdf",
+  "bytes": 469482,
+  "cls": "binary-pdf",
+  "sibling_md": "audits-interlay-informal-report-interlay-audit-2021q2-pdf.md"
+ },
+ {
+  "f": "audits-interlay-informal-report-interlay-audit-2021q3-pdf.md",
+  "bytes": 89182,
+  "cls": "text",
+  "nlines": 1525,
+  "head": "---\nsource_pdf: substrate-l1_findings/audits-interlay-informal-report-interlay-audit-2021q3-pdf.pdf\npages: 44\n---\n\nSecurity Audit Report\nInterBTC Parachain Modules and Vault Client:\nProtocol Design and Source Code\n2021/09/09\nLast revised 2021/09/28\nAuthors: Josef Widder, Cezara Dragoi, Shon Feder\n\n\u00a92021 Informal Systems InterBTC Parachain Modules and Vault Client\nContents\nAudit overview 5\nThe Project . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5\nScope of this report . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5\nAims of audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5\nConducted work . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6\nTimeline . . . . . . . . . . . .",
+  "headings": [
+   "#L277-L278",
+   "#L290-L294"
+  ],
+  "sevcounts": {
+   "medium": 5,
+   "high": 16,
+   "severity": 15,
+   "critical": 2,
+   "minor": 1,
+   "low": 15
+  }
+ },
+ {
+  "f": "audits-interlay-informal-report-interlay-audit-2021q3-pdf.pdf",
+  "bytes": 494251,
+  "cls": "binary-pdf",
+  "sibling_md": "audits-interlay-informal-report-interlay-audit-2021q3-pdf.md"
+ },
+ {
+  "f": "avail-halborn.md",
+  "bytes": 46438,
+  "cls": "text",
+  "nlines": 1364,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/avail-halborn.pdf\npages: 44\n---\n\nPolygon - Avail\nSubstrate Pallet Security\nAudit\nPrepared by: Halborn\nDate of Engagement: May 23rd, 2022 - July 20th, 2022\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 3\nCONTACTS 3\n1 EXECUTIVE OVERVIEW 5\n1.1 INTRODUCTION 6\n1.2 AUDIT SUMMARY 6\n1.3 TEST APPROACH & METHODOLOGY 6\nRISK METHODOLOGY 7\n1.4 SCOPE 9\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 10\n3 FINDINGS & TECH DETAILS 11\n3.1 (HAL-01) HAL-01 USAGE OF VULNERABLE CRATES - LOW 13\nDescription 13\nRisk Level 13\nRecommendation 13\nRemediation plan 13\n3.2 (HAL-02) HAL-02 UNIMPLEMENTED RPC METHOD - INFORMATIONAL 14\nDescription 14",
+  "headings": [],
+  "sevcounts": {
+   "low": 8,
+   "informational": 11,
+   "critical": 4,
+   "high": 4,
+   "medium": 3
+  }
+ },
+ {
+  "f": "bifrost-oak-lev-staking.md",
+  "bytes": 24913,
+  "cls": "text",
+  "nlines": 3484,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/bifrost-oak-lev-staking.pdf\npages: 22\n---\n\nAudit\nReport\nBifrost\nFinance\nLeveraged\nStaking\nv1.0\nMarch\n11,\n2024\n1\n\n\nTable\nof\nContents\nTable\nof\nContents\n2\nLicense\n3\nDisclaimer\n3\nIntroduction",
+  "headings": [],
+  "sevcounts": {
+   "info": 1,
+   "severity": 25,
+   "critical": 1,
+   "minor": 26,
+   "informational": 19,
+   "high": 1,
+   "low": 3,
+   "medium": 3
+  }
+ },
+ {
+  "f": "centrifuge-chainbridge-2020.md",
+  "bytes": 47668,
+  "cls": "text",
+  "nlines": 5748,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/centrifuge-chainbridge-2020.pdf\npages: 28\n---\n\nDate May\n2020\nLead\nAuditor Sergii\nKravchenko\nCo\u00adauditors Daniel\nLuca\nChainBridge\n1\nExecutive\nSummary\n1.1\nScope\n2\nKey\nObservations\n3\nSecurity\nSpecification\n3.1\nActors\n3.2\nTrust\nModel\n4",
+  "headings": [],
+  "sevcounts": {
+   "critical": 7,
+   "medium": 16,
+   "minor": 9,
+   "severity": 2,
+   "high": 2
+  }
+ },
+ {
+  "f": "centrifuge-la-chain.md",
+  "bytes": 33624,
+  "cls": "text",
+  "nlines": 1355,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/centrifuge-la-chain.pdf\npages: 14\n---\n\n\u00a0\nCentrifuge Chain\n\u00a0\nSecurity Audit Report\n\u00a0\nCentrifuge\n\u00a0\nFinal Report Version: 3 April 2020\n\u00a0\n\u00a0\n\u00a0\n\u00a0\n\n\nTable of Contents\n\u00a0\nOverview\n\u00a0\nBackground\n\u00a0\nProject Dates\n\u00a0\nReview Team\n\u00a0\nCoverage",
+  "headings": [],
+  "sevcounts": {
+   "medium": 1,
+   "critical": 1,
+   "high": 1
+  }
+ },
+ {
+  "f": "centrifuge-srl-baseline-2022.md",
+  "bytes": 32346,
+  "cls": "text",
+  "nlines": 602,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/centrifuge-srl-baseline-2022.pdf\npages: 14\n---\n\n \n \n \n \n \nCentrifuge Baseline Security \nAssurance \nThreat model and hacking assessment report  \nV2.3, Sep  5, 202 2 \n \nRegina B\u00edr\u00f3     regina@srlabs.de  \nChristopher Talib            christopher@srlabs.de  \nMostafa Sattari   mostafa@srlabs.de  \n \nAbstract. This work descri bes the result of the thorough and \nindependent security assurance audit of the Centrifuge blockchain \nplatform performed by Security Research Labs. During this stud y, \nCentrifuge provided access to relevant documentation and \nsupported the research team effec tively.  \nThe code of Centrifuge was verified to assure that the business logic \nof the product is resilient to hacking and abuse risks  and that the \nusers  have their investment s secured .  \nThe research team identified several issues ranging from \ninformational to hig",
+  "headings": [],
+  "sevcounts": {
+   "informational": 1,
+   "high": 17,
+   "severity": 4,
+   "medium": 8,
+   "low": 12,
+   "info": 1,
+   "critical": 1
+  }
+ },
+ {
+  "f": "centrifuge-srl-liquidity-pools-2023.md",
+  "bytes": 8618,
+  "cls": "text",
+  "nlines": 207,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/centrifuge-srl-liquidity-pools-2023.pdf\npages: 5\n---\n\n \n \n \n \n \nLiquidity-Pools Code Review \nSecurity audit of Centrifuge\u2019s multi -chain liquidity pool protocol  \nV1. 1, October 3, 2023  \n \nMostafa Sattari      mostafa@srlabs.de  \nKevin Valerio   kevin@srlabs.de  \nRegina B\u00edr\u00f3     regina@srlabs.de  \n \n \n \n \n \n \n \n \n \n \n \nContent \n1 Context ................................ ................................ ...........................  2 ",
+  "headings": [],
+  "sevcounts": {
+   "severity": 5,
+   "medium": 1,
+   "info": 2,
+   "minor": 1,
+   "critical": 1
+  }
+ },
+ {
+  "f": "chainflip-backend-audits-2023-04-trailofbits-securityreview-pdf.md",
+  "bytes": 154405,
+  "cls": "text",
+  "nlines": 3136,
+  "head": "---\nsource_pdf: substrate-l1_findings/chainflip-backend-audits-2023-04-trailofbits-securityreview-pdf.pdf\npages: 102\n---\n\n Chain\ufb02ip Protocol \n Security Assessment \n July 17, 2023 \n Prepared for: \n Martin Rieke \n Chain\ufb02ip \n Prepared by:  Nat Chin  ,  Fredrik Dahlgren  ,  Guillermo  Larregay  ,  Joop van de Pol  ,  Will \n Song  ,  and  Kurt Willis \n\n\n About Trail of Bits \n Founded in 2012 and headquartered in New York, Trail of Bits provides technical security \n assessment and advisory services to some of the world\u2019s most targeted organizations. We \n combine high- end security research with a real -world attacker mentality to reduce risk and \n fortify code. With 100+ employees around the globe, we\u2019ve helped secure critical software \n elements that support billions of end users, including Kubernetes and the Linux kernel. \n We maintain an exhaustive list of publications at  https://github.co",
+  "headings": [
+   "#[test]",
+   "#[test]"
+  ],
+  "sevcounts": {
+   "high": 37,
+   "critical": 2,
+   "info": 3,
+   "low": 36,
+   "severity": 47,
+   "medium": 26,
+   "informational": 36,
+   "moderate": 9,
+   "minor": 1
+  }
+ },
+ {
+  "f": "chainflip-backend-audits-2023-04-trailofbits-securityreview-pdf.pdf",
+  "bytes": 1187040,
+  "cls": "binary-pdf",
+  "sibling_md": "chainflip-backend-audits-2023-04-trailofbits-securityreview-pdf.md"
+ },
+ {
+  "f": "chainflip-backend-audits-chainflip-backend-zellic-audit-report-pdf.md",
+  "bytes": 42677,
+  "cls": "text",
+  "nlines": 844,
+  "head": "---\nsource_pdf: substrate-l1_findings/chainflip-backend-audits-chainflip-backend-zellic-audit-report-pdf.pdf\npages: 30\n---\n\nPrepared for\nMartin Rieke\nChainflipLabs\nPrepared by\nSyed Faraz Abrar\nFilippo Cremonese\nAaron Esau\nSeungHyeon Kim\nZellicDecember 8, 2023\nChainflip Backend\nSubstrate Pallet Security Assessment\n\n\nChainflip Backend SubstratePalletSecurityAssessment December8,2023\nContents About Zellic 4\n1. Executive Summary 4\n1.1. GoalsoftheAssessment 5\n1.2. Non-goalsandLimitations 5\n1.3. Results 6\n2. Introduction 6\n2.1. AboutChainflipBackend 7\n2.2. Methodology 7\n2.3. Scope 9\n2.4. ProjectOverview 10\n2.5. ProjectTimeline 10",
+  "headings": [],
+  "sevcounts": {
+   "critical": 5,
+   "high": 4,
+   "medium": 4,
+   "low": 9,
+   "informational": 2,
+   "severity": 5
+  }
+ },
+ {
+  "f": "chainflip-backend-audits-chainflip-backend-zellic-audit-report-pdf.pdf",
+  "bytes": 830506,
+  "cls": "binary-pdf",
+  "sibling_md": "chainflip-backend-audits-chainflip-backend-zellic-audit-report-pdf.md"
+ },
+ {
+  "f": "chainflip-backend-audits-multisig-kudelski-q1-2022-pdf.md",
+  "bytes": 43625,
+  "cls": "text",
+  "nlines": 1079,
+  "head": "---\nsource_pdf: substrate-l1_findings/chainflip-backend-audits-multisig-kudelski-q1-2022-pdf.pdf\npages: 31\n---\n\n \nAudit of FROST \n \nChainflip.io \n04 May 2022 \nVersion: 2.0 \nPresented by: \nKudelski Security Research Team \nKudelski Security \u2013 Nagravision SA \nCorporate Headquarters \nKudelski Security \u2013 Nagravision SA \nRoute de Gen\u00e8ve, 22-24 \n1033 Cheseaux sur Lausanne \nSwitzerland \n \nFor public release \n\nChainflip.io | Audit of FROST \n04 May 2022  \n \n\u00a9 2022 Nagravision SA / All Rights Reserved Page 2 of 31\nFor public release \nCopyright Notice \nKudelski Security, a business unit of Nagravision SA is a member of the Kudelski Group of Companies. \nThis document is the intellectual property of Kudelski Security and contains confidential and privileged ",
+  "headings": [],
+  "sevcounts": {
+   "severity": 24,
+   "medium": 15,
+   "low": 13,
+   "informational": 21,
+   "high": 4,
+   "minor": 1,
+   "critical": 1,
+   "info": 1
+  }
+ },
+ {
+  "f": "chainflip-backend-audits-multisig-kudelski-q1-2022-pdf.pdf",
+  "bytes": 576339,
+  "cls": "binary-pdf",
+  "sibling_md": "chainflip-backend-audits-multisig-kudelski-q1-2022-pdf.md"
+ },
+ {
+  "f": "chainflip-backend-frost-security-review-md.md",
+  "bytes": 10550,
+  "cls": "text",
+  "nlines": 194,
+  "head": "# FROST security recommendations vs. the Chainflip codebase\n\n**Date:** 2026-05-15\n**Scope reviewed:** `engine/multisig/src/client/{signing,keygen,common}/` and\n`crypto.rs`, plus git history back through the 2023 refactors.\n\n## Headline\n\nFour of the five items are in good shape and largely already mitigated. **One is\na substantiated concern that directly matches the thing flagged for double-checking\n(\"is the check still in place after refactors since 2023?\") \u2014 and the answer\nappears to be: it was weakened by a May-2023 refactor and there is no equivalent\nreplacement.** Details below.\n\n---\n\n## 1. Trail of Bits Pedersen-DKG coefficient-length check \u2014 \u26a0\ufe0f LIKELY REGRESSED, needs expert confirmation\n\nThis is the one to act on.\n\n**What ToB credited Chainflip with (pre-2024):** a per-ceremony check on the\nnumber of coefficient commitments. It existed. Before PR #3248 (`f9204f5d17`,\n\"Avoid Wastef",
+  "headings": [
+   "# FROST security recommendations vs. the Chainflip codebase",
+   "## Headline",
+   "## 1. Trail of Bits Pedersen-DKG coefficient-length check \u2014 \u26a0\ufe0f LIKELY REGRESSED, needs expert confirmation",
+   "## 2. CertiK unidentifiable-abort / inconsistent nonce commitments (Sept 2025) \u2014 \u2705 ALREADY MITIGATED",
+   "## 3. CRYPTO 2025 adaptive-security results \u2014 \u2139\ufe0f INFORMATIONAL, no code-level tweak that worsens it",
+   "## 4. Implementation pitfalls \u2014 \u2705 MOSTLY GOOD (one weak point already covered by #1)",
+   "## 5. Suggested next steps"
+  ],
+  "sevcounts": {
+   "high": 2,
+   "informational": 1
+  }
+ },
+ {
+  "f": "chainflip-backend-security-md.md",
+  "bytes": 5920,
+  "cls": "text",
+  "nlines": 89,
+  "head": "\n# Bug Bounty & Responsible Disclosure Program Policy\n\nChainflip Labs is committed to ensuring the security and integrity of the Chainflip Protocol. To achieve this goal, we invite security researchers and ethical hackers to participate in our Bug Bounty Program. This program encourages responsible disclosure of security vulnerabilities and provides incentives for those who help us identify and address such issues. By participating in our Bug Bounty Program, you agree to the following terms and conditions:\n\n## Scope of the Program\n\n**Our Bug Bounty Program covers the following areas:**\n\n- The Chainflip Protocol Code, including its Rust backend and solidity smart contracts.\n- Public API endpoints and associated services.\n- chainflip.io operated web applications related to the protocol, including scan, swap, auctions, and validators.\n\n**Please note that this program does not cover:**\n\n- Th",
+  "headings": [
+   "# Bug Bounty & Responsible Disclosure Program Policy",
+   "## Scope of the Program",
+   "## Responsible Disclosure",
+   "## Rewards and Recognition",
+   "## Responsible Research",
+   "## AI Submissions",
+   "## Confidentiality",
+   "## No Legal Action",
+   "## Safe Harbour for Returning Assets",
+   "## Program Changes",
+   "## Contact",
+   "## Audits"
+  ],
+  "sevcounts": {
+   "severity": 4
+  }
+ },
+ {
+  "f": "composable-audits-halborn-audit20210229-pallets-core-pdf.md",
+  "bytes": 88978,
+  "cls": "text",
+  "nlines": 2673,
+  "head": "---\nsource_pdf: substrate-l1_findings/composable-audits-halborn-audit20210229-pallets-core-pdf.pdf\npages: 89\n---\n\nComposable\nFinance - Main\nPallets\nSubstrate Pallet Security\nAudit\nPrepared by: Halborn\nDate of Engagement: February 29th, 2022 - April 29th, 2022\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 7\nCONTACTS 8\n1 EXECUTIVE OVERVIEW 9\n1.1 INTRODUCTION 10\n1.2 AUDIT SUMMARY 10\n1.3 TEST APPROACH & METHODOLOGY 10\nRISK METHODOLOGY 11\n1.4 SCOPE 13\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 14\n3 FINDINGS & TECH DETAILS 16\n3.1 (HAL-01) IMPROPER PRICE CALCULATION LEADS TO MULTIPLE VULNERA-\nBILITIES - CRITICAL 18\nDescription 18\nCode Location 18\nProof Of Concept 20",
+  "headings": [],
+  "sevcounts": {
+   "critical": 17,
+   "high": 10,
+   "medium": 7,
+   "low": 35,
+   "informational": 7
+  }
+ },
+ {
+  "f": "composable-audits-halborn-audit20210229-pallets-core-pdf.pdf",
+  "bytes": 1458873,
+  "cls": "binary-pdf",
+  "sibling_md": "composable-audits-halborn-audit20210229-pallets-core-pdf.md"
+ },
+ {
+  "f": "composable-audits-halborn-audit20220730-pallets-pablov2-pdf.md",
+  "bytes": 29305,
+  "cls": "text",
+  "nlines": 936,
+  "head": "---\nsource_pdf: substrate-l1_findings/composable-audits-halborn-audit20220730-pallets-pablov2-pdf.pdf\npages: 38\n---\n\nComposable\nFinance - Pablo\nSubstrate Pallet Security\nAudit\nPrepared by: Halborn\nDate of Engagement: Jul 30th, 2022 - Aug 17th, 2022\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 4\nCONTACTS 5\n1 EXECUTIVE OVERVIEW 6\n1.1 INTRODUCTION 7\n1.2 AUDIT SUMMARY 7\n1.3 TEST APPROACH & METHODOLOGY 7\nRISK METHODOLOGY 8\n1.4 SCOPE 10\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 11\n3 FINDINGS & TECH DETAILS 12\n3.1 (HAL-01) USERS CAN CREATE SAME PAIR POOLS WITHOUT LIMITS - HIGH\n14\nDescription 14\nCode Location 14\nProof Of Concept 15\nRisk Level 16",
+  "headings": [],
+  "sevcounts": {
+   "high": 7,
+   "low": 14,
+   "informational": 10,
+   "critical": 4,
+   "medium": 3
+  }
+ },
+ {
+  "f": "composable-audits-halborn-audit20220730-pallets-pablov2-pdf.pdf",
+  "bytes": 1288330,
+  "cls": "binary-pdf",
+  "sibling_md": "composable-audits-halborn-audit20220730-pallets-pablov2-pdf.md"
+ },
+ {
+  "f": "composable-audits-halborn-audit20220823-pallet-vesting-pdf.md",
+  "bytes": 16070,
+  "cls": "text",
+  "nlines": 514,
+  "head": "---\nsource_pdf: substrate-l1_findings/composable-audits-halborn-audit20220823-pallet-vesting-pdf.pdf\npages: 27\n---\n\nComposable\nFinance - Vesting\nSubstrate Pallet Security\nAudit\nPrepared by: Halborn\nDate of Engagement: August 23rd, 2022 - September 5th, 2022\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 3\nCONTACTS 4\n1 EXECUTIVE OVERVIEW 5\n1.1 INTRODUCTION 6\n1.2 AUDIT SUMMARY 6\n1.3 TEST APPROACH & METHODOLOGY 6\nRISK METHODOLOGY 7\n1.4 SCOPE 9\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 10\n3 FINDINGS & TECH DETAILS 11\n3.1 (HAL-01) POSSIBILITY OF CREATING A VESTING SCHEDULE IN THE PAST -\nLOW 13\nDescription 13\nCode Location 13\nRisk Level 15\nRecommendation 15",
+  "headings": [],
+  "sevcounts": {
+   "low": 8,
+   "informational": 12,
+   "critical": 4,
+   "high": 4,
+   "medium": 3
+  }
+ },
+ {
+  "f": "composable-audits-halborn-audit20220823-pallet-vesting-pdf.pdf",
+  "bytes": 1241415,
+  "cls": "binary-pdf",
+  "sibling_md": "composable-audits-halborn-audit20220823-pallet-vesting-pdf.md"
+ },
+ {
+  "f": "composable-audits-halborn-audit20220926-pallet-byog-pdf.md",
+  "bytes": 12849,
+  "cls": "text",
+  "nlines": 393,
+  "head": "---\nsource_pdf: substrate-l1_findings/composable-audits-halborn-audit20220926-pallet-byog-pdf.pdf\npages: 22\n---\n\nComposable\nFinance - BYO Gas\nSubstrate Pallet Security\nAudit\nPrepared by: Halborn\nDate of Engagement: September 26th, 2022 - October 4th, 2022\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 3\nCONTACTS 4\n1 EXECUTIVE OVERVIEW 5\n1.1 INTRODUCTION 6\n1.2 AUDIT SUMMARY 6\n1.3 TEST APPROACH & METHODOLOGY 6\nRISK METHODOLOGY 7\n1.4 SCOPE 9\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 10\n3 FINDINGS & TECH DETAILS 11\n3.1 (HAL-01) CONFIGURATION ORIGIN CAN BE USED TO SET A PAYMENT ASSET\nFOR AN ARBITRARILY CHOSEN USER - LOW 13\nDescription 13\nCode Location 13\nRisk Level 14\nRecommendation 14",
+  "headings": [],
+  "sevcounts": {
+   "low": 8,
+   "informational": 6,
+   "critical": 4,
+   "high": 4,
+   "medium": 3
+  }
+ },
+ {
+  "f": "composable-audits-halborn-audit20220926-pallet-byog-pdf.pdf",
+  "bytes": 1233683,
+  "cls": "binary-pdf",
+  "sibling_md": "composable-audits-halborn-audit20220926-pallet-byog-pdf.md"
+ },
+ {
+  "f": "composable-audits-halborn-audit20221003-pallet-grandpa-light-client-bridge-pdf.md",
+  "bytes": 15723,
+  "cls": "text",
+  "nlines": 486,
+  "head": "---\nsource_pdf: substrate-l1_findings/composable-audits-halborn-audit20221003-pallet-grandpa-light-client-bridge-pdf.pdf\npages: 23\n---\n\nComposable\nFinance - Grandpa\nLight Client\nBridge Security Audit\nPrepared by: Halborn\nDate of Engagement: October 3rd, 2022 - October 27th, 2022\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 3\nCONTACTS 3\n1 EXECUTIVE OVERVIEW 4\n1.1 INTRODUCTION 5\n1.2 AUDIT SUMMARY 5\n1.3 TEST APPROACH & METHODOLOGY 5\nRISK METHODOLOGY 5\n1.4 SCOPE 7\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 8\n3 FINDINGS & TECH DETAILS 9\n3.1 (HAL-01) GRANDPA JUSTIFICATION - MISSING COMMIT VALIDATION -\nMEDIUM 11\nDescription 11\nCode Location 11\nRisk Level 15\nRecommendation 15",
+  "headings": [],
+  "sevcounts": {
+   "medium": 12,
+   "high": 4,
+   "low": 6,
+   "critical": 3,
+   "informational": 3
+  }
+ },
+ {
+  "f": "composable-audits-halborn-audit20221003-pallet-grandpa-light-client-bridge-pdf.pdf",
+  "bytes": 1249977,
+  "cls": "binary-pdf",
+  "sibling_md": "composable-audits-halborn-audit20221003-pallet-grandpa-light-client-bridge-pdf.md"
+ },
+ {
+  "f": "composable-audits-halborn-audit20221010-pallet-ibc-pdf.md",
+  "bytes": 12421,
+  "cls": "text",
+  "nlines": 361,
+  "head": "---\nsource_pdf: substrate-l1_findings/composable-audits-halborn-audit20221010-pallet-ibc-pdf.pdf\npages: 19\n---\n\nComposable - IBC\nPallet\nSubstrate Pallet Security\nAudit\nPrepared by: Halborn\nDate of Engagement: October 10th, 2022 - November 4th, 2022\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 2\nCONTACTS 3\n1 EXECUTIVE OVERVIEW 4\n1.1 INTRODUCTION 5\n1.2 AUDIT SUMMARY 5\n1.3 TEST APPROACH & METHODOLOGY 5\nRISK METHODOLOGY 6\n1.4 SCOPE 8\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 9\n3 FINDINGS & TECH DETAILS 10\n3.1 (HAL-01) ALLOWED TO TRANSFER ZERO AMOUNT - INFORMATIONAL 12\nDescription 12\nCode Location 12\nRisk Level 15\nRecommendations 15\nRemediation Plan 16",
+  "headings": [],
+  "sevcounts": {
+   "informational": 9,
+   "critical": 4,
+   "high": 4,
+   "low": 5,
+   "medium": 3
+  }
+ },
+ {
+  "f": "composable-audits-halborn-audit20221010-pallet-ibc-pdf.pdf",
+  "bytes": 1236993,
+  "cls": "binary-pdf",
+  "sibling_md": "composable-audits-halborn-audit20221010-pallet-ibc-pdf.md"
+ },
+ {
+  "f": "composable-audits-halborn-audit20221129-pallet-pablo-refactoring-pdf.md",
+  "bytes": 19969,
+  "cls": "text",
+  "nlines": 569,
+  "head": "---\nsource_pdf: substrate-l1_findings/composable-audits-halborn-audit20221129-pallet-pablo-refactoring-pdf.pdf\npages: 29\n---\n\nComposable\nFinance - PabloDEX\nRefactoring\nSubstrate Pallet Security\nAudit\nPrepared by: Halborn\nDate of Engagement: November 29th, 2022 - December 15th, 2022\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 3\nCONTACTS 4\n1 EXECUTIVE OVERVIEW 5\n1.1 INTRODUCTION 6\n1.2 AUDIT SUMMARY 6\n1.3 TEST APPROACH & METHODOLOGY 7\nRISK METHODOLOGY 8\n1.4 SCOPE 10\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 11\n3 FINDINGS & TECH DETAILS 12\n3.1 (HAL-01) MISSING PAUSE FUNCTIONALITY - MEDIUM 14\nDescription 14\nRisk Level 14\nRecommendation 14\nRemediation 14",
+  "headings": [],
+  "sevcounts": {
+   "medium": 9,
+   "low": 8,
+   "informational": 9,
+   "critical": 5,
+   "high": 4,
+   "info": 3
+  }
+ },
+ {
+  "f": "composable-audits-halborn-audit20221129-pallet-pablo-refactoring-pdf.pdf",
+  "bytes": 1254654,
+  "cls": "binary-pdf",
+  "sibling_md": "composable-audits-halborn-audit20221129-pallet-pablo-refactoring-pdf.md"
+ },
+ {
+  "f": "composable-audits-mantis-contracts-composable-escrow-bridge-contracts-audit-v0-2-pdf.md",
+  "bytes": 27832,
+  "cls": "text",
+  "nlines": 3955,
+  "head": "---\nsource_pdf: substrate-l1_findings/composable-audits-mantis-contracts-composable-escrow-bridge-contracts-audit-v0-2-pdf.pdf\npages: 23\n---\n\nComposable\nescrow\nbridge\nDate:\n29/10/2024\nRev\n0.2\nhttps://codezen.tech\n\n\nSummary\nSummary\n1\nDisclaimer\n3\nScope\n4\nMethodology\n5\nSeverity\nLevels\n6\nFindings\n7\n1.",
+  "headings": [],
+  "sevcounts": {
+   "severity": 4,
+   "high": 16,
+   "medium": 11,
+   "low": 19,
+   "info": 3,
+   "informational": 2,
+   "critical": 2
+  }
+ },
+ {
+  "f": "composable-audits-mantis-contracts-composable-escrow-bridge-contracts-audit-v0-2-pdf.pdf",
+  "bytes": 4962011,
+  "cls": "binary-pdf",
+  "sibling_md": "composable-audits-mantis-contracts-composable-escrow-bridge-contracts-audit-v0-2-pdf.md"
+ },
+ {
+  "f": "composable-audits-picasso-cosmos-picasso-cosmos-audit-pdf.md",
+  "bytes": 19739,
+  "cls": "text",
+  "nlines": 2478,
+  "head": "---\nsource_pdf: substrate-l1_findings/composable-audits-picasso-cosmos-picasso-cosmos-audit-pdf.pdf\npages: 18\n---\n\nBanksy\nChain\nDate:\n11/01/2024\nRev\n1.0\nVisit:\nhttps://codezen.tech\n\n\nSummary\nSummary\n1\nDisclaimer\n2\nScope\n3\nMethodology\n4\nSeverity\nLevels\n5\nFindings\n6\n1.",
+  "headings": [],
+  "sevcounts": {
+   "severity": 4,
+   "high": 9,
+   "medium": 7,
+   "low": 9,
+   "info": 10,
+   "informational": 2
+  }
+ },
+ {
+  "f": "composable-audits-picasso-cosmos-picasso-cosmos-audit-pdf.pdf",
+  "bytes": 4375449,
+  "cls": "binary-pdf",
+  "sibling_md": "composable-audits-picasso-cosmos-picasso-cosmos-audit-pdf.md"
+ },
+ {
+  "f": "composable-audits-solana-bridge-contract-composable-bridge-audit-draft-pdf.md",
+  "bytes": 38018,
+  "cls": "text",
+  "nlines": 751,
+  "head": "---\nsource_pdf: substrate-l1_findings/composable-audits-solana-bridge-contract-composable-bridge-audit-draft-pdf.pdf\npages: 31\n---\n\nComposable Bridge\nSecurity Assessment\nAugust 12th, 2024 \u2014 Prepared by OtterSec\nAkash Gurugunti sud0u53r.ak@osec.io\nAjay Shankar Kunapareddy d1r3wolf@osec.io\nRobert Chen r@osec.io\nDRAFT\n\nT able of Contents\nExecutive Summary 3\nOverview 3\nKey Findings 3\nScope 4\nFindings 5\nVulnerabilities 6\nOS-CBG-ADV -00 | Unauthorized Withdrawals Of Staked T okens 8\nOS-CBG-ADV -01 | Account Inconsistencies In Bridge T okens Instruction 9\nOS-CBG-ADV -02 | Unbacked Deposits In Stake Pool 11\nOS-CBG-ADV -03 | Absence Of Bank Account V alidation 12\nOS-CBG-ADV -04 | Unverified Marginfi Account Indices 13\nOS-CBG-ADV -05 | Missing Rewards Withdrawal Functionality 15\nOS-CBG-ADV -06 | Failure T o Burn Receipt T okens 16\nOS-CBG-ADV -07 | Absence Of Rollup Status Check 17\nOS-CBG-ADV -08 |",
+  "headings": [
+   "#[derive(Accounts)]",
+   "#[account(mut)]",
+   "#[account(mut, seeds = [COMMON_SEED], bump = common_state.bump)]",
+   "#[derive(Accounts)]",
+   "#[account(mut)]",
+   "#[account(mut, seeds = [COMMON_SEED], bump = common_state.bump)]",
+   "#[account(mut, constraint = common_state.marginfi_accounts.contains(marginfi_account.key))]"
+  ],
+  "sevcounts": {
+   "critical": 3,
+   "high": 2,
+   "severity": 1,
+   "info": 28,
+   "informational": 1,
+   "low": 1
+  }
+ },
+ {
+  "f": "composable-audits-solana-bridge-contract-composable-bridge-audit-draft-pdf.pdf",
+  "bytes": 1098727,
+  "cls": "binary-pdf",
+  "sibling_md": "composable-audits-solana-bridge-contract-composable-bridge-audit-draft-pdf.md"
+ },
+ {
+  "f": "composable-audits-solana-ibc-avs-codezen-pdf.md",
+  "bytes": 11227,
+  "cls": "text",
+  "nlines": 1531,
+  "head": "---\nsource_pdf: substrate-l1_findings/composable-audits-solana-ibc-avs-codezen-pdf.pdf\npages: 12\n---\n\nGuest\nChain\nLight\nClient\nDate:\n02/05/2024\nRev\n1.0\nVisit:\nhttps://codezen.tech\n\n\nSummary\nSummary\n1\nDisclaimer\n2\nScope\n3\nMethodology\n4\nSeverity\nLevels\n5\nFindings",
+  "headings": [],
+  "sevcounts": {
+   "severity": 4,
+   "high": 7,
+   "medium": 5,
+   "low": 7,
+   "informational": 2,
+   "info": 1
+  }
+ },
+ {
+  "f": "composable-audits-solana-ibc-avs-codezen-pdf.pdf",
+  "bytes": 3050898,
+  "cls": "binary-pdf",
+  "sibling_md": "composable-audits-solana-ibc-avs-codezen-pdf.md"
+ },
+ {
+  "f": "composable-audits-solana-ibc-avs-ottersec-pdf.md",
+  "bytes": 40514,
+  "cls": "text",
+  "nlines": 529,
+  "head": "---\nsource_pdf: substrate-l1_findings/composable-audits-solana-ibc-avs-ottersec-pdf.pdf\npages: 21\n---\n\nP i c a s s o N e t w o r k\nS e c u r i t y A s s e s s m e n t\nA p r i l 2 3 r d , 2 0 2 4 \u2014 P r e p a r e d b y O t t e r S e c\nA k a s h G u r u g u n t i s u d 0 u 5 3 r . a k @ o s e c . i o\nA j a y S h a n k a r K u n a p a r e d d y d 1 r 3 w o l f @ o s e c . i o\n\nT a b l e o f C o n t e n t s\nE x e c u t i v e S u m m a r y 2\nO v e r v i e w 2\nK e y F i n d i n g s 2\nS c o p e 3\nF i n d i n g s 4\nV u l n e r a b i l i t i e s 5\nO S - C F I - A D V - 0 0 | A b i l i t y T o I n i t i a l i z e M u l t i p l e T i m e s 6\nO S - C F I - A D V - 0 1 | D i s c r e p a n c i e s I n D e p o s i t F u n c t i o n a l i t y 7\nO S - C F I - A D V - 0 2 | M i s s i n g R e c e i p t T o k e n B a l a n c e C h e c k 8\nO S - C F I - A D V - 0 3 | L a c k O f I n s t r u c t i o n S y s v ",
+  "headings": [
+   "#[derive(Accounts)]",
+   "#[account(mut)]",
+   "#[account(init_if_needed, payer = admin, seeds = [STAKING_PARAMS_SEED, TEST_SEED], bump,",
+   "#[account(init_if_needed, payer = admin, seeds = [REWARDS_SEED, TEST_SEED], bump,",
+   "#[derive(Accounts)]",
+   "#[account(mut)]",
+   "#[derive(Accounts)]",
+   "#[account(mut)]",
+   "#[derive(Accounts)]",
+   "#[instruction(port_id: ibc::PortId, channel_id_on_b: ibc::ChannelId, hashed_base_denom:",
+   "#[account(mut)]",
+   "#[account(init_if_needed, payer = sender, seeds = [MINT_ESCROW_SEED],",
+   "#[account(init_if_needed, payer = sender, seeds = [hashed_base_denom.as_ref()],"
+  ],
+  "sevcounts": {
+   "info": 33
+  }
+ },
+ {
+  "f": "composable-audits-solana-ibc-avs-ottersec-pdf.pdf",
+  "bytes": 1064647,
+  "cls": "binary-pdf",
+  "sibling_md": "composable-audits-solana-ibc-avs-ottersec-pdf.md"
+ },
+ {
+  "f": "composable-audits-solana-restaking-v2-composable-audit-draft-v2-pdf.md",
+  "bytes": 57765,
+  "cls": "text",
+  "nlines": 789,
+  "head": "---\nsource_pdf: substrate-l1_findings/composable-audits-solana-restaking-v2-composable-audit-draft-v2-pdf.pdf\npages: 30\n---\n\nP i c a s s o N e t w o r k\nS e c u r i t y A s s e s s m e n t\nA p r i l 2 3 r d , 2 0 2 4 \u2014 P r e p a r e d b y O t t e r S e c\nA k a s h G u r u g u n t i s u d 0 u 5 3 r . a k @ o s e c . i o\nA j a y S h a n k a r K u n a p a r e d d y d 1 r 3 w o l f @ o s e c . i o\nD R A F T\n\nT a b l e o f C o n t e n t s\nE x e c u t i v e S u m m a r y 3\nO v e r v i e w 3\nK e y F i n d i n g s 3\nS c o p e 4\nF i n d i n g s 5\nV u l n e r a b i l i t i e s 6\nO S - C F I - A D V - 0 0 | A b i l i t y T o I n i t i a l i z e M u l t i p l e T i m e s 8\nO S - C F I - A D V - 0 1 | D i s c r e p a n c i e s I n D e p o s i t F u n c t i o n a l i t y 9\nO S - C F I - A D V - 0 2 | M i s s i n g R e c e i p t T o k e n B a l a n c e C h e c k 1 0\nO S - C F I - A D V - 0 3 | I n c o ",
+  "headings": [
+   "#[derive(Accounts)]",
+   "#[account(mut)]",
+   "#[account(init_if_needed, payer = admin, seeds = [STAKING_PARAMS_SEED, TEST_SEED], bump,",
+   "#[account(init_if_needed, payer = admin, seeds = [REWARDS_SEED, TEST_SEED], bump,",
+   "#[derive(Accounts)]",
+   "#[account(mut)]",
+   "#[derive(Accounts)]",
+   "#[account(mut)]",
+   "#[derive(Accounts)]",
+   "#[instruction(port_id: ibc::PortId, channel_id_on_b: ibc::ChannelId, hashed_base_denom:",
+   "#[account(mut)]",
+   "#[account(init_if_needed, payer = sender, seeds = [MINT_ESCROW_SEED],",
+   "#[account(init_if_needed, payer = sender, seeds = [hashed_base_denom.as_ref()],"
+  ],
+  "sevcounts": {
+   "info": 33
+  }
+ },
+ {
+  "f": "composable-audits-solana-restaking-v2-composable-audit-draft-v2-pdf.pdf",
+  "bytes": 1135574,
+  "cls": "binary-pdf",
+  "sibling_md": "composable-audits-solana-restaking-v2-composable-audit-draft-v2-pdf.md"
+ },
+ {
+  "f": "composable-audits-solana-restaking-vaults-restaking-vaults-audit-pdf.md",
+  "bytes": 31773,
+  "cls": "text",
+  "nlines": 391,
+  "head": "---\nsource_pdf: substrate-l1_findings/composable-audits-solana-restaking-vaults-restaking-vaults-audit-pdf.pdf\npages: 19\n---\n\nC o m p o s a b l e F i n a n c e\nS e c u r i t y A s s e s s m e n t\nF e b r u a r y 1 4 t h , 2 0 2 4 \u2014 P r e p a r e d b y O t t e r S e c\nA k a s h G u r u g u n t i s u d 0 u 5 3 r . a k @ o s e c . i o\nR o b e r t C h e n r @ o s e c . i o\n\nT a b l e o f C o n t e n t s\nE x e c u t i v e S u m m a r y 2\nO v e r v i e w 2\nK e y F i n d i n g s 2\nS c o p e 3\nF i n d i n g s 4\nV u l n e r a b i l i t i e s 5\nO S - C F I - A D V - 0 0 | A b i l i t y T o I n i t i a l i z e M u l t i p l e T i m e s 6\nO S - C F I - A D V - 0 1 | D i s c r e p a n c y I n D e p o s i t F u n c t i o n a l i t y 7\nO S - C F I - A D V - 0 2 | M i s s i n g R e c e i p t T o k e n B a l a n c e C h e c k 8\nO S - C F I - A D V - 0 3 | S t a k e M i n t D i f f e r e n t i a t i o n 9",
+  "headings": [],
+  "sevcounts": {
+   "info": 15
+  }
+ },
+ {
+  "f": "composable-audits-solana-restaking-vaults-restaking-vaults-audit-pdf.pdf",
+  "bytes": 1024657,
+  "cls": "binary-pdf",
+  "sibling_md": "composable-audits-solana-restaking-vaults-restaking-vaults-audit-pdf.md"
+ },
+ {
+  "f": "composable-halborn-byog.md",
+  "bytes": 12823,
+  "cls": "text",
+  "nlines": 393,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/composable-halborn-byog.pdf\npages: 22\n---\n\nComposable\nFinance - BYO Gas\nSubstrate Pallet Security\nAudit\nPrepared by: Halborn\nDate of Engagement: September 26th, 2022 - October 4th, 2022\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 3\nCONTACTS 4\n1 EXECUTIVE OVERVIEW 5\n1.1 INTRODUCTION 6\n1.2 AUDIT SUMMARY 6\n1.3 TEST APPROACH & METHODOLOGY 6\nRISK METHODOLOGY 7\n1.4 SCOPE 9\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 10\n3 FINDINGS & TECH DETAILS 11\n3.1 (HAL-01) CONFIGURATION ORIGIN CAN BE USED TO SET A PAYMENT ASSET\nFOR AN ARBITRARILY CHOSEN USER - LOW 13\nDescription 13\nCode Location 13\nRisk Level 14\nRecommendation 14",
+  "headings": [],
+  "sevcounts": {
+   "low": 8,
+   "informational": 6,
+   "critical": 4,
+   "high": 4,
+   "medium": 3
+  }
+ },
+ {
+  "f": "composable-halborn-core.md",
+  "bytes": 88951,
+  "cls": "text",
+  "nlines": 2673,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/composable-halborn-core.pdf\npages: 89\n---\n\nComposable\nFinance - Main\nPallets\nSubstrate Pallet Security\nAudit\nPrepared by: Halborn\nDate of Engagement: February 29th, 2022 - April 29th, 2022\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 7\nCONTACTS 8\n1 EXECUTIVE OVERVIEW 9\n1.1 INTRODUCTION 10\n1.2 AUDIT SUMMARY 10\n1.3 TEST APPROACH & METHODOLOGY 10\nRISK METHODOLOGY 11\n1.4 SCOPE 13\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 14\n3 FINDINGS & TECH DETAILS 16\n3.1 (HAL-01) IMPROPER PRICE CALCULATION LEADS TO MULTIPLE VULNERA-\nBILITIES - CRITICAL 18\nDescription 18\nCode Location 18\nProof Of Concept 20",
+  "headings": [],
+  "sevcounts": {
+   "critical": 17,
+   "high": 10,
+   "medium": 7,
+   "low": 35,
+   "informational": 7
+  }
+ },
+ {
+  "f": "composable-halborn-ibc.md",
+  "bytes": 12395,
+  "cls": "text",
+  "nlines": 361,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/composable-halborn-ibc.pdf\npages: 19\n---\n\nComposable - IBC\nPallet\nSubstrate Pallet Security\nAudit\nPrepared by: Halborn\nDate of Engagement: October 10th, 2022 - November 4th, 2022\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 2\nCONTACTS 3\n1 EXECUTIVE OVERVIEW 4\n1.1 INTRODUCTION 5\n1.2 AUDIT SUMMARY 5\n1.3 TEST APPROACH & METHODOLOGY 5\nRISK METHODOLOGY 6\n1.4 SCOPE 8\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 9\n3 FINDINGS & TECH DETAILS 10\n3.1 (HAL-01) ALLOWED TO TRANSFER ZERO AMOUNT - INFORMATIONAL 12\nDescription 12\nCode Location 12\nRisk Level 15\nRecommendations 15\nRemediation Plan 16",
+  "headings": [],
+  "sevcounts": {
+   "informational": 9,
+   "critical": 4,
+   "high": 4,
+   "low": 5,
+   "medium": 3
+  }
+ },
+ {
+  "f": "composable-halborn-pablo-v2.md",
+  "bytes": 29279,
+  "cls": "text",
+  "nlines": 936,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/composable-halborn-pablo-v2.pdf\npages: 38\n---\n\nComposable\nFinance - Pablo\nSubstrate Pallet Security\nAudit\nPrepared by: Halborn\nDate of Engagement: Jul 30th, 2022 - Aug 17th, 2022\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 4\nCONTACTS 5\n1 EXECUTIVE OVERVIEW 6\n1.1 INTRODUCTION 7\n1.2 AUDIT SUMMARY 7\n1.3 TEST APPROACH & METHODOLOGY 7\nRISK METHODOLOGY 8\n1.4 SCOPE 10\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 11\n3 FINDINGS & TECH DETAILS 12\n3.1 (HAL-01) USERS CAN CREATE SAME PAIR POOLS WITHOUT LIMITS - HIGH\n14\nDescription 14\nCode Location 14\nProof Of Concept 15\nRisk Level 16",
+  "headings": [],
+  "sevcounts": {
+   "high": 7,
+   "low": 14,
+   "informational": 10,
+   "critical": 4,
+   "medium": 3
+  }
+ },
+ {
+  "f": "hydradx-c4-2401.md",
+  "bytes": 203280,
+  "cls": "text",
+  "nlines": 4850,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/hydradx-c4-2401.pdf\npages: 148\n---\n\nIntroducing Code4rena Pro League: The elite tier of professional security\nresearchers.Learn more \u2192\nHydraDX\nFindings & Analysis Report\n2024-04-10\nTable of contents\n\u2022 Overview\n\u2022 About C4\n\u2022 Wardens\n\u2022 Summary\n\u2022 Scope\n\u2022 Severity Criteria\n\u2022 High Risk Findings (1)\n\u2022 [H-01] An attacker possesses the capability to exhaust the\nentirety of liquidity within the stable swap pools by manipulating\nthe buy function, speci\ufb01cally by setting the asset_in parameter\nequal to the asset_out parameter\n\u2022 Medium Risk Findings (10)\n\u2022 [M-01] Users can MAKE EMA-Oracle price outdated with direct\ntransfers to StableSwap\n\u2022 [M-02] Malicious liquidity provider can put pool into highly\nHydraDX https://code4rena.com/reports/2024-02-hydradx\n1 of 148 09/06/2024, 14:43\n\nmanipulatable state",
+  "headings": [
+   "#[test]",
+   "#73. They both result in the exact same state of the oracle returning an",
+   "#[test]",
+   "#[test]",
+   "#[test]",
+   "#[test]",
+   "#[test]",
+   "#[pallet::call_index(12)]",
+   "#[pallet::weight(<T as Config>::WeightInfo::remove_token())]",
+   "#[transactional]",
+   "#141:",
+   "#[test]"
+  ],
+  "sevcounts": {
+   "severity": 28,
+   "high": 17,
+   "medium": 27,
+   "low": 19,
+   "critical": 10,
+   "info": 1,
+   "informational": 1
+  }
+ },
+ {
+  "f": "hydradx-node-ai-skills-hydration-cl0wdit-references-report-formatting-md.md",
+  "bytes": 3179,
+  "cls": "text",
+  "nlines": 109,
+  "head": "# Report Formatting\n\n## Report Path\n\nWhen `--file-output` is set, resolve the git repository root via `git rev-parse --show-toplevel` and save the report to `{repo_root}/findings/{timestamp}-hydration-{feature-name}-{model-name}-cl0wdit.md`, where `{feature-name}` is the name of the feature or pallet, `{model-name}` is a filesystem-safe lowercase model slug such as `gpt-5`, `claude-opus-4-5`, or `o3`, and `{timestamp}` is `YYYYMMDD-HHMMSS` at scan time. Create the `findings/` directory if it doesn't exist.\n\n## Output Format\n\n````\n# Security Audit \u2014 <Runtime / Pallet name or repo name>\n\n---\n\n## Scope\n\n| Field | Value |\n|---|---|\n| **Skill version** | hydration_cl0wdit vX.Y.Z |\n| **Model** | <model name/version and reasoning effort> |\n| **Report date** | YYYY-MM-DD |\n| **Commit hash / revision** | `<full commit hash or reviewed revision>` |\n| **Commit date** | YYYY-MM-DD HH:MM:SS \u00b1HHMM |\n|",
+  "headings": [
+   "# Report Formatting",
+   "## Report Path",
+   "## Output Format",
+   "# Security Audit \u2014 <Runtime / Pallet name or repo name>",
+   "## Scope",
+   "## Findings",
+   "## Summary",
+   "## Leads",
+   "## Rules"
+  ],
+  "sevcounts": {
+   "high": 1
+  }
+ },
+ {
+  "f": "hydradx-rv-stableswap-2023.md",
+  "bytes": 44167,
+  "cls": "text",
+  "nlines": 863,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/hydradx-rv-stableswap-2023.pdf\npages: 33\n---\n\n1/33\nSecurity Audit Report\nHydraDX - Stableswap Polkadot\nDelivered: July 24, 2023\nPrepared for HydraDX by\n\n\n2/33\nTable of Contents\nDisclaimer\nExecutive Summary\nGoal\nScope\nMethodology\nPlatform Logic and Features Description\nDifferences From Canonical Stableswap Invariant\nFindings\n[A1] Lack of validations when updating the stableswap's amplification factor\n[A2] Single and empty asset list is permissible as an argument to create_pool\n[A3] add_liquidity  does not check for duplicate assets in assets  argument\n[A4] The asset balance of a pool can drop below the existential deposit\n[A5] Filtering non-zero assets in calculate_d  and calculate_y  breaks non-\ndegeneracy assumption\n[A6] Withdrawal of assets is susceptible to slippage\n[A7] Withdrawing all share assets triggers errors",
+  "headings": [],
+  "sevcounts": {
+   "critical": 3,
+   "informational": 1,
+   "severity": 19,
+   "high": 11,
+   "low": 9,
+   "medium": 10
+  }
+ },
+ {
+  "f": "hydradx-srl-2405.md",
+  "bytes": 10086,
+  "cls": "text",
+  "nlines": 216,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/hydradx-srl-2405.pdf\npages: 7\n---\n\n \n \n- Confidential, 7 pages - \n \nHydraDX Feature Security Assurance  \nHacking assessment report  \nV1.0 , 03 June  20 24  \n \nAudited By:    Bruno Produit   bruno@srlabs.de  \n    Gabriel Arnautu   gabriel@srlabs.de  \n    Marc Heuse   marc@srlabs.de  \n \nAbstract. This work describes the result of the thorough and \nindependent security assurance audit  performed by Security \nResearch Labs  for  the HydraDX  custom \u2019s EVM  implementation layer \nwhich allows Metamask  users to pay for gas using any supported \nasset on the HydraDX  platform . Security Research Labs is a \nconsulting firm that has been providing specialized audit services \nin the Polkadot ecosystem since 2019, including for the Substrate \nand Polkadot projects.  \nDuring this audit , HydraDX  team  provided access to relevant code  \nand supported the re",
+  "headings": [],
+  "sevcounts": {
+   "medium": 4,
+   "info": 4,
+   "severity": 6,
+   "high": 1
+  }
+ },
+ {
+  "f": "interlay-informal-2021q2.md",
+  "bytes": 76937,
+  "cls": "text",
+  "nlines": 1313,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/interlay-informal-2021q2.pdf\npages: 39\n---\n\nSecurity Audit Report\nInterBTC Parachain:\nProtocol Design and Source Code\n2021/06/12\nLast revised 2021/09/17\nAuthors: Josef Widder, Shon Feder\n\n\u00a92021 Informal Systems InterBTC Parachain\nContents\nAudit overview 5\nThe Project . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5\nScope of this report . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5\nConducted work . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5\nTimeline . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5\nConclusions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6\nFur",
+  "headings": [],
+  "sevcounts": {
+   "minor": 14,
+   "high": 11,
+   "critical": 4,
+   "severity": 15,
+   "medium": 5,
+   "low": 13
+  }
+ },
+ {
+  "f": "interlay-informal-2021q3.md",
+  "bytes": 89155,
+  "cls": "text",
+  "nlines": 1525,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/interlay-informal-2021q3.pdf\npages: 44\n---\n\nSecurity Audit Report\nInterBTC Parachain Modules and Vault Client:\nProtocol Design and Source Code\n2021/09/09\nLast revised 2021/09/28\nAuthors: Josef Widder, Cezara Dragoi, Shon Feder\n\n\u00a92021 Informal Systems InterBTC Parachain Modules and Vault Client\nContents\nAudit overview 5\nThe Project . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5\nScope of this report . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5\nAims of audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5\nConducted work . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6\nTimeline . . . . . . . . . . . . . . . . . . . . . . . . . ",
+  "headings": [
+   "#L277-L278",
+   "#L290-L294"
+  ],
+  "sevcounts": {
+   "medium": 5,
+   "high": 16,
+   "severity": 15,
+   "critical": 2,
+   "minor": 1,
+   "low": 15
+  }
+ },
+ {
+  "f": "manta-veridise-chain.md",
+  "bytes": 61074,
+  "cls": "text",
+  "nlines": 1072,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/manta-veridise-chain.pdf\npages: 40\n---\n\nAuditing Report\nHardening Blockchain Security with Formal Methods\nFOR\nManta Chain\nVeridise Inc.\nApril 28, 2023\n\n\u25b6 Prepared For:\nManta Network\nhttps://manta.network/\n\u25b6 Prepared By:\nShankara Pailoor\nJon Stephens\nBurak Kadron\nJacob Van Geffen\nKostas Ferles\nDaniel Dominguez\nBenjamin Sepanski\n\u25b6 Contact Us: contact@veridise.com\n\u25b6 Version History:\nApril 27, 2023 Initial Draft\n\u00a9 2023 Veridise Inc. All Rights Reserved.\n\nContents\nContents iii",
+  "headings": [],
+  "sevcounts": {
+   "critical": 5,
+   "high": 11,
+   "severity": 33,
+   "medium": 18,
+   "low": 24,
+   "informational": 1,
+   "info": 4
+  }
+ },
+ {
+  "f": "moonbeam-srl-2401.md",
+  "bytes": 42025,
+  "cls": "text",
+  "nlines": 728,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/moonbeam-srl-2401.pdf\npages: 21\n---\n\n                                                                                            \n \n \nMoonbeam security audit for runtime 2900, 3000 \nand 3100 \nThreat model and hacking assessment report  \n4th of September  2024  \nPrepared for: \nMoonbase One SEZC \n \n\n                                                                          \nSecurity Research Labs: Moonbeam audit report for runtime 2900, 3000 and 3100 Page 2 of 21 \n \nContent \nDisclaimer ................................ ................................ ................................ ................................ .... 3 \nAll Rights Reserved ................................ ................................ ................................ ...................... 3 \nTimeline ................................ ................................ ........",
+  "headings": [],
+  "sevcounts": {
+   "critical": 4,
+   "medium": 28,
+   "severity": 6,
+   "high": 24,
+   "low": 13
+  }
+ },
+ {
+  "f": "parallel-halborn-loans.md",
+  "bytes": 9875,
+  "cls": "text",
+  "nlines": 299,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/parallel-halborn-loans.pdf\npages: 18\n---\n\nParallel.fi -\nMoney Market\nSubstrate Pallet Security\nAudit\nPrepared by: Halborn\nDate of Engagement: April 29th, 2022 - May 28th, 2022\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 2\nCONTACTS 3\n1 EXECUTIVE OVERVIEW 4\n1.1 INTRODUCTION 6\n1.2 AUDIT SUMMARY 6\n1.3 TEST APPROACH & METHODOLOGY 6\nRISK METHODOLOGY 7\n1.4 SCOPE 9\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 10\n3 FINDINGS & TECH DETAILS 11\n3.1 (HAL-01) THRESHOLDS MIN VALUES NOT ENFORCED - INFORMATIONAL 13\nDescription 13\nCode Location 13\nRisk Level 14\nRecommendation 14\nRemediation Plan 14",
+  "headings": [],
+  "sevcounts": {
+   "informational": 9,
+   "high": 4,
+   "low": 5,
+   "critical": 3,
+   "medium": 3
+  }
+ },
+ {
+  "f": "parallel-tob-2.md",
+  "bytes": 70069,
+  "cls": "text",
+  "nlines": 3461,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/parallel-tob-2.pdf\npages: 60\n---\n\nParaspace\nSecurity Assessment\nNovember 16, 2022\nPrepared for:\nCheng Jiang\nIvan Solomono\ufb00\nParaspace\nPrepared by:\nWill Song, Tjaden Hess, and Samuel Moelius\n\n\nAbout Trail of Bits\nFounded in 2012 and headquartered in New York, Trail of Bits provides technical security\nassessment and advisory services to some of the world\u2019s most targeted organizations. We\ncombine high- end security research with a real -world attacker mentality to reduce risk and\nfortify code. With 100+ employees around the globe, we\u2019ve helped secure critical software\nelements that support billions of end users, including Kubernetes and the Linux kernel.\nWe maintain an exhaustive list of publications at\nhttps://github.com/trailofbits/publications\n,\nwith links to papers, presentations, public audit reports, and podcast appearances.\nIn recent years, ",
+  "headings": [],
+  "sevcounts": {
+   "high": 23,
+   "critical": 5,
+   "info": 2,
+   "severity": 21,
+   "medium": 3,
+   "low": 20,
+   "informational": 18,
+   "moderate": 6,
+   "minor": 2
+  }
+ },
+ {
+  "f": "parallel-tob-3.md",
+  "bytes": 24049,
+  "cls": "text",
+  "nlines": 956,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/parallel-tob-3.pdf\npages: 24\n---\n\nParaspace\nSecurity Assessment\nDecember 7, 2022\nPrepared for:\nCheng Jiang\nIvan Solomono\ufb00\nParaspace\nPrepared by:\nTjaden Hess\n\n\nAbout Trail of Bits\nFounded in 2012 and headquartered in New York, Trail of Bits provides technical security\nassessment and advisory services to some of the world\u2019s most targeted organizations. We\ncombine high- end security research with a real -world attacker mentality to reduce risk and\nfortify code. With 100+ employees around the globe, we\u2019ve helped secure critical software\nelements that support billions of end users, including Kubernetes and the Linux kernel.\nWe maintain an exhaustive list of publications at\nhttps://github.com/trailofbits/publications\n,\nwith links to papers, presentations, public audit reports, and podcast appearances.\nIn recent years, Trail of Bits consultants have s",
+  "headings": [],
+  "sevcounts": {
+   "high": 9,
+   "critical": 2,
+   "info": 2,
+   "minor": 2,
+   "severity": 8,
+   "medium": 3,
+   "low": 8,
+   "informational": 6,
+   "moderate": 5
+  }
+ },
+ {
+  "f": "phala-blockchain-audit-code4rena-phat-contract-runtime-pdf.md",
+  "bytes": 110503,
+  "cls": "text",
+  "nlines": 1976,
+  "head": "---\nsource_pdf: substrate-l1_findings/phala-blockchain-audit-code4rena-phat-contract-runtime-pdf.pdf\npages: 26\n---\n\nIntroducing Code4rena Pro League: The elite tier of professional security researchers. Learn more \u2192\nPhat Contract Runtime\nFindings & Analysis Report\n2024-04-11\nTable of contents\nOverview\nAbout C4\nWardens\nSummary\nScope\nSeverity Criteria\nMedium Risk Findings (4)\n[M-01] Limited availability of balance_of(...)  method\n[M-02] An attacker can bloat the Pink runtime storage with zero costs\n[M-03] A cache that times out can be recovered\n[M-04] An attacker can crash the cluster system by sending an HTTP request with a\nhuge timeout\nLow Risk and Non-Critical Issues\n01 No point in using regular http request over batchhttperequest\n02 CallinCommand  is misleading and should be renamed callinTransaction  for\nclarity\n03 is_running_in_command  function is missing or misnamed in the code\n04 ",
+  "headings": [
+   "#[test]",
+   "#[cfg(test)]",
+   "#[test]",
+   "#[test]",
+   "#[xcall(id = 15)]",
+   "#[default]"
+  ],
+  "sevcounts": {
+   "severity": 15,
+   "medium": 10,
+   "low": 10,
+   "critical": 13,
+   "high": 7,
+   "info": 5,
+   "minor": 1
+  }
+ },
+ {
+  "f": "phala-blockchain-audit-code4rena-phat-contract-runtime-pdf.pdf",
+  "bytes": 2055781,
+  "cls": "binary-pdf",
+  "sibling_md": "phala-blockchain-audit-code4rena-phat-contract-runtime-pdf.md"
+ },
+ {
+  "f": "phala-c4-2401.md",
+  "bytes": 117061,
+  "cls": "text",
+  "nlines": 2481,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/phala-c4-2401.pdf\npages: 81\n---\n\nIntroducing Code4rena Pro League: The elite tier of professional security researchers.\nLearn more \u2192\nPhat Contract Runtime\nFindings & Analysis Report\n2024-04-11\nTable of contents\n\u2022 Overview\n\u2022 About C4\n\u2022 Wardens\n\u2022 Summary\n\u2022 Scope\n\u2022 Severity Criteria\n\u2022 Medium Risk Findings (4)\n\u2022 [M-01] Limited availability of balance_of(...) method\n\u2022 [M-02] An attacker can bloat the Pink runtime storage with zero\ncosts\n\u2022 [M-03] A cache that times out can be recovered\n\u2022 [M-04] An attacker can crash the cluster system by sending an\nHTTP request with a huge timeout\n\u2022 Low Risk and Non-Critical Issues\n\u2022 01 No point in using regular http request over batchhttperequest\nPhat Contract Runtime https://code4rena.com/reports/2024-03-phala-network#summary\n1 of 81 09/06/2024, 14:11\n\n\u2022 02 CallinCommand is misleading and should be renamed",
+  "headings": [
+   "#[test]",
+   "#[cfg(test)]",
+   "#[test]",
+   "#[test]",
+   "#[xcall(id = 15)]",
+   "#[default]"
+  ],
+  "sevcounts": {
+   "severity": 15,
+   "medium": 10,
+   "low": 10,
+   "critical": 13,
+   "high": 7,
+   "info": 5,
+   "minor": 1
+  }
+ },
+ {
+  "f": "publications-audit-reports-peckshield-audit-report-zenlink-v1-0-pdf.md",
+  "bytes": 30227,
+  "cls": "text",
+  "nlines": 615,
+  "head": "---\nsource_pdf: substrate-l1_findings/publications-audit-reports-peckshield-audit-report-zenlink-v1-0-pdf.pdf\npages: 20\n---\n\nPublic\nSMART CONTRACT AUDIT REPORT\nfor\nZenlink Hybrid AMM\nPrepared By: Xiaomi Huang\nPeckShield\nMay 19, 2022\n1/20 PeckShield Audit Report #: 2022-195\n\nPublic\nDocument Properties\nClient Zenlink\nTitle Smart Contract Audit Report\nTarget Zenlink Hybrid AMM\nVersion 1.0\nAuthor Xuxian Jiang\nAuditors Jing Wang, Xuxian Jiang\nReviewed by Xiaomi Huang\nApproved by Xuxian Jiang\nClassi\ufb01cation Public\nVersion Info\nVersion Date Author(s) Description\n1.0 May 19, 2022 Xuxian Jiang Final Release\n1.0-rc1 May 12, 2022 Xuxian Jiang Release Candidate #1\nContact",
+  "headings": [],
+  "sevcounts": {
+   "info": 1,
+   "severity": 12,
+   "high": 9,
+   "critical": 4,
+   "medium": 12,
+   "low": 20,
+   "informational": 3,
+   "minor": 1
+  }
+ },
+ {
+  "f": "publications-audit-reports-peckshield-audit-report-zenlink-v1-0-pdf.pdf",
+  "bytes": 343398,
+  "cls": "binary-pdf",
+  "sibling_md": "publications-audit-reports-peckshield-audit-report-zenlink-v1-0-pdf.md"
+ },
+ {
+  "f": "publications-audit-reports-peckshield-audit-report-zenlinkdex-v1-0-pdf.md",
+  "bytes": 31883,
+  "cls": "text",
+  "nlines": 652,
+  "head": "---\nsource_pdf: substrate-l1_findings/publications-audit-reports-peckshield-audit-report-zenlinkdex-v1-0-pdf.pdf\npages: 22\n---\n\nPublic\nSECURITY AUDIT REPORT\nfor\nZenlink Stable AMM & Swap Router\nPrepared By: Xiaomi Huang\nPeckShield\nAugust 24, 2022\n1/22 PeckShield Audit Report #: 2022-294\n\nPublic\nDocument Properties\nClient Zenlink\nTitle Security Audit Report\nTarget Zenlink Stable AMM & Swap Router\nVersion 1.0\nAuthor Xiaotao Wu\nAuditors Xiaotao Wu, Xuxian Jiang\nReviewed by Xiaomi Huang\nApproved by Xuxian Jiang\nClassification Public\nVersion Info\nVersion Date Author(s) Description\n1.0 August 24, 2022 Xiaotao Wu Final Release\n1.0-rc August 1, 2022 Xiaotao Wu Release Candidate #1\nContact",
+  "headings": [],
+  "sevcounts": {
+   "info": 1,
+   "severity": 13,
+   "high": 12,
+   "critical": 4,
+   "medium": 11,
+   "low": 18,
+   "informational": 1
+  }
+ },
+ {
+  "f": "publications-audit-reports-peckshield-audit-report-zenlinkdex-v1-0-pdf.pdf",
+  "bytes": 360033,
+  "cls": "binary-pdf",
+  "sibling_md": "publications-audit-reports-peckshield-audit-report-zenlinkdex-v1-0-pdf.md"
+ },
+ {
+  "f": "publications-reviews-acalanetwork-pdf.md",
+  "bytes": 66280,
+  "cls": "text",
+  "nlines": 1187,
+  "head": "---\nsource_pdf: substrate-l1_findings/publications-reviews-acalanetwork-pdf.pdf\npages: 36\n---\n\n \u00a0\nAcala  \u00a0\nSecurity   Assessment  \u00a0\n16th   February   2021  \u00a0\n \u00a0\n \u00a0\nPrepared   For:   \u00a0\u00a0\nRuitao   Su   |     Acala  \u00a0\nruitao@laminar.one  \u00a0\n \u00a0\nBette   Chen   |    Acala  \u00a0\nbette@laminar.one  \u00a0\n \u00a0\nBryan   Chen   |    Acala  \u00a0\nbryan@laminar.one  \u00a0\n \u00a0\n \u00a0\nPrepared   By:   \u00a0\u00a0\nDominik   Czarnota    |     Trail   of   Bits  \u00a0\ndominik.czarnota@trailofbits.com   \u00a0\u00a0\n \u00a0\nMichael   Colburn    |     Trail   of   Bits  \u00a0\nmichael.colburn@trailofbits.com   \u00a0\u00a0\n \u00a0\nChangelog:   \u00a0\u00a0",
+  "headings": [
+   "#  \u00a0 Title  \u00a0 Type  \u00a0 Severity"
+  ],
+  "sevcounts": {
+   "high": 7,
+   "low": 14,
+   "informational": 20,
+   "severity": 20,
+   "medium": 4,
+   "moderate": 1
+  }
+ },
+ {
+  "f": "publications-reviews-acalanetwork-pdf.pdf",
+  "bytes": 1323153,
+  "cls": "binary-pdf",
+  "sibling_md": "publications-reviews-acalanetwork-pdf.md"
+ },
+ {
+  "f": "publications-reviews-alephbft-pdf.md",
+  "bytes": 36635,
+  "cls": "text",
+  "nlines": 1013,
+  "head": "---\nsource_pdf: substrate-l1_findings/publications-reviews-alephbft-pdf.pdf\npages: 27\n---\n\nAlephBFTSecurity Assessment\nJune 21, 2021\nPrepared For:\nAdam G\u0105gol |\nCardinal Cryptography & Aleph Zero Foundation\nadam.gagol@cardinals.cc\nPrepared By:\nArtur Cygan |\nTrail of Bits\nartur.cygan@trailofbits.com\nWill Song  |\nTrail of Bits\nwill.song@trailofbits.com\nChangelog:\nJune 21, 2021:\nInitial report draft\nJuly 27, 2021:\nAdded Appendix D: Fix Log\n\n\nExecutive Summary\nProject Dashboard\nEngagement Goals\nCoverage\nRecommendations Summary",
+  "headings": [
+   "#",
+   "#[derive(Debug, Clone, Copy, Eq, PartialEq, Encode, Decode, StdHash)]pub(crate) struct UnitCoord {pub(crate) round: u16,creator: NodeIndex,}",
+   "#[async_trait::async_trait]pub trait Network<H: Hasher, D: Data, S: Signature, MS: PartialMultisignature>: Send {type Error: Debug;/// Send a message to a single node.fn send(&self, data: NetworkData<H, D, S, MS>, node: NodeIndex) -> Result<(),Self::Error>;/// Send a message to all nodes.fn broadcast(&self, data: NetworkData<H, D, S, MS>) -> Result<(), Self::Error>;/// Receive a message from the network.async fn next_event(&mut self) -> Option<NetworkData<H, D, S, MS>>;}",
+   "#![no_main]use libfuzzer_sys::fuzz_target;",
+   "#"
+  ],
+  "sevcounts": {
+   "low": 9,
+   "informational": 28,
+   "severity": 18,
+   "minor": 1,
+   "critical": 1,
+   "high": 10,
+   "medium": 2,
+   "moderate": 1
+  }
+ },
+ {
+  "f": "publications-reviews-alephbft-pdf.pdf",
+  "bytes": 260271,
+  "cls": "binary-pdf",
+  "sibling_md": "publications-reviews-alephbft-pdf.md"
+ },
+ {
+  "f": "publications-reviews-parallelfinance-pdf.pdf",
+  "bytes": 764045,
+  "cls": "binary-pdf",
+  "sibling_md": "publications-reviews-parallelfinance-pdf.md"
+ },
+ {
+  "f": "publications-reviews-parallelfinance2-pdf.md",
+  "bytes": 70090,
+  "cls": "text",
+  "nlines": 3461,
+  "head": "---\nsource_pdf: substrate-l1_findings/publications-reviews-parallelfinance2-pdf.pdf\npages: 60\n---\n\nParaspace\nSecurity Assessment\nNovember 16, 2022\nPrepared for:\nCheng Jiang\nIvan Solomono\ufb00\nParaspace\nPrepared by:\nWill Song, Tjaden Hess, and Samuel Moelius\n\n\nAbout Trail of Bits\nFounded in 2012 and headquartered in New York, Trail of Bits provides technical security\nassessment and advisory services to some of the world\u2019s most targeted organizations. We\ncombine high- end security research with a real -world attacker mentality to reduce risk and\nfortify code. With 100+ employees around the globe, we\u2019ve helped secure critical software\nelements that support billions of end users, including Kubernetes and the Linux kernel.\nWe maintain an exhaustive list of publications at\nhttps://github.com/trailofbits/publications\n,\nwith links to papers, presentations, public audit reports, and podcast appearanc",
+  "headings": [],
+  "sevcounts": {
+   "high": 23,
+   "critical": 5,
+   "info": 2,
+   "severity": 21,
+   "medium": 3,
+   "low": 20,
+   "informational": 18,
+   "moderate": 6,
+   "minor": 2
+  }
+ },
+ {
+  "f": "publications-reviews-parallelfinance2-pdf.pdf",
+  "bytes": 804352,
+  "cls": "binary-pdf",
+  "sibling_md": "publications-reviews-parallelfinance2-pdf.md"
+ },
+ {
+  "f": "publications-reviews-parallelfinance2fixreview-pdf.md",
+  "bytes": 46542,
+  "cls": "text",
+  "nlines": 2519,
+  "head": "---\nsource_pdf: substrate-l1_findings/publications-reviews-parallelfinance2fixreview-pdf.pdf\npages: 44\n---\n\nParaspace\nFix Review\nNovember 28, 2022\nPrepared for:\nCheng Jiang\nIvan Solomono\ufb00\nParaspace\nPrepared by:\nWill Song\n\n\nAbout Trail of Bits\nFounded in 2012 and headquartered in New York, Trail of Bits provides technical security\nassessment and advisory services to some of the world\u2019s most targeted organizations. We\ncombine high- end security research with a real -world attacker mentality to reduce risk and\nfortify code. With 100+ employees around the globe, we\u2019ve helped secure critical software\nelements that support billions of end users, including Kubernetes and the Linux kernel.\nWe maintain an exhaustive list of publications at\nhttps://github.com/trailofbits/publications\n,\nwith links to papers, presentations, public audit reports, and podcast appearances.\nIn recent years, Trail of Bit",
+  "headings": [
+   "#69",
+   "#98",
+   "#109",
+   "#114",
+   "#139",
+   "#176",
+   "#176",
+   "#114",
+   "#176",
+   "#69",
+   "#98",
+   "#176",
+   "#109",
+   "#139"
+  ],
+  "sevcounts": {
+   "high": 19,
+   "critical": 2,
+   "info": 2,
+   "severity": 19,
+   "medium": 3,
+   "low": 11,
+   "informational": 10,
+   "moderate": 1
+  }
+ },
+ {
+  "f": "publications-reviews-parallelfinance2fixreview-pdf.pdf",
+  "bytes": 725802,
+  "cls": "binary-pdf",
+  "sibling_md": "publications-reviews-parallelfinance2fixreview-pdf.md"
+ },
+ {
+  "f": "publications-reviews-parallelfinance3-pdf.md",
+  "bytes": 24070,
+  "cls": "text",
+  "nlines": 956,
+  "head": "---\nsource_pdf: substrate-l1_findings/publications-reviews-parallelfinance3-pdf.pdf\npages: 24\n---\n\nParaspace\nSecurity Assessment\nDecember 7, 2022\nPrepared for:\nCheng Jiang\nIvan Solomono\ufb00\nParaspace\nPrepared by:\nTjaden Hess\n\n\nAbout Trail of Bits\nFounded in 2012 and headquartered in New York, Trail of Bits provides technical security\nassessment and advisory services to some of the world\u2019s most targeted organizations. We\ncombine high- end security research with a real -world attacker mentality to reduce risk and\nfortify code. With 100+ employees around the globe, we\u2019ve helped secure critical software\nelements that support billions of end users, including Kubernetes and the Linux kernel.\nWe maintain an exhaustive list of publications at\nhttps://github.com/trailofbits/publications\n,\nwith links to papers, presentations, public audit reports, and podcast appearances.\nIn recent years, Trail of Bi",
+  "headings": [],
+  "sevcounts": {
+   "high": 9,
+   "critical": 2,
+   "info": 2,
+   "minor": 2,
+   "severity": 8,
+   "medium": 3,
+   "low": 8,
+   "informational": 6,
+   "moderate": 5
+  }
+ },
+ {
+  "f": "publications-reviews-parallelfinance3-pdf.pdf",
+  "bytes": 606428,
+  "cls": "binary-pdf",
+  "sibling_md": "publications-reviews-parallelfinance3-pdf.md"
+ },
+ {
+  "f": "publications-thorchain-bifrost-utxo-client-zellic-audit-report-pdf.md",
+  "bytes": 20809,
+  "cls": "text",
+  "nlines": 404,
+  "head": "---\nsource_pdf: substrate-l1_findings/publications-thorchain-bifrost-utxo-client-zellic-audit-report-pdf.pdf\npages: 16\n---\n\nPrepared for\nTHORChain\nPrepared by\nFrank Bachman\nJunyi Wang\nZellic\nJanuary 27, 2025\nTHORChain Bifrost UTXO Client\nApplication Security Assessment\n\n\nTHORChain Bifrost UTXO Client Application Security Assessment January 27, 2025\nContents About Zellic 3\n1. Overview 3\n1.1. Executive Summary 4\n1.2. Goals of the Assessment 4\n1.3. Non-goals and Limitations 4\n1.4. Results 4\n2. Introduction 5\n2.1. About THORChain Bifrost UTXO Client 6\n2.2. Methodology 6\n2.3. Scope 8\n2.4. Project Overview 9\n2.5. Project Timeline 9\n3. Discussion 9",
+  "headings": [],
+  "sevcounts": {
+   "low": 5,
+   "critical": 4,
+   "high": 4,
+   "medium": 2,
+   "informational": 4,
+   "severity": 2
+  }
+ },
+ {
+  "f": "publications-thorchain-bifrost-utxo-client-zellic-audit-report-pdf.pdf",
+  "bytes": 1042897,
+  "cls": "binary-pdf",
+  "sibling_md": "publications-thorchain-bifrost-utxo-client-zellic-audit-report-pdf.md"
+ },
+ {
+  "f": "publicauditreports-nm0286-final-nodle-pdf.md",
+  "bytes": 41242,
+  "cls": "text",
+  "nlines": 578,
+  "head": "---\nsource_pdf: substrate-l1_findings/publicauditreports-nm0286-final-nodle-pdf.pdf\npages: 16\n---\n\nSecurity Review Report\nNM-0286 Nodle\n(Sep 03, 2024)\n\nNM-0286 Nodle - SECURITY REVIEW\nContents\n1 Executive Summary 2\n2 Audited Files 3\n3 Summary of Issues 3\n4 System Overview 4\n4.1 Grants Migration . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4\n4.2 Rewards Distribution . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5\n5 Risk Rating Methodology 7\n6 Issues 8\n6.1 [High] User grants migration can be blocked by exploiting the MAX_SCHEDULES limit . . . . . . . . . . . . . . . . . . . . . . . . . 8\n6.2 [Low] Incorrect check of the batchSubmitterRewardPercentage parameter during contract construction . . . . . . . . . . . . . 9\n6.3 [Info] Lack of di",
+  "headings": [],
+  "sevcounts": {
+   "high": 15,
+   "low": 14,
+   "info": 6,
+   "informational": 4,
+   "severity": 6,
+   "critical": 4,
+   "medium": 11,
+   "moderate": 1,
+   "minor": 1
+  }
+ },
+ {
+  "f": "publicauditreports-nm0286-final-nodle-pdf.pdf",
+  "bytes": 456058,
+  "cls": "binary-pdf",
+  "sibling_md": "publicauditreports-nm0286-final-nodle-pdf.md"
+ },
+ {
+  "f": "publicreports-solidity-smart-contract-audits-reef-finance-smartcontract-halborn-report-v1-1-pdf.md",
+  "bytes": 11618,
+  "cls": "text",
+  "nlines": 516,
+  "head": "---\nsource_pdf: substrate-l1_findings/publicreports-solidity-smart-contract-audits-reef-finance-smartcontract-halborn-report-v1-1-pdf.pdf\npages: 18\n---\n\n \n 1 \n  \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \nREEF Protocol \nSmart Contract Security Audit   \n \nPrepared by: Halborn \nDate of Engagement: December 3 \u2013 10, 2020 ",
+  "headings": [],
+  "sevcounts": {
+   "low": 8,
+   "informational": 11,
+   "high": 2,
+   "critical": 2,
+   "medium": 1
+  }
+ },
+ {
+  "f": "publicreports-solidity-smart-contract-audits-reef-finance-smartcontract-halborn-report-v1-1-pdf.pdf",
+  "bytes": 2659821,
+  "cls": "binary-pdf",
+  "sibling_md": "publicreports-solidity-smart-contract-audits-reef-finance-smartcontract-halborn-report-v1-1-pdf.md"
+ },
+ {
+  "f": "publicreports-solidity-smart-contract-audits-reef-finance-smartcontract-halborn-report-v1-pdf.md",
+  "bytes": 11388,
+  "cls": "text",
+  "nlines": 510,
+  "head": "---\nsource_pdf: substrate-l1_findings/publicreports-solidity-smart-contract-audits-reef-finance-smartcontract-halborn-report-v1-pdf.pdf\npages: 18\n---\n\n \n 1 \n  \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \nREEF  \nSmart Contract Security Audit \n \nPrepared by: Halborn \nDate of Engagement: November 27, 2020 ",
+  "headings": [],
+  "sevcounts": {
+   "low": 10,
+   "informational": 9,
+   "high": 2,
+   "critical": 2,
+   "medium": 1
+  }
+ },
+ {
+  "f": "publicreports-solidity-smart-contract-audits-reef-finance-smartcontract-halborn-report-v1-pdf.pdf",
+  "bytes": 2638562,
+  "cls": "binary-pdf",
+  "sibling_md": "publicreports-solidity-smart-contract-audits-reef-finance-smartcontract-halborn-report-v1-pdf.md"
+ },
+ {
+  "f": "publicreports-substrate-audits-nodle-nodl-substrate-pallet-security-audit-report-halborn-final-pdf.md",
+  "bytes": 23998,
+  "cls": "text",
+  "nlines": 780,
+  "head": "---\nsource_pdf: substrate-l1_findings/publicreports-substrate-audits-nodle-nodl-substrate-pallet-security-audit-report-halborn-final-pdf.pdf\npages: 40\n---\n\nNodle\nSubstrate Pallets Security\nAudit\nPrepared by: Halborn\nDate of Engagement: October 29th, 2021 - Feb 14th, 2022\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 5\nCONTACTS 5\n1 EXECUTIVE OVERVIEW 6\n1.1 INTRODUCTION 7\n1.2 AUDIT SUMMARY 7\n1.3 TEST APPROACH & METHODOLOGY 7\nRISK METHODOLOGY 8\n1.4 SCOPE 10\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 11\n3 FINDINGS & TECH DETAILS 12\n3.1 (HAL-01) HAL-01 TCR VOTING DESIGN SHOULD BE IMPROVED - MEDIUM\n14\nDescription 14\nRisk Level 14\nRecommendation 14\nRemediation Plan 15\n3.2 (HAL-02) HAL-02 DENOMINATION LOGIC SHOULD BE IMPROVED - MEDIUM",
+  "headings": [
+   "#[zeroize(drop)] doesn\u2019t implement Drop for",
+   "#[zeroize(drop)] doesn\u2019t implement Drop for"
+  ],
+  "sevcounts": {
+   "medium": 13,
+   "critical": 7,
+   "low": 13,
+   "informational": 18,
+   "high": 4
+  }
+ },
+ {
+  "f": "publicreports-substrate-audits-nodle-nodl-substrate-pallet-security-audit-report-halborn-final-pdf.pdf",
+  "bytes": 1271432,
+  "cls": "binary-pdf",
+  "sibling_md": "publicreports-substrate-audits-nodle-nodl-substrate-pallet-security-audit-report-halborn-final-pdf.md"
+ },
+ {
+  "f": "publicreports-substrate-audits-polygon-avail-substrate-pallet-security-audit-report-halborn-final-pdf.md",
+  "bytes": 46520,
+  "cls": "text",
+  "nlines": 1364,
+  "head": "---\nsource_pdf: substrate-l1_findings/publicreports-substrate-audits-polygon-avail-substrate-pallet-security-audit-report-halborn-final-pdf.pdf\npages: 44\n---\n\nPolygon - Avail\nSubstrate Pallet Security\nAudit\nPrepared by: Halborn\nDate of Engagement: May 23rd, 2022 - July 20th, 2022\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 3\nCONTACTS 3\n1 EXECUTIVE OVERVIEW 5\n1.1 INTRODUCTION 6\n1.2 AUDIT SUMMARY 6\n1.3 TEST APPROACH & METHODOLOGY 6\nRISK METHODOLOGY 7\n1.4 SCOPE 9\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 10\n3 FINDINGS & TECH DETAILS 11\n3.1 (HAL-01) HAL-01 USAGE OF VULNERABLE CRATES - LOW 13\nDescription 13\nRisk Level 13\nRecommendation 13\nRemediation plan 13\n3.2 (HAL-02) HAL-02 UNIMPLEMENTED RPC METHOD - INFORMATIONAL 14\nDescription 14",
+  "headings": [],
+  "sevcounts": {
+   "low": 8,
+   "informational": 11,
+   "critical": 4,
+   "high": 4,
+   "medium": 3
+  }
+ },
+ {
+  "f": "publicreports-substrate-audits-polygon-avail-substrate-pallet-security-audit-report-halborn-final-pdf.pdf",
+  "bytes": 1314610,
+  "cls": "binary-pdf",
+  "sibling_md": "publicreports-substrate-audits-polygon-avail-substrate-pallet-security-audit-report-halborn-final-pdf.md"
+ },
+ {
+  "f": "publicreports-substrate-audits-reef-chain-substrate-security-audit-report-halborn-v1-1-pdf.md",
+  "bytes": 19818,
+  "cls": "text",
+  "nlines": 549,
+  "head": "---\nsource_pdf: substrate-l1_findings/publicreports-substrate-audits-reef-chain-substrate-security-audit-report-halborn-v1-1-pdf.pdf\npages: 33\n---\n\nReef Chain\nFRAME Pallet Audit\nPrepared by: Halborn\nDate of Engagement: July 5th, 2021 - July 23rd, 2021\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 4\nCONTACTS 4\n1 EXECUTIVE OVERVIEW 5\n1.1 INTRODUCTION 6\n1.2 AUDIT SUMMARY 6\n1.3 TEST APPROACH & METHODOLOGY 7\nRISK METHODOLOGY 7\n1.4 SCOPE 9\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 10\n3 FINDINGS & TECH DETAILS 11\n3.1 (HAL-01) INTEGER OVERFLOW - MEDIUM 13\nDescription 13\nCode Location 13\nRisk Level 14\nRecommendations 14\nRemediation 14\n3.2 (HAL-02) TOTAL ISSUANCE NOT UPDATED ON MINT - MEDIUM 15\nDescription 15",
+  "headings": [],
+  "sevcounts": {
+   "medium": 9,
+   "low": 14,
+   "informational": 6,
+   "critical": 4,
+   "high": 4
+  }
+ },
+ {
+  "f": "publicreports-substrate-audits-reef-chain-substrate-security-audit-report-halborn-v1-1-pdf.pdf",
+  "bytes": 1515370,
+  "cls": "binary-pdf",
+  "sibling_md": "publicreports-substrate-audits-reef-chain-substrate-security-audit-report-halborn-v1-1-pdf.md"
+ },
+ {
+  "f": "reef-halborn.md",
+  "bytes": 19746,
+  "cls": "text",
+  "nlines": 549,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/reef-halborn.pdf\npages: 33\n---\n\nReef Chain\nFRAME Pallet Audit\nPrepared by: Halborn\nDate of Engagement: July 5th, 2021 - July 23rd, 2021\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 4\nCONTACTS 4\n1 EXECUTIVE OVERVIEW 5\n1.1 INTRODUCTION 6\n1.2 AUDIT SUMMARY 6\n1.3 TEST APPROACH & METHODOLOGY 7\nRISK METHODOLOGY 7\n1.4 SCOPE 9\n2 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 10\n3 FINDINGS & TECH DETAILS 11\n3.1 (HAL-01) INTEGER OVERFLOW - MEDIUM 13\nDescription 13\nCode Location 13\nRisk Level 14\nRecommendations 14\nRemediation 14\n3.2 (HAL-02) TOTAL ISSUANCE NOT UPDATED ON MINT - MEDIUM 15\nDescription 15",
+  "headings": [],
+  "sevcounts": {
+   "medium": 9,
+   "low": 14,
+   "informational": 6,
+   "critical": 4,
+   "high": 4
+  }
+ },
+ {
+  "f": "starlay-oak-wasm.md",
+  "bytes": 70750,
+  "cls": "text",
+  "nlines": 7529,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/starlay-oak-wasm.pdf\npages: 53\n---\n\nAudit\nReport\nStarlay\nProtocol\nWasm\nv1.0\nMarch\n6,\n2024\n1\n\n\nTable\nof\nContents\nTable\nof\nContents\n2\nLicense\n4\nDisclaimer\n4\nIntroduction\n6",
+  "headings": [
+   "#[ink(message)]fn balance_of(&self, _owner: AccountId) -> Balance {10}// (...)}"
+  ],
+  "sevcounts": {
+   "info": 1,
+   "severity": 41,
+   "critical": 26,
+   "minor": 20,
+   "informational": 13,
+   "high": 5,
+   "low": 1,
+   "medium": 4
+  }
+ },
+ {
+  "f": "t3rn-docs-main-docs-resources-security-md.md",
+  "bytes": 9698,
+  "cls": "text",
+  "nlines": 220,
+  "head": "# Security\n\nAt t3rn, security is paramount in enabling seamless, trustless execution of smart contracts across multiple blockchains. This document highlights the key security considerations of the t3rn protocol, focusing on its smart contracts, associated functions, and the mechanics of secure order flow.\n\nt3rn\u2019s smart contracts have been audited by Halborn, Quantstamp, and SR Labs, reflecting our commitment to robust security.\n\nThe **core mission of t3rn** is to empower developers and users with a reliable platform for interoperable decentralized applications. Crosschain interoperability presents unique challenges, especially in ensuring transactions are executed securely without exposing vulnerabilities. To address these, t3rn combines fault tolerance, validation mechanisms, and a focus on trustless, decentralized architecture.\n\n### **Scope of This Documentation**\n\nThis document is int",
+  "headings": [
+   "# Security",
+   "### **Scope of This Documentation**",
+   "### **Objectives**",
+   "## Order Flow Overview",
+   "### **Flow Diagram (Optional for Designer)**",
+   "### **1. Order Lifecycle**",
+   "### **Key Actors and Roles**",
+   "### **Security Considerations in the Flow**",
+   "## Smart Contract Functionality in Order Flow",
+   "### **Core Contracts in the Order Flow**",
+   "### **2. Security Mechanisms Embedded in Smart Contracts**",
+   "## **Core Security Features**",
+   "### **Reentrancy Guards**",
+   "### **Access Control**",
+   "## Security and Resilience in t3rn Protocol",
+   "### **1. Event-Driven Architecture**",
+   "### **2. Secure CrossChain Messaging**",
+   "### **3. Vulnerabilities and Mitigation Strategies**",
+   "### **4. Testing and Auditing Practices**",
+   "## Halborn's Smart Contract Security Audit"
+  ],
+  "sevcounts": {
+   "critical": 6,
+   "high": 1
+  }
+ },
+ {
+  "f": "t3rn-docs-main-static-halborn-sc-security-audit-pdf.md",
+  "bytes": 64117,
+  "cls": "text",
+  "nlines": 1540,
+  "head": "---\nsource_pdf: substrate-l1_findings/t3rn-docs-main-static-halborn-sc-security-audit-pdf.pdf\npages: 57\n---\n\nt3rn - Guardian\nSmart Contract Security\nAssessment\nPrepared by: Halborn\nDate of Engagement: December 11th, 2023 - December 22nd, 2023\nVisit: Halborn.com\n\n\nDOCUMENT REVISION HISTORY 4\nCONTACTS 4\n1 EXECUTIVE OVERVIEW 5\n1.1 INTRODUCTION 6\n1.2 ASSESSMENT SUMMARY 6\n1.3 TEST APPROACH & METHODOLOGY 7\n2 RISK METHODOLOGY 9\n2.1 EXPLOITABILITY 10\n2.2 IMPACT 11\n2.3 SEVERITY COEFFICIENT 13\n2.4 SCOPE 15\n3 ASSESSMENT SUMMARY & FINDINGS OVERVIEW 16\n4 FINDINGS & TECH DETAILS 17\n4.1 (HAL-01) REENTRANCY RISK IN executeLocalOrder WITH ERC677/ERC223\nTOKENS - CRITICAL(10) 19\nDescription 19\nBVSS 19",
+  "headings": [],
+  "sevcounts": {
+   "severity": 9,
+   "critical": 20,
+   "high": 23,
+   "low": 71,
+   "informational": 5,
+   "medium": 18
+  }
+ },
+ {
+  "f": "t3rn-docs-main-static-halborn-sc-security-audit-pdf.pdf",
+  "bytes": 1309645,
+  "cls": "binary-pdf",
+  "sibling_md": "t3rn-docs-main-static-halborn-sc-security-audit-pdf.md"
+ },
+ {
+  "f": "zeitgeist-audit-chaintroopers-audit-report-of-zeitgeist-pm-2022-pdf.md",
+  "bytes": 113360,
+  "cls": "text",
+  "nlines": 2909,
+  "head": "---\nsource_pdf: substrate-l1_findings/zeitgeist-audit-chaintroopers-audit-report-of-zeitgeist-pm-2022-pdf.pdf\npages: 92\n---\n\n   \n \n \n \nCompany Address \n \n \n \n \nZeitgeist \nZRML \nSecurity Assessment Report \nJune 28th, 2022 \nVersion 1.2 \nCONFIDENTIAL \n\n \n \n2 | Page \n \nTable of Contents \nTable of Contents ...................................................................................................... 2 \n1 Executive Summary ............................................................................................ 5 \n1.1 Introduction .............................................................................................. 5 \n1.2 Assessment Results .................................................................................. 6 ",
+  "headings": [
+   "#[test]",
+   "#[test]",
+   "#[test]",
+   "#[test]",
+   "#[test]",
+   "#[transactional]",
+   "#[test]",
+   "#[test]",
+   "#[test]",
+   "#[pallet::weight(T::WeightInfo::admin_move_market_to_closed())]",
+   "#[test]",
+   "#[test]",
+   "#[test]",
+   "#[test]",
+   "#[pallet::weight(T::WeightInfo::admin_move_market_to_closed())]",
+   "#[test]",
+   "#[test]"
+  ],
+  "sevcounts": {
+   "high": 21,
+   "severity": 15,
+   "medium": 17,
+   "low": 20,
+   "informational": 11,
+   "info": 8,
+   "critical": 2
+  }
+ },
+ {
+  "f": "zeitgeist-audit-chaintroopers-audit-report-of-zeitgeist-pm-2022-pdf.pdf",
+  "bytes": 2325155,
+  "cls": "binary-pdf",
+  "sibling_md": "zeitgeist-audit-chaintroopers-audit-report-of-zeitgeist-pm-2022-pdf.md"
+ },
+ {
+  "f": "zeitgeist-docs-review-checklist-md.md",
+  "bytes": 4816,
+  "cls": "text",
+  "nlines": 89,
+  "head": "- [ ] All todos contain a reference to an issue like this: `TODO(#999)`.\n- [ ] The PR links relevant issues and contains a detailed description.\n- [ ] All relevant labels were added.\n- [ ] The docstrings are up to date.\n- [ ] If the PR adds or changes extrinsics or functions used by extrinsics:\n  - [ ] The _Weight_ section in the documentation is up to date.\n  - [ ] The benchmarks are up to date.\n  - [ ] The call filters were adjusted.\n  - [ ] The extrinsics emit all the required events (see [Events](#events)\n        below).\n- [ ] The module `README.md` is up to date.\n- [ ] [docs.zeitgeist.pm] is up to date.\n- [ ] `docs/changelog_for_devs.md` is up to date, specifically:\n  - [ ] Changes relevant to the Frontend Team (extrinsics changed, new\n        functions) are mentioned here.\n  - [ ] All new events are explained so they can easily be integrated into the\n        indexer.\n  - [ ] Breaki",
+  "headings": [
+   "## Events"
+  ],
+  "sevcounts": {
+   "high": 2,
+   "low": 1,
+   "info": 2
+  }
+ },
+ {
+  "f": "zenlink-peckshield.md",
+  "bytes": 31837,
+  "cls": "text",
+  "nlines": 652,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/zenlink-peckshield.pdf\npages: 22\n---\n\nPublic\nSECURITY AUDIT REPORT\nfor\nZenlink Stable AMM & Swap Router\nPrepared By: Xiaomi Huang\nPeckShield\nAugust 24, 2022\n1/22 PeckShield Audit Report #: 2022-294\n\nPublic\nDocument Properties\nClient Zenlink\nTitle Security Audit Report\nTarget Zenlink Stable AMM & Swap Router\nVersion 1.0\nAuthor Xiaotao Wu\nAuditors Xiaotao Wu, Xuxian Jiang\nReviewed by Xiaomi Huang\nApproved by Xuxian Jiang\nClassification Public\nVersion Info\nVersion Date Author(s) Description\n1.0 August 24, 2022 Xiaotao Wu Final Release\n1.0-rc August 1, 2022 Xiaotao Wu Release Candidate #1\nContact",
+  "headings": [],
+  "sevcounts": {
+   "info": 1,
+   "severity": 13,
+   "high": 12,
+   "critical": 4,
+   "medium": 11,
+   "low": 18,
+   "informational": 1
+  }
+ },
+ {
+  "f": "zenlink-slowmist-bifrost.md",
+  "bytes": 18036,
+  "cls": "text",
+  "nlines": 500,
+  "head": "---\nsource_pdf: reports/l1-audits/substrate/zenlink-slowmist-bifrost.pdf\npages: 20\n---\n\n0\n\n\nTable Of Contents\n1 Executive Summary\n2 Audit Methodology\n3 Project Overview\n3.1 Project Introduction\n3.2 Coverage\n3.3 Vulnerability Information\n4 Findings\n4.1 Visibility Description\n4.2 Vulnerability Summary\n5 Audit Result\n6 Statement\n1\n\n\n1 Executive Summary\nOn 2021.11.15, the SlowMist security team received the Bifrost team's security audit application for Bifrost,\ndeveloped the audit plan according to the agreement of both parties and the characteristics of the project, and \ufb01nally\nissued the security audit report.\nThe SlowMist security team adopts the strategy of \"white box\" to conduct a complete security test on the project in\nthe way closest to the real attack.\nThe test method information:",
+  "headings": [],
+  "sevcounts": {
+   "severity": 5,
+   "critical": 3,
+   "high": 6,
+   "medium": 3,
+   "low": 7
+  }
+ }
+]

@@ -1,0 +1,230 @@
+[
+ {
+  "file": "phala-c4-2401.md",
+  "findings": [
+   {
+    "line": 99,
+    "severity": "high",
+    "title": "High-level considerations for vulnerabilities span the following key areas when",
+    "excerpt": "High-level considerations for vulnerabilities span the following key areas when\nconducting assessments:\n\u2022 Malicious Input Handling\n\u2022 Escalation of privileges\n\u2022 Arithmetic\n\u2022 Gas use\nSummary\nScope\nSeverity Criteria\nPhat Contract Runtime https://code4rena.com/reports/2024-03-phala-network#summary\n4 of 81 09/06/2024, 14:11\n\nFor more information regarding the severity criteria referenced throughout the\nsubmission review process, please refer to the documentation provided on the\nC4 website, speci\ufb01cally our section on Severity Categorization.\nSubmitted by 0xTheC0der\nAccording to the documentation (online and in-line), the availability of the\nbalance_of(\u2026) method (see code below) should be any contract instead of\nsystem only which is caused by the present ensure_system check.\nThe ensure_system(\u2026) method returns a BadOrigin error in case the caller/\norigin is not the system contract."
+   },
+   {
+    "line": 120,
+    "severity": "medium",
+    "title": "Medium Risk Findings (4)",
+    "excerpt": "Medium Risk Findings (4)\n[M-01] Limited availability of balance_of(...) method\nfnbalance_of(\n    &self,\n    account: ext::AccountId,\n) -> Result<(pink::Balance, pink::Balance), Self::Error> {\nself.ensure_system()?;    // @audit Availability should be 'any contra\nlet account: AccountId32 = account.convert_to();\nlet total = crate::runtime::Balances::total_balance(&account);\nlet free = crate::runtime::Balances::free_balance(&account);\n    Ok((total, free))\n}\nfnensure_system(&self) -> Result<(), DispatchError> {\nlet contract: AccountId32 = self.address.convert_to();\nif Some(contract) != PalletPink::system_contract() {\nreturn Err(DispatchError::BadOrigin);\n    }\n    Ok(())\nPhat Contract Runtime https://code4rena.com/reports/2024-03-phala-network#summary\n5 of 81 09/06/2024, 14:11\n\nThe availability of the balance_of(\u2026) method is limited to the system contract\ninstead of being accessible to anyone. Therefore, user contracts relying on this\nmethod will inevitably fail.\nFor comparison:\nThe import_latest_system_code(...) method has consistent system only\navailability according to the implementation and documentation.\nPlease add the test case below to phala-blockchain/crates/pink/\nruntime/test"
+   },
+   {
+    "line": 348,
+    "severity": "medium",
+    "title": "Medium risk.",
+    "excerpt": "Medium risk.\nzhaojie (warden) commented:\nAlthough the user cannot query the cached data directly, the user can\nquery it indirectly through the contract. The cache stores o\ufb00-chain data,\nwhich can also cause problems if it is recovered.\nPhat Contract Runtime https://code4rena.com/reports/2024-03-phala-network#summary\n13 of 81 09/06/2024, 14:11\n\nFor example, price data - the attacker lets the expired cache recover, there\nmay be 2 di\ufb00erent prices, which will lead to price manipulation. The report\nsays that storing xxxx in the cache is just an assumption.\nSeverity is determined by the judge, and I think it should at least remain"
+   },
+   {
+    "line": 360,
+    "severity": "medium",
+    "title": "Medium.",
+    "excerpt": "Medium.\nDadeKuma (warden) commented:\nThe set_expire function is never called inside the audit repository, nor in\nthe main Phala repository, and the only proof of how it will be used is inside\nthe docs in the \ufb01le itself, which points to o\ufb00-chain computations.\nUsing this cache to store on-chain data would be a misuse and a user error\n(and I don\u2019t think it would even make sense as the data is volatile/\nincongruent between the workers). This is also con\ufb01rmed by the Sponsor in\nthe comment above.\nOf course, the Judge will decide the \ufb01nal severity. I was just adding some\ndetails that might have been missed in the initial submission.\nEDIT:set_expire is actually called, GitHub search is broken; see\ncomment below. My point on docs/normal usage stands.\nzhaojie (warden) commented:\n@DadeKuma - You should search for set_expiration.\nhttps:/ /github.com/code-423n4/2024-03-phala-network/blob/\npubfnset_expiration(contract: &[u8], key: &[u8], expiration: \nwith_global_cache(|cache| cache.set_expire(contract.into\n}\nPhat Contract Runtime https://code4rena.com/reports/2024-03-phala-network#summary\n14 of 81 09/06/2024, 14:11\n\na01\ufb00be992560d8d0f17deadfb9b9a2bed38377e/phala-blockchain/\ncrates/pink/chain-exte"
+   },
+   {
+    "line": 566,
+    "severity": "critical",
+    "title": "critical issues. The report highlighted below by Cryptor received the top",
+    "excerpt": "critical issues. The report highlighted below by Cryptor received the top\nscore from the judge.\nThe following wardens also submitted reports: ihtishamsudo, XDZIBECX,\n0xTheC0der, zhaojie, Bauchibred, and Daniel526.\nhttps:/ /github.com/code-423n4/2024-03-phala-network/blob/\na01\ufb00be992560d8d0f17deadfb9b9a2bed38377e/phala-blockchain/crates/"
+   },
+   {
+    "line": 572,
+    "severity": "low",
+    "title": "Low Risk and Non-Critical Issues",
+    "excerpt": "Low Risk and Non-Critical Issues\n[01] No point in using regular http request over\nbatchhttperequest\nPhat Contract Runtime https://code4rena.com/reports/2024-03-phala-network#summary\n20 of 81 09/06/2024, 14:11\n\npink/runtime/src/capi/ecall_impl.rs#L299-L300\nSince the len in batchhttprequest is not restricted to being > 1, a user can\njust use batchhttperequest over the regular httprequest as the former is\nless likely to revert due to the timeout bound being longer.\nhttps:/ /github.com/code-423n4/2024-03-phala-network/blob/\na01\ufb00be992560d8d0f17deadfb9b9a2bed38377e/phala-blockchain/crates/\npink/runtime/src/runtime/extension.rs#L336\nhttps:/ /github.com/code-423n4/2024-03-phala-network/blob/\na01\ufb00be992560d8d0f17deadfb9b9a2bed38377e/phala-blockchain/crates/\npink/runtime/src/runtime/extension.rs#L439\nThe function is_running_in_command (from the documentation) is missing\nor misnamed in the code to be is_it_in_transaction.\nhttps:/ /github.com/code-423n4/2024-03-phala-network/blob/\na01\ufb00be992560d8d0f17deadfb9b9a2bed38377e/phala-blockchain/crates/\npink/runtime/src/runtime/extension.rs#L436\nhttps:/ /github.com/code-423n4/2024-03-phala-network/blob/\na01\ufb00be992560d8d0f17deadfb9b9a2bed38377e/phala-bloc"
+   },
+   {
+    "line": 795,
+    "severity": "gas",
+    "title": "gas and storage deposit values.",
+    "excerpt": "gas and storage deposit values.\n6. check_instantiate_result: This function checks the result of a\ncontract instantiation and returns the account ID of the newly created\ncontract if the instantiation was successful.\n7. instantiate: This function instantiates a contract with the given\ncode hash, input data, salt, execution mode, and transaction\narguments.\n8. bare_call: This function calls a method on a contract with the\ngiven address, input data, execution mode, and transaction\narguments.\n9. contract_tx: This function executes a contract transaction and\nhandles gas payment and refund.\n10. Type De\ufb01nitions: The code de\ufb01nes several type aliases for the results\nof contract instantiation and execution.\nPhat Contract Runtime https://code4rena.com/reports/2024-03-phala-network#summary\n28 of 81 09/06/2024, 14:11\n\n11. Macro De\ufb01nition: The define_mask_fn macro is de\ufb01ned to\ngenerate functions for masking the lowest bits of a given number.\nThe macro is used to de\ufb01ne two functions: mask_low_bits64 and\nmask_low_bits128.\n12. Mask Functions: The mask_deposit and mask_gas functions use\nthe mask_low_bits64 and mask_low_bits128 functions to mask\nthe deposit and gas values, respectively. The mask_deposi"
+   },
+   {
+    "line": 825,
+    "severity": "gas",
+    "title": "gas consumed, gas required, and storage deposit values of a",
+    "excerpt": "gas consumed, gas required, and storage deposit values of a\ncontract execution result.\n15. Instantiation Function: The instantiate function instantiates a\nnew contract with the given code hash, input data, salt, and\nexecution mode. It also logs the instantiation result.\n16. Call Function: The bare_call function calls a method of a contract\nwith the given address, input data, execution mode, and transaction\narguments.\n17. Contract Transaction Function: The contract_tx function is a\nhelper function that pays for gas and executes a contract transaction.\nIt also refunds any remaining gas after the transaction.\n3. runtime/src/storage/mod.rs: The contract de\ufb01nes a Storage trait and\nits implementation for managing storage in the Pink runtime environment.\nIt provides methods for executing runtime code using the Storage as a\nbackend and committing changes to the underlying storage backend.\n1. Key Components:\nPhat Contract Runtime https://code4rena.com/reports/2024-03-phala-network#summary\n29 of 81 09/06/2024, 14:11\n\n2. Storage Trait: De\ufb01nes methods for committing transactions and\nexecuting runtime code.\n3. Storage Implementation: Implements the Storage trait using a\nprovided storage backend"
+   },
+   {
+    "line": 939,
+    "severity": "gas",
+    "title": "gas price, deposit per byte, deposit per item, treasury account,",
+    "excerpt": "gas price, deposit per byte, deposit per item, treasury account,\nprivate key, sidevm codes, system contract address, next event block\nnumber, and last event block hash. They can also use the pallet to\nmanage gas payments and refunds.\n13. Additional Notes:\n14. The pallet implements the AddressGenerator trait from the\npallet-contracts crate, which allows it to generate contract\naddresses.\n15. The pallet uses the convert trait to convert between weight and\nbalance.\n6. runtime/src/capi/mod.rs: This contract is protected area in the memory\nthat isolates sensitive data and code from Phala Network.\n1. Imports: The code starts with importing necessary modules and\nlibraries. pink_capi::v1 is the API used for interaction between the\nsecure enclave and the untrusted part of the application.\nphala_sanitized_logger is used for logging.\n2. Entry Point (__pink_runtime_init): This is the entry point of the\nruntime. It initializes the runtime and \ufb01lls the ecalls table. It takes a\ncon\ufb01guration pointer and an ecalls pointer as arguments. It checks if\nthe ocalls (Outside Calls) function can be set correctly and if the\necalls pointer is not null. If either check fails, it logs an error and\nreturns -1. "
+   },
+   {
+    "line": 2408,
+    "severity": "critical",
+    "title": "critical components like key management and extensions execution.",
+    "excerpt": "critical components like key management and extensions execution.\n\u2022 Fuzz testing: Automated fuzzing of inputs and edge cases to detect\nvulnerabilities during development and upgrades.\n\u2022 Inactivity purging: Automatically purge unclaimed assets, expired locks\nand stale data as per con\ufb01gured retention policy.\n\u2022 Memory safety: Link-time optimization, dynamic checks ensure bounded\nmemory access preventing over\ufb02ows/under\ufb02ows.\nThe unique aspect of this code is that it implements a custom runtime called\nPinkRuntime that includes several pallets such as frame_system,\npallet_timestamp, pallet_balances,\npallet_insecure_randomness_collective_flip, pallet_contracts,\nand pallet_pink.\nThe pallet_pink pallet is particularly interesting as it provides functionality\nspeci\ufb01c to the Pink Network, such as managing cluster-wide con\ufb01guration\nand resources, including gas price, deposit per byte, deposit per item,\ntreasury account, private key, sidevm codes, system contract address, next\nevent block number, and last event block hash.\nThe code also implements the AddressGenerator trait from the pallet-\ncontracts crate, which allows it to generate contract addresses. Additionally,\nthe code uses the convert t"
+   }
+  ]
+ },
+ {
+  "file": "chainflip-backend-audits-chainflip-backend-zellic-audit-report-pdf.md",
+  "findings": [
+   {
+    "line": 766,
+    "severity": "gas",
+    "title": "gas-equivalent)cost.",
+    "excerpt": "gas-equivalent)cost.\nItalsoobservesandactsoneventsoriginatingfromthestatechain;theseeventscanbecatego-\nrizedintwobroadcategories:\n\u2022 Keymanagement\u2014eventsthatrequiretohandlekeygen,signing, orkeyhandover\n(thelatterisonlyapplicabletoBTC)\n\u2022 Transactionbroadcast\u2014eventsthatrequestatransactiontobebroadcasttoanex-\nternalchain\nAdditionally,theengineprovidesahealth-checkendpointandanendpointthatprovidesvarious\nactivitymetrics.\nFinally,theengineisresponsibleformonitoringthestatechaintohandlemulti-sigceremonies;\nitalsohasacomponentthathandlespeer-to-peercommunicationwithotherengineinstances.\nThesepartsofthecodewerenotpartofthescopeofthisaudit.\nWitnessing and prewitnessing external events\nTheenginestartsseparatethreadsthatlistenforexternaleventshappeningonsupportedchains\n(BTC,ETH,andPolkadot)andthatarerelevanttoChainflipoperation(i.e.,filteringforeventsthat\nonlyinvolvesupportedassets).\nExternaleventsareactedontwice; areal-timestreamisprocessedtosubmitprewitnessex-\ntrinsicstothestatechain. Theseextrinsicsarerecordedbythestatechainandcauseanevent\ntobeemitted(whichcaninturnbeobservedbyothernodesmonitoringthestatechain). How-\never,prewitnessesdonotcontributetoformingtheconsensusofwhateventsoccurredo"
+   }
+  ]
+ },
+ {
+  "file": "publications-audit-reports-peckshield-audit-report-zenlink-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 99,
+    "severity": "high",
+    "title": "High Critical High Medium",
+    "excerpt": "High Critical High Medium"
+   },
+   {
+    "line": 100,
+    "severity": "medium",
+    "title": "Medium High Medium Low",
+    "excerpt": "Medium High Medium Low"
+   },
+   {
+    "line": 101,
+    "severity": "low",
+    "title": "Low Medium Low Low",
+    "excerpt": "Low Medium Low Low"
+   },
+   {
+    "line": 102,
+    "severity": "high",
+    "title": "High Medium Low",
+    "excerpt": "High Medium Low\nLikelihood\n1.3 Methodology\nTo standardize the evaluation, we de\ufb01ne the following terminology based on OWASP Risk Rating\nMethodology [9]:\n\u2022 Likelihood represents how likely a particular vulnerability is to be uncovered and exploited in\nthe wild;\n\u2022 Impact measures the technical loss and business damage of a successful attack;\n\u2022 Severity demonstrates the overall criticality of the risk.\n5/20 PeckShield Audit Report #: 2022-195\n\nPublic\nLikelihood and impact are categorized into three ratings:H, M and L, i.e., high, medium and"
+   },
+   {
+    "line": 115,
+    "severity": "low",
+    "title": "low respectively. Severity is determined by likelihood and impact and can be classi\ufb01ed into four",
+    "excerpt": "low respectively. Severity is determined by likelihood and impact and can be classi\ufb01ed into four\ncategories accordingly, i.e.,Critical, High, Medium, Low shown in Table 1.2.\nTo evaluate the risk, we go through a list of check items and each would be labeled with\na severity category. For one check item, if our tool or analysis does not identify any issue, the\ncontract is considered safe regarding the check item. For any discovered issue, we might further\ndeploy contracts on our private testnet and run tests to con\ufb01rm the \ufb01ndings. If necessary, we would\nadditionally build a PoC to demonstrate the possibility of exploitation. The concrete list of check\nitems is shown in Table 1.3.\nIn particular, we perform the audit according to the following procedure:\n\u2022 Basic Coding Bugs: We \ufb01rst statically analyze given smart contracts with our proprietary static\ncode analyzer for known coding bugs, and then manually verify (reject or con\ufb01rm) all the issues\nfound by our tool.\n\u2022 Semantic Consistency Checks: We then manually check the logic of implemented smart con-\ntracts and compare with the description in the white paper.\n\u2022 Advanced DeFi Scrutiny: We further review business logics, examine system "
+   },
+   {
+    "line": 247,
+    "severity": "critical",
+    "title": "Critical 0",
+    "excerpt": "Critical 0"
+   },
+   {
+    "line": 248,
+    "severity": "high",
+    "title": "High 0",
+    "excerpt": "High 0"
+   },
+   {
+    "line": 249,
+    "severity": "medium",
+    "title": "Medium 1",
+    "excerpt": "Medium 1"
+   },
+   {
+    "line": 250,
+    "severity": "low",
+    "title": "Low 2",
+    "excerpt": "Low 2"
+   },
+   {
+    "line": 251,
+    "severity": "informational",
+    "title": "Informational 1",
+    "excerpt": "Informational 1\nTotal 4\nWe have so far identi\ufb01ed a list of potential issues: some of them involve subtle corner cases\nthat might not be previously thought of, while others refer to unusual interactions among multiple\ncontracts. For each uncovered issue, we have therefore developed test cases for reasoning, reproduc-\ntion, and/or veri\ufb01cation. After further analysis and internal discussion, we determined a few issues\nof varying severities that need to be brought up and paid more attention to, which are categorized in\nthe above table. More information can be found in the next subsection, and the detailed discussions\nof each of them are in Section 3.\n9/20 PeckShield Audit Report #: 2022-195\n\nPublic\n2.2 Key Findings\nOverall, these smart contracts are well-designed and engineered, though the implementation can\nbe improved by resolving the identi\ufb01ed issues (shown in Table 2.1), including1 medium-severity\nvulnerability, 2 low-severity vulnerabilities, and1 informational recommendation.\nTable 2.1: Key Zenlink Hybrid AMM Audit Findings\nID Severity Title Category Status\nPVE-001 Informational Consistent Use of whenNotPaused Mod-\ni\ufb01er in StableSwap\nCoding Practices Resolved\nPVE-002 Low Implicit"
+   },
+   {
+    "line": 336,
+    "severity": "informational",
+    "title": "Recommendation Apply the whenNotPaused modi\ufb01er consistently inStableSwap",
+    "excerpt": "Recommendation Apply the whenNotPaused modi\ufb01er consistently inStableSwap\nStatus This issue has been resolved as the team ensures the liquidity providers always have\nthe choice to remove the liquidity even when the protocol is paused. The other two functions are\ndesigned to have thewhenNotPaused modi\ufb01er with the purpose of mitigating possible arbitrage from\nimbalanced liquidity removal.\n3.2 Implicit Assumption Enforcement In AddLiquidity()\n\u2022 ID: PVE-002\n\u2022 Severity: Low\n\u2022 Likelihood: Low\n\u2022 Impact: Low\n\u2022 Target: Router\n\u2022 Category: Coding Practices [6]\n\u2022 CWE subcategory: CWE-628 [4]\nDescription\nIn the Zenlink Hybrid AMM protocol, the addLiquidity() routine (see the code snippet below) is pro-\nvided to add amount0Desired amount of token0 and amount1Desired amount of token1 into the pool\nas liquidity via the internal_addLiquidity() routine. To elaborate, we show below the related code\nsnippet.\n368 fu nc ti on a d d L i q u i d i t y (\n369 address token0 ,\n370 address token1 ,\n371 uint256 amount0Desired ,\n372 uint256 amount1Desired ,\n373 uint256 amount0Min ,\n374 uint256 amount1Min ,\n375 address to ,\n12/20 PeckShield Audit Report #: 2022-195\n\nPublic\n376 uint256 dea dl in e\n377 )\n378 public"
+   },
+   {
+    "line": 447,
+    "severity": "informational",
+    "title": "Recommendation Make the requirement ofamount1Desired >= amount1Min and amount0Desired",
+    "excerpt": "Recommendation Make the requirement ofamount1Desired >= amount1Min and amount0Desired\n>= amount0Min explicitly in theaddLiquidity() function.\nStatus The issue has been con\ufb01rmed and the team plans to address it in the next release.\n14/20 PeckShield Audit Report #: 2022-195\n\nPublic\n3.3 Trust Issue of Admin Keys\n\u2022 ID: PVE-003\n\u2022 Severity: Medium\n\u2022 Likelihood: Low\n\u2022 Impact: High\n\u2022 Target: Multiple Contracts\n\u2022 Category: Security Features [5]\n\u2022 CWE subcategory: CWE-287 [3]\nDescription\nIn the Zenlink Hybrid AMM protocol, there is a special administrative account (admin). This admin\naccount plays a critical role in governing and regulating the protocol-wide operations (e.g., con\ufb01gure\nparameters and execute privileged operations). They also have the privilege to control or govern the\n\ufb02ow of assets managed by this protocol. Our analysis shows that this privileged account needs to be\nscrutinized. In the following, we examine their related privileged accesses in current protocol.\n74 fu nc ti on setFee ( uint256 newSwapFee , uint256 n e w A d m i n F e e ) ex ter na l o n l y A d m i n {\n75 require ( n e w S w a p F e e <= MAX_SWAP_FEE , \" > m a x S w a p F e e \" ) ;\n76 require ( n e w A d m i n"
+   },
+   {
+    "line": 509,
+    "severity": "informational",
+    "title": "Recommendation Promptly transfer the administrative privileges to the intended DAO-like",
+    "excerpt": "Recommendation Promptly transfer the administrative privileges to the intended DAO-like\ngovernance contract. And activate the normal on-chain community-based governance life-cycle and\nensure the intended trustless nature and high-quality distributed governance.\nStatus The issue has been mitigated by the team by having a multi-sig account as theadmin.\n3.4 Revisited removeLiquidityImbalance Logic in\nStableSwapStorage\n\u2022 ID: PVE-004\n\u2022 Severity: Low\n\u2022 Likelihood: Low\n\u2022 Impact: Low\n\u2022 Target: StableSwapStorage\n\u2022 Category: Numeric Errors [7]\n\u2022 CWE subcategory: CWE-190 [2]\nDescription\nSafeMath is a widely-used Solidity math library that is designed to support safemath operations by\npreventing common over\ufb02ow or under\ufb02ow issues when working withuint256 operands. While it\nindeed blocks common over\ufb02ow or under\ufb02ow issues, the lack offloat support in Solidity may\nintroduce another subtle, but troublesome issue: precision loss. In this section, we examine one\npossible precision loss source that stems from the mixed uses when both multiplication (mul) and\ndivision (div) are involved.\nIn particular, we use the StableSwapStorage::removeLiquidityImbalance() as an example. This\nroutine is used to remov"
+   },
+   {
+    "line": 581,
+    "severity": "informational",
+    "title": "Recommendation Revise the above calculations to better mitigate possible precision loss.",
+    "excerpt": "Recommendation Revise the above calculations to better mitigate possible precision loss.\nStatus This issue has been \ufb01xed in the following commit:ee3c510.\n18/20 PeckShield Audit Report #: 2022-195\n\nPublic\n4 | Conclusion\nIn this audit, we have analyzed the design and implementation of theZenlink Hybrid AMM protocol,\nwhich is the underlying uni\ufb01ed and universal cross-chainDEX protocol and enables parachains to\nquickly have DEX functionality and share liquidity with otherparachains. The current code base is\nwell structured and neatly organized. Those identi\ufb01ed issues are promptly con\ufb01rmed and addressed.\nMeanwhile, we need to emphasize that smart contracts as a whole are still in an early, but exciting\nstage of development. To improve this report, we greatly appreciate any constructive feedbacks or\nsuggestions, on our methodology, audit \ufb01ndings, or potential gaps in scope/coverage.\n19/20 PeckShield Audit Report #: 2022-195\n\nPublic\nReferences\n[1] MITRE. CWE-1126: Declaration of Variable with Unnecessarily Wide Scope. https://cwe.\nmitre.org/data/de\ufb01nitions/1126.html.\n[2] MITRE. CWE-190: Integer Over\ufb02ow or Wraparound. https://cwe.mitre.org/data/de\ufb01nitions/\n190.html.\n[3] MITRE. CWE-287: Imp"
+   }
+  ]
+ },
+ {
+  "file": "publications-thorchain-bifrost-utxo-client-zellic-audit-report-pdf.md",
+  "findings": [
+   {
+    "line": 129,
+    "severity": "informational",
+    "title": "Informational.",
+    "excerpt": "Informational.\nZellic \u00a9 2025 \u2190 Back to Contents Page 6 of 16\n\nTHORChain Bifrost UTXO Client Application Security Assessment January 27, 2025\nZellic organizes its reports such that the most important findings come first in the document, rather\nthan being strictly ordered on impact alone. Thus, we may sometimes emphasize an \"Informational\"\nfinding higher than a \"Low\" finding. The key distinction is that although certain findings may have the\nsame impact rating, their importance may differ. This varies based on various soft factors, like our\nclients\u2019 threat models, their business needs, and so on. We aim to provide useful and actionable\nadvice to our partners considering their long-term goals, rather than a simple list of security issues\nat present.\nFinally, Zellic provides a list of miscellaneous observations that do not have security impact or are\nnot directly related to the scoped modules itself. These observations \u2014 found in the Discussion\n(3. \u2197) section of the document \u2014 may include suggestions for improving the codebase, or general\nrecommendations, but do not necessarily convey that we suggest a code change.\nZellic \u00a9 2025 \u2190 Back to Contents Page 7 of 16\n\nTHORChain Bifrost UTXO C"
+   },
+   {
+    "line": 245,
+    "severity": "gas",
+    "title": "Gas Gas `json:\"gas\"`",
+    "excerpt": "Gas Gas `json:\"gas\"`\nMemo string `json:\"memo\"`\n}\nThe Bifrost module also maintains an LRU cache to avoid resigning the same transaction.\nUTXO Chain Client\nThe UTXO chain client allows the Bifrost module to create a new client throughNewClient:\nfunc NewClient(\nthorKeys *thorclient.Keys,\ncfg config.BifrostChainConfiguration,\nserver *gotss.TssServer,\nbridge thorclient.ThorchainBridge,\nm *metrics.Metrics,\n) ( *Client, error) {\n// verify the chain is supported\nsupported := map[common.Chain]bool{\ncommon.DOGEChain: true,\ncommon.BCHChain: true,\ncommon.LTCChain: true,\ncommon.BTCChain: true,\n}\nif !supported[cfg.ChainID] {\nreturn nil, fmt. Errorf(\"unsupported utxo chain: %s\", cfg.ChainID)\n}\n// create rpc client\nrpcClient, err := rpc.NewClient(cfg.RPCHost, cfg.UserName, cfg.Password,\ncfg.MaxRPCRetries, logger)\n// node key setup\ntssKeysign, err := tss.NewKeySign(server, bridge)\nIt allows the creation of a chain client for any of the supported UTXO chains. This also sets up the\nRPC connection with the respective external chain to scan and extract transactions, and it registers\nthe TSS key to sign a transaction for the Asgard vault assigned to the node.\nThe client parses the raw transaction to ch"
+   },
+   {
+    "line": 309,
+    "severity": "gas",
+    "title": "Gas: gas,",
+    "excerpt": "Gas: gas,\n}\nInbound transactions are \u201cconf-counted\u201d by the chain client and sent to THORChain along with the\nrequired confirmation count. THORChain does not process these transactions until the required\nblock height is reached (i.e., for a required confirmation count of one, it will immediately process the\ntransaction). The UTXO chain client computes the required confirmations in getBlockRequired-\nConfirmation:\n// getBlockRequiredConfirmation find out how many confirmation the given txIn\nneed to have before it can be send to THORChain\nfunc (c *Client) getBlockRequiredConfirmation(txIn types.TxIn, height int64)\n(int64, error) {\ntotalTxValue := txIn.GetTotalTransactionValue(c.cfg.ChainID.GetGasAsset(),\nc.asgardAddresses)\ntotalFeeAndSubsidy, err := c.getCoinbaseValue(height)\nZellic \u00a9 2025 \u2190 Back to Contents Page 13 of 16\n\nTHORChain Bifrost UTXO Client Application Security Assessment January 27, 2025\nif err != nil {\nc.log.Err(err).Msgf(\"fail to get coinbase value\" )\n}\nconfMul, err := utxo.GetConfMulBasisPoint(c.GetChain().String(), c.bridge)\n[...]\nconfValue := common.GetUncappedShare(confMul,\ncosmos.NewUint(constants.MaxBasisPts),\ncosmos.SafeUintFromInt64(totalFeeAndSubsidy))\nconfirm :"
+   }
+  ]
+ },
+ {
+  "file": "parallel-halborn-loans.md",
+  "findings": [
+   {
+    "line": 29,
+    "severity": "informational",
+    "title": "Recommendation 14",
+    "excerpt": "Recommendation 14\nRemediation Plan 14\n3.2 (HAL-02) MISSING ZERO CHECK - INFORMATIONAL 15\nDescription 15\nCode Location 15\nRisk Level 16"
+   },
+   {
+    "line": 35,
+    "severity": "informational",
+    "title": "Recommendation 16",
+    "excerpt": "Recommendation 16\nRemediation Plan 16\n1\n\nDOCUMENT REVISION HISTORY\nVERSION MODIFICATION DATE AUTHOR\n0.1 Document Creation 04/29/2022 Hossam Mohamed\n0.2 Document Edits 05/28/2022 Hossam Mohamed\n0.3 Document Edits 06/03/2022 Hossam Mohamed\n0.4 Draft Review 06/03/2022 Timur Guvenkaya\n0.5 Draft Final Review 06/03/2022 Gabi Urrutia\n1.0 Remediation Plan 06/13/2022 Hossam Mohamed\n1.1 Remediation Plan Edits 06/14/2022 Timur Guvenkaya\n1.2 Remediation Plan Review 06/17/2022 Gabi Urrutia\n2\n\nCONTACTS\nCONTACT COMPANY EMAIL\nRob Behnke Halborn Rob.Behnke@halborn.com\nSteven Walbroehl Halborn Steven.Walbroehl@halborn.com\nGabi Urrutia Halborn Gabi.Urrutia@halborn.com\nTimur Guvenkaya Halborn Timur.Guvenkaya@halborn.com\nHossam Mohamed Halborn hossam.mohamed@halborn.com\nThiago Mathias Halborn Thiago.Mathias@halborn.com\n3\n\n- -\n4\n\n5\nEXECUTIVE OVERVIEW\n\n1.1 INTRODUCTION\nParallel.fi engaged Halborn to conduct a security assessment on their\nMoney Market (loans) Substrate pallet on April 29th, 2022 and ending\nMay 28th, 2022. Parallel.fi is the decentralized platform that empowers\neveryone access to financial services built on Substrate.\n1.2 AUDIT SUMMARY\nThe team at Halborn was provided 3 weeks for the engag"
+   },
+   {
+    "line": 228,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nA validation routine should be added inside the update_market function\nto enforce that the values of close_factor are within the expected range.\nRemediation Plan:\nNOT APPLICABLE : The Parallel team marked the issue as not applicable, as\nthe close factor is set at 50% and non issue.\n14\nFINDINGS & TECH DETAILS\n\n3.2 (HAL-02) MISSING ZERO CHECK -\nINFORMATIONAL\nDescription:\nThere are no validations to check if borrow_amount is equal to zero,\nallowing to borrow zero.\nCode Location:\nListing 2: parallel/pallets/loans/src/lib.rs (Line 848)\n845 pub fn borrow (\n846 origin : OriginFor <T > ,\n847 asset_id : AssetIdOf <T > ,\n848 #[ pallet :: compact ] borrow_amount : BalanceOf <T > ,\n849 ) -> D i s p a t c h R e s u l t W i t h P o s t I n f o{\n850 let who = ensure_signed ( origin ) ?;\n851 Self :: e n s u r e _ a c t i v e _ m a r k e t( asset_id ) ?;\n852\n853 Self :: borrow_allowed ( asset_id , & who , borrow_amount ) ?;\n854 Self :: accrue_interest ( asset_id ) ?;\n855\n856 // update borrow index after accureInterest .\n857 Self :: u p d a t e _ r e w a r d _ b o r r o w _ i n d e x( asset_id ) ?;\n858 Self :: d i s t r i b u t e _ b o r r o w e r _ r e w a r d( asset_id , & who ) ?;"
+   },
+   {
+    "line": 290,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nImplement validation to check if the value of borrow_amount is equal to\nzero.\nRemediation Plan:\nNOT APPLICABLE : The Parallel team marked the issue as not applicable, as\nthey don\u2019t allow 0 borrow from front end.\n16\nFINDINGS & TECH DETAILS\n\nTHANK YOU FOR CHOOSING"
+   }
+  ]
+ },
+ {
+  "file": "zeitgeist-docs-review-checklist-md.md",
+  "findings": [
+   {
+    "line": 64,
+    "severity": "high",
+    "title": "high-level events are:",
+    "excerpt": "high-level events are:\n\n- `SwapExactAmountIn` (contextualizes a couple of low-level events like\n  `Transfer`)\n- `PoolActive` (doesn't add context, but describes a storage change of a pool\n  structure)\n\nFurthermore, these modifications need to be detailed by specifying either a diff\nor the new storage content, unless the change is absolutely clear from the\ncontext. For example, `SwapExactAmountIn` specifies the balance changes that the\naccounts suffer, but `PoolActive` only provides the id of the pool, _not_ the\nnew status (`Active`), which is clear from the context. Information that is\nimplicitly already available to the indexer **may** be provided, but this is not\nnecessary. For example, the `MarketRejected(market_id, reason)` event not only\nspecifies that the market with `market_id` was rejected and for what `reason`,\nbut also that the advisory bond and oracle bond are settled, but it doesn't\ninclude the info how much the oracle bond actually was.\n\nAdditional info (similar to the remark emitted by\n[`remark_with_event`](https://github.com/paritytech/substrate/blob/6a504b063cf66351b6e352ef18cc18d49146487b/frame/system/src/lib.rs#L488-L499))\n**may** be added to the event. For exampl"
+   }
+  ]
+ }
+]
