@@ -1,0 +1,96 @@
+---
+# Core Classification
+protocol: Maple Labs
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 18098
+audit_firm: TrailOfBits
+contest_link: https://github.com/trailofbits/publications/blob/master/reviews/MapleFinance.pdf
+source_link: https://github.com/trailofbits/publications/blob/master/reviews/MapleFinance.pdf
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 3
+finders:
+  - Paweł Płatek
+  - Maximilian Krüger
+  - Michael Colburn
+---
+
+## Vulnerability Title
+
+Lack of user-controlled limits for input amount in Liquidator.liquidatePortion
+
+### Overview
+
+
+The Liquidator contract is a smart contract that enables users to liquidate their assets. The liquidatePortion function of the Liquidator contract computes the amount of funds that will be transferred from the caller to the liquidator contract. This computation uses an asset price retrieved from an oracle. However, there is no guarantee that the amount paid by the caller will correspond to the current market price, as a transaction that updates the price feed could be mined before the call to liquidatePortion. This could be especially problematic for contracts that call the function, as they cannot predict the return value of the oracle. 
+
+To address this issue, Trail of Bits recommends adding an upper limit to the amount paid by the caller, which would enable the caller to explicitly state their assumptions about the execution of the contract and to avoid paying too much. This is a best practice commonly employed by large DeFi protocols such as Uniswap. To implement this, the contract should introduce a maxReturnAmount parameter and add a require statement to enforce that parameter. Additionally, it is recommended that the caller always be allowed to control the amount of a transfer, especially for transfer amounts that depend on factors that can change between transactions. This should include enabling the caller to add a lower limit for a transfer from a contract and an upper limit for a transfer of the caller’s funds to a contract.
+
+### Original Finding Content
+
+## Target: Liquidator.sol
+
+## Description
+
+The `liquidatePortion` function of the `Liquidator` contract computes the amount of funds that will be transferred from the caller to the liquidator contract. The computation uses an asset price retrieved from an oracle.
+
+There is no guarantee that the amount paid by the caller will correspond to the current market price, as a transaction that updates the price feed could be mined before the call to `liquidatePortion` in the liquidator contract. EOAs that call the function cannot predict the return value of the oracle. If the caller is a contract, though, it can check the return value, with some effort.
+
+Adding an upper limit to the amount paid by the caller would enable the caller to explicitly state his or her assumptions about the execution of the contract and to avoid paying too much. It would also provide additional protection against the misreporting of oracle prices. Since such a scenario is unlikely, we set the difficulty level of this finding to high. Using caller-controlled limits for the amount of a transfer is a best practice commonly employed by large DeFi protocols such as Uniswap.
+
+## Exploit Scenario
+
+Alice calls `liquidatePortion` in the liquidator contract. Due to an oracle malfunction, the amount of her transfer to the liquidator contract is much higher than the amount she would pay for the collateral on another market.
+
+## Recommendations
+
+**Short term:** Introduce a `maxReturnAmount` parameter and add a `require` statement—`require(returnAmount <= maxReturnAmount)`—to enforce that parameter.
+
+**Long term:** Always allow the caller to control the amount of a transfer. This is especially important for transfer amounts that depend on factors that can change between transactions. Enable the caller to add a lower limit for a transfer from a contract and an upper limit for a transfer of the caller’s funds to a contract.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | TrailOfBits |
+| Protocol | Maple Labs |
+| Report Date | N/A |
+| Finders | Paweł Płatek, Maximilian Krüger, Michael Colburn |
+
+### Source Links
+
+- **Source**: https://github.com/trailofbits/publications/blob/master/reviews/MapleFinance.pdf
+- **GitHub**: N/A
+- **Contest**: https://github.com/trailofbits/publications/blob/master/reviews/MapleFinance.pdf
+
+### Keywords for Search
+
+`vulnerability`
+

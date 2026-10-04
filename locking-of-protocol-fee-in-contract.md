@@ -1,0 +1,110 @@
+---
+# Core Classification
+protocol: Entertainmint
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 48440
+audit_firm: OtterSec
+contest_link: https://www.entertainmint.com/
+source_link: https://www.entertainmint.com/
+github_link: github.com/entertainmintlive/emint.
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 3
+finders:
+  - Akash Gurugunti
+  - Robert Chen
+  - OtterSec
+---
+
+## Vulnerability Title
+
+Locking Of Protocol Fee In Contract
+
+### Overview
+
+
+The bug report is about an issue in the code for a function called "close" in a file called "Raises.sol". This function is used by the project owner to close a fundraising campaign and change its state to "Funded" if it has reached its goal amount. However, there is a problem where if the state is changed from "Active" to "Funded", the protocol fee collected from the campaign will be stuck in the contract and cannot be retrieved. This means that the platform will not receive the protocol fee that it is supposed to. 
+
+To fix this issue, the report suggests adding the protocol fee to the global fee balance before changing the state to "Funded". This will ensure that the fee is properly collected and can be retrieved later. The bug has been fixed by adding this change to the code.
+
+### Original Finding Content
+
+## Documentation for Raises Contract
+
+In `Raises.sol`, the `close` function is called by the project owner to close a raise and change its state to `RaiseState.Funded` if it has reached its goal amount. If a raise’s state is changed from `RaiseState.Active` to `RaiseState.Funded`, the protocol fee amount from that raise should be stored in the global fee balance. Otherwise, the protocol fee collected from the raise will be stuck in the contract balance and cannot be retrieved.
+
+## Relevant Code Snippet
+
+```solidity
+src/Raises.sol SOLIDITY
+183 /// @inheritdoc IRaises
+184 function close(uint32 projectId, uint32 raiseId) external override
+,→ onlyCreators whenNotPaused {
+185 // Checks
+186 Raise storage raise = _getRaise(projectId, raiseId);
+187 if (raise.state != RaiseState.Active) revert RaiseInactive();
+188 if (raise.raised < raise.goal) revert RaiseGoalNotMet();
+189
+190 // Effects
+191 emit CloseRaise(projectId, raiseId, raise.state = RaiseState.Funded);
+192 }
+```
+
+## Proof of Concept
+
+1. A project owner creates a raise and closes the raise after it has reached its goal.
+2. Now, if the protocol tries to collect the protocol fee for that raise, no amount is transferred, since the `raise.fees` is not added to `fees[raise.currency]`.
+
+## Remediation
+
+A simple fix for this is to add the `raise.fees` value to `fees[raise.currency]` before changing the state to `RaiseState.Funded`.
+
+## Patch
+
+Fixed by adding raise fees to global fees in commit `689b6f2`.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | OtterSec |
+| Protocol | Entertainmint |
+| Report Date | N/A |
+| Finders | Akash Gurugunti, Robert Chen, OtterSec |
+
+### Source Links
+
+- **Source**: https://www.entertainmint.com/
+- **GitHub**: github.com/entertainmintlive/emint.
+- **Contest**: https://www.entertainmint.com/
+
+### Keywords for Search
+
+`vulnerability`
+

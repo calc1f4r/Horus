@@ -1,0 +1,143 @@
+---
+# Core Classification
+protocol: BadgerDAO
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 2685
+audit_firm: Code4rena
+contest_link: https://code4rena.com/contests/2022-06-badger-vested-aura-contest
+source_link: https://code4rena.com/reports/2022-06-badger
+github_link: https://github.com/code-423n4/2022-06-badger-findings/issues/111
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - liquid_staking
+  - dexes
+  - bridge
+  - cdp
+  - yield
+
+# Audit Details
+report_date: unknown
+finders_count: 8
+finders:
+  - cccz
+  - scaraven
+  - berndartmueller
+  - kirk-baird
+  - dipp
+---
+
+## Vulnerability Title
+
+[M-02] Badger rewards from Hidden Hand can permanently prevent Strategy from receiving bribes
+
+### Overview
+
+
+A bug has been discovered in the Vested Aura and Badger Vaults contracts. If the contract receives rewards from the hidden hand marketplace in BADGER, it attempts to transfer the same amount of tokens twice to two different accounts. This is because the contract calls `_sendBadgerToTree()` in `MyStrategy` and again with `_processExtraToken()` in the `BasicStrategy` contract. As the strategy will not start with any BADGER tokens, the second transfer will revert, preventing any other bribes from being received.
+
+To prove this, the following steps were taken: 1) `claimBribesFromHiddenHand()` was called by the strategist; 2) multiple bribes were sent to the strategy, including BADGER; 3) the strategy received BADGER and called `_handleRewardTransfer()` which called `_sendBadgerToTree()`, sending 50 BADGER to the Badger Tree, reducing the balance to 0; 4) 50 Badger was then sent to the Vault, however the balance was 0, so the command failed and reverted; 5) no more tokens could be claimed.
+
+The bug was discovered using VS Code. The recommended mitigation steps are to change the code in the `_sendBadgerToTree()` function from `IERC20Upgradeable(BADGER).safeTransfer(BADGER_TREE, amount);` to `_processExtraToken(address(BADGER), amount);`.
+
+### Original Finding Content
+
+_Submitted by scaraven, also found by berndartmueller, cccz, dipp, GimelSec, kenzo, kirk-baird, and unforgiven_
+
+<https://github.com/Badger-Finance/vested-aura/blob/d504684e4f9b56660a9e6c6dfb839dcebac3c174/contracts/MyStrategy.sol#L428-L430>
+
+<https://github.com/Badger-Finance/badger-vaults-1.5/blob/3c96bd83e9400671256b235422f63644f1ae3d2a/contracts/BaseStrategy.sol#L351>
+
+<https://github.com/Badger-Finance/vested-aura/blob/d504684e4f9b56660a9e6c6dfb839dcebac3c174/contracts/MyStrategy.sol#L407-L408>
+
+### Impact
+
+If the contract receives rewards from the hidden hand marketplace in BADGER then the contract tries to transfer the same amount of tokens twice to two different accounts, once with `_sendBadgerToTree()` in `MyStrategy` and again with `_processExtraToken()` in the `BasicStrategy` contract. As it is very likely that the strategy will not start with any BADGER tokens, the second transfer will revert (as we are using safeTransfer). This means that `claimBribesFromHiddenHand()` will always revert preventing any other bribes from being received.
+
+### Proof of Concept
+
+1.  `claimBribesFromHiddenHand()` is called by strategist
+2.  Multiple bribes are sent to the strategy including BADGER. For example lets say 50 USDT And 50 BADGER
+3.  Strategy receives BADGER and calls `_handleRewardTransfer()` which calls `_sendBadgerToTree()`. 50 BADGER is sent to the Badger Tree so balance has dropped to 0.
+4.  50 Badger is then again sent to Vault however balance is 0 so the command fails and reverts
+5.  No more tokens can be claimed anymore
+
+### Tools Used
+
+VS Code
+
+### Recommended Mitigation Steps
+
+`_processExtraToken()` eventually sends the badger to the badger tree through the `Vault` contract. Change
+
+        function _sendBadgerToTree(uint256 amount) internal {
+            IERC20Upgradeable(BADGER).safeTransfer(BADGER_TREE, amount);
+            _processExtraToken(address(BADGER), amount);
+        }
+
+to
+
+        function _sendBadgerToTree(uint256 amount) internal {
+            _processExtraToken(address(BADGER), amount);
+        }
+
+**[Alex the Entreprenerd (BadgerDAO) confirmed and commented](https://github.com/code-423n4/2022-06-badger-findings/issues/111#issuecomment-1159591891):**
+ > Developer oversight yeah.
+
+**[shuklaayush (BadgerDAO) commented](https://github.com/code-423n4/2022-06-badger-findings/issues/111#issuecomment-1160811781):**
+ > Yeah, badger bribes can't be claimed. Not sure if I'll call it high risk but definitely an oversight.
+
+ **[jack-the-pug (judge) validated and decreased severity to Medium](https://github.com/code-423n4/2022-06-badger-findings/issues/111)** 
+
+**[Alex the Entreprenerd (BadgerDAO) commented](https://github.com/code-423n4/2022-06-badger-findings/issues/111#issuecomment-1183746419):**
+ > We mitigated by fixing the mistake.
+
+
+
+***
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | BadgerDAO |
+| Report Date | N/A |
+| Finders | cccz, scaraven, berndartmueller, kirk-baird, dipp, unforgiven, GimelSec, kenzo |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2022-06-badger
+- **GitHub**: https://github.com/code-423n4/2022-06-badger-findings/issues/111
+- **Contest**: https://code4rena.com/contests/2022-06-badger-vested-aura-contest
+
+### Keywords for Search
+
+`vulnerability`
+
