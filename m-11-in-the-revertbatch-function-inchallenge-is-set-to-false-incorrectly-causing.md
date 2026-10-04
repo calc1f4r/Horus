@@ -1,0 +1,227 @@
+---
+# Core Classification
+protocol: MorphL2
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 41883
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/207
+source_link: none
+github_link: https://github.com/sherlock-audit/2024-08-morphl2-judging/issues/220
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 4
+finders:
+  - mstpr-brainbot
+  - ulas
+  - 0xRajkumar
+  - p0wd3r
+---
+
+## Vulnerability Title
+
+M-11: In the `revertBatch` function, `inChallenge` is set to `false` incorrectly, causing challenges to continue after the protocol is paused.
+
+### Overview
+
+
+This bug report discusses a problem with the `revertBatch` function in the `morphl2` protocol. The issue is that the `inChallenge` state is set to false even if the batch that was challenged is not part of the reverted batch set. This causes ongoing challenges to be incorrectly invalidated, leading to issues when the protocol is paused. The bug can be exploited to slash the batch submitter and reward the challenger, even though there is no actual issue with the batch. The protocol team has fixed the issue in a recent update. To avoid this problem, it is recommended to use the `batchInChallenge` function to verify if a batch is actually being challenged before setting the `inChallenge` flag to false. 
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2024-08-morphl2-judging/issues/220 
+
+## Found by 
+0xRajkumar, mstpr-brainbot, p0wd3r, ulas
+### Summary
+
+An unchecked batch reversion will cause challenge invalidation for any committed batch, leading to batch rollback issues for challengers, as the isChallenged flag will reset unexpectedly.
+
+### Root Cause
+
+In the [revertBatch function](https://github.com/sherlock-audit/2024-08-morphl2/blob/main/morph/contracts/contracts/l1/rollup/Rollup.sol#L345), the `inChallenge` state is set to false even if the batch that was challenged is not part of the reverted batch set. This causes ongoing challenges to be incorrectly invalidated:
+
+```Solidity
+function revertBatch(bytes calldata _batchHeader, uint256 _count) external onlyOwner {
+            .... REDACTED FOR BREVITY ...
+            if (!challenges[_batchIndex].finished) {
+                batchChallengeReward[challenges[_batchIndex].challenger] += challenges[_batchIndex].challengeDeposit;
+                inChallenge = false;
+            }
+            .... REDACTED FOR BREVITY ...
+```
+In the above code, `if (!challenges[_batchIndex].finished)` will hold `true` for challenges that doesn't exist. If there are no challenges for a specific `_batchIndex`, then `challenges[_batchIndex].finished` will be `false` which in turn will make the `if` condition true. 
+
+This will cause `inChallenge` to be set to `false` even when there are ongoing challenges. Lets assume the following batches were commit to L1 Rollup::
+
+
+```Text
+┌────────────┐      ┌────────────┐      ┌────────────┐      ┌────────────┐
+│            │      │            │      │            │      │            │
+│ Batch 123  ├─────►│ Batch 124  ├─────►│ Batch 125  ├─────►│ Batch 126  ├
+│            │      │            │      │            │      │            │
+└────────────┘      └────────────┘      └────────────┘      └────────────┘
+
+``` 
+Challenger calls `challengeState` on batch 123. This sets `isChallenged` storage variable to true. 
+```Text
+┌────────────┐      ┌────────────┐      ┌────────────┐      ┌────────────┐
+│            │      │            │      │            │      │            │
+│ Batch 123  ├─────►│ Batch 124  ├─────►│ Batch 125  ├─────►│ Batch 126  ├
+│            │      │            │      │            │      │            │
+└────────────┘      └────────────┘      └────────────┘      └────────────┘
+      ▲
+      │
+  challenged
+
+isChallenged = true
+```
+While the challenge is ongoing owner calls `revertBatch` on Batch 125 to revert both Batch 125 and Batch 126. 
+```Text
+ ┌────────────┐      ┌────────────┐      ┌────────────┐      ┌────────────┐
+ │            │      │            │      │            │      │            │
+ │ Batch 123  ├─────►│ Batch 124  ├─────►│ Batch 125  ├─────►│ Batch 126  ├
+ │            │      │            │      │            │      │            │
+ └────────────┘      └────────────┘      └────────────┘      └────────────┘
+       ▲                                       ▲                           
+       │                                       │                           
+  challenged                             revert batch                      
+  
+  isChallenged = true
+```
+Due to the bug in the `revertBatch` function, `isChallenged` is set to `false` even though the challenged batch wasn’t in the reverted batches. 
+
+```Text
+                                                     
+    ┌────────────┐      ┌────────────┐               
+    │            │      │            │               
+    │ Batch 123  ├─────►│ Batch 124  ├               
+    │            │      │            │               
+    └────────────┘      └────────────┘               
+          ▲                                          
+          │                                          
+     challenged                                      
+     
+     isChallenged = false                                            
+```
+
+This will lead to issues when the protocol is paused. Due to the following check in the `setPause` function, the challenge will not be deleted while the protocol is paused:
+```Solidity
+function setPause(bool _status) external onlyOwner {
+            .... REDACTED FOR BREVITY ...
+            // inChallenge is set to false due to the bug in revertBatch
+             if (inChallenge) {
+                batchChallengeReward[challenges[batchChallenged].challenger] += challenges[batchChallenged]
+                    .challengeDeposit;
+                delete challenges[batchChallenged];
+                inChallenge = false;
+            }
+            .... REDACTED FOR BREVITY ...
+```
+During the protocol pause, the prover will not be able to verify the proof and if the pause period is larger than the proof window, prover will lose the challenge and gets slashed.
+
+### Internal pre-conditions
+
+1. Owner calls `revertBatch` on batch n, reverting the nth batch.
+2. Challenger monitors the mempool and initiates a challenge on the n-1 batch.
+3. Due to the bug in `revertBatch`, the `inChallenge` flag is reset to `false`, even though batch n-1 is under challenge.
+4. Owner calls `setPause` and the protocol is paused longer than the challenge window.
+
+### External pre-conditions
+
+_No response_
+
+### Attack Path
+
+1. The owner calls `revertBatch` on batch n, reverting batch n.
+2. A challenger monitors the mempool and calls `challengeBatch` on batch n-1.
+3. The `revertBatch` function incorrectly resets the `inChallenge` flag to false despite batch n-1 being under challenge.
+4. The protocol is paused, preventing the challenge from being deleted.
+5. The prover cannot prove the batch in time due to the paused protocol.
+6. The prover gets slashed, even though the batch is valid.
+
+### Impact
+
+If the protocol is paused when there's an ongoing challenge (albeit inChallenge is set to `false` due to the vulnerability explained above) , the protocol slashes the batch submitter for failing to prove the batch within the challenge window, even though the batch is valid. The challenger may incorrectly receive the challenge reward + slash reward despite no actual issue in the batch.
+
+### PoC
+
+_No response_
+
+### Mitigation
+
+Use `batchInChallenge` function to verify the batch is indeed challenged:
+
+```Solidity
+function revertBatch(bytes calldata _batchHeader, uint256 _count) external onlyOwner {
+				// ... Redacted for brevity ...
+        while (_count > 0) {
+            emit RevertBatch(_batchIndex, _batchHash);
+
+            committedBatches[_batchIndex] = bytes32(0);
+            // if challenge exist and not finished yet, return challenge deposit to challenger
+            if (batchInChallenge(_batchIndex)) {
+                batchChallengeReward[challenges[_batchIndex].challenger] += challenges[_batchIndex].challengeDeposit;
+                inChallenge = false;
+            }
+            delete challenges[_batchIndex];
+
+						// ... Redacted for brevity ...
+        }
+    }
+
+```
+
+
+
+## Discussion
+
+**sherlock-admin2**
+
+The protocol team fixed this issue in the following PRs/commits:
+https://github.com/morph-l2/morph/pull/561
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Sherlock |
+| Protocol | MorphL2 |
+| Report Date | N/A |
+| Finders | mstpr-brainbot, ulas, 0xRajkumar, p0wd3r |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2024-08-morphl2-judging/issues/220
+- **Contest**: https://app.sherlock.xyz/audits/contests/207
+
+### Keywords for Search
+
+`vulnerability`
+
