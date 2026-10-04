@@ -1,0 +1,141 @@
+---
+# Core Classification
+protocol: Squads
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 47345
+audit_firm: OtterSec
+contest_link: https://squads.so/
+source_link: https://squads.so/
+github_link: https://github.com/Squads-Protocol/fuse
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 3
+finders:
+  - Robert Chen
+  - CauêObici
+  - Bruno Halltari
+---
+
+## Vulnerability Title
+
+Server-Side Request Forgery
+
+### Overview
+
+
+This bug report discusses a vulnerability in the token logo endpoint, which can be exploited through SSRF attacks. This allows attackers to access the internal network environment and potentially expose sensitive information or bypass certain IP restrictions. The recommended solution is to implement an image proxy in an isolated environment or establish a whitelist of trusted image servers. A patch has been introduced to remove the token_logo API endpoint.
+
+### Original Finding Content
+
+## Token Logo Endpoint Vulnerability to SSRF Attacks
+
+The token logo endpoint is vulnerable to SSRF attacks, as it makes HTTP requests using potentially malicious URLs obtained from tokens registered on Jupiter.
+
+```rust
+> _ routers/tokens/mod.rs
+pub async fn token_logo(
+    Path(mint): Path<Address>,
+    Extension(ctx): Extension<Arc<Context>>,
+) -> Result<Response, ApiError> {
+    let conn = &mut ctx.redis_connection().await?;
+    let jupiter_tokens = service::tokens_service::get_all_tokens_list(&ctx.http_client, conn).await?;
+    let token = jupiter_tokens.get(&mint);
+    let logo_uri = match token.and_then(|token| token.logo_uri.as_ref()) {
+        None => return Err(ApiError::NotFound),
+        Some(logo_uri) => logo_uri,
+    };
+    let original_response = ctx
+        .http_client
+        .get(logo_uri)
+        .send()
+        .await
+        .wrap_err("Failed to fetch token logo")?;
+```
+
+This vulnerability allows attackers to access the internal network environment, potentially exposing sensitive information and enabling the bypass of certain IP restrictions.
+
+## Remediation
+
+Consider implementing an image proxy in an isolated environment to retrieve the token logos, such as [https://github.com/cactus/go-camo](https://github.com/cactus/go-camo). Additionally, you could establish an allow list of trusted image servers, for example, [https://raw.githubusercontent.com](https://raw.githubusercontent.com).
+
+## Patch
+
+A patch was introduced on 8dae16e by removing the token_logo API endpoint:
+
+```rust
+> _ routers/tokens/mod.rs diff
+Ok(Json(response))
+}
+- pub async fn token_logo(
+- Path(mint): Path<Address>,
+- Extension(ctx): Extension<Arc<Context>>,
+- ) -> Result<Response, ApiError> {
+- let conn = &mut ctx.redis_connection().await?;
+- let jupiter_tokens =
+- service::tokens_service::get_all_tokens_list(&ctx.http_client, conn).await?;
+- 
+- let token = jupiter_tokens.get(&mint);
+- 
+- let logo_uri = match token.and_then(|token| token.logo_uri.as_ref()) {
+- None => return Err(ApiError::NotFound),
+- Some(logo_uri) => logo_uri,
+- };
+- [...]
+```
+
+```rust
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct TokenPriceResponse {
+```
+
+© 2024 Otter Audits LLC. All Rights Reserved. 6/17  
+FUSE Wallet Audit 04 — Vulnerabilities  
+
+© 2024 Otter Audits LLC. All Rights Reserved. 7/17
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | OtterSec |
+| Protocol | Squads |
+| Report Date | N/A |
+| Finders | Robert Chen, CauêObici, Bruno Halltari |
+
+### Source Links
+
+- **Source**: https://squads.so/
+- **GitHub**: https://github.com/Squads-Protocol/fuse
+- **Contest**: https://squads.so/
+
+### Keywords for Search
+
+`vulnerability`
+
