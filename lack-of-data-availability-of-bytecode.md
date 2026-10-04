@@ -1,0 +1,86 @@
+---
+# Core Classification
+protocol: zkSync L1Messenger Upgrade Audit
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 32653
+audit_firm: OpenZeppelin
+contest_link: none
+source_link: https://blog.openzeppelin.com/zksync-l1messenger-upgrade-audit
+github_link: none
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - OpenZeppelin
+---
+
+## Vulnerability Title
+
+Lack of Data Availability of Bytecode
+
+### Overview
+
+
+This bug report discusses an issue with the design of a protocol called ZK-rollup, which is used for processing transactions on a blockchain. The report explains that in this protocol, it is important to have data available on the first layer of the blockchain, known as L1. This is necessary in case the second layer, L2, experiences problems or becomes compromised. However, there is a problem with the current design that prevents data from being sent to L1 in certain cases. This means that if a transaction originates on L2 and creates a new contract, the bytecode for that contract will not be available on L1. This could lead to problems if the L2 sequencer, which is responsible for processing transactions, goes down or becomes malicious. The report suggests a solution to this issue and notes that it has been resolved in a recent update to the protocol.
+
+### Original Finding Content
+
+For rollups, it is crucial to have data availability on the L1 chain. In a ZK-rollup, the validity proof ensures that the L2 sequencer cannot create invalid transactions. However, if the sequencer were to go down or become malicious, having only the proof itself would be insufficient for another node to reconstruct the state on L2. In addition, data availability of bytecode is essential to ensure that not only the state on L2 is able to be reconstructed, but also that the deployed contracts will maintain integrity should the L2 sequencer go down. Furthermore, in the current design with a centralized sequencer, this plays an even more important role as there is a single point of failure.
+
+
+In the design of the protocol, transactions on L2 can originate from L1 or L2. If a message starts from L1, it is not necessary to resend the bytecode back down to L1, as the bytecode is already available on that layer. However, if a transaction starts on L2 and deploys a new contract, the bytecode must be sent to L1 to ensure data availability.
+
+
+Currently, a transaction on L2 gets processed by the bootloader using the [`processL2Tx` function](https://github.com/matter-labs/system-contracts/blob/4dca36d898f2fc0a7e39f0e3ef0c1a78570efaa2/bootloader/bootloader.yul#L1088-L1140). Stepping into this function eventually leads to a call to [`publishCompressedBytecode` in `Compressor`](https://github.com/matter-labs/system-contracts/blob/4dca36d898f2fc0a7e39f0e3ef0c1a78570efaa2/contracts/Compressor.sol#L40-L68). After verifying that the original bytecode and the compressed version of the bytecode match, the function [`markBytecodeAsPublished` is called in `KnownCodesStorage`](https://github.com/matter-labs/system-contracts/blob/4dca36d898f2fc0a7e39f0e3ef0c1a78570efaa2/contracts/KnownCodesStorage.sol#L39-L41). This makes a call to `_markBytecodeAsPublished` with the variable `_shouldSendToL1` set as false. Therefore, the step to [`requestBytecodeL1Publication` will be skipped](https://github.com/matter-labs/system-contracts/blob/4dca36d898f2fc0a7e39f0e3ef0c1a78570efaa2/contracts/KnownCodesStorage.sol#L50-L52) and the bytecode will not be sent to L1.
+
+
+For transactions that originate on L2, consider making the bytecode available on L1 to ensure data availability.
+
+
+***Update:** Resolved in [pull request #332](https://github.com/matter-labs/system-contracts/pull/332) at commit [801b2a2](https://github.com/matter-labs/system-contracts/commit/801b2a2ebc540fa6c0f0b87f7525d8f94012cc2a). The raw compressed data is now sent to L1 in the `publishCompressedBytecode` function.*
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | OpenZeppelin |
+| Protocol | zkSync L1Messenger Upgrade Audit |
+| Report Date | N/A |
+| Finders | OpenZeppelin |
+
+### Source Links
+
+- **Source**: https://blog.openzeppelin.com/zksync-l1messenger-upgrade-audit
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+
