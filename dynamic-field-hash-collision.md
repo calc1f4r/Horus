@@ -1,0 +1,109 @@
+---
+# Core Classification
+protocol: Mysten Labs Sui
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 48087
+audit_firm: OtterSec
+contest_link: https://mystenlabs.com/
+source_link: https://mystenlabs.com/
+github_link: https://github.com/MystenLabs/sui
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 5
+finders:
+  - Cauê Obici
+  - Michal Bochnak
+  - James Wang
+  - Robert Chen
+  - OtterSec
+---
+
+## Vulnerability Title
+
+Dynamic Field Hash Collision
+
+### Overview
+
+
+The bug report discusses an issue with the dynamic_fields.move function where it is possible to produce a collision in generated hashes due to the structure of certain data types. This can result in incorrect behavior for some functions. The suggested solution is to insert the length of certain data arrays at the beginning of their values in the hash. This issue has been fixed in a recent patch.
+
+### Original Finding Content
+
+## Hash Type and Key Computation
+
+In `dynamic_fields.move`, `hash_type_and_key` computes hashes based on an input address and an Object. The hash is created by concatenating three parts:
+
+1. **parent**, `AccountAddress`, which serves as the parent of the object.
+2. **k_bytes**, the data of the object being hashed. It includes the values associated with the object.
+3. **k_tag_bytes**, the data type of the object. It provides information about the structure of the object.
+
+By combining these three components, the hash uniquely identifies the object based on its parent, data, and data type.
+
+However, due to the semi-arbitrary structure of the Struct and Vector data types, it is possible to produce a collision in the generated hashes. This collision may result in incorrect behavior for `add` and `exists_`, which do not account for the Name parameter when performing native functions. Meanwhile, other functions call native functions using a generic parameter `Field<Name, Value>`.
+
+## Remediation
+
+Insert the length of the `k_bytes` and `k_tag_bytes` arrays at the beginning of their values in the hasher object.
+
+```rust
+// crates/sui-framework/src/natives/dynamic_field.rs DIFF
+@@ -92,7 +92,9 @@ pub fn hash_type_and_key(
+ // hash(parent || k || K)
+ let mut hasher = Sha3_256::default();
+ hasher.update(parent);
+ + hasher.update(k_bytes.len().to_le_bytes());
+ hasher.update(k_bytes);
+ + hasher.update(k_tag_bytes.len().to_le_bytes());
+ hasher.update(k_tag_bytes);
+ let hash = hasher.finalize();
+```
+
+## Patch
+
+Fixed in `5b71cef`.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | OtterSec |
+| Protocol | Mysten Labs Sui |
+| Report Date | N/A |
+| Finders | Cauê Obici, Michal Bochnak, James Wang, Robert Chen, OtterSec |
+
+### Source Links
+
+- **Source**: https://mystenlabs.com/
+- **GitHub**: https://github.com/MystenLabs/sui
+- **Contest**: https://mystenlabs.com/
+
+### Keywords for Search
+
+`vulnerability`
+
