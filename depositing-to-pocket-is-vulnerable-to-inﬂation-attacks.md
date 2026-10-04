@@ -1,0 +1,133 @@
+---
+# Core Classification
+protocol: Cryptex
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 40210
+audit_firm: Cantina
+contest_link: https://cantina.xyz/portfolio/c146b746-c0ce-4310-933c-d2e5e3ec934a
+source_link: https://cdn.cantina.xyz/reports/cantina_cryptex_sep2024.pdf
+github_link: none
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - cccz
+  - Patrick Drotleff
+---
+
+## Vulnerability Title
+
+Depositing to Pocket is vulnerable to inﬂation attacks 
+
+### Overview
+
+
+This bug report discusses a potential issue with the BasePocket smart contract. It explains how a malicious user can manipulate the pricePerShare by making a donation, causing other users to lose money. The report provides a scenario where this manipulation can occur and makes recommendations for mitigating the risk. These recommendations include using an ERC4626 Router, tracking assets internally, implementing Dead Shares and Virtual Shares, and making changes to the assert() statement in BasePocket.registerDeposit(). The report also mentions that this issue has been fixed in the Cryptex and Cantina Managed commits.
+
+### Original Finding Content
+
+## Vulnerability Details in BasePocket.sol
+
+## Context
+`BasePocket.sol#L50`
+
+## Description
+When depositing to Pocket, a malicious user can manipulate `pricePerShare` by donating, causing other users to lose due to rounding down when depositing. Consider the following scenario:
+
+1. Alice deposits `1e18` wei collateral to Pocket.
+2. Bob observes Alice's transaction and frontruns her with the following action:
+   1. Bob deposits `1` wei collateral and mints `1` wei share.
+   2. Bob transfers `1e18` wei collateral to Pocket. Now, total assets are `1e18 + 1 wei`, and total shares are `1 wei`.
+3. Alice's transaction is executed: `shares = 1 * 1e18 / (1e18 + 1)`, rounding down to `0`. Alice receives `0` shares.
+4. Bob withdraws `1` wei share and receives `2e18 + 1` wei collateral.
+
+## Recommendation
+According to OpenZeppelin's explanation of ERC-4626 inflation attacks, there are several recommendations to mitigate such attacks, including:
+
+1. **Use of an ERC4626 Router**: This does not resolve the issue on its own, as it relies on users to perform slippage control during mint/deposit to prevent losses.
+   
+   ```solidity
+   function deposit(
+       IERC4626 vault,
+       address to,
+       uint256 amount,
+       uint256 minSharesOut
+   ) public payable virtual override returns (uint256 sharesOut) {
+       if ((sharesOut = vault.deposit(amount, to)) < minSharesOut) { // @audit: slippage control here
+           revert MinSharesError();
+       }
+   }
+   ```
+
+2. **Tracking assets internally**: This means the protocol should not use `balanceOf()` to track assets, which does not apply to rebase tokens, such as aToken.
+
+3. **Dead Shares** (like Uniswap V2):
+
+   ```solidity
+   function mint(address to) external lock returns (uint liquidity) {
+       // ...
+       uint _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
+       if (_totalSupply == 0) {
+           liquidity = Math.sqrt(amount0.mul(amount1)).sub(MINIMUM_LIQUIDITY);
+           _mint(address(0), MINIMUM_LIQUIDITY); // permanently lock the first MINIMUM_LIQUIDITY tokens
+       }
+   }
+   ```
+
+   After we mint the initial `1000` shares to `address(0)`, when the attacker makes a donation, the donated assets will increase the value of these `1000` dead shares, causing the attacker to lose. For instance, if the attacker mints `1001` shares (with `1000` shares minted to `address(0)` and `1` share minted to the attacker), after the attacker donates `1e18` collateral, they immediately lose `1000/1001 * 1e18` collateral.
+
+4. **Virtual Shares and Decimals Offset**: This method is used by OpenZeppelin ERC4626 and is mathematically proven in OpenZeppelin's documentation. However, this method may significantly increase `totalShares`, so the `assert()` statement in `BasePocket.registerDeposit()` may need to be changed if it is used:
+
+   ```solidity
+   assert($.sharesOf[user] < 1e38);
+   ```
+
+## Fixes
+- **Cryptex**: Fixed in commit `18949206`.
+- **Cantina Managed**: Fixed.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Cantina |
+| Protocol | Cryptex |
+| Report Date | N/A |
+| Finders | cccz, Patrick Drotleff |
+
+### Source Links
+
+- **Source**: https://cdn.cantina.xyz/reports/cantina_cryptex_sep2024.pdf
+- **GitHub**: N/A
+- **Contest**: https://cantina.xyz/portfolio/c146b746-c0ce-4310-933c-d2e5e3ec934a
+
+### Keywords for Search
+
+`vulnerability`
+
