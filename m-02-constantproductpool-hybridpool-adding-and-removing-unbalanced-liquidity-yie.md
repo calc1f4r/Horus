@@ -1,0 +1,130 @@
+---
+# Core Classification
+protocol: Sushi
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 24643
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2021-09-sushitrident
+source_link: https://code4rena.com/reports/2021-09-sushitrident
+github_link: https://github.com/code-423n4/2021-09-sushitrident-findings/issues/34
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - dexes
+  - cdp
+  - yield
+  - services
+  - yield_aggregator
+
+# Audit Details
+report_date: unknown
+finders_count: 0
+finders:
+---
+
+## Vulnerability Title
+
+[M-02] `ConstantProductPool` & `HybridPool`: Adding and removing unbalanced liquidity yields slightly more tokens than swap
+
+### Overview
+
+
+A bug has been identified in the current implementation of the mint fee in the Constant Product Pool and Hybrid Pool in Sushi. When unbalanced liquidity is added, a mint fee is applied. However, the current implementation distributes the minted fee to the minter as well (when he should be excluded), which acts as a rebate of sorts and makes adding and removing liquidity as opposed to swapping directly (negligibly) more desirable. 
+
+To illustrate this point, an example was given using the Constant Product Pool. When 5 ETH and 0 USDC were minted as unbalanced LP, the user received 138573488720892 / 1e18 LP tokens. When these LP tokens were burned, the user received 2.4963 ETH and 7692.40 USDC. This is equivalent to swapping 5 - 2.4963 = 2.5037 ETH for 7692.4044 USDC. However, if the user were to swap the 2.5037 ETH directly, he would receive 7692.369221 (0.03 USDC lesser).
+
+The recommended mitigation steps for this bug are to distribute the mint fee to existing LPs first, by incrementing `_reserve0` and `_reserve1` with the fee amounts, and then following the rest of the calculations. Code snippets for the Constant Product Pool and Hybrid Pool were provided to illustrate this. The bug was confirmed by maxsam4 (Sushi).
+
+### Original Finding Content
+
+_Submitted by GreyArt, also found by broccoli_
+
+##### Impact
+A mint fee is applied whenever unbalanced liquidity is added, because it is akin to swapping the excess token amount for the other token.
+
+However, the current implementation distributes the minted fee to the minter as well (when he should be excluded). It therefore acts as a rebate of sorts.
+
+As a result, it makes adding and removing liquidity as opposed to swapping directly (negligibly) more desirable. An example is given below using the Constant Product Pool to illustrate this point. The Hybrid pool exhibits similar behaviour.
+
+##### Proof of Concept
+1.  Initialize the pool with ETH-USDC sushi pool amounts. As of the time of writing, there is roughly 53586.556 ETH and 165143020.5295 USDC.
+2.  Mint unbalanced LP with 5 ETH (& 0 USDC). This gives the user `138573488720892 / 1e18` LP tokens.
+3.  Burn the minted LP tokens, giving the user 2.4963 ETH and 7692.40 USDC. This is therefore equivalent to swapping 5 - 2.4963 = 2.5037 ETH for 7692.4044 USDC.
+4.  If the user were to swap the 2.5037 ETH directly, he would receive 7692.369221 (0.03 USDC lesser).
+
+##### Recommended Mitigation Steps
+The mint fee should be distributed to existing LPs first, by incrementing `_reserve0` and `_reserve1` with the fee amounts. The rest of the calculations follow after.
+
+`ConstantProductPool`
+
+```jsx
+(uint256 fee0, uint256 fee1) = _nonOptimalMintFee(amount0, amount1, _reserve0, _reserve1);
+// increment reserve amounts with fees
+_reserve0 += uint112(fee0);
+_reserve1 += uint112(fee1);
+unchecked {
+    _totalSupply += _mintFee(_reserve0, _reserve1, _totalSupply);
+}
+uint256 computed = TridentMath.sqrt(balance0 * balance1);
+...
+kLast = computed;
+```
+
+`HybridPool`
+
+```jsx
+(uint256 fee0, uint256 fee1) = _nonOptimalMintFee(amount0, amount1, _reserve0, _reserve1);
+// increment reserve amounts with fees
+_reserve0 += uint112(fee0);
+_reserve1 += uint112(fee1);
+uint256 newLiq = _computeLiquidity(balance0, balance1);
+...
+```
+
+**[maxsam4 (Sushi) confirmed](https://github.com/code-423n4/2021-09-sushitrident-findings/issues/34)**
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Sushi |
+| Report Date | N/A |
+| Finders | N/A |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2021-09-sushitrident
+- **GitHub**: https://github.com/code-423n4/2021-09-sushitrident-findings/issues/34
+- **Contest**: https://code4rena.com/reports/2021-09-sushitrident
+
+### Keywords for Search
+
+`vulnerability`
+

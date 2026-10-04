@@ -1,0 +1,244 @@
+---
+# Core Classification
+protocol: Virtuals Protocol
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 61850
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2025-04-virtuals-protocol
+source_link: https://code4rena.com/reports/2025-04-virtuals-protocol
+github_link: https://code4rena.com/audits/2025-04-virtuals-protocol/submissions/F-180
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - YouCrossTheLineAlfie
+---
+
+## Vulnerability Title
+
+[M-23] Using `AgentFactory::setAssetToken` will lead to loss of funds
+
+### Overview
+
+
+The bug report discusses an issue with the `assetToken` variable in the `AgentFactory` contract. This variable is initially set during the `initialize` function and is used in other functions such as `executeApplication`, `_createNewAgentToken`, and `withdraw`. However, changing this variable using the `setAssetToken` function can cause problems, such as the `withdraw` function failing and the `executeApplication` function not being able to find the new `assetToken`. The report suggests a solution to directly add the asset token's address to the `Application` struct instead of using the `assetToken` variable. This would prevent any issues caused by changing the `assetToken` variable.
+
+### Original Finding Content
+
+
+
+The [`AgentFactory::assetToken`](https://github.com/code-423n4/2025-04-virtuals-protocol/blob/28e93273daec5a9c73c438e216dde04c084be452/contracts/virtualPersona/AgentFactory.sol# L123) is initially set upon early `initialize` call:
+```
+
+    // AgentFactory.sol
+    function initialize(
+        // . . . Rest of the code . . .
+    ) public initializer {
+        __Pausable_init();
+
+        tokenImplementation = tokenImplementation_;
+        veTokenImplementation = veTokenImplementation_;
+        daoImplementation = daoImplementation_;
+        assetToken = assetToken_;                       <<@ -- // Sets assetToken initially
+        tbaRegistry = tbaRegistry_;
+        nft = nft_;
+        applicationThreshold = applicationThreshold_;
+        _nextId = 1;
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _vault = vault_;
+    }
+```
+
+This `assetToken` is being used inside [`AgentFactory::executeApplication`](https://github.com/code-423n4/2025-04-virtuals-protocol/blob/28e93273daec5a9c73c438e216dde04c084be452/contracts/virtualPersona/AgentFactory.sol# L196), [`AgentFactory::_createNewAgentToken`](https://github.com/code-423n4/2025-04-virtuals-protocol/blob/28e93273daec5a9c73c438e216dde04c084be452/contracts/virtualPersona/AgentFactory.sol# L288) and [`AgentFactory::withdraw`](https://github.com/code-423n4/2025-04-virtuals-protocol/blob/28e93273daec5a9c73c438e216dde04c084be452/contracts/virtualPersona/AgentFactory.sol# L179).
+
+However, changing this `assetToken` via [`AgentFactory::setAssetToken`](https://github.com/code-423n4/2025-04-virtuals-protocol/blob/28e93273daec5a9c73c438e216dde04c084be452/contracts/virtualPersona/AgentFactory.sol# L388) has serious complications;
+```
+
+    function setAssetToken(address newToken) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        assetToken = newToken;          <<@ -- // Sets `assetToken`
+    }
+```
+
+These issues are described below:
+
+1. [`AgentFactory::withdraw`](https://github.com/code-423n4/2025-04-virtuals-protocol/blob/28e93273daec5a9c73c438e216dde04c084be452/contracts/virtualPersona/AgentFactory.sol# L179) function would fail as the new `assetToken` will be different from the funds held by the contract during `proposeAgent` call.
+```
+
+    function withdraw(uint256 id) public noReentrant {
+        Application storage application = _applications[id];
+
+        require(msg.sender == application.proposer || hasRole(WITHDRAW_ROLE, msg.sender), "Not proposer");
+
+        require(application.status == ApplicationStatus.Active, "Application is not active");
+
+        require(block.number > application.proposalEndBlock, "Application is not matured yet");
+
+        uint256 withdrawableAmount = application.withdrawableAmount;
+
+        application.withdrawableAmount = 0;
+        application.status = ApplicationStatus.Withdrawn;
+
+        IERC20(assetToken).safeTransfer(application.proposer, withdrawableAmount);      <<@ -- // Would break due to different assetToken than upon proposal
+    }
+```
+
+2. [`AgentFactory::executeApplication`](https://github.com/code-423n4/2025-04-virtuals-protocol/blob/28e93273daec5a9c73c438e216dde04c084be452/contracts/virtualPersona/AgentFactory.sol# L196) would fail as there might be no new `assetToken` available inside the contract:
+```
+
+    function executeApplication(uint256 id, bool canStake) public noReentrant {
+        // . . . Rest of the code . . .
+        // C2
+        address lp = IAgentToken(token).liquidityPools()[0];
+        IERC20(assetToken).transfer(token, initialAmount);          <<@ -- // Would revert
+        IAgentToken(token).addInitialLiquidity(address(this));
+```
+
+3. There is no way available to recover old `assetToken` balance as the contract lacks a `recoverERC20` kind of function.
+4. If there were a case where `assetToken` were available inside the contract, the `_createNewAgentToken` would use unintended `assetToken` than what it was actually proposed to:
+```
+
+    function _createNewAgentToken(string memory name, string memory symbol) internal returns (address instance) {
+        instance = Clones.clone(tokenImplementation);
+        IAgentToken(instance).initialize(
+            [_tokenAdmin, _uniswapRouter, assetToken],          <<@ -- // Initialising agent token
+            abi.encode(name, symbol),
+            _tokenSupplyParams,
+            _tokenTaxParams
+        );
+
+        allTradingTokens.push(instance);
+        return instance;
+    }
+```
+
+This cannot be mitigated with current implementation as Base has a private mempool, the protocol in no capacity can guarantee that before `setAssetToken` all tokens are withdrawn by the `WITHDRAW_ROLE`.
+
+Also, these issues are commonly found inside the `AgentFactoryV3` and `AgentFactoryV4` contracts.
+
+### Recommended mitigation steps
+
+It is recommended that instead of using a public variable of `assetToken` in function calls other than `proposeAgent`, add the asset token’s address directly inside the `Application` struct and fetch it, as these calls anyways use the `Application` struct’s mapping:
+```
+
+    struct Application {
+        string name;
+        string symbol;
+        string tokenURI;
++        address tokenAddress;
+        ApplicationStatus status;
+        uint256 withdrawableAmount;
+        address proposer;
+        uint8[] cores;
+        uint256 proposalEndBlock;
+        uint256 virtualId;
+        bytes32 tbaSalt;
+        address tbaImplementation;
+        uint32 daoVotingPeriod;
+        uint256 daoThreshold;
+    }
+```
+
+Updated `withdraw`:
+```
+
+    function withdraw(uint256 id) public noReentrant {
+        Application storage application = _applications[id];
+
+        require(msg.sender == application.proposer || hasRole(WITHDRAW_ROLE, msg.sender), "Not proposer");
+
+        require(application.status == ApplicationStatus.Active, "Application is not active");
+
+        require(block.number > application.proposalEndBlock, "Application is not matured yet");
+
+        uint256 withdrawableAmount = application.withdrawableAmount;
+
+        application.withdrawableAmount = 0;
+        application.status = ApplicationStatus.Withdrawn;
+
+-        IERC20(assetToken).safeTransfer(application.proposer, withdrawableAmount);
++        IERC20(application.tokenAddress).safeTransfer(application.proposer, withdrawableAmount);
+    }
+```
+
+Updated `executeApplication`:
+```
+
+    function executeApplication(uint256 id, bool canStake) public noReentrant {
+        // . . . Rest of the code . . .
+        // C2
+        address lp = IAgentToken(token).liquidityPools()[0];
+-        IERC20(assetToken).transfer(token, initialAmount);
++        IERC20(application.tokenAddress).transfer(token, initialAmount);
+        IAgentToken(token).addInitialLiquidity(address(this));
+```
+
+Updated `_createNewAgentToken`:
+```
+
+- function _createNewAgentToken(string memory name, string memory symbol) internal returns (address instance) {
++ function _createNewAgentToken(string memory name, string memory symbol, address memory applicationAssetToken) internal returns (address instance) {
+        instance = Clones.clone(tokenImplementation);
+        IAgentToken(instance).initialize(
+-            [_tokenAdmin, _uniswapRouter, assetToken],
++            [_tokenAdmin, _uniswapRouter, applicationAssetToken],
+            abi.encode(name, symbol),
+            _tokenSupplyParams,
+            _tokenTaxParams
+        );
+
+        allTradingTokens.push(instance);
+        return instance;
+    }
+```
+
+This would ensure that changing `assetToken` does not break any flow.
+
+---
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Virtuals Protocol |
+| Report Date | N/A |
+| Finders | YouCrossTheLineAlfie |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2025-04-virtuals-protocol
+- **GitHub**: https://code4rena.com/audits/2025-04-virtuals-protocol/submissions/F-180
+- **Contest**: https://code4rena.com/reports/2025-04-virtuals-protocol
+
+### Keywords for Search
+
+`vulnerability`
+

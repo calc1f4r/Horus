@@ -1,0 +1,154 @@
+---
+# Core Classification
+protocol: Gondi
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 49525
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2024-06-gondi-invitational
+source_link: https://code4rena.com/reports/2024-06-gondi-invitational
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - nft_lending
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - oakcobalt
+---
+
+## Vulnerability Title
+
+[M-01] Delegations cannot be removed in some cases due to vulnerable `revokeDelegate()` implementation
+
+### Overview
+
+
+The bug report discusses an issue where an old borrower can use an old delegation to claim on behalf of a new borrower. This is possible due to a flaw in the `delegateRegistry` code, which allows borrowers to delegate locked collateral NFTs to prove token ownership and claim airdrops or event tickets. However, the `revokeDelegate()` function does not properly revoke previous delegations, leading to incorrect delegation data being read and the old borrower being able to claim on behalf of the new borrower. The recommended mitigation step is to allow passing `bytes32 _rights` in the `delegateERC721()` function to correctly revoke existing delegations with custom rights. This bug has been confirmed by a security expert, and it has been noted that it goes against the interface specification. This bug has been rated as a medium-risk severity issue.
+
+### Original Finding Content
+
+
+
+An old borrower can use an old delegation to claim on behalf of a new borrower.
+
+### Proof of Concept
+
+A borrower can delegate locked collateral NFT through `delegateRegistry` to prove token ownership and claim airdrops, event ticketing, etc.
+
+[`delegateRegistry`](https://etherscan.io/address/0x00000000000000447e69651d841bD8D104Bed493# code) by Delegate.Cash protocol allows custom rights to be configured to a delegatee.
+
+Currently, `MultiSourceLoan::delegate` allows a borrower to configure `bytes32 _rights` to `delegateERC721`. In `DelegateRegistry::delegateERC721`, `bytes32 rights` will be [hashed as part of the key](https://github.com/delegatexyz/delegate-registry/blob/ce89e65f9364db21fc621e247a829d9c08374b4e/src/DelegateRegistry.sol# L83) to store delegation data.
+```
+
+//src/lib/loans/MultiSourceLoan.sol
+    function delegate(uint256 _loanId, Loan calldata loan, address _delegate, bytes32 _rights, bool _value) external {
+        if (loan.hash() != _loans[_loanId]) {
+            revert InvalidLoanError(_loanId);
+        }
+        if (msg.sender != loan.borrower) {
+            revert InvalidCallerError();
+        }
+        //@audit-info a borrower can pass custom rights to delegateERC721
+|>      IDelegateRegistry(getDelegateRegistry).delegateERC721(
+            _delegate, loan.nftCollateralAddress, loan.nftCollateralTokenId, _rights, _value
+        );
+
+        emit Delegated(_loanId, _delegate, _value);
+    }
+```
+
+`src/lib/loans/MultiSourceLoan.sol# L484`
+
+The problem is, in `MultiSourceLoan::revokeDelegate`, empty rights will always be passed to `delegateERC721`. This means when a borrower configures custom rights in `delegate()`, they cannot remove the delegation. In `DelegateRegistry::delegateERC721`, empty rights will be hashed into a different key from the borrower’s actual delegation. [Incorrect delegation data will be read](https://github.com/delegatexyz/delegate-registry/blob/ce89e65f9364db21fc621e247a829d9c08374b4e/src/DelegateRegistry.sol# L83-L85) and `delegateERC721` call will return with no change.
+```
+
+//src/lib/loans/MultiSourceLoan.sol
+    function revokeDelegate(address _delegate, address _collection, uint256 _tokenId) external {
+        if (ERC721(_collection).ownerOf(_tokenId) == address(this)) {
+            revert InvalidMethodError();
+        }
+        //@audit revokeDelegate will always pass empty rights.
+|>      IDelegateRegistry(getDelegateRegistry).delegateERC721(_delegate, _collection, _tokenId, "", false);
+
+        emit RevokeDelegate(_delegate, _collection, _tokenId);
+    }
+```
+
+`src/lib/loans/MultiSourceLoan.sol# L496`
+
+**POC:**
+
+1. The original borrower set custom rights and delegated their collateral NFT to a custom contract.
+2. The original borrower’s loan ended and NFT is transferred to a new borrower.
+3. The protocol or the new borrower calls `revokeDelegate()` to remove previous delegations of the NFT.
+4. The new borrower takes out a loan with the NFT and calls `delegate()`, delegating the NFT to a hot wallet.
+5. The original borrower’s old delegation is not cleared from `delegateRegistry` and still claims an event ticket using the old delegation. The old borrower claims the new borrower’s ticket.
+
+### Recommended Mitigation Steps
+
+In `revokeDelegate()`, allow passing `bytes32 _rights` into `delegateERC721()` to correctly revoke existing delegations with custom rights.
+
+### Assessed type
+
+Error
+
+**0xend (Gondi) confirmed**
+
+**0xsomeone (judge) commented:**
+
+> The Warden has outlined how the protocol will incorrectly integrate with the `DelegateRegistry` system, attempting to revoke a previous delegation via an empty payload which is a futile attempt as proper revocation would require the same `_rights` to be passed in with a `false` value for the `_enable` flag.
+>
+> I am slightly mixed in relation to this submission as the `MultiSourceLoan::delegate` function can be utilized with a correct payload to remove delegation from the previous user correctly. I believe that users, protocols, etc., will attempt to use the `MultiSourceLoan::revokeDelegate` function to revoke their delegation, and thus, a medium-risk severity rating is appropriate even though a circumvention already exists in the code.
+>
+> To note, the code also goes against its `interface` specification (`src/interfaces/loans/IMultiSourceLoan.sol# L257-L261`) further re-inforcing a medium-risk rating level.
+
+---
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Gondi |
+| Report Date | N/A |
+| Finders | oakcobalt |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2024-06-gondi-invitational
+- **GitHub**: N/A
+- **Contest**: https://code4rena.com/reports/2024-06-gondi-invitational
+
+### Keywords for Search
+
+`vulnerability`
+
