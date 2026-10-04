@@ -1,0 +1,178 @@
+---
+# Core Classification
+protocol: Thesis - tBTC and Keep
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 13782
+audit_firm: ConsenSys
+contest_link: none
+source_link: https://consensys.net/diligence/audits/2020/02/thesis-tbtc-and-keep/
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - dexes
+  - services
+  - cross_chain
+  - insurance
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - Martin Ortner
+  - Alexander Wade
+---
+
+## Vulnerability Title
+
+Initialize implementations for proxy contracts and protect initialization methods ✓ Addressed
+
+### Overview
+
+
+A bug was reported in the Keep Network, which is a platform for privacy-preserving and censorship-resistant services. The issue was that the implementation for proxy contracts could be initialized by third parties, which could lead to front-running and initialization of the contract if it is not done within the same transaction.
+
+To address this issue, the Keep Network changed the proxies implementation to a version that does not protect the initialization method. They also recommended that unprotected implementation contracts should be initialized in the implementation’s constructor, and that the deployment of the proxy and initialization should be done in the same transaction to protect it from being called by unauthorized parties.
+
+### Original Finding Content
+
+#### Resolution
+
+
+
+This issue is addressed with the following changesets that ensure that the logic contracts cannot be used by other parties by initializing them in the constructor: <https://github.com/keep-network/keep-tecdsa/issues/297,> <https://github.com/keep-network/keep-core/issues/1424,> and <https://github.com/keep-network/tbtc/issues/500>.
+
+
+#### Description
+
+
+It should be avoided that the implementation for proxy contracts can be initialized by third parties. This can be the case if the `initialize` function is unprotected. Since the implementation contract is not meant to be used directly without a proxy delegate-calling it is recommended to protect the initialization method of the implementation by initializing on deployment.
+
+
+Changing the proxies implementation (`upgradeTo()`) to a version that does not protect the initialization method may allow someone to front-run and initialize the contract if it is not done within the same transaction.
+
+
+#### Examples
+
+
+* `KeepVendor` delegates to `KeepVendorImplV1`. The implementations initialization method is unprotected.
+
+
+**keep-tecdsa/solidity/contracts/BondedECDSAKeepVendorImplV1.sol:L22-L32**
+
+
+
+```
+/// @notice Initializes Keep Vendor contract implementation.
+/// @param registryAddress Keep registry contract linked to this contract.
+function initialize(
+    address registryAddress
+)
+    public
+{
+    require(!initialized(), "Contract is already initialized.");
+    \_initialized["BondedECDSAKeepVendorImplV1"] = true;
+    registry = Registry(registryAddress);
+}
+
+```
+* `KeepRandomBeaconServiceImplV1` and `KeepRandomBeaconServiceUpgradeExample`
+
+
+**keep-core/contracts/solidity/contracts/KeepRandomBeaconServiceImplV1.sol:L118-L137**
+
+
+
+```
+function initialize(
+    uint256 priceFeedEstimate,
+    uint256 fluctuationMargin,
+    uint256 dkgContributionMargin,
+    uint256 withdrawalDelay,
+    address registry
+)
+    public
+{
+    require(!initialized(), "Contract is already initialized.");
+    \_initialized["KeepRandomBeaconServiceImplV1"] = true;
+    \_priceFeedEstimate = priceFeedEstimate;
+    \_fluctuationMargin = fluctuationMargin;
+    \_dkgContributionMargin = dkgContributionMargin;
+    \_withdrawalDelay = withdrawalDelay;
+    \_pendingWithdrawal = 0;
+    \_previousEntry = \_beaconSeed;
+    \_registry = registry;
+    \_baseCallbackGas = 18845;
+}
+
+```
+* `Deposit` is deployed via `cloneFactory` delegating to a `masterDepositAddress` in `DepositFactory`. The `masterDepositAddress` (`Deposit`) might be left uninitialized.
+
+
+**tbtc/implementation/contracts/system/DepositFactoryAuthority.sol:L3-L14**
+
+
+
+```
+contract DepositFactoryAuthority {
+
+    bool internal \_initialized = false;
+    address internal \_depositFactory;
+
+    /// @notice Set the address of the System contract on contract initialization
+    function initialize(address \_factory) public {
+        require(! \_initialized, "Factory can only be initialized once.");
+
+        \_depositFactory = \_factory;
+        \_initialized = true;
+    }
+
+```
+#### Recommendation
+
+
+Initialize unprotected implementation contracts in the implementation’s constructor. Protect initialization methods from being called by unauthorized parties or ensure that deployment of the proxy and initialization is performed in the same transaction.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | ConsenSys |
+| Protocol | Thesis - tBTC and Keep |
+| Report Date | N/A |
+| Finders | Martin Ortner, Alexander Wade |
+
+### Source Links
+
+- **Source**: https://consensys.net/diligence/audits/2020/02/thesis-tbtc-and-keep/
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+

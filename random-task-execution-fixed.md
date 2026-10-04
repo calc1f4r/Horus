@@ -1,0 +1,142 @@
+---
+# Core Classification
+protocol: DeFi Saver
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 13474
+audit_firm: ConsenSys
+contest_link: none
+source_link: https://consensys.net/diligence/audits/2021/03/defi-saver/
+github_link: none
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - dexes
+  - cdp
+  - yield
+  - cross_chain
+  - leveraged_farming
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - David Oz Kashi
+  - Shayan Eskandari
+---
+
+## Vulnerability Title
+
+Random task execution ✓ Fixed
+
+### Overview
+
+
+This bug report is about a scenario where a user takes a flash loan. In this scenario, the flash loan wrapper contract (FLAaveV2 or FLDyDx) is given permission to execute functions on behalf of the user’s DSProxy. However, this permission is not revoked until the entire recipe execution is finished. This means that if any of the external calls along the recipe execution is malicious, it could call `executeAction()` back and inject any task it wishes, such as taking user’s funds or draining approved tokens.
+
+The bug was fixed by adding `ReentrancyGuard` to the `executeOperation` function in DecenterApps/[email protected]`478e9cd`. It is recommended that a reentrancy guard (mutex) should be used to cover the entire content of `FLAaveV2.executeOperation`/`FLDyDx.callFunction` in order to prevent such an attack.
+
+### Original Finding Content
+
+#### Resolution
+
+
+
+Fixed in [DecenterApps/[email protected]`478e9cd`](https://github.com/DecenterApps/defisaver-v3-contracts/commit/478e9cdc586ab669cf9ef69222f8886b4771d163) by adding `ReentrancyGuard` to the `executeOperation` function.
+
+
+#### Description
+
+
+In a scenario where user takes a flash loan, `_parseFLAndExecute()` gives the flash loan wrapper contract (`FLAaveV2`, `FLDyDx`) the permission to execute functions on behalf of the user’s `DSProxy`. This execution permission is revoked only after the entire recipe execution is finished, which means that in case that any of the external calls along the recipe execution is malicious, it might call `executeAction()` back and inject any task it wishes (e.g. take user’s funds out, drain approved tokens, etc)
+
+
+#### Examples
+
+
+**code/contracts/actions/flashloan/FLAaveV2.sol:L105-L136**
+
+
+
+```
+function executeOperation(
+    address[] memory \_assets,
+    uint256[] memory \_amounts,
+    uint256[] memory \_fees,
+    address \_initiator,
+    bytes memory \_params
+) public returns (bool) {
+    require(msg.sender == AAVE\_LENDING\_POOL, ERR\_ONLY\_AAVE\_CALLER);
+    require(\_initiator == address(this), ERR\_SAME\_CALLER);
+
+    (Task memory currTask, address proxy) = abi.decode(\_params, (Task, address));
+
+    // Send FL amounts to user proxy
+    for (uint256 i = 0; i < \_assets.length; ++i) {
+        \_assets[i].withdrawTokens(proxy, \_amounts[i]);
+    }
+
+    address payable taskExecutor = payable(registry.getAddr(TASK\_EXECUTOR\_ID));
+
+    // call Action execution
+    IDSProxy(proxy).execute{value: address(this).balance}(
+        taskExecutor,
+        abi.encodeWithSelector(CALLBACK\_SELECTOR, currTask, bytes32(\_amounts[0] + \_fees[0]))
+    );
+
+    // return FL
+    for (uint256 i = 0; i < \_assets.length; i++) {
+        \_assets[i].approveToken(address(AAVE\_LENDING\_POOL), \_amounts[i] + \_fees[i]);
+    }
+
+    return true;
+}
+
+```
+#### Recommendation
+
+
+A reentrancy guard (mutex) that covers the entire content of `FLAaveV2.executeOperation`/`FLDyDx.callFunction` should be used to prevent such attack.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | ConsenSys |
+| Protocol | DeFi Saver |
+| Report Date | N/A |
+| Finders | David Oz Kashi, Shayan Eskandari |
+
+### Source Links
+
+- **Source**: https://consensys.net/diligence/audits/2021/03/defi-saver/
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+

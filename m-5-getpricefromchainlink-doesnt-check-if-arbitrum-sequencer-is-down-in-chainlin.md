@@ -1,0 +1,143 @@
+---
+# Core Classification
+protocol: Iron Bank
+chain: everychain
+category: oracle
+vulnerability_type: chainlink
+
+# Attack Vector Details
+attack_type: chainlink
+affected_component: oracle
+
+# Source Information
+source: solodit
+solodit_id: 19174
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/84
+source_link: none
+github_link: https://github.com/sherlock-audit/2023-05-ironbank-judging/issues/440
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+  - chainlink
+
+# Audit Details
+report_date: unknown
+finders_count: 44
+finders:
+  - josephdara
+  - ni8mare
+  - 0x52
+  - santipu\_
+  - p0wd3r
+---
+
+## Vulnerability Title
+
+M-5: getPriceFromChainlink() doesn't check If Arbitrum sequencer is down in Chainlink feeds
+
+### Overview
+
+
+This bug report is about a vulnerability in the getPriceFromChainlink() function in the PriceOracle.sol code that doesn't check if the Arbitrum sequencer is down in the Chainlink feeds. This vulnerability could potentially be exploited by malicious actors to gain an unfair advantage. The code snippet for this issue can be found at https://github.com/sherlock-audit/2023-05-ironbank/blob/main/ib-v2/src/protocol/oracle/PriceOracle.sol#L66-L72 and it was discovered by 0x52, 0xMAKEOUTHILL, Angry\_Mustache\_Man, Arabadzhiev, Arz, Aymen0909, BenRai, Breeje, Brenzee, BugBusters, Delvir0, HexHackers, Ignite, Jaraxxus, Kodyvim, Madalad, MohammedRizwan, Ocean\_Sky, Proxy, R-Nemes, SovaSlava, berlin-101, bin2chen, bitsurfer, branch\_indigo, deadrxsezzz, devScrooge, josephdara, kutugu, n1punp, n33k, ni8mare, p0wd3r, plainshift-2, rvierdiiev, santipu\_, sashik\_eth, shaka, simon135, sl1, toshii, tsvetanovv, turvec, vagrant.
+
+The protocol team acknowledged the issue and stated that they will fix it when deploying on L2, though the severity of the issue was disagreed with. The team also inquired if it is possible to offer the minimum reward for an oracle issue on L2. The issue has been kept as a medium severity. A code example of Chainlink can be found at https://docs.chain.link/data-feeds/l2-sequencer-feeds#example-code.
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2023-05-ironbank-judging/issues/440 
+
+## Found by 
+0x52, 0xMAKEOUTHILL, Angry\_Mustache\_Man, Arabadzhiev, Arz, Aymen0909, BenRai, Breeje, Brenzee, BugBusters, Delvir0, HexHackers, Ignite, Jaraxxus, Kodyvim, Madalad, MohammedRizwan, Ocean\_Sky, Proxy, R-Nemes, SovaSlava, berlin-101, bin2chen, bitsurfer, branch\_indigo, deadrxsezzz, devScrooge, josephdara, kutugu, n1punp, n33k, ni8mare, p0wd3r, plainshift-2, rvierdiiev, santipu\_, sashik\_eth, shaka, simon135, sl1, toshii, tsvetanovv, turvec, vagrant
+## Summary
+When utilizing Chainlink in L2 chains like Arbitrum, it's important to ensure that the prices provided are not falsely perceived as fresh, even when the sequencer is down. This vulnerability could potentially be exploited by malicious actors to gain an unfair advantage.
+
+## Vulnerability Detail
+There is no check:
+getPriceFromChainlink
+```solidity
+    function getPriceFromChainlink(address base, address quote) internal view returns (uint256) {
+@>      (, int256 price,,,) = registry.latestRoundData(base, quote);
+        require(price > 0, "invalid price");
+
+        // Extend the decimals to 1e18.
+        return uint256(price) * 10 ** (18 - uint256(registry.decimals(base, quote)));
+    }
+```
+
+
+## Impact
+
+could potentially be exploited by malicious actors to gain an unfair advantage.
+
+## Code Snippet
+
+https://github.com/sherlock-audit/2023-05-ironbank/blob/main/ib-v2/src/protocol/oracle/PriceOracle.sol#L66-L72
+
+## Tool used
+
+Manual Review
+
+## Recommendation
+
+code example of Chainlink:
+https://docs.chain.link/data-feeds/l2-sequencer-feeds#example-code
+
+
+
+## Discussion
+
+**0xffff11**
+
+Valid medium
+
+**ib-tycho**
+
+Regarding the mistake in the contest details mentioned in the `README`, we apologize for any confusion caused. When we stated that we would deploy on Arbitrum and Optimism, we meant that we would make the necessary modifications before deployment. This is our standard practice of maintaining contracts with different branches, same as what we did in v1: https://github.com/ibdotxyz/compound-protocol/branches
+
+We are aware of the absence of a registry on OP and Arb, as pointed out by some individuals. We would like to inquire if it is possible to offer the minimum reward for an oracle issue on L2. Thank you.
+
+**ib-tycho**
+
+We'll fix this when deploying on L2, but we disagree with Severity. I would consider this as Low
+
+**0xffff11**
+
+According to past reports and sponsor confirmed that they will fix the issue. The issue will remain as a medium.
+
+**MLON33**
+
+Assuming this issue is acknowledged by the protocol team and won’t be fixed.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Sherlock |
+| Protocol | Iron Bank |
+| Report Date | N/A |
+| Finders | josephdara, ni8mare, 0x52, santipu\_, p0wd3r, toshii, tsvetanovv, branch\_indigo, shaka, Breeje, SovaSlava, Delvir0, vagrant, R-Nemes, MohammedRizwan, BugBusters, Angry\_Mustache\_Man, deadrxsezzz, Brenzee, simon135, Kodyvim, Aymen0909, Madalad, Arabadzhiev, turvec, sl1, plainshift-2, Arz, Ocean\_Sky, n1punp, Ignite, devScrooge, Proxy, kutugu, n33k, HexHackers, Jaraxxus, bin2chen, berlin-101, bitsurfer, 0xMAKEOUTHILL, sashik\_eth, rvierdiiev, BenRai |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2023-05-ironbank-judging/issues/440
+- **Contest**: https://app.sherlock.xyz/audits/contests/84
+
+### Keywords for Search
+
+`Chainlink`
+
