@@ -1,0 +1,111 @@
+---
+# Core Classification
+protocol: Adrena
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 46798
+audit_firm: OtterSec
+contest_link: https://www.adrena.xyz/
+source_link: https://www.adrena.xyz/
+github_link: https://github.com/AdrenaDEX/adrena
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - Robert Chen
+  - Tamta Topuria
+---
+
+## Vulnerability Title
+
+Stablecoin Shorting
+
+### Overview
+
+
+This bug report is about a vulnerability in the code for shorting stablecoins. The current checks in the code are not enough to prevent a user from effectively shorting a stablecoin by using two different stablecoins as custody and collateral. This goes against the intended restriction of not allowing the shorting of stablecoins. The suggested solution is to enhance the checks to ensure that the custody asset itself is not a stablecoin. The issue has been resolved in the latest patch.
+
+### Original Finding Content
+
+## Vulnerability Report
+
+The vulnerability arises because the current checks in `open_position_short` are not sufficient to prevent a user from effectively shorting a stable coin. The `require_keys_neq!` macro ensures that the `custody_key` and `collateral_custody_key` are not the same. This prevents utilizing the same asset for both custody and collateral. However, a user may still provide two different stable coins as the custody and collateral_custody accounts, effectively shorting a stable coin by setting custody to one stable coin and collateral_custody to another. This violates the intended restriction of not allowing the shorting of stable coins.
+
+## Code Snippet
+
+```rust
+// position/open_position_short.rs
+pub fn open_position_short(
+    ctx: Context<OpenPositionShort>,
+    params: &OpenPositionShortParams,
+) -> Result<()> {
+    [...]
+    // Preliminary checks
+    {
+        [...]
+        // Cannot short a stablecoin
+        require_keys_neq!(custody_key, collateral_custody_key);
+        // Must provide stablecoin as collateral for short position
+        require!(
+            collateral_custody.is_stable(),
+            AdrenaError::InvalidCollateralCustody
+        );
+    }
+    [...]
+}
+```
+
+## Remediation
+
+Enhance the checks to ensure that the custody asset itself is not a stable coin.
+
+## Patch
+
+Resolved in `d8a50c8`.
+
+© 2024 Otter Audits LLC. All Rights Reserved. 29/59
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | OtterSec |
+| Protocol | Adrena |
+| Report Date | N/A |
+| Finders | Robert Chen, Tamta Topuria |
+
+### Source Links
+
+- **Source**: https://www.adrena.xyz/
+- **GitHub**: https://github.com/AdrenaDEX/adrena
+- **Contest**: https://www.adrena.xyz/
+
+### Keywords for Search
+
+`vulnerability`
+

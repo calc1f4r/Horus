@@ -1,0 +1,142 @@
+---
+# Core Classification
+protocol: Dhedge
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 18777
+audit_firm: ZachObront
+contest_link: none
+source_link: https://github.com/solodit/solodit_content/blob/main/reports/ZachObront/2023-06-01-Dhedge.md
+github_link: none
+
+# Impact Classification
+severity: low
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: low
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - Zach Obront
+---
+
+## Vulnerability Title
+
+[I-01] `tokenPrice()` Manipulation Analysis
+
+### Overview
+
+See description below for full details.
+
+### Original Finding Content
+
+If the price returned by `tokenPrice()` can be manipulated, then the `_buyBack()` function will provide the user with the wrong number of MTy tokens on L2.
+
+Fortunately, there is protection against `tokenPrice()` falling by more than 0.1% (to catch depegs), which prevents a manipulation down from being performed. This is the type of manipulation that would be profitable to the attacker, as it would lead to them receiving extra MTy tokens on L2.
+
+However, even manipulating the price up could be harmful, as a user with a claim stuck in the Optimism Cross Domain Messenger could have that claim replayed by any user, which allows it to be sandwiched inside a price manipulation attack to give the user fewer MTy tokens than they deserve.
+
+In order to determine whether this risk exists, I analyzed the `tokenPrice()` function.
+
+- It calls `poolManagerLogic.totalFundValue()` to get the total value of the pool, which sums the balances of all the tokens supported by the pool.
+- This total fund value is divided by the total supply of tokens to get the price per token.
+
+`totalSupply()` seems to be incremented and decremented only in the inherented OpenZeppelin contract, which performed these updates safely.
+
+There are two ways that the `totalFundValue` can be changed: (a) make the pool hold a different number of underlying token without MTy total supply adjusting accordingly or (b) mess with the underlying prices of the tokens.
+
+For the first, the only way to do this would be to donate tokens for free to the contract. This would be a potential attack if the first depositer were able to do it, but it is protected on the current contract because (a) any dip in token price of more than 0.1% would be rejected and (b) there is already $2mm USD in the contract, so it would be exorbitantly expensive (and not profitable) to perform this manipulation. As a result, this attack does not seem to be a threat.
+
+In terms of the second option, in order to determine whether the asset prices are safe, it is necessary to look at each of the underlying assets, the oracle used for each, and whether it is prone to manipulation.
+
+Supported Asset: [USDC/sUSD Pool](https://optimistic.etherscan.io/address/0xd16232ad60188b68076a235c65d692090caba155)
+
+- Oracle: 0x5212797D402c11fFF8F19C4BF7Eb311A122521d9
+- Analysis: Uses Velodrome pair totalSupply() and getReserves() to calculates the value using the [Fair LP Pricing](https://blog.alphaventuredao.io/fair-lp-token-pricing/) formula. As long as Velodrome returns the correct values, this shouldn't be able to be manipulated.
+
+Supported Asset: [sUSD](https://optimistic.etherscan.io/address/0x8c6f28f2f1a3c87f0f938b96d27520d9751ec8d9)
+
+- Oracle: 0x5298aAA21a50DBF21E3C82197857fBE84821EAD3
+- Analysis: Price is determined by getting the USDC price from Chainlink, getting the sUSD to USDC price from the Velodrome TWAP (which is assumed to be safe), and using these to determine an sUSD price.
+
+Supported Asset: [USDC](https://optimistic.etherscan.io/address/0x7f5c764cbc14f9669b88837ca1490cca17c31607)
+
+- Oracle: 0x16a9FA2FDa030272Ce99B29CF780dFA30361E0f3
+- Analysis: Uses a Chainlink oracle directly.
+
+Supported Asset: [USDy](https://optimistic.etherscan.io/address/0x1ec50880101022c11530a069690f5446d1464592)
+
+- Oracle: 0x3727181ED49576bB5E00CC04C788E98C563Cc649
+- Analysis: This uses the same `tokenPrice()` formula we are investigating, but with its own separate list of Supported Assets. In order to determine if this can be manipulated, we need to investigate whether any of the sublist of Supported Assets can be manipulated.
+
+Sub-Supported Asset: [USDC/sUSD Pool](https://optimistic.etherscan.io/address/0xd16232ad60188b68076a235c65d692090caba155)
+
+- Already addressed above.
+
+Sub-Supported Asset: [USDC/MAI Pool](https://optimistic.etherscan.io/address/d62c9d8a3d4fd98b27caaefe3571782a3af0a737)
+
+- Oracle: 0x454a70B8d766eF1F8d6cF848aff6e4Ea4D5D6425
+- Analysis: Same analysis as the USDC/sUSD Pool, but with MAI as one of the underlying tokens.
+
+Sub-Supported Asset: [sUSD](https://optimistic.etherscan.io/address/0x8c6f28f2f1a3c87f0f938b96d27520d9751ec8d9)
+
+- Already addressed above.
+
+Sub-Supported Asset: [USDC](https://optimistic.etherscan.io/address/0x7f5c764cbc14f9669b88837ca1490cca17c31607)
+
+- Already addressed above.
+
+Sub-Supported Asset: [VELO](https://optimistic.etherscan.io/address/3c8b650257cfb5f272f799f5e2b4e65093a11a05)
+
+- Oracle: 0xC5E24F77F7da75Ef67610ae624f9edc0CCCC7816
+- Analysis: Same analysis as the sUSD token, except using the TWAP for the USDC/VELO pool.
+
+Sub-Supported Asset: [OP](https://optimistic.etherscan.io/address/4200000000000000000000000000000000000042)
+
+- Oracle: 0x0D276FC14719f9292D5C1eA2198673d1f4269246
+- Analysis: Uses a Chainlink oracle directly.
+
+Sub-Supported Asset: [MAI](https://optimistic.etherscan.io/address/dfa46478f9e5ea86d57387849598dbfb2e964b02)
+
+- Oracle: 0xECAF977A599cD94c71e7292BA0c9cEA9eA227d2a
+- Analysis: Same analysis as the sUSD and VELO tokens, except using the TWAP for the USDC/MAI pool.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | LOW |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | ZachObront |
+| Protocol | Dhedge |
+| Report Date | N/A |
+| Finders | Zach Obront |
+
+### Source Links
+
+- **Source**: https://github.com/solodit/solodit_content/blob/main/reports/ZachObront/2023-06-01-Dhedge.md
+- **GitHub**: N/A
+- **Contest**: N/A
+
+### Keywords for Search
+
+`vulnerability`
+
