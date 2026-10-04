@@ -1,0 +1,104 @@
+---
+# Core Classification
+protocol: Hubble
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 42475
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2022-02-hubble
+source_link: https://code4rena.com/reports/2022-02-hubble
+github_link: https://github.com/code-423n4/2022-02-hubble-findings/issues/44
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - dexes
+  - services
+  - derivatives
+  - liquidity_manager
+  - staking_pool
+
+# Audit Details
+report_date: unknown
+finders_count: 0
+finders:
+---
+
+## Vulnerability Title
+
+[M-05] `Oracle.getUnderlyingPrice` could have wrong decimals
+
+### Overview
+
+
+The Oracle.getUnderlyingPrice function in the code has a bug where it divides the chainlink price by 100, assuming that the answer for the underlying is in 8 decimals and needs to be reduced to 6 decimals to match USDC. However, this may not be accurate for all tokens and chainlink oracles can have different decimals. The recommended mitigation steps suggest taking into account the on-chain reported decimals and scaling down the price to 6 decimals. The severity of the bug was initially marked as high, but was later downgraded to medium as it was found to be caused by dividing by magic numbers (100) and not considering all possible scenarios.
+
+### Original Finding Content
+
+_Submitted by cmichel_
+
+<https://github.com/code-423n4/2022-02-hubble/blob/8c157f519bc32e552f8cc832ecc75dc381faa91e/contracts/Oracle.sol#L34><br>
+
+The `Oracle.getUnderlyingPrice` function divides the chainlink price by `100`.<br>
+It probably assumes that the answer for the underlying is in 8 decimals but then wants to reduce it for 6 decimals to match USDC.
+
+However, arbitrary `underlying` tokens are used and the chainlink oracles can have different decimals.
+
+### Recommended Mitigation Steps
+
+While most USD price feeds use 8 decimals, it's better to take the on-chain reported decimals into account by doing `AggregatorV3Interface(chainLinkAggregatorMap[underlying]).decimals()`, see [Chainlink docs](https://docs.chain.link/docs/get-the-latest-price/#getting-a-different-price-denomination).<br>
+The price should then be scaled down to 6 decimals.
+
+**[atvanguard (Hubble) confirmed, but disagreed with High severity and commented](https://github.com/code-423n4/2022-02-hubble-findings/issues/44#issuecomment-1049511584):**
+ > All chainlink USD pairings are expected to have 8 decimals hence disagreeing with severity; but yes agree that asserting this check when adding a new asset is a good idea. 
+
+**[moose-code (judge) decreased severity to Medium and commented](https://github.com/code-423n4/2022-02-hubble-findings/issues/44#issuecomment-1059976567):**
+ > Downgrading to medium. Dividing by magic numbers (100) should clearly comment assumptions.
+
+
+
+***
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Hubble |
+| Report Date | N/A |
+| Finders | N/A |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2022-02-hubble
+- **GitHub**: https://github.com/code-423n4/2022-02-hubble-findings/issues/44
+- **Contest**: https://code4rena.com/reports/2022-02-hubble
+
+### Keywords for Search
+
+`vulnerability`
+
