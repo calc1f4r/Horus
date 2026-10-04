@@ -1,0 +1,797 @@
+{
+  "meta": {
+    "manifest": "lending",
+    "description": "Compressed hunt cards for lending — one-line detection rules for bulk scanning",
+    "totalCards": 10,
+    "skipped": 0,
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, use optional preconditions/proofShape/falsePositiveSignals/reportEvidence when present, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "enriched": 10
+  },
+  "cards": [
+    {
+      "id": "lending-dust-rounding-loan-closure-dust-and-rounding-breakage-of--000",
+      "title": "Dust and Rounding Breakage of Loan Closure and Liquidation",
+      "severity": "MEDIUM",
+      "grep": "MorphoLendingRouter\\.healthFactor|dust_positions_unprofitable_to_clear|exact_share_match_revert_grief|front_run_share_delta_revert|debt_share_accounting|V3Vault\\.repay",
+      "detect": "Exact-share-match revert** [D1]: Revert Lend `V3Vault.repay`/`liquidate` revert when requested shares exceed...",
+      "cat": [
+        "lending",
+        "liquidation",
+        "borrowing",
+        "collateral",
+        "bad-debt"
+      ],
+      "languages": [
+        "any"
+      ],
+      "ecosystem": [
+        "any"
+      ],
+      "ref": "DB/lending/accounting/dust-rounding-loan-closure.md",
+      "lines": [
+        83,
+        344
+      ],
+      "reportEvidence": {
+        "count": 6,
+        "sampleReports": [
+          "reports/lending_borrowing_findings/m-16-repayments-and-liquidations-can-be-forced-to-revert-by-an-attacker-that-rep.md",
+          "reports/lending_borrowing_findings/allowing-the-creation-of-dust-cdps-could-lead-redeemersliquidators-to-be-not-pro.md",
+          "reports/lending_borrowing_findings/h-1-fee-precision-loss-disrupts-liquidations-and-causes-loss-of-funds.md",
+          "reports/lending_borrowing_findings/bigger-precision-loss-in-tokenamount-to-usd-conversion-will-lead-incorrect-liqui.md",
+          "reports/lending_borrowing_findings/m-7-rounding-discrepancy-between-morpholendingrouterhealthfactor-and-morphorepay.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "rounding",
+          "dust rounding breakage loan closure liquidation",
+          "dust rounding",
+          "rounding breakage",
+          "debtshares rounding"
+        ],
+        "commonlyComposesWith": [
+          "liquidation",
+          "dust rounding breakage loan closure liquidation",
+          "closure liquidation",
+          "debt shares rounding",
+          "repay exceeds debt"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: require(shares <= debtShares) style validation where anyone can decrement debtShares between the victim's simulation and execution.; Signal...",
+        "PROVE: *Path A: 1-share repay front-run griefs repayment and enables liquidation [D1]; Victim is near the liquidation threshold; plans a full repay of debtShares.",
+        "FALSIFY: Not this bug when: repay clamps to outstanding debt (repaying type(uint256).max or more than debt succeeds and burns all shares).; Not this bug when: dust loss is...",
+        "IMPACT: Third-party-forced revert of repay and liquidation near thresholds (2/6 unique findings: D1, D6)",
+        "Can anyone decrement a position's debt shares/amount between a victim's quote and execution? What happens on mismatch — clamp or revert?",
+        "Is there a minimum position size at open? Compute redeemer/liquidator profit at that size vs gas."
+      ],
+      "antipattern": "dust CDPs openable; closing them costs more than it pays",
+      "securePattern": "one library function, one direction, used by every consumer",
+      "validWhen": "Signal 1: require(shares <= debtShares) style validation where anyone can decrement debtShares between the victim's simulation and execution.; Signal 2: Dust-sized...",
+      "invalidWhen": "Not this bug when: repay clamps to outstanding debt (repaying type(uint256).max or more than debt succeeds and burns all shares).; Not this bug when: dust loss is...",
+      "impact": "Third-party-forced revert of repay and liquidation near thresholds (2/6 unique findings: D1, D6)",
+      "preconditions": [
+        "Attacker front-runs with repay(tokenId, 1, true) — debtShares drops by 1.",
+        "Attacker (or anyone) liquidates at debtShares - 1 while the victim is defenseless.",
+        "Attackers (or organic users) create many dust CDPs."
+      ],
+      "proofShape": "*Path A: 1-share repay front-run griefs repayment and enables liquidation [D1] -> Victim is near the liquidation threshold; plans a full repay of debtShares.",
+      "falsePositiveSignals": [
+        "Not this bug when: repay clamps to outstanding debt (repaying type(uint256).max or more than debt succeeds and burns all shares).",
+        "Not this bug when: dust loss is bounded below gas cost AND no griefing vector exists (pure QA-level rounding).",
+        "Safe if: protocols enforce minimum position sizes at open AND closure paths accept over-repayment with refund."
+      ]
+    },
+    {
+      "id": "lending-bad-debt-socialization-bad-debt-socialization-and-mis-000",
+      "title": "Bad Debt Socialization and Missing Write-Off",
+      "severity": "HIGH",
+      "grep": "loss_not_shared_last_withdrawer_loses|redistribution_skips_later_batches|collateral_exit_without_debt_check|executeCrossLiquidateERC20|withdrawLiquidityAndClaim|maxWithdrawableCollateral",
+      "detect": "No write-off on liquidation** [B1]: Frax `liquidate()` pays the liquidator from collateral but never marks the unbacked...",
+      "cat": [
+        "lending",
+        "liquidation",
+        "borrowing",
+        "collateral",
+        "bad-debt"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/lending/bad-debt/bad-debt-socialization.md",
+      "lines": [
+        87,
+        374
+      ],
+      "reportEvidence": {
+        "count": 10,
+        "sampleReports": [
+          "reports/lending_borrowing_findings/h-02-liquidate-doesnt-mark-off-bad-debt-leading-to-a-last-lender-to-withdraw-los.md",
+          "reports/lending_borrowing_findings/h-05-bad-debt-is-never-handled-which-places-insolvency-risks-on-benddao.md",
+          "reports/lending_borrowing_findings/h-09-bad-debts-should-not-continue-to-accrue-interest.md",
+          "reports/lending_borrowing_findings/bad-debt-redistribution-not-happening-between-liquidations-in-batch-mode.md",
+          "reports/lending_borrowing_findings/collateral-can-be-withdrawn-without-repaying-usds-loan.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "missing bad debt settlement",
+          "logical error",
+          "unhandled bad debt",
+          "pool accounting",
+          "collateral exhaustion"
+        ],
+        "commonlyComposesWith": [
+          "bad debt",
+          "total assets",
+          "liquidity index",
+          "supply shares",
+          "liquidate clean"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: Liquidation transfers all remaining collateral but leaves userDebt > 0 with no code path that reduces pool-level totalAssets/totalBorrows...",
+        "PROVE: *Path A: Last lender to withdraw loses [B1][B6]; Pair holds 10 lenders × $1k; borrower's collateral crashes to $7k value.",
+        "FALSIFY: Not this bug when: the protocol has an explicit bad-debt mechanism — treasury coverage documented in-scope, a socialization step in the liquidation finalizer, or a...;...",
+        "IMPACT: Insolvent pools with par-paying withdrawals until cash runs out (3/10 unique findings: B1, B6, B2)",
+        "Trace collateral-to-zero: when a position's collateral hits 0 with debt remaining, which storage variable changes, in which function, atomically with what?",
+        "Does any withdrawal path let a user exit collateral while debt stays outstanding?"
+      ],
+      "antipattern": "liquidityIndex tracks interest only — bad debt never enters the formula",
+      "securePattern": "track bad debt explicitly; reward marking; accrue interest on live debt only",
+      "validWhen": "Signal 1: Liquidation transfers all remaining collateral but leaves userDebt > 0 with no code path that reduces pool-level totalAssets/totalBorrows by the shortfall.;...",
+      "invalidWhen": "Not this bug when: the protocol has an explicit bad-debt mechanism — treasury coverage documented in-scope, a socialization step in the liquidation finalizer, or a...;...",
+      "impact": "Insolvent pools with par-paying withdrawals until cash runs out (3/10 unique findings: B1, B6, B2)",
+      "preconditions": [
+        "collateral is exhausted and debt remains, the pool must write off and socialize the loss immediately — protocols that skip the...",
+        "Impact: unbacked stablecoin supply; depeg pressure."
+      ],
+      "proofShape": "*Path A: Last lender to withdraw loses [B1][B6] -> Pair holds 10 lenders × $1k; borrower's collateral crashes to $7k value.",
+      "falsePositiveSignals": [
+        "Not this bug when: the protocol has an explicit bad-debt mechanism — treasury coverage documented in-scope, a socialization step in the liquidation finalizer, or a...",
+        "Not this bug when: the \"loss\" is only unrealized mark-to-market variance that ordinary interest spread covers.",
+        "Safe if: every path that removes collateral (withdraw, claim, auction settlement) reverts when outstanding debt would exceed remaining collateral value."
+      ]
+    },
+    {
+      "id": "lending-supply-borrow-cap-bypass-supply-borrow-cap-enforcement--000",
+      "title": "Supply / Borrow Cap Enforcement Bypass",
+      "severity": "MEDIUM",
+      "grep": "PoolManager\\._changePoolCollateral|PoolManager\\.liquidate\\(poolId|cap_checked_before_not_after|_requireEnoughDepositCap|Vault\\._maxDeposit|_changePoolCollateral",
+      "detect": "Increment-only check** [C2]: Zaros `_requireEnoughDepositCap(collateralType, amount, depositCap)` reverts only when...",
+      "cat": [
+        "lending",
+        "liquidation",
+        "borrowing",
+        "collateral",
+        "bad-debt"
+      ],
+      "languages": [
+        "any"
+      ],
+      "ecosystem": [
+        "any"
+      ],
+      "ref": "DB/lending/caps/supply-borrow-cap-bypass.md",
+      "lines": [
+        84,
+        349
+      ],
+      "reportEvidence": {
+        "count": 9,
+        "sampleReports": [
+          "reports/lending_borrowing_findings/improper-supply-cap-limitation-enforcement.md",
+          "reports/lending_borrowing_findings/users-can-easily-bypass-collateral-depositcap-limit-using-multiple-deposits-unde.md",
+          "reports/lending_borrowing_findings/m-03-bypassing-collateral-cap-check.md",
+          "reports/lending_borrowing_findings/m-24-user-collateral-cap-check-issue.md",
+          "reports/lending_borrowing_findings/funds-can-be-redirected-to-the-idle-market-by-reaching-the-metamorpho-supply-cap.md"
+        ],
+        "severityConsensus": "MEDIUM",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "incomplete cap validation",
+          "logical error",
+          "wrong cap check",
+          "cap validation",
+          "deposit or borrow"
+        ],
+        "commonlyComposesWith": [
+          "deposit cap",
+          "supply cap",
+          "borrow cap",
+          "collateral cap",
+          "max deposit"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: The require statement references only the function's amount argument and the cap constant — no totalX storage term.; Signal 2: The cap is...",
+        "PROVE: *Path A: Multiple sub-cap deposits bypass a collateral cap [C2]; Protocol sets depositCap = 1M for collateral X.",
+        "FALSIFY: Not this bug when: validation is totalDeposited[collateral] + amount <= depositCap (cumulative, atomically updated).; Not this bug when: capacity exhaustion merely...",
+        "IMPACT: Risk-limit bypass: exposure concentration beyond governance-set caps (6/9 unique findings: C1-C4, C6, C9)",
+        "For every cap: which storage variable holds the cumulative total, and is it in the same expression as the increment?",
+        "Is the cap checked before or after the mutation? Re-derive the post-state."
+      ],
+      "antipattern": "reserve top-up can exceed pool capacity and revert the liquidation",
+      "securePattern": "subtract outgoing collateral before adding reserve funds (OZ suggestion)",
+      "validWhen": "Signal 1: The require statement references only the function's amount argument and the cap constant — no totalX storage term.; Signal 2: The cap is checked as a...",
+      "invalidWhen": "Not this bug when: validation is totalDeposited[collateral] + amount <= depositCap (cumulative, atomically updated).; Not this bug when: capacity exhaustion merely...",
+      "impact": "Risk-limit bypass: exposure concentration beyond governance-set caps (6/9 unique findings: C1-C4, C6, C9)",
+      "preconditions": [
+        "*Path A: Multiple sub-cap deposits bypass a collateral cap [C2]",
+        "Protocol sets depositCap = 1M for collateral X.",
+        "Attacker (or any users combined) deposits 900k, then 900k, then 900k...",
+        "Each tx passes because each amount <= depositCap; total deposited grows unbounded.",
+        "sETH supply cap = C; current issued = C - epsilon."
+      ],
+      "proofShape": "*Path A: Multiple sub-cap deposits bypass a collateral cap [C2] -> Protocol sets depositCap = 1M for collateral X.",
+      "falsePositiveSignals": [
+        "Not this bug when: validation is totalDeposited[collateral] + amount <= depositCap (cumulative, atomically updated).",
+        "Not this bug when: capacity exhaustion merely blocks new deposits (intended behavior) without touching liquidation/redemption paths.",
+        "Safe if: liquidation and reserve flows are exempt from capacity checks or capacity is checked after subtracting outgoing amounts."
+      ]
+    },
+    {
+      "id": "lending-collateral-value-inflation-collateral-value-inflation-and-000",
+      "title": "Collateral Value Inflation and Double-Counting",
+      "severity": "HIGH",
+      "grep": "UserLoanLogic\\.increaseCollateral|double_entrypoint_collateral_exit|double_count_effective_collateral|updateWithRepayWithCollateral|null_deposit_array_inflation|depositData\\.totalAmount",
+      "detect": "Zero-amount deposit grows the iteration list** [V1][V2]: `UserLoanLogic.increaseCollateral` pushes `poolId` to...",
+      "cat": [
+        "lending",
+        "liquidation",
+        "borrowing",
+        "collateral",
+        "bad-debt"
+      ],
+      "languages": [
+        "any"
+      ],
+      "ecosystem": [
+        "any"
+      ],
+      "ref": "DB/lending/collateral/collateral-value-inflation.md",
+      "lines": [
+        85,
+        351
+      ],
+      "reportEvidence": {
+        "count": 8,
+        "sampleReports": [
+          "reports/lending_borrowing_findings/zero-deposits-can-be-used-to-artificially-inflate-a-users-collateral-value-allow.md",
+          "reports/lending_borrowing_findings/collateral-inflation-exploit-via-zero-amount-deposits-allows-an-attacker-to-drai.md",
+          "reports/lending_borrowing_findings/attacker-can-inflate-effectivecollateralvalue.md",
+          "reports/lending_borrowing_findings/logic-flaw-in-userloanincreasecollateral-leads-to-double-counting-of-effectiveco.md",
+          "reports/lending_borrowing_findings/incorrect-updates-to-pooldepositdatatotalamount-and-loancollateralused-during-re.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "inflation",
+          "collateral value inflation double counting",
+          "value inflation",
+          "inflation double",
+          "collateral accounting error"
+        ],
+        "commonlyComposesWith": [
+          "col pools array",
+          "effective collateral value",
+          "increase collateral",
+          "zero amount deposit",
+          "double entrypoint token"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: A data structure tracking which collaterals a user has (array/set) can grow without a value-increase, and valuation iterates the structure...",
+        "PROVE: *Path A: Null-deposit array inflation [V1][V2]; Attacker calls deposit with fAmount = 0, N times — loan.colPools now holds N copies of poolId.",
+        "FALSIFY: Not this bug when: the valuation reads a mapping keyed by pool (each pool counted once) rather than iterating a push-growable array, or zero-amount deposits revert.; Not...",
+        "IMPACT: Borrowing power inflated by an unbounded multiplier (5/8 unique findings: V1-V5 family)",
+        "Call every collateral state-changer with amount = 0: what structural state mutates?",
+        "Is each pool/asset counted exactly once in effective collateral? Trace the iteration structure for duplicates."
+      ],
+      "antipattern": "fAmount == 0 still grows colPools; valuation counts per entry",
+      "securePattern": "verify the collateral balance is unchanged after any sweep (Frankencoin mitigation)",
+      "validWhen": "Signal 1: A data structure tracking which collaterals a user has (array/set) can grow without a value-increase, and valuation iterates the structure summing balances.;...",
+      "invalidWhen": "Not this bug when: the valuation reads a mapping keyed by pool (each pool counted once) rather than iterating a push-growable array, or zero-amount deposits revert.; Not...",
+      "impact": "Borrowing power inflated by an unbounded multiplier (5/8 unique findings: V1-V5 family)",
+      "preconditions": [
+        "*Path A: Null-deposit array inflation [V1][V2]",
+        "Attacker calls deposit with fAmount = 0, N times — loan.colPools now holds N copies of poolId.",
+        "Attacker deposits X once: loan.collaterals[poolId].balance = X.",
+        "Attacker borrows up to N × X × LTV and walks away.",
+        "Impact: pool drain bounded only by each pool's borrow cap (flash loans supply the deposit X)."
+      ],
+      "proofShape": "*Path A: Null-deposit array inflation [V1][V2] -> Attacker calls deposit with fAmount = 0, N times — loan.colPools now holds N copies of poolId.",
+      "falsePositiveSignals": [
+        "Not this bug when: the valuation reads a mapping keyed by pool (each pool counted once) rather than iterating a push-growable array, or zero-amount deposits revert.",
+        "Not this bug when: collateral token set is restricted to vetted single-entry tokens by an enforced whitelist (Frankencoin acknowledged this residual risk).",
+        "Safe if: repay-with-collateral updates totalAmount by principalPaid only after interest math, and invariant tests assert totalAmount <= balance + totalBorrowed."
+      ]
+    },
+    {
+      "id": "lending-missing-accrual-stale-index-missing-interest-accrual-and-s-000",
+      "title": "Missing Interest Accrual and Stale Index Accounting",
+      "severity": "MEDIUM",
+      "grep": "accrued_interest_ignored_on_withdraw|credit_limit_checked_before_accrual|BorrowLogic\\.executeRepay|_accrueAccountInterest|cumulativeInterestRate|exchangeRateCurrent",
+      "detect": "Check before accrual** [A1]: Union Finance `UToken.borrow` runs `require(borrowBalanceView(msg.sender) + amount + fee...",
+      "cat": [
+        "lending",
+        "liquidation",
+        "borrowing",
+        "collateral",
+        "bad-debt"
+      ],
+      "languages": [
+        "any"
+      ],
+      "ecosystem": [
+        "any"
+      ],
+      "ref": "DB/lending/interest-accrual/missing-accrual-stale-index.md",
+      "lines": [
+        83,
+        330
+      ],
+      "reportEvidence": {
+        "count": 7,
+        "sampleReports": [
+          "reports/lending_borrowing_findings/h-01-borrow-must-accrueinterest-first.md",
+          "reports/lending_borrowing_findings/h-02-lendingpairliquidateaccount-does-not-accrue-and-update-cumulativeinterestra.md",
+          "reports/lending_borrowing_findings/m-02-lendingpairwithdrawuniposition-should-accrue-debt-first.md",
+          "reports/lending_borrowing_findings/h-04-accrued-interest-is-not-accounted-for-when-withdrawing.md",
+          "reports/lending_borrowing_findings/h-10-interest-rate-is-updated-before-updating-the-debt-when-repaying-debt.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "stale index accounting",
+          "logical error",
+          "accrual ordering bug",
+          "interest accrual",
+          "borrow repay liquidate withdraw"
+        ],
+        "commonlyComposesWith": [
+          "accrue interest",
+          "borrow index",
+          "cumulative interest rate",
+          "update state",
+          "reserve cache"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: A require/comparison over debt or credit-limit values appears textually BEFORE the accrueInterest/updateState call in the same function.;...",
+        "PROVE: *Path A: Borrow against a stale index [A1]; Borrower takes a loan; market is quiet — no accrueInterest for weeks.",
+        "FALSIFY: Not this bug when: the market uses lazy-accrual-with-strict-CEI and every external read path (balanceOf-equivalents) accrues internally (Compound-style...; Not this bug...",
+        "IMPACT: Borrowing beyond limits/credit lines (1/7 unique findings: A1)",
+        "For each of borrow/repay/withdraw/liquidate: which line accrues, and does any earlier line read debt or limits?",
+        "Do partial accrual helpers exist, and do action paths use them?"
+      ],
+      "antipattern": "partial accrual — user balances updated, market rate not",
+      "securePattern": "repay mutates total debt, then rates reflect post-action utilization",
+      "validWhen": "Signal 1: A require/comparison over debt or credit-limit values appears textually BEFORE the accrueInterest/updateState call in the same function.; Signal 2: An action...",
+      "invalidWhen": "Not this bug when: the market uses lazy-accrual-with-strict-CEI and every external read path (balanceOf-equivalents) accrues internally (Compound-style...; Not this bug...",
+      "impact": "Borrowing beyond limits/credit lines (1/7 unique findings: A1)",
+      "preconditions": [
+        "Utilization and supply rate still reflect the old (higher) total borrows."
+      ],
+      "proofShape": "*Path A: Borrow against a stale index [A1] -> Borrower takes a loan; market is quiet — no accrueInterest for weeks.",
+      "falsePositiveSignals": [
+        "Not this bug when: the market uses lazy-accrual-with-strict-CEI and every external read path (balanceOf-equivalents) accrues internally (Compound-style...",
+        "Not this bug when: dust-level interest between blocks is the only delta (same-block operations) — the bug bites in low-activity markets with long accrual gaps.",
+        "Safe if: the first statement of every state-changing function is accrual (or the entry router accrues for all touched reserves)."
+      ]
+    },
+    {
+      "id": "lending-liquidation-evasion-dos-liquidation-evasion-borrower-m-000",
+      "title": "Liquidation Evasion — Borrower Makes Their Own Position Unliquidatable",
+      "severity": "HIGH",
+      "grep": "Salty\\.depositCollateralAndIncreaseShare|StabilityPool\\.liquidateBorrower\\(user|crvUSDToken\\.balanceOf\\(address\\(this|auction_timestamp_reset_blocks_seizure|cooldown_rearm_blocks_liquidation|callback_revert_blocks_seizure",
+      "detect": "Liquidation paths contain revertible steps whose preconditions are attacker-influenced:",
+      "cat": [
+        "lending",
+        "liquidation",
+        "borrowing",
+        "collateral",
+        "bad-debt"
+      ],
+      "languages": [
+        "any"
+      ],
+      "ecosystem": [
+        "any"
+      ],
+      "ref": "DB/lending/liquidation/liquidation-evasion-dos.md",
+      "lines": [
+        91,
+        419
+      ],
+      "reportEvidence": {
+        "count": 9,
+        "sampleReports": [
+          "reports/lending_borrowing_findings/borrower-can-prevent-hisher-loan-from-being-liquidated.md",
+          "reports/lending_borrowing_findings/fng-16-loans-with-cerc721-collateral-can-be-made-unliquidatable.md",
+          "reports/Hexens/2023-11-06-Fungify.md",
+          "reports/lending_borrowing_findings/h-05-user-can-evade-liquidation-by-depositing-the-minimum-of-tokens-and-gain-tim.md",
+          "reports/lending_borrowing_findings/h-01-liquidations-can-be-prevented-by-frontrunning-and-liquidating-1-debt-or-mor.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "liquidation dos",
+          "denial of service",
+          "revertible liquidation path",
+          "liquidation engine",
+          "borrower action"
+        ],
+        "commonlyComposesWith": [
+          "liquidation",
+          "on erc721 received",
+          "safe transfer from",
+          "cooldown expiration",
+          "auction start timestamp"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: Any external call inside the liquidation path whose recipient/callback is controlled by the liquidated borrower (NFT return, token with...",
+        "PROVE: *Path A: Malicious receiver callback blocks seizure [E5]; Borrower is a contract that reverts/returns wrong selector from onERC721Received when from == vault.",
+        "FALSIFY: Not this bug when: collateral seizure uses transfer() instead of safeTransferFrom() for the final collateral push, or the callback return value is not required to...;...",
+        "IMPACT: Permanently unliquidatable underwater positions (8/8 unique findings)",
+        "Walk the liquidation function and list EVERY external call — which ones reach borrower-controlled code?",
+        "Can any borrower action (deposit, bid, repay 1 wei, transfer 1 wei of share token) re-arm a precondition the liquidation path checks?"
+      ],
+      "antipattern": "any dust deposit re-arms the cooldown that liquidation must respect",
+      "securePattern": "record the returnable collateral as a claim instead of pushing it",
+      "validWhen": "Signal 1: Any external call inside the liquidation path whose recipient/callback is controlled by the liquidated borrower (NFT return, token with hook, recipient of...;...",
+      "invalidWhen": "Not this bug when: collateral seizure uses transfer() instead of safeTransferFrom() for the final collateral push, or the callback return value is not required to...;...",
+      "impact": "Permanently unliquidatable underwater positions (8/8 unique findings)",
+      "preconditions": [
+        "Borrower is a contract that reverts/returns wrong selector from onERC721Received when from == vault.",
+        "Liquidator calls liquidate; _cleanUpLoan does safeTransferFrom back to owner.",
+        "*Path B: Dust deposit re-arms cooldown [E3]",
+        "Alice deposits, borrows max; collateral price crashes.",
+        "Alice front-runs liquidation with a DUST+1 deposit → cooldownExpiration = now + modificationCooldown."
+      ],
+      "proofShape": "*Path A: Malicious receiver callback blocks seizure [E5] -> Borrower is a contract that reverts/returns wrong selector from onERC721Received when from == vault.",
+      "falsePositiveSignals": [
+        "Not this bug when: collateral seizure uses transfer() instead of safeTransferFrom() for the final collateral push, or the callback return value is not required to...",
+        "Not this bug when: cooldown/auction state can only be set by admin or keeper, not by the borrower being liquidated.",
+        "Safe if: liquidation path performs only calls to trusted contracts (pool, oracle, treasury) and all borrower-controlled interactions are deferred to a post-seizure,..."
+      ]
+    },
+    {
+      "id": "lending-liquidation-seizure-economics-liquidation-seizure-economics--000",
+      "title": "Liquidation Seizure Economics Miscalculation",
+      "severity": "HIGH",
+      "grep": "Teller\\.liquidateDefaultedLoanWithIncentive|_calculateAvailableCollateralToLiquidate|liquidateCalculateSeizeTokens|_validateSeizedAssetValue|_handleLiquidationSuccess|_executeLiquidationCore",
+      "detect": "The liquidation repayment-to-seizure pipeline performs several unit and semantic conversions.",
+      "cat": [
+        "lending",
+        "liquidation",
+        "borrowing",
+        "collateral",
+        "bad-debt"
+      ],
+      "languages": [
+        "any"
+      ],
+      "ecosystem": [
+        "any"
+      ],
+      "ref": "DB/lending/liquidation/liquidation-seizure-economics.md",
+      "lines": [
+        90,
+        408
+      ],
+      "reportEvidence": {
+        "count": 8,
+        "sampleReports": [
+          "reports/lending_borrowing_findings/h-2-users-can-seize-more-assets-during-liquidation-by-using-typeuintmax.md",
+          "reports/lending_borrowing_findings/h-3-using-original-principal-amount-as-due-amount-inside-liquidatedefaultedloanw.md",
+          "reports/lending_borrowing_findings/h-19-cross-chain-liquidation-uses-collateral-seize-amount-instead-of-repayment-a.md",
+          "reports/lending_borrowing_findings/h-02-liquidation-doesnt-account-for-penalty-when-calculating-collateral-to-give-.md",
+          "reports/lending_borrowing_findings/h-03-the-amount-of-debt-removed-during-liquidation-may-be-worth-more-than-the-ac.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "liquidation math error",
+          "logical error",
+          "wrong liquidation amount math",
+          "liquidation engine",
+          "liquidator call"
+        ],
+        "commonlyComposesWith": [
+          "liquidation",
+          "liquidation seizure economics miscalculation",
+          "liquidation seizure",
+          "executeliquidationcall",
+          "execute liquidation call"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: A liquidation amount variable crosses a unit boundary (shares → assets, principal → remaining principal, seize → repay) without the...",
+        "PROVE: *Path A: Share/asset unit confusion in full liquidation [S6]; Borrower accrues debt with borrowIndex > 1 (interest accrued).",
+        "FALSIFY: Not this bug when: shares are converted via rayMul(borrowIndex) / toAmount() before entering the liquidation math (Aave-style LiquidationLogic with proper...; Not this...",
+        "IMPACT: Borrower collateral over-seizure beyond the bonus-justified amount (2/8 unique findings: S1, S4-family)",
+        "Trace every liquidation amount variable end-to-end: is it shares or assets at each step? Is the index conversion present exactly once?",
+        "Can the same debt position appear twice in liquidation calldata? What does `type(uint256).max` expand to per entry?"
+      ],
+      "antipattern": "bonus-inflated collateralShare exceeds user collateral, clamped instead of re-derived",
+      "securePattern": "one debt entry per pool, cap checked against actual transferred amounts",
+      "validWhen": "Signal 1: A liquidation amount variable crosses a unit boundary (shares → assets, principal → remaining principal, seize → repay) without the corresponding...",
+      "invalidWhen": "Not this bug when: shares are converted via rayMul(borrowIndex) / toAmount() before entering the liquidation math (Aave-style LiquidationLogic with proper...; Not this...",
+      "impact": "Borrower collateral over-seizure beyond the bonus-justified amount (2/8 unique findings: S1, S4-family)",
+      "preconditions": [
+        "attacker control of: liquidation calldata (repay amounts, seize amounts, array contents), or an oracle/boundary making positions...",
+        "Attacker deposits 100e collateral, borrows 80e underlying.",
+        "Discount (2%) exceeds penalty effect (1%) — attacker profits by the spread."
+      ],
+      "proofShape": "*Path A: Share/asset unit confusion in full liquidation [S6] -> Borrower accrues debt with borrowIndex > 1 (interest accrued).",
+      "falsePositiveSignals": [
+        "Not this bug when: shares are converted via rayMul(borrowIndex) / toAmount() before entering the liquidation math (Aave-style LiquidationLogic with proper...",
+        "Not this bug when: the seized-value cap is validated against actual transferred amounts after state updates, or each poolId may appear at most once in the liquidation...",
+        "Safe if: penalty is applied symmetrically — collateral out and debt cleared both scale with repayAmount - penalty, and full-liquidation sweeps userDebt computed in..."
+      ]
+    },
+    {
+      "id": "lending-oracle-driven-liquidation-mispricing-oracle-driven-liquidation-misp-000",
+      "title": "Oracle-Driven Liquidation Mispricing in Lending Markets",
+      "severity": "MEDIUM",
+      "grep": "BetaOracleUniswapV2\\.convert|calculate_max_liquidation|BetaBank\\.liquidate|_getLiquidationInfo|liquidation_engine|getUnderlyingPrice",
+      "detect": "User-supplied oracle, unagreed** [O1]: `NFTPairWithOracle` lets the borrower set `params.oracle` at loan request;...",
+      "cat": [
+        "lending",
+        "liquidation",
+        "borrowing",
+        "collateral",
+        "bad-debt"
+      ],
+      "languages": [
+        "any"
+      ],
+      "ecosystem": [
+        "any"
+      ],
+      "ref": "DB/lending/liquidation/oracle-driven-liquidation-mispricing.md",
+      "lines": [
+        87,
+        378
+      ],
+      "reportEvidence": {
+        "count": 6,
+        "sampleReports": [
+          "reports/lending_borrowing_findings/h-01-avoidance-of-liquidation-via-malicious-oracle.md",
+          "reports/lending_borrowing_findings/m-1-missing-staleness-check-in-pythoracle-can-lead-to-forced-liquidations-and-th.md",
+          "reports/lending_borrowing_findings/h-03-the-use-of-spot-price-by-coresaltyfeed-can-lead-to-price-manipulation-and-u.md",
+          "reports/lending_borrowing_findings/h01-incorrect-uniswap-price-use-discourages-liquidations.md",
+          "reports/lending_borrowing_findings/m-01-liquidations-can-be-run-on-the-bogus-oracle-prices.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "unvalidated price input",
+          "data manipulation",
+          "bad price input to liquidation",
+          "liquidation engine",
+          "price feed read"
+        ],
+        "commonlyComposesWith": [
+          "oracle",
+          "liquidation",
+          "oracle driven liquidation mispricing lending markets",
+          "oracle driven",
+          "driven liquidation"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: A liquidation-eligibility or payout computation reads a price whose freshness, direction (base/quote), or source is not validated on that...",
+        "PROVE: *Path A: Stale Pyth price forces liquidation of healthy positions [O2]; Pyth feeds for both assets go un-updated for ~3 days (keeper outage, no sponsored feed on the...",
+        "FALSIFY: Not this bug when: the finding is purely about the price feed being manipulated (flash-loan spot poke of a DEX pool) with no lending-side consumption flaw — that is...;...",
+        "IMPACT: Healthy positions liquidated at non-market prices (3/6 unique findings: O2, O3, O5)",
+        "Who can influence every price input used at liquidation time (feed updater, pool trader, loan parameter setter)?",
+        "Is freshness enforced per-read, with a fallback, for push-style oracles?"
+      ],
+      "antipattern": "getPriceUnsafe returns ANY previously posted price, freshness unverified",
+      "securePattern": "current price must sit within a threshold of TWAP for state-changing actions",
+      "validWhen": "Signal 1: A liquidation-eligibility or payout computation reads a price whose freshness, direction (base/quote), or source is not validated on that path.; Signal 2:...",
+      "invalidWhen": "Not this bug when: the finding is purely about the price feed being manipulated (flash-loan spot poke of a DEX pool) with no lending-side consumption flaw — that is...;...",
+      "impact": "Healthy positions liquidated at non-market prices (3/6 unique findings: O2, O3, O5)",
+      "preconditions": [
+        "attacker control of: a Pyth update (anyone can call updatePriceFeeds), the loan's oracle parameter, or enough capital to move a...",
+        "Day 2 both assets +10%; Day 3 both -20% — attacker posts the Day-2 price for the borrow asset and the Day-3 price for the...",
+        "Attacker liquidates, extracting the liquidation discount.",
+        "Attacker pokes CoreSaltyFeed down another ~3% (cost ~0.0036 ETH) below the lagging TWAP.",
+        "Attacker liquidates first and claims the liquidation reward (default max $500)."
+      ],
+      "proofShape": "*Path A: Stale Pyth price forces liquidation of healthy positions [O2] -> Pyth feeds for both assets go un-updated for ~3 days (keeper outage, no sponsored feed on the chain).",
+      "falsePositiveSignals": [
+        "Not this bug when: the finding is purely about the price feed being manipulated (flash-loan spot poke of a DEX pool) with no lending-side consumption flaw — that is...",
+        "Not this bug when: staleness/deviation checks, fallback oracles, and TWAP-vs-spot thresholds are already enforced on the liquidation path.",
+        "Safe if: liquidation additionally requires the current price to be within a threshold of a TWAP, or uses a whitelisted oracle with heartbeat + deviation bounds."
+      ]
+    },
+    {
+      "id": "lending-self-liquidation-abuse-self-liquidation-abuse-in-lend-000",
+      "title": "Self-Liquidation Abuse in Lending Protocols",
+      "severity": "HIGH",
+      "grep": "flash_loan_guard_bypass_via_liquidation_move|LIQUIDATION_GRACE_PERIOD|healthscore_liquidation|idToBlockOfLastDeposit|CannotSeizeOwnPosition|DepositedInSameBlock",
+      "detect": "State reset on any liquidation** [L1]: `Aloe Borrower.liquidate` clears the warn bits (`slot0 = (slot0_ &...",
+      "cat": [
+        "lending",
+        "liquidation",
+        "borrowing",
+        "collateral",
+        "bad-debt"
+      ],
+      "languages": [
+        "any"
+      ],
+      "ecosystem": [
+        "any"
+      ],
+      "ref": "DB/lending/liquidation/self-liquidation-abuse.md",
+      "lines": [
+        84,
+        366
+      ],
+      "reportEvidence": {
+        "count": 7,
+        "sampleReports": [
+          "reports/lending_borrowing_findings/h-1-it-is-possible-to-frontrun-liquidations-with-self-liquidation-with-high-stra.md",
+          "reports/lending_borrowing_findings/proxy-based-self-liquidation-creates-bad-debt-for-lenders.md",
+          "reports/lending_borrowing_findings/h-10-flash-loan-protection-mechanism-can-be-bypassed-via-self-liquidations.md",
+          "reports/lending_borrowing_findings/self-liquidations-of-leveraged-positions-can-be-profitable.md",
+          "reports/lending_borrowing_findings/early-self-liquidations-receive-a-portion-of-future-fees-to-be-paid-by-other-cre.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "incentive design flaw",
+          "economic exploit",
+          "profitable or blocking self liquidation",
+          "liquidation engine",
+          "owner self liquidation"
+        ],
+        "commonlyComposesWith": [
+          "liquidation",
+          "self liquidation abuse lending protocols",
+          "self liquidation",
+          "liquidation abuse",
+          "liquidation_grace_period"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: Nothing structurally prevents msg.sender == position.owner (directly or through a second contract) from calling the liquidation/seize...",
+        "PROVE: *Path A: Self-liquidation clears the warning state (evasion) [L1]; Open a huge borrow with minimal margin; account becomes unhealthy and is warned.",
+        "FALSIFY: Not this bug when: self-liquidation is intentionally allowed but provably unprofitable (penalty >= discount on the collateral-out side) and cannot reset any blocking...;...",
+        "IMPACT: Risk-free value extraction from lenders/protocol (4/7 unique findings: L2, L3, L4, L7)",
+        "Can the owner (or any contract they deploy) reach the liquidation/seize entry for their own position?",
+        "Does any liquidation reset anti-abuse state regardless of resulting health?"
+      ],
+      "antipattern": "msg.sender identity is not the position owner when routed through a proxy",
+      "securePattern": "dedicated self-liquidation entry without bonus, or owner-restricted economics",
+      "validWhen": "Signal 1: Nothing structurally prevents msg.sender == position.owner (directly or through a second contract) from calling the liquidation/seize entry.; Signal 2: A...",
+      "invalidWhen": "Not this bug when: self-liquidation is intentionally allowed but provably unprofitable (penalty >= discount on the collateral-out side) and cannot reset any blocking...;...",
+      "impact": "Risk-free value extraction from lenders/protocol (4/7 unique findings: L2, L3, L4, L7)",
+      "preconditions": [
+        "the borrower can trigger their own liquidation — directly or via a proxy — the liquidation discount, grace-state reset,...",
+        "*Path B: Proxy bypass of the owner-seizure check (extraction) [L2]",
+        "Deploy two contracts: router (position owner) and seizer.",
+        "Router opens a position, deposits minimal collateral, calls unlock.",
+        "Self-liquidate A, directing collateral to account B — move never updates idToBlockOfLastDeposit[B]."
+      ],
+      "proofShape": "*Path A: Self-liquidation clears the warning state (evasion) [L1] -> Open a huge borrow with minimal margin; account becomes unhealthy and is warned.",
+      "falsePositiveSignals": [
+        "Not this bug when: self-liquidation is intentionally allowed but provably unprofitable (penalty >= discount on the collateral-out side) and cannot reset any blocking...",
+        "Not this bug when: position.owner == msg.sender checks use identity that survives proxies (e.g.",
+        "Safe if: liquidation-triggerable state can only be cleared when the position becomes healthy, and all fund-moving paths update manipulation guards."
+      ]
+    },
+    {
+      "id": "lending-health-factor-miscalculation-health-factor-and-collateral-r-000",
+      "title": "Health Factor and Collateral Ratio Miscalculation",
+      "severity": "HIGH",
+      "grep": "_validateMaxLTV\\(strategyId|userCollateralRatioMantissa|AccountHealth::add_token|precision_mixing_in_ratio|Market\\._isSolvent|balance_decimals_ignored",
+      "detect": "Precision mixing** [H1][H2]: Surge `userCollateralRatioMantissa = debtValue (loan-token precision) / collateralBalance (collateral-token precision)`.",
+      "cat": [
+        "lending",
+        "liquidation",
+        "borrowing",
+        "collateral",
+        "bad-debt"
+      ],
+      "languages": [
+        "any"
+      ],
+      "ecosystem": [
+        "any"
+      ],
+      "ref": "DB/lending/risk-params/health-factor-miscalculation.md",
+      "lines": [
+        86,
+        380
+      ],
+      "reportEvidence": {
+        "count": 9,
+        "sampleReports": [
+          "reports/lending_borrowing_findings/h-1-precision-differences-when-calculating-usercollateralratiomantissa-causes-ma.md",
+          "reports/lending_borrowing_findings/h-2-precision-differences-when-calculating-usercollateralratiomantissa-causes-ma.md",
+          "reports/lending_borrowing_findings/account-health-calculations-ignore-token-decimals.md",
+          "reports/lending_borrowing_findings/h-04-incorrect-solvency-check-because-it-multiplies-collateralizationrate-by-sha.md",
+          "reports/lending_borrowing_findings/h-22-lack-of-safety-buffer-between-liquidation-threshold-and-ltv-ratio-for-borro.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "health factor computation error",
+          "logical error",
+          "wrong collateralization math",
+          "risk engine",
+          "borrow or withdraw"
+        ],
+        "commonlyComposesWith": [
+          "liquidationthreshold",
+          "liquidation threshold",
+          "user collateral ratio mantissa",
+          "collateralization rate",
+          "ltv"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: The ratio's numerator and denominator carry different decimal scales (token decimals, price feed decimals, mantissa exponents) with no...",
+        "PROVE: *Path A: Precision mixing makes positions unliquidatable [H1]; User supplies SHIB (18 dec) collateral, borrows USDC (6 dec).",
+        "FALSIFY: Not this bug when: values are normalized to a common 18-decimal internal unit before every ratio (Aave-style oracle unit accounting) — check the actual...",
+        "IMPACT: Over-borrowing past MaxLTV / leverage limits (3/9 unique findings: H6, H9, and precision collapses)",
+        "For every ratio: list the decimals of each operand and the normalization applied.",
+        "Are rates/thresholds applied to amounts, never to shares, at every use site?"
+      ],
+      "antipattern": "rescale uses price/BP decimals only; token balance decimals dropped",
+      "securePattern": "18-decimal normalization before comparison (Surge fix)",
+      "validWhen": "Signal 1: The ratio's numerator and denominator carry different decimal scales (token decimals, price feed decimals, mantissa exponents) with no normalization step.;...",
+      "invalidWhen": "Not this bug when: values are normalized to a common 18-decimal internal unit before every ratio (Aave-style oracle unit accounting) — check the actual...",
+      "impact": "Over-borrowing past MaxLTV / leverage limits (3/9 unique findings: H6, H9, and precision collapses)",
+      "preconditions": [
+        "After the first partial liquidation the loan is still undercollateralized → liquidated again, churning penalties."
+      ],
+      "proofShape": "*Path A: Precision mixing makes positions unliquidatable [H1] -> User supplies SHIB (18 dec) collateral, borrows USDC (6 dec).",
+      "falsePositiveSignals": [
+        "Not this bug when: values are normalized to a common 18-decimal internal unit before every ratio (Aave-style oracle unit accounting) — check the actual normalization,...",
+        "Not this bug when: liquidation threshold intentionally equals LTV by documented design (rare; judges accepted the Tapioca finding because repeated-liquidation churn...",
+        "Safe if: strategy/market ids are derived from position storage, and thresholds are separate state variables strictly greater than LTV."
+      ]
+    }
+  ]
+}

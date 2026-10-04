@@ -1,0 +1,69 @@
+# cosmos 3
+
+> 131 nodes · cohesion 0.13
+
+## Key Concepts
+
+- **9. Operator Deregistration** (77 connections) — `DB/cosmos/app-chain/node-operator/minipool-node-vulnerabilities.md`
+- **2. Dos Consensus Halt** (67 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
+- **Keywords** (65 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
+- **1. Dos Block Production Halt [HIGH]** (63 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
+- **5. Dos Unbounded Array** (61 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
+- **Keywords** (61 connections) — `DB/cosmos/app-chain/bridge/cross-chain-bridge-vulnerabilities.md`
+- **1. Dos Function Revert [HIGH]** (59 connections) — `DB/cosmos/app-chain/dos/griefing-revert-dos.md`
+- **Keywords** (55 connections) — `DB/cosmos/app-chain/dos/gas-resource-exhaustion.md`
+- **Keywords** (53 connections) — `DB/cosmos/app-chain/dos/griefing-revert-dos.md`
+- **2. Dos Gas Metering Bypass** (51 connections) — `DB/cosmos/app-chain/dos/gas-resource-exhaustion.md`
+- **8. Dos Deposit Spam** (49 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
+- **dos_logic** (48 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
+- **Severity: Medium Risk** (47 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
+- **1. Dos Gas Limit Exploit [HIGH]** (47 connections) — `DB/cosmos/app-chain/dos/gas-resource-exhaustion.md`
+- **3. Dos State Machine** (45 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
+- **3. Bridge Relayer Exploit** (45 connections) — `DB/cosmos/app-chain/bridge/cross-chain-bridge-vulnerabilities.md`
+- **Medium Risk Report** (45 connections) — `DB/cosmos/app-chain/dos/gas-resource-exhaustion.md`
+- **5. Dos Large Payload** (43 connections) — `DB/cosmos/app-chain/dos/gas-resource-exhaustion.md`
+- **Severity: Medium Risk** (43 connections) — `DB/cosmos/app-chain/node-operator/minipool-node-vulnerabilities.md`
+- **7. Dos Message Flooding** (41 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
+- **4. Dos Unbounded Beginblock** (39 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
+- **6. Dos Panic Crash** (39 connections) — `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
+- **3. Dos Dust Grief** (39 connections) — `DB/cosmos/app-chain/dos/griefing-revert-dos.md`
+- **3. Minipool Slash Avoidance** (39 connections) — `DB/cosmos/app-chain/node-operator/minipool-node-vulnerabilities.md`
+- **2. Bridge Token Accounting** (37 connections) — `DB/cosmos/app-chain/bridge/cross-chain-bridge-vulnerabilities.md`
+- *... and 106 more nodes in this community*
+
+## Relationships
+
+- [cosmos 4](cosmos_4.md) (47 shared connections)
+- [cosmos](cosmos.md) (41 shared connections)
+- [cosmos 2](cosmos_2.md) (32 shared connections)
+- [cosmos 5](cosmos_5.md) (16 shared connections)
+- [cosmos 16](cosmos_16.md) (14 shared connections)
+- [cosmos 7](cosmos_7.md) (13 shared connections)
+- [cosmos 10](cosmos_10.md) (13 shared connections)
+- [cosmos 6](cosmos_6.md) (6 shared connections)
+- [cosmos 11](cosmos_11.md) (6 shared connections)
+- [cosmos 14](cosmos_14.md) (6 shared connections)
+- [cosmos 9](cosmos_9.md) (6 shared connections)
+- [cosmos 12](cosmos_12.md) (5 shared connections)
+
+## Source Files
+
+- `DB/cosmos/app-chain/access-control/authorization-vulnerabilities.md`
+- `DB/cosmos/app-chain/accounting/balance-tracking-errors.md`
+- `DB/cosmos/app-chain/bridge/cross-chain-bridge-vulnerabilities.md`
+- `DB/cosmos/app-chain/consensus/consensus-finality-vulnerabilities.md`
+- `DB/cosmos/app-chain/dos/chain-halt-consensus-dos.md`
+- `DB/cosmos/app-chain/dos/gas-resource-exhaustion.md`
+- `DB/cosmos/app-chain/dos/griefing-revert-dos.md`
+- `DB/cosmos/app-chain/governance/governance-voting-vulnerabilities.md`
+- `DB/cosmos/app-chain/node-operator/minipool-node-vulnerabilities.md`
+
+## Audit Trail
+
+- EXTRACTED: 132 (10%)
+- INFERRED: 1161 (90%)
+- AMBIGUOUS: 0 (0%)
+
+---
+
+*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*

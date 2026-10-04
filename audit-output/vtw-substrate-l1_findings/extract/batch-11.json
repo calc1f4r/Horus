@@ -1,0 +1,190 @@
+[
+ {
+  "file": "acala-trailofbits.md",
+  "findings": [
+   {
+    "line": 90,
+    "severity": "low",
+    "title": "low   severity   \ufb01ndings   are   about   the   inability   of   transferring   MAX   amount   of   ACA   tokens",
+    "excerpt": "low   severity   \ufb01ndings   are   about   the   inability   of   transferring   MAX   amount   of   ACA   tokens  \u00a0\n( TOB-ACA-004 ),   insecure   con\ufb01guration   for   running   Acala   docker   container   ( TOB-ACA-001 )  \u00a0\nand   missing   of   security-related   HTTP   headers   in   Acala-dapp   ( TOB-ACA-008 ).  \u00a0\n \u00a0\nIn   addition   to   the   \ufb01ndings,   we   documented   the   Homa   protocol   properties   we   tested   in  \u00a0\nAppendix   B    and   listed   the   steps   for   testing   a   local   Acala   node   using   its   development  \u00a0\naccounts   (Alice,   Bob,   etc.)   with   Acala-dapp   and   Polkadot   UI   in    Appendix   D .   We   also   included  \u00a0\nDocker   containers   recommendations   in    Appendix   C    and   documented   some   non-security  \u00a0\nissues   in   the    Appendix   E:   Code   Quality   Recommendations .  \u00a0\n \u00a0\nOverall,   Acala   is   a   complex   distributed   system   whose   security   heavily   depends   on   the  \u00a0\nchosen   parameters   and   protocols.   However,   Acala   lacks   proper   documentation   on   many  \u00a0\naspects   of   its   system,   which   results   in   misunderstanding   and   weak   implementation.  \u00a0\nMultiple   feature"
+   },
+   {
+    "line": 256,
+    "severity": "gas",
+    "title": "gas   fees.    TOB-ACA-011",
+    "excerpt": "gas   fees.    TOB-ACA-011  \u00a0\nLong   term  \u00a0\n\u2751    Consider   using   a    multi-stage   Docker   image   build    for   Acala   docker   image   and  \u00a0\nadding   only   the   necessary   binaries   to   the   resulting   image.    This   will   decrease   the   attack  \u00a0\nsurface   for   an   attacker   who   gains   code   execution   in   the   container   and   should   also   result   in  \u00a0\nsmaller   Docker   images.   Additionally,   review   the    Appendix   C:   Docker   Recommendations    for  \u00a0\nfurther   Docker   guidance.    TOB-ACA-001  \u00a0\n \u00a0\n\u2751    Add   tests   to   ensure   the   \"MAX\"   ACA   and   other   tokens   transfer   succeeds.    This   will  \u00a0\nprevent   similar   bugs   from   appearing   if   the   code   changes.   All   \ufb01nancial   transactions   should  \u00a0\nbe   tested   with   both   use   cases   and   misuse   cases.    TOB-ACA-004  \u00a0\n \u00a0\n\u2751    Implement   dependency   checks   for   Acala's   dependencies   (and   their   dependencies)  \u00a0\nas   part   of   the   CI/CD   pipeline   of   application   development.    Do   not   allow   builds   to  \u00a0\ncontinue   with   any   outdated   dependencies.    TOB-ACA-005  \u00a0\n \u00a0\n\u2751    Keep   track   of   the    polkadot.j"
+   },
+   {
+    "line": 310,
+    "severity": "informational",
+    "title": "Informational",
+    "excerpt": "Informational  \u00a0\n4  \u00a0 Transferring   \"max\"   ACA   tokens   through  \u00a0\nAcala-dapp   fails   and   only   burns   the   fees  \u00a0\nData   Validation  \u00a0 Low  \u00a0\n5  \u00a0 The   Substrate   dependency   \"chaostests\"  \u00a0\ncontain   out   of   date   dependencies   that  \u00a0\nhave   security   vulnerabilities \u00a0\nPatching  \u00a0 Informational  \u00a0\n6  \u00a0 Lack   of   proper   development   guidance   on  \u00a0\nusing   Acala-dapp   with   Acala  \u00a0\nDocumentation \u00a0 Informational  \u00a0\n7  \u00a0 CSRF   in    Acala/apps    settings   which   allows  \u00a0\nchanging   the   RPC   endpoint   URL  \u00a0\nData   Validation  \u00a0 Informational  \u00a0\n8  \u00a0 Missing   security-related   HTTP   headers   in  \u00a0\nthe   Acala-dapp   application  \u00a0\nCon\ufb01guration  \u00a0 Low  \u00a0\n9  \u00a0 Small   amounts   are   not   displayed   in  \u00a0\nAcala-dapp   or   are   displayed   in   a   scienti\ufb01c  \u00a0\nnotation  \u00a0\nUnde\ufb01ned  \u00a0\nBehavior"
+   },
+   {
+    "line": 332,
+    "severity": "informational",
+    "title": "Informational",
+    "excerpt": "Informational  \u00a0\n10 \u00a0 Providing   too   small   value   renders  \u00a0\nAcala-dapp   unresponsive  \u00a0\nDenial   of  \u00a0\nService"
+   },
+   {
+    "line": 337,
+    "severity": "informational",
+    "title": "Informational",
+    "excerpt": "Informational  \u00a0\n11 \u00a0 Documentation   is   incomplete  \u00a0 Documentation \u00a0 Informational  \u00a0\n\u00a9   2021   Trail   of   Bits  \u00a0 Acala   Assessment   |   9 \u00a0\n\n1.   Insecure   con\ufb01guration   for   running   Acala   node   in   a   Docker   container  \u00a0\nSeverity:   Low Di\ufb03culty:   High  \u00a0\nType:   Con\ufb01guration Finding   ID:   TOB-ACA-001  \u00a0\nTarget:    documentation   for   running   node   in   a   Docker   container   \n \u00a0\nDescription  \u00a0\nThe   Acala   documentation   describes   how   to   launch   an   Acala   node   in   a   Docker   container,  \u00a0\nfrom   the    acala/acala-node    docker   images.   While   those   images   run   the   node   process   as   a  \u00a0\nnon-root   user,   the   documented   way   to   run   them   does   not   prevent   the   user   to   gain   more  \u00a0\nprivileges.   This   may   allow   an   attacker   who   gets   code   execution   access   within   the   container  \u00a0\nto   escalate   their   privileges   in   certain   scenarios.  \u00a0\n \u00a0\nThe   \ufb01rst   docker   invocation   can   be   found   at   the    integration-guide/node-management  \u00a0\ndocumentation   page:  \u00a0\n  \ndocker   run   -p   9944:9944   acala/acala-node:0.6.2   --name   \n\"calling_home_from_a_docker_cont"
+   },
+   {
+    "line": 445,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation  \u00a0\nShort   term,   either   remove   the    sudo    functionality   from   the   Acala   chain   speci\ufb01cation   or, \u00a0\ndocument   how   it   will   be   disabled   or   removed   after   the   network   goes   live,   similarly   to   what  \u00a0\nthe    Polkadot   did   during   its   launch .  \u00a0\n \u00a0\n \u00a0 \u00a0\n \u00a0\n \u00a0\nacala_runtime::GenesisConfig     {   \n//   (...)   \npallet_sudo:    Some (SudoConfig     {     key:    root_key .clone()     }),  \u00a0\n\u00a9   2021   Trail   of   Bits  \u00a0 Acala   Assessment   |   12 \u00a0\n\n \u00a0\n3.   Changed   but   unused   liquidAmountToBurn   value  \u00a0\nSeverity:   Informational Di\ufb03culty:   High  \u00a0\nType:   Unde\ufb01ned   Behavior Finding   ID:   TOB-ACA-003  \u00a0\nTarget:    acala.js/packages/sdk-homa/src/staking-pool.ts   \n \u00a0\nDescription  \u00a0\nThere   are   two   places   in   the    acala.js    codebase   where   a   variable   of    liquidAmountToBurn    is  \u00a0\nintroduced,   used,   changed   but   unused   further   in   the   \ufb02ow   (Figures   3.1-2).   Those   cases  \u00a0\nshould   be   further   investigated   as   they   could   be   real   bugs.  \u00a0\n \u00a0\nFigure   3.1:   The    getStakingAmountInRedeemByFreeUnbonded    function  \u00a0\n( acala.js/packages/sdk-homa/src/staking-po"
+   },
+   {
+    "line": 475,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation  \u00a0\n \u00a0\n \u00a0\n    public    getStakingAmountInRedeemByFreeUnbonded( /*   (...)   */ ):   {    /*   (...)   */    }   {   \n      //   (...)   \n      let     liquidAmountToBurn    =   amount;   \n      let    demandStakingAmount   =   liquidExchangeRate.times( liquidAmountToBurn );   \n      //   (...)   \n      if    (!demandStakingAmount.isZero()   &&   !availableFreePool.isZero())   {   \n        if    (demandStakingAmount.isGreaterThan(availableFreePool))   {   \n          const    ratio   =   FixedPointNumber.fromRational(availableFreePool,   demandStakingAmount);   \n  \n          liquidAmountToBurn   =   ratio.times(liquidAmountToBurn);   \n         demandStakingAmount   =   availableFreePool;   \n       }   \n      //   (...)   -   the   liquidAmountToBurn   value   is   unused   \n   }   \n    public    getStakingAmountInClaimUnbonding( /*   (...)   */ ):   {    /*   (...)   */    }   {   \n      //   (...)   \n      let     liquidAmountToBurn    =   amount;   \n      let    demandStakingAmount   =   liquidExchangeRate.times( liquidAmountToBurn );   \n      //   (...)   \n      if    (!demandStakingAmount.isZero()   &&   !availableUnclaimedUnbonding.isZero())   {  \n        if    (d"
+   },
+   {
+    "line": 661,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation  \u00a0\nShort   term,   add   the   missing   security-related   HTTP   headers   to   Acala-dapp.   Prevent   the   site  \u00a0\nfrom   being   rendered   in   iframes   with    X-Frame-Options:   DENY    header   and   implement   the  \u00a0\nCSP   policy   and   validate   it   with   a    CSP   Evaluator .   This   will   help   mitigate   the   e\ufb00ects   of   attacks  \u00a0\nsuch   as   clickjacking   or   XSS.  \u00a0\n \u00a0\nLong   term,   track   the   further   developments   of   CSP   and   similar   web   browser   features   that  \u00a0\nhelp   with   mitigating   security   risk.   As   new   protections   are   developed,   ensure   they   are  \u00a0\nadopted   as   quickly   as   possible.  \u00a0\n \u00a0\nReferences  \u00a0\n\u25cf Mozilla   developer   docs:   Content   Security   Policy  \u00a0\n\u25cf CSP   evaluator   from   Google   \u00a0 \u00a0\n \u00a0\n \u00a0\n\u00a9   2021   Trail   of   Bits  \u00a0 Acala   Assessment   |   20 \u00a0\n\n9.   Small   amounts   are   not   displayed   in   Acala-dapp   or   are   displayed   in   a  \u00a0\nscienti\ufb01c   notation   \u00a0\u00a0\nSeverity:   Informational Di\ufb03culty:   Low  \u00a0\nType:   Unde\ufb01ned   Behavior Finding   ID:   TOB-ACA-009  \u00a0\nTarget:    Acala/acala-dapp   \n \u00a0\nDescription  \u00a0\nThe   Acala-dapp   presents   small   amou"
+   },
+   {
+    "line": 764,
+    "severity": "informational",
+    "title": "Recommendation",
+    "excerpt": "Recommendation  \u00a0\nShort   term,   expand   and   unify   the   documentation   to   better   cover   governance,   incentives,  \u00a0\nand   gas   fees.  \u00a0\n \u00a0\nLong   term,   regularly   review   public   documentation   to   ensure   it   is   kept   up   to   date   with   the  \u00a0\ncurrent   system.   \u00a0 \u00a0\n \u00a0\n \u00a0\n\u00a9   2021   Trail   of   Bits  \u00a0 Acala   Assessment   |   24 \u00a0\n\nA.   Vulnerability   Classi\ufb01cations  \u00a0\n \u00a0\n \u00a0\n \u00a0\n \u00a0\nVulnerability   Classes  \u00a0\nClass  \u00a0 Description  \u00a0\nAccess   Controls  \u00a0 Related   to   authorization   of   users   and   assessment   of   rights  \u00a0\nAuditing   and   Logging  \u00a0 Related   to   auditing   of   actions   or   logging   of   problems  \u00a0\nAuthentication  \u00a0 Related   to   the   identi\ufb01cation   of   users  \u00a0\nCon\ufb01guration  \u00a0 Related   to   security   con\ufb01gurations   of   servers,   devices,   or  \u00a0\nsoftware  \u00a0\nCryptography  \u00a0 Related   to   protecting   the   privacy   or   integrity   of   data  \u00a0\nData   Exposure  \u00a0 Related   to   unintended   exposure   of   sensitive   information  \u00a0\nData   Validation  \u00a0 Related   to   improper   reliance   on   the   structure   or   values   of   data  \u00a0\nDenial   of   Service  \u00a0 Related   to   causing   system   failure  "
+   },
+   {
+    "line": 798,
+    "severity": "informational",
+    "title": "Informational  \u00a0 The   issue   does   not   pose   an   immediate   risk,   but   is   relevant   to   security",
+    "excerpt": "Informational  \u00a0 The   issue   does   not   pose   an   immediate   risk,   but   is   relevant   to   security  \u00a0\nbest   practices   or   Defense   in   Depth  \u00a0\nUndetermined  \u00a0 The   extent   of   the   risk   was   not   determined   during   this   engagement"
+   },
+   {
+    "line": 801,
+    "severity": "low",
+    "title": "Low  \u00a0 The   risk   is   relatively   small   or   is   not   a   risk   the   customer   has   indicated   is",
+    "excerpt": "Low  \u00a0 The   risk   is   relatively   small   or   is   not   a   risk   the   customer   has   indicated   is  \u00a0\nimportant  \u00a0\n\u00a9   2021   Trail   of   Bits  \u00a0 Acala   Assessment   |   25"
+   },
+   {
+    "line": 809,
+    "severity": "medium",
+    "title": "Medium  \u00a0 Individual   user\u2019s   information   is   at   risk,   exploitation   would   be   bad   for",
+    "excerpt": "Medium  \u00a0 Individual   user\u2019s   information   is   at   risk,   exploitation   would   be   bad   for  \u00a0\nclient\u2019s   reputation,   moderate   \ufb01nancial   impact,   possible   legal  \u00a0\nimplications   for   client"
+   },
+   {
+    "line": 812,
+    "severity": "high",
+    "title": "High  \u00a0 Large   numbers   of   users,   very   bad   for   client\u2019s   reputation,   or   serious",
+    "excerpt": "High  \u00a0 Large   numbers   of   users,   very   bad   for   client\u2019s   reputation,   or   serious  \u00a0\nlegal   or   \ufb01nancial   implications  \u00a0\nDi\ufb03culty   Levels  \u00a0\nDi\ufb03culty  \u00a0 Description  \u00a0\nUndetermined  \u00a0 The   di\ufb03culty   of   exploit   was   not   determined   during   this   engagement"
+   },
+   {
+    "line": 817,
+    "severity": "low",
+    "title": "Low  \u00a0 Commonly   exploited,   public   tools   exist   or   can   be   scripted   that   exploit",
+    "excerpt": "Low  \u00a0 Commonly   exploited,   public   tools   exist   or   can   be   scripted   that   exploit  \u00a0\nthis   \ufb02aw"
+   },
+   {
+    "line": 819,
+    "severity": "medium",
+    "title": "Medium  \u00a0 Attackers   must   write   an   exploit,   or   need   an   in-depth   knowledge   of   a",
+    "excerpt": "Medium  \u00a0 Attackers   must   write   an   exploit,   or   need   an   in-depth   knowledge   of   a  \u00a0\ncomplex   system"
+   },
+   {
+    "line": 821,
+    "severity": "high",
+    "title": "High  \u00a0 The   attacker   must   have   privileged   insider   access   to   the   system,   may",
+    "excerpt": "High  \u00a0 The   attacker   must   have   privileged   insider   access   to   the   system,   may  \u00a0\nneed   to   know   extremely   complex   technical   details,   or   must   discover  \u00a0\nother   weaknesses   in   order   to   exploit   this   issue  \u00a0\n\u00a9   2021   Trail   of   Bits  \u00a0 Acala   Assessment   |   26 \u00a0\n\nB.   Homa   Properties  \u00a0\nThe   table   below   lists   properties   of   the   Homa   Tokenized   Liquidity   Staking   protocol   gathered  \u00a0\nand   tested   during   the   assessment.  \u00a0\n \u00a0\n \u00a0\n \u00a0\nProperty  \u00a0 Status  \u00a0\nMinting  \u00a0\nThe   user   receives   the   correct   amount   of  \u00a0\nLDOT  \u00a0\nMinting   uses    liquid_exchange_rate    to  \u00a0\ndetermine   the   correct   amount   of   LDOT   to  \u00a0\nissue.  \u00a0\nThe   system   takes   the   correct   amount   of  \u00a0\nDOT  \u00a0\nMinting   calls    the   DOT    transfer    function    to  \u00a0\ntransfer   the   amount   passed   to    mint .  \u00a0\nZero   mints   are   handled   properly  \u00a0 The   function    immediately   returns    if   the  \u00a0\namount   to   mint   is   zero.  \u00a0\nThe   user   can\u2019t   mint   an   amount   greater   than  \u00a0\ntheir   balance  \u00a0\nMinting   attempts   to   transfer   the   desired  \u00a0\namount   of   tokens   and   the   und"
+   }
+  ]
+ },
+ {
+  "file": "acala-c4-2401.md",
+  "findings": [
+   {
+    "line": 111,
+    "severity": "high",
+    "title": "High-level considerations for vulnerabilities span the following key areas",
+    "excerpt": "High-level considerations for vulnerabilities span the following key areas\nwhen conducting assessments:\n\u2022 Malicious Input Handling\n\u2022 Escalation of privileges\n\u2022 Arithmetic\n\u2022 Gas use\nFor more information regarding the severity criteria referenced throughout\nthe submission review process, please refer to the documentation provided\non the C4 website, speci\ufb01cally our section on Severity Categorization.\nSubmitted by ZanyBonzy, also found by ihtishamsudo\nThe rewards library holds the transfer_share_and_rewards allows for\nself transfer which can be used to double shares and rewards. Important to\nnote that the function, for now is not in use by the in-scope contracts.\nHowever, I still believe it\u2019s worth pointing out.\nCopy and paste the below test into tests.rs. It shows how users Alice and\nBob, by invoking this function, can increase their share/rewards balance."
+   },
+   {
+    "line": 127,
+    "severity": "high",
+    "title": "High Risk Findings (3)",
+    "excerpt": "High Risk Findings (3)\n[H-01] transfer_share_and_rewards allows for self\ntransfer\nProof of Concept\nAcala https://code4rena.com/reports/2024-03-acala\n5 of 52 09/06/2024, 14:14\n\nfntransfer_to_self() {\nExtBuilder::default().build().execute_with(|| {\n// Open a pool with bob holding 100 shares in the pool\nRewardsModule::add_share(&BOB, &DOT_POOL, \n// Accumulate rewards\nassert_ok!(RewardsModule::accumulate_reward\n// Alice deposits into the pool and gets shares, assert th\nRewardsModule::add_share(&ALICE, &DOT_POOL, \n// Assert that rewards still exist\nassert_ok!(RewardsModule::accumulate_reward\n// Gets pools info \nlet pool_info = RewardsModule::pool_infos\n// Ensures that reward transfer doesn't affect pool\nlet new_pool_info = RewardsModule::pool_infos\nassert_eq!(pool_info, new_pool_info, \"reward transfer does\n// Assert that Alice's share/rewards transfer to self succ\nassert_ok!(RewardsModule::transfer_share_and_rewards\n// Assert that alice's share/reward balance has now increa\nassert_eq!(\nRewardsModule::shares_and_withdrawn_rewards\n(190, vec![(NATIVE_COIN, 190)].into_iter\n);\n// Alice has discovered infinite money glitch? She tries a\n// Alice's transfers shares and rewards again to to self,"
+   },
+   {
+    "line": 376,
+    "severity": "medium",
+    "title": "Medium Risk Findings (4)",
+    "excerpt": "Medium Risk Findings (4)\n[M-01] Claiming rewards while the deduction rate is !\n= 0, allows for repeated withdrawal of redistributed\nrewards\nfnpayout_reward_and_reaccumulate_reward(\npool_id: PoolId,\nwho: &T::AccountId,\nreward_currency_id: CurrencyId,\npayout_amount: Balance,\nreaccumulate_amount: Balance,\n) -> DispatchResult {\nif !reaccumulate_amount.is_zero() {\n<orml_rewards::Pallet<T>>::accumulate_reward\n}\nT::Currency::transfer(reward_currency_id, &Self::\nOk(())\n}\nProof of Concept\nAcala https://code4rena.com/reports/2024-03-acala\n14 of 52 09/06/2024, 14:14\n\n#[test]\nfnrepeated_claiming() {\nExtBuilder::default().build().execute_with(|| {\nassert_ok!(TokensModule::deposit(BTC, &VAULT::\nassert_ok!(IncentivesModule::update_claim_reward_deduction\nRuntimeOrigin::signed(ROOT::get()),\nvec![(PoolId::Dex(BTC_AUSD_LP), Rate::\n));\nassert_ok!(IncentivesModule::update_claim_reward_deduction\nRuntimeOrigin::signed(ROOT::get()),\nvec![(PoolId::Dex(BTC_AUSD_LP), Rate::\n));\n// 40% deduction rate\nassert_ok!(IncentivesModule::update_claim_reward_deduction\nRuntimeOrigin::signed(ROOT::get()),\nvec![(PoolId::Dex(BTC_AUSD_LP), Rate::\n));\n// give RewardsSource tokens\nTokensModule::deposit(BTC, &RewardsSource::"
+   },
+   {
+    "line": 708,
+    "severity": "low",
+    "title": "Low Risk and Non-Critical Issues",
+    "excerpt": "Low Risk and Non-Critical Issues\n[01] Admin is a single point of failure\n/// The origin which may update incentive related params\ntypeUpdateOrigin: EnsureOrigin<Self::RuntimeOrigin>;\nImpact\nRecommended Mitigation Steps\nAcala https://code4rena.com/reports/2024-03-acala\n25 of 52 09/06/2024, 14:14\n\nthe incentive related params if anything were to happen to UpdateOrigin.\nThis is very rampant in code, for example, take a look here.\n[02] Consider adding better documentation\npubfnadd_share(who: &T::AccountId, pool: &T::PoolId, add_amount:\nif add_amount.is_zero() {\nreturn;\n}\nPoolInfos::<T>::mutate(pool, |pool_info| {\nlet initial_total_shares = pool_info.total_shares;\npool_info.total_shares = pool_info.total_shares.\nletmut withdrawn_inflation = Vec\npool_info\n.rewards\n.iter_mut()\n.for_each(|(reward_currency, (total_reward\nlet reward_inflation = \nZero::zero\n} else {\nU256::from\n.\n.\n.\n.\n.\n};\n*total_reward = total_reward.\n*total_withdrawn_reward = total_wi\nwithdrawn_inflation.\n});\nAcala https://code4rena.com/reports/2024-03-acala\n26 of 52 09/06/2024, 14:14"
+   }
+  ]
+ },
+ {
+  "file": "composable-audits-solana-ibc-avs-ottersec-pdf.md",
+  "findings": []
+ },
+ {
+  "file": "parallel-tob-3.md",
+  "findings": [
+   {
+    "line": 361,
+    "severity": "low",
+    "title": "Low-Level",
+    "excerpt": "Low-Level\nManipulation\nWe found no issues related to low-level manipulation.\nSatisfactory\nTesting and\nVeri\ufb01cation\nTest coverage is generally high, but some critical\nfunctionality has no corresponding negative testing, as\ndescribed in\nTOB-PARASPACE-1\n.\nModerate\nTrail of Bits\n11\nParaspace Security Assessment\nPUBLIC\n\n\nSummary of Findings\nThe table below summarizes the \ufb01ndings of the review, including type and severity details.\nID\nTitle\nType\nSeverity\n1\nMissing negative tests for several assertions\nTesting\nInformational\n2\nUse of a magic constant with unclear meaning for\nthe sAPE unstaking incentive\nCon\ufb01guration\nInformational\nTrail of Bits\n12\nParaspace Security Assessment\nPUBLIC\n\n\nDetailed Findings"
+   },
+   {
+    "line": 678,
+    "severity": "low",
+    "title": "Low-Level",
+    "excerpt": "Low-Level\nManipulation\nThe justi\ufb01ed use of inline assembly and low-level calls\nTesting and\nVeri\ufb01cation\nThe presence of robust testing procedures (e.g., unit tests, integration\ntests, and veri\ufb01cation methods) and su\ufb03cient test coverage\nRating Criteria\nRating\nDescription\nStrong\nNo issues were found, and the system exceeds industry standards.\nSatisfactory"
+   },
+   {
+    "line": 691,
+    "severity": "informational",
+    "title": "Minor issues were found, but the system is compliant with best practices.",
+    "excerpt": "Minor issues were found, but the system is compliant with best practices.\nModerate\nSome issues that may a\ufb00ect system safety were found.\nTrail of Bits\n19\nParaspace Security Assessment\nPUBLIC\n\n\nWeak\nMany issues that a\ufb00ect system safety were found.\nMissing\nA required component is missing, signi\ufb01cantly a\ufb00ecting system safety.\nNot Applicable\nThe category is not applicable to this review.\nNot Considered\nThe category was not considered in this review.\nFurther\nInvestigation\nRequired\nFurther investigation is required to reach a meaningful conclusion.\nTrail of Bits\n20\nParaspace Security Assessment\nPUBLIC\n\n\nC. Non-Security-Related Findings\nThe following recommendations are not associated with speci\ufb01c vulnerabilities. However,\nthey enhance code readability and may prevent the introduction of vulnerabilities in the\nfuture.\n\u25cf\nThe\nDefaultReserveInterestRateStrategy\ncontract de\ufb01nes\nboth a\nborrowUsageRatio\nand a\nsupplyUsageRatio\nvariable"
+   }
+  ]
+ },
+ {
+  "file": "reef-halborn.md",
+  "findings": []
+ },
+ {
+  "file": "astar-srl-2403.md",
+  "findings": [
+   {
+    "line": 93,
+    "severity": "low",
+    "title": "1 low severity), which are summarized in Table 1.",
+    "excerpt": "1 low severity), which are summarized in Table 1. \nIssue Severity References Status \nMissing benchmarking for the lockdrop \nprecompile dispatch"
+   },
+   {
+    "line": 97,
+    "severity": "informational",
+    "title": "Info [2] Closed",
+    "excerpt": "Info [2] Closed \nUnbounded call length limit in lockdrop \ndispatch call"
+   },
+   {
+    "line": 100,
+    "severity": "low",
+    "title": "Low [3] Closed",
+    "excerpt": "Low [3] Closed \nTable 1 Code audit issue summary \n3.2 Detailed findings \n3.2.1 Missing benchmarking for the lockdrop precompile dispatch \nAttack scenario Static ref_time used for weight calculation leading to underestimation \nof the weights can enable an attacker to perform denial of service \nLocation precompiles/dispatch-lockdrop \nTracking [2] \nAttack impact An attacker may spam and conduct denial of service attacks cheaply in \ncomparison to the actual weight_to_gas price \nSeverity Info \nStatus Closed [4] \n \nThe precompile dispatch-lockdrop has un-benchmarked weight_to_gas estimation with \nref_time configured to 1_000_000_000 [5].  \n// Record a fixed amount of weight to ensure there is no free execution \nhandle.record_cost(Runtime::GasWeightMapping::weight_to_gas( \n    Weight::from_parts(1_000_000_000u64, 0), \n))?; \n\n \nSRL-Astar-lockdrop-precompile-audit-report-final Page 5 of 6  \nDas Logo Horizontal\n\u2014 Pos / Neg\n3\nThis estimation doesn\u2019t reflect the actual runtime environment and can aid an attacker to spam \nthe chain.   \nWe suggest to appropriately benchmark the precompile dispatch to reflect the accurate \nweight_to_gas estimation for ref_time and POV_size. \nThe issue was acknowl"
+   }
+  ]
+ },
+ {
+  "file": "chainflip-backend-security-md.md",
+  "findings": []
+ }
+]

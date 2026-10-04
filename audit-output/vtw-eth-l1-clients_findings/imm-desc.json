@@ -1,0 +1,1330 @@
+[
+ {
+  "f": "37104-bc-insight-reth-rpc-is-vulnerable-to-dns-rebinding-attacks.md",
+  "bytes": 4079,
+  "title": "#37104 \\[BC-Insight] Reth RPC is vulnerable to DNS rebinding attacks",
+  "sev": "Insight",
+  "tgt": "https://github.com/paradigmxyz/reth",
+  "desc": "## Brief/Intro Reth's RPC does not check the host origin of RPC requests which allows DNS rebinding attacks. Note, this does not require a user configuring CORS and the default configuration is vulnerable as DNS rebinding bypasses same origin policies. ## Vulnerability Details A user opens a malicious website on the same machine as they are running a Reth node that has not exposed its RPC to the internet. However, by responding to DNS queries with 127.0.0.1 instead of the server's IP, the website is able to send fetch requests to 127.0.0.1:8545, bypassing same origin policy. This is due to the"
+ },
+ {
+  "f": "37113-bc-low-https-github.md",
+  "bytes": 2502,
+  "title": "Page Not Found",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "37120-bc-insight-remote-handshake-based-tcp-30303-flooding-leads-to-an-out-of-memory-crash.md",
+  "bytes": 5769,
+  "title": "#37120 \\[BC-Insight] Remote handshake-based TCP/30303 flooding leads to an out-of-memory crash",
+  "sev": "Insight",
+  "tgt": "https://github.com/NethermindEth/nethermind",
+  "desc": "## Brief/Intro A critical remote P2P crash vulnerability has been identified in Nethermind 1.29.1 (latest). If used in the wild it would result in netsplits. ## Vulnerability Details When blank, telnet-like TCP connections are opened and closed as quickly as possible over TCP/30303, from a multithreaded attack script, an OOM crash occurs in the `nethermind` process - causing it to kill itself and require a manual reboot by node operators. An attacker would hop the Ethereum network by handshaking into public nodes, gathering their peers, hopping from those, etc. until every `ip:port` in the net"
+ },
+ {
+  "f": "37134-bc-insight-improper-secp256k-sanitization.md",
+  "bytes": 6694,
+  "title": "#37134 \\[BC-Insight] Improper secp256k sanitization",
+  "sev": "Insight",
+  "tgt": "https://github.com/prysmaticlabs/prysm",
+  "desc": "Hey Prysm, Ethereum Foundation, Triagers, We stumbled upon something during our research and we hope this adds some value to the Prysm team. ## Description Inside `crypto/ecdsa/utils.go::ConvertToInterfacePubkey()`: ```go func ConvertToInterfacePubkey(pubkey *ecdsa.PublicKey) (crypto.PubKey, error) { xVal, yVal := new(btcec.FieldVal), new(btcec.FieldVal) if xVal.SetByteSlice(pubkey.X.Bytes()) { return nil, errors.Errorf(\"X value overflows\") } if yVal.SetByteSlice(pubkey.Y.Bytes()) { return nil, errors.Errorf(\"Y value overflows\") } // @audit does not verify that the pubkey is on the secp256k1 c"
+ },
+ {
+  "f": "37148-bc-insight-wantedpeerdials-branch-will-never-be-executed.md",
+  "bytes": 8793,
+  "title": "#37148 \\[BC-Insight] \\`wantedPeerDials()\\` branch will never be executed",
+  "sev": "Insight",
+  "tgt": "https://github.com/prysmaticlabs/prysm",
+  "desc": "Hey Triagers, Ethereum Foundation, Prysm! We encountered the following during our research and we think it can add value to the Prysm team. ## Description Inside `prysm/beacon-chain/p2p/discovery.go::listenForNodes()` we can find the following: ```go func (s *Service) listenForNewNodes() { //.. if s.isPeerAtLimit(false /* inbound */) { // Pause the main loop for a period to stop looking // for new peers. log.Trace(\"Not looking for peers, at peer limit\") time.Sleep(pollingPeriod) continue } wantedCount := s.wantedPeerDials() if wantedCount == 0 { log.Trace(\"Not looking for peers, at peer limit\""
+ },
+ {
+  "f": "37153-bc-insight-malicious-validator-can-bring-down-honest-nodes.md",
+  "bytes": 7209,
+  "title": "#37153 \\[BC-Insight] Malicious validator can bring down honest nodes",
+  "sev": "Insight",
+  "tgt": "https://github.com/prysmaticlabs/prysm",
+  "desc": "Hey friends, We stumbled upon the following during our research & hope this will add value to the Prysm team. ## Description If we take a look at `validateBlsToExecutionChange()`, we can see the following: ```go func (s *Service) validateBlsToExecutionChange(ctx context.Context, pid peer.ID, msg *pubsub.Message) (pubsub.ValidationResult, error) { //.. // Validate that the execution change object is valid. _, err = blocks.ValidateBLSToExecutionChange(st, blsChange) //.. } ``` `ValidateBLSToExecutionChange()` is called. Now, let's take a look at `ValidateBLSToExecutionChange()`: ```go func Valid"
+ },
+ {
+  "f": "37186-bc-insight-missing-validation-for-fixed-size-bytes-types-in-abi-parsing.md",
+  "bytes": 3662,
+  "title": "#37186 \\[BC-Insight] Missing Validation for Fixed-Size bytes Types in ABI Parsing",
+  "sev": "Insight",
+  "tgt": "https://github.com/ledgerwatch/erigon",
+  "desc": "## Brief/Intro In the NewType function within type.go, there is a lack of validation for the size of fixed-length bytes types. ## Vulnerability Details According to the argument encoding for the solidity, the bytes should limited to 32 bytes:\\ <https://docs.soliditylang.org/en/v0.8.23/abi-spec.html> \\| bytes: binary type of M bytes, 0 < M <= 32. However, such limitation is missing in the accounts/abi/type.go: ``` case \"bytes\": if varSize == 0 { typ.T = BytesTy } else { typ.T = FixedBytesTy typ.Size = varSize } ``` Also, it should be noted the validation has been added in Geth: <https://github."
+ },
+ {
+  "f": "37191-bc-insight-unvalidated-field-names-in-tuple-abi-parsing-causes-runtime-panic-via-reflect.md",
+  "bytes": 3087,
+  "title": "Page Not Found",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "37199-bc-low-potential-chain-fork-due-to-shallow-copy-of-byte-slice.md",
+  "bytes": 7212,
+  "title": "#37199 \\[BC-Low] Potential Chain Fork Due to Shallow Copy of Byte Slice",
+  "sev": "Low",
+  "tgt": "https://github.com/ledgerwatch/erigon",
+  "desc": "## Brief/Intro A potential chain fork has been discovered in the Ethereum client Erigon ( <https://github.com/erigontech/erigon> ) due to the shallow copy of the byte slice in precompile contract dataCopy. ## Vulnerability Details The issue outlined in this report pertains to the precompile contract dataCopy, detailed as follows: Affected Codebase: <https://github.com/erigontech/erigon/tree/v2.61.0-beta1> The precompile contract dataCopy is utilized to copy the input (byte slice): <https://github.com/erigontech/erigon/blob/v2.61.0-beta1/core/vm/contracts.go#L303> ``` // data copy implemented a"
+ },
+ {
+  "f": "37210-bc-insight-missing-check-of-http-batch-response-length.md",
+  "bytes": 9293,
+  "title": "#37210 \\[BC-Insight] Missing Check of HTTP Batch Response Length",
+  "sev": "Insight",
+  "tgt": "https://github.com/ledgerwatch/erigon",
+  "desc": "## Brief/Intro The Client.BatchCallContext in the rpc package of Ethereum client Erigon ( <https://github.com/erigontech/erigon> ) could be stuck due to the missing check of the HTTP batch response length in the sendBatchHTTP(). ## Vulnerability Details Affected Codebase:\\ <https://github.com/erigontech/erigon/tree/v2.61.0-beta1> In the rpc package, the Client.BatchCall() is used to send all requests in a single batch, which calls the Client.BatchCallContext() to perform the batched calls, in which the Client.sendBatchHTTP() will be invoked in case that it\u2019s an HTTP request: <https://github.co"
+ },
+ {
+  "f": "37246-bc-low-lodestar-snappy-checksum-issue.md",
+  "bytes": 5371,
+  "title": "#37246 \\[BC-Low] lodestar snappy checksum issue",
+  "sev": "Low",
+  "tgt": "https://github.com/chainsafe/lodestar",
+  "desc": "## Brief/Intro Lodestar does not verify checksum in snappy framing uncompressed chunks. ## Vulnerability Details In Req/Resp protocol the messages are encoded by using ssz\\_snappy encoding,\\ which is a snappy framing compression over ssz encoded message. In snappy framing format there are uncompressed chunks, each such chunk is prefixed with a checksum. Let's see how golang implementation parses such chunks - <https://github.com/golang/snappy/blob/master/decode.go#L176> ``` case chunkTypeUncompressedData: // Section 4.3. Uncompressed data (chunk type 0x01). if chunkLen < checksumSize { r.err ="
+ },
+ {
+  "f": "37286-sc-insight-elimination-of-security-checks-in-forkcreator-class.md",
+  "bytes": 4147,
+  "title": "#37286 \\[SC-Insight] Elimination of Security Checks in ForkCreator Class",
+  "sev": "Insight",
+  "tgt": "https://github.com/ethereum/execution-specs",
+  "desc": "\\#Summary: The ForkCreator class and its associated methods (find\\_replace and duplicate\\_fork) fail to validate user input (from\\_fork and to\\_fork) before constructing file paths or performing file operations. This lack of input validation allows attackers to bypass intended security controls, such as directory traversal prevention or file overwriting safeguards. Attackers can exploit this vulnerability to: 1- Perform directory traversal attacks to access sensitive system files.\\ 2- Overwrite arbitrary files or directories, potentially causing data loss or privilege escalation. Vuln Code Sni"
+ },
+ {
+  "f": "37300-bc-insight-incorrect-encoding-of-negative-big.md",
+  "bytes": 2799,
+  "title": "Page Not Found",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "37350-bc-insight-null-is-not-unmarshalled-correctly-into-json.md",
+  "bytes": 2864,
+  "title": "Page Not Found",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "37351-bc-insight-resubscribe-deadlocks-when-unsubscribing-within-an-unblock-channel.md",
+  "bytes": 6403,
+  "title": "#37351 \\[BC-Insight] Resubscribe Deadlocks When Unsubscribing Within An Unblock Channel",
+  "sev": "Insight",
+  "tgt": "https://github.com/ledgerwatch/erigon",
+  "desc": "## Brief/Intro `ResubscribeErr` located in Ethereum client Erigon ( <https://github.com/erigontech/erigon> ) is intended to perform event subscription. It waits for the subscription to fail and calls fn again. This process repeats until `Unsubscribe` is called or the active subscription ends successfully. The resub goroutine needs to live long enough to read from the unsub channel. Otherwise, an Unsubscribe call deadlocks when writing to the unblock unsub channel. ## Vulnerability Details Affected Codebase:\\ <https://github.com/erigontech/erigon/tree/v2.61.0-beta1> In the event package, the `R"
+ },
+ {
+  "f": "37352-bc-insight-missing-liveness-check-in-collecttablenodes.md",
+  "bytes": 6419,
+  "title": "#37352 \\[BC-Insight] Missing Liveness Check in \\`collectTableNodes()\\`",
+  "sev": "Insight",
+  "tgt": "https://github.com/ledgerwatch/erigon",
+  "desc": "## Brief/Intro An issue that the node misses liveness check will be added to the node table with `collectTableNodes()` was identified in the Ethereum client Erigon ( <https://github.com/erigontech/erigon> ). ## Vulnerability Details Affected Codebase:\\ <https://github.com/erigontech/erigon/tree/v2.61.0-beta1> The function `collectTableNodes()` is intended to collect all the nodes for the FindNode result given a specified distance: <https://github.com/erigontech/erigon/blob/v2.60.10/accounts/abi/type.go#L158> ``` func (t *UDPv5) collectTableNodes(rip net.IP, distances []uint, limit int) []*enod"
+ },
+ {
+  "f": "37359-bc-insight-failure-to-generate-abi-binding-in-golang.md",
+  "bytes": 28569,
+  "title": "#37359 \\[BC-Insight] Failure to Generate ABI Binding in Golang",
+  "sev": "Insight",
+  "tgt": "https://github.com/ledgerwatch/erigon",
+  "desc": "## Brief/Intro Abigen fails to generate ABI binding of Solidity code in the accounts/abi package when the keyword of Golang is passed as the inputs of the binding. ## Vulnerability Details Affected Codebase:\\ <https://github.com/erigontech/erigon/tree/v2.61.0-beta1> The Ethereum client Erigon (<https://github.com/erigontech/erigon>) provides the Abigen tool to generate the Golang wrapper around a Solidity contract ABI: <https://github.com/erigontech/erigon/blob/v2.61.0-beta1/accounts/abi/bind/bind.go#L60> ``` func Bind(types []string, abis []string, bytecodes []string, fsigs []map[string]strin"
+ },
+ {
+  "f": "37442-bc-insight-potential-address-collision-with-precompile-contract-during-contract-deployment.md",
+  "bytes": 12846,
+  "title": "#37442 \\[BC-Insight] Potential Address Collision with Precompile Contract During Contract Deployment",
+  "sev": "Insight",
+  "tgt": "https://github.com/ledgerwatch/erigon",
+  "desc": "## Brief/Intro Within the contract deployment in the Erigon, it misses the check that the newly created contract address does not belong to the precompile contract addresses, which leads to the address collision. ## Vulnerability Details Affected Codebase:\\ <https://github.com/erigontech/erigon/tree/v2.61.0-beta1> The function `create()` is utilized to create a contract via contract deployment transaction, opcode Create and Create2. <https://github.com/erigontech/erigon/blob/v2.61.0-beta1/core/vm/evm.go#L353> ``` func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gasRemaining"
+ },
+ {
+  "f": "37462-bc-low-invalid-rlp-decoding-for-single-bytes.md",
+  "bytes": 6817,
+  "title": "#37462 \\[BC-Low] Invalid RLP decoding for single bytes",
+  "sev": "Low",
+  "tgt": "https://github.com/hyperledger/besu",
+  "desc": "## Brief/Intro The `decodeOne` function in the `RLP` class has a bug which makes it accept invalid inputs for an encoded value that has the same prefix as a single byte and could trigger consensus failures if the MPT contains some invalid state. ## Vulnerability Details There is a corectness bug in the implementation of the `RLP.decodeOne` function.\\ Indeed, if we look at the [Ethereum official documentation about the RLP format](https://ethereum.org/en/developers/docs/data-structures-and-encoding/rlp/), it is stated that ``` RLP encoding is defined as follows: ... - For a single byte whose va"
+ },
+ {
+  "f": "37466-bc-medium-evil-client-oom-crash-fast-p2p-crash.md",
+  "bytes": 5561,
+  "title": "#37466 \\[BC-Medium] Evil-client OOM crash (fast P2P crash)",
+  "sev": "Medium",
+  "tgt": "https://github.com/NethermindEth/nethermind",
+  "desc": "## Brief/Intro A new critical remote P2P crash vulnerability has been identified in Nethermind 1.29.1 (latest). If used in the wild it would result in netsplits - as is also seen in report #37120, although this crash is triggered significantly faster from a single attacking machine. To be precise - both attacks result in the same netsplits - with this attack just being a bit faster. ## Vulnerability Details Requesting block receipts isn't sufficiently rate-limited. By handshaking into `nethermind`, which oddly doesn't require the same 1 IP per 30 seconds rule as `geth` does, completing the han"
+ },
+ {
+  "f": "37483-bc-insight-there-is-a-trace-discrepancy-for-nethermind-when-handling-eof-from-push-opcode.md",
+  "bytes": 4920,
+  "title": "#37483 \\[BC-Insight] There is a trace discrepancy for Nethermind when handling EOF from PUSH opcode",
+  "sev": "Insight",
+  "tgt": "https://github.com/NethermindEth/nethermind",
+  "desc": "## Brief/Intro Hey There, I was testing Nethermind, GETH, and EELS evms, using goevmlab and I found out that Nethermind treated push opcode EOF differently. ## Vulnerability Details Traces specification is introduced in the eip 3155 <https://eips.ethereum.org/EIPS/eip-3155>, and it will be emitted for every instruction in the lifetime of the transaction, for example, Push4 (0x63) meaning it is pushing the next 4 bytes to the stack, so 0x63deadbeef will push \"deadbeef\" to the stack, and it will emit the trace for this push4 instruction, this also means that during the execution of this transact"
+ },
+ {
+  "f": "37505-bc-insight-remotely-spamming-1-byte-leads-to-full-peer-removal-and-desync-in-both-execution-an.md",
+  "bytes": 6887,
+  "title": "#37505 \\[BC-Insight] Remotely spamming 1 byte leads to full peer removal and desync in both execution and consensus clients",
+  "sev": "Insight",
+  "tgt": "https://github.com/Consensys/teku",
+  "desc": "## Brief/Intro A remote desynchronization (P2P DoS) exploit has been identified in Teku 24.10.3. A single attacking machine can disable remote nodes by spamming a blank space over raw tcp/9000. ## Vulnerability Details The latest release is susceptible to a simple remote DoS. Unlike a process crash, it recovers after a couple of minutes when the script is turned off - but with a sustained botnet attack, it's an irrelevant detail, because the attack would come from a botnet regardless. During the attack, the test/victim node machine running `teku` struggles to operate and maintain SSH comms - d"
+ },
+ {
+  "f": "37568-bc-insight-missing-specification-logic.md",
+  "bytes": 3887,
+  "title": "#37568 \\[BC-Insight] missing specification logic",
+  "sev": "Insight",
+  "tgt": "https://github.com/chainsafe/lodestar",
+  "desc": "### Brief/Intro Lacking the logic which the length of KZG commitments is less than or equal to the limitation defined in Consensus Layer ### Vulnerability Details Lacking the logic of the following. The type of the payload of this topic changes to the (modified) SignedBeaconBlock found in Deneb. \\[Modified in Deneb:EIP4844] New validation: \\[REJECT] The length of KZG commitments is less than or equal to the limitation defined in Consensus Layer -- i.e. validate that len(body.signed\\_beacon\\_block.message.blob\\_kzg\\_commitments) <= MAX\\_BLOBS\\_PER\\_BLOCK ### Impact Details A bug in specificatio"
+ },
+ {
+  "f": "37577-bc-insight-tx.md",
+  "bytes": 2518,
+  "title": "Page Not Found",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "37582-sc-low-incorrect-hexstring-parsing-leads-to-compilation-error-or-type-confusion.md",
+  "bytes": 6675,
+  "title": "#37582 \\[SC-Low] Incorrect HexString Parsing Leads To Compilation Error Or Type Confusion",
+  "sev": "Low",
+  "tgt": "https://github.com/vyperlang/vyper",
+  "desc": "## Brief/Intro Hex string pre-parsing without considering position adjustments may result in mismatched offsets, and eventually cause compiler failure or type confusions. ## Vulnerability Details Vyper supports several custom syntax, and one of those are HexString, written in the `x'01234'` syntax, and treated as `Bytes[]` literal values. Since HexString is not legal python syntax, a pre-parsing pass must be made to \"fix\" the code before passing it to python.ast module for parsing. The fixing rule is relatively simple, it just strips the leading `x`, and track occurances in `hex_string_locatio"
+ },
+ {
+  "f": "37583-sc-low-incorrect-for-annotation-parsing.md",
+  "bytes": 6743,
+  "title": "#37583 \\[SC-Low] Incorrect For Annotation Parsing",
+  "sev": "Low",
+  "tgt": "https://github.com/vyperlang/vyper",
+  "desc": "## Brief/Intro For loop extracts annotation parsing and constructs ast separately for it. However, insufficient validation allows otherwise illegal code to compile, and create ambiguity in the intended behavior of contracts. ## Vulnerability Details Python for loops does not support type annotation for iterator variable. However, since vyper is a strongly typed language, it requires the type to be specified. This introduces the need for pre-parsing of for loops to extract out the type annotation, \"fix\" the code. ``` class ForParser: def __init__(self, code): self._code = code self.annotations "
+ },
+ {
+  "f": "37584-sc-insight-nonpayable-not-respected-for-internal-function.md",
+  "bytes": 8400,
+  "title": "#37584 \\[SC-Insight] Nonpayable Not Respected For Internal Function",
+  "sev": "Insight",
+  "tgt": "https://github.com/vyperlang/vyper",
+  "desc": "## Brief/Intro Vyper merges payable / nonpayable distinctions into mutability enum allowing those decorators to be used for internal functions, but does not fully enforces it. This may lead to ambiguity on what contract functions guard against. In the worst case, this may result in missed checks causing program behavior to diverge from user intentions, and eventually lead to funds loss. ## Vulnerability Details Vyper `StateMutability` encompasses both `pure` / `view` / (`mutable`) and the slightly different `payable` / `nonpayable` distinctions. ``` class StateMutability(StringEnum): PURE = en"
+ },
+ {
+  "f": "37593-bc-insight-inconsistent-address-collision-check-against-precompile-contracts-during-contract-d.md",
+  "bytes": 16232,
+  "title": "#37593 \\[BC-Insight] Inconsistent Address Collision Check Against Precompile Contracts During Contract Deployment",
+  "sev": "Insight",
+  "tgt": "https://github.com/paradigmxyz/reth",
+  "desc": "## Brief/Intro Within the contract deployment in the Revm (utilized in Ethereum execution client, Reth), it has the check that the newly created contract address does not belong to the precompile contract addresses, while the Ethereum execution specs and other Ethereum execution clients do not have such check. Though it is unlikely to happen due to the hardness of hash collision, it could lead to consensus issues once it\u2019s triggered. ## Vulnerability Details Affected Codebase:\\ <https://github.com/bluealloy/revm/tree/v50> The function `make_create_frame()` is utilized to create a contract via "
+ },
+ {
+  "f": "37594-sc-insight-nimbus-incorrectly-rejects-non-minimally-encoded-snappy-data-lengths-due-to-spec.md",
+  "bytes": 3103,
+  "title": "Page Not Found",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "37634-sc-low-incorrect-builtin-erc4626-call-signature.md",
+  "bytes": 4308,
+  "title": "#37634 \\[SC-Low] Incorrect Builtin ERC4626 Call Signature",
+  "sev": "Low",
+  "tgt": "https://github.com/vyperlang/vyper",
+  "desc": "## Brief/Intro Vyper provides several common builtin interfaces to save developer the troubles of having to define those themselves. Unfortunately, the interface of ERC4626 may produce incorrect signatures, potentially leading to call failures or calling incorrect functions. ## Vulnerability Details The ERC4626.vyi builtin interface provided by vyper contains several functions with optional arguments. ``` @external def deposit(assets: uint256, receiver: address=msg.sender) -> uint256: ... @external def mint(shares: uint256, receiver: address=msg.sender) -> uint256: ... @external def withdraw(a"
+ },
+ {
+  "f": "37646-bc-insight-no-implementation-of-blob.md",
+  "bytes": 2776,
+  "title": "Page Not Found",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "37695-bc-insight-executing-transaction-that-has-a-wrong-nonce-might-triggered-a-chain-split-due-to-m.md",
+  "bytes": 8734,
+  "title": "#37695 \\[BC-Insight] Executing transaction that has a wrong nonce might triggered a chain split due to mismatch stateroot",
+  "sev": "Insight",
+  "tgt": "https://github.com/NethermindEth/nethermind",
+  "desc": "## Brief/Intro Hey There, I am doing statetest using goevmlab and found out that executing a transaction that has a wrong nonce leads to a Nethermind client diverging from GETH and the spec, which can be seen by their stateroot after the transaction was executed, this means that Nethermind is not consistent with GETH when executing those transaction. ## Vulnerability Details When submitting a transaction, nonce is one of the args that's getting submitted to the blockchain, and it will increment for every executed transaction. I found out that Nethermind execution client is not consistent with "
+ },
+ {
+  "f": "37985-sc-low-incorrectly-eliminate-code-with-side-effect-in-slice-args.md",
+  "bytes": 8667,
+  "title": "#37985 \\[SC-Low] Incorrectly Eliminate Code With Side Effect In Slice Args",
+  "sev": "Low",
+  "tgt": "https://github.com/vyperlang/vyper",
+  "desc": "## Brief/Intro The `slice` precompile skips `length != 0` check when the first argument is an `is_adhoc_slice`. However, if `length == 0`, the `make_setter` function will discard all operations except `mstore dst_size_field 0` regardless of any potential side effect, leading to incorrect compilation. ## Vulnerability Details The slice buildin skips a lot of checks when the src to be slices is an `adhoc_slice` (`msg.data` or `(address).code`). Notably, the `length_literal < 1` check is skipped. ``` class Slice(BuiltinFunctionT): ... def fetch_call_return(self, node): ... arg = node.args[0] ... "
+ },
+ {
+  "f": "38015-bc-insight-violation-of-eip-2681-in-create-transaction.md",
+  "bytes": 13129,
+  "title": "#38015 \\[BC-Insight] Violation of EIP-2681 in Create Transaction",
+  "sev": "Insight",
+  "tgt": "https://github.com/NethermindEth/nethermind",
+  "desc": "## Brief/Intro EIP-2681 (<https://eips.ethereum.org/EIPS/eip-2681>) requires every Ethereum execution client to restrict the nonce of an account to 2^64 - 1. Specifically, a transaction with nonce 2^64 - 1 should fail, including create transaction and call transaction.\\ In the current implementation of Nethermind, the threshold of nonce in the creation transaction is 2^64 - 2 which is 1 less than the threshold ( 2^64 - 1 ) specified in EIP-2681. This could be problematic once an account reaches this threshold, and potentially leading to consensus issues. ## Vulnerability Details Affected Codeb"
+ },
+ {
+  "f": "38146-bc-medium-nimbus-eth2-remote-crash.md",
+  "bytes": 6949,
+  "title": "#38146 \\[BC-Medium] nimbus-eth2 remote crash",
+  "sev": "Medium",
+  "tgt": "https://github.com/status-im/nimbus-eth2",
+  "desc": "## Brief/Intro Nimbus-eth2 libp2p incorrectly parses protobuf messages. As a result it will lead to denial of service issue. ## Vulnerability Details First we need to see how Nim converts uint64 to int type. Consider the following simple nim program: ``` var bsize:uint64 = 0x80000000_00000000'u64 echo \"casting...\" var offset:int = int(bsize) echo \"offset = \", offset ``` If you compile and run it, you will receive the exception: ``` casting... ../nim-2.2.0/lib/system/fatal.nim(53) sysFatal Error: unhandled exception: value out of range [RangeDefect] Error: execution of an external program faile"
+ },
+ {
+  "f": "38169-sc-insight-deferred-evaluation-of-default.md",
+  "bytes": 2850,
+  "title": "Page Not Found",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "38275-bc-low-evil-client-p2p-headers-traversal-leads-to-d-dos-and-total-peer-removal.md",
+  "bytes": 4555,
+  "title": "#38275 \\[BC-Low] Evil-client P2P headers-traversal leads to D/DoS and total peer removal",
+  "sev": "Low",
+  "tgt": "https://github.com/hyperledger/besu",
+  "desc": "## Intro A remote P2P vulnerability has been identified in the Besu 24.12.2 (latest) with impact that is identical to that of a sustained D/DoS attack. ## Vulnerability Details Using a multithreaded golang based evil-client that spoofs itself as a valid client and peers into a Besu node and starts spamming it with block header range protocol message requests, the remote machine running Besu's CPU runs to 97% - 100% - and all of its peers are remotely disconnected; (attached PoC screenshot) for as long as the attack is sustained. Fortunately the node does recover - but a botnet doesn't care abo"
+ },
+ {
+  "f": "38277-bc-insight-potential-out-of-range-panic-in-unmarshaljson-of-hexordecimal256.md",
+  "bytes": 6538,
+  "title": "#38277 \\[BC-Insight] Potential Out-of-Range Panic in \\`UnmarshalJSON()\\` of \\`HexOrDecimal256\\`",
+  "sev": "Insight",
+  "tgt": "https://github.com/ledgerwatch/erigon",
+  "desc": "## Brief/Intro In the erigon-lib/common/math package, the type `HexOrDecimal256` marshals big.Int into hex or decimal strings. Due to a mishandling of the slice index in the method `UnmarshalJSON()`, it would possibly lead to an out-of-range panic if this method is invoked with a certain value. ## Vulnerability Details Affected Codebase: <https://github.com/erigontech/erigon/tree/v3.0.0-alpha7> The function `UnmarshalJSON()` is utilized to parse hex or decimal string into big.Int. <https://github.com/erigontech/erigon/blob/v3.0.0-alpha7/erigon-lib/common/math/big.go#L61> ``` func (i *HexOrDeci"
+ },
+ {
+  "f": "38278-bc-low-potential-dos-to-mempool-due-to-missing-gas-limit-check.md",
+  "bytes": 19104,
+  "title": "#38278 \\[BC-Low] Potential DoS to Mempool Due to Missing Gas Limit Check",
+  "sev": "Low",
+  "tgt": "https://github.com/ledgerwatch/erigon",
+  "desc": "## Brief/Intro The transaction validation misses the check of the gas limit in a transaction when entering the mempool (txpool). In case that the transaction of gas limit is more than the block gas limit, the transaction will never be included in a block, which should be discarded immediately. However, the Erigon client misses such a check which allows these types of spam transactions to enter into the mempool. Since there is no cost to the attackers submitting such transactions, it would lead to the potential DoS attack to the Erigon mempool as it would consume a lot of computing resources. #"
+ },
+ {
+  "f": "38292-sc-medium-incorrect-sqrt-calculation-result.md",
+  "bytes": 5560,
+  "title": "#38292 \\[SC-Medium] Incorrect Sqrt Calculation Result",
+  "sev": "Medium",
+  "tgt": "https://github.com/vyperlang/vyper",
+  "desc": "## Brief/Intro Vyper `sqrt` builtin uses the babylonian method to calculate square roots of decimals. Unfortunately, improper handling of the oscillating final states may lead to `sqrt` incorrectly returning rounded up results. ## Vulnerability Details Vyper injects the following code to handle calculation of decimal `sqrt`. `x` is the input provided by user. ``` assert x >= 0.0 z: decimal = 0.0 if x == 0.0: z = 0.0 else: z = x / 2.0 + 0.5 y: decimal = x for i: uint256 in range(256): if z == y: break y = z z = (x / z + z) / 2.0 ``` Notably, the terminal condition of the algorithm is either `z_"
+ },
+ {
+  "f": "38318-bc-low-nimbus-eth2-gossipsub-misconfiguration-allows-malicious-peers-gossip-malformed-data-wit.md",
+  "bytes": 5429,
+  "title": "#38318 \\[BC-Low] nimbus-eth2: Gossipsub misconfiguration allows malicious peers gossip malformed data without penalization",
+  "sev": "Low",
+  "tgt": "https://github.com/status-im/nimbus-eth2",
+  "desc": "## Brief/Intro Peers can gossip snappy compressed data that is corrupted or data that is not properly SSZ-encoded and nimbus-eth2 will not reject them, allowing spam. ## Vulnerability Details Peers can gossip snappy compressed data that is corrupted or data that is not properly SSZ-encoded and nimbus-eth2 will not apply the libp2p invalid message penalty due to the topic weight being set to zero (`basicParams` uses `TopicParam.init` which defaults to zero). Although these message are rejected as invalid, the penalty applied to the peer's score is zero (the product of the topic weight, zero, an"
+ },
+ {
+  "f": "38319-bc-insight-edge-case-difference-for-geth-and-nethermind-when-calculating-memory-expansion-gas.md",
+  "bytes": 6942,
+  "title": "#38319 \\[BC-Insight] Edge case difference for GETH and NETHERMIND when calculating memory expansion gas",
+  "sev": "Insight",
+  "tgt": "https://github.com/NethermindEth/nethermind",
+  "desc": "## Brief/Intro Hey There, Merry christmas and happy new year!!! I found out that there is a discrepancy in the way nethermind handles gas calculation for memory expansion, instead of limiting word size to uint32 max like GETH EL, its limiting the word size to int32 max, which is way lower than uint32 max. This attack is an edge case when the gas limit is higher than 30M. Fortunately, the current Ethereum gas limit is set to 30M, Therefore the possibility of this attack to occur is small. Based on the things that you concerned about, this attack falls under this statement ``` Edge case behavior"
+ },
+ {
+  "f": "38427-bc-low-discrepancy-in-intrinsic-gas-calculation-between-txpool-and-evm-execution.md",
+  "bytes": 15999,
+  "title": "#38427 \\[BC-Low] Discrepancy in Intrinsic Gas Calculation between Txpool and EVM Execution",
+  "sev": "Low",
+  "tgt": "https://github.com/ledgerwatch/erigon",
+  "desc": "## Brief/Intro The intrinsic gas amount is the minimal amount of gas required for a transaction calculated solely based on the transaction structure before the actual transaction execution. Both transaction validation in txpool and evm execution enforce the gas limit provided in the transaction larger than the intrinsic gas to be included into a block and execution. In Erigon (<https://github.com/erigontech/erigon> ), the intrinsic gas amount calculated in txpool is less than the transaction execution for transaction type **AccessListTxType** (**they should be the same**), which could possibly"
+ },
+ {
+  "f": "38459-bc-low-erigon-remote-dos.md",
+  "bytes": 4501,
+  "title": "#38459 \\[BC-Low] erigon remote DoS",
+  "sev": "Low",
+  "tgt": "https://github.com/ledgerwatch/erigon",
+  "desc": "## Brief/Intro Erigon contains embedded consensus implementation called Caplin. BlobSidecarsByRange handler does not validate incoming parameters. Malformed p2p request allows an attacker to trigger infinite loop in erigon node. ## Vulnerability Details Let's look at the BlobSidecarsByRange p2p handler <https://github.com/erigontech/erigon/blob/main/cl/sentinel/handlers/blobs.go#L32> ``` func (c *ConsensusHandlers) blobsSidecarsByRangeHandler(s network.Stream) error { req := &cltypes.BlobsByRangeRequest{} if err := ssz_snappy.DecodeAndReadNoForkDigest(s, req, clparams.DenebVersion); err != nil"
+ },
+ {
+  "f": "38502-bc-low-pending-pool-subtraction-overflow-causes-node-halt-shutdown.md",
+  "bytes": 15675,
+  "title": "#38502 \\[BC-Low] Pending pool subtraction overflow causes node halt/shutdown",
+  "sev": "Low",
+  "tgt": "https://github.com/paradigmxyz/reth",
+  "desc": "## Brief/Intro The latest `reth` release (`v1.1.4`) contains a subtraction overflow vulnerability in the pending transaction pool which can lead to node halt/shutdown, given the right set of transactions in the pool. A crafted set of transaction inputs can lead to an infinite loop in the pending pool for release builds, as a result of this subtraction overflow. The node will continue to run but will be unable to process transactions further. ## Vulnerability Details The vulnerability is found in `crates/transaction-pool/src/pool/pending.rs`, in the function `remove_to_limit`. The actual line w"
+ },
+ {
+  "f": "38505-sc-low-irnode-multi-evaluation-in-for-list-iter.md",
+  "bytes": 12485,
+  "title": "#38505 \\[SC-Low] IRNode Multi-Evaluation In For List Iter",
+  "sev": "Low",
+  "tgt": "https://github.com/vyperlang/vyper",
+  "desc": "## Brief/Intro Following report #38504, we show that multi-evaluation of a single expression if possible for for list iter, and also discuss why other context check and defense in depth mechanisms such as `unique_symbol` failed to serve as the last line of defense. ## Vulnerability Details Following report #38504, we want to demonstrate another case where multi-evaluation happens, and the `unique_symbol` defense in depth is not able to catch it at compile time. This will touch a lot of components, so bear with the lengthy explaination. Vyper for loops allow two kinds of `iters`, namely `range`"
+ },
+ {
+  "f": "38530-sc-low-incorrectly-eliminated-code-with-side-effect-in-concat-args.md",
+  "bytes": 6641,
+  "title": "#38530 \\[SC-Low] Incorrectly Eliminated Code With Side Effect In Concat Args",
+  "sev": "Low",
+  "tgt": "https://github.com/vyperlang/vyper",
+  "desc": "## Brief/Intro If `length == 0` or `length_bound == 0`, the `copy_bytes` function will discard all operations regardless of any potential side effect, leading to incorrect compilation. This may lead to `concat` args being eliminated. ## Vulnerability Details The Concat builtin utilizes `copy_bytes` to copy arguments to the destination buffer. ``` class Concat(BuiltinFunctionT): ... def build_IR(self, expr, context): ... for arg in args: dst_data = add_ofst(bytes_data_ptr(dst), ofst) if isinstance(arg.typ, _BytestringT): # Ignore empty strings if arg.typ.maxlen == 0: continue"
+ },
+ {
+  "f": "38554-bc-low-incorrect-transaction-fee-check-in-sendrawtransaction.md",
+  "bytes": 10164,
+  "title": "#38554 \\[BC-Low] Incorrect Transaction Fee Check in \\`SendRawTransaction()\\`",
+  "sev": "Low",
+  "tgt": "https://github.com/ledgerwatch/erigon",
+  "desc": "## Brief/Intro The `SendRawTransaction()` allows users to submit signed raw transactions to the local Erigon nodes, which contains a transaction fee check to ensure the transaction does not provide too many fees. However, the transaction fees calculation is incorrect due to incorrect fetch of gas price for the transaction types, DynamicFeeTxType, BlobTxType and SetCodeTxType. Specifically, the gas price fetched from these types of transactions is the Tip instead of the FeeCap. This overlook makes this transaction fees ineffective as the fee cap is normally much larger than the tip. ## Vulnerab"
+ },
+ {
+  "f": "38557-bc-insight-function-ispush-misses-opcode-push0.md",
+  "bytes": 9060,
+  "title": "#38557 \\[BC-Insight] Function \\`IsPush()\\` Misses Opcode PUSH0",
+  "sev": "Insight",
+  "tgt": "https://github.com/ledgerwatch/erigon",
+  "desc": "## Brief/Intro The opcode PUSH0 is introduced in EIP-3855 (<https://eips.ethereum.org/EIPS/eip-3855> ) that pushes the constant value 0 onto the stack. In Erigon (<https://github.com/erigontech/erigon> ), the function `IsPush()` is used to check if an opcode is a push opcode, which does not include the `PUSH0` opcode. In the current implementation, this function `IsPush()` is mostly utilized in the execution tracer and external tools, such asm and goja. Missing the opcode `PUSH0` would mess up the trace generated in the upstream applications. ## Vulnerability Details Affected Codebase:\\ <https"
+ },
+ {
+  "f": "38581-sc-insight-incorrect-unwrap-on-bytes-and-string.md",
+  "bytes": 4776,
+  "title": "#38581 \\[SC-Insight] Incorrect unwrap on Bytes and String",
+  "sev": "Insight",
+  "tgt": "https://github.com/vyperlang/vyper",
+  "desc": "## Brief/Intro During codegen stage, Vyper compiler does a incorrect unwrap to constant Bytes and String variables, later causing the compiler to panic. ## Vulnerability Details While parsing Name and Attribute expressions in codegen stage, if the referenced variable is mark as a constant, then `Expr.parse_value_expr` will be called to directly setup IRnode from the expression assigned to the constant variable. ``` def parse_Name(self): varname = self.expr.id if varname == \"self\": return IRnode.from_list([\"address\"], typ=AddressT()) varinfo = self.expr._expr_info.var_info assert varinfo is not"
+ },
+ {
+  "f": "38598-bc-insight-getreceiptsmsg-abuse-leads-to-the-dos-and-or-crash-of-every-el-client-in-the-ethere.md",
+  "bytes": 23135,
+  "title": "#38598 \\[BC-Insight] GetReceiptsMsg abuse leads to the DoS and/or crash of every EL client in the Ethereum network",
+  "sev": "Insight",
+  "tgt": "https://github.com/ethereum/go-ethereum",
+  "desc": "## Preamble This report has been marked as **High** as it can be adjusted, but these would be classified as **Critical** elsewhere in the industry. I'm not sure why that hasn't been there case here. I've found \\~20 exploits in various Ethereum CL/ES clients that haven't been submitted. I'll sweep this contest by the rules laid out in the terms of engagement if you let me. There are just so many to report and I don't know if there's enough time. For practicality's sake we could establish TG DM or group comms for TL;DR reports and quick patches to circumvent time constraints and the (I don't kno"
+ },
+ {
+  "f": "38682-sc-medium-augassign-evaluation-order-causing-oob-write-within-the-object.md",
+  "bytes": 4652,
+  "title": "#38682 \\[SC-Medium] AugAssign evaluation order causing OOB write within the object",
+  "sev": "Medium",
+  "tgt": "https://github.com/vyperlang/vyper",
+  "desc": "## Brief/Intro AugAssign (e.g. `+=`, `-=`, ...) statements does not consider the side effect caused by rhs, allowing out-of-bounds index write within the array. ## Vulnerability Details Vyper parse `AugAssign` statements by first cache the target location to avoid double evaluation.\\ However, in the case when target is an access to a `DynArray` and the right value modify the array, the cached `target` will evaluate first, following the modifications like `DynArray.pop()`, and eventually the `STORE` operation could store the computed output in an index that falls outside the array\u2019s current len"
+ },
+ {
+  "f": "38686-bc-low-nodes-with-trusted-peers-vulnerable-to-pending-peer-flooding-and-dos.md",
+  "bytes": 20196,
+  "title": "#38686 \\[BC-Low] Nodes with trusted peers vulnerable to pending peer flooding and DoS",
+  "sev": "Low",
+  "tgt": "https://github.com/paradigmxyz/reth",
+  "desc": "## Brief/Intro The latest `reth` release (`v1.1.5`) contains a peer management vulnerability which allows both unlimited pending peers and DoS attacks which disable the connection of new peers. These attacks can be carried out on any `reth` node with trusted peers. The unlimited peers issue results from the peer manager allowing in new pending connections even after pending limits are exceeded. The DoS attack comes from disconnecting pending peers which have exceeded this limit, leading to a subtraction overflow which results in the pending limit being permanently exceeded. ## Vulnerability De"
+ },
+ {
+  "f": "38693-sc-insight-bytesm-to-bytes-conversion-does-not-match-the-reference-implementation.md",
+  "bytes": 3831,
+  "title": "#38693 \\[SC-Insight] BytesM to Bytes conversion does not match the reference implementation",
+  "sev": "Insight",
+  "tgt": "https://github.com/vyperlang/vyper",
+  "desc": "## Brief/Intro According to the Vyper doc (see ref 1) a small Python reference implementation for conversion logic is maintained as part of Vyper\u2019s test suite (see ref 2) However behavior of the compiler does not match the reference when it comes to BytesM to Bytes\\[] conversion ## Vulnerability Details The reference specifies the `BytesM_T` -> `Bytes_T` conversion should be possible if the size of the output type is at least as big as the in type (see ref 3) But the compiler does not implement that behavior correctly, this is done in `vyper/builtins/_convert.py`(see ref 4) which does not allo"
+ },
+ {
+  "f": "38733-bc-medium-nibmus-eth2-remote-crash.md",
+  "bytes": 7067,
+  "title": "#38733 \\[BC-Medium] nibmus-eth2 remote crash",
+  "sev": "Medium",
+  "tgt": "https://github.com/status-im/nimbus-eth2",
+  "desc": "## Brief/Intro Nimbus-eth2 does not verify slot number of incoming attestations. Because it uses checked integer calculations, malformed attestation may crash the node. ## Vulnerability Details Nim signed integer arithmetic is checked, so in case of overflow Defect will be thrown. Defects inherit from System.Defect, they are not catchable and terminate the running process. Let's see how incoming attestations are processed <https://github.com/status-im/nimbus-eth2/blob/stable/beacon\\\\_chain/gossip\\\\_processing/eth2\\\\_processor.nim#L361> ``` proc processAttestation*( self: ref Eth2Processor, src"
+ },
+ {
+  "f": "38766-bc-insight-nil-pointer-dereference-panics-in-encodepayload-of-blob-txs-encoding.md",
+  "bytes": 14187,
+  "title": "#38766 \\[BC-Insight] Nil Pointer Dereference Panics in encodePayload() of Blob Tx\u2019s Encoding",
+  "sev": "Insight",
+  "tgt": "https://github.com/ledgerwatch/erigon",
+  "desc": "## Brief/Intro `EIP-4844` (<https://github.com/ethereum/EIPs/blob/master/EIPS/eip-4844.md> ) introduces a new transaction type, blob tx, which does not allow the `To` address to be nil (i.e., it cannot be used to create contract). In Erigon (<https://github.com/erigontech/erigon/> ), the blob tx allows the `To` address to be nil. In case that the blob tx includes a nil `To` address, the tx encoding causes a nil pointer dereference panics due to a flaw in function `encodePayload()`. ## Vulnerability Details Affected Codebase:\\ <https://github.com/erigontech/erigon/tree/v2.61.0> The blob tx is d"
+ },
+ {
+  "f": "38807-bc-low-dos-any-reth-node-via-ban-logic-exploit.md",
+  "bytes": 15315,
+  "title": "#38807 \\[BC-Low] DoS any reth node via ban logic exploit",
+  "sev": "Low",
+  "tgt": "https://github.com/paradigmxyz/reth",
+  "desc": "## Brief/Intro The latest `reth` release (`v1.1.5`) contains a ban logic vulnerability, enabling a DoS attack that prevents all new incoming peers from connecting. The exploit can easily be executed on all `reth` nodes on the network. The exploit works by making a malicious node intentionally get banned on the target `reth` node via a specific code path. Then, a bug in the counting logic of incoming peers can be exploited to conduct the DoS. ## Vulnerability Details The primary bug exists in `crates/net/network/src/peers.rs`, in the function `on_incoming_session_established`. The bug occurs wh"
+ },
+ {
+  "f": "38828-bc-low-decode-rlp-of-legacy-transaction-allows-tailing-bytes.md",
+  "bytes": 9393,
+  "title": "#38828 \\[BC-Low] Decode RLP of Legacy Transaction Allows Tailing Bytes",
+  "sev": "Low",
+  "tgt": "https://github.com/ledgerwatch/erigon",
+  "desc": "## Brief/Intro RLP serialization is widely used in the Ethereum clients, which provides a standard format for the data transfer between nodes. In Erigon (<https://github.com/erigontech/erigon/> ), the decode RLP of legacy tx misses check the tailing bytes, which allows extra tailing bytes during the RLP decoding. This could possibly be a consensus issue as other Ethereum clients reject such legacy transactions. ## Vulnerability Details Affected Codebase:\\ <https://github.com/erigontech/erigon/tree/v2.61.0> The function `DecodeRLPTransaction()` is intended to decode the RLP encoding of transact"
+ },
+ {
+  "f": "38850-bc-low-remote-p2p-oom-crash-getblockheaders-reth.md",
+  "bytes": 7049,
+  "title": "#38850 \\[BC-Low] Remote P2P OOM Crash (GetBlockHeaders) / Reth",
+  "sev": "Low",
+  "tgt": "https://github.com/paradigmxyz/reth",
+  "desc": "## Intro A remote crash vulnerability has been identified in Reth v1.1.5 - 1 lightweight attacking machine can remotely crash Reth nodes regardless of server specs. If scaled it would result in the removal of all Reth nodes from the network and trigger partitioning. ## Vulnerability Details By abusing the GetBlockHeaders P2P request - we can request large block ranges resulting in a fast OOM crash as the remote victim node tries to process the workload. This is how we started Reth: ``` ./reth node --datadir=/data/storage/reth --chain=sepolia --http --http.addr=0.0.0.0 --http.port=8545 --http.a"
+ },
+ {
+  "f": "38855-sc-low-evaluation-order-is-not-respected-in-log-function.md",
+  "bytes": 7663,
+  "title": "#38855 \\[SC-Low] Evaluation order is not respected in \\`log\\` function",
+  "sev": "Low",
+  "tgt": "https://github.com/vyperlang/vyper",
+  "desc": "## Brief/Intro The left-to-right argument evaluation order is not respected when Event definition contains indexed fields. ## Vulnerability Details There are two evaluation order issues in the current implementation of log function: * indexed field always evaluate first * indexed field evaluate in reverse order During log expression parsing, IRnodes of indexed fields in the Event definition will be collected separately from normal data field. It will then be passed into `ir_node_for_log()` function, the function will also encode both of them separately and make them as the arguments of the out"
+ },
+ {
+  "f": "38894-bc-low-missing-expiration-check-for-pong-and-neighbors-packets-and-not-refreshing-the-endpoint.md",
+  "bytes": 11640,
+  "title": "#38894 \\[BC-Low] Missing expiration check for Pong and Neighbors packets and not refreshing the endpoint proof",
+  "sev": "Low",
+  "tgt": "https://github.com/hyperledger/besu",
+  "desc": "## Brief/Intro There is an inconsistency with the discv4 specification regarding the `Pong` and `Neighbors` packet. Indeed, they contain an `expiration` field which should be checked according to the current time but is not. This makes Besu accepting outdated `Pong` and `Neighbors` packets from unresponsive or modified nodes, and might create a bonding with a now undesired connection after an unreasonable amount of time was elapsed with no bonding. Additionally, `Besu` never initiates a new bonding by itself even if it's outdated, making it a potential bad peer for other node implementations. "
+ },
+ {
+  "f": "38902-bc-low-no-check-on-the-maximum-size-of-the-encoded-enr-on-enr.md",
+  "bytes": 2782,
+  "title": "Page Not Found",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "38908-bc-insight-missing-failed-subcalls-in-erigon-tracers-when-encountering-errinsufficientbalance.md",
+  "bytes": 6075,
+  "title": "#38908 \\[BC-Insight] Missing Failed Subcalls in Erigon Tracers When Encountering \\`ErrInsufficientBalance\\` Error",
+  "sev": "Insight",
+  "tgt": "https://github.com/ledgerwatch/erigon",
+  "desc": "## Brief/Intro Given any transactions with a failed subcalls due to insufficient balance, the tracer module in `Erigon` does not work properly. More specifically, the corresponding subcall is missing. This bug can be exploited in production. ## Vulnerability Details #### Expected behaviour For a transaction with a failed subcall due to `ErrInsufficientBalance`, the tracer should return the full trace, including all subcalls, even if some fail. The expected output is: ``` { \"txHash\": \"0xd0d52b784a239d1a7e765f6cd9daf0ffdee29f6c942f517b42b42388b8a7ff87\", \"result\": { \"from\": \"0xfdce42116f541fc8f7b"
+ },
+ {
+  "f": "38920-bc-medium-teku-remote-dos.md",
+  "bytes": 9390,
+  "title": "#38920 \\[BC-Medium] teku remote DoS",
+  "sev": "Medium",
+  "tgt": "https://github.com/Consensys/teku",
+  "desc": "## Brief/Intro Teku does not validate parameters of incoming BlobSidecarsByRange requests. Malformed BlobSidecarsByRange request allows an attacker to bypass validateRequest() method and also approveObjectsCount() (internal rate limiter). ## Vulnerability Details Let's look at the code which process req/resp requests <https://github.com/Consensys/teku/blob/master/networking/eth2/src/main/java/tech/pegasys/teku/networking/eth2/rpc/core/Eth2IncomingRequestHandler.java#L100> ``` private void handleRequest( final Optional<Eth2Peer> peer, final TRequest request, final ResponseCallback<TResponse> ca"
+ },
+ {
+  "f": "38948-bc-low-lighthouse-remote-dos.md",
+  "bytes": 9916,
+  "title": "#38948 \\[BC-Low] lighthouse remote DoS",
+  "sev": "Low",
+  "tgt": "https://github.com/sigp/lighthouse",
+  "desc": "## Brief/Intro The issue is very similar to #38920 which I've sent earlier. Lighthouse internal rate limiter is vulnerable to integer overflow. Remote attacker will be able to bypass rate limit checks and trigger potential Denial of Service issue. ## Vulnerability Details The BlobSidecarsByRange p2p request <https://github.com/ethereum/consensus-specs/blob/dev/specs/deneb/p2p-interface.md?ref=bankless.ghost.io#blobsidecarsbyrange-v1> has two parameters - start\\_slot and count. To prevent potential Denial of service issues, lighhouse has internal rate limiter. If the 'count' value is too high, "
+ },
+ {
+  "f": "38958-bc-low-eels-cant-handle-overflow-gas-calculation-in-modexp-precompile.md",
+  "bytes": 6487,
+  "title": "#38958 \\[BC-Low] EELS cant handle overflow gas calculation in modexp precompile",
+  "sev": "Low",
+  "tgt": "https://github.com/ethereum/execution-specs",
+  "desc": "## Brief/Intro Hi Team, I was testing the gas calculation for modexp precompile for GETH, Nethermind, and comparing it with EELS. And I found out that EELS can't handle a very large base length like GETH, and Nethermind. ## Vulnerability Details When executing a precompile contract there are some steps that the EL takes before actually executing the precompile contract, those steps were: 1. calculate the gas 2. check if the gas didn't exceed the forwarded gas 3. if the gas check passes then it will execute the precompile based on the input that was given. The bug was found when I noticed that "
+ },
+ {
+  "f": "39018-bc-insight-rate-limiting-under-specification-and-consequences.md",
+  "bytes": 14782,
+  "title": "#39018 \\[BC-Insight] Rate Limiting Under-Specification and Consequences",
+  "sev": "Insight",
+  "tgt": "https://github.com/ethereum/consensus-specs",
+  "desc": "## Brief/Intro The rate limiting mechanism in current implementations is under-specified, leading to inconsistent behavior and unintended consequences across clients. This lack of clarity results in network instability, degraded performance, and forks, as demonstrated below.\\ For example, an honest lighthouse client will disconnect from an honest prysm client because they chose different rate-limiting parameters and have different rate-limiting error codes. ## Vulnerability Details Rate limiting is a critical component of such a decentralized network, ensuring that nodes do not get overwhelmed"
+ },
+ {
+  "f": "audit-reports-animoca-2025-06-23-audit-report-anichess-ethereum-contracts-v1-2-pdf.md",
+  "bytes": 9820,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "audit-reports-anoma-2023-03-28-audit-report-namada-ethereum-bridge-v1-0-pdf.md",
+  "bytes": 20206,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "audit-reports-nawa-2026-07-16-audit-report-nawa-usdt-stable-vault-ethereum-v1-0-pdf.md",
+  "bytes": 95101,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "berachain-reth-geth-sigp-2025.md",
+  "bytes": 72859,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "chainsafe-gossamer-sigp.md",
+  "bytes": 71708,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "ef-pectra-sigp.md",
+  "bytes": 24658,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "erigon-docs-audits-2017-04-25-geth-audit-truesec-pdf.md",
+  "bytes": 24074,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "erigon-docs-audits-2018-09-14-clef-audit-ncc-pdf.md",
+  "bytes": 44091,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "erigon-docs-audits-2019-10-15-discv5-audit-leastauthority-pdf.md",
+  "bytes": 31199,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "erigon-docs-audits-2020-01-24-discv5-audit-cure53-pdf.md",
+  "bytes": 8444,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "erigon-docs-plans-20260707-versionmap-lifecycle-paths-review-md.md",
+  "bytes": 29153,
+  "title": "VersionMap account-lifecycle paths \u2014 end-to-end review",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "erigon-docs-plans-completed-2026-04-08-pr-20272-review-fixes-md.md",
+  "bytes": 9880,
+  "title": "PR #20272 \u2014 Review Fixes",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "erigon-docs-plans-completed-2026-04-08-pr-20407-review-fixes-md.md",
+  "bytes": 8526,
+  "title": "PR #20407 \u2014 Review Fixes",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "erigon-docs-site-docs-fundamentals-security-md.md",
+  "bytes": 6607,
+  "title": "Security",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "erigon-docs-site-versioned-docs-version-v3-3-fundamentals-security-md.md",
+  "bytes": 6653,
+  "title": "Security",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "erigon-docs-site-versioned-docs-version-v3-4-fundamentals-security-md.md",
+  "bytes": 6180,
+  "title": "Security",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "eth-c-kzg-libs-sigp.md",
+  "bytes": 17653,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "eth-kzg-libs-sigp.md",
+  "bytes": 54278,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "eth-node-discovery-la.md",
+  "bytes": 31160,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "go-ethereum-docs-audits-2017-04-25-geth-audit-truesec-pdf.md",
+  "bytes": 24079,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "go-ethereum-docs-audits-2018-09-14-clef-audit-ncc-pdf.md",
+  "bytes": 44096,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "go-ethereum-docs-audits-2019-10-15-discv5-audit-leastauthority-pdf.md",
+  "bytes": 31204,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "go-ethereum-docs-audits-2020-01-24-discv5-audit-cure53-pdf.md",
+  "bytes": 8449,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "go-ethereum-security-md.md",
+  "bytes": 5495,
+  "title": "Security Policy",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "grandine-audit-matter-labs-security-review-report-2024-11-21-pdf.md",
+  "bytes": 3302,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "grandine-audit-x41-code-review-grandine-final-report-2024-11-29-pdf.md",
+  "bytes": 28004,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "lighthouse-ai-code-review-md.md",
+  "bytes": 8357,
+  "title": "Lighthouse Code Review Guidelines",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "lodestar-audits-2020-03-23-utility-libraries-pdf.md",
+  "bytes": 20890,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nethermind-agents-skills-resource-leak-audit-references-pattern-categories-md.md",
+  "bytes": 6798,
+  "title": "Pattern Categories to Search",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nethermind-agents-skills-resource-leak-audit-skill-md.md",
+  "bytes": 15393,
+  "title": "Resource Leak Audit",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nethermind-agents-skills-review-skill-md.md",
+  "bytes": 20822,
+  "title": "Code review",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-eth2-spec-core-attestation-processing-and-production-md.md",
+  "bytes": 6900,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-eth2-spec-core-block-synchronization-md.md",
+  "bytes": 1092,
+  "title": "Ingoing Sync algorithms",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-eth2-spec-core-epoch-finalization-and-justification-md.md",
+  "bytes": 1533,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-eth2-spec-core-eth1-data-processing-md.md",
+  "bytes": 1558,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-eth2-spec-core-fork-choice-logic-md.md",
+  "bytes": 2172,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-eth2-spec-core-reward-processing-md.md",
+  "bytes": 2320,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-eth2-spec-core-signature-verification-md.md",
+  "bytes": 1390,
+  "title": "Description",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-eth2-spec-core-state-transition-logic-md.md",
+  "bytes": 2830,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-network-core-discovery-protocol-discv5-md.md",
+  "bytes": 1314,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-network-core-eth2-req-resp-protocol-md.md",
+  "bytes": 1980,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-network-core-publish-subscribe-gossipsub-md.md",
+  "bytes": 2293,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-network-core-ssz-serialization-and-tree-hashing-md.md",
+  "bytes": 1747,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-validator-core-account-management-and-key-storage-md.md",
+  "bytes": 16470,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-validator-core-block-attestation-signing-md.md",
+  "bytes": 3027,
+  "title": "Description",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-validator-core-command-line-interface-cli-md.md",
+  "bytes": 2511,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-validator-core-rpc-api-md.md",
+  "bytes": 1737,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-nbc-audit-2020-validator-core-slash-prevention-mechanisms-md.md",
+  "bytes": 3331,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-the-auditors-handbook-src-02-2-stack-ref-ptr-types-md.md",
+  "bytes": 3377,
+  "title": "Nim data types",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-the-auditors-handbook-src-02-3-correctness-distinct-mutability-effects-exceptions-md.md",
+  "bytes": 4427,
+  "title": "Correctness, distinct, mutability, effects, exceptions",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-the-auditors-handbook-src-02-4-debugging-nim-sanitizers-fuzzers-md.md",
+  "bytes": 3506,
+  "title": "Debugging Nim",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "nimbus-eth2-docs-the-auditors-handbook-src-02-the-nim-programming-language-md.md",
+  "bytes": 4592,
+  "title": "The Nim Programming Language",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-berachain-sigma-prime-berachain-reth-geth-security-assessment-report-v2-0-pdf.md",
+  "bytes": 72928,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-chainsafe-forest-review-pdf.md",
+  "bytes": 45003,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-chainsafe-gossamer-review-pdf.md",
+  "bytes": 71735,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-commitboost-sigma-prime-commit-boost-client-security-assessment-report-v2-0-pdf.md",
+  "bytes": 39672,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-commitboost-sigma-prime-commitboost-multiplexer-signer-security-assessment-report-v2-1-pdf.md",
+  "bytes": 46295,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-eth-docker-review-pdf.md",
+  "bytes": 11742,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-eth-docker-sigma-prime-eth-docker-update-2-v2-0-pdf.md",
+  "bytes": 7581,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-ethereum-foundation-c-kzg-review-pdf.md",
+  "bytes": 17691,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-ethereum-foundation-ef-kzg-review-pdf.md",
+  "bytes": 54319,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-ethereum-foundation-pectra-review-pdf.md",
+  "bytes": 24702,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-filecoin-filecoin-drand-2-review-pdf.md",
+  "bytes": 27818,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-filecoin-filecoin-drand-review-pdf.md",
+  "bytes": 115027,
+  "title": "this hangs",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-filecoin-filecoin-lotus-review-pdf.md",
+  "bytes": 97098,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-filecoin-filecoin-proofs-review-pdf.md",
+  "bytes": 35869,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-obol-sigma-prime-obol-network-charon-security-assessment-report-v2-1-pdf.md",
+  "bytes": 57127,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-opsek-review-pdf.md",
+  "bytes": 56840,
+  "title": "Get all Wi-Fi interfaces",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-reth-review-pdf.md",
+  "bytes": 128374,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-risc-zero-sigma-prime-risc-zero-the-signal-ethereum-security-assessment-report-v2-0-pdf.md",
+  "bytes": 21729,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "public-audits-reports-rise-sigma-prime-rise-core-node-security-assessment-report-v2-0-pdf.md",
+  "bytes": 63486,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-astria-geth-zellic-audit-report-pdf.md",
+  "bytes": 18726,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-audit-reports-peckshield-audit-report-bscstationstartpools-v1-0-pdf.md",
+  "bytes": 43227,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-audit-reports-peckshield-audit-report-pinksale-subscriptionpool-v1-0-pdf.md",
+  "bytes": 28651,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-ebridge-ethereum-bridge-zellic-audit-report-pdf.md",
+  "bytes": 79456,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-facet-geth-zellic-audit-report-pdf.md",
+  "bytes": 26715,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-presentations-blackhat-ethereum-blackhat-ethereum-pdf.md",
+  "bytes": 11208,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-presentations-blockchain-autopsies-analyzing-smart-contract-deaths-us-18-little-blockchain-autopsies-analyzing-ethereum-smart-contract-deaths-pdf.md",
+  "bytes": 13749,
+  "title": "!\u2192",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-presentations-rattle-an-ethereum-evm-binary-analysis-framework-rattlerecon-pdf.md",
+  "bytes": 8385,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-presentations-securing-value-on-the-ethereum-blockchain-intro-to-ethereum-security-pdf.md",
+  "bytes": 4453,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-reviews-2023-04-prysm-securityreview-pdf.md",
+  "bytes": 118497,
+  "title": "$1",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-reviews-2023-08-scrolll2geth-initial-securityreview-pdf.md",
+  "bytes": 52050,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-reviews-2023-08-scrolll2geth-securityreview-pdf.md",
+  "bytes": 27972,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-reviews-2024-06-ethereum-foundation-devcon-auction-raffle-securityreview-pdf.md",
+  "bytes": 21623,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-reviews-2025-03-offchain-geth-14-4-securityreview-pdf.md",
+  "bytes": 9484,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-reviews-2025-1-everstake-ethereum-staking-protocol-securityreview-pdf.md",
+  "bytes": 62417,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-reviews-dfinityconsensus-pdf.md",
+  "bytes": 39970,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-reviews-eth2depositcli-pdf.md",
+  "bytes": 48593,
+  "title": "Title \u00a0 Type \u00a0 Severity",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-spectral-modelers-zellic-audit-report-pdf.md",
+  "bytes": 73352,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publications-spectral-token-zellic-audit-report-pdf.md",
+  "bytes": 12661,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publicauditreports-nm0234-final-ethereum-foundation-holesky-funds-vault-pdf.md",
+  "bytes": 31389,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publicreports-l1-audits-taraxa-node-evm-l1-security-audit-report-halborn-final-pdf.md",
+  "bytes": 52855,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publicreports-solidity-smart-contract-audits-erd-ethereum-reserve-dollar-smart-contract-security-assessment-report-halborn-final-pdf.md",
+  "bytes": 27830,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publicreports-solidity-smart-contract-audits-lodestar-finance-staking-smart-contract-security-assessment-report-halborn-final-pdf.md",
+  "bytes": 73437,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publicreports-solidity-smart-contract-audits-lodestar-lodestar-finance-smart-contract-security-assessment-report-halborn-final-pdf.md",
+  "bytes": 109367,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publicreports-solidity-smart-contract-audits-nftfi-ethereum-smart-contract-security-audit-report-halborn-final-pdf.md",
+  "bytes": 14699,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publicreports-solidity-smart-contract-audits-seascape-lighthouse-smart-contract-security-audit-report-halborn-final-pdf.md",
+  "bytes": 20979,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "publicreports-solidity-smart-contract-audits-yieldly-finance-bridge-ethereum-smart-contract-security-audit-halborn-v-1-1-pdf.md",
+  "bytes": 40867,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ },
+ {
+  "f": "reth-sigp-2024.md",
+  "bytes": 128352,
+  "title": "",
+  "sev": "",
+  "tgt": "",
+  "desc": ""
+ }
+]

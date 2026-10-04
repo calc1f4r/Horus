@@ -1,0 +1,2915 @@
+{
+  "meta": {
+    "category": "substrate",
+    "description": "Pattern-level index for substrate vulnerabilities",
+    "fileCount": 20,
+    "totalPatterns": 20,
+    "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
+  },
+  "files": [
+    {
+      "file": "DB/substrate/amm/omnipool-liquidity-math.md",
+      "totalLines": 298,
+      "frontmatter": {
+        "protocol": "hydradx",
+        "chain": "polkadot",
+        "category": "arithmetic",
+        "vulnerability_type": "rounding_error_exploitation",
+        "root_cause_family": "rounding_error",
+        "pattern_key": "rounding-direction-error | Omnipool liquidity/swap math | trade or LP operation | pool drain / invariant break",
+        "interaction_scope": "single_contract",
+        "involved_contracts": [
+          "pallet-omnipool",
+          "LRNA hub asset accounting"
+        ],
+        "path_keys": [
+          "rounding-direction-error | sell/buy | rounding favoring user over pool | incremental pool drain",
+          "rounding-direction-error | add/remove liquidity | excess LRNA minted/burned | LIQUIDITY_EQUIVALENCE break",
+          "rounding-direction-error | refund_refused_asset | withdraw to any caller via AddTokenOrigin | LRNA theft",
+          "rounding-direction-error | same-asset swap | asset_in == asset_out | unlimited price inflation"
+        ],
+        "attack_type": "arithmetic_exploit",
+        "affected_component": "AMM swap and liquidity state transitions (pallet-omnipool)",
+        "primitives": [
+          "fixed_point_math",
+          "hub_reserve (LRNA)",
+          "LIQUIDITY_EQUIVALENCE",
+          "add_liquidity",
+          "remove_liquidity",
+          "refund_refused_asset",
+          "TVLCap",
+          "stablecoin_price",
+          "asset_in == asset_out"
+        ],
+        "code_keywords": [
+          "hub_reserve",
+          "LIQUIDITY_EQUIVALENCE",
+          "refund_refused_asset",
+          "AddTokenOrigin",
+          "add_liquidity",
+          "remove_liquidity",
+          "sell",
+          "TVLCap"
+        ],
+        "severity": "high",
+        "impact": "fund_loss",
+        "language": "rust",
+        "tags": [
+          "substrate",
+          "amm",
+          "hydradx",
+          "omnipool",
+          "rounding",
+          "invariant",
+          "lorna"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-omnipool-liquidity-math-rounding-direction-errors-and--000",
+          "title": "Rounding-Direction Errors and Missing Swap Guards Drain the Omnipool",
+          "lineStart": 100,
+          "lineEnd": 298,
+          "lineCount": 199,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "AddTokenOrigin",
+            "add_liquidity",
+            "buy",
+            "div_floor",
+            "mul_floor",
+            "refund_refused_asset",
+            "remove_liquidity",
+            "sell",
+            "single_contract",
+            "strong",
+            "hub_reserve",
+            "LIQUIDITY_EQUIVALENCE",
+            "TVLCap",
+            "fixed_point_math",
+            "stablecoin_price"
+          ],
+          "searchKeywords": [
+            "rounding",
+            "direction",
+            "errors",
+            "missing",
+            "swap",
+            "guards",
+            "drain",
+            "omnipool",
+            "hub_reserve",
+            "hub reserve",
+            "liquidity_equivalence",
+            "liquidity equivalence",
+            "refund_refused_asset",
+            "refund refused asset",
+            "addtokenorigin",
+            "add token origin",
+            "add_liquidity",
+            "add liquidity",
+            "remove_liquidity",
+            "remove liquidity",
+            "sell",
+            "tvlcap",
+            "fixed_point_math",
+            "fixed point math",
+            "hub_reserve (lrna)",
+            "hub reserve (lrna)",
+            "stablecoin_price",
+            "stablecoin price",
+            "asset_in == asset_out",
+            "asset in == asset out",
+            "amm swap and liquidity state transitions (pallet-omnipool)",
+            "amm swap and liquidity state transitions (pallet omnipool)"
+          ],
+          "rootCause": "The Omnipool's fixed-point math chose the wrong rounding direction at several steps, so every trade leaks a tiny amount of value from the pool to the trader ([rv3]). LP exits burned excess LRNA, viola",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 11,
+            "sampleReports": [
+              "reports/substrate-l1_findings/hydradx-rv-omnipool-2022.md",
+              "reports/substrate-l1_findings/hydradx-c4-2401.md",
+              "reports/substrate-l1_findings/chainflip-backend-audits-chainflip-backend-zellic-audit-report-pdf.md",
+              "reports/substrate-l1_findings/zeitgeist-audit-chaintroopers-audit-report-of-zeitgeist-pm-2022-pdf.md",
+              "reports/substrate-l1_findings/composable-audits-halborn-audit20220730-pallets-pablov2-pdf.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "rounding",
+              "rounding error",
+              "arithmetic exploit",
+              "rounding direction error",
+              "omnipool liquidity swap math"
+            ],
+            "commonlyComposesWith": [
+              "fixed point math",
+              "hub reserve (lrna)",
+              "liquidity equivalence",
+              "add liquidity",
+              "remove liquidity"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/bridges/grandpa-light-client-validation.md",
+      "totalLines": 256,
+      "frontmatter": {
+        "protocol": "composable",
+        "chain": "polkadot",
+        "category": "bridge",
+        "vulnerability_type": "consensus_validation_bypass",
+        "root_cause_family": "incomplete_result_validation",
+        "pattern_key": "partial-result-check | GRANDPA justification verification | commit with duplicates/equivocations | invalid finality accepted",
+        "interaction_scope": "single_contract",
+        "involved_contracts": [
+          "pallet-grandpa-light-client (justification.rs)",
+          "prover (prover/src/lib.rs)"
+        ],
+        "path_keys": [
+          "partial-result-check | validate_commit | is_valid() only, counters ignored | invalid justification accepted",
+          "partial-result-check | VoterSet::new | duplicate voters in validator set | total_weight manipulation",
+          "partial-result-check | prover loop | unbounded unknown_headers | prover DoS (infinite loop / OOM)"
+        ],
+        "attack_type": "data_validation_bypass",
+        "affected_component": "GRANDPA justification/finality verification",
+        "primitives": [
+          "grandpa_justification",
+          "precommit",
+          "VoterSet",
+          "total_weight",
+          "num_duplicated_precommits",
+          "num_invalid_voters",
+          "num_equivocations",
+          "validate_commit",
+          "ancestry_rule",
+          "unknown_headers"
+        ],
+        "code_keywords": [
+          "validate_commit",
+          "is_valid",
+          "num_duplicated_precommits",
+          "num_invalid_voters",
+          "num_equivocations",
+          "VoterSet::new",
+          "total_weight",
+          "unknown_headers"
+        ],
+        "severity": "medium",
+        "impact": "invalid_finality_accepted",
+        "language": "rust",
+        "tags": [
+          "substrate",
+          "bridge",
+          "grandpa",
+          "light_client",
+          "finality",
+          "dos"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-grandpa-light-client-validation-partial-commit-validation-resu-000",
+          "title": "Partial Commit-Validation Result Lets Invalid GRANDPA Justifications Pass a Light Client",
+          "lineStart": 76,
+          "lineEnd": 256,
+          "lineCount": 181,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "CommitValidationResult",
+            "VoterSet::new",
+            "VoterSet::new(voters",
+            "bd400dd",
+            "is_valid",
+            "num_duplicated_precommits",
+            "num_equivocations",
+            "num_invalid_voters",
+            "single_contract",
+            "strong",
+            "total_weight",
+            "unknown_headers",
+            "validate_commit",
+            "validate_commit(...",
+            "grandpa_justification",
+            "precommit",
+            "VoterSet",
+            "ancestry_rule"
+          ],
+          "searchKeywords": [
+            "partial",
+            "commit",
+            "validation",
+            "result",
+            "lets",
+            "invalid",
+            "grandpa",
+            "justifications",
+            "pass",
+            "light",
+            "client",
+            "validate_commit",
+            "validate commit",
+            "is_valid",
+            "is valid",
+            "num_duplicated_precommits",
+            "num duplicated precommits",
+            "num_invalid_voters",
+            "num invalid voters",
+            "num_equivocations",
+            "num equivocations",
+            "voterset::new",
+            "voter set new",
+            "total_weight",
+            "total weight",
+            "unknown_headers",
+            "unknown headers",
+            "grandpa_justification",
+            "grandpa justification",
+            "precommit",
+            "voterset",
+            "voter set"
+          ],
+          "rootCause": "`validate_commit` in finality-grandpa returns a `CommitValidationResult` whose `is_valid()` is a coarse boolean; the individual counters exist precisely because duplicated precommits, precommits from ",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 3,
+            "sampleReports": [
+              "reports/substrate-l1_findings/composable-halborn-grandpa-lc.md",
+              "reports/substrate-l1_findings/composable-audits-halborn-audit20221003-pallet-grandpa-light-client-bridge-pdf.md",
+              "reports/substrate-l1_findings/audit-reports-snowbridge-2024-05-24-audit-report-snowbridge-v1-1-pdf.md"
+            ],
+            "severityConsensus": "MEDIUM",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "incomplete result validation",
+              "data validation bypass",
+              "partial result check",
+              "grandpa justification verification",
+              "commit with duplicates equivocations"
+            ],
+            "commonlyComposesWith": [
+              "grandpa justification",
+              "precommit",
+              "voter set",
+              "total weight",
+              "num duplicated precommits"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/bridges/snowbridge-bridge-accounting.md",
+      "totalLines": 284,
+      "frontmatter": {
+        "protocol": "snowbridge",
+        "chain": "polkadot",
+        "category": "bridge",
+        "vulnerability_type": "fund_accounting_bypass",
+        "root_cause_family": "missing_access_control",
+        "pattern_key": "unguarded-privileged-extrinsic | bridge Gateway/Agent accounting | permissionless registration or refund call | sovereign/relayer fund drain",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "Gateway.sol",
+          "BeefyClient.sol",
+          "Agent contracts (AssetHub agents)",
+          "inbound/outbound queues"
+        ],
+        "path_keys": [
+          "unguarded-privileged-extrinsic | create_agent | permissionless spam -> ordered-channel DoS | relayer-fund drain",
+          "unguarded-privileged-extrinsic | registerToken | uncovered AssetHub deposit | sovereign-fund drain",
+          "unguarded-privileged-extrinsic | transferNativeFromAgent | unrestricted caller | Agent asset exfiltration",
+          "unguarded-privileged-extrinsic | BeefyClient submit | replicated prevRandao tickets | randomness redraw"
+        ],
+        "attack_type": "access_control_bypass",
+        "affected_component": "bridge fund custody and message submission (Gateway, BeefyClient, agents)",
+        "primitives": [
+          "create_agent",
+          "registerToken",
+          "transferNativeFromAgent",
+          "submit",
+          "BeefyClient",
+          "prevRandao",
+          "ordered_channel",
+          "inbound_queue",
+          "agent_fund_accounting",
+          "multi_asset_deposits"
+        ],
+        "code_keywords": [
+          "create_agent",
+          "registerToken",
+          "transferNativeFromAgent",
+          "submit",
+          "BeefyClient",
+          "prevRandao",
+          "Gateway",
+          "inboundQueue"
+        ],
+        "severity": "critical",
+        "impact": "fund_loss",
+        "language": "rust",
+        "tags": [
+          "substrate",
+          "bridge",
+          "snowbridge",
+          "access_control",
+          "ethereum",
+          "beefy"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-snowbridge-bridge-accounting-unguarded-gateway-extrinsics-d-000",
+          "title": "Unguarded Gateway Extrinsics Drain Relayer and Sovereign Bridge Funds",
+          "lineStart": 77,
+          "lineEnd": 284,
+          "lineCount": 208,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "create_agent",
+            "multi_contract",
+            "registerToken",
+            "strong",
+            "submit",
+            "transferNativeFromAgent",
+            "BeefyClient",
+            "prevRandao",
+            "Gateway",
+            "inboundQueue",
+            "ordered_channel",
+            "inbound_queue",
+            "agent_fund_accounting",
+            "multi_asset_deposits",
+            "agents)"
+          ],
+          "searchKeywords": [
+            "unguarded",
+            "gateway",
+            "extrinsics",
+            "drain",
+            "relayer",
+            "sovereign",
+            "bridge",
+            "funds",
+            "create_agent",
+            "create agent",
+            "registertoken",
+            "register token",
+            "transfernativefromagent",
+            "transfer native from agent",
+            "submit",
+            "beefyclient",
+            "beefy client",
+            "prevrandao",
+            "prev randao",
+            "inboundqueue",
+            "inbound queue",
+            "ordered_channel",
+            "ordered channel",
+            "inbound_queue",
+            "agent_fund_accounting",
+            "agent fund accounting",
+            "multi_asset_deposits",
+            "multi asset deposits",
+            "bridge fund custody and message submission (gateway",
+            "agents)",
+            "fund_accounting_bypass",
+            "fund accounting bypass"
+          ],
+          "rootCause": "The Gateway treats several fund-committing operations as if they were protected when they are public. `create_agent` is permissionless, and each spam call forces agent-creation work whose cost lands o",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/substrate-l1_findings/snowbridge-oak-v1-1.md",
+              "reports/substrate-l1_findings/snowbridge-oak-ext-v1-1.md"
+            ],
+            "severityConsensus": "CRITICAL",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing access control",
+              "access control bypass",
+              "unguarded privileged extrinsic",
+              "bridge gateway agent accounting",
+              "permissionless registration or refund call"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "bridge fund custody and message submission (gateway",
+              "create agent",
+              "register token",
+              "transfer native from agent"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/crypto/sr25519-signature-verification.md",
+      "totalLines": 259,
+      "frontmatter": {
+        "protocol": "edgeware",
+        "chain": "polkadot",
+        "category": "crypto",
+        "vulnerability_type": "signature_verification_bypass",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "missing-edge-case-check | sr25519 signature verification | non-canonical / identity-point input | invalid signature accepted",
+        "interaction_scope": "single_contract",
+        "involved_contracts": [
+          "micro-sr25519 index.ts (verify)",
+          "scure-sr25519 index.ts (verify)"
+        ],
+        "path_keys": [
+          "missing-edge-case-check | sr25519_verify | identity-point public key | invalid signature accepted",
+          "missing-edge-case-check | sr25519_verify | non-canonical signature decode | verification malleability",
+          "missing-edge-case-check | sr25519_verify | empty transcript label | broken domain separation"
+        ],
+        "attack_type": "input_validation_bypass",
+        "affected_component": "signature_verification (sr25519_verify)",
+        "primitives": [
+          "schnorrkel_sr25519",
+          "ristretto255_point",
+          "point_at_infinity_identity_check",
+          "scalar_canonicality",
+          "merlin_transcript_domain_separation",
+          "ed25519_key_encoding",
+          "timing_side_channel"
+        ],
+        "code_keywords": [
+          "sr25519_verify",
+          "pointAtInfinity",
+          "identity",
+          "transcript",
+          "vrfVerify",
+          "secretKey",
+          "ed25519",
+          "Scalar"
+        ],
+        "severity": "low",
+        "impact": "invalid_signature_accepted",
+        "language": "rust",
+        "tags": [
+          "substrate",
+          "crypto",
+          "sr25519",
+          "schnorrkel",
+          "signature_verification",
+          "ristretto255"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-sr25519-signature-verification-missing-point-at-infinity-and--000",
+          "title": "Missing Point-at-Infinity and Canonicality Checks in sr25519 Signature Verification",
+          "lineStart": 75,
+          "lineEnd": 259,
+          "lineCount": 185,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "SecretKey",
+            "moderate",
+            "schnorrkel",
+            "single_contract",
+            "verify",
+            "vrfVerify",
+            "sr25519_verify",
+            "pointAtInfinity",
+            "identity",
+            "transcript",
+            "ed25519",
+            "Scalar",
+            "schnorrkel_sr25519",
+            "ristretto255_point",
+            "point_at_infinity_identity_check",
+            "scalar_canonicality",
+            "merlin_transcript_domain_separation",
+            "ed25519_key_encoding",
+            "timing_side_channel"
+          ],
+          "searchKeywords": [
+            "missing",
+            "point",
+            "infinity",
+            "canonicality",
+            "checks",
+            "sr25519",
+            "signature",
+            "verification",
+            "sr25519_verify",
+            "sr25519 verify",
+            "pointatinfinity",
+            "point at infinity",
+            "identity",
+            "transcript",
+            "vrfverify",
+            "vrf verify",
+            "secretkey",
+            "secret key",
+            "ed25519",
+            "scalar",
+            "schnorrkel_sr25519",
+            "schnorrkel sr25519",
+            "ristretto255_point",
+            "ristretto255 point",
+            "point_at_infinity_identity_check",
+            "point at infinity identity check",
+            "scalar_canonicality",
+            "scalar canonicality",
+            "merlin_transcript_domain_separation",
+            "merlin transcript domain separation",
+            "ed25519_key_encoding",
+            "ed25519 key encoding"
+          ],
+          "rootCause": "Reimplementing schnorrkel verification requires rejecting degenerate inputs the math library tolerates. The audited implementations (a) never checked whether the decoded public key is the point at inf",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 5,
+            "sampleReports": [
+              "reports/substrate-l1_findings/audit-reports-polkadot-2025-06-12-audit-report-polkadot-micro-sr25519-v1-0-pdf.md",
+              "reports/substrate-l1_findings/audit-reports-polkadot-2025-08-22-audit-report-polkadot-scure-sr25519-v1-5-pdf.md",
+              "reports/substrate-l1_findings/audit-reports-polkadot-2025-06-12-differential-fuzz-testing-report-polkadot-micro-sr25519-v1-0-pdf.md",
+              "reports/substrate-l1_findings/chainflip-backend-audits-multisig-kudelski-q1-2022-pdf.md",
+              "reports/substrate-l1_findings/starlay-oak-wasm.md"
+            ],
+            "severityConsensus": "CRITICAL",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "input validation bypass",
+              "missing edge case check",
+              "sr25519 signature verification",
+              "non canonical identity point input"
+            ],
+            "commonlyComposesWith": [
+              "schnorrkel sr25519",
+              "ristretto255 point",
+              "point at infinity identity check",
+              "scalar canonicality",
+              "merlin transcript domain separation"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/lifecycle/runtime-upgrade-storage-migration.md",
+      "totalLines": 281,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "polkadot",
+        "category": "lifecycle",
+        "vulnerability_type": "upgrade_migration_failure",
+        "root_cause_family": "unsynchronized_state_migration",
+        "pattern_key": "untested-storage-migration | runtime upgrade | storage layout / function indices / immutable vars change | stuck funds or wrong-function execution",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "Gateway (upgradable bridge contract)",
+          "inbound-queue",
+          "parachain runtime (wasm)"
+        ],
+        "path_keys": [
+          "untested-storage-migration | Gateway upgrade | storage layout change without migration | token loss / channel immobilization",
+          "untested-storage-migration | inbound-queue Gateway address | stale hardcoded address after upgrade | stuck bridge",
+          "untested-storage-migration | function index shift | call indices move across upgrade | wrong function executed",
+          "untested-storage-migration | immutable vars overwrite | upgrade resets config state | invariant loss"
+        ],
+        "attack_type": "state_corruption",
+        "affected_component": "runtime upgrade path (on_initialize / on_runtime_upgrade, storage migrations, call indices)",
+        "primitives": [
+          "on_runtime_upgrade",
+          "storage_migration",
+          "VersionedMigration",
+          "function_call_index",
+          "call_filter",
+          "inbound_queue",
+          "gateway_address",
+          "pallet_macro_defaults",
+          "try-runtime"
+        ],
+        "code_keywords": [
+          "on_runtime_upgrade",
+          "migrate",
+          "StorageVersion",
+          "on_initialize",
+          "inbound_queue",
+          "Gateway",
+          "call_index",
+          "try_runtime"
+        ],
+        "severity": "high",
+        "impact": "fund_loss",
+        "language": "rust",
+        "tags": [
+          "substrate",
+          "lifecycle",
+          "runtime_upgrade",
+          "storage_migration",
+          "snowbridge",
+          "parachain"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-runtime-upgrade-storage-migration-untested-runtime-upgrades-shif-000",
+          "title": "Untested Runtime Upgrades Shift Layout/Indices and Strand Bridge Funds",
+          "lineStart": 86,
+          "lineEnd": 281,
+          "lineCount": 196,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "StorageVersion",
+            "VersionedMigration",
+            "multi_contract",
+            "on_initialize",
+            "set_code",
+            "strong",
+            "on_runtime_upgrade",
+            "migrate",
+            "inbound_queue",
+            "Gateway",
+            "call_index",
+            "try_runtime",
+            "storage_migration",
+            "function_call_index",
+            "call_filter",
+            "gateway_address",
+            "pallet_macro_defaults",
+            "try-runtime"
+          ],
+          "searchKeywords": [
+            "untested",
+            "runtime",
+            "upgrades",
+            "shift",
+            "layout",
+            "indices",
+            "strand",
+            "bridge",
+            "funds",
+            "on_runtime_upgrade",
+            "on runtime upgrade",
+            "migrate",
+            "storageversion",
+            "storage version",
+            "on_initialize",
+            "on initialize",
+            "inbound_queue",
+            "inbound queue",
+            "gateway",
+            "call_index",
+            "call index",
+            "try_runtime",
+            "try runtime",
+            "storage_migration",
+            "storage migration",
+            "versionedmigration",
+            "versioned migration",
+            "function_call_index",
+            "function call index",
+            "call_filter",
+            "call filter",
+            "gateway_address"
+          ],
+          "rootCause": "Upgrades are code replacements over live state. Snowbridge's upgrade flow had four gaps: Gateway storage migrations were incomplete (tokens/channel state stranded, [sb12]); the inbound-queue's Gateway",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 14,
+            "sampleReports": [
+              "reports/substrate-l1_findings/snowbridge-oak-v1-1.md",
+              "reports/substrate-l1_findings/polkadot-runtime-templates-oz-2024-12.md",
+              "reports/substrate-l1_findings/pendulum-docs-pen-migration-review-handover-md.md",
+              "reports/substrate-l1_findings/pendulum-docs-pen-migration-internal-review-md.md",
+              "reports/substrate-l1_findings/hydradx-c4-2401.md"
+            ],
+            "severityConsensus": "MEDIUM",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "unsynchronized state migration",
+              "state corruption",
+              "untested storage migration",
+              "runtime upgrade",
+              "storage layout function indices immutable vars change"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "on runtime upgrade",
+              "storage migration",
+              "versioned migration",
+              "function call index"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/oracle/ema-oracle-manipulation.md",
+      "totalLines": 247,
+      "frontmatter": {
+        "protocol": "hydradx",
+        "chain": "polkadot",
+        "category": "oracle",
+        "vulnerability_type": "price_manipulation",
+        "root_cause_family": "stale_or_unsynced_state",
+        "pattern_key": "bypassed-oracle-update-path | EMA price oracle | direct transfer to AMM pool | price moves without oracle tracking",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "HydraDX Omnipool",
+          "EMA oracle feed"
+        ],
+        "path_keys": [
+          "bypassed-oracle-update-path | direct transfer to Omnipool | pool reserves change without oracle hook | oracle price divergence",
+          "bypassed-oracle-update-path | reciprocal EMA | 1/ema(p) != ema(1/p) | TWAP inversion error",
+          "bypassed-oracle-update-path | MAX_UNIQUE_ENTRIES | dead configuration constant | missing aggregation bound"
+        ],
+        "attack_type": "data_manipulation",
+        "affected_component": "price_feed (EMA oracle over Omnipool reserves)",
+        "oracle_provider": "custom",
+        "oracle_attack_vector": "manipulation",
+        "primitives": [
+          "ema_price",
+          "twap",
+          "omnipool_reserves",
+          "lazy_oracle_update",
+          "reciprocal_inversion",
+          "MAX_UNIQUE_ENTRIES",
+          "oracle_update_hook"
+        ],
+        "code_keywords": [
+          "ema",
+          "price",
+          "oracle",
+          "MAX_UNIQUE_ENTRIES",
+          "hub_asset",
+          "reserve",
+          "update_price",
+          "Omnipool"
+        ],
+        "severity": "medium",
+        "impact": "incorrect_pricing",
+        "language": "rust",
+        "tags": [
+          "substrate",
+          "oracle",
+          "hydradx",
+          "omnipool",
+          "ema",
+          "twap",
+          "price_manipulation"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-ema-oracle-manipulation-lazy-ema-oracle-diverges-from--000",
+          "title": "Lazy EMA Oracle Diverges from Omnipool Spot Price via Un-Hooked Reserve Changes",
+          "lineStart": 79,
+          "lineEnd": 247,
+          "lineCount": 169,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "MAX_UNIQUE_ENTRIES",
+            "ema(p",
+            "multi_contract",
+            "strong",
+            "transfer",
+            "ema",
+            "price",
+            "oracle",
+            "hub_asset",
+            "reserve",
+            "update_price",
+            "Omnipool",
+            "ema_price",
+            "twap",
+            "omnipool_reserves",
+            "lazy_oracle_update",
+            "reciprocal_inversion",
+            "oracle_update_hook",
+            "manipulation"
+          ],
+          "searchKeywords": [
+            "lazy",
+            "ema",
+            "oracle",
+            "diverges",
+            "omnipool",
+            "spot",
+            "price",
+            "via",
+            "hooked",
+            "reserve",
+            "changes",
+            "max_unique_entries",
+            "max unique entries",
+            "hub_asset",
+            "hub asset",
+            "update_price",
+            "update price",
+            "ema_price",
+            "ema price",
+            "twap",
+            "omnipool_reserves",
+            "omnipool reserves",
+            "lazy_oracle_update",
+            "lazy oracle update",
+            "reciprocal_inversion",
+            "reciprocal inversion",
+            "oracle_update_hook",
+            "oracle update hook",
+            "price_feed (ema oracle over omnipool reserves)",
+            "price feed (ema oracle over omnipool reserves)",
+            "price_manipulation",
+            "price manipulation"
+          ],
+          "rootCause": "The EMA oracle is lazily updated inside trade execution, but the Omnipool's reserves can also change via direct transfers to the pool account (e.g., donations, mistakes, or deliberate manipulation), w",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 5,
+            "sampleReports": [
+              "reports/substrate-l1_findings/hydradx-rv-ema-oracle-2023.md",
+              "reports/substrate-l1_findings/hydradx-c4-2401.md",
+              "reports/substrate-l1_findings/composable-audits-halborn-audit20210229-pallets-core-pdf.md",
+              "reports/substrate-l1_findings/composable-halborn-core.md",
+              "reports/substrate-l1_findings/starlay-oak-wasm.md"
+            ],
+            "severityConsensus": "CRITICAL",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "price_manipulation",
+              "price manipulation",
+              "stale or unsynced state",
+              "data manipulation",
+              "bypassed oracle update path"
+            ],
+            "commonlyComposesWith": [
+              "oracle",
+              "lazy_oracle_update",
+              "lazy oracle update",
+              "oracle_update_hook",
+              "oracle update hook"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/pallets/crowdloan-refund-manipulation.md",
+      "totalLines": 244,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "polkadot",
+        "category": "business_logic",
+        "vulnerability_type": "state_accounting_error",
+        "root_cause_family": "missing_state_update",
+        "pattern_key": "unbalanced-claim-refund | crowdloan vault accounting | contribution not decremented | stale vault totals",
+        "interaction_scope": "single_contract",
+        "involved_contracts": [
+          "pallets/crowdloans",
+          "vault storage (vault.contributed)"
+        ],
+        "path_keys": [
+          "unbalanced-claim-refund | claim | contribution_kill without decrement | inflated vault.contributed",
+          "unbalanced-claim-refund | refund | contribution_kill without decrement | wrong cap/strategy decisions",
+          "unbalanced-claim-refund | update_vault no-op | misleading VaultUpdated event | operator desync"
+        ],
+        "attack_type": "logic_flaw",
+        "affected_component": "crowdloan_claim_refund_accounting",
+        "primitives": [
+          "vault.contributed",
+          "contribution_kill",
+          "ChildStorageKind::Contributed",
+          "VaultPhase",
+          "ctoken",
+          "trie_index"
+        ],
+        "code_keywords": [
+          "contribution_kill",
+          "vault.contributed",
+          "claim",
+          "refund",
+          "update_vault",
+          "set_vrfs",
+          "VrfOrigin",
+          "VaultClaimed"
+        ],
+        "severity": "medium",
+        "impact": "accounting_corruption",
+        "language": "rust",
+        "tags": [
+          "substrate",
+          "pallet",
+          "crowdloan",
+          "state_management"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-crowdloan-refund-manipulation-crowdloan-claim-refund-fails-t-000",
+          "title": "Crowdloan Claim/Refund Fails to Decrement vault.contributed, Corrupting Vault Accounting",
+          "lineStart": 76,
+          "lineEnd": 244,
+          "lineCount": 169,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "VaultUpdated",
+            "VrfsUpdated",
+            "checked_sub",
+            "claim",
+            "contributed",
+            "contribution_kill",
+            "contribution_kill(...",
+            "contribution_strategy",
+            "moderate",
+            "refund",
+            "saturating_sub",
+            "set_vrfs",
+            "single_contract",
+            "update_vault",
+            "vault.contributed",
+            "VrfOrigin",
+            "VaultClaimed",
+            "ChildStorageKind::Contributed",
+            "VaultPhase",
+            "ctoken"
+          ],
+          "searchKeywords": [
+            "crowdloan",
+            "claim",
+            "refund",
+            "fails",
+            "decrement",
+            "vault",
+            "contributed",
+            "corrupting",
+            "accounting",
+            "contribution_kill",
+            "contribution kill",
+            "vault.contributed",
+            "vault contributed",
+            "update_vault",
+            "update vault",
+            "set_vrfs",
+            "set vrfs",
+            "vrforigin",
+            "vrf origin",
+            "vaultclaimed",
+            "vault claimed",
+            "childstoragekind::contributed",
+            "child storage kind contributed",
+            "vaultphase",
+            "vault phase",
+            "ctoken",
+            "trie_index",
+            "trie index",
+            "crowdloan_claim_refund_accounting",
+            "crowdloan claim refund accounting",
+            "state_accounting_error",
+            "state accounting error"
+          ],
+          "rootCause": "`claim`/`refund` were written to pay out and clean up the contributor's record but the author forgot the aggregate update: `Self::contribution_kill(vault.trie_index, &who, ChildStorageKind::Contribute",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 7,
+            "sampleReports": [
+              "reports/substrate-l1_findings/parallel-tob-1.md",
+              "reports/substrate-l1_findings/publications-reviews-parallelfinance-pdf.md",
+              "reports/substrate-l1_findings/audit-reports-zeitgeist-2025-01-02-audit-report-zeitgeist-combinatorial-betting-and-futarchy-security-audit-v1-0-pdf.md",
+              "reports/substrate-l1_findings/audits-interlay-informal-report-interlay-audit-2021q2-pdf.md",
+              "reports/substrate-l1_findings/audits-interlay-informal-report-interlay-audit-2021q3-pdf.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing state update",
+              "logic flaw",
+              "unbalanced claim refund",
+              "crowdloan vault accounting",
+              "contribution not decremented"
+            ],
+            "commonlyComposesWith": [
+              "vault contributed",
+              "contribution kill",
+              "child storage kind contributed",
+              "vault phase",
+              "ctoken"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/pallets/error-handling-state-consistency.md",
+      "totalLines": 259,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "polkadot",
+        "category": "reliability",
+        "vulnerability_type": "error_handling_state_divergence",
+        "root_cause_family": "incomplete_failure_handling",
+        "pattern_key": "partial-failure | multi-step extrinsic | mid-path error | inconsistent state",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "multi-step extrinsics"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "multi-step extrinsics",
+        "primitives": [
+          "acknowledged",
+          "after",
+          "agent",
+          "always",
+          "case",
+          "causing"
+        ],
+        "code_keywords": [
+          "acknowledged",
+          "after",
+          "agent",
+          "always",
+          "case",
+          "causing",
+          "code",
+          "contract",
+          "critical",
+          "description"
+        ],
+        "severity": "critical",
+        "impact": "dos",
+        "language": "rust",
+        "tags": [
+          "reliability",
+          "l1",
+          "substrate",
+          "audit-mined"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-error-handling-state-consistency-error-handling-000",
+          "title": "Error Handling",
+          "lineStart": 85,
+          "lineEnd": 259,
+          "lineCount": 175,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "dos",
+            "multi_contract",
+            "unassessed",
+            "acknowledged",
+            "after",
+            "agent",
+            "always",
+            "case",
+            "causing",
+            "code",
+            "contract",
+            "critical",
+            "description"
+          ],
+          "searchKeywords": [
+            "error",
+            "handling",
+            "error handling",
+            "acknowledged",
+            "after",
+            "agent",
+            "always",
+            "case",
+            "causing",
+            "code",
+            "contract",
+            "critical",
+            "description",
+            "multi-step extrinsics",
+            "multi step extrinsics",
+            "error_handling_state_divergence",
+            "error handling state divergence",
+            "incomplete_failure_handling",
+            "incomplete failure handling",
+            "partial-failure",
+            "partial failure",
+            "multi-step extrinsic",
+            "multi step extrinsic",
+            "mid-path error",
+            "mid path error",
+            "inconsistent state",
+            "logical_error",
+            "logical error",
+            "dos"
+          ],
+          "rootCause": "The cited reports describe multi-step extrinsics paths where a validation, bound, or state-consistency check is missing around attacker-influenced input or an attacker-growable collection. The pattern",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/substrate-l1_findings/composable-audits-halborn-audit20210229-pallets-core-pdf.md",
+              "reports/substrate-l1_findings/composable-halborn-core.md",
+              "reports/substrate-l1_findings/audit-reports-snowbridge-2024-02-12-audit-report-snowbridge-extension-v1-1-pdf.md",
+              "reports/substrate-l1_findings/audit-reports-snowbridge-2024-05-24-audit-report-snowbridge-v1-1-pdf.md",
+              "reports/substrate-l1_findings/audit-reports-kilt-2025-03-27-audit-report-kilt-bonding-curve-pallet-v1-0-pdf.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "incomplete failure handling",
+              "logical error",
+              "partial failure",
+              "multi step extrinsic",
+              "mid path error"
+            ],
+            "commonlyComposesWith": [
+              "acknowledged",
+              "after",
+              "agent",
+              "always",
+              "case"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/pallets/fee-handling.md",
+      "totalLines": 240,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "polkadot",
+        "category": "fees",
+        "vulnerability_type": "fee_handling_error",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "fee-handling-gap | fee path | payment or refund | value leak or griefing",
+        "interaction_scope": "single_contract",
+        "involved_contracts": [
+          "fee collection paths"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "fee collection paths",
+        "primitives": [
+          "accesses",
+          "actual",
+          "amount",
+          "attacks",
+          "broker",
+          "called"
+        ],
+        "code_keywords": [
+          "accesses",
+          "actual",
+          "amount",
+          "attacks",
+          "broker",
+          "called",
+          "case",
+          "change",
+          "charged",
+          "come"
+        ],
+        "severity": "critical",
+        "impact": "fund_loss",
+        "language": "rust",
+        "tags": [
+          "fees",
+          "l1",
+          "substrate",
+          "audit-mined"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-fee-handling-fee-handling-000",
+          "title": "Fee Handling",
+          "lineStart": 66,
+          "lineEnd": 240,
+          "lineCount": 175,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "fund_loss",
+            "single_contract",
+            "unassessed",
+            "accesses",
+            "actual",
+            "amount",
+            "attacks",
+            "broker",
+            "called",
+            "case",
+            "change",
+            "charged",
+            "come"
+          ],
+          "searchKeywords": [
+            "fee",
+            "handling",
+            "fee handling",
+            "accesses",
+            "actual",
+            "amount",
+            "attacks",
+            "broker",
+            "called",
+            "case",
+            "change",
+            "charged",
+            "come",
+            "fee collection paths",
+            "fee_handling_error",
+            "fee handling error",
+            "missing_validation",
+            "missing validation",
+            "fee-handling-gap",
+            "fee handling gap",
+            "fee path",
+            "payment or refund",
+            "value leak or griefing",
+            "logical_error",
+            "logical error",
+            "fund_loss",
+            "fund loss"
+          ],
+          "rootCause": "The cited reports describe fee collection paths paths where a validation, bound, or state-consistency check is missing around attacker-influenced input or an attacker-growable collection. The pattern ",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 9,
+            "sampleReports": [
+              "reports/substrate-l1_findings/chainflip-backend-audits-chainflip-backend-zellic-audit-report-pdf.md",
+              "reports/substrate-l1_findings/audit-reports-snowbridge-2024-02-12-audit-report-snowbridge-extension-v1-1-pdf.md",
+              "reports/substrate-l1_findings/starlay-oak-wasm.md",
+              "reports/substrate-l1_findings/manta-veridise-chain.md",
+              "reports/substrate-l1_findings/acala-c4-2401.md"
+            ],
+            "severityConsensus": "MEDIUM",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "logical error",
+              "fee handling gap",
+              "fee path",
+              "payment or refund"
+            ],
+            "commonlyComposesWith": [
+              "accesses",
+              "actual",
+              "amount",
+              "attacks",
+              "broker"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/pallets/governance-origin-confusion.md",
+      "totalLines": 287,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "polkadot",
+        "category": "access_control",
+        "vulnerability_type": "origin_confusion",
+        "root_cause_family": "misconfigured_privilege_boundary",
+        "pattern_key": "weak-or-missing-origin | pallet governance/admin extrinsics | governance commands absent, delayed, or template-default | unauthorized or failed privileged ops",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "Snowbridge Gateway (Ethereum side)",
+          "Polkadot-side runtime/pallet governance surfaces",
+          "pallet_democracy / OpenGov config",
+          "runtime templates"
+        ],
+        "path_keys": [
+          "weak-or-missing-origin | administrative commands | not implemented on Polkadot side | privileged ops unavailable",
+          "weak-or-missing-origin | governance throttling | delayed governance operations | slow emergency response",
+          "weak-or-missing-origin | pallet centralized control | single origin controls all functions | privileged concentration",
+          "weak-or-missing-origin | template WeightInfo | substrate-node-template defaults shipped | mispriced weights",
+          "weak-or-missing-origin | XCM fee config | waived XCM fees / undocumented OpenGov config | unpriced messaging"
+        ],
+        "attack_type": "configuration_error",
+        "affected_component": "governance and administrative origin configuration",
+        "primitives": [
+          "ensure_origin",
+          "Root",
+          "AddTokenOrigin",
+          "pallet_democracy",
+          "OpenGov",
+          "WeightInfo",
+          "substrate-node-template",
+          "XCM delivery fees",
+          "MaxRemoteLockConsumers",
+          "governance throttling"
+        ],
+        "code_keywords": [
+          "ensure_root",
+          "ensure_origin",
+          "WeightInfo",
+          "substrate_node_template",
+          "MaxRemoteLockConsumers",
+          "OpenGov",
+          "pallet_democracy",
+          "transferNativeFromAgent"
+        ],
+        "severity": "medium",
+        "impact": "unauthorized_access",
+        "language": "rust",
+        "tags": [
+          "substrate",
+          "pallet",
+          "governance",
+          "access_control",
+          "origin",
+          "configuration",
+          "opengov"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-governance-origin-confusion-governance-admin-origins-missi-000",
+          "title": "Governance/Admin Origins Missing, Throttled, or Left at Template Defaults",
+          "lineStart": 87,
+          "lineEnd": 287,
+          "lineCount": 201,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "BaseFilter",
+            "MaxRemoteLockConsumers",
+            "WeightInfo",
+            "call_filter",
+            "ensure_root",
+            "moderate",
+            "multi_contract",
+            "substrate_node_template::weights",
+            "ensure_origin",
+            "substrate_node_template",
+            "OpenGov",
+            "pallet_democracy",
+            "transferNativeFromAgent",
+            "Root",
+            "AddTokenOrigin",
+            "substrate-node-template"
+          ],
+          "searchKeywords": [
+            "governance",
+            "admin",
+            "origins",
+            "missing",
+            "throttled",
+            "left",
+            "template",
+            "defaults",
+            "ensure_root",
+            "ensure root",
+            "ensure_origin",
+            "ensure origin",
+            "weightinfo",
+            "weight info",
+            "substrate_node_template",
+            "substrate node template",
+            "maxremotelockconsumers",
+            "max remote lock consumers",
+            "opengov",
+            "open gov",
+            "pallet_democracy",
+            "pallet democracy",
+            "transfernativefromagent",
+            "transfer native from agent",
+            "root",
+            "addtokenorigin",
+            "add token origin",
+            "substrate-node-template",
+            "xcm delivery fees",
+            "governance throttling",
+            "governance and administrative origin configuration",
+            "origin_confusion"
+          ],
+          "rootCause": "Governance integration is frequently deferred: Snowbridge shipped with administrative commands that had no Polkadot-side implementation ([sb4]), throttling that delays governance operations ([sb5]), a",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 11,
+            "sampleReports": [
+              "reports/substrate-l1_findings/snowbridge-oak-v1-1.md",
+              "reports/substrate-l1_findings/acala-srl-2023.md",
+              "reports/substrate-l1_findings/polkadot-runtime-templates-oz-2024-07.md",
+              "reports/substrate-l1_findings/polkadot-runtime-templates-oz-2024-04.md",
+              "reports/substrate-l1_findings/audit-reports-snowbridge-2025-01-07-audit-report-snowbridge-updates-3-v1-0-pdf.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "misconfigured privilege boundary",
+              "configuration error",
+              "weak or missing origin",
+              "pallet governance admin extrinsics",
+              "governance commands absent"
+            ],
+            "commonlyComposesWith": [
+              "ensure origin",
+              "root",
+              "add token origin",
+              "pallet democracy",
+              "open gov"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/pallets/lending-liquidation.md",
+      "totalLines": 251,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "polkadot",
+        "category": "lending",
+        "vulnerability_type": "liquidation_accounting",
+        "root_cause_family": "accounting_error",
+        "pattern_key": "liquidation-accounting-gap | lending pallet | price move + liquidate | bad debt",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "lending pallets and liquidation logic"
+        ],
+        "attack_type": "economic_exploit",
+        "affected_component": "lending pallets and liquidation logic",
+        "primitives": [
+          "accrued",
+          "accruing",
+          "allow",
+          "asset",
+          "assets",
+          "attackers"
+        ],
+        "code_keywords": [
+          "accrued",
+          "accruing",
+          "allow",
+          "asset",
+          "assets",
+          "attackers",
+          "auto",
+          "before",
+          "behalf",
+          "borrow"
+        ],
+        "severity": "critical",
+        "impact": "fund_loss",
+        "language": "rust",
+        "tags": [
+          "lending",
+          "l1",
+          "substrate",
+          "audit-mined"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-lending-liquidation-lending-liquidation-000",
+          "title": "Lending Liquidation",
+          "lineStart": 77,
+          "lineEnd": 251,
+          "lineCount": 175,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "fund_loss",
+            "multi_contract",
+            "unassessed",
+            "accrued",
+            "accruing",
+            "allow",
+            "asset",
+            "assets",
+            "attackers",
+            "auto",
+            "before",
+            "behalf",
+            "borrow"
+          ],
+          "searchKeywords": [
+            "lending",
+            "liquidation",
+            "lending liquidation",
+            "accrued",
+            "accruing",
+            "allow",
+            "asset",
+            "assets",
+            "attackers",
+            "auto",
+            "before",
+            "behalf",
+            "borrow",
+            "lending pallets and liquidation logic",
+            "liquidation_accounting",
+            "liquidation accounting",
+            "accounting_error",
+            "accounting error",
+            "liquidation-accounting-gap",
+            "liquidation accounting gap",
+            "lending pallet",
+            "price move + liquidate",
+            "bad debt",
+            "economic_exploit",
+            "economic exploit",
+            "fund_loss",
+            "fund loss"
+          ],
+          "rootCause": "The cited reports describe lending pallets and liquidation logic paths where a validation, bound, or state-consistency check is missing around attacker-influenced input or an attacker-growable collect",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/substrate-l1_findings/composable-audits-halborn-audit20210229-pallets-core-pdf.md",
+              "reports/substrate-l1_findings/composable-halborn-core.md",
+              "reports/substrate-l1_findings/starlay-oak-wasm.md",
+              "reports/substrate-l1_findings/audits-interlay-informal-report-interlay-audit-2021q2-pdf.md",
+              "reports/substrate-l1_findings/interlay-informal-2021q2.md"
+            ],
+            "severityConsensus": "CRITICAL",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "accounting error",
+              "economic exploit",
+              "liquidation accounting gap",
+              "lending pallet",
+              "price move + liquidate"
+            ],
+            "commonlyComposesWith": [
+              "liquidation",
+              "lending liquidation",
+              "lending pallets and liquidation logic",
+              "liquidation_accounting",
+              "liquidation accounting"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/pallets/missing-validation.md",
+      "totalLines": 323,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "polkadot",
+        "category": "validation",
+        "vulnerability_type": "missing_input_validation",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "validation-gap | extrinsic | crafted input | invalid state accepted",
+        "interaction_scope": "single_contract",
+        "involved_contracts": [
+          "extrinsic input validation"
+        ],
+        "attack_type": "input_validation_bypass",
+        "affected_component": "extrinsic input validation",
+        "primitives": [
+          "account",
+          "accrued",
+          "amounts",
+          "arbitrary",
+          "asset",
+          "assets"
+        ],
+        "code_keywords": [
+          "account",
+          "accrued",
+          "amounts",
+          "arbitrary",
+          "asset",
+          "assets",
+          "attackers",
+          "auto",
+          "borrow",
+          "calculation"
+        ],
+        "severity": "critical",
+        "impact": "fund_loss",
+        "language": "rust",
+        "tags": [
+          "validation",
+          "l1",
+          "substrate",
+          "audit-mined"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-missing-validation-validation-missing-000",
+          "title": "Validation Missing",
+          "lineStart": 149,
+          "lineEnd": 323,
+          "lineCount": 175,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "fund_loss",
+            "single_contract",
+            "unassessed",
+            "account",
+            "accrued",
+            "amounts",
+            "arbitrary",
+            "asset",
+            "assets",
+            "attackers",
+            "auto",
+            "borrow",
+            "calculation"
+          ],
+          "searchKeywords": [
+            "validation",
+            "missing",
+            "validation missing",
+            "account",
+            "accrued",
+            "amounts",
+            "arbitrary",
+            "asset",
+            "assets",
+            "attackers",
+            "auto",
+            "borrow",
+            "calculation",
+            "extrinsic input validation",
+            "missing_input_validation",
+            "missing input validation",
+            "missing_validation",
+            "missing validation",
+            "validation-gap",
+            "validation gap",
+            "extrinsic",
+            "crafted input",
+            "invalid state accepted",
+            "input_validation_bypass",
+            "input validation bypass",
+            "fund_loss",
+            "fund loss"
+          ],
+          "rootCause": "The cited reports describe extrinsic input validation paths where a validation, bound, or state-consistency check is missing around attacker-influenced input or an attacker-growable collection. The pa",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 41,
+            "sampleReports": [
+              "reports/substrate-l1_findings/hydradx-c4-2401.md",
+              "reports/substrate-l1_findings/composable-audits-halborn-audit20221003-pallet-grandpa-light-client-bridge-pdf.md",
+              "reports/substrate-l1_findings/chainflip-backend-audits-2023-04-trailofbits-securityreview-pdf.md",
+              "reports/substrate-l1_findings/composable-audits-solana-restaking-vaults-restaking-vaults-audit-pdf.md",
+              "reports/substrate-l1_findings/audit-reports-snowbridge-2025-01-07-audit-report-snowbridge-updates-3-v1-0-pdf.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "input validation bypass",
+              "validation gap",
+              "extrinsic",
+              "crafted input"
+            ],
+            "commonlyComposesWith": [
+              "account",
+              "accrued",
+              "amounts",
+              "arbitrary",
+              "asset"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/pallets/origin-authorization-bypass.md",
+      "totalLines": 240,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "polkadot",
+        "category": "access_control",
+        "vulnerability_type": "privilege_escalation",
+        "root_cause_family": "authorization_logic_flaw",
+        "pattern_key": "broken-role-check | pallet extrinsic dispatch | privileged extrinsic call | unauthorized role impersonation",
+        "interaction_scope": "single_contract",
+        "involved_contracts": [
+          "pallet_circuit",
+          "Authorization storage"
+        ],
+        "path_keys": [
+          "broken-role-check | pallet extrinsic dispatch | privileged extrinsic call | unauthorized role impersonation | bid_sfx | Circuit->Authorization",
+          "broken-role-check | pallet extrinsic dispatch | privileged extrinsic call | unauthorized role impersonation | gateway escrow takeover | Circuit->Gateways"
+        ],
+        "attack_type": "access_control_bypass",
+        "affected_component": "extrinsic_origin_validation",
+        "primitives": [
+          "ensure_signed",
+          "role_registry",
+          "authorize_function",
+          "CircuitRole",
+          "dispatchable_extrinsic"
+        ],
+        "code_keywords": [
+          "authorize",
+          "CircuitRole",
+          "ensure_role",
+          "bid_sfx",
+          "ensure_signed",
+          "Authorization",
+          "take_escrow"
+        ],
+        "severity": "high",
+        "impact": "unauthorized_access",
+        "language": "rust",
+        "tags": [
+          "substrate",
+          "pallet",
+          "access_control",
+          "role_check"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-origin-authorization-bypass-broken-extrinsic-role-authoriz-000",
+          "title": "Broken Extrinsic Role Authorization Allows CircuitRole Impersonation",
+          "lineStart": 70,
+          "lineEnd": 240,
+          "lineCount": 171,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "CircuitRole",
+            "authorize",
+            "bid_sfx",
+            "ensure_origin",
+            "moderate",
+            "single_contract",
+            "ensure_role",
+            "ensure_signed",
+            "Authorization",
+            "take_escrow",
+            "role_registry",
+            "authorize_function",
+            "dispatchable_extrinsic",
+            "extrinsic_origin_validation"
+          ],
+          "searchKeywords": [
+            "broken",
+            "extrinsic",
+            "role",
+            "authorization",
+            "allows",
+            "circuit",
+            "impersonation",
+            "authorize",
+            "circuitrole",
+            "circuit role",
+            "ensure_role",
+            "ensure role",
+            "bid_sfx",
+            "bid sfx",
+            "ensure_signed",
+            "ensure signed",
+            "take_escrow",
+            "take escrow",
+            "role_registry",
+            "role registry",
+            "authorize_function",
+            "authorize function",
+            "dispatchable_extrinsic",
+            "dispatchable extrinsic",
+            "extrinsic_origin_validation",
+            "extrinsic origin validation",
+            "privilege_escalation",
+            "privilege escalation",
+            "authorization_logic_flaw",
+            "authorization logic flaw",
+            "broken-role-check",
+            "broken role check"
+          ],
+          "rootCause": "In `bid_sfx` (and siblings), the `authorize` function is invoked to verify the caller is an Executor, but the implementation error lets arbitrary signers satisfy the check — any user can impersonate i",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 11,
+            "sampleReports": [
+              "reports/substrate-l1_findings/t3rn-srl-2401.md",
+              "reports/substrate-l1_findings/nodle-halborn.md",
+              "reports/substrate-l1_findings/polkadot-runtime-templates-oz-2024-07.md",
+              "reports/substrate-l1_findings/hydradx-c4-2401.md",
+              "reports/substrate-l1_findings/zenlink-peckshield.md"
+            ],
+            "severityConsensus": "MEDIUM",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "authorization logic flaw",
+              "access control bypass",
+              "broken role check",
+              "pallet extrinsic dispatch",
+              "privileged extrinsic call"
+            ],
+            "commonlyComposesWith": [
+              "ensure signed",
+              "role registry",
+              "authorize function",
+              "circuit role",
+              "dispatchable extrinsic"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/pallets/rounding-issuance-math.md",
+      "totalLines": 242,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "polkadot",
+        "category": "arithmetic",
+        "vulnerability_type": "rounding_precision_error",
+        "root_cause_family": "rounding_error",
+        "pattern_key": "rounding-drift | fixed-point math | repeated ops | value leak",
+        "interaction_scope": "single_contract",
+        "involved_contracts": [
+          "balance/issuance computation paths"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "balance/issuance computation paths",
+        "primitives": [
+          "arithmetic",
+          "asset",
+          "could",
+          "currencies",
+          "defined",
+          "description"
+        ],
+        "code_keywords": [
+          "arithmetic",
+          "asset",
+          "could",
+          "currencies",
+          "defined",
+          "description",
+          "dispatchable",
+          "happens",
+          "integer",
+          "issuance"
+        ],
+        "severity": "high",
+        "impact": "fund_loss",
+        "language": "rust",
+        "tags": [
+          "arithmetic",
+          "l1",
+          "substrate",
+          "audit-mined"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-rounding-issuance-math-arith-rounding-000",
+          "title": "Arith Rounding",
+          "lineStart": 68,
+          "lineEnd": 242,
+          "lineCount": 175,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "fund_loss",
+            "single_contract",
+            "unassessed",
+            "arithmetic",
+            "asset",
+            "could",
+            "currencies",
+            "defined",
+            "description",
+            "dispatchable",
+            "happens",
+            "integer",
+            "issuance"
+          ],
+          "searchKeywords": [
+            "arith",
+            "rounding",
+            "arith rounding",
+            "arithmetic",
+            "asset",
+            "could",
+            "currencies",
+            "defined",
+            "description",
+            "dispatchable",
+            "happens",
+            "integer",
+            "issuance",
+            "balance/issuance computation paths",
+            "balance issuance computation paths",
+            "rounding_precision_error",
+            "rounding precision error",
+            "rounding_error",
+            "rounding error",
+            "rounding-drift",
+            "rounding drift",
+            "fixed-point math",
+            "fixed point math",
+            "repeated ops",
+            "value leak",
+            "logical_error",
+            "logical error",
+            "fund_loss",
+            "fund loss"
+          ],
+          "rootCause": "The cited reports describe balance/issuance computation paths paths where a validation, bound, or state-consistency check is missing around attacker-influenced input or an attacker-growable collection",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 8,
+            "sampleReports": [
+              "reports/substrate-l1_findings/acala-srl-2021-12.md",
+              "reports/substrate-l1_findings/publicreports-substrate-audits-reef-chain-substrate-security-audit-report-halborn-v1-1-pdf.md",
+              "reports/substrate-l1_findings/reef-halborn.md",
+              "reports/substrate-l1_findings/manta-veridise-chain.md",
+              "reports/substrate-l1_findings/acala-c4-2401.md"
+            ],
+            "severityConsensus": "MEDIUM",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "rounding",
+              "arith rounding",
+              "rounding_precision_error",
+              "rounding precision error",
+              "rounding_error"
+            ],
+            "commonlyComposesWith": [
+              "arithmetic",
+              "asset",
+              "could",
+              "currencies",
+              "defined"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/pallets/staking-unlock-relock-double-spend.md",
+      "totalLines": 243,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "polkadot",
+        "category": "access_control",
+        "vulnerability_type": "missing_access",
+        "root_cause_family": "missing_validation",
+        "pattern_key": "missing-relock-balance-verification | staking ledger | unlocked-chunk relock | double-spend staking rewards",
+        "interaction_scope": "single_contract",
+        "involved_contracts": [
+          "pallet_dapp_staking_v3",
+          "pallet_balances"
+        ],
+        "path_keys": [
+          "missing-relock-balance-verification | staking ledger | unlocked-chunk relock | double-spend staking rewards | unlock+transfer+relock_unlocking | DappStaking->Balances"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "staking_ledger",
+        "primitives": [
+          "unlocked_chunks",
+          "ledger_balance",
+          "relock_unlocking",
+          "free_balance_transfer",
+          "lock_registry"
+        ],
+        "code_keywords": [
+          "relock_unlocking",
+          "unlocked_chunks",
+          "Ledger::unlock",
+          "assert_unlock",
+          "transfer_all",
+          "staked_amount",
+          "AccountLedger"
+        ],
+        "severity": "critical",
+        "impact": "fund_loss",
+        "language": "rust",
+        "tags": [
+          "substrate",
+          "pallet",
+          "staking",
+          "double_spend",
+          "state_validation"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-staking-unlock-relock-double-spend-staking-ledger-relock-of-alrea-000",
+          "title": "Staking Ledger Relock of Already-Spent Unlocked Chunks (Double Spend)",
+          "lineStart": 66,
+          "lineEnd": 243,
+          "lineCount": 178,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "Balances::transfer_all",
+            "T::Currency::free_balance",
+            "free_balance",
+            "moderate",
+            "relock_unlocking",
+            "single_contract",
+            "stake",
+            "transfer_all",
+            "unlock",
+            "unlock(500",
+            "unlocked_chunks",
+            "unstake",
+            "usable_balance",
+            "Ledger::unlock",
+            "assert_unlock",
+            "staked_amount",
+            "AccountLedger",
+            "ledger_balance",
+            "free_balance_transfer",
+            "lock_registry"
+          ],
+          "searchKeywords": [
+            "staking",
+            "ledger",
+            "relock",
+            "already",
+            "spent",
+            "unlocked",
+            "chunks",
+            "relock_unlocking",
+            "relock unlocking",
+            "unlocked_chunks",
+            "unlocked chunks",
+            "ledger::unlock",
+            "ledger unlock",
+            "assert_unlock",
+            "assert unlock",
+            "transfer_all",
+            "transfer all",
+            "staked_amount",
+            "staked amount",
+            "accountledger",
+            "account ledger",
+            "ledger_balance",
+            "ledger balance",
+            "free_balance_transfer",
+            "free balance transfer",
+            "lock_registry",
+            "lock registry",
+            "staking_ledger",
+            "staking ledger",
+            "missing_access",
+            "missing access",
+            "missing_validation"
+          ],
+          "rootCause": "The dApp staking v3 ledger tracks pending unlocks as `unlocked_chunks`, but `relock_unlocking` converts chunks back into staked balance using the recorded amounts. After `unlock` credits free balance,",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 8,
+            "sampleReports": [
+              "reports/substrate-l1_findings/astar-srl-2401.md",
+              "reports/substrate-l1_findings/chainflip-backend-audits-2023-04-trailofbits-securityreview-pdf.md",
+              "reports/substrate-l1_findings/composable-audits-halborn-audit20210229-pallets-core-pdf.md",
+              "reports/substrate-l1_findings/composable-halborn-core.md",
+              "reports/substrate-l1_findings/publicreports-substrate-audits-nodle-nodl-substrate-pallet-security-audit-report-halborn-final-pdf.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing validation",
+              "logical error",
+              "missing relock balance verification",
+              "staking ledger",
+              "unlocked chunk relock"
+            ],
+            "commonlyComposesWith": [
+              "unlocked chunks",
+              "ledger balance",
+              "relock unlocking",
+              "free balance transfer",
+              "lock registry"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/pallets/token-balance-accounting.md",
+      "totalLines": 255,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "polkadot",
+        "category": "tokens",
+        "vulnerability_type": "issuance_balance_accounting",
+        "root_cause_family": "accounting_error",
+        "pattern_key": "issuance-accounting-gap | token pallet | mint/burn/transfer | supply mismatch",
+        "interaction_scope": "single_contract",
+        "involved_contracts": [
+          "token/issuance pallet paths"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "token/issuance pallet paths",
+        "primitives": [
+          "addition",
+          "addressed",
+          "amounts",
+          "asset",
+          "assets",
+          "availability"
+        ],
+        "code_keywords": [
+          "addition",
+          "addressed",
+          "amounts",
+          "asset",
+          "assets",
+          "availability",
+          "balance",
+          "balance_of",
+          "causes",
+          "certain"
+        ],
+        "severity": "critical",
+        "impact": "fund_loss",
+        "language": "rust",
+        "tags": [
+          "tokens",
+          "l1",
+          "substrate",
+          "audit-mined"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-token-balance-accounting-token-issuance-000",
+          "title": "Token Issuance",
+          "lineStart": 81,
+          "lineEnd": 255,
+          "lineCount": 175,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "fund_loss",
+            "single_contract",
+            "unassessed",
+            "addition",
+            "addressed",
+            "amounts",
+            "asset",
+            "assets",
+            "availability",
+            "balance",
+            "balance_of",
+            "causes",
+            "certain"
+          ],
+          "searchKeywords": [
+            "token",
+            "issuance",
+            "token issuance",
+            "addition",
+            "addressed",
+            "amounts",
+            "asset",
+            "assets",
+            "availability",
+            "balance",
+            "balance_of",
+            "balance of",
+            "causes",
+            "certain",
+            "token/issuance pallet paths",
+            "token issuance pallet paths",
+            "issuance_balance_accounting",
+            "issuance balance accounting",
+            "accounting_error",
+            "accounting error",
+            "issuance-accounting-gap",
+            "issuance accounting gap",
+            "token pallet",
+            "mint/burn/transfer",
+            "mint burn transfer",
+            "supply mismatch",
+            "logical_error",
+            "logical error",
+            "fund_loss",
+            "fund loss"
+          ],
+          "rootCause": "The cited reports describe token/issuance pallet paths paths where a validation, bound, or state-consistency check is missing around attacker-influenced input or an attacker-growable collection. The p",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 17,
+            "sampleReports": [
+              "reports/substrate-l1_findings/hydradx-c4-2401.md",
+              "reports/substrate-l1_findings/chainflip-backend-audits-2023-04-trailofbits-securityreview-pdf.md",
+              "reports/substrate-l1_findings/acala-srl-2021-12.md",
+              "reports/substrate-l1_findings/phala-c4-2401.md",
+              "reports/substrate-l1_findings/composable-audits-solana-restaking-vaults-restaking-vaults-audit-pdf.md"
+            ],
+            "severityConsensus": "MEDIUM",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "accounting error",
+              "logical error",
+              "issuance accounting gap",
+              "token pallet",
+              "mint burn transfer"
+            ],
+            "commonlyComposesWith": [
+              "addition",
+              "addressed",
+              "amounts",
+              "asset",
+              "assets"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/pallets/unbounded-iteration-dos.md",
+      "totalLines": 261,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "polkadot",
+        "category": "dos",
+        "vulnerability_type": "unbounded_iteration_halt",
+        "root_cause_family": "resource_exhaustion",
+        "pattern_key": "unbounded-iteration | pallet loop | attacker-grown storage | block halt",
+        "interaction_scope": "single_contract",
+        "involved_contracts": [
+          "pallet loops / weight handling"
+        ],
+        "attack_type": "resource_exhaustion",
+        "affected_component": "pallet loops / weight handling",
+        "primitives": [
+          "account",
+          "asset_in",
+          "asset_out",
+          "attack",
+          "attacker",
+          "attackers"
+        ],
+        "code_keywords": [
+          "account",
+          "asset_in",
+          "asset_out",
+          "attack",
+          "attacker",
+          "attackers",
+          "bloat",
+          "bloated",
+          "bridge",
+          "calculation"
+        ],
+        "severity": "critical",
+        "impact": "dos",
+        "language": "rust",
+        "tags": [
+          "dos",
+          "l1",
+          "substrate",
+          "audit-mined"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-unbounded-iteration-dos-dos-unbounded-000",
+          "title": "Dos Unbounded",
+          "lineStart": 87,
+          "lineEnd": 261,
+          "lineCount": 175,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "dos",
+            "single_contract",
+            "unassessed",
+            "account",
+            "asset_in",
+            "asset_out",
+            "attack",
+            "attacker",
+            "attackers",
+            "bloat",
+            "bloated",
+            "bridge",
+            "calculation"
+          ],
+          "searchKeywords": [
+            "dos",
+            "unbounded",
+            "dos unbounded",
+            "account",
+            "asset_in",
+            "asset in",
+            "asset_out",
+            "asset out",
+            "attack",
+            "attacker",
+            "attackers",
+            "bloat",
+            "bloated",
+            "bridge",
+            "calculation",
+            "pallet loops / weight handling",
+            "pallet loops weight handling",
+            "unbounded_iteration_halt",
+            "unbounded iteration halt",
+            "resource_exhaustion",
+            "resource exhaustion",
+            "unbounded-iteration",
+            "unbounded iteration",
+            "pallet loop",
+            "attacker-grown storage",
+            "attacker grown storage",
+            "block halt"
+          ],
+          "rootCause": "The cited reports describe pallet loops / weight handling paths where a validation, bound, or state-consistency check is missing around attacker-influenced input or an attacker-growable collection. Th",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 21,
+            "sampleReports": [
+              "reports/substrate-l1_findings/hydradx-c4-2401.md",
+              "reports/substrate-l1_findings/phala-c4-2401.md",
+              "reports/substrate-l1_findings/chainflip-backend-audits-multisig-kudelski-q1-2022-pdf.md",
+              "reports/substrate-l1_findings/composable-audits-solana-ibc-avs-codezen-pdf.md",
+              "reports/substrate-l1_findings/audit-reports-bifrost-2024-03-11-audit-report-bifrost-finance-leveraged-staking-v1-0-pdf.md"
+            ],
+            "severityConsensus": "MEDIUM",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "resource exhaustion",
+              "unbounded iteration",
+              "pallet loop",
+              "attacker grown storage",
+              "block halt"
+            ],
+            "commonlyComposesWith": [
+              "bridge",
+              "account",
+              "asset in",
+              "asset out",
+              "attack"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/pallets/vault-deposit-accounting.md",
+      "totalLines": 299,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "polkadot",
+        "category": "vault",
+        "vulnerability_type": "deposit_withdrawal_accounting",
+        "root_cause_family": "accounting_error",
+        "pattern_key": "share-accounting-gap | vault pallet | deposit/redeem | stuck funds",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "vault/staking衍生 deposit flows"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "vault/staking衍生 deposit flows",
+        "primitives": [
+          "abused",
+          "account",
+          "addition",
+          "addressed",
+          "admin",
+          "allowed"
+        ],
+        "code_keywords": [
+          "abused",
+          "account",
+          "addition",
+          "addressed",
+          "admin",
+          "allowed",
+          "anyone",
+          "attackers",
+          "being",
+          "called"
+        ],
+        "severity": "critical",
+        "impact": "fund_loss",
+        "language": "rust",
+        "tags": [
+          "vault",
+          "l1",
+          "substrate",
+          "audit-mined"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-vault-deposit-accounting-vault-deposit-accounting-000",
+          "title": "Vault Deposit Accounting",
+          "lineStart": 125,
+          "lineEnd": 299,
+          "lineCount": 175,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "fund_loss",
+            "multi_contract",
+            "unassessed",
+            "abused",
+            "account",
+            "addition",
+            "addressed",
+            "admin",
+            "allowed",
+            "anyone",
+            "attackers",
+            "being",
+            "called"
+          ],
+          "searchKeywords": [
+            "vault",
+            "deposit",
+            "accounting",
+            "vault deposit accounting",
+            "vault deposit",
+            "deposit accounting",
+            "abused",
+            "account",
+            "addition",
+            "addressed",
+            "admin",
+            "allowed",
+            "anyone",
+            "attackers",
+            "being",
+            "called",
+            "vault/staking衍生 deposit flows",
+            "vault staking衍生 deposit flows",
+            "deposit_withdrawal_accounting",
+            "deposit withdrawal accounting",
+            "accounting_error",
+            "accounting error",
+            "share-accounting-gap",
+            "share accounting gap",
+            "vault pallet",
+            "deposit/redeem",
+            "deposit redeem",
+            "stuck funds",
+            "logical_error",
+            "logical error",
+            "fund_loss",
+            "fund loss"
+          ],
+          "rootCause": "The cited reports describe vault/staking衍生 deposit flows paths where a validation, bound, or state-consistency check is missing around attacker-influenced input or an attacker-growable collection. The",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 19,
+            "sampleReports": [
+              "reports/substrate-l1_findings/hydradx-c4-2401.md",
+              "reports/substrate-l1_findings/chainflip-backend-audits-2023-04-trailofbits-securityreview-pdf.md",
+              "reports/substrate-l1_findings/chainflip-backend-audits-multisig-kudelski-q1-2022-pdf.md",
+              "reports/substrate-l1_findings/composable-audits-solana-restaking-vaults-restaking-vaults-audit-pdf.md",
+              "reports/substrate-l1_findings/centrifuge-chainbridge-2020.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "accounting error",
+              "logical error",
+              "share accounting gap",
+              "vault pallet",
+              "deposit redeem"
+            ],
+            "commonlyComposesWith": [
+              "abused",
+              "account",
+              "addition",
+              "addressed",
+              "admin"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/pallets/vesting-schedule-bypass.md",
+      "totalLines": 251,
+      "frontmatter": {
+        "protocol": "composable",
+        "chain": "polkadot",
+        "category": "access_control",
+        "vulnerability_type": "schedule_validation_bypass",
+        "root_cause_family": "missing_temporal_validation",
+        "pattern_key": "unvalidated-time-window | vesting schedule | start/end in the past accepted | vesting terms bypassed",
+        "interaction_scope": "single_contract",
+        "involved_contracts": [
+          "frame vesting pallet (frame/vesting/src/lib.rs)"
+        ],
+        "path_keys": [
+          "unvalidated-time-window | vested_transfer | schedule starting in the past | immediate/retroactive vesting",
+          "unvalidated-time-window | vested_transfer | schedule ending in the past | zero-cliff degenerate schedule",
+          "unvalidated-time-window | root-origin/sudo config | informational privileged paths | weak governance surface"
+        ],
+        "attack_type": "input_validation_bypass",
+        "affected_component": "vesting schedule validation (vested_transfer)",
+        "primitives": [
+          "vested_transfer",
+          "vesting_schedule",
+          "starting_block",
+          "ending_block",
+          "block_number_validation",
+          "ensure_root",
+          "sudo_pallet"
+        ],
+        "code_keywords": [
+          "vested_transfer",
+          "VestingInfo",
+          "starting_block",
+          "ending_block",
+          "vest",
+          "ensure_root",
+          "merge_vesting_info"
+        ],
+        "severity": "low",
+        "impact": "policy_bypass",
+        "language": "rust",
+        "tags": [
+          "substrate",
+          "pallet",
+          "vesting",
+          "access_control",
+          "temporal_validation",
+          "frame"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-vesting-schedule-bypass-vesting-schedules-with-past-st-000",
+          "title": "Vesting Schedules With Past Start/End Blocks Bypass Intended Lock Terms",
+          "lineStart": 66,
+          "lineEnd": 251,
+          "lineCount": 186,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "ending_block",
+            "moderate",
+            "now",
+            "single_contract",
+            "starting_block",
+            "vest",
+            "vested_transfer",
+            "VestingInfo",
+            "ensure_root",
+            "merge_vesting_info",
+            "vesting_schedule",
+            "block_number_validation",
+            "sudo_pallet"
+          ],
+          "searchKeywords": [
+            "vesting",
+            "schedules",
+            "past",
+            "start",
+            "end",
+            "blocks",
+            "bypass",
+            "intended",
+            "lock",
+            "terms",
+            "vested_transfer",
+            "vested transfer",
+            "vestinginfo",
+            "vesting info",
+            "starting_block",
+            "starting block",
+            "ending_block",
+            "ending block",
+            "vest",
+            "ensure_root",
+            "ensure root",
+            "merge_vesting_info",
+            "merge vesting info",
+            "vesting_schedule",
+            "vesting schedule",
+            "block_number_validation",
+            "block number validation",
+            "sudo_pallet",
+            "sudo pallet",
+            "vesting schedule validation (vested_transfer)",
+            "vesting schedule validation (vested transfer)",
+            "schedule_validation_bypass"
+          ],
+          "rootCause": "`vested_transfer` validates the schedule's arithmetic (per-block amounts, locked ≤ balance) but accepts any block numbers, including windows entirely in the past. When `ending_block <= now`, `vest()` ",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/substrate-l1_findings/composable-halborn-vesting.md",
+              "reports/substrate-l1_findings/composable-audits-halborn-audit20220823-pallet-vesting-pdf.md"
+            ],
+            "severityConsensus": "LOW",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing temporal validation",
+              "input validation bypass",
+              "unvalidated time window",
+              "vesting schedule",
+              "start end in the past accepted"
+            ],
+            "commonlyComposesWith": [
+              "vested transfer",
+              "vesting schedule",
+              "starting block",
+              "ending block",
+              "block number validation"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/substrate/pallets/xcm-instruction-validation.md",
+      "totalLines": 240,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "polkadot",
+        "category": "cross_chain",
+        "vulnerability_type": "input_validation_bypass",
+        "root_cause_family": "configuration_error",
+        "pattern_key": "missing-xcm-fee-or-limit | XCM message delivery | unpriced cross-chain execution | spam and congestion",
+        "interaction_scope": "cross_chain",
+        "involved_contracts": [
+          "xcm_config / FeeManager",
+          "pallet_message_queue",
+          "pallet_call_decompressor"
+        ],
+        "path_keys": [
+          "missing-xcm-fee-or-limit | XCM delivery fee waived | FeeManager = () | message queue congestion",
+          "missing-xcm-fee-or-limit | sibling delivery unpriced | NoPriceForMessageDelivery | storage exhaustion",
+          "missing-xcm-fee-or-limit | nested call decode | decompress_call | stack exhaustion",
+          "missing-xcm-fee-or-limit | unsigned ISMP relay | handle_incoming_message | free execution"
+        ],
+        "attack_type": "denial_of_service",
+        "affected_component": "xcm_config_message_delivery",
+        "primitives": [
+          "FeeManager",
+          "PriceForSiblingDelivery",
+          "NoPriceForMessageDelivery",
+          "DecodeLimit",
+          "Weigher",
+          "XcmConfig"
+        ],
+        "code_keywords": [
+          "FeeManager",
+          "PriceForSiblingDelivery",
+          "NoPriceForMessageDelivery",
+          "decompress_call",
+          "DecodeLimit",
+          "decode_with_depth_limit",
+          "handle_incoming_message",
+          "xcm_configs"
+        ],
+        "severity": "high",
+        "impact": "denial_of_service",
+        "language": "rust",
+        "tags": [
+          "substrate",
+          "xcm",
+          "dos",
+          "misconfiguration"
+        ]
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "substrate-xcm-instruction-validation-waived-xcm-delivery-fees-and-u-000",
+          "title": "Waived XCM Delivery Fees and Unbounded Cross-Chain Message Execution Enable Spam Congestion",
+          "lineStart": 72,
+          "lineEnd": 240,
+          "lineCount": 169,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "FeeManager",
+            "NoPriceForMessageDelivery",
+            "PriceForSiblingDelivery",
+            "cross_chain",
+            "decode",
+            "decode_with_depth_limit(DecodeLimit::new(n",
+            "decompress_call",
+            "strong",
+            "DecodeLimit",
+            "decode_with_depth_limit",
+            "handle_incoming_message",
+            "xcm_configs",
+            "Weigher",
+            "XcmConfig",
+            "xcm_config_message_delivery"
+          ],
+          "searchKeywords": [
+            "waived",
+            "xcm",
+            "delivery",
+            "fees",
+            "unbounded",
+            "cross",
+            "chain",
+            "message",
+            "execution",
+            "enable",
+            "spam",
+            "congestion",
+            "feemanager",
+            "fee manager",
+            "priceforsiblingdelivery",
+            "price for sibling delivery",
+            "nopriceformessagedelivery",
+            "no price for message delivery",
+            "decompress_call",
+            "decompress call",
+            "decodelimit",
+            "decode limit",
+            "decode_with_depth_limit",
+            "decode with depth limit",
+            "handle_incoming_message",
+            "handle incoming message",
+            "xcm_configs",
+            "xcm configs",
+            "weigher",
+            "xcmconfig",
+            "xcm config",
+            "xcm_config_message_delivery"
+          ],
+          "rootCause": "Runtime configuration templates and production runtimes ship XCM configs with `FeeManager = ()` and sibling delivery priced at zero, alongside unbounded decoding and unpriced unsigned message executio",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/substrate-l1_findings/polkadot-runtime-templates-oz-2024-04.md",
+              "reports/substrate-l1_findings/hyperbridge-srl-2405.md",
+              "reports/substrate-l1_findings/parallel-tob-1.md",
+              "reports/substrate-l1_findings/acala-srl-2021-12.md",
+              "reports/substrate-l1_findings/audit-reports-snowbridge-2024-05-24-audit-report-snowbridge-v1-1-pdf.md"
+            ],
+            "severityConsensus": "CRITICAL",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "configuration error",
+              "denial of service",
+              "missing xcm fee or limit",
+              "xcm message delivery",
+              "unpriced cross chain execution"
+            ],
+            "commonlyComposesWith": [
+              "fee manager",
+              "price for sibling delivery",
+              "no price for message delivery",
+              "decode limit",
+              "weigher"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

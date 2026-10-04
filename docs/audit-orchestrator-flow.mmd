@@ -1,0 +1,60 @@
+flowchart TD
+    U["User invokes audit-orchestrator"] --> P0["Phase 0: Graph Foundation"]
+
+    subgraph G["Phase 0 Graph Foundation"]
+        G1["Run graphify on target codebase"]
+        G2["Run horus-graphify-blockchain if available"]
+        G3["Merge graphify graph + blockchain AST"]
+        G4["Write audit-output/graph/graph.json"]
+        G5["Start graphify MCP server when available"]
+        G6["Initialize coverage.jsonl"]
+        G7["Optional memory recall from lessons_db.py"]
+        G1 --> G3
+        G2 --> G3
+        G3 --> G4 --> G5
+        G4 --> G6
+        G7 --> G6
+    end
+
+    P0 --> P1["Phase 1: Reconnaissance"]
+    P1 --> P2["Phase 2: Context Building"]
+    P2 --> P3["Phase 3: Invariant Extraction + Review"]
+    P3 --> P4["Phase 4: Iterative Discovery"]
+
+    subgraph D["Phase 4 Discovery Streams"]
+        D1["4A: DB hunt cards + graph expansion"]
+        D2["4B: Protocol reasoning"]
+        D3["4C: Multi-persona audit"]
+        D4["4D: Missing-validation reasoning"]
+        D5["4E: Attack-graph synthesizer"]
+    end
+
+    P4 --> D1
+    P4 --> D2
+    P4 --> D3
+    P4 --> D4
+    P4 --> D5
+
+    G4 -. "graph path queries" .-> D1
+    G4 -. "code path graph" .-> D2
+    G4 -. "coverage log" .-> D3
+    G4 -. "candidate paths" .-> D5
+    P3 -. "reviewed invariants" .-> D5
+
+    D1 --> P5["Phase 5: Merge + Triage"]
+    D2 --> P5
+    D3 --> P5
+    D4 --> P5
+    D5 --> P5
+
+    P5 --> P6{"static-only?"}
+    P6 -- "no" --> P6A["Phase 6: PoC Generation + Execution"]
+    P6A --> P7["Phase 7: Fuzzing/Formal Verification"]
+    P6 -- "yes" --> P8["Phase 8: Pre-Judging"]
+    P7 --> P8
+    P8 --> P9["Phase 9: Issue Polishing"]
+    P9 --> P10["Phase 10: Deep Review"]
+    P10 --> P11["Phase 11: Report Assembly"]
+
+    P11 --> C["Cleanup graphify MCP server via audit-output/graph/mcp.pid"]
+    P11 --> R["CONFIRMED-REPORT.md"]

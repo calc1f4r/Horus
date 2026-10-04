@@ -1,0 +1,1602 @@
+{
+  "meta": {
+    "manifest": "eth-l1-clients",
+    "description": "Compressed hunt cards for eth-l1-clients — one-line detection rules for bulk scanning",
+    "totalCards": 26,
+    "skipped": 20,
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, use optional preconditions/proofShape/falsePositiveSignals/reportEvidence when present, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "enriched": 26
+  },
+  "cards": [
+    {
+      "id": "eth-l1-clients-kzg-blob-validation-real-reports-001",
+      "title": "Real Reports",
+      "severity": "MEDIUM",
+      "grep": "panic_on_malformed_hex_or_text_input_in_bindings|modexp_precompile_gas_overflow_in_eels_reference|bls12_381_point_deserialization_not_validated|random_oracle_batch_proof_may_be_zero|newdomain_panic_on_certain_input|parameter_length_not_validated",
+      "detect": "Report: `reports/eth-l1-clients_findings/eth-c-kzg-libs-sigp.md` (16 pages; findings TOC at top)",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/crypto/kzg-blob-validation.md",
+      "lines": [
+        131,
+        160
+      ],
+      "reportEvidence": {
+        "count": 6,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/eth-c-kzg-libs-sigp.md",
+          "reports/eth-l1-clients_findings/eth-kzg-libs-sigp.md",
+          "reports/eth-l1-clients_findings/38958-bc-low-eels-cant-handle-overflow-gas-calculation-in-modexp-precompile.md",
+          "reports/eth-l1-clients_findings/38766-bc-insight-nil-pointer-dereference-panics-in-encodepayload-of-blob-txs-encoding.md",
+          "reports/eth-l1-clients_findings/public-audits-reports-ethereum-foundation-c-kzg-review-pdf.md"
+        ],
+        "scope": "section",
+        "support": "explicit"
+      },
+      "graphHints": {
+        "variants": [
+          "unsafe input handling in crypto bindings",
+          "panic crash",
+          "invalid proof acceptance",
+          "gas underflow",
+          "trusted setup misuse"
+        ],
+        "commonlyComposesWith": [
+          "panic on malformed hex or text input in bindings",
+          "bls12 381 point deserialization not validated",
+          "parameter length not validated",
+          "newdomain panic on certain input",
+          "trusted setup loading panics"
+        ]
+      },
+      "check": [
+        "VERIFY: Report: reports/eth-l1-clients_findings/eth-c-kzg-libs-sigp.md (16 pages; findings TOC at top)"
+      ],
+      "validWhen": "Report: reports/eth-l1-clients_findings/eth-c-kzg-libs-sigp.md (16 pages; findings TOC at top)"
+    },
+    {
+      "id": "eth-l1-clients-kzg-blob-validation-vulnerable-code-pattern-generi-002",
+      "title": "Vulnerable Code Pattern (generic)",
+      "severity": "MEDIUM",
+      "grep": "panic_on_malformed_hex_or_text_input_in_bindings|modexp_precompile_gas_overflow_in_eels_reference|bls12_381_point_deserialization_not_validated|random_oracle_batch_proof_may_be_zero|newdomain_panic_on_certain_input|parameter_length_not_validated",
+      "detect": "// VULNERABLE: panic on malformed input in binding (go-kzg UnmarshalText pattern)",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/crypto/kzg-blob-validation.md",
+      "lines": [
+        161,
+        172
+      ],
+      "reportEvidence": {
+        "count": 22,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/eth-c-kzg-libs-sigp.md",
+          "reports/eth-l1-clients_findings/eth-kzg-libs-sigp.md",
+          "reports/eth-l1-clients_findings/38958-bc-low-eels-cant-handle-overflow-gas-calculation-in-modexp-precompile.md",
+          "reports/eth-l1-clients_findings/38766-bc-insight-nil-pointer-dereference-panics-in-encodepayload-of-blob-txs-encoding.md",
+          "reports/eth-l1-clients_findings/public-audits-reports-ethereum-foundation-c-kzg-review-pdf.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "unsafe input handling in crypto bindings",
+          "panic crash",
+          "invalid proof acceptance",
+          "gas underflow",
+          "trusted setup misuse"
+        ],
+        "commonlyComposesWith": [
+          "panic on malformed hex or text input in bindings",
+          "bls12 381 point deserialization not validated",
+          "parameter length not validated",
+          "newdomain panic on certain input",
+          "trusted setup loading panics"
+        ]
+      },
+      "check": [
+        "VERIFY: // VULNERABLE: panic on malformed input in binding (go-kzg UnmarshalText pattern)",
+        "PROVE: panic on malformed input in binding (go-kzg UnmarshalText pattern)"
+      ],
+      "antipattern": "panic on malformed input in binding (go-kzg UnmarshalText pattern)",
+      "validWhen": "// VULNERABLE: panic on malformed input in binding (go-kzg UnmarshalText pattern)",
+      "proofShape": "panic on malformed input in binding (go-kzg UnmarshalText pattern)"
+    },
+    {
+      "id": "eth-l1-clients-kzg-blob-validation-detection-hunt-strategy-003",
+      "title": "Detection & Hunt Strategy",
+      "severity": "MEDIUM",
+      "grep": "panic_on_malformed_hex_or_text_input_in_bindings|bls12_381_point_deserialization_not_validated|random_oracle_batch_proof_may_be_zero|newdomain_panic_on_certain_input|parameter_length_not_validated|trusted_setup_loading_panics",
+      "detect": "In each EL client, locate the go-kzg/c-kzg/ckzg_natives binding version; diff against upstream",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/crypto/kzg-blob-validation.md",
+      "lines": [
+        173,
+        182
+      ],
+      "reportEvidence": {
+        "count": 22,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/eth-c-kzg-libs-sigp.md",
+          "reports/eth-l1-clients_findings/eth-kzg-libs-sigp.md",
+          "reports/eth-l1-clients_findings/38958-bc-low-eels-cant-handle-overflow-gas-calculation-in-modexp-precompile.md",
+          "reports/eth-l1-clients_findings/38766-bc-insight-nil-pointer-dereference-panics-in-encodepayload-of-blob-txs-encoding.md",
+          "reports/eth-l1-clients_findings/public-audits-reports-ethereum-foundation-c-kzg-review-pdf.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "unsafe input handling in crypto bindings",
+          "panic crash",
+          "invalid proof acceptance",
+          "gas underflow",
+          "trusted setup misuse"
+        ],
+        "commonlyComposesWith": [
+          "panic on malformed hex or text input in bindings",
+          "bls12 381 point deserialization not validated",
+          "parameter length not validated",
+          "newdomain panic on certain input",
+          "trusted setup loading panics"
+        ]
+      },
+      "check": [
+        "VERIFY: In each EL client, locate the go-kzg/c-kzg/ckzg_natives binding version; diff against upstream"
+      ],
+      "validWhen": "In each EL client, locate the go-kzg/c-kzg/ckzg_natives binding version; diff against upstream"
+    },
+    {
+      "id": "eth-l1-clients-client-gas-divergence-geth-nethermind-real-reports-001",
+      "title": "Real Reports",
+      "severity": "MEDIUM",
+      "grep": "edge_case_memory_expansion_gas_mismatch|eof_push_opcode_trace_discrepancy|memory_word_cap_int32_vs_uint32|push0_missing_in_ispush|memory_expansion_gas|memoryExpansion",
+      "detect": "Report:...",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/execution/client-gas-divergence-geth-nethermind.md",
+      "lines": [
+        120,
+        149
+      ],
+      "reportEvidence": {
+        "count": 5,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/38319-bc-insight-edge-case-difference-for-geth-and-nethermind-when-calculating-memory-expansion-gas.md",
+          "reports/eth-l1-clients_findings/37483-bc-insight-there-is-a-trace-discrepancy-for-nethermind-when-handling-eof-from-push-opcode.md",
+          "reports/eth-l1-clients_findings/38557-bc-insight-function-ispush-misses-opcode-push0.md",
+          "reports/eth-l1-clients_findings/38958-bc-low-eels-cant-handle-overflow-gas-calculation-in-modexp-precompile.md",
+          "reports/eth-l1-clients_findings/berachain-reth-geth-sigp-2025.md"
+        ],
+        "scope": "section",
+        "support": "explicit"
+      },
+      "graphHints": {
+        "variants": [
+          "integer width or bound mismatch in gas math",
+          "edge case gas mismatch",
+          "chain split via gas limit raise",
+          "trace divergence",
+          "gas divergence"
+        ],
+        "commonlyComposesWith": [
+          "memory word cap int32 vs uint32",
+          "edge case memory expansion gas mismatch",
+          "eof push opcode trace discrepancy",
+          "push0 missing in ispush",
+          "memory expansion gas"
+        ]
+      }
+    },
+    {
+      "id": "eth-l1-clients-client-gas-divergence-geth-nethermind-vulnerable-code-pattern-generi-002",
+      "title": "Vulnerable Code Pattern (generic)",
+      "severity": "MEDIUM",
+      "grep": "edge_case_memory_expansion_gas_mismatch|eof_push_opcode_trace_discrepancy|memory_word_cap_int32_vs_uint32|push0_missing_in_ispush|memory_expansion_gas|memoryExpansion",
+      "detect": "// NETHERMIND (vulnerable class): word size capped at int32 max",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/execution/client-gas-divergence-geth-nethermind.md",
+      "lines": [
+        150,
+        166
+      ],
+      "reportEvidence": {
+        "count": 35,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/38319-bc-insight-edge-case-difference-for-geth-and-nethermind-when-calculating-memory-expansion-gas.md",
+          "reports/eth-l1-clients_findings/37483-bc-insight-there-is-a-trace-discrepancy-for-nethermind-when-handling-eof-from-push-opcode.md",
+          "reports/eth-l1-clients_findings/38557-bc-insight-function-ispush-misses-opcode-push0.md",
+          "reports/eth-l1-clients_findings/38958-bc-low-eels-cant-handle-overflow-gas-calculation-in-modexp-precompile.md",
+          "reports/eth-l1-clients_findings/berachain-reth-geth-sigp-2025.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "integer width or bound mismatch in gas math",
+          "edge case gas mismatch",
+          "chain split via gas limit raise",
+          "trace divergence",
+          "gas divergence"
+        ],
+        "commonlyComposesWith": [
+          "memory word cap int32 vs uint32",
+          "edge case memory expansion gas mismatch",
+          "eof push opcode trace discrepancy",
+          "push0 missing in ispush",
+          "memory expansion gas"
+        ]
+      },
+      "check": [
+        "VERIFY: // NETHERMIND (vulnerable class): word size capped at int32 max",
+        "PROVE: if size > math.MaxUint32-31 { return math.MaxUint32/32 + 1 } // uint32 cap (2^32 - 1)"
+      ],
+      "antipattern": "if size > math.MaxUint32-31 { return math.MaxUint32/32 + 1 } // uint32 cap (2^32 - 1)",
+      "validWhen": "// NETHERMIND (vulnerable class): word size capped at int32 max",
+      "proofShape": "if size > math.MaxUint32-31 { return math.MaxUint32/32 + 1 } // uint32 cap (2^32 - 1)"
+    },
+    {
+      "id": "eth-l1-clients-client-gas-divergence-geth-nethermind-detection-hunt-strategy-003",
+      "title": "Detection & Hunt Strategy",
+      "severity": "MEDIUM",
+      "grep": "edge_case_memory_expansion_gas_mismatch|eof_push_opcode_trace_discrepancy|memory_word_cap_int32_vs_uint32|push0_missing_in_ispush|memory_expansion_gas|memoryExpansion",
+      "detect": "Build a gas-math diff matrix per opcode family (memory expansion, copy, create, call, log,",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/execution/client-gas-divergence-geth-nethermind.md",
+      "lines": [
+        167,
+        181
+      ],
+      "reportEvidence": {
+        "count": 35,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/38319-bc-insight-edge-case-difference-for-geth-and-nethermind-when-calculating-memory-expansion-gas.md",
+          "reports/eth-l1-clients_findings/37483-bc-insight-there-is-a-trace-discrepancy-for-nethermind-when-handling-eof-from-push-opcode.md",
+          "reports/eth-l1-clients_findings/38557-bc-insight-function-ispush-misses-opcode-push0.md",
+          "reports/eth-l1-clients_findings/38958-bc-low-eels-cant-handle-overflow-gas-calculation-in-modexp-precompile.md",
+          "reports/eth-l1-clients_findings/berachain-reth-geth-sigp-2025.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "integer width or bound mismatch in gas math",
+          "edge case gas mismatch",
+          "chain split via gas limit raise",
+          "trace divergence",
+          "gas divergence"
+        ],
+        "commonlyComposesWith": [
+          "memory word cap int32 vs uint32",
+          "edge case memory expansion gas mismatch",
+          "eof push opcode trace discrepancy",
+          "push0 missing in ispush",
+          "memory expansion gas"
+        ]
+      },
+      "check": [
+        "VERIFY: Build a gas-math diff matrix per opcode family (memory expansion, copy, create, call, log,"
+      ],
+      "validWhen": "Build a gas-math diff matrix per opcode family (memory expansion, copy, create, call, log,"
+    },
+    {
+      "id": "eth-l1-clients-rlp-decoding-lenient-parsing-vulnerable-code-patterns-gener-001",
+      "title": "Vulnerable Code Patterns (generic)",
+      "severity": "CRITICAL",
+      "grep": "trailing_bytes_accepted_after_rlp_payload|create_tx_accepted_for_eip4844_blob_type|single_byte_prefix_returns_full_input|nil_pointer_deref_on_nil_to_field|UnmarshalTransactionFromBinary|rlp_list_header_not_validated",
+      "detect": "// VULNERABLE: legacy path skips trailing-byte check (erigon #38828)",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/execution/rlp-decoding-lenient-parsing.md",
+      "lines": [
+        180,
+        204
+      ],
+      "reportEvidence": {
+        "count": 13,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/38828-bc-low-decode-rlp-of-legacy-transaction-allows-tailing-bytes.md",
+          "reports/eth-l1-clients_findings/37462-bc-low-invalid-rlp-decoding-for-single-bytes.md",
+          "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+          "reports/eth-l1-clients_findings/38766-bc-insight-nil-pointer-dereference-panics-in-encodepayload-of-blob-txs-encoding.md",
+          "reports/eth-l1-clients_findings/berachain-reth-geth-sigp-2025.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "missing input validation in decoder",
+          "lenient decoding",
+          "non canonical encoding acceptance",
+          "consensus divergence",
+          "rlp lenient decoding"
+        ],
+        "commonlyComposesWith": [
+          "trailing bytes accepted after rlp payload",
+          "single byte prefix returns full input",
+          "create tx accepted for eip4844 blob type",
+          "rlp list header not validated",
+          "nil pointer deref on nil to field"
+        ]
+      },
+      "neverPrune": true,
+      "check": [
+        "VERIFY: // VULNERABLE: legacy path skips trailing-byte check (erigon #38828)",
+        "PROVE: optional field where EIP requires presence (reth RETH-03)"
+      ],
+      "antipattern": "optional field where EIP requires presence (reth RETH-03)",
+      "validWhen": "// VULNERABLE: legacy path skips trailing-byte check (erigon #38828)",
+      "proofShape": "optional field where EIP requires presence (reth RETH-03)"
+    },
+    {
+      "id": "eth-l1-clients-rlp-decoding-lenient-parsing-similar-reports-002",
+      "title": "Similar Reports",
+      "severity": "CRITICAL",
+      "grep": "trailing_bytes_accepted_after_rlp_payload|create_tx_accepted_for_eip4844_blob_type|single_byte_prefix_returns_full_input|nil_pointer_deref_on_nil_to_field|UnmarshalTransactionFromBinary|rlp_list_header_not_validated",
+      "detect": "Similar Reports",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/execution/rlp-decoding-lenient-parsing.md",
+      "lines": [
+        205,
+        215
+      ],
+      "reportEvidence": {
+        "count": 13,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/38828-bc-low-decode-rlp-of-legacy-transaction-allows-tailing-bytes.md",
+          "reports/eth-l1-clients_findings/37462-bc-low-invalid-rlp-decoding-for-single-bytes.md",
+          "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+          "reports/eth-l1-clients_findings/38766-bc-insight-nil-pointer-dereference-panics-in-encodepayload-of-blob-txs-encoding.md",
+          "reports/eth-l1-clients_findings/berachain-reth-geth-sigp-2025.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "missing input validation in decoder",
+          "lenient decoding",
+          "non canonical encoding acceptance",
+          "consensus divergence",
+          "rlp lenient decoding"
+        ],
+        "commonlyComposesWith": [
+          "trailing bytes accepted after rlp payload",
+          "single byte prefix returns full input",
+          "create tx accepted for eip4844 blob type",
+          "rlp list header not validated",
+          "nil pointer deref on nil to field"
+        ]
+      },
+      "neverPrune": true
+    },
+    {
+      "id": "eth-l1-clients-rpc-dns-rebinding-related-files-in-corpus-l2-get-001",
+      "title": "Related files in corpus (L2 geth forks — same class check)",
+      "severity": "MEDIUM",
+      "grep": "no_host_header_check_on_rpc_requests|browser_same_origin_policy_bypass|dns_rebind_localhost_bypass|debug_api_remote_abuse|tower_allowed_hosts|rpc_http_server",
+      "detect": "`reports/eth-l1-clients_findings/publications-astria-geth-zellic-audit-report-pdf.md`",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/execution/rpc-dns-rebinding.md",
+      "lines": [
+        128,
+        137
+      ],
+      "reportEvidence": {
+        "count": 4,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/publications-astria-geth-zellic-audit-report-pdf.md",
+          "reports/eth-l1-clients_findings/publications-facet-geth-zellic-audit-report-pdf.md",
+          "reports/eth-l1-clients_findings/publications-reviews-2025-03-offchain-geth-14-4-securityreview-pdf.md",
+          "reports/eth-l1-clients_findings/go-ethereum-security-md.md"
+        ],
+        "scope": "section",
+        "support": "explicit"
+      },
+      "graphHints": {
+        "variants": [
+          "missing origin check on local service",
+          "dns rebinding",
+          "same origin bypass",
+          "unauthenticated rpc",
+          "rpc host header gap"
+        ],
+        "commonlyComposesWith": [
+          "no host header check on rpc requests",
+          "dns rebind localhost bypass",
+          "browser same origin policy bypass",
+          "debug api remote abuse",
+          "rpc http server"
+        ]
+      },
+      "check": [
+        "VERIFY: reports/eth-l1-clients_findings/publications-astria-geth-zellic-audit-report-pdf.md"
+      ],
+      "validWhen": "reports/eth-l1-clients_findings/publications-astria-geth-zellic-audit-report-pdf.md",
+      "preconditions": [
+        "auditing any geth fork: confirm the virtualhost check survived the fork (it lives in"
+      ]
+    },
+    {
+      "id": "eth-l1-clients-rpc-dns-rebinding-vulnerable-code-pattern-generi-002",
+      "title": "Vulnerable Code Pattern (generic)",
+      "severity": "MEDIUM",
+      "grep": "no_host_header_check_on_rpc_requests|browser_same_origin_policy_bypass|dns_rebind_localhost_bypass|debug_api_remote_abuse|tower_allowed_hosts|rpc_http_server",
+      "detect": "// VULNERABLE: middleware chain without host validation (#37104 pattern)",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/execution/rpc-dns-rebinding.md",
+      "lines": [
+        138,
+        152
+      ],
+      "reportEvidence": {
+        "count": 15,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/37104-bc-insight-reth-rpc-is-vulnerable-to-dns-rebinding-attacks.md",
+          "reports/eth-l1-clients_findings/publications-astria-geth-zellic-audit-report-pdf.md",
+          "reports/eth-l1-clients_findings/publications-facet-geth-zellic-audit-report-pdf.md",
+          "reports/eth-l1-clients_findings/publications-reviews-2025-03-offchain-geth-14-4-securityreview-pdf.md",
+          "reports/eth-l1-clients_findings/go-ethereum-security-md.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "missing origin check on local service",
+          "dns rebinding",
+          "same origin bypass",
+          "unauthenticated rpc",
+          "rpc host header gap"
+        ],
+        "commonlyComposesWith": [
+          "no host header check on rpc requests",
+          "dns rebind localhost bypass",
+          "browser same origin policy bypass",
+          "debug api remote abuse",
+          "rpc http server"
+        ]
+      },
+      "check": [
+        "VERIFY: // VULNERABLE: middleware chain without host validation (#37104 pattern)",
+        "PROVE: middleware chain without host validation (#37104 pattern)"
+      ],
+      "antipattern": "middleware chain without host validation (#37104 pattern)",
+      "validWhen": "// VULNERABLE: middleware chain without host validation (#37104 pattern)",
+      "proofShape": "middleware chain without host validation (#37104 pattern)"
+    },
+    {
+      "id": "eth-l1-clients-rpc-dns-rebinding-detection-hunt-strategy-003",
+      "title": "Detection & Hunt Strategy",
+      "severity": "MEDIUM",
+      "grep": "no_host_header_check_on_rpc_requests|browser_same_origin_policy_bypass|dns_rebind_localhost_bypass|debug_api_remote_abuse|tower_allowed_hosts|rpc_http_server",
+      "detect": "Grep the RPC server builder for host allowlist middleware; if absent → finding (severity per",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/execution/rpc-dns-rebinding.md",
+      "lines": [
+        153,
+        162
+      ],
+      "reportEvidence": {
+        "count": 15,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/37104-bc-insight-reth-rpc-is-vulnerable-to-dns-rebinding-attacks.md",
+          "reports/eth-l1-clients_findings/publications-astria-geth-zellic-audit-report-pdf.md",
+          "reports/eth-l1-clients_findings/publications-facet-geth-zellic-audit-report-pdf.md",
+          "reports/eth-l1-clients_findings/publications-reviews-2025-03-offchain-geth-14-4-securityreview-pdf.md",
+          "reports/eth-l1-clients_findings/go-ethereum-security-md.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "missing origin check on local service",
+          "dns rebinding",
+          "same origin bypass",
+          "unauthenticated rpc",
+          "rpc host header gap"
+        ],
+        "commonlyComposesWith": [
+          "no host header check on rpc requests",
+          "dns rebind localhost bypass",
+          "browser same origin policy bypass",
+          "debug api remote abuse",
+          "rpc http server"
+        ]
+      },
+      "check": [
+        "VERIFY: Grep the RPC server builder for host allowlist middleware; if absent → finding (severity per"
+      ],
+      "validWhen": "Grep the RPC server builder for host allowlist middleware; if absent → finding (severity per"
+    },
+    {
+      "id": "eth-l1-clients-state-root-fork-choice-mismatch-real-reports-001",
+      "title": "Real Reports",
+      "severity": "CRITICAL",
+      "grep": "trie_updates_not_removed_for_all_chains_on_fork_choice_updated|side_chain_hashes_invalid_for_state_provider|buffered_blocks_skip_state_root_validation|trieupdates_flush_reorders_operations|shallow_copy_of_byte_slice_fork|engineapi_error_hash_mismatch",
+      "detect": "Report: `reports/eth-l1-clients_findings/reth-sigp-2024.md` (finding text ~line 451:",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/execution/state-root-fork-choice-mismatch.md",
+      "lines": [
+        128,
+        149
+      ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+          "reports/eth-l1-clients_findings/37199-bc-low-potential-chain-fork-due-to-shallow-copy-of-byte-slice.md"
+        ],
+        "scope": "section",
+        "support": "explicit"
+      },
+      "graphHints": {
+        "variants": [
+          "consensus pipeline validation gap",
+          "state root skip",
+          "sidechain hash corruption",
+          "fork choice accounting bug",
+          "chain split"
+        ],
+        "commonlyComposesWith": [
+          "buffered blocks skip state root validation",
+          "side chain hashes invalid for state provider",
+          "trieupdates flush reorders operations",
+          "trie updates not removed for all chains on fork choice updated",
+          "shallow copy of byte slice fork"
+        ]
+      },
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Report: reports/eth-l1-clients_findings/reth-sigp-2024.md (finding text ~line 451"
+      ],
+      "validWhen": "Report: reports/eth-l1-clients_findings/reth-sigp-2024.md (finding text ~line 451"
+    },
+    {
+      "id": "eth-l1-clients-state-root-fork-choice-mismatch-vulnerable-code-pattern-generi-002",
+      "title": "Vulnerable Code Pattern (generic)",
+      "severity": "CRITICAL",
+      "grep": "trie_updates_not_removed_for_all_chains_on_fork_choice_updated|side_chain_hashes_invalid_for_state_provider|buffered_blocks_skip_state_root_validation|trieupdates_flush_reorders_operations|shallow_copy_of_byte_slice_fork|engineapi_error_hash_mismatch",
+      "detect": "// VULNERABLE: buffered reconnect path skips state root verification (RETH-05 pattern)",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/execution/state-root-fork-choice-mismatch.md",
+      "lines": [
+        150,
+        168
+      ],
+      "reportEvidence": {
+        "count": 22,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+          "reports/eth-l1-clients_findings/37199-bc-low-potential-chain-fork-due-to-shallow-copy-of-byte-slice.md",
+          "reports/eth-l1-clients_findings/audit-reports-anoma-2023-03-28-audit-report-namada-ethereum-bridge-v1-0-pdf.md",
+          "reports/eth-l1-clients_findings/chainsafe-gossamer-sigp.md",
+          "reports/eth-l1-clients_findings/ef-pectra-sigp.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "consensus pipeline validation gap",
+          "state root skip",
+          "sidechain hash corruption",
+          "fork choice accounting bug",
+          "chain split"
+        ],
+        "commonlyComposesWith": [
+          "buffered blocks skip state root validation",
+          "side chain hashes invalid for state provider",
+          "trieupdates flush reorders operations",
+          "trie updates not removed for all chains on fork choice updated",
+          "shallow copy of byte slice fork"
+        ]
+      },
+      "neverPrune": true,
+      "check": [
+        "VERIFY: // VULNERABLE: buffered reconnect path skips state root verification (RETH-05 pattern)",
+        "PROVE: buffered reconnect path skips state root verification (RETH-05 pattern)"
+      ],
+      "antipattern": "buffered reconnect path skips state root verification (RETH-05 pattern)",
+      "validWhen": "// VULNERABLE: buffered reconnect path skips state root verification (RETH-05 pattern)",
+      "proofShape": "buffered reconnect path skips state root verification (RETH-05 pattern)"
+    },
+    {
+      "id": "eth-l1-clients-state-root-fork-choice-mismatch-detection-hunt-strategy-003",
+      "title": "Detection & Hunt Strategy",
+      "severity": "CRITICAL",
+      "grep": "trie_updates_not_removed_for_all_chains_on_fork_choice_updated|side_chain_hashes_invalid_for_state_provider|buffered_blocks_skip_state_root_validation|trieupdates_flush_reorders_operations|shallow_copy_of_byte_slice_fork|engineapi_error_hash_mismatch",
+      "detect": "Map every entry point that marks a block \"validated\" (import, buffer-connect, side-chain",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/execution/state-root-fork-choice-mismatch.md",
+      "lines": [
+        169,
+        181
+      ],
+      "reportEvidence": {
+        "count": 22,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+          "reports/eth-l1-clients_findings/37199-bc-low-potential-chain-fork-due-to-shallow-copy-of-byte-slice.md",
+          "reports/eth-l1-clients_findings/audit-reports-anoma-2023-03-28-audit-report-namada-ethereum-bridge-v1-0-pdf.md",
+          "reports/eth-l1-clients_findings/chainsafe-gossamer-sigp.md",
+          "reports/eth-l1-clients_findings/ef-pectra-sigp.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "consensus pipeline validation gap",
+          "state root skip",
+          "sidechain hash corruption",
+          "fork choice accounting bug",
+          "chain split"
+        ],
+        "commonlyComposesWith": [
+          "buffered blocks skip state root validation",
+          "side chain hashes invalid for state provider",
+          "trieupdates flush reorders operations",
+          "trie updates not removed for all chains on fork choice updated",
+          "shallow copy of byte slice fork"
+        ]
+      },
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Map every entry point that marks a block \"validated\" (import, buffer-connect, side-chain"
+      ],
+      "validWhen": "Map every entry point that marks a block \"validated\" (import, buffer-connect, side-chain"
+    },
+    {
+      "id": "eth-l1-clients-discv4-discv5-endpoint-proof-enr-real-reports-001",
+      "title": "Real Reports",
+      "severity": "MEDIUM",
+      "grep": "respond_closest_shares_all_neighbours|pong_neighbors_expiration_not_checked|endpoint_proof_never_refresh_bonding|enr_response_max_size_unchecked|enr_responses_not_validated|find_node_invalid_endpoint",
+      "detect": "Report:...",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/p2p/discv4-discv5-endpoint-proof-ENR.md",
+      "lines": [
+        127,
+        162
+      ],
+      "reportEvidence": {
+        "count": 4,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/38894-bc-low-missing-expiration-check-for-pong-and-neighbors-packets-and-not-refreshing-the-endpoint.md",
+          "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+          "reports/eth-l1-clients_findings/38902-bc-low-no-check-on-the-maximum-size-of-the-encoded-enr-on-enr.md",
+          "reports/eth-l1-clients_findings/eth-node-discovery-la.md"
+        ],
+        "scope": "section",
+        "support": "explicit"
+      },
+      "graphHints": {
+        "variants": [
+          "discovery protocol validation gap",
+          "packet replay",
+          "endpoint proof bypass",
+          "enr oversize",
+          "neighbor flood"
+        ],
+        "commonlyComposesWith": [
+          "pong neighbors expiration not checked",
+          "endpoint proof never refresh bonding",
+          "respond closest shares all neighbours",
+          "find node invalid endpoint",
+          "enr response max size unchecked"
+        ]
+      }
+    },
+    {
+      "id": "eth-l1-clients-discv4-discv5-endpoint-proof-enr-vulnerable-code-pattern-generi-002",
+      "title": "Vulnerable Code Pattern (generic)",
+      "severity": "MEDIUM",
+      "grep": "respond_closest_shares_all_neighbours|pong_neighbors_expiration_not_checked|endpoint_proof_never_refresh_bonding|enr_response_max_size_unchecked|enr_responses_not_validated|find_node_invalid_endpoint",
+      "detect": "// VULNERABLE: expiration parsed but not enforced (besu #38894 pattern)",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/p2p/discv4-discv5-endpoint-proof-ENR.md",
+      "lines": [
+        163,
+        180
+      ],
+      "reportEvidence": {
+        "count": 5,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/38894-bc-low-missing-expiration-check-for-pong-and-neighbors-packets-and-not-refreshing-the-endpoint.md",
+          "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+          "reports/eth-l1-clients_findings/38902-bc-low-no-check-on-the-maximum-size-of-the-encoded-enr-on-enr.md",
+          "reports/eth-l1-clients_findings/eth-node-discovery-la.md",
+          "reports/eth-l1-clients_findings/37352-bc-insight-missing-liveness-check-in-collecttablenodes.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "discovery protocol validation gap",
+          "packet replay",
+          "endpoint proof bypass",
+          "enr oversize",
+          "neighbor flood"
+        ],
+        "commonlyComposesWith": [
+          "pong neighbors expiration not checked",
+          "endpoint proof never refresh bonding",
+          "respond closest shares all neighbours",
+          "find node invalid endpoint",
+          "enr response max size unchecked"
+        ]
+      },
+      "check": [
+        "VERIFY: // VULNERABLE: expiration parsed but not enforced (besu #38894 pattern)",
+        "PROVE: expiration parsed but not enforced (besu #38894 pattern)"
+      ],
+      "antipattern": "expiration parsed but not enforced (besu #38894 pattern)",
+      "validWhen": "// VULNERABLE: expiration parsed but not enforced (besu #38894 pattern)",
+      "proofShape": "expiration parsed but not enforced (besu #38894 pattern)"
+    },
+    {
+      "id": "eth-l1-clients-discv4-discv5-endpoint-proof-enr-detection-hunt-strategy-003",
+      "title": "Detection & Hunt Strategy",
+      "severity": "MEDIUM",
+      "grep": "respond_closest_shares_all_neighbours|pong_neighbors_expiration_not_checked|endpoint_proof_never_refresh_bonding|enr_response_max_size_unchecked|enr_responses_not_validated|find_node_invalid_endpoint",
+      "detect": "For each discv4 packet kind, tick the spec checklist: MAC ✓, hash-prev ✓, expiration-enforced?,",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/p2p/discv4-discv5-endpoint-proof-ENR.md",
+      "lines": [
+        181,
+        191
+      ],
+      "reportEvidence": {
+        "count": 5,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/38894-bc-low-missing-expiration-check-for-pong-and-neighbors-packets-and-not-refreshing-the-endpoint.md",
+          "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+          "reports/eth-l1-clients_findings/38902-bc-low-no-check-on-the-maximum-size-of-the-encoded-enr-on-enr.md",
+          "reports/eth-l1-clients_findings/eth-node-discovery-la.md",
+          "reports/eth-l1-clients_findings/37352-bc-insight-missing-liveness-check-in-collecttablenodes.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "discovery protocol validation gap",
+          "packet replay",
+          "endpoint proof bypass",
+          "enr oversize",
+          "neighbor flood"
+        ],
+        "commonlyComposesWith": [
+          "pong neighbors expiration not checked",
+          "endpoint proof never refresh bonding",
+          "respond closest shares all neighbours",
+          "find node invalid endpoint",
+          "enr response max size unchecked"
+        ]
+      },
+      "check": [
+        "VERIFY: For each discv4 packet kind, tick the spec checklist: MAC ✓, hash-prev ✓, expiration-enforced?,"
+      ],
+      "validWhen": "For each discv4 packet kind, tick the spec checklist: MAC ✓, hash-prev ✓, expiration-enforced?,"
+    },
+    {
+      "id": "eth-l1-clients-gossipsub-malformed-message-real-report-001",
+      "title": "Real Report",
+      "severity": "LOW",
+      "grep": "waste_compute_deserializing_undecodable_messages|topic_weight_zero_invalid_messages_unpenalized|malformed_snappy_ssz_gossip_survives_scoring|invalid_message_handling|invalidMessageDeliveries|AggregateAndProofsTopic",
+      "detect": "Report:...",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/p2p/gossipsub-malformed-message.md",
+      "lines": [
+        107,
+        126
+      ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/38318-bc-low-nimbus-eth2-gossipsub-misconfiguration-allows-malicious-peers-gossip-malformed-data-wit.md",
+          "reports/eth-l1-clients_findings/38146-bc-medium-nimbus-eth2-remote-crash.md",
+          "reports/eth-l1-clients_findings/38733-bc-medium-nibmus-eth2-remote-crash.md"
+        ],
+        "scope": "section",
+        "support": "explicit"
+      },
+      "graphHints": {
+        "variants": [
+          "scoring misconfiguration zero default weight",
+          "penalty bypass",
+          "invalid message spam",
+          "resource exhaustion",
+          "gossipsub penalty bypass"
+        ],
+        "commonlyComposesWith": [
+          "topic weight zero invalid messages unpenalized",
+          "malformed snappy ssz gossip survives scoring",
+          "waste compute deserializing undecodable messages",
+          "gossipsub topic params",
+          "peer scoring"
+        ]
+      },
+      "check": [
+        "IMPACT: node wastes compute+bandwidth deserializing undecodable data; ability to follow the"
+      ],
+      "impact": "node wastes compute+bandwidth deserializing undecodable data; ability to follow the"
+    },
+    {
+      "id": "eth-l1-clients-gossipsub-malformed-message-detection-hunt-strategy-002",
+      "title": "Detection & Hunt Strategy",
+      "severity": "LOW",
+      "grep": "waste_compute_deserializing_undecodable_messages|topic_weight_zero_invalid_messages_unpenalized|malformed_snappy_ssz_gossip_survives_scoring|invalid_message_handling|invalidMessageDeliveries|gossipsub_topic_params",
+      "detect": "Grep every gossipsub topic registration in the client for default-initialized `TopicParam` /",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/p2p/gossipsub-malformed-message.md",
+      "lines": [
+        137,
+        147
+      ],
+      "reportEvidence": {
+        "count": 4,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/38318-bc-low-nimbus-eth2-gossipsub-misconfiguration-allows-malicious-peers-gossip-malformed-data-wit.md",
+          "reports/eth-l1-clients_findings/38146-bc-medium-nimbus-eth2-remote-crash.md",
+          "reports/eth-l1-clients_findings/38733-bc-medium-nibmus-eth2-remote-crash.md",
+          "reports/eth-l1-clients_findings/37351-bc-insight-resubscribe-deadlocks-when-unsubscribing-within-an-unblock-channel.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "scoring misconfiguration zero default weight",
+          "penalty bypass",
+          "invalid message spam",
+          "resource exhaustion",
+          "gossipsub penalty bypass"
+        ],
+        "commonlyComposesWith": [
+          "topic weight zero invalid messages unpenalized",
+          "malformed snappy ssz gossip survives scoring",
+          "waste compute deserializing undecodable messages",
+          "gossipsub topic params",
+          "peer scoring"
+        ]
+      },
+      "check": [
+        "VERIFY: Grep every gossipsub topic registration in the client for default-initialized TopicParam /"
+      ],
+      "validWhen": "Grep every gossipsub topic registration in the client for default-initialized TopicParam /"
+    },
+    {
+      "id": "eth-l1-clients-p2p-remote-dos-oom-vulnerable-code-pattern-generi-008",
+      "title": "Vulnerable Code Pattern (generic)",
+      "severity": "HIGH",
+      "grep": "evil_client_fast_crash_via_unthrottled_requests|missing_handshake_timeout_holding_sockets|ban_logic_incoming_peer_count_exhaustion|handshake_tcp_flood_no_ip_ratelimit|getblockheaders_large_range_oom|getreceiptsmsg_amplification",
+      "detect": "// VULNERABLE: response size driven by peer-controlled range, fully buffered",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md",
+      "lines": [
+        187,
+        201
+      ],
+      "reportEvidence": {
+        "count": 18,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/38850-bc-low-remote-p2p-oom-crash-getblockheaders-reth.md",
+          "reports/eth-l1-clients_findings/37466-bc-medium-evil-client-oom-crash-fast-p2p-crash.md",
+          "reports/eth-l1-clients_findings/37120-bc-insight-remote-handshake-based-tcp-30303-flooding-leads-to-an-out-of-memory-crash.md",
+          "reports/eth-l1-clients_findings/38598-bc-insight-getreceiptsmsg-abuse-leads-to-the-dos-and-or-crash-of-every-el-client-in-the-ethere.md",
+          "reports/eth-l1-clients_findings/38807-bc-low-dos-any-reth-node-via-ban-logic-exploit.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "unbounded remote work without rate limit",
+          "resource exhaustion",
+          "oom crash",
+          "connection flood",
+          "request amplification"
+        ],
+        "commonlyComposesWith": [
+          "getblockheaders large range oom",
+          "getreceiptsmsg amplification",
+          "handshake tcp flood no ip ratelimit",
+          "evil client fast crash via unthrottled requests",
+          "ping spamming deskew"
+        ]
+      },
+      "check": [
+        "VERIFY: // VULNERABLE: response size driven by peer-controlled range, fully buffered",
+        "PROVE: response size driven by peer-controlled range, fully buffered"
+      ],
+      "antipattern": "response size driven by peer-controlled range, fully buffered",
+      "validWhen": "// VULNERABLE: response size driven by peer-controlled range, fully buffered",
+      "proofShape": "response size driven by peer-controlled range, fully buffered"
+    },
+    {
+      "id": "eth-l1-clients-p2p-remote-dos-oom-similar-reports-009",
+      "title": "Similar Reports",
+      "severity": "MEDIUM",
+      "grep": "evil_client_fast_crash_via_unthrottled_requests|missing_handshake_timeout_holding_sockets|ban_logic_incoming_peer_count_exhaustion|handshake_tcp_flood_no_ip_ratelimit|getblockheaders_large_range_oom|getreceiptsmsg_amplification",
+      "detect": "Similar Reports",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md",
+      "lines": [
+        202,
+        218
+      ],
+      "reportEvidence": {
+        "count": 18,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/38850-bc-low-remote-p2p-oom-crash-getblockheaders-reth.md",
+          "reports/eth-l1-clients_findings/37466-bc-medium-evil-client-oom-crash-fast-p2p-crash.md",
+          "reports/eth-l1-clients_findings/37120-bc-insight-remote-handshake-based-tcp-30303-flooding-leads-to-an-out-of-memory-crash.md",
+          "reports/eth-l1-clients_findings/38598-bc-insight-getreceiptsmsg-abuse-leads-to-the-dos-and-or-crash-of-every-el-client-in-the-ethere.md",
+          "reports/eth-l1-clients_findings/38807-bc-low-dos-any-reth-node-via-ban-logic-exploit.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "unbounded remote work without rate limit",
+          "resource exhaustion",
+          "oom crash",
+          "connection flood",
+          "request amplification"
+        ],
+        "commonlyComposesWith": [
+          "getblockheaders large range oom",
+          "getreceiptsmsg amplification",
+          "handshake tcp flood no ip ratelimit",
+          "evil client fast crash via unthrottled requests",
+          "ping spamming deskew"
+        ]
+      }
+    },
+    {
+      "id": "eth-l1-clients-snappy-decompression-dos-real-reports-001",
+      "title": "Real Reports",
+      "severity": "MEDIUM",
+      "grep": "non_minimal_varint_length_accepted_or_rejected|uncompressed_chunk_checksum_not_verified|corrupted_gossip_deserialization_cost|chunkTypeUncompressedData|reqresp_encoding|gossip_decoding",
+      "detect": "Report: `reports/eth-l1-clients_findings/37246-bc-low-lodestar-snappy-checksum-issue.md`",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/p2p/snappy-decompression-DoS.md",
+      "lines": [
+        112,
+        135
+      ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/37246-bc-low-lodestar-snappy-checksum-issue.md",
+          "reports/eth-l1-clients_findings/37594-sc-insight-nimbus-incorrectly-rejects-non-minimally-encoded-snappy-data-lengths-due-to-spec.md"
+        ],
+        "scope": "section",
+        "support": "explicit"
+      },
+      "graphHints": {
+        "variants": [
+          "missing integrity check in decoder",
+          "integrity check bypass",
+          "spec divergence",
+          "resource waste",
+          "snappy framing gap"
+        ],
+        "commonlyComposesWith": [
+          "uncompressed chunk checksum not verified",
+          "non minimal varint length accepted or rejected",
+          "corrupted gossip deserialization cost",
+          "reqresp encoding",
+          "gossip decoding"
+        ]
+      },
+      "check": [
+        "VERIFY: Report: reports/eth-l1-clients_findings/37246-bc-low-lodestar-snappy-checksum-issue.md"
+      ],
+      "validWhen": "Report: reports/eth-l1-clients_findings/37246-bc-low-lodestar-snappy-checksum-issue.md",
+      "preconditions": [
+        "minimal encodings where the framing spec is ambiguous, rejecting messages other stacks accept."
+      ]
+    },
+    {
+      "id": "eth-l1-clients-snappy-decompression-dos-vulnerable-code-pattern-generi-002",
+      "title": "Vulnerable Code Pattern (generic)",
+      "severity": "MEDIUM",
+      "grep": "non_minimal_varint_length_accepted_or_rejected|uncompressed_chunk_checksum_not_verified|corrupted_gossip_deserialization_cost|chunkTypeUncompressedData|reqresp_encoding|gossip_decoding",
+      "detect": "// VULNERABLE: no checksum verification on uncompressed chunk (lodestar #37246)",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/p2p/snappy-decompression-DoS.md",
+      "lines": [
+        136,
+        149
+      ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/37246-bc-low-lodestar-snappy-checksum-issue.md",
+          "reports/eth-l1-clients_findings/37594-sc-insight-nimbus-incorrectly-rejects-non-minimally-encoded-snappy-data-lengths-due-to-spec.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "missing integrity check in decoder",
+          "integrity check bypass",
+          "spec divergence",
+          "resource waste",
+          "snappy framing gap"
+        ],
+        "commonlyComposesWith": [
+          "uncompressed chunk checksum not verified",
+          "non minimal varint length accepted or rejected",
+          "corrupted gossip deserialization cost",
+          "reqresp encoding",
+          "gossip decoding"
+        ]
+      },
+      "check": [
+        "VERIFY: // VULNERABLE: no checksum verification on uncompressed chunk (lodestar #37246)",
+        "PROVE: no checksum verification on uncompressed chunk (lodestar #37246)"
+      ],
+      "antipattern": "no checksum verification on uncompressed chunk (lodestar #37246)",
+      "validWhen": "// VULNERABLE: no checksum verification on uncompressed chunk (lodestar #37246)",
+      "proofShape": "no checksum verification on uncompressed chunk (lodestar #37246)"
+    },
+    {
+      "id": "eth-l1-clients-txpool-gas-nonce-validation-divergence-real-reports-001",
+      "title": "Real Reports",
+      "severity": "MEDIUM",
+      "grep": "pending_pool_subtraction_overflow_infinite_loop|wrong_nonce_execution_state_root_mismatch|missing_block_gas_limit_check_in_txpool|intrinsic_gas_txpool_vs_evm_mismatch|sendrawtransaction_fee_check_bypass|eip2681_nonce_upper_bound_violation",
+      "detect": "Report:...",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md",
+      "lines": [
+        132,
+        168
+      ],
+      "reportEvidence": {
+        "count": 7,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/38427-bc-low-discrepancy-in-intrinsic-gas-calculation-between-txpool-and-evm-execution.md",
+          "reports/eth-l1-clients_findings/38278-bc-low-potential-dos-to-mempool-due-to-missing-gas-limit-check.md",
+          "reports/eth-l1-clients_findings/38554-bc-low-incorrect-transaction-fee-check-in-sendrawtransaction.md",
+          "reports/eth-l1-clients_findings/38015-bc-insight-violation-of-eip-2681-in-create-transaction.md",
+          "reports/eth-l1-clients_findings/37695-bc-insight-executing-transaction-that-has-a-wrong-nonce-might-triggered-a-chain-split-due-to-m.md"
+        ],
+        "scope": "section",
+        "support": "explicit"
+      },
+      "graphHints": {
+        "variants": [
+          "validation logic duplicated and diverged",
+          "spam tx acceptance",
+          "mempool dos",
+          "eip violation",
+          "state root divergence"
+        ],
+        "commonlyComposesWith": [
+          "intrinsic gas txpool vs evm mismatch",
+          "missing block gas limit check in txpool",
+          "sendrawtransaction fee check bypass",
+          "eip2681 nonce upper bound violation",
+          "wrong nonce execution state root mismatch"
+        ]
+      }
+    },
+    {
+      "id": "eth-l1-clients-txpool-gas-nonce-validation-divergence-vulnerable-code-pattern-generi-002",
+      "title": "Vulnerable Code Pattern (generic)",
+      "severity": "MEDIUM",
+      "grep": "pending_pool_subtraction_overflow_infinite_loop|wrong_nonce_execution_state_root_mismatch|missing_block_gas_limit_check_in_txpool|intrinsic_gas_txpool_vs_evm_mismatch|sendrawtransaction_fee_check_bypass|eip2681_nonce_upper_bound_violation",
+      "detect": "// VULNERABLE: txpool intrinsic gas misses access-list charging that EVM applies (#38427)",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md",
+      "lines": [
+        169,
+        181
+      ],
+      "reportEvidence": {
+        "count": 10,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/38427-bc-low-discrepancy-in-intrinsic-gas-calculation-between-txpool-and-evm-execution.md",
+          "reports/eth-l1-clients_findings/38278-bc-low-potential-dos-to-mempool-due-to-missing-gas-limit-check.md",
+          "reports/eth-l1-clients_findings/38554-bc-low-incorrect-transaction-fee-check-in-sendrawtransaction.md",
+          "reports/eth-l1-clients_findings/38015-bc-insight-violation-of-eip-2681-in-create-transaction.md",
+          "reports/eth-l1-clients_findings/37695-bc-insight-executing-transaction-that-has-a-wrong-nonce-might-triggered-a-chain-split-due-to-m.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "validation logic duplicated and diverged",
+          "spam tx acceptance",
+          "mempool dos",
+          "eip violation",
+          "state root divergence"
+        ],
+        "commonlyComposesWith": [
+          "intrinsic gas txpool vs evm mismatch",
+          "missing block gas limit check in txpool",
+          "sendrawtransaction fee check bypass",
+          "eip2681 nonce upper bound violation",
+          "wrong nonce execution state root mismatch"
+        ]
+      },
+      "check": [
+        "VERIFY: // VULNERABLE: txpool intrinsic gas misses access-list charging that EVM applies (#38427)",
+        "PROVE: txpool intrinsic gas misses access-list charging that EVM applies (#38427)"
+      ],
+      "antipattern": "txpool intrinsic gas misses access-list charging that EVM applies (#38427)",
+      "validWhen": "// VULNERABLE: txpool intrinsic gas misses access-list charging that EVM applies (#38427)",
+      "proofShape": "txpool intrinsic gas misses access-list charging that EVM applies (#38427)"
+    },
+    {
+      "id": "eth-l1-clients-txpool-gas-nonce-validation-divergence-detection-hunt-strategy-003",
+      "title": "Detection & Hunt Strategy",
+      "severity": "MEDIUM",
+      "grep": "pending_pool_subtraction_overflow_infinite_loop|wrong_nonce_execution_state_root_mismatch|missing_block_gas_limit_check_in_txpool|intrinsic_gas_txpool_vs_evm_mismatch|sendrawtransaction_fee_check_bypass|eip2681_nonce_upper_bound_violation",
+      "detect": "Locate every intrinsic-gas implementation in the repo (`grep -r intrinsic`); assert exactly one",
+      "cat": [
+        "eth-l1",
+        "execution-client",
+        "consensus-client",
+        "devp2p",
+        "gossipsub",
+        "rlp",
+        "beacon",
+        "reth",
+        "geth"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md",
+      "lines": [
+        186,
+        197
+      ],
+      "reportEvidence": {
+        "count": 10,
+        "sampleReports": [
+          "reports/eth-l1-clients_findings/38427-bc-low-discrepancy-in-intrinsic-gas-calculation-between-txpool-and-evm-execution.md",
+          "reports/eth-l1-clients_findings/38278-bc-low-potential-dos-to-mempool-due-to-missing-gas-limit-check.md",
+          "reports/eth-l1-clients_findings/38554-bc-low-incorrect-transaction-fee-check-in-sendrawtransaction.md",
+          "reports/eth-l1-clients_findings/38015-bc-insight-violation-of-eip-2681-in-create-transaction.md",
+          "reports/eth-l1-clients_findings/37695-bc-insight-executing-transaction-that-has-a-wrong-nonce-might-triggered-a-chain-split-due-to-m.md"
+        ],
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "validation logic duplicated and diverged",
+          "spam tx acceptance",
+          "mempool dos",
+          "eip violation",
+          "state root divergence"
+        ],
+        "commonlyComposesWith": [
+          "intrinsic gas txpool vs evm mismatch",
+          "missing block gas limit check in txpool",
+          "sendrawtransaction fee check bypass",
+          "eip2681 nonce upper bound violation",
+          "wrong nonce execution state root mismatch"
+        ]
+      },
+      "check": [
+        "VERIFY: Locate every intrinsic-gas implementation in the repo (grep -r intrinsic); assert exactly one"
+      ],
+      "validWhen": "Locate every intrinsic-gas implementation in the repo (grep -r intrinsic); assert exactly one"
+    }
+  ]
+}

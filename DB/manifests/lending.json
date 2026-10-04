@@ -1,0 +1,1640 @@
+{
+  "meta": {
+    "category": "lending",
+    "description": "Pattern-level index for lending vulnerabilities",
+    "fileCount": 10,
+    "totalPatterns": 10,
+    "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
+  },
+  "files": [
+    {
+      "file": "DB/lending/accounting/dust-rounding-loan-closure.md",
+      "totalLines": 344,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "arithmetic",
+        "vulnerability_type": "rounding_dust_breakage",
+        "root_cause_family": "rounding_direction_error",
+        "pattern_key": "dust_rounding_closure_break | debt_share_accounting | dust_repay_or_precision_loss | repay_liquidate_revert_or_unprofitable",
+        "interaction_scope": "single_contract",
+        "involved_contracts": [
+          "V3Vault / LendingPair (repay, liquidate)",
+          "CDP redemption / liquidation incentive math",
+          "healthFactor vs repay routers",
+          "fee accounting in liquidation flows"
+        ],
+        "path_keys": [
+          "dust_rounding_closure_break | repay() | V3Vault→debtShares | exact_share_match_revert_grief",
+          "dust_rounding_closure_break | liquidate() | V3Vault→DebtChanged | front_run_share_delta_revert",
+          "dust_rounding_closure_break | openCDP(dust) | CDP→redemption | dust_positions_unprofitable_to_clear",
+          "dust_rounding_closure_break | healthFactor() | Router→Morpho | rounding_discrepancy_migration_failure"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "debt_share_accounting",
+        "primitives": [
+          "debtShares rounding",
+          "RepayExceedsDebt",
+          "DebtChanged",
+          "dust CDP",
+          "liquidation profitability",
+          "fee precision",
+          "token-to-USD conversion precision",
+          "rounding direction (ceil vs floor)",
+          "share-to-amount conversion"
+        ],
+        "code_keywords": [
+          "RepayExceedsDebt",
+          "DebtChanged",
+          "debtShares",
+          "convertToShares",
+          "convertToAssets",
+          "ceilDiv",
+          "roundUp",
+          "healthFactor",
+          "minProfit"
+        ],
+        "severity": "medium",
+        "impact": "dos",
+        "financial_impact": "medium",
+        "tags": [
+          "lending",
+          "rounding",
+          "precision",
+          "dust",
+          "liquidation",
+          "defi"
+        ],
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "lending-dust-rounding-loan-closure-dust-and-rounding-breakage-of--000",
+          "title": "Dust and Rounding Breakage of Loan Closure and Liquidation",
+          "lineStart": 83,
+          "lineEnd": 344,
+          "lineCount": 262,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "DebtChanged",
+            "Morpho.repay",
+            "MorphoLendingRouter.healthFactor",
+            "RepayExceedsDebt",
+            "V3Vault.repay",
+            "ceil",
+            "ceilDiv",
+            "convertToShares",
+            "debtShares",
+            "dust_positions_unprofitable_to_clear",
+            "exact_share_match_revert_grief",
+            "floor",
+            "front_run_share_delta_revert",
+            "healthFactor",
+            "liquidate",
+            "convertToAssets",
+            "roundUp",
+            "minProfit",
+            "debt_share_accounting"
+          ],
+          "searchKeywords": [
+            "dust",
+            "rounding",
+            "breakage",
+            "loan",
+            "closure",
+            "liquidation",
+            "dust rounding breakage loan closure liquidation",
+            "dust rounding",
+            "rounding breakage",
+            "breakage loan",
+            "loan closure",
+            "closure liquidation",
+            "repayexceedsdebt",
+            "repay exceeds debt",
+            "debtchanged",
+            "debt changed",
+            "debtshares",
+            "debt shares",
+            "converttoshares",
+            "convert to shares",
+            "converttoassets",
+            "convert to assets",
+            "ceildiv",
+            "ceil div",
+            "roundup",
+            "round up",
+            "healthfactor",
+            "health factor",
+            "minprofit",
+            "min profit",
+            "debtshares rounding",
+            "debt shares rounding"
+          ],
+          "rootCause": "1. **Exact-share-match revert** [D1]: Revert Lend `V3Vault.repay`/`liquidate` revert when requested shares exceed outstanding (`RepayExceedsDebt`, `DebtChanged`). Anyone can repay 1 share of another's",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/lending_borrowing_findings/m-16-repayments-and-liquidations-can-be-forced-to-revert-by-an-attacker-that-rep.md",
+              "reports/lending_borrowing_findings/allowing-the-creation-of-dust-cdps-could-lead-redeemersliquidators-to-be-not-pro.md",
+              "reports/lending_borrowing_findings/h-1-fee-precision-loss-disrupts-liquidations-and-causes-loss-of-funds.md",
+              "reports/lending_borrowing_findings/bigger-precision-loss-in-tokenamount-to-usd-conversion-will-lead-incorrect-liqui.md",
+              "reports/lending_borrowing_findings/m-7-rounding-discrepancy-between-morpholendingrouterhealthfactor-and-morphorepay.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "rounding",
+              "dust rounding breakage loan closure liquidation",
+              "dust rounding",
+              "rounding breakage",
+              "debtshares rounding"
+            ],
+            "commonlyComposesWith": [
+              "liquidation",
+              "dust rounding breakage loan closure liquidation",
+              "closure liquidation",
+              "debt shares rounding",
+              "repay exceeds debt"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/lending/bad-debt/bad-debt-socialization.md",
+      "totalLines": 374,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "liquidation",
+        "vulnerability_type": "bad_debt_handling",
+        "root_cause_family": "missing_bad_debt_settlement",
+        "pattern_key": "unhandled_bad_debt | pool_accounting | collateral_exhaustion | loss_not_socialized",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "LendingPool / Pair",
+          "LiquidationLogic",
+          "SupplyLogic (withdraw)",
+          "DebtToken / share accounting",
+          "StabilityPool / reserve"
+        ],
+        "path_keys": [
+          "unhandled_bad_debt | liquidate() | LiquidationLogic→Pool | bad_debt_never_marked_off",
+          "unhandled_bad_debt | withdraw() | SupplyLogic→liquidityIndex | loss_not_shared_last_withdrawer_loses",
+          "unhandled_bad_debt | withdrawLiquidityAndClaim() | Collateral→Pool | collateral_exit_without_debt_check",
+          "unhandled_bad_debt | batchLiquidate() | Liquidation→DebtToken | redistribution_skips_later_batches"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "solvency_accounting",
+        "primitives": [
+          "badDebt",
+          "totalAssets",
+          "liquidityIndex",
+          "supplyShares",
+          "liquidateClean",
+          "debt socialization",
+          "reserve settlement",
+          "interest accrual on defaulted debt",
+          "collateralRatio check"
+        ],
+        "code_keywords": [
+          "liquidateClean",
+          "badDebt",
+          "totalAssets",
+          "liquidityIndex",
+          "withdrawLiquidityAndClaim",
+          "batchLiquidate",
+          "executeCrossLiquidateERC20",
+          "_getDebtAmount",
+          "maxWithdrawableCollateral"
+        ],
+        "severity": "high",
+        "impact": "fund_loss",
+        "financial_impact": "high",
+        "tags": [
+          "lending",
+          "bad_debt",
+          "insolvency",
+          "liquidation",
+          "defi"
+        ],
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "lending-bad-debt-socialization-bad-debt-socialization-and-mis-000",
+          "title": "Bad Debt Socialization and Missing Write-Off",
+          "lineStart": 87,
+          "lineEnd": 374,
+          "lineCount": 288,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "SupplyLogic.withdraw",
+            "badDebt",
+            "bad_debt_never_marked_off",
+            "batchLiquidate",
+            "batchLiquidateTroves",
+            "claimCollateral",
+            "collateral_exit_without_debt_check",
+            "debtAmount",
+            "executeWithdraw",
+            "liquidate",
+            "liquidateClean",
+            "liquidityIndex",
+            "loss_not_shared_last_withdrawer_loses",
+            "multi_contract",
+            "redistribution_skips_later_batches",
+            "totalAssets",
+            "withdrawLiquidityAndClaim",
+            "executeCrossLiquidateERC20",
+            "_getDebtAmount",
+            "maxWithdrawableCollateral"
+          ],
+          "searchKeywords": [
+            "bad",
+            "debt",
+            "socialization",
+            "missing",
+            "write",
+            "off",
+            "bad debt socialization missing write off",
+            "bad debt",
+            "debt socialization",
+            "socialization missing",
+            "missing write",
+            "write off",
+            "liquidateclean",
+            "liquidate clean",
+            "baddebt",
+            "totalassets",
+            "total assets",
+            "liquidityindex",
+            "liquidity index",
+            "withdrawliquidityandclaim",
+            "withdraw liquidity and claim",
+            "batchliquidate",
+            "batch liquidate",
+            "executecrossliquidateerc20",
+            "execute cross liquidate erc20",
+            "_getdebtamount",
+            "get debt amount",
+            "maxwithdrawablecollateral",
+            "max withdrawable collateral",
+            "supplyshares",
+            "supply shares",
+            "reserve settlement"
+          ],
+          "rootCause": "1. **No write-off on liquidation** [B1]: Frax `liquidate()` pays the liquidator from collateral but never marks the unbacked remainder off `totalAssets.amount`; `liquidateClean()` (which would) has no",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 10,
+            "sampleReports": [
+              "reports/lending_borrowing_findings/h-02-liquidate-doesnt-mark-off-bad-debt-leading-to-a-last-lender-to-withdraw-los.md",
+              "reports/lending_borrowing_findings/h-05-bad-debt-is-never-handled-which-places-insolvency-risks-on-benddao.md",
+              "reports/lending_borrowing_findings/h-09-bad-debts-should-not-continue-to-accrue-interest.md",
+              "reports/lending_borrowing_findings/bad-debt-redistribution-not-happening-between-liquidations-in-batch-mode.md",
+              "reports/lending_borrowing_findings/collateral-can-be-withdrawn-without-repaying-usds-loan.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing bad debt settlement",
+              "logical error",
+              "unhandled bad debt",
+              "pool accounting",
+              "collateral exhaustion"
+            ],
+            "commonlyComposesWith": [
+              "bad debt",
+              "total assets",
+              "liquidity index",
+              "supply shares",
+              "liquidate clean"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/lending/caps/supply-borrow-cap-bypass.md",
+      "totalLines": 349,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "risk_parameters",
+        "vulnerability_type": "cap_enforcement_bypass",
+        "root_cause_family": "incomplete_cap_validation",
+        "pattern_key": "wrong_cap_check | cap_validation | deposit_or_borrow | cap_bypass_or_capacity_dos",
+        "interaction_scope": "single_contract",
+        "involved_contracts": [
+          "Pool / Market / EtherCollateral",
+          "Margin collateral module",
+          "Vault (MetaMorpho / ERC4622-style)",
+          "PoolManager + ReservePool"
+        ],
+        "path_keys": [
+          "wrong_cap_check | deposit() | Margin→depositCap | per_tx_not_cumulative_check",
+          "wrong_cap_check | openLoan() | EtherCollateral | cap_checked_before_not_after",
+          "wrong_cap_check | liquidate() | PoolManager→ReservePool | reserve_funds_exceed_capacity_dos",
+          "wrong_cap_check | flashloan deposit | MetaMorpho→idleMarket | supply_cap_redirection_grief"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "cap_validation",
+        "primitives": [
+          "depositCap",
+          "supplyCap",
+          "borrowCap",
+          "collateral cap",
+          "maxDeposit",
+          "totalDeposited accounting",
+          "reserve funds",
+          "pool capacity"
+        ],
+        "code_keywords": [
+          "_requireEnoughDepositCap",
+          "depositCap",
+          "supplyCap",
+          "borrowCap",
+          "maxDeposit",
+          "_changePoolCollateral",
+          "openLoan",
+          "isSupplyCapExceeded",
+          "maxExternalDeposit"
+        ],
+        "severity": "medium",
+        "impact": "risk_limit_bypass",
+        "financial_impact": "medium",
+        "tags": [
+          "lending",
+          "caps",
+          "risk_parameters",
+          "dos",
+          "defi"
+        ],
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "lending-supply-borrow-cap-bypass-supply-borrow-cap-enforcement--000",
+          "title": "Supply / Borrow Cap Enforcement Bypass",
+          "lineStart": 84,
+          "lineEnd": 349,
+          "lineCount": 266,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "EtherCollateral",
+            "PoolManager._changePoolCollateral",
+            "PoolManager.liquidate(poolId",
+            "Vault._maxDeposit",
+            "_changePoolCollateral",
+            "_maxDeposit",
+            "_requireEnoughDepositCap",
+            "bonusFromReserve",
+            "borrow",
+            "cap_checked_before_not_after",
+            "deposit",
+            "depositCap",
+            "liquidate",
+            "loanAmount",
+            "maxDeposit",
+            "supplyCap",
+            "borrowCap",
+            "openLoan",
+            "isSupplyCapExceeded",
+            "maxExternalDeposit"
+          ],
+          "searchKeywords": [
+            "supply",
+            "borrow",
+            "cap",
+            "enforcement",
+            "bypass",
+            "supply borrow cap enforcement bypass",
+            "supply borrow",
+            "borrow cap",
+            "cap enforcement",
+            "enforcement bypass",
+            "_requireenoughdepositcap",
+            "require enough deposit cap",
+            "depositcap",
+            "deposit cap",
+            "supplycap",
+            "supply cap",
+            "borrowcap",
+            "maxdeposit",
+            "max deposit",
+            "_changepoolcollateral",
+            "change pool collateral",
+            "openloan",
+            "open loan",
+            "issupplycapexceeded",
+            "is supply cap exceeded",
+            "maxexternaldeposit",
+            "max external deposit",
+            "collateral cap",
+            "totaldeposited accounting",
+            "total deposited accounting",
+            "reserve funds",
+            "pool capacity"
+          ],
+          "rootCause": "1. **Increment-only check** [C2]: Zaros `_requireEnoughDepositCap(collateralType, amount, depositCap)` reverts only when `amount > depositCap` — total deposited for the type is not part of the express",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 9,
+            "sampleReports": [
+              "reports/lending_borrowing_findings/improper-supply-cap-limitation-enforcement.md",
+              "reports/lending_borrowing_findings/users-can-easily-bypass-collateral-depositcap-limit-using-multiple-deposits-unde.md",
+              "reports/lending_borrowing_findings/m-03-bypassing-collateral-cap-check.md",
+              "reports/lending_borrowing_findings/m-24-user-collateral-cap-check-issue.md",
+              "reports/lending_borrowing_findings/funds-can-be-redirected-to-the-idle-market-by-reaching-the-metamorpho-supply-cap.md"
+            ],
+            "severityConsensus": "MEDIUM",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "incomplete cap validation",
+              "logical error",
+              "wrong cap check",
+              "cap validation",
+              "deposit or borrow"
+            ],
+            "commonlyComposesWith": [
+              "deposit cap",
+              "supply cap",
+              "borrow cap",
+              "collateral cap",
+              "max deposit"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/lending/collateral/collateral-value-inflation.md",
+      "totalLines": 351,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "collateral",
+        "vulnerability_type": "collateral_value_inflation",
+        "root_cause_family": "collateral_accounting_error",
+        "pattern_key": "inflated_collateral_accounting | collateral_ledger | zero_deposit_or_double_count | over_borrowing_or_collateral_theft",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "LoanManager / UserLoanLogic",
+          "Position (CDP)",
+          "Vault registry / licensing",
+          "Collateral token (double-entrypoint ERC20)",
+          "OracleManager"
+        ],
+        "path_keys": [
+          "inflated_collateral_accounting | deposit(0) | UserLoanLogic→colPools | null_deposit_array_inflation",
+          "inflated_collateral_accounting | increaseCollateral() | UserLoanLogic | double_count_effective_collateral",
+          "inflated_collateral_accounting | withdraw(token) | Position→legacyToken | double_entrypoint_collateral_exit",
+          "inflated_collateral_accounting | repayWithCollateral() | LoanManagerLogic→PoolData | totalAmount_underflow_inflation"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "collateral_ledger",
+        "primitives": [
+          "colPools array",
+          "effectiveCollateralValue",
+          "increaseCollateral",
+          "zero-amount deposit",
+          "double-entrypoint token",
+          "depositData.totalAmount",
+          "repayWithCollateral",
+          "collateral balance check",
+          "isLoanOverCollateralized"
+        ],
+        "code_keywords": [
+          "increaseCollateral",
+          "colPools",
+          "effectiveCollateralValue",
+          "getLoanLiquidity",
+          "isLoanOverCollateralized",
+          "updateWithRepayWithCollateral",
+          "depositData.totalAmount",
+          "withdrawCollateral",
+          "Position.withdraw"
+        ],
+        "severity": "high",
+        "impact": "fund_loss",
+        "financial_impact": "high",
+        "tags": [
+          "lending",
+          "collateral",
+          "accounting",
+          "over_borrowing",
+          "defi"
+        ],
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "lending-collateral-value-inflation-collateral-value-inflation-and-000",
+          "title": "Collateral Value Inflation and Double-Counting",
+          "lineStart": 85,
+          "lineEnd": 351,
+          "lineCount": 267,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "Position.withdraw",
+            "Position.withdraw(token",
+            "UserLoanLogic.increaseCollateral",
+            "balance",
+            "colPools",
+            "deposit",
+            "depositData.totalAmount",
+            "double_count_effective_collateral",
+            "double_entrypoint_collateral_exit",
+            "effectiveCollateralValue",
+            "getLoanLiquidity",
+            "increaseCollateral",
+            "loan.colPools",
+            "multi_contract",
+            "null_deposit_array_inflation",
+            "isLoanOverCollateralized",
+            "updateWithRepayWithCollateral",
+            "withdrawCollateral",
+            "repayWithCollateral",
+            "collateral_ledger"
+          ],
+          "searchKeywords": [
+            "collateral",
+            "value",
+            "inflation",
+            "double",
+            "counting",
+            "collateral value inflation double counting",
+            "collateral value",
+            "value inflation",
+            "inflation double",
+            "double counting",
+            "increasecollateral",
+            "increase collateral",
+            "colpools",
+            "col pools",
+            "effectivecollateralvalue",
+            "effective collateral value",
+            "getloanliquidity",
+            "get loan liquidity",
+            "isloanovercollateralized",
+            "is loan over collateralized",
+            "updatewithrepaywithcollateral",
+            "update with repay with collateral",
+            "depositdata.totalamount",
+            "deposit data total amount",
+            "withdrawcollateral",
+            "withdraw collateral",
+            "position.withdraw",
+            "position withdraw",
+            "colpools array",
+            "col pools array",
+            "zero-amount deposit",
+            "zero amount deposit"
+          ],
+          "rootCause": "1. **Zero-amount deposit grows the iteration list** [V1][V2]: `UserLoanLogic.increaseCollateral` pushes `poolId` to `loan.colPools` whenever the balance was zero — including for `fAmount == 0`; N null",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 8,
+            "sampleReports": [
+              "reports/lending_borrowing_findings/zero-deposits-can-be-used-to-artificially-inflate-a-users-collateral-value-allow.md",
+              "reports/lending_borrowing_findings/collateral-inflation-exploit-via-zero-amount-deposits-allows-an-attacker-to-drai.md",
+              "reports/lending_borrowing_findings/attacker-can-inflate-effectivecollateralvalue.md",
+              "reports/lending_borrowing_findings/logic-flaw-in-userloanincreasecollateral-leads-to-double-counting-of-effectiveco.md",
+              "reports/lending_borrowing_findings/incorrect-updates-to-pooldepositdatatotalamount-and-loancollateralused-during-re.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "inflation",
+              "collateral value inflation double counting",
+              "value inflation",
+              "inflation double",
+              "collateral accounting error"
+            ],
+            "commonlyComposesWith": [
+              "col pools array",
+              "effective collateral value",
+              "increase collateral",
+              "zero amount deposit",
+              "double entrypoint token"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/lending/interest-accrual/missing-accrual-stale-index.md",
+      "totalLines": 330,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "interest_rate_model",
+        "vulnerability_type": "accrual_ordering_error",
+        "root_cause_family": "stale_index_accounting",
+        "pattern_key": "accrual_ordering_bug | interest_accrual | borrow_repay_liquidate_withdraw | stale_debt_or_phantom_interest",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "UToken / Market (borrow, repay)",
+          "LendingPair (liquidateAccount, withdrawUniPosition)",
+          "BorrowLogic / SupplyLogic (cache + updateState ordering)",
+          "CrossChainRouter (cross-chain debt mirror)"
+        ],
+        "path_keys": [
+          "accrual_ordering_bug | borrow() | UToken→borrowIndex | credit_limit_checked_before_accrual",
+          "accrual_ordering_bug | liquidateAccount() | LendingPair→cumulativeInterestRate | unaccrued_self_liquidation_skips_interest",
+          "accrual_ordering_bug | executeRepay() | BorrowLogic→updateState | rate_updated_before_debt_update",
+          "accrual_ordering_bug | withdraw() | LendingPair→debtAccrual | accrued_interest_ignored_on_withdraw"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "interest_accrual",
+        "primitives": [
+          "accrueInterest",
+          "borrowIndex",
+          "cumulativeInterestRate",
+          "updateState",
+          "reserve.cache",
+          "nextBorrowIndex",
+          "getDebtBalance",
+          "accrueAccount",
+          "credit limit"
+        ],
+        "code_keywords": [
+          "accrueInterest",
+          "accrueAccount",
+          "borrowIndex",
+          "cumulativeInterestRate",
+          "updateState",
+          "borrowBalanceView",
+          "getDebtBalance",
+          "executeRepay",
+          "_accrueAccountInterest"
+        ],
+        "severity": "medium",
+        "impact": "fund_loss",
+        "financial_impact": "medium",
+        "tags": [
+          "lending",
+          "interest",
+          "accounting",
+          "ordering",
+          "defi"
+        ],
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "lending-missing-accrual-stale-index-missing-interest-accrual-and-s-000",
+          "title": "Missing Interest Accrual and Stale Index Accounting",
+          "lineStart": 83,
+          "lineEnd": 330,
+          "lineCount": 248,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "BorrowLogic.executeRepay",
+            "UToken.borrow",
+            "_accrueAccountInterest",
+            "accrueInterest",
+            "accrued_interest_ignored_on_withdraw",
+            "balanceOf",
+            "borrow",
+            "borrow(amount",
+            "borrowBalanceView",
+            "borrowIndex",
+            "credit_limit_checked_before_accrual",
+            "cumulativeInterestRate",
+            "exchangeRateCurrent",
+            "executeRepay",
+            "liquidateAccount",
+            "accrueAccount",
+            "updateState",
+            "getDebtBalance",
+            "reserve.cache",
+            "nextBorrowIndex"
+          ],
+          "searchKeywords": [
+            "missing",
+            "interest",
+            "accrual",
+            "stale",
+            "index",
+            "accounting",
+            "missing interest accrual stale index accounting",
+            "missing interest",
+            "interest accrual",
+            "accrual stale",
+            "stale index",
+            "index accounting",
+            "accrueinterest",
+            "accrue interest",
+            "accrueaccount",
+            "accrue account",
+            "borrowindex",
+            "borrow index",
+            "cumulativeinterestrate",
+            "cumulative interest rate",
+            "updatestate",
+            "update state",
+            "borrowbalanceview",
+            "borrow balance view",
+            "getdebtbalance",
+            "get debt balance",
+            "executerepay",
+            "execute repay",
+            "_accrueaccountinterest",
+            "accrue account interest",
+            "reserve.cache",
+            "reserve cache"
+          ],
+          "rootCause": "1. **Check before accrual** [A1]: Union Finance `UToken.borrow` runs `require(borrowBalanceView(msg.sender) + amount + fee <= maxBorrow)` and the credit-limit check with the OLD `borrowIndex`; `accrue",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 7,
+            "sampleReports": [
+              "reports/lending_borrowing_findings/h-01-borrow-must-accrueinterest-first.md",
+              "reports/lending_borrowing_findings/h-02-lendingpairliquidateaccount-does-not-accrue-and-update-cumulativeinterestra.md",
+              "reports/lending_borrowing_findings/m-02-lendingpairwithdrawuniposition-should-accrue-debt-first.md",
+              "reports/lending_borrowing_findings/h-04-accrued-interest-is-not-accounted-for-when-withdrawing.md",
+              "reports/lending_borrowing_findings/h-10-interest-rate-is-updated-before-updating-the-debt-when-repaying-debt.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "stale index accounting",
+              "logical error",
+              "accrual ordering bug",
+              "interest accrual",
+              "borrow repay liquidate withdraw"
+            ],
+            "commonlyComposesWith": [
+              "accrue interest",
+              "borrow index",
+              "cumulative interest rate",
+              "update state",
+              "reserve cache"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/lending/liquidation/liquidation-evasion-dos.md",
+      "totalLines": 419,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "liquidation",
+        "vulnerability_type": "liquidation_evasion",
+        "root_cause_family": "liquidation_dos",
+        "pattern_key": "revertible_liquidation_path | liquidation_engine | borrower_action | uncollectable_bad_debt",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "LiquidationEngine / LendingPool",
+          "StabilityPool",
+          "ERC721 collateral receiver (borrower contract)",
+          "StakingRewards / cooldown logic",
+          "Auction / DutchAuction module",
+          "PosManager debt-tracking module"
+        ],
+        "path_keys": [
+          "revertible_liquidation_path | liquidate() | LiquidationEngine→ERC721_receiver | callback_revert_blocks_seizure",
+          "revertible_liquidation_path | depositCollateral() | StakingRewards→LiquidationEngine | cooldown_rearm_blocks_liquidation",
+          "revertible_liquidation_path | buyLoan() | Lender→Auction | auction_timestamp_reset_blocks_seizure",
+          "revertible_liquidation_path | self-liquidate(1 wei) | PosManager→LendingPool | monotonic_debt_assumption_revert",
+          "revertible_liquidation_path | liquidation trigger | StabilityPool→LendingPool | missing_funds_revert"
+        ],
+        "attack_type": "denial_of_service",
+        "affected_component": "liquidation_engine",
+        "primitives": [
+          "onERC721Received",
+          "safeTransferFrom",
+          "cooldownExpiration",
+          "auctionStartTimestamp",
+          "seizeLoan",
+          "buyLoan",
+          "debtShareToAmtCurrent",
+          "whole-NFT rounding",
+          "precisionDelta",
+          "StabilityPool balance check",
+          "InsufficientBalance"
+        ],
+        "code_keywords": [
+          "onERC721Received",
+          "safeTransferFrom",
+          "auctionStartTimestamp",
+          "seizeLoan",
+          "liquidateBorrower",
+          "cooldownExpiration",
+          "liquidateUser",
+          "batchLiquidateBorrow",
+          "InsufficientBalance",
+          "oneNFTAmount"
+        ],
+        "severity": "high",
+        "impact": "dos",
+        "financial_impact": "high",
+        "tags": [
+          "lending",
+          "liquidation",
+          "dos",
+          "bad_debt",
+          "nft_collateral",
+          "defi"
+        ],
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "lending-liquidation-evasion-dos-liquidation-evasion-borrower-m-000",
+          "title": "Liquidation Evasion — Borrower Makes Their Own Position Unliquidatable",
+          "lineStart": 91,
+          "lineEnd": 419,
+          "lineCount": 329,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "GainsNetwork.triggerOrder",
+            "InsufficientBalance",
+            "Salty.depositCollateralAndIncreaseShare",
+            "StabilityPool.liquidateBorrower(user",
+            "_cleanUpLoan",
+            "auctionStartTimestamp",
+            "auction_timestamp_reset_blocks_seizure",
+            "buyLoan",
+            "bytes4(0xdeadbeef",
+            "callback_revert_blocks_seizure",
+            "cooldownExpiration",
+            "cooldown_rearm_blocks_liquidation",
+            "crvUSDToken.balanceOf(address(this",
+            "debtShareToAmtCurrent",
+            "depositCollateral",
+            "onERC721Received",
+            "safeTransferFrom",
+            "seizeLoan",
+            "liquidateBorrower",
+            "liquidateUser"
+          ],
+          "searchKeywords": [
+            "liquidation",
+            "evasion",
+            "borrower",
+            "makes",
+            "their",
+            "own",
+            "position",
+            "unliquidatable",
+            "onerc721received",
+            "on erc721 received",
+            "safetransferfrom",
+            "safe transfer from",
+            "auctionstarttimestamp",
+            "auction start timestamp",
+            "seizeloan",
+            "seize loan",
+            "liquidateborrower",
+            "liquidate borrower",
+            "cooldownexpiration",
+            "cooldown expiration",
+            "liquidateuser",
+            "liquidate user",
+            "batchliquidateborrow",
+            "batch liquidate borrow",
+            "insufficientbalance",
+            "insufficient balance",
+            "onenftamount",
+            "one nftamount",
+            "buyloan",
+            "buy loan",
+            "debtsharetoamtcurrent",
+            "debt share to amt current"
+          ],
+          "rootCause": "Liquidation paths contain revertible steps whose preconditions are attacker-influenced:\n\n\n\n1. **Borrower-controlled ERC721 callback** [E5]: `Revert Lend._cleanUpLoan` returns the LP NFT to the owner v",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 9,
+            "sampleReports": [
+              "reports/lending_borrowing_findings/borrower-can-prevent-hisher-loan-from-being-liquidated.md",
+              "reports/lending_borrowing_findings/fng-16-loans-with-cerc721-collateral-can-be-made-unliquidatable.md",
+              "reports/Hexens/2023-11-06-Fungify.md",
+              "reports/lending_borrowing_findings/h-05-user-can-evade-liquidation-by-depositing-the-minimum-of-tokens-and-gain-tim.md",
+              "reports/lending_borrowing_findings/h-01-liquidations-can-be-prevented-by-frontrunning-and-liquidating-1-debt-or-mor.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "liquidation dos",
+              "denial of service",
+              "revertible liquidation path",
+              "liquidation engine",
+              "borrower action"
+            ],
+            "commonlyComposesWith": [
+              "liquidation",
+              "on erc721 received",
+              "safe transfer from",
+              "cooldown expiration",
+              "auction start timestamp"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/lending/liquidation/liquidation-seizure-economics.md",
+      "totalLines": 408,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "liquidation",
+        "vulnerability_type": "incorrect_seizure_calculation",
+        "root_cause_family": "liquidation_math_error",
+        "pattern_key": "wrong_liquidation_amount_math | liquidation_engine | liquidator_call | collateral_over_seizure_or_debt_underclear",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "LiquidationLogic",
+          "RiskEngine / RiskModule",
+          "CDPVault",
+          "CrossChainRouter (bridge messaging)",
+          "LendingPool / Market",
+          "DebtToken"
+        ],
+        "path_keys": [
+          "wrong_liquidation_amount_math | liquidate() | LiquidationLogic→DebtToken | shares_treated_as_assets",
+          "wrong_liquidation_amount_math | liquidate() | RiskModule→Oracle | over_seizure_via_uint256_max_replay",
+          "wrong_liquidation_amount_math | liquidatePosition() | CDPVault→PoolV3 | penalty_not_applied_to_seized_collateral",
+          "wrong_liquidation_amount_math | crosschain liquidation | CrossChainRouter→LayerZero | seize_amount_reused_as_repay_amount"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "liquidation_engine",
+        "primitives": [
+          "closeFactor",
+          "liquidationBonus",
+          "liquidationPenalty",
+          "liquidationDiscount",
+          "seizeTokens",
+          "repayAmount",
+          "debtShares",
+          "borrowIndex",
+          "computeClosingFactor",
+          "collateralShare",
+          "amountDue",
+          "maxLiquidatableDebt"
+        ],
+        "code_keywords": [
+          "executeLiquidationCall",
+          "_calculateDebt",
+          "liquidateCalculateSeizeTokens",
+          "_validateSeizedAssetValue",
+          "computeClosingFactor",
+          "liquidatePosition",
+          "actualDebtToLiquidate",
+          "seizeTokens",
+          "debtToCover",
+          "maxSeizedAssetValue"
+        ],
+        "severity": "high",
+        "impact": "fund_loss",
+        "financial_impact": "high",
+        "tags": [
+          "lending",
+          "liquidation",
+          "defi",
+          "accounting",
+          "cross_chain"
+        ],
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "lending-liquidation-seizure-economics-liquidation-seizure-economics--000",
+          "title": "Liquidation Seizure Economics Miscalculation",
+          "lineStart": 90,
+          "lineEnd": 408,
+          "lineCount": 319,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "LiquidationLogic",
+            "Payload.amount",
+            "Pool.liquidate",
+            "Teller.liquidateDefaultedLoanWithIncentive",
+            "_calculateAvailableCollateralToLiquidate",
+            "_calculateDebt",
+            "_executeLiquidationCore",
+            "_getAmountOwedForBid",
+            "_handleLiquidationSuccess",
+            "amountDue",
+            "borrowIndex",
+            "closeFactor",
+            "collateralShare",
+            "debtShares",
+            "debtSharesToAmount",
+            "executeLiquidationCall",
+            "liquidateCalculateSeizeTokens",
+            "_validateSeizedAssetValue",
+            "computeClosingFactor",
+            "liquidatePosition"
+          ],
+          "searchKeywords": [
+            "liquidation",
+            "seizure",
+            "economics",
+            "miscalculation",
+            "liquidation seizure economics miscalculation",
+            "liquidation seizure",
+            "seizure economics",
+            "economics miscalculation",
+            "executeliquidationcall",
+            "execute liquidation call",
+            "_calculatedebt",
+            "calculate debt",
+            "liquidatecalculateseizetokens",
+            "liquidate calculate seize tokens",
+            "_validateseizedassetvalue",
+            "validate seized asset value",
+            "computeclosingfactor",
+            "compute closing factor",
+            "liquidateposition",
+            "liquidate position",
+            "actualdebttoliquidate",
+            "actual debt to liquidate",
+            "seizetokens",
+            "seize tokens",
+            "debttocover",
+            "debt to cover",
+            "maxseizedassetvalue",
+            "max seized asset value",
+            "closefactor",
+            "close factor",
+            "liquidationbonus",
+            "liquidation bonus"
+          ],
+          "rootCause": "The liquidation repayment-to-seizure pipeline performs several unit and semantic conversions. Each finding breaks one conversion:\n\n\n\n1. **Shares vs assets** [S6]: `ZeroLend One._calculateDebt` returns",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 8,
+            "sampleReports": [
+              "reports/lending_borrowing_findings/h-2-users-can-seize-more-assets-during-liquidation-by-using-typeuintmax.md",
+              "reports/lending_borrowing_findings/h-3-using-original-principal-amount-as-due-amount-inside-liquidatedefaultedloanw.md",
+              "reports/lending_borrowing_findings/h-19-cross-chain-liquidation-uses-collateral-seize-amount-instead-of-repayment-a.md",
+              "reports/lending_borrowing_findings/h-02-liquidation-doesnt-account-for-penalty-when-calculating-collateral-to-give-.md",
+              "reports/lending_borrowing_findings/h-03-the-amount-of-debt-removed-during-liquidation-may-be-worth-more-than-the-ac.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "liquidation math error",
+              "logical error",
+              "wrong liquidation amount math",
+              "liquidation engine",
+              "liquidator call"
+            ],
+            "commonlyComposesWith": [
+              "liquidation",
+              "liquidation seizure economics miscalculation",
+              "liquidation seizure",
+              "executeliquidationcall",
+              "execute liquidation call"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/lending/liquidation/oracle-driven-liquidation-mispricing.md",
+      "totalLines": 378,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "oracle",
+        "vulnerability_type": "liquidation_price_misuse",
+        "root_cause_family": "unvalidated_price_input",
+        "pattern_key": "bad_price_input_to_liquidation | liquidation_engine | price_feed_read | unfair_or_avoided_liquidation",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "LiquidationEngine / MarginAccount",
+          "Oracle / PriceAggregator / CoreSaltyFeed",
+          "PythOracle",
+          "BetaOracleUniswapV2",
+          "NFTPairWithOracle (user-supplied oracle)"
+        ],
+        "path_keys": [
+          "bad_price_input_to_liquidation | liquidate() | Oracle→MarginAccount | stale_price_forced_liquidation",
+          "bad_price_input_to_liquidation | loan creation | NFTPairWithOracle→Lender | malicious_oracle_evasion",
+          "bad_price_input_to_liquidation | liquidate() | CoreSaltyFeed→PriceAggregator | spot_manipulation_unfair_liquidation",
+          "bad_price_input_to_liquidation | liquidate() | BetaOracleUniswapV2→BetaBank | twap_reciprocal_underpayment"
+        ],
+        "attack_type": "data_manipulation",
+        "affected_component": "liquidation_engine",
+        "oracle_provider": "pyth",
+        "oracle_attack_vector": "staleness",
+        "primitives": [
+          "getPriceUnsafe",
+          "latestRoundData",
+          "TWAP reciprocal",
+          "PriceAggregator averaging",
+          "staleness check",
+          "oracle whitelist",
+          "liquidation threshold",
+          "health factor recalculation",
+          "spot price"
+        ],
+        "code_keywords": [
+          "getPriceUnsafe",
+          "getUnderlyingPrice",
+          "latestRoundData",
+          "PriceAggregator",
+          "oracle.get",
+          "isLiquidatable",
+          "_getLiquidationInfo",
+          "calculate_max_liquidation",
+          "removeCollateral"
+        ],
+        "severity": "medium",
+        "impact": "incorrect_pricing",
+        "financial_impact": "high",
+        "tags": [
+          "lending",
+          "liquidation",
+          "oracle",
+          "price_manipulation",
+          "defi"
+        ],
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "lending-oracle-driven-liquidation-mispricing-oracle-driven-liquidation-misp-000",
+          "title": "Oracle-Driven Liquidation Mispricing in Lending Markets",
+          "lineStart": 87,
+          "lineEnd": 378,
+          "lineCount": 292,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "BetaBank.liquidate",
+            "BetaOracleUniswapV2.convert",
+            "CoreSaltyFeed",
+            "NFTPairWithOracle",
+            "PriceAggregator",
+            "_getLiquidationInfo",
+            "_lend",
+            "convert",
+            "get",
+            "getPrice",
+            "getPriceUnsafe",
+            "getUnderlyingPrice",
+            "isLiquidatable",
+            "latestRoundData",
+            "liquidate",
+            "oracle.get",
+            "calculate_max_liquidation",
+            "removeCollateral",
+            "liquidation_engine",
+            "staleness"
+          ],
+          "searchKeywords": [
+            "oracle",
+            "driven",
+            "liquidation",
+            "mispricing",
+            "lending",
+            "markets",
+            "oracle driven liquidation mispricing lending markets",
+            "oracle driven",
+            "driven liquidation",
+            "liquidation mispricing",
+            "mispricing lending",
+            "lending markets",
+            "getpriceunsafe",
+            "get price unsafe",
+            "getunderlyingprice",
+            "get underlying price",
+            "latestrounddata",
+            "latest round data",
+            "priceaggregator",
+            "price aggregator",
+            "oracle.get",
+            "oracle get",
+            "isliquidatable",
+            "is liquidatable",
+            "_getliquidationinfo",
+            "get liquidation info",
+            "calculate_max_liquidation",
+            "calculate max liquidation",
+            "removecollateral",
+            "remove collateral",
+            "twap reciprocal",
+            "priceaggregator averaging"
+          ],
+          "rootCause": "1. **User-supplied oracle, unagreed** [O1]: `NFTPairWithOracle` lets the borrower set `params.oracle` at loan request; `_lend` never checks `params.oracle == accepted.oracle`. A malicious oracle's `ge",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/lending_borrowing_findings/h-01-avoidance-of-liquidation-via-malicious-oracle.md",
+              "reports/lending_borrowing_findings/m-1-missing-staleness-check-in-pythoracle-can-lead-to-forced-liquidations-and-th.md",
+              "reports/lending_borrowing_findings/h-03-the-use-of-spot-price-by-coresaltyfeed-can-lead-to-price-manipulation-and-u.md",
+              "reports/lending_borrowing_findings/h01-incorrect-uniswap-price-use-discourages-liquidations.md",
+              "reports/lending_borrowing_findings/m-01-liquidations-can-be-run-on-the-bogus-oracle-prices.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "unvalidated price input",
+              "data manipulation",
+              "bad price input to liquidation",
+              "liquidation engine",
+              "price feed read"
+            ],
+            "commonlyComposesWith": [
+              "oracle",
+              "liquidation",
+              "oracle driven liquidation mispricing lending markets",
+              "oracle driven",
+              "driven liquidation"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/lending/liquidation/self-liquidation-abuse.md",
+      "totalLines": 366,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "liquidation",
+        "vulnerability_type": "self_liquidation_abuse",
+        "root_cause_family": "incentive_design_flaw",
+        "pattern_key": "profitable_or_blocking_self_liquidation | liquidation_engine | owner_self_liquidation | value_extraction_or_evasion",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "LiquidationEngine / Borrower",
+          "VaultManager (collateral move)",
+          "Seize module (owner check)",
+          "Oracle adapters (Redstone / Pyth)",
+          "Flash loan provider"
+        ],
+        "path_keys": [
+          "profitable_or_blocking_self_liquidation | liquidate() | Borrower→LiquidationEngine | self_liquidation_clears_warning_state",
+          "profitable_or_blocking_self_liquidation | seize() | AttackerProxy→Seize | owner_check_bypass_via_proxy",
+          "profitable_or_blocking_self_liquidation | liquidate() | OracleAdapter→Liquidation | oracle_sandwich_self_liquidation",
+          "profitable_or_blocking_self_liquidation | liquidate(id,to) | VaultManager→move | flash_loan_guard_bypass_via_liquidation_move"
+        ],
+        "attack_type": "economic_exploit",
+        "affected_component": "liquidation_engine",
+        "primitives": [
+          "liquidation discount",
+          "liquidationPenalty",
+          "owner-seizure check",
+          "warn / grace period",
+          "strain value",
+          "idToBlockOfLastDeposit",
+          "oracle price update sandwich",
+          "LTV vs discount factor",
+          "flash loan"
+        ],
+        "code_keywords": [
+          "liquidate",
+          "seize",
+          "CannotSeizeOwnPosition",
+          "idToBlockOfLastDeposit",
+          "LIQUIDATION_GRACE_PERIOD",
+          "unlockCallback",
+          "healthscore_liquidation",
+          "liquidationDiscount",
+          "DepositedInSameBlock"
+        ],
+        "severity": "high",
+        "impact": "fund_loss",
+        "financial_impact": "high",
+        "tags": [
+          "lending",
+          "liquidation",
+          "economic",
+          "flash_loan",
+          "defi"
+        ],
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "lending-self-liquidation-abuse-self-liquidation-abuse-in-lend-000",
+          "title": "Self-Liquidation Abuse in Lending Protocols",
+          "lineStart": 84,
+          "lineEnd": 366,
+          "lineCount": 283,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "AttackerRouter",
+            "AttackerSeizer",
+            "CannotSeizeOwnPosition",
+            "LIQUIDATION_GRACE_PERIOD",
+            "LTV_borrow",
+            "Licredity.seize",
+            "deposit",
+            "flash_loan_guard_bypass_via_liquidation_move",
+            "idToBlockOfLastDeposit",
+            "increaseDebtShare",
+            "liquidate",
+            "liquidationDiscount",
+            "move",
+            "msg.sender",
+            "multi_contract",
+            "seize",
+            "unlockCallback",
+            "healthscore_liquidation",
+            "DepositedInSameBlock",
+            "liquidationPenalty"
+          ],
+          "searchKeywords": [
+            "self",
+            "liquidation",
+            "abuse",
+            "lending",
+            "protocols",
+            "self liquidation abuse lending protocols",
+            "self liquidation",
+            "liquidation abuse",
+            "abuse lending",
+            "lending protocols",
+            "liquidate",
+            "seize",
+            "cannotseizeownposition",
+            "cannot seize own position",
+            "idtoblockoflastdeposit",
+            "id to block of last deposit",
+            "liquidation_grace_period",
+            "liquidation grace period",
+            "unlockcallback",
+            "unlock callback",
+            "healthscore_liquidation",
+            "healthscore liquidation",
+            "liquidationdiscount",
+            "liquidation discount",
+            "depositedinsameblock",
+            "deposited in same block",
+            "liquidationpenalty",
+            "liquidation penalty",
+            "owner-seizure check",
+            "owner seizure check",
+            "warn / grace period",
+            "warn grace period"
+          ],
+          "rootCause": "1. **State reset on any liquidation** [L1]: `Aloe Borrower.liquidate` clears the warn bits (`slot0 = (slot0_ & SLOT0_MASK_POSITIONS) | SLOT0_DIRT`) regardless of how much is repaid; a self-liquidation",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 7,
+            "sampleReports": [
+              "reports/lending_borrowing_findings/h-1-it-is-possible-to-frontrun-liquidations-with-self-liquidation-with-high-stra.md",
+              "reports/lending_borrowing_findings/proxy-based-self-liquidation-creates-bad-debt-for-lenders.md",
+              "reports/lending_borrowing_findings/h-10-flash-loan-protection-mechanism-can-be-bypassed-via-self-liquidations.md",
+              "reports/lending_borrowing_findings/self-liquidations-of-leveraged-positions-can-be-profitable.md",
+              "reports/lending_borrowing_findings/early-self-liquidations-receive-a-portion-of-future-fees-to-be-paid-by-other-cre.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "incentive design flaw",
+              "economic exploit",
+              "profitable or blocking self liquidation",
+              "liquidation engine",
+              "owner self liquidation"
+            ],
+            "commonlyComposesWith": [
+              "liquidation",
+              "self liquidation abuse lending protocols",
+              "self liquidation",
+              "liquidation abuse",
+              "liquidation_grace_period"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/lending/risk-params/health-factor-miscalculation.md",
+      "totalLines": 380,
+      "frontmatter": {
+        "protocol": "generic",
+        "chain": "everychain",
+        "category": "risk_parameters",
+        "vulnerability_type": "collateral_ratio_miscalculation",
+        "root_cause_family": "health_factor_computation_error",
+        "pattern_key": "wrong_collateralization_math | risk_engine | borrow_or_withdraw | ltv_bypass_or_wrong_liquidation_threshold",
+        "interaction_scope": "multi_contract",
+        "involved_contracts": [
+          "RiskEngine / AccountHealth",
+          "LendingPool / Market (CDP)",
+          "Oracle / price feeds",
+          "Bank position manager (strategy validation)"
+        ],
+        "path_keys": [
+          "wrong_collateralization_math | borrow() | Pool→oracle | precision_mixing_in_ratio",
+          "wrong_collateralization_math | _isSolvent() | Market→YieldBox | rate_applied_to_shares",
+          "wrong_collateralization_math | reducePosition() | Bank→strategyRegistry | unvalidated_strategy_id_bypasses_maxltv",
+          "wrong_collateralization_math | add_token() | AccountHealth→priceFeed | balance_decimals_ignored"
+        ],
+        "attack_type": "logical_error",
+        "affected_component": "risk_engine",
+        "primitives": [
+          "userCollateralRatioMantissa",
+          "collateralizationRate",
+          "LTV",
+          "liquidation threshold",
+          "token decimals normalization",
+          "shares vs amounts",
+          "strategyId validation",
+          "BasisPoints",
+          "price feed decimals"
+        ],
+        "code_keywords": [
+          "userCollateralRatioMantissa",
+          "_isSolvent",
+          "collateralizationRate",
+          "maxLTV",
+          "_validateMaxLTV",
+          "add_token",
+          "liquidationThreshold",
+          "toAmount",
+          "BasisPoints"
+        ],
+        "severity": "high",
+        "impact": "fund_loss",
+        "financial_impact": "high",
+        "tags": [
+          "lending",
+          "risk_parameters",
+          "ltv",
+          "health_factor",
+          "decimals",
+          "defi"
+        ],
+        "language": "solidity",
+        "version": "all"
+      },
+      "patternCount": 1,
+      "patterns": [
+        {
+          "id": "lending-health-factor-miscalculation-health-factor-and-collateral-r-000",
+          "title": "Health Factor and Collateral Ratio Miscalculation",
+          "lineStart": 86,
+          "lineEnd": 380,
+          "lineCount": 295,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "AccountHealth::add_token",
+            "GenericLogic",
+            "Market._isSolvent",
+            "_isSolvent",
+            "_validateMaxLTV",
+            "_validateMaxLTV(strategyId",
+            "add_token",
+            "balance_decimals_ignored",
+            "borrow",
+            "collateralizationRate",
+            "liquidate",
+            "maxLTV",
+            "multi_contract",
+            "precision_mixing_in_ratio",
+            "rate_applied_to_shares",
+            "userCollateralRatioMantissa",
+            "liquidationThreshold",
+            "toAmount",
+            "BasisPoints",
+            "LTV"
+          ],
+          "searchKeywords": [
+            "health",
+            "factor",
+            "collateral",
+            "ratio",
+            "miscalculation",
+            "health factor collateral ratio miscalculation",
+            "health factor",
+            "factor collateral",
+            "collateral ratio",
+            "ratio miscalculation",
+            "usercollateralratiomantissa",
+            "user collateral ratio mantissa",
+            "_issolvent",
+            "is solvent",
+            "collateralizationrate",
+            "collateralization rate",
+            "maxltv",
+            "max ltv",
+            "_validatemaxltv",
+            "validate max ltv",
+            "add_token",
+            "add token",
+            "liquidationthreshold",
+            "liquidation threshold",
+            "toamount",
+            "to amount",
+            "basispoints",
+            "basis points",
+            "ltv",
+            "token decimals normalization",
+            "shares vs amounts",
+            "strategyid validation"
+          ],
+          "rootCause": "1. **Precision mixing** [H1][H2]: Surge `userCollateralRatioMantissa = debtValue (loan-token precision) / collateralBalance (collateral-token precision)`. For USDC (1e6) debt vs SHIB (100,001e18) coll",
+          "subsections": null,
+          "reportEvidence": {
+            "count": 9,
+            "sampleReports": [
+              "reports/lending_borrowing_findings/h-1-precision-differences-when-calculating-usercollateralratiomantissa-causes-ma.md",
+              "reports/lending_borrowing_findings/h-2-precision-differences-when-calculating-usercollateralratiomantissa-causes-ma.md",
+              "reports/lending_borrowing_findings/account-health-calculations-ignore-token-decimals.md",
+              "reports/lending_borrowing_findings/h-04-incorrect-solvency-check-because-it-multiplies-collateralizationrate-by-sha.md",
+              "reports/lending_borrowing_findings/h-22-lack-of-safety-buffer-between-liquidation-threshold-and-ltv-ratio-for-borro.md"
+            ],
+            "severityConsensus": "HIGH",
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "health factor computation error",
+              "logical error",
+              "wrong collateralization math",
+              "risk engine",
+              "borrow or withdraw"
+            ],
+            "commonlyComposesWith": [
+              "liquidationthreshold",
+              "liquidation threshold",
+              "user collateral ratio mantissa",
+              "collateralization rate",
+              "ltv"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+name: Emergency Manual Sync to Master
+
+# Manual fallback — use this when you need to force-sync master outside of
+# the normal hunt-cards push flow (e.g., after a hotfix or a rebased branch).
+# The automatic sync runs as Job 2 in regenerate-manifests.yml on every
+# hunt-cards push and should be preferred under normal circumstances.
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Branch to sync from'
+        required: true
+        default: 'hunt-cards'
+
+permissions:
+  contents: write
+
+jobs:
+  emergency-sync:
+    uses: ./.github/workflows/reusable-sync-to-master.yml
+    with:
+      source_branch: ${{ github.event.inputs.source_branch }}
+      commit_message_prefix: 'sync(manual)'

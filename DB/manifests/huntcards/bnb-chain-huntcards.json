@@ -1,0 +1,397 @@
+{
+  "meta": {
+    "manifest": "bnb-chain",
+    "description": "Compressed hunt cards for bnb-chain — one-line detection rules for bulk scanning",
+    "totalCards": 5,
+    "skipped": 0,
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, use optional preconditions/proofShape/falsePositiveSignals/reportEvidence when present, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "enriched": 5
+  },
+  "cards": [
+    {
+      "id": "bnb-chain-geth-inherited-bsc-audit-findings-geth-inherited-audit-findings--000",
+      "title": "Geth-Inherited Audit Findings Relevant to BSC Clients",
+      "severity": "HIGH",
+      "grep": "rlpxFrameRW\\.ReadMsg|tx\\.Value\\(\\)\\.Sign|qosReduceConfidence|readHandshakeMsg|ErrNegativeValue|newCorsHandler",
+      "detect": "Security properties delegated to defaults, callers, or serialization rather than enforced locally:",
+      "cat": [
+        "bnb",
+        "bsc",
+        "parlia",
+        "greenfield",
+        "opbnb",
+        "beaconchain",
+        "bnb-chain-l1"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/bnb-chain/consensus/geth-inherited-bsc-audit-findings.md",
+      "lines": [
+        93,
+        335
+      ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/bnb-chain_findings/bsc-docs-audits-2017-04-25-geth-audit-truesec-pdf.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "insecure defaults and missing defensive checks",
+          "configuration bypass",
+          "insecure default",
+          "rpc http cors",
+          "regression commit"
+        ],
+        "commonlyComposesWith": [
+          "cors default allow all",
+          "empty slice vs empty string default",
+          "user controlled memory allocation",
+          "unbounded object pool (int pool)",
+          "divide by zero panic"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: A regression commit changes the *type* of a security-relevant default (string → slice) so the \"empty\" value takes a different code path in...",
+        "PROVE: *Path A: Browser → HTTP RPC same-origin bypass [HIGH]; Victim runs geth --rpc (any bsc-geth fork with the same default) with default CORS config",
+        "FALSIFY: Not this bug when: CORS default explicitly fails closed (no headers emitted unless configured) — verify with curl -i -X OPTIONS -H \"Origin: attacker\" before/after...",
+        "IMPACT: Any website can read responses from a locally running node's HTTP RPC (default --rpc), enabling info disclosure and driving whatever namespaces are exposed on...",
+        "OPTIONS-probe the HTTP RPC with an arbitrary Origin on default config (expect no ACAO header)",
+        "Trace every refactor commit that changes a default value's type (string→slice, int→pointer)"
+      ],
+      "antipattern": "framebuf := make([]byte, rsize) // TRUESEC: user-controlled allocation of 16.8MB",
+      "securePattern": "default emits no CORS headers (browser blocks cross-origin);",
+      "validWhen": "Signal 1: A regression commit changes the *type* of a security-relevant default (string → slice) so the \"empty\" value takes a different code path in downstream...;...",
+      "invalidWhen": "Not this bug when: CORS default explicitly fails closed (no headers emitted unless configured) — verify with curl -i -X OPTIONS -H \"Origin: attacker\" before/after...",
+      "impact": "Any website can read responses from a locally running node's HTTP RPC (default --rpc), enabling info disclosure and driving whatever namespaces are exposed on...",
+      "preconditions": [
+        "Victim visits attacker-controlled page (any origin, even file:// with null Origin)",
+        "Attacker opens RLPx connections and sends frames with maximal 24-bit size fields"
+      ],
+      "proofShape": "*Path A: Browser → HTTP RPC same-origin bypass [HIGH] -> Victim runs geth --rpc (any bsc-geth fork with the same default) with default CORS config -> Victim visits attacker-controlled page (any origin, even file:// with...",
+      "falsePositiveSignals": [
+        "Not this bug when: CORS default explicitly fails closed (no headers emitted unless configured) — verify with curl -i -X OPTIONS -H \"Origin: attacker\" before/after the...",
+        "Not this bug when: frame-size caps are checked before buffer allocation and handshake sizes are bounds-checked against the spec",
+        "Safe if: divisors are constants or immediately zero-checked; block-processing re-validates tx.Value().Sign() >= 0 explicitly"
+      ]
+    },
+    {
+      "id": "bnb-chain-launchpool-deposit-validation-launchpool-staking-pool-deposi-000",
+      "title": "Launchpool/Staking-Pool Deposit Validation & Dual-Ledger Sync (BSCStation Start Pools)",
+      "severity": "MEDIUM",
+      "grep": "ERC20\\(token\\)\\.transfer\\(\\.\\.\\.|_beforeTokenTransfer|single_contract_family|updateRewardPerBlock|deposit\\(_amount|updateUnstakingFee",
+      "detect": "PVE-001 (Medium, L-likelihood/H-impact) — unhooked LP transfer.",
+      "cat": [
+        "bnb",
+        "bsc",
+        "parlia",
+        "greenfield",
+        "opbnb",
+        "beaconchain",
+        "bnb-chain-l1"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/bnb-chain/defi/launchpool-deposit-validation.md",
+      "lines": [
+        92,
+        366
+      ],
+      "reportEvidence": {
+        "count": 4,
+        "sampleReports": [
+          "reports/bnb-chain_findings/publications-audit-reports-peckshield-audit-report-bscstationstartpools-v1-0-pdf.md",
+          "reports/bnb-chain_findings/publications-audit-reports-peckshield-audit-report-pinksale-subscriptionpool-v1-0-pdf.md",
+          "reports/bnb-chain_findings/publicreports-solidity-smart-contract-audits-bscex-launchpadx-smartcontract-report-halborn-v1-pdf.md",
+          "reports/bnb-chain_findings/publicreports-solidity-smart-contract-audits-bscex-launchpoolx-smartcontract-report-halborn-v1-pdf.md"
+        ],
+        "severityConsensus": "LOW",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "dual ledger without transfer hook",
+          "logical error",
+          "unhooked lp transfer",
+          "staking lp token",
+          "erc20 transfer of position"
+        ],
+        "commonlyComposesWith": [
+          "erc20 inherited position token",
+          "user info amount shadow ledger",
+          "acc token per share checkpoint",
+          "reward debt migration on transfer",
+          "non compliant erc20 returns"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: Contract inherits/mints an ERC20 whose balances represent staked positions, and no _transfer/_beforeTokenTransfer hook updates the staking...",
+        "PROVE: *Path A: LP transfer bricks both parties' withdrawal [MEDIUM]; Alice deposits 100 stakedToken → userInfo[Alice].amount = 100, LP balance[Alice] = 100",
+        "FALSIFY: Not this bug when: _transfer is overridden to migrate userInfo.amount and settle/migrate rewardDebt for both sender and receiver (post-fix commit 1dd2057) — verify...",
+        "IMPACT: Transferred LP = permanently unwithdrawable stake: underlying + accrued rewards locked in pool for both transfer parties",
+        "If position token is ERC20: transfer LP between two accounts, then attempt withdraw from both — exactly the legal holder must succeed",
+        "Verify rewardDebt migration for sender AND receiver on transfer (and on transferFrom)"
+      ],
+      "antipattern": "recipient of transferred LP has balance but no userInfo,",
+      "securePattern": "override _transfer to migrate amount + rewardDebt on both sides",
+      "validWhen": "Signal 1: Contract inherits/mints an ERC20 whose balances represent staked positions, and no _transfer/_beforeTokenTransfer hook updates the staking ledger or reward...",
+      "invalidWhen": "Not this bug when: _transfer is overridden to migrate userInfo.amount and settle/migrate rewardDebt for both sender and receiver (post-fix commit 1dd2057) — verify...",
+      "impact": "Transferred LP = permanently unwithdrawable stake: underlying + accrued rewards locked in pool for both transfer parties",
+      "preconditions": [
+        "Alice deposits 100 stakedToken → userInfo[Alice].amount = 100, LP balance[Alice] = 100",
+        "Owner calls addRewardToken(newToken, rate) which zeroes accTokenPerShare[newToken] (fine, new token) — but for the reward-rate...",
+        "Stakers who deposited before the change receive distorted shares of the interim rewards; timing the update lets a privileged/MEV...",
+        "*Path D: Admin misconfiguration bricks withdraw [INFO]",
+        "Owner sets unStakingFee = 20000 (precision 10000) or feeCollector = 0x0"
+      ],
+      "proofShape": "*Path A: LP transfer bricks both parties' withdrawal [MEDIUM] -> Alice deposits 100 stakedToken → userInfo[Alice].amount = 100, LP balance[Alice] = 100 -> Alice transfer(Bob, 100) → LP balance[Bob] = 100;...",
+      "falsePositiveSignals": [
+        "Not this bug when: _transfer is overridden to migrate userInfo.amount and settle/migrate rewardDebt for both sender and receiver (post-fix commit 1dd2057) — verify the...",
+        "Not this bug when: the position token is non-transferable (mint/burn to holder only) or transfers are disabled — then no desync surface exists",
+        "Reward-checkpoint issue is Medium only if parameters are mutable AFTER pool start (pre-start-only mutation like updateRewardPerBlock's block.number < startBlock guard..."
+      ]
+    },
+    {
+      "id": "bnb-chain-pinksale-subscription-access-pinksale-subscriptionpool-admi-000",
+      "title": "PinkSale SubscriptionPool: Admin Allocation Rewrite & Token-Compliance Gaps",
+      "severity": "MEDIUM",
+      "grep": "SubscriptionPool::_lockLiquidity|LaunchPadLibrary\\.addLiquidity|IERC20\\(token\\)\\.approve\\(\\.\\.\\.|contributeCustomCurrency|updateCalculatedData|totalVolumePurchased",
+      "detect": "PVE-004 (Medium) — ungoverned admin keys.",
+      "cat": [
+        "bnb",
+        "bsc",
+        "parlia",
+        "greenfield",
+        "opbnb",
+        "beaconchain",
+        "bnb-chain-l1"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/bnb-chain/defi/pinksale-subscription-access.md",
+      "lines": [
+        80,
+        317
+      ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/bnb-chain_findings/publications-audit-reports-peckshield-audit-report-pinksale-subscriptionpool-v1-0-pdf.md"
+        ],
+        "severityConsensus": "MEDIUM",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "ungoverned admin rewrite of user state",
+          "logical error",
+          "admin state rewrite",
+          "governance setter",
+          "post commitment user allocations"
+        ],
+        "commonlyComposesWith": [
+          "ratio based allocation (committed total committed)",
+          "arbitrary admin array write (users[]",
+          "amounts[])",
+          "stage state machine (calculation stage)",
+          "raw erc20 approve assumptions"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: An admin function accepts parallel address[]/uint256[] and writes per-user state directly, gated only by a length-equality require — no...",
+        "PROVE: *Path A: Compromised governance rigs allocations [MEDIUM]; Sale collects commitments from N users; purchasedOf[u] reflects their contributions",
+        "FALSIFY: Not this bug when: admin rewrites are timelocked, evented, restricted to correction windows before finalize, or behind a DAO/timelock contract — PeckShield's own...; Not...",
+        "IMPACT: Full allocation integrity loss on key compromise: arbitrary winners/losers per sale, finalize forced",
+        "Inventory every admin-write to user state; require events + timelock/DAO or on-chain-derived values",
+        "Check stage-machine setters for validation (legal transitions) and events"
+      ],
+      "antipattern": "stage machine advanced/reversed by a single key, silently",
+      "securePattern": "corrections are evented, windowed before finalize, and ideally",
+      "validWhen": "Signal 1: An admin function accepts parallel address[]/uint256[] and writes per-user state directly, gated only by a length-equality require — no per-value bounds,...",
+      "invalidWhen": "Not this bug when: admin rewrites are timelocked, evented, restricted to correction windows before finalize, or behind a DAO/timelock contract — PeckShield's own...; Not...",
+      "impact": "Full allocation integrity loss on key compromise: arbitrary winners/losers per sale, finalize forced",
+      "preconditions": [
+        "Attacker with the governance key (phished multisig signer, key theft) calls updateCalculatedData(hugeTotal, [victim1, victim2,..."
+      ],
+      "proofShape": "*Path A: Compromised governance rigs allocations [MEDIUM] -> Sale collects commitments from N users; purchasedOf[u] reflects their contributions -> Attacker with the governance key (phished multisig signer, key theft)...",
+      "falsePositiveSignals": [
+        "Not this bug when: admin rewrites are timelocked, evented, restricted to correction windows before finalize, or behind a DAO/timelock contract — PeckShield's own...",
+        "Not this bug when: allocation is computed purely on-chain from commitments (ratio formula) with NO admin-override entry point",
+        "Deflationary incompatibility (PVE-001) is LOW when currency set is protocol-curated (PinkSale confirmed no need to support such tokens); escalate only if arbitrary..."
+      ]
+    },
+    {
+      "id": "bnb-chain-bnbx-staking-derivative-bnbx-liquid-staking-share-acco-000",
+      "title": "BnbX Liquid-Staking Share Accounting (Stader StakeManager)",
+      "severity": "HIGH",
+      "grep": "increaseTotalRedelegated\\(amount|increaseTotalRedelegated|_disableInitializers|addRestakingRewards|totalBnbToWithdraw|getTotalPooledBnb",
+      "detect": "HAL-01 (HIGH) — underflow via unsynced accumulators.",
+      "cat": [
+        "bnb",
+        "bsc",
+        "parlia",
+        "greenfield",
+        "opbnb",
+        "beaconchain",
+        "bnb-chain-l1"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/bnb-chain/tokens/bnbx-staking-derivative.md",
+      "lines": [
+        86,
+        339
+      ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/bnb-chain_findings/publicreports-solidity-smart-contract-audits-staderlabs-bnbx-smart-contract-security-audit-report-halborn-final-pdf.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "oracleless share minting with unsynced pool totals",
+          "logical error",
+          "stale pool total",
+          "deposit conversion",
+          "operator reward bump"
+        ],
+        "commonlyComposesWith": [
+          "share price as total pooled bnb over total supply",
+          "operator adjustable pool total (total redelegated)",
+          "underflow revert as dos",
+          "zero share first deposit",
+          "reentrancy resistant local caching (bnb xto burn copied before burn)"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: An exchange-rate function divides by a pool total that ANY privileged setter can increase without transferring assets in...",
+        "PROVE: *Path A: Reward-bump underflow bricks withdrawals [HIGH]; Contract has totalDeposited = 90 BNB, totalRedelegated = 0, totalSupply = 90 BnbX",
+        "FALSIFY: Not this bug when: reward-accumulator bumps are bounded (post-fix addRestakingRewards requires amount > 0 and startUndelegation recalculates the ratio at execution...",
+        "IMPACT: Permanent revert of startUndelegation freezes the undelegation pipeline → all users' exits blocked until operator re-syncs accumulators or contract is upgraded",
+        "Enumerate every writer of each pool-total term; for each, prove asset inflow (balance delta) or accept inflation risk",
+        "Trace withdrawal path: is the BNB amount converted at request time or settlement time? Does settlement subtract from the same accumulator deposits added to?"
+      ],
+      "antipattern": "implementation left initializable",
+      "securePattern": "addRestakingRewards requires backed amount; startUndelegation",
+      "validWhen": "Signal 1: An exchange-rate function divides by a pool total that ANY privileged setter can increase without transferring assets in (increaseTotalRedelegated(amount)...",
+      "invalidWhen": "Not this bug when: reward-accumulator bumps are bounded (post-fix addRestakingRewards requires amount > 0 and startUndelegation recalculates the ratio at execution...",
+      "impact": "Permanent revert of startUndelegation freezes the undelegation pipeline → all users' exits blocked until operator re-syncs accumulators or contract is upgraded",
+      "preconditions": [
+        "Contract has totalDeposited = 90 BNB, totalRedelegated = 0, totalSupply = 90 BnbX",
+        "Bot calls startUndelegation() → totalDeposited (90) -= 110 → panic revert",
+        "*Path B: First depositor mints zero shares [MEDIUM]",
+        "Fresh pool: totalDeposited = 0, totalSupply = 0",
+        "Alice deposits 1 BNB → convertBnbToBnbX(1e18) = 1e18 * max(totalShares=0→1, 1) / 10e18 = 0"
+      ],
+      "proofShape": "*Path A: Reward-bump underflow bricks withdrawals [HIGH] -> Contract has totalDeposited = 90 BNB, totalRedelegated = 0, totalSupply = 90 BnbX -> Operator calls increaseTotalRedelegated(20 BNB) (anticipating restaking...",
+      "falsePositiveSignals": [
+        "Not this bug when: reward-accumulator bumps are bounded (post-fix addRestakingRewards requires amount > 0 and startUndelegation recalculates the ratio at execution time...",
+        "Not this bug when: the operator bump is provably backed by restaking rewards already custodied by the contract (balance-delta proof), not merely asserted",
+        "Zero-share mint needs: totalDeposited == 0 AND reward bump > first deposit amount."
+      ]
+    },
+    {
+      "id": "bnb-chain-stkbnb-redemption-accounting-stkbnb-redemption-claim-accoun-000",
+      "title": "stkBNB Redemption/Claim Accounting (Persistence StakePool)",
+      "severity": "MEDIUM",
+      "grep": "StakeBNBToken\\.selfDestruct\\(addr|InsufficientFundsToSatisfyClaim|int256\\(bnbUnbonding_|FeeVault\\.claimStkBNB|address\\(this\\)\\.balance|_claimReserve",
+      "detect": "HAL-02 (wrong guard variable)** — `_claim` guards with `address(this).balance < req.weiToReturn` in the description...",
+      "cat": [
+        "bnb",
+        "bsc",
+        "parlia",
+        "greenfield",
+        "opbnb",
+        "beaconchain",
+        "bnb-chain-l1"
+      ],
+      "languages": [
+        "solidity"
+      ],
+      "ecosystem": [
+        "evm"
+      ],
+      "ref": "DB/bnb-chain/tokens/stkbnb-redemption-accounting.md",
+      "lines": [
+        81,
+        326
+      ],
+      "reportEvidence": {
+        "count": 1,
+        "sampleReports": [
+          "reports/bnb-chain_findings/publicreports-solidity-smart-contract-audits-persistence-stkbnb-smart-contract-security-audit-report-halborn-final-pdf.md"
+        ],
+        "severityConsensus": "MEDIUM",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "wrong guard variable and unsafe admin power",
+          "logical error",
+          "wrong reserve check",
+          "claim payout",
+          "contract balance vs claim reserve"
+        ],
+        "commonlyComposesWith": [
+          "claim reserve ledger",
+          "swap delete claim array",
+          "uint256 to int256 cast",
+          "selfdestruct with native balance",
+          "transfer 2300 gas stipend"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: A payout guard compares address(this).balance (or a different bucket) against req.weiToReturn while the decremented ledger is _claimReserve...",
+        "PROVE: *Path A: User claim reverts — reserve/balance mismatch DoS [MEDIUM→LOW]; Users request unstake; their weiToReturn is queued in claimReqs",
+        "FALSIFY: Not this bug when: the payout check and the decrement use the same ledger variable (if (_claimReserve < req.weiToReturn) revert) — post-fix code does exactly this; Not...",
+        "IMPACT: Claim pipeline can revert indefinitely while the reserve/balance ledgers disagree → user-exit DoS on a liquid-staking derivative",
+        "For every payout, confirm guard variable == decremented variable == actually-transferred source",
+        "Enumerate every address an admin can direct tokens to; verify each has an extraction path"
+      ],
+      "antipattern": "if (index >= claimReqs[msg.sender].length) revert IndexOutOfBounds(index);",
+      "securePattern": "check the exact bucket that will be decremented",
+      "validWhen": "Signal 1: A payout guard compares address(this).balance (or a different bucket) against req.weiToReturn while the decremented ledger is _claimReserve — mismatch...",
+      "invalidWhen": "Not this bug when: the payout check and the decrement use the same ledger variable (if (_claimReserve < req.weiToReturn) revert) — post-fix code does exactly this; Not...",
+      "impact": "Claim pipeline can revert indefinitely while the reserve/balance ledgers disagree → user-exit DoS on a liquid-staking derivative",
+      "preconditions": [
+        "*Path B: Admin strands FeeVault fees in StakePool [LOW]",
+        "Owner calls FeeVault.claimStkBNB(stakePoolAddress, amount) (fat-finger or malicious compromise)",
+        "*Path C: Admin self-destruct destroys redemption [MEDIUM]",
+        "Admin pauses, then calls selfDestruct(addr) on StakeBNBToken"
+      ],
+      "proofShape": "*Path A: User claim reverts — reserve/balance mismatch DoS [MEDIUM→LOW] -> Users request unstake; their weiToReturn is queued in claimReqs -> Contract holds BNB (balance > 0) but _claimReserve == 0 (unbond proceeds not...",
+      "falsePositiveSignals": [
+        "Not this bug when: the payout check and the decrement use the same ledger variable (if (_claimReserve < req.weiToReturn) revert) — post-fix code does exactly this",
+        "Not this bug when: self-destruct is timelocked and documented as catastrophic-upgrade-only escape hatch — post-fix uses OZ TimelockController; severity then reflects...",
+        "Safe if: recipients of fee-sending functions are validated != address(stakePool) and StakePool has a sweep/recovery path for stkBNB"
+      ]
+    }
+  ]
+}

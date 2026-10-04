@@ -1,0 +1,894 @@
+[
+ {
+  "file": "audits-neutron-2025-07-18-neutron-timewave-q2-2025-valence-protocol-audit-report-final-pdf.md",
+  "findings": [
+   {
+    "line": 131,
+    "severity": "critical",
+    "title": "Critical 0",
+    "excerpt": "Critical 0\nInformal Systems\u00a92025 < T able of Contents 3\n\nNeutron & Timewave Q2 2025\n Valence Protocol\nFinding Severity Number"
+   },
+   {
+    "line": 137,
+    "severity": "high",
+    "title": "High 2",
+    "excerpt": "High 2"
+   },
+   {
+    "line": 138,
+    "severity": "medium",
+    "title": "Medium 5",
+    "excerpt": "Medium 5"
+   },
+   {
+    "line": 139,
+    "severity": "low",
+    "title": "Low 5",
+    "excerpt": "Low 5"
+   },
+   {
+    "line": 140,
+    "severity": "informational",
+    "title": "Informational 5",
+    "excerpt": "Informational 5\nT otal 17\nInformal Systems\u00a92025 < T able of Contents 4\n\nNeutron & Timewave Q2 2025\n Valence Protocol\nSystem Overview\nThe Valence Protocol is a unified development environment for trust-minimized cross-chain DeFi applications,\nenabling developers to buildValence Programs. These programs simplify cross-chain operations, offering extensi-\nbility and rapid deployment without requiring complex smart contracts or multisig setups.\nCore components\nIn the next sections we go over the core architecture components of the protocol under scope, which are coloured\ngreen in the following diagram:\nFigure 1: Architecture diagram\nAccount system\nThe account system in the Valence Protocol is designed to securely manage funds and enable controlled execution\nof operations through approved libraries. At its core is the Account.sol contract, which serves as an abstract base\nfor account management. This contract introduces a mechanism for approving specific library addresses, ensuring\nthat only trusted libraries can interact with the account\u2019s funds or execute operations. Additionally, Account.sol\nimplements ownership control, allowing the account owner to manage approvals and execute privi"
+   },
+   {
+    "line": 560,
+    "severity": "gas",
+    "title": "gas which can lead to less gas needed to execute sending callback to the callback destination. However,",
+    "excerpt": "gas which can lead to less gas needed to execute sending callback to the callback destination. However,\nthis will revert the whole transaction.\n\u25cf Property PROC_CLBCK-02: Callbacks are built to represent the adequate situation\n\u2013 Threat a: Callback build does not represent the adequate result of operations\n\u279eThreat analysis:\nCallbacks are returned with result which is supposed to encapsulate result of atomic or subatomic\noperation. Result consists of:\n{\nsucceeded: bool,\nexpired: bool,\nexecutedCount: uint256,\nerrorData: bytes\n}\nAssumptions are:\n1) if the subroutine achieved its goal -succeededmust betrue,\n2) if messages are deemed expired -expiredmust betrue,\n3)executedCountmust represent the exact number of subroutines that has finished successfully,\n4) in case of error -errorDatashould represent that error.\n\u279eThreat inspection:\nScenario 1 - Messages are expired - OK\nIn that event result will be {succeeded: false, expired: true, executedCount: 0, errorData:\nbytes(\"\")} adequately encapsulating the state of the execution. Callback will be built with adequate\ndata sinceexecutionResultwill be set toIProcessor.ExecutionResult.Expired.\nScenario 2 - Atomic - OK\n_executeAtomicSubroutine() will"
+   },
+   {
+    "line": 1523,
+    "severity": "high",
+    "title": "High Halting of the chain; loss, locking, or unauthorized",
+    "excerpt": "High Halting of the chain; loss, locking, or unauthorized\nwithdrawal of funds of many users; arbitrary\ntransaction execution; forging of user messages /\ncircumvention of authorization logic"
+   },
+   {
+    "line": 1527,
+    "severity": "medium",
+    "title": "Medium T emporary denial of service / substantial unexpected",
+    "excerpt": "Medium T emporary denial of service / substantial unexpected\ndelays in processing user requests (e.g. many\nhours/days); loss, locking, or unauthorized withdrawal\nof funds of a single user / few users; failures during\ntransaction execution (e.g. out of gas errors); substantial\nincrease in node computational requirements (e.g. 10x)"
+   },
+   {
+    "line": 1533,
+    "severity": "low",
+    "title": "Low T ransient unexpected delays in processing user",
+    "excerpt": "Low T ransient unexpected delays in processing user\nrequests (e.g. minutes/a few hours); Medium increase\nin node computational requirements (e.g. 2x); any kind\nof problem that affects end users, but can be repaired\nby manual intervention (e.g. a special transaction)\nInformal Systems\u00a92025 < T able of Contents 45\n\nNeutron & Timewave Q2 2025\n Valence Protocol\nImpactScore Examples\nNone Small increase in node computational requirements\n(e.g. 20%); code inefficiencies; bad code practices;\nlack/incompleteness of tests; lack/incompleteness of\ndocumentation\nExploitability Score\nThe Exploitability score reflects the ease and technical means by which the vulnerability can be exploited; it\nrepresents the characteristics of the vulnerable component. In the below table we list, for each category, examples\nof actions by actors that are enough to trigger the exploit. In the examples below:\n\u25cf Actorscan be any entity that interacts with the system: other blockchains, system users, validators, relayers, but\nalso uncontrollable phenomena (e.g. network delays or partitions).\n\u25cf Actionscan be\n\u2013 legitimate, e.g. submission of a transaction that follows protocol rules by a user; delegation/redelega-\ntion/b"
+   },
+   {
+    "line": 1565,
+    "severity": "high",
+    "title": "High illegitimate actions taken by a small group of actors;",
+    "excerpt": "High illegitimate actions taken by a small group of actors;\npossibly coordinated with legitimate actions taken by a"
+   },
+   {
+    "line": 1567,
+    "severity": "medium",
+    "title": "medium group of actors",
+    "excerpt": "medium group of actors"
+   },
+   {
+    "line": 1568,
+    "severity": "medium",
+    "title": "Medium illegitimate actions taken by a medium group of actors;",
+    "excerpt": "Medium illegitimate actions taken by a medium group of actors;\npossibly coordinated with legitimate actions taken by a\nlarge group of actors"
+   },
+   {
+    "line": 1571,
+    "severity": "low",
+    "title": "Low illegitimate actions taken by a large group of actors;",
+    "excerpt": "Low illegitimate actions taken by a large group of actors;\npossibly coordinated with legitimate actions taken by\nall actors\nNone illegitimate actions taken in a coordinated fashion by all\nactors\nSeverity Score\nThe severity score combines the above two sub-scores into a single value, and roughly represents the probability\nof the system suffering a severe impact with time; thus it also represents the measure of the urgency or order\nin which vulnerabilities need to be addressed. We assess the severity according to the combination scheme\nrepresented graphically below.\nInformal Systems\u00a92025 < T able of Contents 46\n\nNeutron & Timewave Q2 2025\n Valence Protocol\nFigure 3: Severity classification\nAs can be seen from the image above, only a combination of high impact with high exploitability results in a Critical\nseverity score; such vulnerabilities need to be addressed ASAP. Accordingly, High severity score receive vulnera-\nbilities with the combination of high impact and medium exploitability, or medium impact, but high exploitability.\nSeverityScore Examples"
+   },
+   {
+    "line": 1590,
+    "severity": "critical",
+    "title": "Critical Halting of chain via a submission of a specially crafted",
+    "excerpt": "Critical Halting of chain via a submission of a specially crafted\ntransaction"
+   },
+   {
+    "line": 1592,
+    "severity": "high",
+    "title": "High Permanent loss of user funds via a combination of",
+    "excerpt": "High Permanent loss of user funds via a combination of\nsubmitting a specially crafted transaction with delaying\nof certain messages by a large portion of relayers"
+   },
+   {
+    "line": 1595,
+    "severity": "medium",
+    "title": "Medium Substantial unexpected delays in processing user",
+    "excerpt": "Medium Substantial unexpected delays in processing user\nrequests via a combination of delaying of certain\nmessages by a large group of relayers with coordinated\nwithdrawal of funds by a large group of users"
+   },
+   {
+    "line": 1599,
+    "severity": "low",
+    "title": "Low 2x increase in node computational requirements via",
+    "excerpt": "Low 2x increase in node computational requirements via\ncoordinated withdrawal of all user tokens"
+   },
+   {
+    "line": 1601,
+    "severity": "informational",
+    "title": "Informational Code inefficiencies; bad code practices;",
+    "excerpt": "Informational Code inefficiencies; bad code practices;\nlack/incompleteness of tests; lack/incompleteness of\ndocumentation; any exploit for which a coordinated\nillegitimate action of all actors is necessary\nInformal Systems\u00a92025 < T able of Contents 47\n\nNeutron & Timewave Q2 2025\n Valence Protocol\nDisclaimer\nThis report is subject to the terms and conditions (including without limitation, description of services, confidentiality,\ndisclaimer and limitation of liability, etc.) set forth in the associated Services Agreement. This report provided in\nconnection with the Services set forth in the Services Agreement shall be used by the Company only to the extent\npermitted under the terms and conditions set forth in the Agreement.\nThis audit report is provided on an \u201cas is\u201d basis, with no guarantee of the completeness, accuracy, timeliness or of\nthe results obtained by use of the information provided. Informal has relied upon information and data provided by\nthe client, and is not responsible for any errors or omissions in such information and data or results obtained from\nthe use of that information or conclusions in this report. Informal makes no warranty of any kind, express or implied,"
+   }
+  ]
+ },
+ {
+  "file": "audits-neutron-2023-11-11-audit-report-neutron-duality-v0-5-0-integration-of-cosmos-sdk-0-47-pdf.md",
+  "findings": [
+   {
+    "line": 138,
+    "severity": "critical",
+    "title": "Critical 3",
+    "excerpt": "Critical 3"
+   },
+   {
+    "line": 139,
+    "severity": "high",
+    "title": "High 1",
+    "excerpt": "High 1"
+   },
+   {
+    "line": 140,
+    "severity": "medium",
+    "title": "Medium 0",
+    "excerpt": "Medium 0"
+   },
+   {
+    "line": 141,
+    "severity": "low",
+    "title": "Low 5",
+    "excerpt": "Low 5\nUnknown 2"
+   },
+   {
+    "line": 143,
+    "severity": "informational",
+    "title": "Informational 5",
+    "excerpt": "Informational 5\nTotal 16\n\n\u00a9 2023 Informal Systems Neutron: Duality v0.5.0 + integration of Cosmos SDK 0.47\nSystem Overview and Checked Threats 4\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\nSystem Overview and Checked Threats\nDuality v0.5.0\nDuality at v0.5.0\u00a0is about to be integrated into Neutron. We've been conducting a\u00a0previous audit of Duality at v0.2.0, \nthus the present audit is to a large degree based on the previous one, and we highlight only the important \ndifferences wrt. v0.2.0.\nFor the overview of the core Duality functionality and its security we refer the reader to the \"System Overview\" and \n\"Threat Inspection\" sections of the\u00a0Duality v0.2.0 audit report.\nFrom the point of view of\u00a0external\u00a0system interfaces, the introduction of the\u00a0IBC Swap module\u00a0is a very important \nchange, allowing anyone to piggyback a limit order in the memo field of the ICS-20 fungible token transfer IBC \npacket. The limit order will then be filled, if possible, immediately upon receiving of the ICS-20 packet: only Fill-Or-\nKill limit orders are permitted currently.\nThe single most important\u00a0internal\u00a0change is that of\u00a0Introduction of Pool IDs: while in the old version liquidity \npools have been identified internally by t"
+   },
+   {
+    "line": 1658,
+    "severity": "high",
+    "title": "High Halting of the chain; loss, locking, or unauthorized withdrawal of funds of many users;",
+    "excerpt": "High Halting of the chain; loss, locking, or unauthorized withdrawal of funds of many users; \narbitrary transaction execution; forging of user messages / circumvention of \nauthorization logic"
+   },
+   {
+    "line": 1661,
+    "severity": "medium",
+    "title": "Medium Temporary denial of service / substantial unexpected delays in processing user requests",
+    "excerpt": "Medium Temporary denial of service / substantial unexpected delays in processing user requests \n(e.g. many hours/days); loss, locking, or unauthorized withdrawal of funds of a single \nuser / few users; failures during transaction execution (e.g. out of gas errors); substantial \nincrease in node computational requirements (e.g. 10x)"
+   },
+   {
+    "line": 1665,
+    "severity": "low",
+    "title": "Low Transient unexpected delays in processing user requests (e.g. minutes/a few hours);",
+    "excerpt": "Low Transient unexpected delays in processing user requests (e.g. minutes/a few hours);"
+   },
+   {
+    "line": 1666,
+    "severity": "medium",
+    "title": "Medium increase in node computational requirements (e.g. 2x); any kind of problem that",
+    "excerpt": "Medium increase in node computational requirements (e.g. 2x); any kind of problem that \naffects end users, but can be repaired by manual intervention (e.g. a special transaction)\n None Small increase in node computational requirements (e.g. 20%); code inefficiencies; bad \ncode practices; lack/incompleteness of tests; lack/incompleteness of documentation\nExploitability Score\nThe Exploitability score reflects the ease and technical means by which the vulnerability can be exploited; it \nrepresents the characteristics of the vulnerable component. In the below table we list, for each category, examples \nof actions by actors that are enough to trigger the exploit. In the examples below:\nActors\u00a0can be any entity that interacts with the system: other blockchains, system users, validators, relayers, \nbut also uncontrollable phenomena (e.g. network delays or partitions).\nActions\u00a0can be\n\n\u00a9 2023 Informal Systems Neutron: Duality v0.5.0 + integration of Cosmos SDK 0.47\nAppendix: Vulnerability Classification 49\n\u2022\n\u2022\n\u2022\nlegitimate, e.g. submission of a transaction that follows protocol rules by a user; delegation/\nredelegation/bonding/unbonding; validator downtime; validator voting on a single, but"
+   },
+   {
+    "line": 1695,
+    "severity": "high",
+    "title": "High illegitimate actions taken by a small group of actors; possibly coordinated with",
+    "excerpt": "High illegitimate actions taken by a small group of actors; possibly coordinated with \nlegitimate actions taken by a medium group of actors"
+   },
+   {
+    "line": 1697,
+    "severity": "medium",
+    "title": "Medium illegitimate actions taken by a medium group of actors; possibly coordinated with",
+    "excerpt": "Medium illegitimate actions taken by a medium group of actors; possibly coordinated with \nlegitimate actions taken by a large group of actors"
+   },
+   {
+    "line": 1699,
+    "severity": "low",
+    "title": "Low illegitimate actions taken by a large group of actors; possibly coordinated with",
+    "excerpt": "Low illegitimate actions taken by a large group of actors; possibly coordinated with \nlegitimate actions taken by all actors\n None illegitimate actions taken in a coordinated fashion by all actors\nSeverity Score\nThe severity score combines the above two sub-scores into a single value, and roughly represents the probability of \nthe system suffering a severe impact with time; thus it also represents the measure of the urgency or order in which \nvulnerabilities need to be addressed. We assess the severity according to the combination scheme represented \ngraphically below.\nAs can be seen from the image above, only a combination of high impact with high exploitability results in a Critical \nseverity score; such vulnerabilities need to be addressed ASAP. Accordingly, High severity score receive \nvulnerabilities with the combination of high impact and medium exploitability, or medium impact, but high \nexploitability.\nSeverity Score Examples"
+   },
+   {
+    "line": 1712,
+    "severity": "critical",
+    "title": "Critical Halting of chain via a submission of a specially crafted transaction",
+    "excerpt": "Critical Halting of chain via a submission of a specially crafted transaction\n\n\n\u00a9 2023 Informal Systems Neutron: Duality v0.5.0 + integration of Cosmos SDK 0.47\nAppendix: Vulnerability Classification 50\nSeverity Score Examples"
+   },
+   {
+    "line": 1718,
+    "severity": "high",
+    "title": "High Permanent loss of user funds via a combination of submitting a specially crafted",
+    "excerpt": "High Permanent loss of user funds via a combination of submitting a specially crafted \ntransaction with delaying of certain messages by a large portion of relayers"
+   },
+   {
+    "line": 1720,
+    "severity": "medium",
+    "title": "Medium Substantial unexpected delays in processing user requests via a combination of",
+    "excerpt": "Medium Substantial unexpected delays in processing user requests via a combination of \ndelaying of certain messages by a large group of relayers with coordinated withdrawal \nof funds by a large group of users"
+   },
+   {
+    "line": 1723,
+    "severity": "low",
+    "title": "Low 2x increase in node computational requirements via coordinated withdrawal of all user",
+    "excerpt": "Low 2x increase in node computational requirements via coordinated withdrawal of all user \ntokens"
+   },
+   {
+    "line": 1725,
+    "severity": "informational",
+    "title": "Informational Code inefficiencies; bad code practices; lack/incompleteness of tests; lack/",
+    "excerpt": "Informational Code inefficiencies; bad code practices; lack/incompleteness of tests; lack/\nincompleteness of documentation; any exploit for which a coordinated illegitimate \naction of all actors is necessary\n\n\u00a9 2023 Informal Systems Neutron: Duality v0.5.0 + integration of Cosmos SDK 0.47\nDisclaimer 51\nDisclaimer\nThis report is subject to the terms and conditions (including without limitation, description of services, \nconfidentiality, disclaimer and limitation of liability, etc.) set forth in the associated Services Agreement. This report \nprovided in connection with the Services set forth in the Services Agreement shall be used by the Company only to \nthe extent permitted under the terms and conditions set forth in the Agreement.\nThis audit report is provided on an \u201cas is\u201d basis, with no guarantee of the completeness, accuracy, timeliness or of \nthe results obtained by use of the information provided. Informal has relied upon information and data provided by \nthe client, and is not responsible for any errors or omissions in such information and data or results obtained from \nthe use of that information or conclusions in this report. Informal makes no warranty of any kind, express"
+   }
+  ]
+ },
+ {
+  "file": "audits-cosmos-hub-2023-02-10-audit-report-ics-replicated-security-pdf.md",
+  "findings": [
+   {
+    "line": 104,
+    "severity": "low",
+    "title": "Low or Informational severity.",
+    "excerpt": "Low or Informational severity.\nFurther Increasing Con\ufb01dence\nThe scope of this audit was limited to manual code review and manual analysis and reconstruction of the protocols.\nWe are aware that the ICS team ran a separate protocol audit in which the protocol\u2019s TLA+ model was checked by\na formal veri\ufb01er. To further increase con\ufb01dence in the implementation, we recommend augmenting the existing test\nsuite with TLA+ model-based adversarial testing. This would also make it easier to maintain the test suite in the\nevent of future changes to the codebase.\nIt is our understanding that the Interchain Security team intends to pursue such measures to further improve\ncon\ufb01dence in their system.\n4\n\n\u00a92023 Informal Systems Interchain Security v.1.0\nAudit Dashboard\nTarget Summary\n\u2022 Type: Speci\ufb01cation and Implementation\n\u2022 Platform: Golang\n\u2022 Artifacts:\n\u2013ICS28 Cross Chain Validation: 94baa3f\n\u2013Interchain Security: v1.0.0-rc1\n\u2013Cosmos SDK: v0.45.11-ics, speci\ufb01cally the changes wrt v0.45.11\nEngagement Summary\n\u2022 Dates: 16.01.2023 to 10.02.2023\n\u2022 Method: Manual code review & protocol analysis\n\u2022 Employees Engaged: 3\nSeverity Summary\nFinding Severity #"
+   },
+   {
+    "line": 130,
+    "severity": "critical",
+    "title": "Critical 0",
+    "excerpt": "Critical 0"
+   },
+   {
+    "line": 131,
+    "severity": "high",
+    "title": "High 1",
+    "excerpt": "High 1"
+   },
+   {
+    "line": 132,
+    "severity": "medium",
+    "title": "Medium 2",
+    "excerpt": "Medium 2"
+   },
+   {
+    "line": 133,
+    "severity": "low",
+    "title": "Low 3",
+    "excerpt": "Low 3"
+   },
+   {
+    "line": 134,
+    "severity": "informational",
+    "title": "Informational 2",
+    "excerpt": "Informational 2\nTotal 8\n5\n\n\u00a92023 Informal Systems Interchain Security v.1.0\nSystem Overview\nInterchain Security introduces an option for new or existing blockchains to lease security from a larger blockchain.\nThe (smaller) blockchains that lease security are calledconsumer chains, and the (larger) blockchain that provides\nsecurity is called theprovider chain. Validators of the provider chain will additionally validate on consumer chains\nusing their stake from the provider. In e\ufb00ect, misbehavior on any of the consumers becomes equally costly as\nmisbehavior on the provider itself. Importantly, a consumer can only be added through a governance proposal on\nthe provider.\nIn this section, we give a high-level overview of the system, which will be useful for understanding the rest of the\nreport. For more details on the system, see the speci\ufb01cation \ufb01le or the documentation.\nIn order to achieve the replication of security, the provider (P) and a consumer (C) are exchanging the following\nmessages over IBC:\n\u2022 P\u2192C: Validator Set Change (VSC). This message makes sure that the consumer chain keeps up with\nthe changes of the validator set on the provider chain.\n\u2022 C\u2192P: VSC matured. This message is"
+   },
+   {
+    "line": 447,
+    "severity": "low",
+    "title": "Low risk Low risk Medium risk",
+    "excerpt": "Low risk Low risk Medium risk\nValidators\nharmed"
+   },
+   {
+    "line": 450,
+    "severity": "low",
+    "title": "Low risk Low risk High risk",
+    "excerpt": "Low risk Low risk High risk\n14\n\n\u00a92023 Informal Systems Interchain Security v.1.0\nWe note that the codebase has received a number of changes since this audit. The introduced changes are changing\nthe threat landscape that is presented in the Table 2. We have not re-audited the codebase with the new changes,\nbut here we give an overview of release candidates that followed the audit, and, where relevant, comment on their\nexpected (but not audited) impact on the threat landscape.\n\u2022 v1.0.0-rc2: Code re-organization. No expected impact on the threat landscape.\n\u2022 v1.0.0-rc3: IBC is bumped to version 4.2.0 (from previous 3.4.0). No expected impact on the threat\nlandscape.\n\u2022 v1.0.0.-rc4: Testing and documentation improved, the problem described in IF-ICS-02 is \ufb01xed.With this\nchange, the throttling mechanism works as expected and makes it more di\ufb03cult for malicious\nactors to take over the provider validator set.\n\u2022 v1.0.0-rc5: Consumer initiated slashing and tombstoning is disabled (only jailing remains).This change\nsigni\ufb01cantly reduces the threat to validators under existence of byzantine consumers.\n\u2022 v1.0.0-rc6: Testing and documentation are improved, SDK version is bumped tov0.45.13-ics (fr"
+   },
+   {
+    "line": 617,
+    "severity": "high",
+    "title": "High A byzantine consumer can tombstone, slash, or jail an",
+    "excerpt": "High A byzantine consumer can tombstone, slash, or jail an\ninnocent validator"
+   },
+   {
+    "line": 619,
+    "severity": "medium",
+    "title": "Medium Consecutive meter replenishments when the meter is",
+    "excerpt": "Medium Consecutive meter replenishments when the meter is\nnegative"
+   },
+   {
+    "line": 621,
+    "severity": "medium",
+    "title": "Medium Panics on failure to send IBC packets",
+    "excerpt": "Medium Panics on failure to send IBC packets"
+   },
+   {
+    "line": 622,
+    "severity": "low",
+    "title": "Low Unbonding period on consumers is not enforced",
+    "excerpt": "Low Unbonding period on consumers is not enforced"
+   },
+   {
+    "line": 623,
+    "severity": "low",
+    "title": "Low A consumer can delay unbonding period on the Hub to",
+    "excerpt": "Low A consumer can delay unbonding period on the Hub to\nbe up to 35 days"
+   },
+   {
+    "line": 625,
+    "severity": "low",
+    "title": "Low A byzantine consumer might in\ufb02ict Denial-Of-Service to",
+    "excerpt": "Low A byzantine consumer might in\ufb02ict Denial-Of-Service to\nother consumers"
+   },
+   {
+    "line": 627,
+    "severity": "informational",
+    "title": "Informational Suboptimal integration of changes into Cosmos SDK",
+    "excerpt": "Informational Suboptimal integration of changes into Cosmos SDK"
+   },
+   {
+    "line": 628,
+    "severity": "informational",
+    "title": "Informational Problems that harm code readability",
+    "excerpt": "Informational Problems that harm code readability\n19\n\n\u00a92023 Informal Systems Interchain Security v.1.0\nA byzantine consumer can tombstone, slash, or jail an innocent validator\nID IF-ICS-01\nSeverity High\nImpact High\nExploitability Medium\nType Protocol assumption\nIssue link\nStatus Update Resolved\nDescription\nPer the Evidence Provision assumption, the provider will not check slash requests coming from consumers but will\nact upon them immediately. Thus, a byzantine consumer can report that a validator double signed a block, causing\nit to be slashed and tombstoned. Similarly, if a validator was reported for downtime, it will be slashed and jailed.\nProblem Scenarios\nBoth described scenarios can be used to harm any individual validator.\nRecommendation\nWe recommend checking the validity of an infraction report before acting upon it.\nStatus Update\nResolved. As a short-term solution, the provider will only jail validators for downtime infractions on consumers, there\nis no slashing or tombstoning (issue 689). In the future, the consumer will have to send evidence of an infraction to\nthe provider (as planned in the Untrusted consumers milestone).\n20\n\n\u00a92023 Informal Systems Interchain Security "
+   },
+   {
+    "line": 983,
+    "severity": "high",
+    "title": "High Halting of the chain; loss, locking, or unauthorized",
+    "excerpt": "High Halting of the chain; loss, locking, or unauthorized\nwithdrawal of funds of many users; arbitrary transaction\nexecution; forging of user messages / circumvention of\nauthorization logic"
+   },
+   {
+    "line": 987,
+    "severity": "medium",
+    "title": "Medium Temporary denial of service / substantial unexpected",
+    "excerpt": "Medium Temporary denial of service / substantial unexpected\ndelays in processing user requests (e.g. many\nhours/days); loss, locking, or unauthorized withdrawal of\nfunds of a single user / few users; failures during\ntransaction execution (e.g. out of gas errors); substantial\nincrease in node computational requirements (e.g. 10x)"
+   },
+   {
+    "line": 993,
+    "severity": "low",
+    "title": "Low Transient unexpected delays in processing user requests",
+    "excerpt": "Low Transient unexpected delays in processing user requests\n(e.g. minutes/a few hours); Medium increase in node\ncomputational requirements (e.g. 2x); any kind of\nproblem that a\ufb00ects end users, but can be repaired by\nmanual intervention (e.g. a special transaction)\nNone Small increase in node computational requirements\n(e.g. 20%); code ine\ufb03ciencies; bad code practices;\nlack/incompleteness of tests; lack/incompleteness of\ndocumentation\nExploitability Score\nThe Exploitability score re\ufb02ects the ease and technical means by which the vulnerability can be exploited; it\nrepresents the characteristics of the vulnerable component. In the below table we list, for each category, examples of\nactions by actors that are enough to trigger the exploit. In the examples below:\n30\n\n\u00a92023 Informal Systems Interchain Security v.1.0\n\u2022 Actors can be any entity that interacts with the system: other blockchains, system users, validators, relayers,\nbut also uncontrollable phenomena (e.g. network delays or partitions).\n\u2022 Actions can be\n\u2013legitimate, e.g. submission of a transaction that follows protocol rules by a user; delega-\ntion/redelegation/bonding/unbonding; validator downtime; validator voting on a sing"
+   },
+   {
+    "line": 1024,
+    "severity": "high",
+    "title": "High illegitimate actions taken by a small group of actors;",
+    "excerpt": "High illegitimate actions taken by a small group of actors;\npossibly coordinated with legitimate actions taken by a"
+   },
+   {
+    "line": 1026,
+    "severity": "medium",
+    "title": "medium group of actors",
+    "excerpt": "medium group of actors"
+   },
+   {
+    "line": 1027,
+    "severity": "medium",
+    "title": "Medium illegitimate actions taken by a medium group of actors;",
+    "excerpt": "Medium illegitimate actions taken by a medium group of actors;\npossibly coordinated with legitimate actions taken by a\nlarge group of actors"
+   },
+   {
+    "line": 1030,
+    "severity": "low",
+    "title": "Low illegitimate actions taken by a large group of actors;",
+    "excerpt": "Low illegitimate actions taken by a large group of actors;\npossibly coordinated with legitimate actions taken by all\nactors\nNone illegitimate actions taken in a coordinated fashion by all\nactors\nSeverity Score\nThe severity score combines the above two sub-scores into a single value, and roughly represents the probability\nof the system su\ufb00ering a severe impact with time; thus it also represents the measure of the urgency or order in\nwhich vulnerabilities need to be addressed. We assess the severity according to the combination scheme represented\ngraphically below.\nFigure 6: Severity classi\ufb01cation\nAs can be seen from the image above, only a combination of high impact with high exploitability results in a Critical\nseverity score; such vulnerabilities need to be addressed ASAP. Accordingly, High severity score receive vulnerabilities\nwith the combination of high impact and medium exploitability, or medium impact, but high exploitability.\n31\n\n\u00a92023 Informal Systems Interchain Security v.1.0\nSeverityScore Examples"
+   },
+   {
+    "line": 1048,
+    "severity": "critical",
+    "title": "Critical Halting of chain via a submission of a specially crafted",
+    "excerpt": "Critical Halting of chain via a submission of a specially crafted\ntransaction"
+   },
+   {
+    "line": 1050,
+    "severity": "high",
+    "title": "High Permanent loss of user funds via a combination of",
+    "excerpt": "High Permanent loss of user funds via a combination of\nsubmitting a specially crafted transaction with delaying\nof certain messages by a large portion of relayers"
+   },
+   {
+    "line": 1053,
+    "severity": "medium",
+    "title": "Medium Substantial unexpected delays in processing user",
+    "excerpt": "Medium Substantial unexpected delays in processing user\nrequests via a combination of delaying of certain\nmessages by a large group of relayers with coordinated\nwithdrawal of funds by a large group of users"
+   },
+   {
+    "line": 1057,
+    "severity": "low",
+    "title": "Low 2x increase in node computational requirements via",
+    "excerpt": "Low 2x increase in node computational requirements via\ncoordinated withdrawal of all user tokens"
+   },
+   {
+    "line": 1059,
+    "severity": "informational",
+    "title": "Informational Code ine\ufb03ciencies; bad code practices;",
+    "excerpt": "Informational Code ine\ufb03ciencies; bad code practices;\nlack/incompleteness of tests; lack/incompleteness of\ndocumentation; any exploit for which a coordinated\nillegitimate action of all actors is necessary\n32"
+   }
+  ]
+ },
+ {
+  "file": "publicreports-cosmwasm-smart-contract-audits-astroport-fi-amm-protocol-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+  "findings": [
+   {
+    "line": 143,
+    "severity": "informational",
+    "title": "Recommendation 58",
+    "excerpt": "Recommendation 58\nRemediation plan: 58\n3.18 (HAL-18) INTEGER OVERFLOW - INFORMATIONAL 59\nDescription 59\nCode Location 59\nRisk Level 61\n5\n\nRecommendations 61\nRemediation plan 61\n3.19 (HAL-19) POSSIBLE MISUSE OF HELPER METHODS - INFORMATIONAL 62\nDescription 62\nCode Location 62\nRisk Level 62\nRecommendations 63\nRemediation plan 63\n4 AUTOMATED TESTING 63\n4.1 AUTOMATED ANALYSIS 65\nDescription 65\n6\n\nDOCUMENT REVISION HISTORY\nVERSION MODIFICATION DATE AUTHOR\n0.1 Document Creation 10/25/2021 Luis Quispe Gonzales\n0.2 Document Updates 11/16/2021 Piotr Cielas\n0.3 Document Updates 11/24/2021 Connor Taylor\n0.4 Document Updates 11/26/2021 Luis Quispe Gonzales\n0.5 Draft Review 11/30/2021 Gabi Urrutia\n1.0 Remediation Plan 12/13/2021 Luis Quispe Gonzales\n1.1 Remediation Plan Review 12/14/2021 Gabi Urrutia\n7\n\nCONTACTS\nCONTACT COMPANY EMAIL\nRob Behnke Halborn Rob.Behnke@halborn.com\nSteven Walbroehl Halborn Steven.Walbroehl@halborn.com\nGabi Urrutia Halborn Gabi.Urrutia@halborn.com\nLuis Quispe\nGonzales Halborn Luis.QuispeGonzales@halborn.com\n8"
+   },
+   {
+    "line": 328,
+    "severity": "medium",
+    "title": "Medium SOLVED - 12/08/2021",
+    "excerpt": "Medium SOLVED - 12/08/2021\n(HAL-07) PRIVILEGED ADDRESS CAN BE\nTRANSFERRED WITHOUT CONFIRMATION IN\nFACTORY"
+   },
+   {
+    "line": 332,
+    "severity": "medium",
+    "title": "Medium SOLVED - 12/06/2021",
+    "excerpt": "Medium SOLVED - 12/06/2021\n(HAL-08) OWNER ADDRESS NOT\nTRANSFERABLE Medium SOLVED - 12/06/2021\n(HAL-09) MISCALCULATION OF REVERSE\nSIMULATION IN STABLE PAIRS Medium SOLVED - 11/17/2021\n(HAL-10) ADDRESS VALIDATION MISSING Low SOLVED - 11/29/2021\n(HAL-11) LACK OF LIMITS WHEN\nPERFORMING MULTI-SWAP Low SOLVED - 12/02/2021\n(HAL-12) POSSIBILITY TO CREATE FAKE\nPAIRS WITH NATIVE COINS Low SOLVED - 12/01/2021\n(HAL-13) AMOUNT OF TOKENS SENT ARE\nNOT VALIDATED WHEN EXECUTING SWAP\nOPERATIONS"
+   },
+   {
+    "line": 345,
+    "severity": "informational",
+    "title": "Informational ACKNOWLEDGED",
+    "excerpt": "Informational ACKNOWLEDGED\n(HAL-14) NO RESTRICTIONS TO\nDEREGISTER PAIRS Informational ACKNOWLEDGED\n(HAL-15) MISMATCH OF STABLESWAP\nFORMULA BETWEEN LITEPAPER AND\nCONTRACT"
+   },
+   {
+    "line": 351,
+    "severity": "informational",
+    "title": "Informational ACKNOWLEDGED",
+    "excerpt": "Informational ACKNOWLEDGED\n15\nEXECUTIVE OVERVIEW\n\nSECURITY ANALYSIS RISK LEVEL REMEDIATION DATE\n(HAL-16) QUERYING USERS\u2019 SHARE IN\nPOOLS COULD PANIC Informational SOLVED - 12/01/2021\n(HAL-17) OVERFLOW CHECKS NOT SET\nFOR PROFILE RELEASE Informational ACKNOWLEDGED\n(HAL-18) INTEGER OVERFLOW Informational SOLVED - 12/07/2021\n(HAL-19) POSSIBLE MISUSE OF HELPER\nMETHODS Informational SOLVED - 12/03/2021\n16\nEXECUTIVE OVERVIEW\n\n17\nFINDINGS & TECH\nDETAILS\n\n3.1 (HAL-01) ANONYMOUS CONTRACT\nCONFIG MODIFICATION - HIGH\nDescription:\nThe astroport-maker and astroport-generator contracts hold their configu-\nrations in storage. Configuration parameters are set with the set_config\n, set_allowed_reward_proxies and set_tokens_per_block functions defined\nin contracts/tokenomics/maker/src/contract.rs and contracts/tokenomics/\ngenerator/src/contract.rs. Because those functions do not verify the\nmessage sender, malicious users can overwrite configuration parameters.\nFor example, overwriting the staking and governance contract addresses\nmay redirect new funds to attacker-controlled account(s).\nCode Location:\nContract initialisation\nListing 1: tokenomics/maker/src/contract.rs (Lines 30,39)\n20 #[ cfg_attr ( not"
+   },
+   {
+    "line": 1479,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to explicitly enable overflow checks in each individual\ncontract and package. That measure helps when the project is refactored\nto prevent unintended consequences.\nRemediation plan::\nACKNOWLEDGED: The Astroport team acknowledged this finding.\n58\nFINDINGS & TECH DETAILS\n\n3.18 (HAL-18) INTEGER OVERFLOW -\nINFORMATIONAL\nDescription:\nInteger overflows/underflows were identified in the register_vesting_accounts\nfunction defined in contracts/tokenomics/vesting/src/contract.rs.\nFor example, a subtraction underflow may occur when the\nregister_vesting_account function defined in tokenomics/vesting/\nsrc/contract.rs is executed.\nInteger overflows or underflow occur when the result of an arithmetic\noperation is outside the possible range for an integer. If the amount\nexceeds the maximum or is lower than the minimum represented by the number\nof bits available, it will result in an incorrect value.\nThe overflow-checks feature is set to true in the top crate and it will\ncause the contract to panic on any overflow.\nCode Location:\nListing 29: tokenomics/staking/src/contract.rs (Lines 119,129,136)\n118 for sch in & vesting_account . schedules {\n119 to_deposit += if le"
+   }
+  ]
+ },
+ {
+  "file": "publicreports-cosmwasm-smart-contract-audits-nexus-protocol-cosmwasm-smart-contract-security-audit-report-halborn-v1-1-pdf.md",
+  "findings": [
+   {
+    "line": 27,
+    "severity": "informational",
+    "title": "Recommendation 18",
+    "excerpt": "Recommendation 18\nRemediation plan 18\n3.2 (HAL-02) MISCALCULATION OF NASSET TOKENS TO MINT LEADS TO UNFAIR\nWITHDRAWING / DOS - HIGH 19\nDescription 19\nCode Location 20\nRisk Level 20"
+   },
+   {
+    "line": 34,
+    "severity": "informational",
+    "title": "Recommendation 20",
+    "excerpt": "Recommendation 20\nRemediation plan 21\n3.3 (HAL-03) NO UPDATE OF LOAN REPAYMENT STATE ON REBALANCE FUNC-\nTION - HIGH 22\nDescription 22\n1\n\nCode Location 22\nRisk Level 23"
+   },
+   {
+    "line": 43,
+    "severity": "informational",
+    "title": "Recommendation 23",
+    "excerpt": "Recommendation 23\nRemediation plan 23\n3.4 (HAL-04) PRIVILEGED ADDRESSES CAN BE TRANSFERRED WITHOUT CON-\nFIRMATION - MEDIUM 24\nDescription 24\nCode Location 24\nRisk Level 25"
+   },
+   {
+    "line": 50,
+    "severity": "informational",
+    "title": "Recommendation 25",
+    "excerpt": "Recommendation 25\nRemediation plan 25\n3.5 (HAL-05) DECIMAL RATES COULD BE UPDATED TO A VALUE GREATER OR\nEQUAL THAN 1 - LOW 27\nDescription 27\nCode Location 27\nRisk Level 27"
+   },
+   {
+    "line": 57,
+    "severity": "informational",
+    "title": "Recommendation 28",
+    "excerpt": "Recommendation 28\nRemediation plan 28\n3.6 (HAL-06) LOAN REPAYMENT COULD TAKE MORE ITERATIONS THAN ALLOWED -\nLOW 29\nDescription 29\nCode Location 29\nRisk Level 29"
+   },
+   {
+    "line": 64,
+    "severity": "informational",
+    "title": "Recommendation 30",
+    "excerpt": "Recommendation 30\nRemediation plan 30\n3.7 (HAL-07) ROUNDING ISSUES WHEN DEPOSITING / WITHDRAWING BASSET\nTOKENS - LOW 31\nDescription 31\n2\n\nCode Location 31\nRisk Level 32"
+   },
+   {
+    "line": 73,
+    "severity": "informational",
+    "title": "Recommendation 32",
+    "excerpt": "Recommendation 32\nRemediation plan 32\n3.8 (HAL-08) UNAUTHORIZED TOKEN REWARDS CONTRACT ADDRESS MODIFICA-\nTION - INFORMATIONAL 33\nDescription 33\nCode Location 33\nRisk Level 34\nRecommendations 34\nRemediation plan: 34\n3.9 (HAL-09) GLOBAL INDEX MANIPULATION - INFORMATIONAL 35\nDescription 35\nCode Location 35\nRisk Level 37\nRecommendations 37\nRemediation plan: 37\n3.10 (HAL-10) INSUFFICIENT MARKETING DATA VALIDATION - INFORMATIONAL\n38\nDescription 38\nCode Location 38\nRisk Level 39\nRecommendations 39\nRemediation plan: 39\n3.11 (HAL-11) NO UNLOCKING MECHANISM FOR EMERGENCY SITUATIONS - IN-\nFORMATIONAL 40\nDescription 40\n3\n\nCode Location 40\nRisk Level 41"
+   },
+   {
+    "line": 102,
+    "severity": "informational",
+    "title": "Recommendation 41",
+    "excerpt": "Recommendation 41\nRemediation plan 41\n3.12 (HAL-12) POSSIBLE EXCESSIVE ACCESS TO REBALANCE FUNCTION - IN-\nFORMATIONAL 42\nDescription 42\nCode Location 42\nRisk Level 42"
+   },
+   {
+    "line": 109,
+    "severity": "informational",
+    "title": "Recommendation 43",
+    "excerpt": "Recommendation 43\nRemediation plan 43\n3.13 (HAL-13) ADDRESS VALIDATION MISSING - INFORMATIONAL 44\nDescription 44\nCode Location 44\nRisk Level 44\nRecommendations 45\nRemediation plan 45\n3.14 (HAL-14) OVERFLOW CHECKS NOT SET FOR PROFILE RELEASE - INFORMA-\nTIONAL 46\nDescription 46\nCode Location 46\nRisk Level 46"
+   },
+   {
+    "line": 122,
+    "severity": "informational",
+    "title": "Recommendation 46",
+    "excerpt": "Recommendation 46\nRemediation plan 47\n3.15 (HAL-15) ARITHMETIC OVERFLOW - INFORMATIONAL 48\nDescription 48\n4\n\nCode Location 48\nRisk Level 49\nRecommendations 49\nRemediation plan 50\n3.16 (HAL-16) MINTER ADDRESS NOT UPDATEABLE - INFORMATIONAL 51\nDescription 51\nCode Location 51\nRisk Level 52\nRecommendations 52\nRemediation plan 52\n3.17 (HAL-17) INACCURATE ERROR MESSAGES - INFORMATIONAL 53\nDescription 53\nCode Location 53\nRisk Level 53"
+   },
+   {
+    "line": 142,
+    "severity": "informational",
+    "title": "Recommendation 54",
+    "excerpt": "Recommendation 54\nRemediation plan 54\n4 FUZZING 55\nIntroduction 56\nDescription 56\nPoC 57\nResults 57\n5 AUTOMATED TESTING 58\n5.1 VULNERABILITIES AUTOMATIC DETECTION 59\nDescription 59\n5\n\nResults 59\n6\n\nDOCUMENT REVISION HISTORY\nVERSION MODIFICATION DATE AUTHOR\n0.1 Document Creation 08/09/2021 Piotr Cielas\n0.2 Document Updates 08/20/2021 Piotr Cielas\n0.3 Document Updates 08/31/2021 Luis Quispe Gonzales\n1.0 Final Version 09/03/2021 Luis Quispe Gonzales\n1.1 Remediation Plan 09/16/2021 Luis Quispe Gonzales\nCONTACTS\nCONTACT COMPANY EMAIL\nRob Behnke Halborn Rob.Behnke@halborn.com\nSteven Walbroehl Halborn Steven.Walbroehl@halborn.com\nGabi Urrutia Halborn Gabi.Urrutia@halborn.com\nLuis Quispe\nGonzales Halborn Luis.QuispeGonzales@halborn.com\nPiotr Cielas Halborn Piotr.Cielas@halborn.com\n7\n\n8\nEXECUTIVE OVERVIEW\n\n1.1 AUDIT SUMMARY\nNexus Protocol engaged Halborn to conduct a security assessment on smart\ncontracts beginning on August 9th, 2021 and ending September 3rd, 2021.\nThe security engineers involved on the audit are blockchain and smart-\ncontract security experts with advanced penetration testing, smart-"
+   },
+   {
+    "line": 288,
+    "severity": "high",
+    "title": "High SOLVED - 09/07/2021",
+    "excerpt": "High SOLVED - 09/07/2021\n(HAL-02) MISCALCULATION OF NASSET\nTOKENS TO MINT LEADS TO UNFAIR\nWITHDRAWING / DOS"
+   },
+   {
+    "line": 292,
+    "severity": "high",
+    "title": "High SOLVED - 08/26/2021",
+    "excerpt": "High SOLVED - 08/26/2021\n(HAL-03) NO UPDATE OF LOAN REPAYMENT\nSTATE ON REBALANCE FUNCTION High SOLVED - 08/26/2021\n(HAL-04) PRIVILEGED ADDRESSES CAN\nBE TRANSFERRED WITHOUT CONFIRMATION Medium SOLVED - 09/14/2021\n(HAL-05) DECIMAL RATES COULD BE\nUPDATED TO A VALUE GREATER OR EQUAL\nTHAN 1"
+   },
+   {
+    "line": 300,
+    "severity": "low",
+    "title": "Low SOLVED - 08/25/2021",
+    "excerpt": "Low SOLVED - 08/25/2021\n(HAL-06) LOAN REPAYMENT COULD TAKE\nMORE ITERATIONS THAN ALLOWED Low SOLVED - 09/14/2021\n(HAL-07) ROUNDING ISSUES WHEN\nDEPOSITING / WITHDRAWING BASSET\nTOKENS"
+   },
+   {
+    "line": 306,
+    "severity": "low",
+    "title": "Low SOLVED - 09/12/2021",
+    "excerpt": "Low SOLVED - 09/12/2021\n(HAL-08) UNAUTHORIZED TOKEN REWARDS\nCONTRACT ADDRESS MODIFICATION Informational ACKNOWLEDGED\n(HAL-09) GLOBAL INDEX MANIPULATION Informational ACKNOWLEDGED\n(HAL-10) INSUFFICIENT MARKETING\nDATA VALIDATION Informational ACKNOWLEDGED\n(HAL-11) NO UNLOCKING MECHANISM FOR\nEMERGENCY SITUATIONS Informational ACKNOWLEDGED\n(HAL-12) POSSIBLE EXCESSIVE ACCESS\nTO REBALANCE FUNCTION Informational ACKNOWLEDGED\n(HAL-13) ADDRESS VALIDATION MISSING Informational ACKNOWLEDGED\n(HAL-14) OVERFLOW CHECKS NOT SET\nFOR PROFILE RELEASE Informational SOLVED - 09/12/2021\n(HAL-15) INTEGER OVERFLOW Informational ACKNOWLEDGED\n(HAL-16) MINTER ADDRESS NOT\nUPDATEABLE Informational ACKNOWLEDGED\n(HAL-17) INACCURATE ERROR MESSAGES Informational SOLVED - 09/12/2021\n14\nEXECUTIVE OVERVIEW\n\n15\nFINDINGS & TECH\nDETAILS\n\n3.1 (HAL-01) MISCALCULATION OF\nBALANCE LEADS TO OVERRATED REWARDS\nDISTRIBUTION - HIGH\nDescription:\nThe split_profit_to_handle_interest function from contract-\ns/basset_vault/src/utils.rs always miscalculates the value of\ntotal_stable_coin_balance, which produces the following consequences:\n\u2022 The aforementioned function wrongly calculates rewards and overrates\nthem, at expenses of vault "
+   },
+   {
+    "line": 384,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nUpdate the total_stable_coin_balance formula not to include the value of\nselling_anc_profit. Below is a proposed sample formula:\ntotal_stable_coin_balance = aterra_amount \u2217 aterra_exchange_rate +\nstable_coin_balance_bef ore_sell_anc\nRemediation plan:\nSOLVED: Issue fixed in commit cbaeb5bd108c030d5993145d080495c1ccf1719f.\n18\nFINDINGS & TECH DETAILS\n\n3.2 (HAL-02) MISCALCULATION OF\nNASSET TOKENS TO MINT LEADS TO\nUNFAIR WITHDRAWING / DOS - HIGH\nDescription:\nThe deposit_basset function from contracts/basset_vault/src/commands.rs\nmiscalculates the value of nasset_to_mint if someone has previously trans-\nferred bAsset tokens directly to the vault, which produces the following\nconsequences:\n\u2022 When a legitimate user deposits bAsset tokens to the vault, the\nnasset_to_mint value will be lower than it should be, which leads\nto unfair withdrawing.\n\u2022 If nAsset supply is zero, legitimate users will not be able to\ndeposit or withdraw bAssets anymore, which causes an unrecoverable\ndenial of service (DoS) of the Nexus protocol.\nIt is important to note that it is not possible to revert, undo or correct\nthe logic of the deposit_basset function, unless the vault contract is\nredeployed, "
+   },
+   {
+    "line": 456,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nUpdate deposit_amount value to include bAsset tokens directly transferred\nto the vault. Below are proposed sample formulas:\n20\nFINDINGS & TECH DETAILS\n\ndeposit_amount = basset_in_contract_address\nnasset_to_mint = nasset_supply \u2217 deposit_amount\nbasset_balance \u2212 deposit_amount\nRemediation plan:\nSOLVED: Issue fixed in commit dd6c2467c5e1f7bdc90c7b87b3c7fb4ee8c6244d.\n21\nFINDINGS & TECH DETAILS\n\n3.3 (HAL-03) NO UPDATE OF LOAN\nREPAYMENT STATE ON REBALANCE\nFUNCTION - HIGH\nDescription:\nThe rebalance function from contracts/basset_vault/src/commands.rs never\nresets repaying_loan_state value when loan repayment completes, so its\niteration_index will continue increasing until reaching the maximum number\nof iterations allowed. Once it happens, loan repayments could be wrongly\nmarked as completed or throw error messages, instead of iterating to\nactually complete the repayment.\nIt is important to note that is not possible to revert, undo or correct the\nlogic of the rebalance function, unless the vault contract is redeployed,\nwhich could lead to a significant loss of users\u2019 or Nexus vault\u2019s funds.\nCode Location:\nListing 3: contracts/basset_vault/src/commands.rs (Lines 389)\n384 B o"
+   },
+   {
+    "line": 502,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nUpdate the logic of rebalance function to reset repaying_loan_state value\nwhen loan repayment completes.\nRemediation plan:\nSOLVED: Issue fixed in commit c5714f1d8d73dac552820a3180cd598b33bb2bcb.\n23\nFINDINGS & TECH DETAILS\n\n3.4 (HAL-04) PRIVILEGED ADDRESSES\nCAN BE TRANSFERRED WITHOUT\nCONFIRMATION - MEDIUM\nDescription:\nAn incorrect use of the update_config function in contracts can set owner\nto an invalid address and inadvertently lose control of the contracts,\nwhich cannot be undone in any way. Currently, the owner of the contracts\ncan change governance contract address (owner) using the aforementioned\nfunction in a single transaction and without confirmation from the new\naddress.\nThe affected smart contracts are the following:\n\u2022 basset_vault\n\u2022 basset_vault_strategy\n\u2022 nasset_token_config_holder\n\u2022 nasset_token_rewards\n\u2022 psi_distributor\nCode Location:\nListing 4: contracts/basset_vault/src/commands.rs\n52 if let Some ( ref gov_addr ) = gov_addr {\n53 current_config . go v e r n a n c e _ c o n t r a c t= deps . api . addr_validate (\ngov_addr ) ?;\n54 }\nListing 5: contracts/basset_vault_strategy/src/commands.rs\n24 if let Some ( ref governance_addr ) = governance_addr {\n25 c"
+   },
+   {
+    "line": 559,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to split ownership transfer functionality into set_owner\nand accept_ownership functions. The latter function allows the transfer\nto be completed by recipient.\nRemediation plan:\nSOLVED: Issue fixed in the following commits:\n\u2022 561ab303f514ea9b3d68940cbe4f864ccc7cce12\n25\nFINDINGS & TECH DETAILS\n\n\u2022 14e76524135074757aae4e635dc2c352d3c611ca\n\u2022 9523bf781294e8134aeb8bbdb152ea9ba90eeb49\n\u2022 cf9709ba279507ae2951039fed8368f504184291\n\u2022 b551a6cd48864af1874356a05cf5984aa6bc4e22\n26\nFINDINGS & TECH DETAILS\n\n3.5 (HAL-05) DECIMAL RATES COULD BE\nUPDATED TO A VALUE GREATER OR EQUAL\nTHAN 1 - LOW\nDescription:\nThe update_config function from contracts/psi_distributor/src/com-\nmands.rs changes all fields directly, so does not restrict that values\nof manual_ltv, fee_rate or tax_rate are greater or equal than 1.\nThe aforementioned values are used to calculate reward distribution and\nif are not correctly set, the formula will always panic and won\u2019t allow\nlegitimate users to claim their rewards, thus generating a denial of\nservice (DoS) in Nexus protocol.\nCode Location:\nListing 9: contracts/psi_distributor/src/commands.rs\n162 if let Some ( manual_ltv ) = manual_ltv {\n163 current"
+   },
+   {
+    "line": 606,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nAdd a validation routine inside update_config function to ensure that\nvalues of manual_ltv, fee_rate and tax_rate are lesser than 1.\nRemediation plan:\nSOLVED: Issue fixed in commit 36c2395e68ee805426dccf46d6cb1e98f2bd3834.\n28\nFINDINGS & TECH DETAILS\n\n3.6 (HAL-06) LOAN REPAYMENT COULD\nTAKE MORE ITERATIONS THAN ALLOWED -\nLOW\nDescription:\nThe set_buffer_part function from contracts/basset_vault_strategy/src/s-\ntate.rs changes the value of buffer_part directly and does not verify\nif this value does not exceed the number of iterations allowed by the\nLOAN_REPAYMENT_MAX_RECURSION_DEEP constant.\nIf the number of iterations reaches its maximum value, the loan repayment\nwill be wrongly marked as completed (because of previous partial pay-\nments), instead of throwing an error message for loan repayment failure.\nCode Location:\nListing 10: contracts/basset_vault_strategy/src/state.rs\n70 pub fn set_buffer_part (& mut self , value : Decimal256 ) ->\nContractResult <() > {\n71 if value . is_zero () || value > Decimal256 :: one () {\n72 return Err ( ContractError :: In a pp r o pr i a te V a lu e) ;\n73 }\n74\n75 self . buffer_part = value ;\n76 Ok (() )\n77 }\nRisk Level:\nLikelihood - 1\nImp"
+   },
+   {
+    "line": 642,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nAdd a validation routine inside set_buffer_part function to ensure that\nloan repayment will be able to complete within the number of iterations\nallowed. Below is a proposed sample validation for this routine:\nbuf f er_part > = max_ltv \u2212 aim_ltv\nLOAN_REP AY M EN T_M AX_RECU RSION _DEEP\nRemediation plan:\nSOLVED: Issue fixed in commit cfe2ef43d778d2b363abd6bd5d287066bfe86aca.\n30\nFINDINGS & TECH DETAILS\n\n3.7 (HAL-07) ROUNDING ISSUES WHEN\nDEPOSITING / WITHDRAWING BASSET\nTOKENS - LOW\nDescription:\nWhen calculating nasset_to_mint in deposit_basset function and\nbasset_to_withdraw in withdraw_basset function, the \u201cmultiply before\ndivide\u201d principle is not followed, which generates rounding issues.\nAlthough the actual difference for rounding in each operation is very\nsmall, in the long run and with enough operations, it could cause a\nsignificant imbalance.\nCode Location:\nCalculating the nAsset tokens to mint:\nListing 11: contracts/basset_vault/src/commands.rs (Lines 169,178)\n168 let fa r m e r _ b a s s e t _ s h a r e: Decimal256 =\n169 Decimal256 :: from_ratio ( deposit_amount .0 , basset_balance .0) ;\n170\n171 // nAsset tokens to mint :\n172 // user_share = ( deposite d_basset "
+   },
+   {
+    "line": 694,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nThe formulas to calculate nasset_to_mint and basset_to_withdraw should be\nrewritten to reduce rounding issues. Below are proposed sample formulas:\nnasset_to_mint = nasset_supply \u2217 deposit_amount\nbasset_balance \u2212 deposit_amount\nbasset_to_withdraw = basset_in_custody \u2217 nasset_to_withdraw_amount\nnasset_token_supply\nRemediation plan:\nSOLVED: Issue fixed in commit d80eef123844c614c9eb43180828ddc7ea8ac49c.\n32\nFINDINGS & TECH DETAILS\n\n3.8 (HAL-08) UNAUTHORIZED TOKEN\nREWARDS CONTRACT ADDRESS\nMODIFICATION - INFORMATIONAL\nDescription:\nThe set_nasset_token_rewards_contract method in contracts/\nnasset_token_config_holder/src/state.rs can be used to update\nthe contract configuration and set the nAsset rewards contract address\nif it hasn\u2019t been already set. This config option is world-writeable\nand can be accessed by sending a SetTokenRewardsContract message to the\nhandler in contracts/nasset_token_config_holder/src/contract.rs. This\nmay lead to unauthorized config modification and possible loss of users\u2019\nrewards.\nCode Location:\nListing 13: contracts/nasset_token_config_holder/src/contract.rs\n(Lines 42,47)\n37 ExecuteMsg :: Anyone { anyone_msg } = > match anyone_msg {\n38 AnyoneMsg"
+   },
+   {
+    "line": 965,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to add locking / unlocking mechanisms in contract to\nmanage emergency situations, such as handling unexpected states on con-\ntract, loss or steal of tokens, etc. The aforementioned mechanisms should\nbe only accessible to Emergency role.\nRemediation plan:\nACKNOWLEDGED: Nexus team has stated that having bAssets in custody when\nexist some circulating nAssets is a extremely remote situation, and in\ncase it happens and locks the vault contract, they prefer to redeploy a\nnew one because of existing data corruption.\n41\nFINDINGS & TECH DETAILS\n\n3.12 (HAL-12) POSSIBLE EXCESSIVE\nACCESS TO REBALANCE FUNCTION -\nINFORMATIONAL\nDescription:\nWhen a user deposits bAsset tokens, rebalance function is called as part\nof regular operations through Anyone::Rebalance message, which allows\nthat anyone can call the function anytime.\nBecause there is no need that external users or smart contracts other\nthan vault contract call the aforementioned function, it is important to\napply the principle of least privilege in this case.\nCode Location:\nListing 22: contracts/basset_vault/src/contract.rs (Lines 286)\n276 AnyoneMsg :: Rebalance {} = > {\n277 let config = load_config ( deps "
+   },
+   {
+    "line": 1009,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to update logic of Anyone::Rebalance message to restrict\nthat only vault contract could call rebalance function.\nRemediation plan:\nACKNOWLEDGED: Nexus team stated that rebalance function can be called\nby anyone by design. Also, they will try to achieve decentralization\nby sharing script that periodically calls Anyone::Rebalance message with\ncommunity.\n43\nFINDINGS & TECH DETAILS\n\n3.13 (HAL-13) ADDRESS VALIDATION\nMISSING - INFORMATIONAL\nDescription:\nOne thing the holder_to_response function defined in contracts/\nnasset_token_rewards/src/queries.rs does is it converts an array of\nbytes to an account address. This function assumes that the array of\nbytes provided contains a valid address but does not verify if that\u2019s\nactually true.\nCode Location:\nListing 23: contracts/nasset_token_rewards/src/queries.rs (Lines 118)\n114 pub fn ho l de r _ to _ r es p o ns e(\n115 ho l d e r _ w i t h _ a d d r e s s: StdResult <( Vec < u8 > , Holder ) >,\n116 ) -> StdResult < HolderResponse > {\n117 let ( addr_bytes , holder ) = h o l d e r _ w i t h _ a d d r e s s?;\n118 let address = std :: str :: from_utf8 (& addr_bytes ) ?. to_string () ;\n119\n120 Ok ( HolderResponse {\n"
+   },
+   {
+    "line": 1079,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to explicitly enable overflow checks in each individual\ncontract and package. That measure helps when the project is refactored\nto prevent unintended consequences.\n46\nFINDINGS & TECH DETAILS\n\nRemediation plan:\nSOLVED: Issue fixed in commit 1402dcb673fc7e9b9ae2df72a92019ef2938378b.\n47\nFINDINGS & TECH DETAILS\n\n3.15 (HAL-15) ARITHMETIC OVERFLOW -\nINFORMATIONAL\nDescription:\nAn overflow happens when an arithmetic operation reaches the maximum size\nof a type. For instance in the decimal_multiplication_in_256() method,\ntwo Decimal256 values are multiplied which may end up overflowing the\ntype. In computer programming, an overflow occurs when an arithmetic\noperation attempts to create a numeric value that is outside of the range\nthat can be represented with a given number of bits -- either larger than\nthe maximum or lower than the minimum representable value.\nCode Location:\nListing 25: contracts/nasset_token_rewards/src/math.rs (Lines 8)\n5 pub fn d e c i m a l _ m u l t i p l i c a t i o n _ i n _ 2 5 6( a: Decimal , b: Decimal ) ->\nDecimal {\n6 let a_u256 : Decimal256 = a. into () ;\n7 let b_u256 : Decimal256 = b. into () ;\n8 let c_u256 : Decimal = ( b_u256"
+   },
+   {
+    "line": 1238,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nCorrect error messages to show more accurate information and to avoid\nconfusing users if these messages appear.\nRemediation plan:\nSOLVED: Issue fixed in commits 9824dc093494925dffba74aa60be9ff0e3eedbc6\nand c770d69c135659c2c16d585435b17e542e3ba470.\n54\nFINDINGS & TECH DETAILS\n\n55\nFUZZING\n\nIntroduction:\nFuzzing or fuzz testing is an automated software testing technique that\ninvolves providing invalid, unexpected, or random data as inputs to a\ncomputer program. The program is then monitored for exceptions such as\ncrashes, failing built-in code assertions, or potential memory leaks.\nHalborn custom-built scripts leverage libFuzzer and cargo-fuzz for in-\nprocess, coverage-guided fuzz testing.\nThe fuzzer tracks which areas of the code are reached, and generates muta-\ntions on the corpus of input data in order to maximize the code coverage.\nThe code coverage information is provided by LLVM\u2019s SanitizerCoverage\ninstrumentation.\nDescription:\nHalborn used custom fuzzing scripts, tailored to the specifics of Sub-\nstrate and the Cere protocol. The methods targeted were the ones accepting\nvectors of bytes as input because they are potentially most likely to be\nvulnerable to memory-"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-neutron-2026-04-09-audit-report-neutron-auction-and-undelegations-contract-chain-upgrade-phase-2-report-2-pdf.md",
+  "findings": [
+   {
+    "line": 2435,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n \n-\n \nLevel\n \nof\n \ndocumentation\n \n \nHigh\n \nThe\n \nupgrade\n \nstrategy\n \nis\n \nwell\n \ndescribed.\n \nTest\n \ncoverage"
+   },
+   {
+    "line": 2464,
+    "severity": "low",
+    "title": "Low-Medium",
+    "excerpt": "Low-Medium\n \nTest\n \ncoverage\n \ncomputed\n \nwith\n \ngo\n \ntest\n \nis\n \n41%\n \n \n10\n \n\n \nSummary\n \nof\n \nFindings\n \n \nNo\n \nDescription\n \nSeverity\n \nStatus\n \n1"
+   },
+   {
+    "line": 5924,
+    "severity": "low",
+    "title": "low-cost",
+    "excerpt": "low-cost\n \nsignaling\n \nattacks:\n \nan\n \nactor\n \ncould\n \nrepeatedly\n \nsubmit\n \nmisleading\n \nor\n \ncontroversial\n \nproposals\n \nto\n \nin\ufb02uence\n \nmarket\n \nsentiment\n \nor\n \ngovernance\n \ndiscussions,\n \ncancelling"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-dymension-2024-03-08-audit-report-dymension-point-0d-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 1261,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\nThe\ncodebase\ngenerally\nfollowed\nreadability\nand\nclarity\nstandards,\nbut\nthere\nwere\nsome\ninstances\nof\nambiguous\nand\nmisleading\nvariable\nand\nfunction\nnames.\nLevel\nof\ndocumentation"
+   },
+   {
+    "line": 1286,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n-\nTest\ncoverage"
+   },
+   {
+    "line": 1290,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\ngo\ntest\noutputs\na\ntest\ncode\ncoverage\nfor\nthe\nstreamer\nmodule\nof\n77.6%\nstatements.\n10\n\nSummary\nof\nFindings\nNo\nDescription\nSeverity\nStatus\n1\nThe\ninvariant\nchecking\nthe\nlast\nstream\nID\nwill\nbreak\nover\ntime,\npotentially\ncausing\nthe\nchain"
+   },
+   {
+    "line": 2134,
+    "severity": "gas",
+    "title": "Gas:",
+    "excerpt": "Gas:\nBypassing\nEthermint\nAnte\nHandlers\nby\nJump\nCrypto.\nThis\nissue\nhas\nbeen\nindependently\nreported\nby\na\nthird\nparty\nduring\nthe\naudit.\nRecommendation\nWe\nrecommend\nusing\nEthermint's\nNewAuthzLimiterDecorator\ndecorator\nto\nrestrict\nthe\nMsgEthereumTx\nmessage\ntype\nfrom\nbeing\nnested\nin\na\nMsgExec"
+   },
+   {
+    "line": 2375,
+    "severity": "critical",
+    "title": "critical.",
+    "excerpt": "critical.\nRecommendation\nWe\nrecommend\nadding\nthe\ntxfees\nmodule\nto\nthe\nbank\nmodule's\nblocklist\nin\nthe\nModuleAccountAddrs\nfunction.\nStatus:\nResolved\n5.\nEVM\ncontract\naddresses\nsquatting\nvia\nthe\nvesting\nmodule\nresulting\nin\nnon-functioning\ncontracts\nand\ninaccessible\nfunds\nSeverity:\nMajor\nDuring\nthe\nDymension"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-stride-2022-09-26-audit-report-stride-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 630,
+    "severity": "gas",
+    "title": "gas limit",
+    "excerpt": "gas limit\nMinor\nResolved\n18\nCasting\nuint64\nmsg.Amount\ninto\nuint32\nfor\nItoa\nconversion may yield in an over\ufb02ow\nMinor\nResolved\n19\nIncorrect code comment\nInformational\nResolved\n20\nDepositRecord\n\u2018s\nAmount\nis signed integer\nInformational\nResolved\n21\nHard-coded value may impact log readability\nInformational\nResolved\n22\nExcessive logging and print values\nInformational\nResolved\n23\nReplace hard-coded version in\nGetAppVersion\nInformational\nResolved\n24\nValidations on checking negative values for"
+   },
+   {
+    "line": 722,
+    "severity": "low",
+    "title": "Low-Medium",
+    "excerpt": "Low-Medium\nThere are many TODO comments in\nthe codebase that indicate the code\nis still under active development.\nLevel of documentation\nHigh\n-\nTest coverage"
+   },
+   {
+    "line": 730,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n-\n11\n\nDetailed Findings\n1.\nNon-deterministic iterations can cause consensus failures\nSeverity: Critical\nIn\nseveral\ninstances\nof\nthe\ncodebase,\niterations\nare\ndone\nover\nmaps.\nSince\nGo\nmap\niterations\nare\nnon-deterministic,\nthis\nwould\ncause\neach\nvalidator\nto\nproduce\na\ndi\ufb00erent\napp\nhash,\ncausing a consensus failure and potentially leading to a chain halt.\nA\ufb00ected code lines:\n\u25cf\nx/stakeibc/keeper/unbonding_records.go:101-109"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-amulet-2024-02-07-audit-report-amulet-neutron-pos-strategy-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 1080,
+    "severity": "low",
+    "title": "Low-Medium",
+    "excerpt": "Low-Medium\nAlthough\ncommon\nprogrammatic\npatterns\nwere\nused,\nthe\nnon-standard\narchitecture\nmade\nexecution\npaths\nharder\nto\nfollow.\nLevel\nof\ndocumentation\nMedium\nDocumentation\nis\navailable\nin\nthe\nstrategies.md\n\ufb01le.\nTest\ncoverage\nLow\ncargo\ntarpaulin\nreports\na\ntest\ncoverage\nof\n30.75%\n.\n8"
+   }
+  ]
+ },
+ {
+  "file": "audits-agoric-informal-agoric-report-phase3-pdf.md",
+  "findings": [
+   {
+    "line": 78,
+    "severity": "high",
+    "title": "4. High Fidelity Garbage Collection Modeling (Kernel)",
+    "excerpt": "4. High Fidelity Garbage Collection Modeling (Kernel)"
+   },
+   {
+    "line": 79,
+    "severity": "high",
+    "title": "5. High Fidelity Garbage Collection Modeling (Comms)",
+    "excerpt": "5. High Fidelity Garbage Collection Modeling (Comms)\nThe tasks were conducted 01.10.2021 through 23.12.2021 by Informal Systems by the following personnel:\n\u2022 Daniel Tisdall: Research Engineer at Informal Systems\nConducted work\nStarting 1st October, Informal Systems conducted a formal methods assessment of the existing documentation and\nthe code. Our team began by reviewing the SwingSet package documentation to refamiliarise ourselves with aspects\nof the system not focused on in phase 2.\nAfter developing an understanding, work began to integrate the adversarial tests and test driver into the Agoric\nSDK o\ufb03cial code repository, to exercise the userspace capabilities of inter-communicating vats. This work includes a\nTLA+ model, as well as vat code written in Javascript, and some additional scripts written in Python and Bash for\npre and post processing steps.\nAdditionally, we inspected documentation and code relevant to the working of the garbage collector protocols,\nrestricted to the parts that relate to the kernel, vats and comms vat, but not including the virtual object manager\nor liveslots. We created a model of garbage collection protocol \ufb02ows in the comms vats, and also created a "
+   }
+  ]
+ },
+ {
+  "file": "publicreports-cosmwasm-smart-contract-audits-stader-labs-lunax-contrracts-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+  "findings": [
+   {
+    "line": 28,
+    "severity": "informational",
+    "title": "Recommendation 14",
+    "excerpt": "Recommendation 14\nRemediation plan 15\n3.2 (HAL-02) UNDERUSED PROTOCOL INACTIVE STATE - LOW 16\nDescription 16\nCode Location 16\nRisk Level 16"
+   },
+   {
+    "line": 34,
+    "severity": "informational",
+    "title": "Recommendation 17",
+    "excerpt": "Recommendation 17\nRemediation plan 17\n3.3 (HAL-03) CONFIGURATION PARAMETER COULD NOT BE UPDATED - INFOR-\nMATIONAL 18\nDescription 18\n1\n\nCode Location 18\nRisk Level 19"
+   },
+   {
+    "line": 43,
+    "severity": "informational",
+    "title": "Recommendation 19",
+    "excerpt": "Recommendation 19\nRemediation plan 19\n3.4 (HAL-04) OUTDATED INFORMATION DISPLAYED TO USERS - INFORMATIONAL\n20\nDescription 20\nCode Location 20\nRisk Level 20"
+   },
+   {
+    "line": 50,
+    "severity": "informational",
+    "title": "Recommendation 20",
+    "excerpt": "Recommendation 20\nRemediation plan 21\n3.5 (HAL-05) MISUSE OF HELPER METHODS - INFORMATIONAL 22\nDescription 22\nCode Location 22\nRisk Level 22"
+   },
+   {
+    "line": 56,
+    "severity": "informational",
+    "title": "Recommendation 22",
+    "excerpt": "Recommendation 22\nRemediation plan 23\n3.6 (HAL-06) MULTIPLE INSTANCES OF UNCHECKED MATH - INFORMATIONAL\n24\nDescription 24\nCode Location 24\nRisk Level 24"
+   },
+   {
+    "line": 63,
+    "severity": "informational",
+    "title": "Recommendation 25",
+    "excerpt": "Recommendation 25\nRemediation plan 25\n3.7 (HAL-07) UNFINISHED DEVELOPMENT COMMENTS - INFORMATIONAL 26\nDescription 26\n2\n\nCode Location 26\nRisk Level 27"
+   },
+   {
+    "line": 71,
+    "severity": "informational",
+    "title": "Recommendation 27",
+    "excerpt": "Recommendation 27\nRemediation plan 27\n4 AUTOMATED TESTING 28\n4.1 AUTOMATED ANALYSIS 29\nDescription 29\n3\n\nDOCUMENT REVISION HISTORY\nVERSION MODIFICATION DATE AUTHOR\n0.1 Document Creation 01/17/2022 Jose C. Ramirez\n0.2 Document Updates 02/04/2022 Jose C. Ramirez\n0.3 Document Updates 02/07/2022 Connor Taylor\n0.4 Draft Version 02/07/2022 Jose C. Ramirez\n0.5 Draft Review 02/07/2022 Gabi Urrutia\n1.0 Remediation Plan 02/08/2022 Jose C. Ramirez\n1.1 Remediation Plan Review 02/08/2022 Gabi Urrutia\n4\n\nCONTACTS\nCONTACT COMPANY EMAIL\nRob Behnke Halborn Rob.Behnke@halborn.com\nSteven Walbroehl Halborn Steven.Walbroehl@halborn.com\nGabi Urrutia Halborn Gabi.Urrutia@halborn.com\nJose C. Ramirez Halborn jose.ramirez@halborn.com\nConnor Taylor Halborn connor.taylor@halborn.com\n5\n\n6\nEXECUTIVE OVERVIEW\n\n1.1 INTRODUCTION\nStader Labs engaged Halborn to conduct a security audit on their smart\ncontracts beginning on January 17th, 2022 and ending on February 7th,\n2022. The security assessment was scoped to the LunaX related smart\ncontracts provided to the Halborn team.\n1.2 AUDIT SUMMARY\nThe team at Halborn was provided three weeks for the engagement and\nassigned two security engineers to audit the security of "
+   },
+   {
+    "line": 245,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to add manager transfer capabilities to the contracts,\nsplit into two different functions: set_manager and accept_manager. The\nlatter function allows the transfer to be completed by the recipient, pro-\ntecting the contract against potential typing errors compared to single-\nstep manager change features.\n14\nFINDINGS & TECH DETAILS\n\nRemediation plan:\nSOLVED: The issue was fixed with the above recommendation in commit\n849a43b9c96cb6b70b67a0bb60aaa5c0be221d1e.\n15\nFINDINGS & TECH DETAILS\n\n3.2 (HAL-02) UNDERUSED PROTOCOL\nINACTIVE STATE - LOW\nDescription:\nThe staking contract implemented a switch to go into a pause-like state\ncalled \u201cProtocol Inactive\u201d by using the config.active setting. This check\nwas not implemented consistently across all the functions accessible for\nunprivileged users, but only on the deposit one.\nThis state could be desirable for some reasons, where external users\u2019\ninterference would like to be kept to the minimum among all features of\nthe contract.\nCode Location:\nListing 2: Affected assets\n1 contracts / staking / src / contract . rs :486 redeem_rewards function\n2 contracts / staking / src / contract . rs :523 swap_rewards function\n3"
+   },
+   {
+    "line": 287,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to extend the usage of the \u201cProtocol Inactive\u201d check to\nthe rest of publicly accessible functionalities related to fund updates,\nstake tracking or swap contract interaction.\nRemediation plan:\nSOLVED: A new \u201coperations control\u201d mechanism has been implemented to\nhave a more granular control over paused operations, covering all listed\nfunctionalities.\nThis issue was fixed in commit 368f9a665af2fd6d512d2687e40f8699b7a6e164.\n17\nFINDINGS & TECH DETAILS\n\n3.3 (HAL-03) CONFIGURATION\nPARAMETER COULD NOT BE UPDATED -\nINFORMATIONAL\nDescription:\nThe instantiate function did not set the cw20_token_contract address,\nas done with other contract addresses required in the configuration.\nInstead, it relied on update_config being called post initialization,\nwhich could cause undesirable situations if this address is not set right\nafter deployment.\nIt is worth noting that the update_config function only allowed to set\nthe CW20 address if it contained the initial value Addr::unchecked(\"0\").\nThis effectively forbade any future change after the first update.\nCode Location:\nListing 3: contracts/staking/src/contract.rs (Lines 62)\n55 a i r d r o p _ r e g i s t r y _ c o n t"
+   },
+   {
+    "line": 348,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nThe cw20_token_contract variable should be set upon instantiate, as with\nthe other contract addresses.\nRemediation plan:\nACKNOWLEDGED: Stader Labs acknowledged this finding.\n19\nFINDINGS & TECH DETAILS\n\n3.4 (HAL-04) OUTDATED INFORMATION\nDISPLAYED TO USERS - INFORMATIONAL\nDescription:\nThe reimburse_slashing function of the staking contract does not update\nthe total_staked and exchange_rate state variables. As detailed in the\ncomment of line 635, most functionalities perform a check_slashing at\nthe beginning or update these values. However, this is not the case of\nquery_user_info and query_compute_deposit_breakdown.\nIf a user queries those functions after a reimburse_slashing has been\nperformed, they would receive erroneous information due to the lack of\nupdate.\nCode Location:\nListing 5: Affected assets\n1 contracts / staking / src / contract . rs :615 re i mb u r se _ s la s h in gfunction\nRisk Level:\nLikelihood - 2\nImpact - 1"
+   },
+   {
+    "line": 373,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nUpdate the total_staked and exchange_rate state variables consistently\nso every function returns or work with up-to-date information.\n20\nFINDINGS & TECH DETAILS\n\nRemediation plan:\nSOLVED: Added a RedeemRewards message from the staking contract as a\nresult of the reimburse_slashing function, which effectively updates the\nexchange rate at the end of the transaction.\nThis issue was fixed on commit 24ec25b51e52e98c1128cd77c379d94b3e9dab58s.\n21\nFINDINGS & TECH DETAILS\n\n3.5 (HAL-05) MISUSE OF HELPER\nMETHODS - INFORMATIONAL\nDescription:\nThe use of the unwrap and expect function is very useful for testing\nenvironments because a value is forcibly demanded to get an error (aka\npanic!) if the \u201cOption\u201d does not have \u201cSome\u201d value or \u201cResult\u201d. Never-\ntheless, leaving unwrap or expect functions in production environments\nis a bad practice because not only will this cause the program to crash\nout, or panic!, but also (in case of unwrap) no helpful messages are\nshown to help the user solve, or understand the reason of the error.\nCode Location:\nListing 6: Affected assets\n1 contracts / reward / src / contract . rs : # L93 , 168 , 171 , 217\n2 contracts / staking / src / contract . rs :"
+   },
+   {
+    "line": 407,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to not use the unwrap or expect functions in a production\nenvironment because this use provokes panic! and may crash the Spectrum\ncontracts without error messages. Some alternatives are possible, such as\npropagating the error by putting a \"?\", using unwrap_or / unwrap_or_else\n/ unwrap_or_default functions, or using error-chain crate for errors.\n22\nFINDINGS & TECH DETAILS\n\nReference: https://crates.io/crates/error-chain\nRemediation plan:\nSOLVED: Most of the instances highlighted below has been fixed using\nthe recommendations or deemed secure due to previous checks. Instances\nrelated to the result of checked_add operations have not been modified,\nas the risk of overflow in those cases is minimal, since the entire supply\nof Terra supply will not cause the value of uint128 to overflow.\nThis issue was fixed in commit 7478e89ee9a0f72b89690573fd2dee956d2408fa.\n23\nFINDINGS & TECH DETAILS\n\n3.6 (HAL-06) MULTIPLE INSTANCES OF\nUNCHECKED MATH - INFORMATIONAL\nDescription:\nSome mathematical operations that could cause unexpected behavior under\nspecific circumstances were found on the codebase. Although no effective\narithmetic over/underflow were found and the ove"
+   },
+   {
+    "line": 458,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIn the \u201crelease\u201d mode, Rust does not panic on overflows and overflown\nvalues just \u201cwrap\u201d without any explicit feedback to the user. It is rec-\nommended then to use vetted safe math libraries for arithmetic operations\nconsistently throughout the smart contract system. Consider replacing\nthe addition operator with Rust\u2019s checked_add method, the multiplication\nwith checked_mul and so on.\nRemediation plan:\nACKNOWLEDGED: Since the affected instances were not exploitable and there-\nfore did not pose a direct risk to in-scope contracts, Stader Labs ac-\nknowledged the potential risks outlined above.\n25\nFINDINGS & TECH DETAILS\n\n3.7 (HAL-07) UNFINISHED DEVELOPMENT\nCOMMENTS - INFORMATIONAL\nDescription:\nMultiple \u201cToDo\u201d comments and commented code instances were found on the\ncodebase. Although incomplete code does not directly cause a security\nvulnerability or affect the audit\u2019s outcome as far as it is functional,\nhaving development comments could simplify the process for an attacker\nto find a valid attack surface within the contract.\nIn addition, it shows that the audited code will be different from the\nreleased one, which could cause that new vulnerabilities were to be\nintrodu"
+   },
+   {
+    "line": 507,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nRemove all the instances development related comments, reviewing if some\nmodifications are still pending to be made.\nRemediation plan:\nSOLVED: Suggested mitigation steps have been implemented by the Stader\nLabs team in commit 07878e2eefa1e66a9a25ad3dc234340a355b5ad0.\n27\nFINDINGS & TECH DETAILS\n\n28\nAUTOMATED TESTING\n\n4.1 AUTOMATED ANALYSIS\nDescription:\nHalborn used automated security scanners to assist with detection of\nwell-known security issues and vulnerabilities. Among the tools used\nwas cargo audit, a security scanner for vulnerabilities reported to the\nRustSec Advisory Database. All vulnerabilities published in https://\ncrates.io are stored in a repository named The RustSec Advisory Database.\ncargo audit is a human-readable version of the advisory database which\nperforms a scanning on Cargo.lock. Security Detections are only in scope.\nTo better assist the developers maintaining this code, the auditors are\nincluding the output with the dependencies tree, and this is included\nin the cargo audit output to better know the dependencies affected by\nunmaintained and vulnerable crates.\nID package Short Description\nRUSTSEC-2020-0025 bigint biginit is unmaintained, use u"
+   }
+  ]
+ },
+ {
+  "file": "publicreports-cosmwasm-smart-contract-audits-astroport-fi-astral-assembly-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+  "findings": [
+   {
+    "line": 29,
+    "severity": "informational",
+    "title": "Recommendation 13",
+    "excerpt": "Recommendation 13\nRemediation plan 13\n3.2 (HAL-02) INCONSISTENT XASTRO BLOCK HEIGHT SELECTION - MEDIUM\n15\nDescription 15\nCode Location 16\nRisk Level 16"
+   },
+   {
+    "line": 36,
+    "severity": "informational",
+    "title": "Recommendation 17",
+    "excerpt": "Recommendation 17\nRemediation plan 17\n3.3 (HAL-03) NO MINIMUM THRESHOLD FOR EFFECTIVE DELAY PERIOD - LOW\n18\n1\n\nDescription 18\nCode Location 18\nRisk Level 19"
+   },
+   {
+    "line": 45,
+    "severity": "informational",
+    "title": "Recommendation 19",
+    "excerpt": "Recommendation 19\nRemediation plan 19\n3.4 (HAL-04) UNCHECKED ARITHMETIC - INFORMATIONAL 20\nDescription 20\nCode Location 20\nRisk Level 20"
+   },
+   {
+    "line": 51,
+    "severity": "informational",
+    "title": "Recommendation 20",
+    "excerpt": "Recommendation 20\nRemediation plan 21\n4 AUTOMATED TESTING 22\n4.1 AUTOMATED ANALYSIS 23\nDescription 23\n2\n\nDOCUMENT REVISION HISTORY\nVERSION MODIFICATION DATE AUTHOR\n0.1 Document Creation 03/07/2022 Jakub Heba\n0.2 Document Update 03/08/2022 Jose C. Ramirez\n0.3 Draft Version 03/17/2022 Jose C. Ramirez\n0.4 Draft Review 03/17/2022 Gabi Urrutia\n1.0 Remediation Plan 04/01/2022 Jose C. Ramirez\n1.1 Remediation Plan Review 04/01/2022 Gabi Urrutia\nCONTACTS\nCONTACT COMPANY EMAIL\nRob Behnke Halborn Rob.Behnke@halborn.com\nSteven Walbroehl Halborn Steven.Walbroehl@halborn.com\nGabi Urrutia Halborn Gabi.Urrutia@halborn.com\nJakub Heba Halborn Jakub.Heba@halborn.com\nJose Ramirez Halborn Jose.Ramirez@halborn.com\n3\n\n4\nEXECUTIVE OVERVIEW\n\n1.1 INTRODUCTION\nAstroport.fi engaged Halborn to conduct a security audit on their smart\ncontracts beginning on March 7th, 2022 and ending on March 18th, 2022.\nThe security assessment was scoped to the smart contracts provided to the\nHalborn team.\n1.2 AUDIT SUMMARY\nThe team at Halborn was provided two weeks for the engagement and as-\nsigned two full-time security engineers to audit the security of the smart\ncontract. The security engineers are a blockchain and smart-co"
+   },
+   {
+    "line": 251,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIf possible, restrict that URLs are submitted to a whitelist of domains.\nAs this may not be feasible due to the nature of the feature, it is rec-\nommended to limit the link, title and description fields to alphanumeric\ncharacters plus a subset of symbols, or perform XSS validation using Rust\nlibraries such as libinjection.\nReference: LibInjection\u2019s XSS validation function\nRemediation plan:\nPARTIALLY SOLVED: URL and character validation measures were implemented\nin commit 6910dbf80aba668b4788cc7e73efcf16108cef33. However, Astroport.\n13\nFINDINGS & TECH DETAILS\n\nfi stated that the content of the proposal will be carefully HTML-encoded\nin a future release of the front-end to mitigate any potential XSS vectors\nnot covered by the smart contract sanitization steps. As the front-end\nis out of scope for this audit scope and therefore the remediation cannot\nbe reviewed, this issue has been marked as \"Partially solved\".\n14\nFINDINGS & TECH DETAILS\n\n3.2 (HAL-02) INCONSISTENT XASTRO\nBLOCK HEIGHT SELECTION - MEDIUM\nDescription:\nThe assembly contract uses different block heights when casting a vote\nand when calculating the total voting power available for a proposal.\nThis situation"
+   },
+   {
+    "line": 336,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nA consistent block height and time should be used when retrieving in-\nformation about total supplies and total balances that are expected to\nreflect the same state of a token.\nRemediation plan:\nNOT APPLICABLE: The underlying logic in storing SnapshotMap effectively\nreflected the user\u2019s voting power (calculated at calc_voting_power) in\nproposal.start_block - 1 . Causing the block height to be selected con-\nsistently in all the relevant places.\n17\nFINDINGS & TECH DETAILS\n\n3.3 (HAL-03) NO MINIMUM THRESHOLD\nFOR EFFECTIVE DELAY PERIOD - LOW\nDescription:\nTimelocks are defined in the assembly contract to allow users of the\nprotocol to react in time if a change made is bad faith or is not in the\nbest interest of the protocol and its users.\nThe instantiate and update_config functions of the assembly\ncontract do not restrict timelocks ( execution_delay_period and\nproposal_expiration_period) from being greater than or equal to a\nminimum threshold . Therefore, malicious changes proposed through voting\ncould even be executed immediately if execution_delay_period is not set\nappropriately.\nCode Location:\nListing 4: contracts/assembly/src/contract.rs (Lines 67,68)\n62 let config = C"
+   },
+   {
+    "line": 395,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nAdd a validation routine inside the instantiate and update_config\nfunctions to ensure that timelock ( execution_delay_period and\nproposal_expiration_period) is greater than or equal to a minimum\nthreshold that allows users of Astroport will act promptly against any\nissue the protocol could have when changes are made. The following are\nsome examples of timelocks used in other protocols:\n\u2022 Uniswap: 48-hours timelock\n\u2022 Compound: 48-hours timelock\n\u2022 Aave: 24-hours timelock (Short time lock)\nRemediation plan:\nSOLVED: The issue was fixed in commit 6dcfefe59514a85495a4e34a2ec50ea41f0d10d2.\n19\nFINDINGS & TECH DETAILS\n\n3.4 (HAL-04) UNCHECKED ARITHMETIC -\nINFORMATIONAL\nDescription:\nIn computer programming, an overflow occurs when an arithmetic operation\nattempts to create a numeric value that is outside the range that can be\nrepresented by a given number of bits -- either greater than the maximum\nvalue or less than the minimum representable value.\nThis issue has been raised as informational only, since it was not possible\nto define a clear exploitation scenario for the affected case.\nCode Location:\nListing 6: Affected resources\n1 contracts / assembly / src / contract . rs :71"
+   },
+   {
+    "line": 427,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIn \u201crelease\u201d mode Rust does not panic on overflows and overflown values\njust \u201cwrap\u201d without any explicit feedback to the user. It is recom-\nmended then to use vetted safe math libraries for arithmetic operations\nconsistently throughout the smart contract system. Consider replacing\nthe addition operator with Rust\u2019s checked_add method, the subtraction\noperator with Rust\u2019s checked_subs method, and so on.\n20\nFINDINGS & TECH DETAILS\n\nRemediation plan:\nSOLVED: The issue was fixed in commit 6dcfefe59514a85495a4e34a2ec50ea41f0d10d2.\n21\nFINDINGS & TECH DETAILS\n\n22\nAUTOMATED TESTING\n\n4.1 AUTOMATED ANALYSIS\nDescription:\nHalborn used automated security scanners to assist with detection of\nwell-known security issues and vulnerabilities. Among the tools used\nwas cargo audit, a security scanner for vulnerabilities reported to the\nRustSec Advisory Database. All vulnerabilities published in https://\ncrates.io are stored in a repository named The RustSec Advisory Database.\ncargo audit is a human-readable version of the advisory database which\nperforms a scanning on Cargo.lock. Security Detections are only in scope.\nNo unmaintained or yanked library was found.\n23\nAUTOMATED TESTING\n\nTH"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-terra-liquidity-bootstrapping-pool-2021-12-23-audit-report-terra-liquidity-bootstrapping-pool-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 335,
+    "severity": "informational",
+    "title": "Informational notes do not have a status, since we consider them optional recommendations.",
+    "excerpt": "Informational notes do not have a status, since we consider them optional recommendations.\nNote,\nthat\naudits\nare\nan\nimportant\nstep\nto\nimprove\nthe\nsecurity\nof\nsmart\ncontracts\nand\ncan\n\ufb01nd\nmany\nissues.\nHowever,\nauditing\ncomplex\ncodebases\nhas\nits\nlimits\nand\na\nremaining\nrisk\nis\npresent (see disclaimer).\nUsers\nof\nthe\nsystem\nshould\nexercise\ncaution."
+   },
+   {
+    "line": 539,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n-\nCode readability and clarity\nMedium\n-\nLevel of Documentation"
+   },
+   {
+    "line": 545,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n-\nTest Coverage"
+   },
+   {
+    "line": 548,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n-\n8\n\nDetailed Findings\n1.\nPools\nwith\nbig\nbut\ndi\ufb00erent\ntoken\namounts\nallow\nattackers\nto\nextract free value with minimal cost\nSeverity: Critical\nFor\nbig\namounts\nof\ntokens\nin\nthe\no\ufb00er\nand\nask\npools\nwith\ndi\ufb00erent\ntoken\nvalues,\nthe\ncalc_out_given_in\nfunction\nin\ncontracts/terraswap_pair/src/math.rs:11\napplies\nrounding,"
+   }
+  ]
+ },
+ {
+  "file": "publicreports-cosmwasm-smart-contract-audits-mars-cw-asset-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+  "findings": [
+   {
+    "line": 27,
+    "severity": "informational",
+    "title": "Recommendation 12",
+    "excerpt": "Recommendation 12\nRemediation plan 12\n4 AUTOMATED TESTING 12\n4.1 AUTOMATED ANALYSIS 14\nDescription 14\n1\n\nDOCUMENT REVISION HISTORY\nVERSION MODIFICATION DATE AUTHOR\n0.1 Document Creation 01/13/2022 Jose C. Ramirez\n0.2 Document Updates 01/20/2022 Jose C. Ramirez\n0.3 Draft Version 01/21/2022 Jose C. Ramirez\n0.4 Draft Review 01/21/2022 Gabi Urrutia\n1.0 Remediation Plan 02/08/2022 Jose C. Ramirez\n1.1 Remediation Plan Review 02/08/2022 Gabi Urrutia\nCONTACTS\nCONTACT COMPANY EMAIL\nRob Behnke Halborn Rob.Behnke@halborn.com\nSteven Walbroehl Halborn Steven.Walbroehl@halborn.com\nGabi Urrutia Halborn Gabi.Urrutia@halborn.com\nJose C. Ramirez Halborn jose.ramirez@halborn.com\n2\n\n3\nEXECUTIVE OVERVIEW\n\n1.1 AUDIT SUMMARY\nMars Protocol engaged Halborn to conduct a security assessment on a\nCosmWasm smart contract beginning on January 13th, 2022 and ending January\n21st, 2022.\nThe security engineers involved on the audit are blockchain and smart-\ncontract security experts with advanced penetration testing, smart-\ncontract hacking, and deep knowledge of multiple blockchain protocols.\nThe purpose of this audit is to achieve the following:\n\u2022 Ensure that smart contract functions work as intended.\n\u2022 Identify "
+   },
+   {
+    "line": 193,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nEnforce some basic format rules on denom such as being 4 lowercase a-z\ncharacters. A more strict option would be to perform white-listing by\ncomparing the denom against the complete list of valid native coins on\nTerra.\nRemediation plan:\nSOLVED: the check function was modified to perform white-listing by\naccepting a list of valid denoms to compare the asset\u2019s details with, as\nsuggested above.\nThis issue was fixed on commit 9beba1158f8b3e7f06a237c7d35fc89fb1ba3e6b\n12\nFINDINGS & TECH DETAILS\n\n13\nAUTOMATED TESTING\n\n4.1 AUTOMATED ANALYSIS\nDescription:\nHalborn used automated security scanners to assist with detection of\nwell-known security issues and vulnerabilities. Among the tools used\nwas cargo audit, a security scanner for vulnerabilities reported to the\nRustSec Advisory Database. All vulnerabilities published in https://\ncrates.io are stored in a repository named The RustSec Advisory Database.\ncargo audit is a human-readable version of the advisory database which\nperforms a scanning on Cargo.lock. Security Detections are only in scope.\nTo better assist the developers maintaining this code, the auditors are\nincluding the output with the dependencies tree, and this is "
+   }
+  ]
+ }
+]

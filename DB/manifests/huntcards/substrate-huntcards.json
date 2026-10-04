@@ -1,0 +1,1622 @@
+{
+  "meta": {
+    "manifest": "substrate",
+    "description": "Compressed hunt cards for substrate — one-line detection rules for bulk scanning",
+    "totalCards": 20,
+    "skipped": 0,
+    "usage": "Load cards into context. For each card, grep target code for card.grep. On hit: execute card.check steps directly, use validWhen/invalidWhen/impact for rapid triage, use optional preconditions/proofShape/falsePositiveSignals/reportEvidence when present, and only read full DB entry (card.ref + card.lines) for confirmed true/likely positives.",
+    "enriched": 20
+  },
+  "cards": [
+    {
+      "id": "substrate-omnipool-liquidity-math-rounding-direction-errors-and--000",
+      "title": "Rounding-Direction Errors and Missing Swap Guards Drain the Omnipool",
+      "severity": "HIGH",
+      "grep": "LIQUIDITY_EQUIVALENCE|refund_refused_asset|stablecoin_price|remove_liquidity|fixed_point_math|single_contract",
+      "detect": "The Omnipool's fixed-point math chose the wrong rounding direction at several steps, so every trade leaks a tiny amount...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/amm/omnipool-liquidity-math.md",
+      "lines": [
+        100,
+        298
+      ],
+      "reportEvidence": {
+        "count": 11,
+        "sampleReports": [
+          "reports/substrate-l1_findings/hydradx-rv-omnipool-2022.md",
+          "reports/substrate-l1_findings/hydradx-c4-2401.md",
+          "reports/substrate-l1_findings/chainflip-backend-audits-chainflip-backend-zellic-audit-report-pdf.md",
+          "reports/substrate-l1_findings/zeitgeist-audit-chaintroopers-audit-report-of-zeitgeist-pm-2022-pdf.md",
+          "reports/substrate-l1_findings/composable-audits-halborn-audit20220730-pallets-pablov2-pdf.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "rounding",
+          "rounding error",
+          "arithmetic exploit",
+          "rounding direction error",
+          "omnipool liquidity swap math"
+        ],
+        "commonlyComposesWith": [
+          "fixed point math",
+          "hub reserve (lrna)",
+          "liquidity equivalence",
+          "add liquidity",
+          "remove liquidity"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: Trade math uses div_floor/mul_floor (or the equivalent fixed-point ops) such that the user's output is rounded UP or their input rounded...",
+        "PROVE: *Path A: Cumulative rounding drain; Attacker executes many small swaps where each rounds a unit of value in the trader's favor.",
+        "FALSIFY: Not this bug when: rounding consistently favors the pool (user rounded down) in outputs and up in inputs, verified on both sell and buy paths.; Safe if: refund paths...",
+        "IMPACT: Cumulative pool drain via rounding ([rv3]); unbounded price corruption via same-asset swaps ([rv7]).",
+        "For every swap direction: does rounding favor the pool in ALL steps (sell AND buy)?",
+        "Are same-asset and zero-amount swaps rejected at dispatch?"
+      ],
+      "antipattern": "remove_liquidity burns more LRNA than required (#448/#445)",
+      "securePattern": "refund only to the position owner; burn exactly the invariant amount",
+      "validWhen": "Signal 1: Trade math uses div_floor/mul_floor (or the equivalent fixed-point ops) such that the user's output is rounded UP or their input rounded DOWN at the pool's...;...",
+      "invalidWhen": "Not this bug when: rounding consistently favors the pool (user rounded down) in outputs and up in inputs, verified on both sell and buy paths.; Safe if: refund paths...",
+      "impact": "Cumulative pool drain via rounding ([rv3]); unbounded price corruption via same-asset swaps ([rv7]).",
+      "preconditions": [
+        "attacker control of: ordinary trader/LP accounts (no privileged roles needed) plus, for #2, stablecoin price influence.",
+        "Attacker executes many small swaps where each rounds a unit of value in the trader's favor.",
+        "Repeated at scale, value flows from pool reserves to the attacker — pool drain.",
+        "Attacker calls sell with asset_in == asset_out (#436/#437).",
+        "Attacker invokes refund_refused_asset with an origin that satisfies AddTokenOrigin (weak check)."
+      ],
+      "proofShape": "*Path A: Cumulative rounding drain -> Attacker executes many small swaps where each rounds a unit of value in the trader's favor.",
+      "falsePositiveSignals": [
+        "Not this bug when: rounding consistently favors the pool (user rounded down) in outputs and up in inputs, verified on both sell and buy paths.",
+        "Safe if: refund paths require the original position owner or a governance origin, and same-asset swaps are explicitly rejected.",
+        "Requires attacker control of: ordinary trader/LP accounts (no privileged roles needed) plus, for #2, stablecoin price influence."
+      ]
+    },
+    {
+      "id": "substrate-grandpa-light-client-validation-partial-commit-validation-resu-000",
+      "title": "Partial Commit-Validation Result Lets Invalid GRANDPA Justifications Pass a Light Client",
+      "severity": "MEDIUM",
+      "grep": "num_duplicated_precommits|VoterSet::new\\(voters|validate_commit\\(\\.\\.\\.|CommitValidationResult|grandpa_justification|num_invalid_voters",
+      "detect": "`validate_commit` in finality-grandpa returns a `CommitValidationResult` whose `is_valid()` is a coarse boolean; the...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/bridges/grandpa-light-client-validation.md",
+      "lines": [
+        76,
+        256
+      ],
+      "reportEvidence": {
+        "count": 3,
+        "sampleReports": [
+          "reports/substrate-l1_findings/composable-halborn-grandpa-lc.md",
+          "reports/substrate-l1_findings/composable-audits-halborn-audit20221003-pallet-grandpa-light-client-bridge-pdf.md",
+          "reports/substrate-l1_findings/audit-reports-snowbridge-2024-05-24-audit-report-snowbridge-v1-1-pdf.md"
+        ],
+        "severityConsensus": "MEDIUM",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "incomplete result validation",
+          "data validation bypass",
+          "partial result check",
+          "grandpa justification verification",
+          "commit with duplicates equivocations"
+        ],
+        "commonlyComposesWith": [
+          "grandpa justification",
+          "precommit",
+          "voter set",
+          "total weight",
+          "num duplicated precommits"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: A call to validate_commit(...) whose result is consumed only via is_valid() while num_duplicated_precommits, num_invalid_voters,...",
+        "PROVE: *Path A: Equivocating/duplicated justification accepted as finality; Attacker (or faulty relayer) crafts a justification whose precommit weight passes the threshold only...",
+        "FALSIFY: Not this bug when: the caller checks every field of the validation result (treats any non-zero counter as invalid), or uses an upstream finality-grandpa helper that...;...",
+        "IMPACT: Invalid finality accepted on the bridging chain — the light client's core invariant breaks; any bridge decision (token mint/release) built on finalized headers...",
+        "Are all CommitValidationResult counters checked (or a helper that does)?",
+        "Can the voter set contain duplicate keys at construction?"
+      ],
+      "antipattern": "justification.rs:57,77,74 — rich result collapsed to is_valid()",
+      "securePattern": "every anomaly counter must be zero (per Halborn fix)",
+      "validWhen": "Signal 1: A call to validate_commit(...) whose result is consumed only via is_valid() while num_duplicated_precommits, num_invalid_voters, num_equivocations are...",
+      "invalidWhen": "Not this bug when: the caller checks every field of the validation result (treats any non-zero counter as invalid), or uses an upstream finality-grandpa helper that...;...",
+      "impact": "Invalid finality accepted on the bridging chain — the light client's core invariant breaks; any bridge decision (token mint/release) built on finalized headers...",
+      "preconditions": [
+        "attacker control of: submitted justification bytes (HAL-01/02) or prover input headers (HAL-03).",
+        "Attacker (or faulty relayer) crafts a justification whose precommit weight passes the threshold only because a precommit is...",
+        "Attacker influences the voter-set input to VoterSet::new (e.g., via authority-set update message).",
+        "Attacker feeds the prover a header stream with a large or cyclic unknown_headers set."
+      ],
+      "proofShape": "*Path A: Equivocating/duplicated justification accepted as finality -> Attacker (or faulty relayer) crafts a justification whose precommit weight passes the threshold only because a...",
+      "falsePositiveSignals": [
+        "Not this bug when: the caller checks every field of the validation result (treats any non-zero counter as invalid), or uses an upstream finality-grandpa helper that...",
+        "Safe if: the voter set is constructed from an authority-set root already committed on-chain and deduplicated by construction.",
+        "Requires attacker control of: submitted justification bytes (HAL-01/02) or prover input headers (HAL-03)."
+      ]
+    },
+    {
+      "id": "substrate-snowbridge-bridge-accounting-unguarded-gateway-extrinsics-d-000",
+      "title": "Unguarded Gateway Extrinsics Drain Relayer and Sovereign Bridge Funds",
+      "severity": "CRITICAL",
+      "grep": "transferNativeFromAgent|agent_fund_accounting|multi_asset_deposits|ordered_channel|multi_contract|registerToken",
+      "detect": "The Gateway treats several fund-committing operations as if they were protected when they are public.",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/bridges/snowbridge-bridge-accounting.md",
+      "lines": [
+        77,
+        284
+      ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/substrate-l1_findings/snowbridge-oak-v1-1.md",
+          "reports/substrate-l1_findings/snowbridge-oak-ext-v1-1.md"
+        ],
+        "severityConsensus": "CRITICAL",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "missing access control",
+          "access control bypass",
+          "unguarded privileged extrinsic",
+          "bridge gateway agent accounting",
+          "permissionless registration or refund call"
+        ],
+        "commonlyComposesWith": [
+          "bridge",
+          "bridge fund custody and message submission (gateway",
+          "create agent",
+          "register token",
+          "transfer native from agent"
+        ]
+      },
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Signal 1: A registration function (create_agent, registerToken) callable by any address whose downstream cost (agent creation on AssetHub, 10 DOT...",
+        "PROVE: *Path A: Relayer-fund drain via create_agent spam; Attacker calls create_agent in a loop for garbage token addresses.",
+        "FALSIFY: Not this bug when: registration is gated by governance/owner origin AND the deposit is charged to and refundable by the caller.; Safe if: agent creation is rate-limited,...",
+        "IMPACT: Three distinct fund-loss sinks: relayer funds (spam-forced delivery costs), sovereign funds (uncovered deposits), agent escrow (exfiltration + stranded funds).",
+        "Who pays for agent/token registration on the destination chain — caller or communal funds?",
+        "Can any address move funds out of an Agent or the Gateway?"
+      ],
+      "antipattern": "BeefyClient.sol:231-290 — ticket uniqueness not enforced on prevRandao",
+      "securePattern": "access control + caller-covered deposits (per Oak recommendations)",
+      "validWhen": "Signal 1: A registration function (create_agent, registerToken) callable by any address whose downstream cost (agent creation on AssetHub, 10 DOT deposit) is paid...",
+      "invalidWhen": "Not this bug when: registration is gated by governance/owner origin AND the deposit is charged to and refundable by the caller.; Safe if: agent creation is rate-limited,...",
+      "impact": "Three distinct fund-loss sinks: relayer funds (spam-forced delivery costs), sovereign funds (uncovered deposits), agent escrow (exfiltration + stranded funds).",
+      "preconditions": [
+        "attacker control of: any Ethereum address (permissionless calls) — no special role needed for #1/#2/#3.",
+        "Attacker calls create_agent in a loop for garbage token addresses.",
+        "Attacker calls registerToken for arbitrary tokens.",
+        "Each registration consumes an uncovered fixed 10 DOT deposit from sovereign funds on AssetHub.",
+        "Attacker invokes transferNativeFromAgent without any allowed-caller check and moves native assets out of the Agent."
+      ],
+      "proofShape": "*Path A: Relayer-fund drain via create_agent spam -> Attacker calls create_agent in a loop for garbage token addresses.",
+      "falsePositiveSignals": [
+        "Not this bug when: registration is gated by governance/owner origin AND the deposit is charged to and refundable by the caller.",
+        "Safe if: agent creation is rate-limited, deposit-gated, and the ordered channel cannot be spammed below the relayer's funding.",
+        "Requires attacker control of: any Ethereum address (permissionless calls) — no special role needed for #1/#2/#3."
+      ]
+    },
+    {
+      "id": "substrate-sr25519-signature-verification-missing-point-at-infinity-and--000",
+      "title": "Missing Point-at-Infinity and Canonicality Checks in sr25519 Signature Verification",
+      "severity": "LOW",
+      "grep": "merlin_transcript_domain_separation|point_at_infinity_identity_check|ed25519_key_encoding|timing_side_channel|scalar_canonicality|schnorrkel_sr25519",
+      "detect": "Reimplementing schnorrkel verification requires rejecting degenerate inputs the math library tolerates.",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/crypto/sr25519-signature-verification.md",
+      "lines": [
+        75,
+        259
+      ],
+      "reportEvidence": {
+        "count": 5,
+        "sampleReports": [
+          "reports/substrate-l1_findings/audit-reports-polkadot-2025-06-12-audit-report-polkadot-micro-sr25519-v1-0-pdf.md",
+          "reports/substrate-l1_findings/audit-reports-polkadot-2025-08-22-audit-report-polkadot-scure-sr25519-v1-5-pdf.md",
+          "reports/substrate-l1_findings/audit-reports-polkadot-2025-06-12-differential-fuzz-testing-report-polkadot-micro-sr25519-v1-0-pdf.md",
+          "reports/substrate-l1_findings/chainflip-backend-audits-multisig-kudelski-q1-2022-pdf.md",
+          "reports/substrate-l1_findings/starlay-oak-wasm.md"
+        ],
+        "severityConsensus": "CRITICAL",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "input validation bypass",
+          "missing edge case check",
+          "sr25519 signature verification",
+          "non canonical identity point input"
+        ],
+        "commonlyComposesWith": [
+          "schnorrkel sr25519",
+          "ristretto255 point",
+          "point at infinity identity check",
+          "scalar canonicality",
+          "merlin transcript domain separation"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: A public key or signature component is decoded to a curve point without checking for the identity/point-at-infinity (index.ts:308-311,...",
+        "PROVE: *Path A: Identity-point public key verifies without a secret key; Attacker submits the identity point (point at infinity) as a public key to whatever...",
+        "FALSIFY: Not this bug when: the implementation delegates all point/scalar arithmetic to a vetted Ristretto255 library that rejects non-canonical encodings by construction.; Safe...",
+        "IMPACT: Verification bypass primitives: identity-point keys verify without secret keys; malleable signatures break uniqueness assumptions.",
+        "Does verify() reject the identity point as a public key? (compare against schnorrkel tests)",
+        "Are non-canonical scalar/point encodings rejected, not normalized?"
+      ],
+      "antipattern": "index.ts:308-311 (micro-sr25519) / index.ts:484-487 (scure-sr25519)",
+      "securePattern": "per-protocol label, length caps, constant-time verification",
+      "validWhen": "Signal 1: A public key or signature component is decoded to a curve point without checking for the identity/point-at-infinity (index.ts:308-311, index.ts:484-487).;...",
+      "invalidWhen": "Not this bug when: the implementation delegates all point/scalar arithmetic to a vetted Ristretto255 library that rejects non-canonical encodings by construction.; Safe...",
+      "impact": "Verification bypass primitives: identity-point keys verify without secret keys; malleable signatures break uniqueness assumptions.",
+      "preconditions": [
+        "attacker control of: the public key blob, signature blob, or message bytes passed to verify (e.g., arbitrary account...",
+        "Attacker submits the identity point (point at infinity) as a public key to whatever registration/verification surface consumes...",
+        "Verification succeeds for crafted signatures without the attacker holding any secret scalar.",
+        "Any account/bridge/multisig auth built on this verify accepts the attacker as valid.",
+        "Attacker takes a valid signature and produces non-canonical variants (non-reduced scalars, non-canonical point encodings)."
+      ],
+      "proofShape": "*Path A: Identity-point public key verifies without a secret key -> Attacker submits the identity point (point at infinity) as a public key to whatever registration/verification surface...",
+      "falsePositiveSignals": [
+        "Not this bug when: the implementation delegates all point/scalar arithmetic to a vetted Ristretto255 library that rejects non-canonical encodings by construction.",
+        "Safe if: verification is only used with keys generated in-process and never on attacker-supplied key material (still weak — flag as defense-in-depth gap, not a...",
+        "Requires attacker control of: the public key blob, signature blob, or message bytes passed to verify (e.g., arbitrary account registration, bridge signature submission)."
+      ]
+    },
+    {
+      "id": "substrate-runtime-upgrade-storage-migration-untested-runtime-upgrades-shif-000",
+      "title": "Untested Runtime Upgrades Shift Layout/Indices and Strand Bridge Funds",
+      "severity": "HIGH",
+      "grep": "pallet_macro_defaults|function_call_index|on_runtime_upgrade|VersionedMigration|storage_migration|gateway_address",
+      "detect": "Upgrades are code replacements over live state.",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/lifecycle/runtime-upgrade-storage-migration.md",
+      "lines": [
+        86,
+        281
+      ],
+      "reportEvidence": {
+        "count": 14,
+        "sampleReports": [
+          "reports/substrate-l1_findings/snowbridge-oak-v1-1.md",
+          "reports/substrate-l1_findings/polkadot-runtime-templates-oz-2024-12.md",
+          "reports/substrate-l1_findings/pendulum-docs-pen-migration-review-handover-md.md",
+          "reports/substrate-l1_findings/pendulum-docs-pen-migration-internal-review-md.md",
+          "reports/substrate-l1_findings/hydradx-c4-2401.md"
+        ],
+        "severityConsensus": "MEDIUM",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "unsynchronized state migration",
+          "state corruption",
+          "untested storage migration",
+          "runtime upgrade",
+          "storage layout function indices immutable vars change"
+        ],
+        "commonlyComposesWith": [
+          "bridge",
+          "on runtime upgrade",
+          "storage migration",
+          "versioned migration",
+          "function call index"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: An upgrade changes pallet storage items or Gateway contract storage layout without a StorageVersion-gated migration ([sb12]).; Signal 2:...",
+        "PROVE: *Path A: Gateway upgrade strands tokens/channels; Operator upgrades the Gateway with a new storage layout.",
+        "FALSIFY: Not this bug when: every migration is VersionedMigration-gated, exercised with try-runtime on a fork of real state, and call-index changes ship with a...; Safe if: the...",
+        "IMPACT: Bridged token loss and channel immobilization ([sb12]); full bridge liveness failure via address desync ([sb14]).",
+        "Diff storage layouts (names, types, prefixes) between runtime versions — is every delta migrated?",
+        "Was try-runtime executed against a snapshot of production state for this upgrade?"
+      ],
+      "antipattern": "storage item renamed/moved with no versioned migration",
+      "securePattern": "gate migrations on storage version; prove them against real state",
+      "validWhen": "Signal 1: An upgrade changes pallet storage items or Gateway contract storage layout without a StorageVersion-gated migration ([sb12]).; Signal 2: The inbound-queue...",
+      "invalidWhen": "Not this bug when: every migration is VersionedMigration-gated, exercised with try-runtime on a fork of real state, and call-index changes ship with a...; Safe if: the...",
+      "impact": "Bridged token loss and channel immobilization ([sb12]); full bridge liveness failure via address desync ([sb14]).",
+      "preconditions": [
+        "attacker control of: usually none — these are operator/lifecycle-triggered; \"attack\" = scheduling an upgrade (governance/ sudo)."
+      ],
+      "proofShape": "*Path A: Gateway upgrade strands tokens/channels -> Operator upgrades the Gateway with a new storage layout.",
+      "falsePositiveSignals": [
+        "Not this bug when: every migration is VersionedMigration-gated, exercised with try-runtime on a fork of real state, and call-index changes ship with a...",
+        "Safe if: the Gateway address is fixed at genesis and the queue's pointer is proven equal in an integration test each release.",
+        "Requires attacker control of: usually none — these are operator/lifecycle-triggered; \"attack\" = scheduling an upgrade (governance/ sudo)."
+      ]
+    },
+    {
+      "id": "substrate-ema-oracle-manipulation-lazy-ema-oracle-diverges-from--000",
+      "title": "Lazy EMA Oracle Diverges from Omnipool Spot Price via Un-Hooked Reserve Changes",
+      "severity": "MEDIUM",
+      "grep": "MAX_UNIQUE_ENTRIES|reciprocal_inversion|oracle_update_hook|lazy_oracle_update|omnipool_reserves|multi_contract",
+      "detect": "The EMA oracle is lazily updated inside trade execution, but the Omnipool's reserves can also change via direct...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/oracle/ema-oracle-manipulation.md",
+      "lines": [
+        79,
+        247
+      ],
+      "reportEvidence": {
+        "count": 5,
+        "sampleReports": [
+          "reports/substrate-l1_findings/hydradx-rv-ema-oracle-2023.md",
+          "reports/substrate-l1_findings/hydradx-c4-2401.md",
+          "reports/substrate-l1_findings/composable-audits-halborn-audit20210229-pallets-core-pdf.md",
+          "reports/substrate-l1_findings/composable-halborn-core.md",
+          "reports/substrate-l1_findings/starlay-oak-wasm.md"
+        ],
+        "severityConsensus": "CRITICAL",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "price_manipulation",
+          "price manipulation",
+          "stale or unsynced state",
+          "data manipulation",
+          "bypassed oracle update path"
+        ],
+        "commonlyComposesWith": [
+          "oracle",
+          "lazy_oracle_update",
+          "lazy oracle update",
+          "oracle_update_hook",
+          "oracle update hook"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: The pool account accepts direct transfers (is not greedily rejecting non-pallet balance changes) and the oracle update lives only in the...",
+        "PROVE: *Path A: Move real price without moving the oracle; Attacker transfers a large quantity of an asset directly to the Omnipool account.",
+        "FALSIFY: Not this bug when: the pool account rejects direct transfers (post-fix HydraDX behavior) or the oracle recomputes from absolute reserves on every read rather than...;...",
+        "IMPACT: Oracle/spot-price divergence window during and after direct transfers ([rvA1]).",
+        "List every code path that mutates pool reserves — does each trigger the oracle update?",
+        "Does any consumer invert the oracle output instead of reading the reverse pair?"
+      ],
+      "antipattern": "reserves mutable by transfers; EMA updated only on trades",
+      "securePattern": "reserves only mutable via pallet logic that always updates the oracle",
+      "validWhen": "Signal 1: The pool account accepts direct transfers (is not greedily rejecting non-pallet balance changes) and the oracle update lives only in the swap path ([rvA1]).;...",
+      "invalidWhen": "Not this bug when: the pool account rejects direct transfers (post-fix HydraDX behavior) or the oracle recomputes from absolute reserves on every read rather than...;...",
+      "impact": "Oracle/spot-price divergence window during and after direct transfers ([rvA1]).",
+      "preconditions": [
+        "attacker control of: token balances sent directly to the pool account (Path A) — ordinary user capability pre-fix.",
+        "Attacker transfers a large quantity of an asset directly to the Omnipool account.",
+        "Consumers acting on the stale EMA (or on reserve-derived spot) misprice trades/liquidations in the attacker's favor window."
+      ],
+      "proofShape": "*Path A: Move real price without moving the oracle -> Attacker transfers a large quantity of an asset directly to the Omnipool account.",
+      "falsePositiveSignals": [
+        "Not this bug when: the pool account rejects direct transfers (post-fix HydraDX behavior) or the oracle recomputes from absolute reserves on every read rather than...",
+        "Safe if: consumers only ever use the EMA in its computed direction and never invert it.",
+        "Requires attacker control of: token balances sent directly to the pool account (Path A) — ordinary user capability pre-fix."
+      ]
+    },
+    {
+      "id": "substrate-crowdloan-refund-manipulation-crowdloan-claim-refund-fails-t-000",
+      "title": "Crowdloan Claim/Refund Fails to Decrement vault.contributed, Corrupting Vault Accounting",
+      "severity": "MEDIUM",
+      "grep": "ChildStorageKind::Contributed|contribution_kill\\(\\.\\.\\.|contribution_strategy|vault\\.contributed|contribution_kill|single_contract",
+      "detect": "`claim`/`refund` were written to pay out and clean up the contributor's record but the author forgot the aggregate...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/pallets/crowdloan-refund-manipulation.md",
+      "lines": [
+        76,
+        244
+      ],
+      "reportEvidence": {
+        "count": 7,
+        "sampleReports": [
+          "reports/substrate-l1_findings/parallel-tob-1.md",
+          "reports/substrate-l1_findings/publications-reviews-parallelfinance-pdf.md",
+          "reports/substrate-l1_findings/audit-reports-zeitgeist-2025-01-02-audit-report-zeitgeist-combinatorial-betting-and-futarchy-security-audit-v1-0-pdf.md",
+          "reports/substrate-l1_findings/audits-interlay-informal-report-interlay-audit-2021q2-pdf.md",
+          "reports/substrate-l1_findings/audits-interlay-informal-report-interlay-audit-2021q3-pdf.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "missing state update",
+          "logic flaw",
+          "unbalanced claim refund",
+          "crowdloan vault accounting",
+          "contribution not decremented"
+        ],
+        "commonlyComposesWith": [
+          "vault contributed",
+          "contribution kill",
+          "child storage kind contributed",
+          "vault phase",
+          "ctoken"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: An extrinsic removes/zeroes a per-user contribution record but the enclosing vault struct's contributed field is never mutated in the same...",
+        "PROVE: *Path A: Claim leaves stale aggregate; Contributor calls claim after the vault succeeds; ctoken is paid and the child-trie entry is killed.",
+        "FALSIFY: Not this bug when: the aggregate is recomputed lazily from the child trie (no cached total) — then no stale copy exists.; Safe if: claim/refund paths are followed by a...",
+        "IMPACT: Permanent divergence between aggregate and per-user accounting; wrong cap enforcement and downstream amount calculations; unhandled XCM failures in the same...",
+        "For every payout extrinsic: is every stored total that the payout affects decremented?",
+        "Is there an invariant test `vault.contributed == sum(child_trie)` after claim/refund?"
+      ],
+      "antipattern": "child entry killed but vault.contributed untouched",
+      "securePattern": "kill child entry AND decrement vault total atomically",
+      "validWhen": "Signal 1: An extrinsic removes/zeroes a per-user contribution record but the enclosing vault struct's contributed field is never mutated in the same call.; Signal 2: Any...",
+      "invalidWhen": "Not this bug when: the aggregate is recomputed lazily from the child trie (no cached total) — then no stale copy exists.; Safe if: claim/refund paths are followed by a...",
+      "impact": "Permanent divergence between aggregate and per-user accounting; wrong cap enforcement and downstream amount calculations; unhandled XCM failures in the same...",
+      "preconditions": [
+        "attacker control of: none required to corrupt state; ordinary users claiming trigger it.",
+        "Contributor calls claim after the vault succeeds; ctoken is paid and the child-trie entry is killed.",
+        "vault.contributed still includes the claimed amount.",
+        "Vault totals diverge from refundable liabilities, mispricing the vault's obligations.",
+        "Privileged update_vault/set_vrfs called with unchanged parameters."
+      ],
+      "proofShape": "*Path A: Claim leaves stale aggregate -> Contributor calls claim after the vault succeeds; ctoken is paid and the child-trie entry is killed.",
+      "falsePositiveSignals": [
+        "Not this bug when: the aggregate is recomputed lazily from the child trie (no cached total) — then no stale copy exists.",
+        "Safe if: claim/refund paths are followed by a reconciliation hook or the vault is terminal (phase Ended) before the total is read again.",
+        "Requires attacker control of: none required to corrupt state; ordinary users claiming trigger it."
+      ]
+    },
+    {
+      "id": "substrate-error-handling-state-consistency-error-handling-000",
+      "title": "Error Handling",
+      "severity": "CRITICAL",
+      "grep": "multi_contract|acknowledged|description|unassessed|critical|causing",
+      "detect": "The cited reports describe multi-step extrinsics paths where a validation, bound, or state-consistency check is missing...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/pallets/error-handling-state-consistency.md",
+      "lines": [
+        85,
+        259
+      ],
+      "reportEvidence": {
+        "count": 13,
+        "sampleReports": [
+          "reports/substrate-l1_findings/composable-audits-halborn-audit20210229-pallets-core-pdf.md",
+          "reports/substrate-l1_findings/composable-halborn-core.md",
+          "reports/substrate-l1_findings/audit-reports-snowbridge-2024-02-12-audit-report-snowbridge-extension-v1-1-pdf.md",
+          "reports/substrate-l1_findings/audit-reports-snowbridge-2024-05-24-audit-report-snowbridge-v1-1-pdf.md",
+          "reports/substrate-l1_findings/audit-reports-kilt-2025-03-27-audit-report-kilt-bonding-curve-pallet-v1-0-pdf.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "incomplete failure handling",
+          "logical error",
+          "partial failure",
+          "multi step extrinsic",
+          "mid path error"
+        ],
+        "commonlyComposesWith": [
+          "acknowledged",
+          "after",
+          "agent",
+          "always",
+          "case"
+        ]
+      },
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Signal 1: title evidence in cited reports matches the audited component family (multi-step extrinsics); Signal 2: severity consensus across...",
+        "PROVE: *Path A: [Direct input path]; Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+        "FALSIFY: Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path; Safe if: audited version postdates the fix noted in the source...",
+        "IMPACT: Wrong accounting / reward misallocation / stuck or double-counted funds (fund-loss class rows above)",
+        "Verify bounded iteration/gas on the affected path",
+        "Check state-consistency guarantees across the failure paths cited above"
+      ],
+      "antipattern": "3.17 (HAL-17) POSSIBLE ERROR AFTER CRITICAL FUNCTION - INFORMATIONAL 83 Description 83 Code Location",
+      "securePattern": "explicit bounds + validation before state mutation",
+      "validWhen": "Signal 1: title evidence in cited reports matches the audited component family (multi-step extrinsics); Signal 2: severity consensus across independent auditors...",
+      "invalidWhen": "Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path; Safe if: audited version postdates the fix noted in the source...",
+      "impact": "Wrong accounting / reward misallocation / stuck or double-counted funds (fund-loss class rows above)",
+      "preconditions": [
+        "attacker control of: the inputs named in the cited finding titles (messages, bids, deposits)",
+        "Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+        "Attacker cheaply grows a collection (plans, stakes, peers, entries)."
+      ],
+      "proofShape": "*Path A: [Direct input path] -> Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+      "falsePositiveSignals": [
+        "Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path",
+        "Safe if: audited version postdates the fix noted in the source report status",
+        "Requires attacker control of: the inputs named in the cited finding titles (messages, bids, deposits)"
+      ]
+    },
+    {
+      "id": "substrate-fee-handling-fee-handling-000",
+      "title": "Fee Handling",
+      "severity": "CRITICAL",
+      "grep": "single_contract|fund_loss|unassessed|accesses|charged|attacks",
+      "detect": "The cited reports describe fee collection paths paths where a validation, bound, or state-consistency check is missing...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/pallets/fee-handling.md",
+      "lines": [
+        66,
+        240
+      ],
+      "reportEvidence": {
+        "count": 9,
+        "sampleReports": [
+          "reports/substrate-l1_findings/chainflip-backend-audits-chainflip-backend-zellic-audit-report-pdf.md",
+          "reports/substrate-l1_findings/audit-reports-snowbridge-2024-02-12-audit-report-snowbridge-extension-v1-1-pdf.md",
+          "reports/substrate-l1_findings/starlay-oak-wasm.md",
+          "reports/substrate-l1_findings/manta-veridise-chain.md",
+          "reports/substrate-l1_findings/acala-c4-2401.md"
+        ],
+        "severityConsensus": "MEDIUM",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "fee handling gap",
+          "fee path",
+          "payment or refund"
+        ],
+        "commonlyComposesWith": [
+          "accesses",
+          "actual",
+          "amount",
+          "attacks",
+          "broker"
+        ]
+      },
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Signal 1: title evidence in cited reports matches the audited component family (fee collection paths); Signal 2: severity consensus across...",
+        "PROVE: *Path A: [Direct input path]; Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+        "FALSIFY: Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path; Safe if: audited version postdates the fix noted in the source...",
+        "IMPACT: Wrong accounting / reward misallocation / stuck or double-counted funds (fund-loss class rows above)",
+        "Verify bounded iteration/gas on the affected path",
+        "Check state-consistency guarantees across the failure paths cited above"
+      ],
+      "antipattern": "Potential locked funds in case the user-deﬁned destinationFee does not cover the actual fee",
+      "securePattern": "explicit bounds + validation before state mutation",
+      "validWhen": "Signal 1: title evidence in cited reports matches the audited component family (fee collection paths); Signal 2: severity consensus across independent auditors...",
+      "invalidWhen": "Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path; Safe if: audited version postdates the fix noted in the source...",
+      "impact": "Wrong accounting / reward misallocation / stuck or double-counted funds (fund-loss class rows above)",
+      "preconditions": [
+        "attacker control of: the inputs named in the cited finding titles (messages, bids, deposits)",
+        "Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+        "Attacker cheaply grows a collection (plans, stakes, peers, entries)."
+      ],
+      "proofShape": "*Path A: [Direct input path] -> Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+      "falsePositiveSignals": [
+        "Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path",
+        "Safe if: audited version postdates the fix noted in the source report status",
+        "Requires attacker control of: the inputs named in the cited finding titles (messages, bids, deposits)"
+      ]
+    },
+    {
+      "id": "substrate-governance-origin-confusion-governance-admin-origins-missi-000",
+      "title": "Governance/Admin Origins Missing, Throttled, or Left at Template Defaults",
+      "severity": "MEDIUM",
+      "grep": "substrate_node_template::weights|transferNativeFromAgent|substrate_node_template|MaxRemoteLockConsumers|substrate\\-node\\-template|pallet_democracy",
+      "detect": "Governance integration is frequently deferred: Snowbridge shipped with administrative commands that had no...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/pallets/governance-origin-confusion.md",
+      "lines": [
+        87,
+        287
+      ],
+      "reportEvidence": {
+        "count": 11,
+        "sampleReports": [
+          "reports/substrate-l1_findings/snowbridge-oak-v1-1.md",
+          "reports/substrate-l1_findings/acala-srl-2023.md",
+          "reports/substrate-l1_findings/polkadot-runtime-templates-oz-2024-07.md",
+          "reports/substrate-l1_findings/polkadot-runtime-templates-oz-2024-04.md",
+          "reports/substrate-l1_findings/audit-reports-snowbridge-2025-01-07-audit-report-snowbridge-updates-3-v1-0-pdf.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "misconfigured privilege boundary",
+          "configuration error",
+          "weak or missing origin",
+          "pallet governance admin extrinsics",
+          "governance commands absent"
+        ],
+        "commonlyComposesWith": [
+          "ensure origin",
+          "root",
+          "add token origin",
+          "pallet democracy",
+          "open gov"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: A pallet exposes governance/admin commands whose dispatchable implementation is absent or todo!()/unreachable on one side of the system...",
+        "PROVE: *Path A: Governance command has no receiver — privileged action impossible; An incident requires freezing/adjusting the bridge; governance passes the command.",
+        "FALSIFY: Not this bug when: every governance command has a symmetric, tested implementation on both sides, and origins follow least-privilege (different roles for different...;...",
+        "IMPACT: Unimplementable governance commands and throttled dispatch break the privileged escape hatch exactly when it is needed ([sb4], [sb5]).",
+        "For each documented governance/admin command: does a dispatchable exist and pass a functional test on every chain involved?",
+        "Do routine and destructive extrinsics use different configured origins?"
+      ],
+      "antipattern": "governance can pass the command, but nothing executes on this side",
+      "securePattern": "every documented admin command implemented & tested on both sides; tiered origins",
+      "validWhen": "Signal 1: A pallet exposes governance/admin commands whose dispatchable implementation is absent or todo!()/unreachable on one side of the system ([sb4]).; Signal 2: All...",
+      "invalidWhen": "Not this bug when: every governance command has a symmetric, tested implementation on both sides, and origins follow least-privilege (different roles for different...;...",
+      "impact": "Unimplementable governance commands and throttled dispatch break the privileged escape hatch exactly when it is needed ([sb4], [sb5]).",
+      "preconditions": [
+        "attacker control of: often nothing adversarial — these are fail-open configuration defects; the \"attacker\" may be time (delayed..."
+      ],
+      "proofShape": "*Path A: Governance command has no receiver — privileged action impossible -> An incident requires freezing/adjusting the bridge; governance passes the command.",
+      "falsePositiveSignals": [
+        "Not this bug when: every governance command has a symmetric, tested implementation on both sides, and origins follow least-privilege (different roles for different...",
+        "Safe if: throttling exists deliberately as rate-limiting with documented emergency bypass, and template weights are benchmarked before mainnet.",
+        "Requires attacker control of: often nothing adversarial — these are fail-open configuration defects; the \"attacker\" may be time (delayed governance response during an..."
+      ]
+    },
+    {
+      "id": "substrate-lending-liquidation-lending-liquidation-000",
+      "title": "Lending Liquidation",
+      "severity": "CRITICAL",
+      "grep": "multi_contract|fund_loss|unassessed|attackers|accruing|accrued",
+      "detect": "The cited reports describe lending pallets and liquidation logic paths where a validation, bound, or state-consistency...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/pallets/lending-liquidation.md",
+      "lines": [
+        77,
+        251
+      ],
+      "reportEvidence": {
+        "count": 6,
+        "sampleReports": [
+          "reports/substrate-l1_findings/composable-audits-halborn-audit20210229-pallets-core-pdf.md",
+          "reports/substrate-l1_findings/composable-halborn-core.md",
+          "reports/substrate-l1_findings/starlay-oak-wasm.md",
+          "reports/substrate-l1_findings/audits-interlay-informal-report-interlay-audit-2021q2-pdf.md",
+          "reports/substrate-l1_findings/interlay-informal-2021q2.md"
+        ],
+        "severityConsensus": "CRITICAL",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "accounting error",
+          "economic exploit",
+          "liquidation accounting gap",
+          "lending pallet",
+          "price move + liquidate"
+        ],
+        "commonlyComposesWith": [
+          "liquidation",
+          "lending liquidation",
+          "lending pallets and liquidation logic",
+          "liquidation_accounting",
+          "liquidation accounting"
+        ]
+      },
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Signal 1: title evidence in cited reports matches the audited component family (lending pallets and liquidation logic); Signal 2: severity consensus...",
+        "PROVE: *Path A: [Direct input path]; Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+        "FALSIFY: Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path; Safe if: audited version postdates the fix noted in the source...",
+        "IMPACT: Wrong accounting / reward misallocation / stuck or double-counted funds (fund-loss class rows above)",
+        "Verify bounded iteration/gas on the affected path",
+        "Check state-consistency guarantees across the failure paths cited above"
+      ],
+      "antipattern": "3.3 (HAL-03) IMPROPER LENDING MARKET CONFIGURATION - CRITICAL Description: Inside the lending pallet",
+      "securePattern": "explicit bounds + validation before state mutation",
+      "validWhen": "Signal 1: title evidence in cited reports matches the audited component family (lending pallets and liquidation logic); Signal 2: severity consensus across independent...",
+      "invalidWhen": "Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path; Safe if: audited version postdates the fix noted in the source...",
+      "impact": "Wrong accounting / reward misallocation / stuck or double-counted funds (fund-loss class rows above)",
+      "preconditions": [
+        "attacker control of: the inputs named in the cited finding titles (messages, bids, deposits)",
+        "Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+        "Attacker cheaply grows a collection (plans, stakes, peers, entries)."
+      ],
+      "proofShape": "*Path A: [Direct input path] -> Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+      "falsePositiveSignals": [
+        "Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path",
+        "Safe if: audited version postdates the fix noted in the source report status",
+        "Requires attacker control of: the inputs named in the cited finding titles (messages, bids, deposits)"
+      ]
+    },
+    {
+      "id": "substrate-missing-validation-validation-missing-000",
+      "title": "Validation Missing",
+      "severity": "CRITICAL",
+      "grep": "single_contract|fund_loss|calculation|unassessed|attackers|arbitrary",
+      "detect": "The cited reports describe extrinsic input validation paths where a validation, bound, or state-consistency check is...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/pallets/missing-validation.md",
+      "lines": [
+        149,
+        323
+      ],
+      "reportEvidence": {
+        "count": 41,
+        "sampleReports": [
+          "reports/substrate-l1_findings/hydradx-c4-2401.md",
+          "reports/substrate-l1_findings/composable-audits-halborn-audit20221003-pallet-grandpa-light-client-bridge-pdf.md",
+          "reports/substrate-l1_findings/chainflip-backend-audits-2023-04-trailofbits-securityreview-pdf.md",
+          "reports/substrate-l1_findings/composable-audits-solana-restaking-vaults-restaking-vaults-audit-pdf.md",
+          "reports/substrate-l1_findings/audit-reports-snowbridge-2025-01-07-audit-report-snowbridge-updates-3-v1-0-pdf.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "input validation bypass",
+          "validation gap",
+          "extrinsic",
+          "crafted input"
+        ],
+        "commonlyComposesWith": [
+          "account",
+          "accrued",
+          "amounts",
+          "arbitrary",
+          "asset"
+        ]
+      },
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Signal 1: title evidence in cited reports matches the audited component family (extrinsic input validation); Signal 2: severity consensus across...",
+        "PROVE: *Path A: [Direct input path]; Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+        "FALSIFY: Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path; Safe if: audited version postdates the fix noted in the source...",
+        "IMPACT: Wrong accounting / reward misallocation / stuck or double-counted funds (fund-loss class rows above)",
+        "Verify bounded iteration/gas on the affected path",
+        "Check state-consistency guarantees across the failure paths cited above"
+      ],
+      "antipattern": "Fiat-Shamir subsampling does not guarantee the inclusion of any honest validator",
+      "securePattern": "explicit bounds + validation before state mutation",
+      "validWhen": "Signal 1: title evidence in cited reports matches the audited component family (extrinsic input validation); Signal 2: severity consensus across independent auditors...",
+      "invalidWhen": "Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path; Safe if: audited version postdates the fix noted in the source...",
+      "impact": "Wrong accounting / reward misallocation / stuck or double-counted funds (fund-loss class rows above)",
+      "preconditions": [
+        "attacker control of: the inputs named in the cited finding titles (messages, bids, deposits)",
+        "Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+        "Attacker cheaply grows a collection (plans, stakes, peers, entries)."
+      ],
+      "proofShape": "*Path A: [Direct input path] -> Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+      "falsePositiveSignals": [
+        "Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path",
+        "Safe if: audited version postdates the fix noted in the source report status",
+        "Requires attacker control of: the inputs named in the cited finding titles (messages, bids, deposits)"
+      ]
+    },
+    {
+      "id": "substrate-origin-authorization-bypass-broken-extrinsic-role-authoriz-000",
+      "title": "Broken Extrinsic Role Authorization Allows CircuitRole Impersonation",
+      "severity": "HIGH",
+      "grep": "extrinsic_origin_validation|dispatchable_extrinsic|authorize_function|single_contract|role_registry|ensure_signed",
+      "detect": "In `bid_sfx` (and siblings), the `authorize` function is invoked to verify the caller is an Executor, but the...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/pallets/origin-authorization-bypass.md",
+      "lines": [
+        70,
+        240
+      ],
+      "reportEvidence": {
+        "count": 11,
+        "sampleReports": [
+          "reports/substrate-l1_findings/t3rn-srl-2401.md",
+          "reports/substrate-l1_findings/nodle-halborn.md",
+          "reports/substrate-l1_findings/polkadot-runtime-templates-oz-2024-07.md",
+          "reports/substrate-l1_findings/hydradx-c4-2401.md",
+          "reports/substrate-l1_findings/zenlink-peckshield.md"
+        ],
+        "severityConsensus": "MEDIUM",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "authorization logic flaw",
+          "access control bypass",
+          "broken role check",
+          "pallet extrinsic dispatch",
+          "privileged extrinsic call"
+        ],
+        "commonlyComposesWith": [
+          "ensure signed",
+          "role registry",
+          "authorize function",
+          "circuit role",
+          "dispatchable extrinsic"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: A dispatchable calls an authorize(origin, Role::X)-style helper but the helper checks the wrong account, wrong role constant, or ignores...",
+        "PROVE: *Path A: Impersonate an Executor to bid on side-effects; Attacker submits bid_sfx with their own account.",
+        "FALSIFY: Not this bug when: role checks use ensure_role!-style macros that revert on failure and bind to the actual origin.; Safe if: the pallet additionally requires a...",
+        "IMPACT: Complete bypass of role separation for affected extrinsics; attacker gains operator capabilities.",
+        "For every role-gated extrinsic: can a non-role signed account complete the call?",
+        "Is the authorize helper's failure path a revert (not a log)?"
+      ],
+      "antipattern": "checks the target/sender stored in payload, not the extrinsic caller",
+      "securePattern": "authorization result must gate execution and bind to the actual caller",
+      "validWhen": "Signal 1: A dispatchable calls an authorize(origin, Role::X)-style helper but the helper checks the wrong account, wrong role constant, or ignores its boolean result.;...",
+      "invalidWhen": "Not this bug when: role checks use ensure_role!-style macros that revert on failure and bind to the actual origin.; Safe if: the pallet additionally requires a...",
+      "impact": "Complete bypass of role separation for affected extrinsics; attacker gains operator capabilities.",
+      "preconditions": [
+        "attacker control of: any funded account (no special role).",
+        "Attacker submits bid_sfx with their own account.",
+        "Buggy authorize() passes; attacker bids on/intercepts cross-chain side-effect execution.",
+        "Attacker influences execution ordering/fees reserved for operators.",
+        "Attacker reaches an escrow-governance extrinsic without holding the required role."
+      ],
+      "proofShape": "*Path A: Impersonate an Executor to bid on side-effects -> Attacker submits bid_sfx with their own account.",
+      "falsePositiveSignals": [
+        "Not this bug when: role checks use ensure_role!-style macros that revert on failure and bind to the actual origin.",
+        "Safe if: the pallet additionally requires a multisig/governance origin for the destructive path.",
+        "Requires attacker control of: any funded account (no special role)."
+      ]
+    },
+    {
+      "id": "substrate-rounding-issuance-math-arith-rounding-000",
+      "title": "Arith Rounding",
+      "severity": "HIGH",
+      "grep": "single_contract|fund_loss|dispatchable|description|unassessed|currencies",
+      "detect": "The cited reports describe balance/issuance computation paths paths where a validation, bound, or state-consistency...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/pallets/rounding-issuance-math.md",
+      "lines": [
+        68,
+        242
+      ],
+      "reportEvidence": {
+        "count": 8,
+        "sampleReports": [
+          "reports/substrate-l1_findings/acala-srl-2021-12.md",
+          "reports/substrate-l1_findings/publicreports-substrate-audits-reef-chain-substrate-security-audit-report-halborn-v1-1-pdf.md",
+          "reports/substrate-l1_findings/reef-halborn.md",
+          "reports/substrate-l1_findings/manta-veridise-chain.md",
+          "reports/substrate-l1_findings/acala-c4-2401.md"
+        ],
+        "severityConsensus": "MEDIUM",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "rounding",
+          "arith rounding",
+          "rounding_precision_error",
+          "rounding precision error",
+          "rounding_error"
+        ],
+        "commonlyComposesWith": [
+          "arithmetic",
+          "asset",
+          "could",
+          "currencies",
+          "defined"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: title evidence in cited reports matches the audited component family (balance/issuance computation paths); Signal 2: severity consensus...",
+        "PROVE: *Path A: [Direct input path]; Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+        "FALSIFY: Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path; Safe if: audited version postdates the fix noted in the source...",
+        "IMPACT: Wrong accounting / reward misallocation / stuck or double-counted funds (fund-loss class rows above)",
+        "Verify bounded iteration/gas on the affected path",
+        "Check state-consistency guarantees across the failure paths cited above"
+      ],
+      "antipattern": "transfer_share_and_rewards can be used to transfer out shares without transferring reward debt due t",
+      "securePattern": "explicit bounds + validation before state mutation",
+      "validWhen": "Signal 1: title evidence in cited reports matches the audited component family (balance/issuance computation paths); Signal 2: severity consensus across independent...",
+      "invalidWhen": "Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path; Safe if: audited version postdates the fix noted in the source...",
+      "impact": "Wrong accounting / reward misallocation / stuck or double-counted funds (fund-loss class rows above)",
+      "preconditions": [
+        "attacker control of: the inputs named in the cited finding titles (messages, bids, deposits)",
+        "Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+        "Attacker cheaply grows a collection (plans, stakes, peers, entries)."
+      ],
+      "proofShape": "*Path A: [Direct input path] -> Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+      "falsePositiveSignals": [
+        "Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path",
+        "Safe if: audited version postdates the fix noted in the source report status",
+        "Requires attacker control of: the inputs named in the cited finding titles (messages, bids, deposits)"
+      ]
+    },
+    {
+      "id": "substrate-staking-unlock-relock-double-spend-staking-ledger-relock-of-alrea-000",
+      "title": "Staking Ledger Relock of Already-Spent Unlocked Chunks (Double Spend)",
+      "severity": "CRITICAL",
+      "grep": "T::Currency::free_balance|Balances::transfer_all|free_balance_transfer|relock_unlocking|unlocked_chunks|single_contract",
+      "detect": "The dApp staking v3 ledger tracks pending unlocks as `unlocked_chunks`, but `relock_unlocking` converts chunks back...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/pallets/staking-unlock-relock-double-spend.md",
+      "lines": [
+        66,
+        243
+      ],
+      "reportEvidence": {
+        "count": 8,
+        "sampleReports": [
+          "reports/substrate-l1_findings/astar-srl-2401.md",
+          "reports/substrate-l1_findings/chainflip-backend-audits-2023-04-trailofbits-securityreview-pdf.md",
+          "reports/substrate-l1_findings/composable-audits-halborn-audit20210229-pallets-core-pdf.md",
+          "reports/substrate-l1_findings/composable-halborn-core.md",
+          "reports/substrate-l1_findings/publicreports-substrate-audits-nodle-nodl-substrate-pallet-security-audit-report-halborn-final-pdf.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "missing validation",
+          "logical error",
+          "missing relock balance verification",
+          "staking ledger",
+          "unlocked chunk relock"
+        ],
+        "commonlyComposesWith": [
+          "unlocked chunks",
+          "ledger balance",
+          "relock unlocking",
+          "free balance transfer",
+          "lock registry"
+        ]
+      },
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Signal 1: A relock/claim path that reads unlocked_chunks (or equivalent pending-release records) without cross-checking free_balance or the Balances...",
+        "PROVE: *Path A: Unlock → Transfer → Relock → Restake (double reward); Attacker locks 500 of 1000 tokens and stakes them.",
+        "FALSIFY: Not this bug when: relock amount is recomputed from T::Currency::free_balance() / usable_balance() at call time, or unlock burns the chunk record atomically on release.;...",
+        "IMPACT: Staking rewards are minted against non-existent balance (inflation theft).",
+        "After unlock + full transfer_out, does relock of the same amount fail?",
+        "Is relock amount min(recorded_chunks, usable_balance)?"
+      ],
+      "antipattern": "relock trusts unlocked_chunks records; balance may already be transferred away",
+      "securePattern": "unlocked funds stay under a named lock until explicitly withdrawn",
+      "validWhen": "Signal 1: A relock/claim path that reads unlocked_chunks (or equivalent pending-release records) without cross-checking free_balance or the Balances lock at...",
+      "invalidWhen": "Not this bug when: relock amount is recomputed from T::Currency::free_balance() / usable_balance() at call time, or unlock burns the chunk record atomically on release.;...",
+      "impact": "Staking rewards are minted against non-existent balance (inflation theft).",
+      "preconditions": [
+        "a user unstakes, the amount moves into unlocked_chunks pending release.",
+        "attacker control of: only their own account and normal extrinsic ordering (no privileged origin needed).",
+        "Attacker locks 500 of 1000 tokens and stakes them.",
+        "relock_unlocking on the first account re-locks the phantom 500 and re-stakes them — rewards now accrue on both accounts for one...",
+        "Attacker manipulates staking tenure records (Issue 4 of same report) to qualify for loyal-staker rewards they should not receive."
+      ],
+      "proofShape": "*Path A: Unlock → Transfer → Relock → Restake (double reward) -> Attacker locks 500 of 1000 tokens and stakes them.",
+      "falsePositiveSignals": [
+        "Not this bug when: relock amount is recomputed from T::Currency::free_balance() / usable_balance() at call time, or unlock burns the chunk record atomically on release.",
+        "Safe if: the Balances pallet holds a named lock that is decremented on transfer, making the withdrawn amount unusable.",
+        "Requires attacker control of: only their own account and normal extrinsic ordering (no privileged origin needed)."
+      ]
+    },
+    {
+      "id": "substrate-token-balance-accounting-token-issuance-000",
+      "title": "Token Issuance",
+      "severity": "CRITICAL",
+      "grep": "single_contract|balance_of|fund_loss|availability|unassessed|addressed",
+      "detect": "The cited reports describe token/issuance pallet paths paths where a validation, bound, or state-consistency check is...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/pallets/token-balance-accounting.md",
+      "lines": [
+        81,
+        255
+      ],
+      "reportEvidence": {
+        "count": 17,
+        "sampleReports": [
+          "reports/substrate-l1_findings/hydradx-c4-2401.md",
+          "reports/substrate-l1_findings/chainflip-backend-audits-2023-04-trailofbits-securityreview-pdf.md",
+          "reports/substrate-l1_findings/acala-srl-2021-12.md",
+          "reports/substrate-l1_findings/phala-c4-2401.md",
+          "reports/substrate-l1_findings/composable-audits-solana-restaking-vaults-restaking-vaults-audit-pdf.md"
+        ],
+        "severityConsensus": "MEDIUM",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "accounting error",
+          "logical error",
+          "issuance accounting gap",
+          "token pallet",
+          "mint burn transfer"
+        ],
+        "commonlyComposesWith": [
+          "addition",
+          "addressed",
+          "amounts",
+          "asset",
+          "assets"
+        ]
+      },
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Signal 1: title evidence in cited reports matches the audited component family (token/issuance pallet paths); Signal 2: severity consensus across...",
+        "PROVE: *Path A: [Direct input path]; Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+        "FALSIFY: Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path; Safe if: audited version postdates the fix noted in the source...",
+        "IMPACT: Wrong accounting / reward misallocation / stuck or double-counted funds (fund-loss class rows above)",
+        "Verify bounded iteration/gas on the affected path",
+        "Check state-consistency guarantees across the failure paths cited above"
+      ],
+      "antipattern": "4.2 Transfer functions of ERC20 tokens may return false Critical ✓ Addressed Resolution Addressed in",
+      "securePattern": "explicit bounds + validation before state mutation",
+      "validWhen": "Signal 1: title evidence in cited reports matches the audited component family (token/issuance pallet paths); Signal 2: severity consensus across independent auditors...",
+      "invalidWhen": "Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path; Safe if: audited version postdates the fix noted in the source...",
+      "impact": "Wrong accounting / reward misallocation / stuck or double-counted funds (fund-loss class rows above)",
+      "preconditions": [
+        "attacker control of: the inputs named in the cited finding titles (messages, bids, deposits)",
+        "Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+        "Attacker cheaply grows a collection (plans, stakes, peers, entries)."
+      ],
+      "proofShape": "*Path A: [Direct input path] -> Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+      "falsePositiveSignals": [
+        "Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path",
+        "Safe if: audited version postdates the fix noted in the source report status",
+        "Requires attacker control of: the inputs named in the cited finding titles (messages, bids, deposits)"
+      ]
+    },
+    {
+      "id": "substrate-unbounded-iteration-dos-dos-unbounded-000",
+      "title": "Dos Unbounded",
+      "severity": "CRITICAL",
+      "grep": "single_contract|asset_out|calculation|asset_in|unassessed|attackers",
+      "detect": "The cited reports describe pallet loops / weight handling paths where a validation, bound, or state-consistency check...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/pallets/unbounded-iteration-dos.md",
+      "lines": [
+        87,
+        261
+      ],
+      "reportEvidence": {
+        "count": 21,
+        "sampleReports": [
+          "reports/substrate-l1_findings/hydradx-c4-2401.md",
+          "reports/substrate-l1_findings/phala-c4-2401.md",
+          "reports/substrate-l1_findings/chainflip-backend-audits-multisig-kudelski-q1-2022-pdf.md",
+          "reports/substrate-l1_findings/composable-audits-solana-ibc-avs-codezen-pdf.md",
+          "reports/substrate-l1_findings/audit-reports-bifrost-2024-03-11-audit-report-bifrost-finance-leveraged-staking-v1-0-pdf.md"
+        ],
+        "severityConsensus": "MEDIUM",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "resource exhaustion",
+          "unbounded iteration",
+          "pallet loop",
+          "attacker grown storage",
+          "block halt"
+        ],
+        "commonlyComposesWith": [
+          "bridge",
+          "account",
+          "asset in",
+          "asset out",
+          "attack"
+        ]
+      },
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Signal 1: title evidence in cited reports matches the audited component family (pallet loops / weight handling); Signal 2: severity consensus across...",
+        "PROVE: *Path A: [Direct input path]; Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+        "FALSIFY: Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path; Safe if: audited version postdates the fix noted in the source...",
+        "IMPACT: Wrong accounting / reward misallocation / stuck or double-counted funds (fund-loss class rows above)",
+        "Verify bounded iteration/gas on the affected path",
+        "Check state-consistency guarantees across the failure paths cited above"
+      ],
+      "antipattern": "[H-01] An attacker possesses the capability to exhaust the entirety of liquidity within the stable s",
+      "securePattern": "explicit bounds + validation before state mutation",
+      "validWhen": "Signal 1: title evidence in cited reports matches the audited component family (pallet loops / weight handling); Signal 2: severity consensus across independent auditors...",
+      "invalidWhen": "Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path; Safe if: audited version postdates the fix noted in the source...",
+      "impact": "Wrong accounting / reward misallocation / stuck or double-counted funds (fund-loss class rows above)",
+      "preconditions": [
+        "attacker control of: the inputs named in the cited finding titles (messages, bids, deposits)",
+        "Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+        "Attacker cheaply grows a collection (plans, stakes, peers, entries)."
+      ],
+      "proofShape": "*Path A: [Direct input path] -> Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+      "falsePositiveSignals": [
+        "Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path",
+        "Safe if: audited version postdates the fix noted in the source report status",
+        "Requires attacker control of: the inputs named in the cited finding titles (messages, bids, deposits)"
+      ]
+    },
+    {
+      "id": "substrate-vault-deposit-accounting-vault-deposit-accounting-000",
+      "title": "Vault Deposit Accounting",
+      "severity": "CRITICAL",
+      "grep": "multi_contract|fund_loss|unassessed|attackers|addressed|addition",
+      "detect": "The cited reports describe vault/staking衍生 deposit flows paths where a validation, bound, or state-consistency check is...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/pallets/vault-deposit-accounting.md",
+      "lines": [
+        125,
+        299
+      ],
+      "reportEvidence": {
+        "count": 19,
+        "sampleReports": [
+          "reports/substrate-l1_findings/hydradx-c4-2401.md",
+          "reports/substrate-l1_findings/chainflip-backend-audits-2023-04-trailofbits-securityreview-pdf.md",
+          "reports/substrate-l1_findings/chainflip-backend-audits-multisig-kudelski-q1-2022-pdf.md",
+          "reports/substrate-l1_findings/composable-audits-solana-restaking-vaults-restaking-vaults-audit-pdf.md",
+          "reports/substrate-l1_findings/centrifuge-chainbridge-2020.md"
+        ],
+        "severityConsensus": "HIGH",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "accounting error",
+          "logical error",
+          "share accounting gap",
+          "vault pallet",
+          "deposit redeem"
+        ],
+        "commonlyComposesWith": [
+          "abused",
+          "account",
+          "addition",
+          "addressed",
+          "admin"
+        ]
+      },
+      "neverPrune": true,
+      "check": [
+        "VERIFY: Signal 1: title evidence in cited reports matches the audited component family (vault/staking衍生 deposit flows); Signal 2: severity consensus across...",
+        "PROVE: *Path A: [Direct input path]; Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+        "FALSIFY: Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path; Safe if: audited version postdates the fix noted in the source...",
+        "IMPACT: Wrong accounting / reward misallocation / stuck or double-counted funds (fund-loss class rows above)",
+        "Verify bounded iteration/gas on the affected path",
+        "Check state-consistency guarantees across the failure paths cited above"
+      ],
+      "antipattern": "Attackers can steal funds by being the ﬁrst depositor of the pool",
+      "securePattern": "explicit bounds + validation before state mutation",
+      "validWhen": "Signal 1: title evidence in cited reports matches the audited component family (vault/staking衍生 deposit flows); Signal 2: severity consensus across independent auditors...",
+      "invalidWhen": "Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path; Safe if: audited version postdates the fix noted in the source...",
+      "impact": "Wrong accounting / reward misallocation / stuck or double-counted funds (fund-loss class rows above)",
+      "preconditions": [
+        "attacker control of: the inputs named in the cited finding titles (messages, bids, deposits)",
+        "Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+        "Attacker cheaply grows a collection (plans, stakes, peers, entries)."
+      ],
+      "proofShape": "*Path A: [Direct input path] -> Attacker submits crafted input (message, tx, packet, or config change) accepted by the entry surface.",
+      "falsePositiveSignals": [
+        "Not this bug when: the target chain/module already enforces explicit bounds/limits on the affected path",
+        "Safe if: audited version postdates the fix noted in the source report status",
+        "Requires attacker control of: the inputs named in the cited finding titles (messages, bids, deposits)"
+      ]
+    },
+    {
+      "id": "substrate-vesting-schedule-bypass-vesting-schedules-with-past-st-000",
+      "title": "Vesting Schedules With Past Start/End Blocks Bypass Intended Lock Terms",
+      "severity": "LOW",
+      "grep": "block_number_validation|merge_vesting_info|vesting_schedule|vested_transfer|single_contract|starting_block",
+      "detect": "`vested_transfer` validates the schedule's arithmetic (per-block amounts, locked ≤ balance) but accepts any block...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/pallets/vesting-schedule-bypass.md",
+      "lines": [
+        66,
+        251
+      ],
+      "reportEvidence": {
+        "count": 2,
+        "sampleReports": [
+          "reports/substrate-l1_findings/composable-halborn-vesting.md",
+          "reports/substrate-l1_findings/composable-audits-halborn-audit20220823-pallet-vesting-pdf.md"
+        ],
+        "severityConsensus": "LOW",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "missing temporal validation",
+          "input validation bypass",
+          "unvalidated time window",
+          "vesting schedule",
+          "start end in the past accepted"
+        ],
+        "commonlyComposesWith": [
+          "vested transfer",
+          "vesting schedule",
+          "starting block",
+          "ending block",
+          "block number validation"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: vested_transfer constructs VestingInfo::new(starting_block, ending_block, ...) with no ensure!(starting_block >=...",
+        "PROVE: *Path A: Retroactive schedule = instant unlock; Sender (or a buggy payroll/airdrop tool) submits vested_transfer with ending_block already behind now.",
+        "FALSIFY: Not this bug when: the pallet (or a wrapper) enforces starting_block >= now and ending_block > starting_block + min_duration at schedule creation.; Safe if: past-dated...",
+        "IMPACT: Vesting locks created with past windows provide zero temporal protection — tokens are immediately unlocked.",
+        "Does schedule creation compare start/end against the current block?",
+        "What happens on vest() the same block a past-dated schedule is created?"
+      ],
+      "antipattern": "payroll/airdrop wrapper forwards user-supplied windows unchecked",
+      "securePattern": "wrapper computes windows from now, never from caller input",
+      "validWhen": "Signal 1: vested_transfer constructs VestingInfo::new(starting_block, ending_block, ...) with no ensure!(starting_block >= frame_system::block_number()) style check...;...",
+      "invalidWhen": "Not this bug when: the pallet (or a wrapper) enforces starting_block >= now and ending_block > starting_block + min_duration at schedule creation.; Safe if: past-dated...",
+      "impact": "Vesting locks created with past windows provide zero temporal protection — tokens are immediately unlocked.",
+      "preconditions": [
+        "attacker control of: the schedule fields in vested_transfer — i.e., any account sending a vested transfer (typically the..."
+      ],
+      "proofShape": "*Path A: Retroactive schedule = instant unlock -> Sender (or a buggy payroll/airdrop tool) submits vested_transfer with ending_block already behind now.",
+      "falsePositiveSignals": [
+        "Not this bug when: the pallet (or a wrapper) enforces starting_block >= now and ending_block > starting_block + min_duration at schedule creation.",
+        "Safe if: past-dated schedules are an accepted product decision (as Composable RISK ACCEPTED) and no downstream logic (airdrops, investor locks, legal terms) depends on...",
+        "Requires attacker control of: the schedule fields in vested_transfer — i.e., any account sending a vested transfer (typically the treasury/issuer, so impact is often..."
+      ]
+    },
+    {
+      "id": "substrate-xcm-instruction-validation-waived-xcm-delivery-fees-and-u-000",
+      "title": "Waived XCM Delivery Fees and Unbounded Cross-Chain Message Execution Enable Spam Congestion",
+      "severity": "HIGH",
+      "grep": "decode_with_depth_limit\\(DecodeLimit::new\\(n|xcm_config_message_delivery|NoPriceForMessageDelivery|handle_incoming_message|decode_with_depth_limit|PriceForSiblingDelivery",
+      "detect": "Runtime configuration templates and production runtimes ship XCM configs with `FeeManager = ()` and sibling delivery...",
+      "cat": [
+        "substrate",
+        "pallet",
+        "polkadot",
+        "parachain",
+        "frame",
+        "xcm",
+        "ink"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "ecosystem": [
+        "polkadot"
+      ],
+      "ref": "DB/substrate/pallets/xcm-instruction-validation.md",
+      "lines": [
+        72,
+        240
+      ],
+      "reportEvidence": {
+        "count": 6,
+        "sampleReports": [
+          "reports/substrate-l1_findings/polkadot-runtime-templates-oz-2024-04.md",
+          "reports/substrate-l1_findings/hyperbridge-srl-2405.md",
+          "reports/substrate-l1_findings/parallel-tob-1.md",
+          "reports/substrate-l1_findings/acala-srl-2021-12.md",
+          "reports/substrate-l1_findings/audit-reports-snowbridge-2024-05-24-audit-report-snowbridge-v1-1-pdf.md"
+        ],
+        "severityConsensus": "CRITICAL",
+        "scope": "file",
+        "support": "context_only"
+      },
+      "graphHints": {
+        "variants": [
+          "configuration error",
+          "denial of service",
+          "missing xcm fee or limit",
+          "xcm message delivery",
+          "unpriced cross chain execution"
+        ],
+        "commonlyComposesWith": [
+          "fee manager",
+          "price for sibling delivery",
+          "no price for message delivery",
+          "decode limit",
+          "weigher"
+        ]
+      },
+      "check": [
+        "VERIFY: Signal 1: FeeManager type in XCM config is () (or any NewFree implementation), or PriceForSiblingDelivery is NoPriceForMessageDelivery.; Signal 2: A...",
+        "PROVE: *Path A: Free XCM spam floods the message queue; Attacker sends a high volume of XCM messages from a chain with no delivery fee charged.",
+        "FALSIFY: Not this bug when: fees are configured with exponential backlog pricing (Kusama-style) and benchmarks exist for the actual runtime.; Safe if: unsigned paths validate...",
+        "IMPACT: Queue/storage exhaustion, long delivery delays, dropped messages; permanent chain stall when forced-execution bridges carry the nesting bomb ([hb3]).",
+        "Does every inbound XMP/XCM path charge a fee covering worst-case weight?",
+        "Is sibling-parachain delivery priced (exponentially)?"
+      ],
+      "antipattern": "no decode depth limit (from [hb3], pallet-call-decompressor)",
+      "securePattern": "charge fees with exponential backlog + bound decode depth",
+      "validWhen": "Signal 1: FeeManager type in XCM config is () (or any NewFree implementation), or PriceForSiblingDelivery is NoPriceForMessageDelivery.; Signal 2: A dispatchable that...",
+      "invalidWhen": "Not this bug when: fees are configured with exponential backlog pricing (Kusama-style) and benchmarks exist for the actual runtime.; Safe if: unsigned paths validate...",
+      "impact": "Queue/storage exhaustion, long delivery delays, dropped messages; permanent chain stall when forced-execution bridges carry the nesting bomb ([hb3]).",
+      "preconditions": [
+        "attacker control of: any funded account on a connected chain (cheap; cost is near zero when fees waived).",
+        "Attacker sends a high volume of XCM messages from a chain with no delivery fee charged.",
+        "Attacker relays messages between sibling parachains with PriceForSiblingDelivery = NoPriceForMessageDelivery.",
+        "Attacker submits a deeply nested compressed call to decompress_call (no decode depth limit).",
+        "ISMP messages are unsigned extrinsics; attacker submits Request/Response/Consensus messages for free."
+      ],
+      "proofShape": "*Path A: Free XCM spam floods the message queue -> Attacker sends a high volume of XCM messages from a chain with no delivery fee charged.",
+      "falsePositiveSignals": [
+        "Not this bug when: fees are configured with exponential backlog pricing (Kusama-style) and benchmarks exist for the actual runtime.",
+        "Safe if: unsigned paths validate against a tag/nonce and the pool drops invalid submissions (note: Hyperbridge showed repeated FraudProof replay can still circumvent...",
+        "Requires attacker control of: any funded account on a connected chain (cheap; cost is near zero when fees waived)."
+      ]
+    }
+  ]
+}

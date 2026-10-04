@@ -1,0 +1,732 @@
+[
+ {
+  "file": "audits-anoma-anoma-q4-2025-risc-zero-rm-evm-protocol-adapter-audit-final-report-v2-pdf.md",
+  "findings": [
+   {
+    "line": 167,
+    "severity": "critical",
+    "title": "Critical 0",
+    "excerpt": "Critical 0"
+   },
+   {
+    "line": 168,
+    "severity": "high",
+    "title": "High 0",
+    "excerpt": "High 0"
+   },
+   {
+    "line": 169,
+    "severity": "medium",
+    "title": "Medium 2",
+    "excerpt": "Medium 2"
+   },
+   {
+    "line": 170,
+    "severity": "low",
+    "title": "Low 4",
+    "excerpt": "Low 4"
+   },
+   {
+    "line": 171,
+    "severity": "informational",
+    "title": "Informational 9",
+    "excerpt": "Informational 9\nTotal 15\nTable 1: Identified Security Findings\nInformal Systems \u00a9 2025 4\n\nAnoma Q4 2025\n Security Audit Report\nSystem Overview\nIn the Anoma Protocol, users send information about the desired state change (intent) to solvers. By \nanalyzing the desired outcomes, solvers determine the optimal execution paths, and the resource \nmachine generates transactions with the necessary cryptographic proofs to validate the proposed \nresource transitions. The protocol adapter receives these fully-formed transactions and serves as \nthe authoritative source of truth for resource state.\nFollowing, we describe in some detail the two components in scope: the ARM risc0 resource machine \nand the EVM protocol adapter. The definitions and properties in the threat model define more \nprecisely the desired behavior of the components under scope.\narm: Anoma Resource Machine\nThe ARM is used to create, compose, and verify transactions. It is stateless and run by every node \nthat processes transactions. Anoma users submit their intents to the intent gossip network in the \nform of unbalanced ARM transactions with metadata, which are received and processed by solvers \nthat output balanced ARM trans"
+   },
+   {
+    "line": 569,
+    "severity": "high",
+    "title": "high-quality entropy from the operating system\u2019s secure random source.",
+    "excerpt": "high-quality entropy from the operating system\u2019s secure random source.\n\u2022 The encryption module does a comparison involving sensitive data that may return early in \nsome cases.\nThe threat doesn\u2019t hold.\nThe encryption module does not perform any variable-time comparisons on sensitive cryptographic \ndata.\nInformal Systems \u00a9 2025 17\n\nAnoma Q4 2025\n Security Audit Report\n\u2022 The encryption module does not perform point validation, i.e., it does not prevent low\u00adorder \npoint attacks.\nThe threat holds.\nThe encryption module relies on k256\u2019s point validation during deserialization, which validates \nthat all points lie on the secp256k1 curve and rejects invalid curve points. However, k256 explicitly \naccepts the identity point during deserialization, and the encryption module provides no additional \nvalidation to reject it before use in ECDH operations. While this does not represent a cryptographic \nvulnerability in the traditional sense (as it requires user code to mistakenly provide the identity \npoint), it creates a defense-in-depth gap that could lead to predictable shared secrets and complete \nprivacy breaches if programming errors occur in application code. We have documented a recom-\nme"
+   },
+   {
+    "line": 1242,
+    "severity": "gas",
+    "title": "5. Gas optimization",
+    "excerpt": "5. Gas optimization\nDemonstrates gas\u00adconscious design:\nInformal Systems \u00a9 2025 37\n\nAnoma Q4 2025\n Security Audit Report\n\u2022 Uses transient storage for reentrancy guard (EIP-1153, gas-efficient)\n\u2022 OpenZeppelin\u2019s Arrays.unsafeAccess for performance (code ref)\n\u2022 Memory variables cached to avoid repeated SLOAD: uint256 treeDepth = depth(self) (code ref)\n\u2022 Calldata for read-only parameters: Transaction calldata transaction\n\u2022 Pre-increment where applicable: ++treeDepth instead of treeDepth++\n\u2022 Packed struct layouts where possible\n6. External dependencies\nUses audited, industry\u00adstandard libraries:\n\u2022 OpenZeppelin Contracts (access control, utilities, cryptography)\n\u2022 RISC Zero Ethereum libraries (proof verification)\n\u2022 Solady (EfficientHashLib for gas optimization)\n\u2022 Permit2 integration for token approvals\n\u2022 No custom implementations of standard patterns\n7. Immutability and constants\nProper use of storage modifiers:\n\u2022 Constants for fixed values: bytes32 internal constant _VERIFYING_KEY\n\u2022 Immutable for constructor-set values: _TRUSTED_RISC_ZERO_VERIFIER_ROUTER\n\u2022 Clear naming convention: underscore prefix for internal/private state\n8. Event emission\nComprehensive event logging:\n\u2022 Events for all "
+   },
+   {
+    "line": 2406,
+    "severity": "gas",
+    "title": "Gas measurements from fuzz testing (10,000 runs):",
+    "excerpt": "Gas measurements from fuzz testing (10,000 runs):\n\u2022 Original implementation: \u03bc: 6,163 gas, ~: 6,644 gas\n\u2022 Optimized implementation: \u03bc: 4,024 gas, ~: 4,213 gas\n\u2022 Savings: ~2,000 gas average, ~2,400 gas median\nProblem scenarios\n\u2022 Gas inefficiency.\n\u2022 Theoretical overflow risk: While impractical due to gas limits, the loop-based approach could \ntheoretically overflow the uint8 return type with malicious inputs (e.g., leavesCount > 2^255).\nRecommendation\nReplace the loop-based implementation with a logarithmic formula using OpenZeppelin\u2019s Math.log2:\n1 /// @notice Optimized implementation using log2\n Solidity\n2 function computeMinimalTreeDepth_Optimized(uint256 leavesCount) internal pure returns \n(uint8 treeDepth) {\n3   return leavesCount <= 1 ? 0 : uint8(Math-log2(leavesCount - 1) + 1);\n4 }\nThe optimization was validated with a comprehensive test suite-\n1 // SPDX-License-Identifier: MIT\n Solidity\n2 pragma solidity ^0-8-30;\n3\nInformal Systems \u00a9 2025 73\n\nAnoma Q4 2025\n Security Audit Report\n4 import {Test} from \"forge-std/Test-sol\";\n5 import {Math} from \"@openzeppelin-contracts/utils/math/Math-sol\";\n6\n7 /// @title ComputeMinimalTreeDepth Comparison Test\n8 /// @notice Tests that compare th"
+   },
+   {
+    "line": 2637,
+    "severity": "informational",
+    "title": "Recommendation: Use checked_next_power_of_two() to detect overflow and return a proper error",
+    "excerpt": "Recommendation: Use checked_next_power_of_two() to detect overflow and return a proper error \ninstead of allowing a panic with an unclear message.\n1 // In arm/src/error.rs, add a new error variant: TreeTooLarge Rust\n2\n3   pub fn root(&self) -> Result<Digest, ArmError> {\n4     let len = self.leaves.len()\n5       .checked_next_power_of_two()\n6       .ok_or(ArmError::TreeTooLarge)?;\n7\n8     let mut cur_layer = self.leaves.clone();\n9     cur_layer.resize(len, *PADDING_LEAF);\n10\n11     while cur_layer.len() > 1 {\n12       cur_layer = cur_layer\n13         .chunks(2)\n14         .map(|pair| hash_two(&pair[0], &pair[1]))\n15         .collect();\n16     }\n17\n18     Ok(cur_layer[0])\n19   }\n20\n21   pub fn generate_path(&self, cur_leave: &Digest) -> Result<MerklePath, ArmError> {\n22     let len = self.leaves.len()\n23       .checked_next_power_of_two()\n24       .ok_or(ArmError::TreeTooLarge)?;\n25\n26     let mut cur_layer = self.leaves.clone();\nInformal Systems \u00a9 2025 78\n\nAnoma Q4 2025\n Security Audit Report\n27     cur_layer.resize(len, *PADDING_LEAF);\n28\n29     // ... rest of the implementation \n30   }\nevm-protocol-adapter\n\u2022 The codebase relies heavily on the assumption that compliance units consi"
+   },
+   {
+    "line": 2693,
+    "severity": "informational",
+    "title": "Recommendation: Extract into named constants (e.g., RESOURCES_PER_COMPLIANCE_UNIT = 2,",
+    "excerpt": "Recommendation: Extract into named constants (e.g., RESOURCES_PER_COMPLIANCE_UNIT = 2, \nRISC0_BOOL_TRUE_LE = 0x01000000) to improve readability and maintainability.\n\u2022 public functions not used internally could be marked external\n1 function getProtocolAdapterVersion() public pure override returns (bytes32 \nversion)\n Solidity\nStatus\nThe development team addressed this finding in PR #158  for arm-risc0 and in PR #398  for \nevm-protocol-adapter.\nInformal Systems \u00a9 2025 79\n\nAnoma Q4 2025\n Security Audit Report\nFeedback on specification\nSeverity Informational Exploitability None Status Acknowledged\nType Documentation Impact None\nIn this finding, we provide feedback on the specification. As a side note, we would like to highlight \nthat the navigation bar on the side is a bit awkward to use because it refreshes the page each time \nyou expand the menu.\nGeneral feedback\n\u2022 The abstract specification is not very approachable.\n\u2023 It assumes that the reader already knows most details of the overall architecture, i.e., what\u2019s a \nresource machine, its purpose, the context in which resource machine may be used and how \nit would interact with other components/actors. Paragraphs like \u201cThe role of the "
+   }
+  ]
+ },
+ {
+  "file": "audits-osmosis-2023-06-23-audit-report-osmosis-q2-pdf.md",
+  "findings": [
+   {
+    "line": 34,
+    "severity": "informational",
+    "title": "Minor code improvements \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0",
+    "excerpt": "Minor code improvements \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 26\nRedundant condition check in loop for qualifyingLiquidity evaluation\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 27\nAlignment issue between comments and code in tick comparison logic \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 29\nRedundancies in GetAllPositionIdsForPoolId() function and ensurePositionOwner() usage\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 31\nInefficient string concatenation\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 33\nInefficient comparison methods and unnecessary object creation \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 35\nAppendix: Vulnerability Classification ..................................................................... 37\nImpact Score \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 37\nExploitability Score \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0"
+   },
+   {
+    "line": 87,
+    "severity": "informational",
+    "title": "informational severity findings. Based on our analysis, we recommend the following areas for immediate and",
+    "excerpt": "informational severity findings. Based on our analysis, we recommend the following areas for immediate and \nrelatively low effort improvements:\nOptimization in data storage: Some findings highlight potential improvements in how KV stores are utilized. \nSmall adaptations can yield significant enhancements in storage mechanisms.\nPerformance optimizations: Another noteworthy area pertains to findings related to performance \nimprovements. Although these changes may be small individually, their cumulative impact can lead to \nsubstantial overall improvements over time.\n\n\u00a9 2023 Informal Systems Osmosis Q2 2023\nAudit dashboard 2\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022"
+   },
+   {
+    "line": 226,
+    "severity": "critical",
+    "title": "Critical 0",
+    "excerpt": "Critical 0"
+   },
+   {
+    "line": 227,
+    "severity": "high",
+    "title": "High 1",
+    "excerpt": "High 1"
+   },
+   {
+    "line": 228,
+    "severity": "medium",
+    "title": "Medium 1",
+    "excerpt": "Medium 1"
+   },
+   {
+    "line": 229,
+    "severity": "low",
+    "title": "Low 1",
+    "excerpt": "Low 1"
+   },
+   {
+    "line": 230,
+    "severity": "informational",
+    "title": "Informational 7",
+    "excerpt": "Informational 7\nTotal 10\n\n\u00a9 2023 Informal Systems Osmosis Q2 2023\nSystem Overview 4\n1.\n2.\n3.\na.\nb.\nc.\nd.\n4.\nSystem Overview\nOsmosis is a decentralized blockchain protocol built on top of the Cosmos network. It aims to provide an \ninfrastructure for efficient and secure token exchange. Osmosis focuses on the concept of liquidity pools, allowing \nusers to create and manage pools of tokens for trading purposes.\nBy using the Osmosis platform, users can create and manage liquidity pools by depositing pairs of tokens. These \npools enable the exchange of tokens and serve as the basis for price discovery. Liquidity providers earn transaction \nfees and receive liquidity pool tokens in return for providing liquidity. Osmosis supports multiple pool types \n(balancer, stableswap) and the scope of this audit is around concentrated liquidity pools.\nConcentrated liquidity\nThe design of the Automated Market Maker, introduced by Uniswap, which is based on creating the possibility to \nliquid in specific price ranges using the concept of ticks is called concentrated liquidity. It allows liquidity providers \n(LPs) to focus their capital in a specific price range, resulting in higher efficiency and lowe"
+   },
+   {
+    "line": 1078,
+    "severity": "informational",
+    "title": "Minor code improvements",
+    "excerpt": "Minor code improvements\nTitle Minor code improvements\nProject Osmosis Q2 2023\nType IMPLEMENTATION\nSeverity 0 INFORMATIONAL\nImpact 0 NONE\nExploitability 0 NONE\nIssue \u00a0\nInvolved artifacts\nosmosis/x/concentrated-liquidity/position.go\nosmosis/x/concentrated-liquidity/lp.go\nosmosis/x/concentrated-liquidity/fees.go\nDescription\nInstead of evaluating the value of lockIsMature  at this point, a more concise function return statement \ncan be implemented as follows: return !lockIsMature, lockId, nil . This simplifies the code \nand provides a clear output from the function.\nWhile the comment explicitly specifies that the requestedLiquidityAmountToWithdraw  should be \na positive value, the current validation check using IsNegative()  only verifies that the value is not \nbelow zero, neglecting the consideration of zero itself.\nTo ensure a logical sequence of operations, it is advisable to execute the collection of rewards after \nvalidating the amount of liquidity intended for withdrawal. Hence, a recommended modification here would \ninvolve swapping these two actions.\nThe function GetFeeAccumulator  can be optimized for simplicity by consolidating it into a single line: \nreturn accum.GetAccumula"
+   },
+   {
+    "line": 1459,
+    "severity": "high",
+    "title": "High Halting of the chain; loss, locking, or unauthorized withdrawal of funds of many users;",
+    "excerpt": "High Halting of the chain; loss, locking, or unauthorized withdrawal of funds of many users; \narbitrary transaction execution; forging of user messages / circumvention of \nauthorization logic"
+   },
+   {
+    "line": 1462,
+    "severity": "medium",
+    "title": "Medium Temporary denial of service / substantial unexpected delays in processing user requests",
+    "excerpt": "Medium Temporary denial of service / substantial unexpected delays in processing user requests \n(e.g. many hours/days); loss, locking, or unauthorized withdrawal of funds of a single \nuser / few users; failures during transaction execution (e.g. out of gas errors); substantial \nincrease in node computational requirements (e.g. 10x)"
+   },
+   {
+    "line": 1466,
+    "severity": "low",
+    "title": "Low Transient unexpected delays in processing user requests (e.g. minutes/a few hours);",
+    "excerpt": "Low Transient unexpected delays in processing user requests (e.g. minutes/a few hours);"
+   },
+   {
+    "line": 1467,
+    "severity": "medium",
+    "title": "Medium increase in node computational requirements (e.g. 2x); any kind of problem that",
+    "excerpt": "Medium increase in node computational requirements (e.g. 2x); any kind of problem that \naffects end users, but can be repaired by manual intervention (e.g. a special transaction)\n\ud83d\udd35\u00a0None Small increase in node computational requirements (e.g. 20%); code inefficiencies; bad \ncode practices; lack/incompleteness of tests; lack/incompleteness of documentation\nExploitability Score\nThe Exploitability score reflects the ease and technical means by which the vulnerability can be exploited; it \nrepresents the characteristics of the vulnerable component. In the below table we list, for each category, examples \nof actions by actors that are enough to trigger the exploit. In the examples below:\nActors\u00a0can be any entity that interacts with the system: other blockchains, system users, validators, relayers, \nbut also uncontrollable phenomena (e.g. network delays or partitions).\nActions\u00a0can be\n\n\u00a9 2023 Informal Systems Osmosis Q2 2023\nAppendix: Vulnerability Classification 38\n\u2022\n\u2022\n\u2022\nlegitimate, e.g. submission of a transaction that follows protocol rules by a user; delegation/\nredelegation/bonding/unbonding; validator downtime; validator voting on a single, but alternative \nblock; delays in relaying "
+   },
+   {
+    "line": 1496,
+    "severity": "high",
+    "title": "High illegitimate actions taken by a small group of actors; possibly coordinated with",
+    "excerpt": "High illegitimate actions taken by a small group of actors; possibly coordinated with \nlegitimate actions taken by a medium group of actors"
+   },
+   {
+    "line": 1498,
+    "severity": "medium",
+    "title": "Medium illegitimate actions taken by a medium group of actors; possibly coordinated with",
+    "excerpt": "Medium illegitimate actions taken by a medium group of actors; possibly coordinated with \nlegitimate actions taken by a large group of actors"
+   },
+   {
+    "line": 1500,
+    "severity": "low",
+    "title": "Low illegitimate actions taken by a large group of actors; possibly coordinated with",
+    "excerpt": "Low illegitimate actions taken by a large group of actors; possibly coordinated with \nlegitimate actions taken by all actors\n\ud83d\udd35\u00a0None illegitimate actions taken in a coordinated fashion by all actors\nSeverity Score\nThe severity score combines the above two sub-scores into a single value, and roughly represents the probability of \nthe system suffering a severe impact with time; thus it also represents the measure of the urgency or order in which \nvulnerabilities need to be addressed. We assess the severity according to the combination scheme represented \ngraphically below.\nAs can be seen from the image above, only a combination of high impact with high exploitability results in a Critical \nseverity score; such vulnerabilities need to be addressed ASAP. Accordingly, High severity score receive \nvulnerabilities with the combination of high impact and medium exploitability, or medium impact, but high \nexploitability.\nSeverity Score Examples\n\ud83d\udd34\u00a0Critical Halting of chain via a submission of a specially crafted transaction\n\n\n\u00a9 2023 Informal Systems Osmosis Q2 2023\nAppendix: Vulnerability Classification 39\nSeverity Score Examples"
+   },
+   {
+    "line": 1519,
+    "severity": "high",
+    "title": "High Permanent loss of user funds via a combination of submitting a specially crafted",
+    "excerpt": "High Permanent loss of user funds via a combination of submitting a specially crafted \ntransaction with delaying of certain messages by a large portion of relayers"
+   },
+   {
+    "line": 1521,
+    "severity": "medium",
+    "title": "Medium Substantial unexpected delays in processing user requests via a combination of",
+    "excerpt": "Medium Substantial unexpected delays in processing user requests via a combination of \ndelaying of certain messages by a large group of relayers with coordinated withdrawal \nof funds by a large group of users"
+   },
+   {
+    "line": 1524,
+    "severity": "low",
+    "title": "Low 2x increase in node computational requirements via coordinated withdrawal of all user",
+    "excerpt": "Low 2x increase in node computational requirements via coordinated withdrawal of all user \ntokens\n\ud83d\udd35Informational Code inefficiencies; bad code practices; lack/incompleteness of tests; lack/\nincompleteness of documentation; any exploit for which a coordinated illegitimate \naction of all actors is necessary\n\n\u00a9 2023 Informal Systems Osmosis Q2 2023\nDisclaimer 40\nDisclaimer\nThis report is subject to the terms and conditions (including without limitation, description of services, \nconfidentiality, disclaimer and limitation of liability, etc.) set forth in the associated Services Agreement. This report \nprovided in connection with the Services set forth in the Services Agreement shall be used by the Company only to \nthe extent permitted under the terms and conditions set forth in the Agreement.\u00a0\nThis audit report is provided on an \u201cas is\u201d basis, with no guarantee of the completeness, accuracy, timeliness or of \nthe results obtained by use of the information provided. Informal Systems has relied upon information and data \nprovided by the client, and is not responsible for any errors or omissions in such information and data or results \nobtained from the use of that information or conclusi"
+   }
+  ]
+ },
+ {
+  "file": "audits-neutron-2023-11-05-audit-report-neutron-smart-contracts-overrule-liquidity-migration-pdf.md",
+  "findings": [
+   {
+    "line": 105,
+    "severity": "critical",
+    "title": "Critical 2",
+    "excerpt": "Critical 2"
+   },
+   {
+    "line": 106,
+    "severity": "high",
+    "title": "High 1",
+    "excerpt": "High 1"
+   },
+   {
+    "line": 107,
+    "severity": "medium",
+    "title": "Medium 0",
+    "excerpt": "Medium 0"
+   },
+   {
+    "line": 108,
+    "severity": "low",
+    "title": "Low 2",
+    "excerpt": "Low 2"
+   },
+   {
+    "line": 109,
+    "severity": "informational",
+    "title": "Informational 6",
+    "excerpt": "Informational 6\nTotal 11\n\n\u00a9 2023 Informal Systems Neutron Smart Contracts: Overrule + Liquidity Migration\nIdentified Threats and the Audit Plan 3\n1.\n2.\n3.\n4.\n5.\n6.\n7.\n8.\n1.\n2.\n3.\n4.\n5.\n6.\nIdentified Threats and the Audit Plan\nWhen analyzing both parts of the audit, governance overrule contracts and liquidity migration contracts, we \nfocused first on understanding the protocol, looking for potential errors in the protocol, and finally inspecting the \ncode to find implementation errors.\nDuring our analysis, we inspected in particular the following general threats:\nCrossing Trust Boundaries: any input coming from an independent (and thus potentially malicious) source \nmust not be accepted unconditionally.\nInter-Contract Interactions: whether the contracts employed during execution respect the expected \ncontracts, and whether they can be influenced with malicious intents.\nError Handling: every potential failure in the sequence of the messages needs to be handled appropriately.\nMathematical Computations: whether all computations are performed correctly, and if there are problems \ndue to e.g. incorrect datatype usage or rounding\nAccess Control: entry points of a contract should contain a"
+   },
+   {
+    "line": 1148,
+    "severity": "high",
+    "title": "High Halting of the chain; loss, locking, or unauthorized withdrawal of funds of many users;",
+    "excerpt": "High Halting of the chain; loss, locking, or unauthorized withdrawal of funds of many users; \narbitrary transaction execution; forging of user messages / circumvention of \nauthorization logic"
+   },
+   {
+    "line": 1151,
+    "severity": "medium",
+    "title": "Medium Temporary denial of service / substantial unexpected delays in processing user requests",
+    "excerpt": "Medium Temporary denial of service / substantial unexpected delays in processing user requests \n(e.g. many hours/days); loss, locking, or unauthorized withdrawal of funds of a single \nuser / few users; failures during transaction execution (e.g. out of gas errors); substantial \nincrease in node computational requirements (e.g. 10x)"
+   },
+   {
+    "line": 1155,
+    "severity": "low",
+    "title": "Low Transient unexpected delays in processing user requests (e.g. minutes/a few hours);",
+    "excerpt": "Low Transient unexpected delays in processing user requests (e.g. minutes/a few hours);"
+   },
+   {
+    "line": 1156,
+    "severity": "medium",
+    "title": "Medium increase in node computational requirements (e.g. 2x); any kind of problem that",
+    "excerpt": "Medium increase in node computational requirements (e.g. 2x); any kind of problem that \naffects end users, but can be repaired by manual intervention (e.g. a special transaction)\n None Small increase in node computational requirements (e.g. 20%); code inefficiencies; bad \ncode practices; lack/incompleteness of tests; lack/incompleteness of documentation\nExploitability Score\nThe Exploitability score reflects the ease and technical means by which the vulnerability can be exploited; it \nrepresents the characteristics of the vulnerable component. In the below table we list, for each category, examples \nof actions by actors that are enough to trigger the exploit. In the examples below:\nActors\u00a0can be any entity that interacts with the system: other blockchains, system users, validators, relayers, \nbut also uncontrollable phenomena (e.g. network delays or partitions).\nActions\u00a0can be\n\n\u00a9 2023 Informal Systems Neutron Smart Contracts: Overrule + Liquidity Migration\nAppendix: Vulnerability Classification 34\n\u2022\n\u2022\n\u2022\nlegitimate, e.g. submission of a transaction that follows protocol rules by a user; delegation/\nredelegation/bonding/unbonding; validator downtime; validator voting on a single, but "
+   },
+   {
+    "line": 1185,
+    "severity": "high",
+    "title": "High illegitimate actions taken by a small group of actors; possibly coordinated with",
+    "excerpt": "High illegitimate actions taken by a small group of actors; possibly coordinated with \nlegitimate actions taken by a medium group of actors"
+   },
+   {
+    "line": 1187,
+    "severity": "medium",
+    "title": "Medium illegitimate actions taken by a medium group of actors; possibly coordinated with",
+    "excerpt": "Medium illegitimate actions taken by a medium group of actors; possibly coordinated with \nlegitimate actions taken by a large group of actors"
+   },
+   {
+    "line": 1189,
+    "severity": "low",
+    "title": "Low illegitimate actions taken by a large group of actors; possibly coordinated with",
+    "excerpt": "Low illegitimate actions taken by a large group of actors; possibly coordinated with \nlegitimate actions taken by all actors\n None illegitimate actions taken in a coordinated fashion by all actors\nSeverity Score\nThe severity score combines the above two sub-scores into a single value, and roughly represents the probability of \nthe system suffering a severe impact with time; thus it also represents the measure of the urgency or order in which \nvulnerabilities need to be addressed. We assess the severity according to the combination scheme represented \ngraphically below.\nAs can be seen from the image above, only a combination of high impact with high exploitability results in a Critical \nseverity score; such vulnerabilities need to be addressed ASAP. Accordingly, High severity score receive \nvulnerabilities with the combination of high impact and medium exploitability, or medium impact, but high \nexploitability.\nSeverity Score Examples"
+   },
+   {
+    "line": 1202,
+    "severity": "critical",
+    "title": "Critical Halting of chain via a submission of a specially crafted transaction",
+    "excerpt": "Critical Halting of chain via a submission of a specially crafted transaction\n\n\n\u00a9 2023 Informal Systems Neutron Smart Contracts: Overrule + Liquidity Migration\nAppendix: Vulnerability Classification 35\nSeverity Score Examples"
+   },
+   {
+    "line": 1208,
+    "severity": "high",
+    "title": "High Permanent loss of user funds via a combination of submitting a specially crafted",
+    "excerpt": "High Permanent loss of user funds via a combination of submitting a specially crafted \ntransaction with delaying of certain messages by a large portion of relayers"
+   },
+   {
+    "line": 1210,
+    "severity": "medium",
+    "title": "Medium Substantial unexpected delays in processing user requests via a combination of",
+    "excerpt": "Medium Substantial unexpected delays in processing user requests via a combination of \ndelaying of certain messages by a large group of relayers with coordinated withdrawal \nof funds by a large group of users"
+   },
+   {
+    "line": 1213,
+    "severity": "low",
+    "title": "Low 2x increase in node computational requirements via coordinated withdrawal of all user",
+    "excerpt": "Low 2x increase in node computational requirements via coordinated withdrawal of all user \ntokens"
+   },
+   {
+    "line": 1215,
+    "severity": "informational",
+    "title": "Informational Code inefficiencies; bad code practices; lack/incompleteness of tests; lack/",
+    "excerpt": "Informational Code inefficiencies; bad code practices; lack/incompleteness of tests; lack/\nincompleteness of documentation; any exploit for which a coordinated illegitimate \naction of all actors is necessary\n\n\u00a9 2023 Informal Systems Neutron Smart Contracts: Overrule + Liquidity Migration\nDisclaimer 36\nDisclaimer\nThis report is subject to the terms and conditions (including without limitation, description of services, \nconfidentiality, disclaimer and limitation of liability, etc.) set forth in the associated Services Agreement. This report \nprovided in connection with the Services set forth in the Services Agreement shall be used by the Company only to \nthe extent permitted under the terms and conditions set forth in the Agreement.\nThis audit report is provided on an \u201cas is\u201d basis, with no guarantee of the completeness, accuracy, timeliness or of \nthe results obtained by use of the information provided. Informal has relied upon information and data provided by \nthe client, and is not responsible for any errors or omissions in such information and data or results obtained from \nthe use of that information or conclusions in this report. Informal makes no warranty of any kind, express "
+   }
+  ]
+ },
+ {
+  "file": "audits-anoma-2024-08-16-ibc-and-masp-integrations-final-report-pdf.md",
+  "findings": [
+   {
+    "line": 30,
+    "severity": "informational",
+    "title": "Minor Code Improvements\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 ",
+    "excerpt": "Minor Code Improvements\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 21\nAppendix: Vulnerability Classification ..................................................................... 23\nImpact Score \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 23\nExploitability Score \u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 23\nSeverity Score\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0 24\nDisclaimer.................................................................................................................. 26\n\n\u00a9 2024 Informal Systems Anoma 2024 Q3\nAudit Overview 1\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\nAudit Overview\nScope\nIn July 2024, Informal Systems has conducted a security audit for IBC integration into Namada. The audit aimed at \ninspecting the correctness and security propertie"
+   },
+   {
+    "line": 104,
+    "severity": "critical",
+    "title": "Critical 2",
+    "excerpt": "Critical 2"
+   },
+   {
+    "line": 105,
+    "severity": "high",
+    "title": "High 0",
+    "excerpt": "High 0"
+   },
+   {
+    "line": 106,
+    "severity": "medium",
+    "title": "Medium 0",
+    "excerpt": "Medium 0"
+   },
+   {
+    "line": 107,
+    "severity": "low",
+    "title": "Low 1",
+    "excerpt": "Low 1"
+   },
+   {
+    "line": 108,
+    "severity": "informational",
+    "title": "Informational 4",
+    "excerpt": "Informational 4\nTotal 7\n\n\u00a9 2024 Informal Systems Anoma 2024 Q3\nThreat Analysis 3\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\n\u2022\nThreat Analysis\nIn our threat analysis, we start by defining a set of properties required for the correctness of the IBC integration in \nNamada. We separate them into safety and liveness. For each property, we define one or more threats. We then \nanalyzed them individually to see if they could be violated, resulting in the findings presented in the Findings \nsection.\nAdditionally, we have inspected a set of non-functional threats related to integer-type conversions, integer \noverflow, and DoS attacks. We have listed them at the bottom of this section.\nSafety Properties\n1. Namada correctly implements all ibc-rs core, client and client upgradability \ncontext APIs\nThreat 1.1: Namada does not implement one or more context methods.\nThreat 1.2: Namada\u2019s implementation of one or more context methods does not attain the IBC specification.\nThreat 1.3: The data passed to one or more context methods is not serialized/deserialized correctly upon storing/\nretrieving.\nThreat 1.4: The implementation of one or more context methods does not handle \"storage not responding\" \nscenarios correctly.\nThreat "
+   },
+   {
+    "line": 403,
+    "severity": "informational",
+    "title": "Minor Code",
+    "excerpt": "Minor Code \nImprovements\nIMPLEMENTATION 0 INFORMATIONAL ACKNOWLEDGED\n\n\u00a9 2024 Informal Systems Anoma 2024 Q3\nFindings 10\n\u2022\nIncorrect Balance Updates in IBC Transfer Handling\nProject Namada 2024 Q3\nType IMPLEMENTATION\nSeverity 4 CRITICAL\nImpact 3 HIGH\nExploitability 3 HIGH\nStatus ACKNOWLEDGED\nIssue \u00a0https://github.com/anoma/namada/pull/3611\nInvolved artifacts\nnamada/crates/namada/src/ledger/native_vp/masp.rs\nDescription\nThe MASP VP computes how MASP transactions change balances in changed_balances  and based on those \nchanges performs the validation. When a transaction includes a Recv  IBC message, the changed_balances\nvariable is updated by adding the transferred amount to the IBC internal address balance before the execution of \nthe transaction; see the following code:\n // Apply the given write acknowledge to the changed balances structure\n    fn apply_recv_msg(\n        &self,\n        mut acc: ChangedBalances,\n        msg: &IbcMsgRecvPacket,\n        ibc_traces: Vec<String>,\n        amount: Amount,\n        keys_changed: &BTreeSet<Key>,\n    ) -> Result<ChangedBalances> {\n        self.check_packet_receiving(msg, keys_changed)?;\n\u00a0\n        // If the transfer was a failure, then enable f"
+   },
+   {
+    "line": 719,
+    "severity": "informational",
+    "title": "Minor Code Improvements",
+    "excerpt": "Minor Code Improvements\nProject Namada 2024 Q3\nType IMPLEMENTATION\nSeverity 0 INFORMATIONAL\nImpact 0 NONE\nExploitability 0 NONE\nStatus ACKNOWLEDGED\nIssue \u00a0https://github.com/anoma/namada/pull/3611\nDescription\nDuring the code inspection, a several places for small improvements in the code were identified:\nA small optimization is possible in this part of code: \nRefactor the code to perform an early exit by evaluating the non_allowed_changes  condition before \ncreating masp_token_map_changed  and masp_transfer_changes . This will streamline the logic \nand potentially improve performance by avoiding unnecessary computations when non-allowed changes \nare detected. The refactored code should look like this:\nlet masp_keys_changed: Vec<&Key> =\n    keys_changed.iter().filter(|key| is_masp_key(key)).collect();\n\u00a0\nlet non_allowed_changes = masp_keys_changed.iter().any(|key| {\n    !is_masp_transfer_key(key) && !is_masp_token_map_key(key)\n});\n\u00a0\nif non_allowed_changes {\n    return Err(...); // handle the error or early exit here\n}\n\u00a0\nlet masp_token_map_changed = masp_keys_changed\n    .iter()\n    .any(|key| is_masp_token_map_key(key));\n\u00a0\nlet masp_transfer_changes = masp_keys_changed\n    .iter()\n   "
+   },
+   {
+    "line": 786,
+    "severity": "high",
+    "title": "High Halting of the chain; loss, locking, or unauthorized withdrawal of funds of many users;",
+    "excerpt": "High Halting of the chain; loss, locking, or unauthorized withdrawal of funds of many users; \narbitrary transaction execution; forging of user messages / circumvention of \nauthorization logic"
+   },
+   {
+    "line": 789,
+    "severity": "medium",
+    "title": "Medium Temporary denial of service / substantial unexpected delays in processing user requests",
+    "excerpt": "Medium Temporary denial of service / substantial unexpected delays in processing user requests \n(e.g. many hours/days); loss, locking, or unauthorized withdrawal of funds of a single \nuser / few users; failures during transaction execution (e.g. out of gas errors); substantial \nincrease in node computational requirements (e.g. 10x)"
+   },
+   {
+    "line": 793,
+    "severity": "low",
+    "title": "Low Transient unexpected delays in processing user requests (e.g. minutes/a few hours);",
+    "excerpt": "Low Transient unexpected delays in processing user requests (e.g. minutes/a few hours);"
+   },
+   {
+    "line": 794,
+    "severity": "medium",
+    "title": "Medium increase in node computational requirements (e.g. 2x); any kind of problem that",
+    "excerpt": "Medium increase in node computational requirements (e.g. 2x); any kind of problem that \naffects end users, but can be repaired by manual intervention (e.g. a special transaction)\n None Small increase in node computational requirements (e.g. 20%); code inefficiencies; bad \ncode practices; lack/incompleteness of tests; lack/incompleteness of documentation\nExploitability Score\nThe Exploitability score reflects the ease and technical means by which the vulnerability can be exploited; it \nrepresents the characteristics of the vulnerable component. In the below table we list, for each category, examples \nof actions by actors that are enough to trigger the exploit. In the examples below:\nActors\u00a0can be any entity that interacts with the system: other blockchains, system users, validators, relayers, \nbut also uncontrollable phenomena (e.g. network delays or partitions).\nActions\u00a0can be\n\n\u00a9 2024 Informal Systems Anoma 2024 Q3\nAppendix: Vulnerability Classification 24\n\u2022\n\u2022\n\u2022\nlegitimate, e.g. submission of a transaction that follows protocol rules by a user; delegation/\nredelegation/bonding/unbonding; validator downtime; validator voting on a single, but alternative \nblock; delays in relaying cer"
+   },
+   {
+    "line": 823,
+    "severity": "high",
+    "title": "High illegitimate actions taken by a small group of actors; possibly coordinated with",
+    "excerpt": "High illegitimate actions taken by a small group of actors; possibly coordinated with \nlegitimate actions taken by a medium group of actors"
+   },
+   {
+    "line": 825,
+    "severity": "medium",
+    "title": "Medium illegitimate actions taken by a medium group of actors; possibly coordinated with",
+    "excerpt": "Medium illegitimate actions taken by a medium group of actors; possibly coordinated with \nlegitimate actions taken by a large group of actors"
+   },
+   {
+    "line": 827,
+    "severity": "low",
+    "title": "Low illegitimate actions taken by a large group of actors; possibly coordinated with",
+    "excerpt": "Low illegitimate actions taken by a large group of actors; possibly coordinated with \nlegitimate actions taken by all actors\n None illegitimate actions taken in a coordinated fashion by all actors\nSeverity Score\nThe severity score combines the above two sub-scores into a single value, and roughly represents the probability of \nthe system suffering a severe impact with time; thus it also represents the measure of the urgency or order in which \nvulnerabilities need to be addressed. We assess the severity according to the combination scheme represented \ngraphically below.\nAs can be seen from the image above, only a combination of high impact with high exploitability results in a Critical \nseverity score; such vulnerabilities need to be addressed ASAP. Accordingly, High severity score receive \nvulnerabilities with the combination of high impact and medium exploitability, or medium impact, but high \nexploitability.\nSeverity Score Examples"
+   },
+   {
+    "line": 840,
+    "severity": "critical",
+    "title": "Critical Halting of chain via a submission of a specially crafted transaction",
+    "excerpt": "Critical Halting of chain via a submission of a specially crafted transaction"
+   },
+   {
+    "line": 841,
+    "severity": "high",
+    "title": "High Permanent loss of user funds via a combination of submitting a specially crafted",
+    "excerpt": "High Permanent loss of user funds via a combination of submitting a specially crafted \ntransaction with delaying of certain messages by a large portion of relayers"
+   },
+   {
+    "line": 843,
+    "severity": "medium",
+    "title": "Medium Substantial unexpected delays in processing user requests via a combination of",
+    "excerpt": "Medium Substantial unexpected delays in processing user requests via a combination of \ndelaying of certain messages by a large group of relayers with coordinated withdrawal \nof funds by a large group of users\n\n\n\u00a9 2024 Informal Systems Anoma 2024 Q3\nAppendix: Vulnerability Classification 25\nSeverity Score Examples"
+   },
+   {
+    "line": 851,
+    "severity": "low",
+    "title": "Low 2x increase in node computational requirements via coordinated withdrawal of all user",
+    "excerpt": "Low 2x increase in node computational requirements via coordinated withdrawal of all user \ntokens"
+   },
+   {
+    "line": 853,
+    "severity": "informational",
+    "title": "Informational Code inefficiencies; bad code practices; lack/incompleteness of tests; lack/",
+    "excerpt": "Informational Code inefficiencies; bad code practices; lack/incompleteness of tests; lack/\nincompleteness of documentation; any exploit for which a coordinated illegitimate \naction of all actors is necessary\n\n\u00a9 2024 Informal Systems Anoma 2024 Q3\nDisclaimer 26\nDisclaimer\nThis report is subject to the terms and conditions (including without limitation, description of services, \nconfidentiality, disclaimer and limitation of liability, etc.) set forth in the associated Services Agreement. This report \nprovided in connection with the Services set forth in the Services Agreement shall be used by the Company only to \nthe extent permitted under the terms and conditions set forth in the Agreement.\nThis audit report is provided on an \u201cas is\u201d basis, with no guarantee of the completeness, accuracy, timeliness or of \nthe results obtained by use of the information provided. Informal has relied upon information and data provided by \nthe client, and is not responsible for any errors or omissions in such information and data or results obtained from \nthe use of that information or conclusions in this report. Informal makes no warranty of any kind, express or \nimplied, regarding the accuracy, adequ"
+   }
+  ]
+ },
+ {
+  "file": "publications-trufin-injective-staker-zellic-audit-report-pdf.md",
+  "findings": [
+   {
+    "line": 79,
+    "severity": "informational",
+    "title": "informational in nature.",
+    "excerpt": "informational in nature.\nZellic \u00a9 2024 \u2190 Back to Contents Page 4 of 35\n\nTruFin Injective Staker Smart Contract Security Assessment November 19, 2024\nBreakdown of Finding Impacts\nImpact Level Count\n\u25a0 Critical 0\n\u25a0 High 0\n\u25a0 Medium 1\n\u25a0 Low 0\n\u25a0 Informational 1\nZellic \u00a9 2024 \u2190 Back to Contents Page 5 of 35\n\nTruFin Injective Staker Smart Contract Security Assessment November 19, 2024\n2. Introduction 2.1. About T ruFin Injective Staker\nT ruFin contributed the following description of T ruFin Injective Staker:\nT ruFin provides access to INJ staking for institutions featuring auto-compounding of rewards\nand the ability to allocate rewards to other addresses. The protocol is permissioned, ensuring\nthat each user has passed know-your-customer (KYC) checks and that only whitelisted users\ncan stake.\n2.2. Methodology\nDuring a security assessment, Zellic works through standard phases of security auditing, including\nboth automated testing and manual review. These processes can vary significantly per engagement,\nbut the majority of the time is spent on a thorough manual review of the entire scope.\nAlongside a variety of tools and analyzers used on an as-needed basis, Zellic focuses primarily on\nthe "
+   },
+   {
+    "line": 126,
+    "severity": "informational",
+    "title": "Informational.",
+    "excerpt": "Informational.\nZellic \u00a9 2024 \u2190 Back to Contents Page 6 of 35\n\nTruFin Injective Staker Smart Contract Security Assessment November 19, 2024\nZellic organizes its reports such that the most important findings come first in the document, rather\nthan being strictly ordered on impact alone. Thus, we may sometimes emphasize an \"Informational\"\nfinding higher than a \"Low\" finding. The key distinction is that although certain findings may have the\nsame impact rating, their importance may differ. This varies based on various soft factors, like our\nclients\u2019 threat models, their business needs, and so on. We aim to provide useful and actionable\nadvice to our partners considering their long-term goals, rather than a simple list of security issues\nat present.\nZellic \u00a9 2024 \u2190 Back to Contents Page 7 of 35\n\nTruFin Injective Staker Smart Contract Security Assessment November 19, 2024\n2.3. Scope\nThe engagement involved a review of the following targets:\nTruFin Injective Staker Contracts\nType Rust\nPlatform Cosmos\nT arget smart-contracts-inj-zellic\nRepository https:/ /github.com/T ruFin-io/smart-contracts-inj-zellic.git\u2197\nVersion c3e4c242947a32f26fec95dbb220b0475f9c1f15\nPrograms constants.rs\ncontract.rs"
+   },
+   {
+    "line": 963,
+    "severity": "informational",
+    "title": "informational in nature.",
+    "excerpt": "informational in nature.\n5.1. Disclaimer\nThis assessment does not provide any warranties about finding all possible issues within its scope;\nin other words, the evaluation results do not guarantee the absence of any subsequent issues. Zel-\nlic, of course, also cannot make guarantees about any code added to the project after the version\nreviewed during our assessment. Furthermore, because a single assessment can never be consid-\nered comprehensive, we always recommend multiple independent assessments paired with a bug\nbounty program.\nFor each finding, Zellic provides a recommended solution. All code samples in these recommen-\ndations are intended to convey how an issue may be resolved (i.e., the idea), but they may not be\ntested or functional code. These recommendations are not exhaustive, and we encourage our part-\nners to consider them as a starting point for further discussion. We are happy to provide additional\nguidance and advice as needed.\nFinally, the contents of this assessment report are for informational purposes only; do not construe\nany information in this report as legal, tax, investment, or financial advice. Nothing contained in this\nreport constitutes a solicitation o"
+   }
+  ]
+ },
+ {
+  "file": "publicreports-cosmwasm-smart-contract-audits-brokkr-protocol-p1-contracts-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+  "findings": [
+   {
+    "line": 28,
+    "severity": "informational",
+    "title": "Recommendation 17",
+    "excerpt": "Recommendation 17\nRemediation plan 17\n3.2 (HAL-02) BBRO TOKENS ARE LOST WHEN UNSTAKING OR CLAIMING RE-\nWARDS - HIGH 18\nDescription 18\nCode Location 18\nRisk Level 19"
+   },
+   {
+    "line": 35,
+    "severity": "informational",
+    "title": "Recommendation 19",
+    "excerpt": "Recommendation 19\nRemediation plan 19\n3.3 (HAL-03) BBRO REWARDS SCHEMA COULD PRODUCE UNFAIR ADVANTAGES -\nHIGH 20\nDescription 20\n1\n\nCode Location 20\nRisk Level 21"
+   },
+   {
+    "line": 44,
+    "severity": "informational",
+    "title": "Recommendation 21",
+    "excerpt": "Recommendation 21\nRemediation plan 21\n3.4 (HAL-04) PRICES FROM TWAP ORACLE CAN BECOME STALE - MEDIUM 23\nDescription 23\nCode Location 23\nRisk Level 24"
+   },
+   {
+    "line": 50,
+    "severity": "informational",
+    "title": "Recommendation 24",
+    "excerpt": "Recommendation 24\nRemediation plan 24\n3.5 (HAL-05) PRIVILEGED ADDRESS CAN BE TRANSFERRED WITHOUT CONFIR-\nMATION - MEDIUM 25\nDescription 25\nCode Location 25\nRisk Level 27"
+   },
+   {
+    "line": 57,
+    "severity": "informational",
+    "title": "Recommendation 27",
+    "excerpt": "Recommendation 27\nRemediation plan 27\n3.6 (HAL-06) MISSING VALIDATION FOR BASE RATE AND GROWTH PARAMETERS -\nLOW 28\nDescription 28\nCode Location 28\nRisk Level 29"
+   },
+   {
+    "line": 64,
+    "severity": "informational",
+    "title": "Recommendation 29",
+    "excerpt": "Recommendation 29\nRemediation plan 29\n3.7 (HAL-07) MISSING VALIDATION FOR BONDING DISCOUNTS AND REWARD\nRATIO - LOW 30\nDescription 30\n2\n\nCode Location 30\nRisk Level 31"
+   },
+   {
+    "line": 73,
+    "severity": "informational",
+    "title": "Recommendation 32",
+    "excerpt": "Recommendation 32\nRemediation plan 32\n3.8 (HAL-08) MISSING VALIDATION FOR MIN AND MAX VALUES OF LOCKUP\nPERIOD - LOW 33\nDescription 33\nCode Location 33\nRisk Level 34"
+   },
+   {
+    "line": 80,
+    "severity": "informational",
+    "title": "Recommendation 34",
+    "excerpt": "Recommendation 34\nRemediation plan 34\n3.9 (HAL-09) VESTING SCHEDULES COULD BE UNCLAIMABLE - INFORMATIONAL\n35\nDescription 35\nCode Location 35\nRisk Level 35"
+   },
+   {
+    "line": 87,
+    "severity": "informational",
+    "title": "Recommendation 35",
+    "excerpt": "Recommendation 35\nRemediation plan 35\n3.10 (HAL-10) SLIGHT ROUNDING ISSUES WHEN PROVIDING LP TOKENS - IN-\nFORMATIONAL 36\nDescription 36\nCode Location 36\nRisk Level 36"
+   },
+   {
+    "line": 94,
+    "severity": "informational",
+    "title": "Recommendation 37",
+    "excerpt": "Recommendation 37\nRemediation plan 37\n3.11 (HAL-11) OVERFLOW CHECKS NOT SET FOR PROFILE RELEASE - INFORMA-\nTIONAL 38\nDescription 38\n3\n\nCode Location 38\nRisk Level 38"
+   },
+   {
+    "line": 103,
+    "severity": "informational",
+    "title": "Recommendation 38",
+    "excerpt": "Recommendation 38\nRemediation plan 38\n4\n\nDOCUMENT REVISION HISTORY\nVERSION MODIFICATION DATE AUTHOR\n0.1 Document Creation 03/07/2022 Luis Quispe Gonzales\n0.2 Document Updates 03/16/2022 Alexis Fabre\n0.3 Document Updates 03/18/2022 Luis Quispe Gonzales\n0.4 Draft Version 03/23/2022 Luis Quispe Gonzales\n0.5 Draft Review 03/24/2022 Gabi Urrutia\n1.0 Remediation Plan 03/27/2022 Luis Quispe Gonzales\n1.1 Remediation Plan Review 03/27/2022 Gabi Urrutia\n5\n\nCONTACTS\nCONTACT COMPANY EMAIL\nRob Behnke Halborn Rob.Behnke@halborn.com\nSteven Walbroehl Halborn Steven.Walbroehl@halborn.com\nGabi Urrutia Halborn Gabi.Urrutia@halborn.com\nLuis Quispe\nGonzales Halborn Luis.QuispeGonzales@halborn.com\n6\n\n7\nEXECUTIVE OVERVIEW\n\n1.1 AUDIT SUMMARY\nBrokkr engaged Halborn to conduct a security assessment on CosmWasm smart\ncontracts beginning on March 7th, 2022 and ending on March 23rd, 2022.\nThe security engineers involved on the audit are blockchain and smart-\ncontract security experts with advanced penetration testing, smart-\ncontract hacking, and deep knowledge of multiple blockchain protocols.\nThe purpose of this audit is to achieve the following:\n\u2022 Ensure that smart contract functions work as intended.\n\u2022 Ide"
+   },
+   {
+    "line": 250,
+    "severity": "high",
+    "title": "High FUTURE RELEASE",
+    "excerpt": "High FUTURE RELEASE\n(HAL-02) BBRO TOKENS ARE LOST WHEN\nUNSTAKING OR CLAIMING REWARDS High SOLVED - 03/26/2022\n(HAL-03) BBRO REWARDS SCHEMA COULD\nPRODUCE UNFAIR ADVANTAGES High PARTIALLY SOLVED\n(HAL-04) PRICES FROM TWAP ORACLE\nCAN BECOME STALE Medium SOLVED - 03/23/2022\n(HAL-05) PRIVILEGED ADDRESS CAN BE\nTRANSFERRED WITHOUT CONFIRMATION Medium SOLVED - 03/21/2022\n(HAL-06) MISSING VALIDATION FOR\nBASE RATE AND GROWTH PARAMETERS Low SOLVED - 03/26/2022\n(HAL-07) MISSING VALIDATION FOR\nBONDING DISCOUNTS AND REWARD RATIO Low SOLVED - 03/26/2022\n(HAL-08) MISSING VALIDATION FOR MIN\nAND MAX VALUES OF LOCKUP PERIOD Low SOLVED - 03/26/2022\n(HAL-09) VESTING SCHEDULES COULD BE\nUNCLAIMABLE Informational ACKNOWLEDGED\n(HAL-10) SLIGHT ROUNDING ISSUES\nWHEN PROVIDING LP TOKENS Informational ACKNOWLEDGED\n(HAL-11) OVERFLOW CHECKS NOT SET\nFOR PROFILE RELEASE Informational SOLVED - 03/09/2022\n13\nEXECUTIVE OVERVIEW\n\n14\nFINDINGS & TECH\nDETAILS\n\n3.1 (HAL-01) POSSIBILITY TO TRANSFER\nAN ARBITRARY AMOUNT OF TOKENS OUT OF\nSOME CONTRACTS - HIGH\nDescription:\nThe bonding-v1 and mvp-treasury contracts allow an admin (Brokkr team) to\ntransfer an arbitrary amount of tokens out of them. Two possible attack\nscenarios wi"
+   },
+   {
+    "line": 353,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to transfer the ownership of contracts mentioned above\nto a Governance contract, which will control the changes proposed through\na voting process. Otherwise, the following security measures should be\napplied:\n\u2022 Remove the possibility to update the value of treasury_contract in\nbonding-v1 contract.\n\u2022 Update the logic of spend function in mvp-treasury contract to verify\nthat the value of recipient belongs to a list of contracts that Brokkr\nprotocol interacts with. This list is defined when mvp-treasury is\ninstantiated and should be non-modifiable.\n\u2022 Brokkr admin should be handled by a multi-sig wallet.\nRemediation plan:\nPENDING: The Brokkr team stated that they plan to transfer the ownership of\nthe contracts to a full-fledged governance contract setup in the midterm,\nwhich will severely reduce the likelihood of liquidity loss exposure\nattacks. Meanwhile, they will handle the Brokkr admin by a multisig\nwallet, as suggested in the recommendation.\n17\nFINDINGS & TECH DETAILS\n\n3.2 (HAL-02) BBRO TOKENS ARE LOST\nWHEN UNSTAKING OR CLAIMING\nREWARDS - HIGH\nDescription:\nWhen a user unstake or claim BRO rewards in staking-v1 contract, his in-\nformation is totall"
+   },
+   {
+    "line": 420,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nUpdate the logic of unstake and claim_bro_rewards functions to remove\nusers\u2019 information from STAKERS item only if, additionally to the already\nexisting conditions, pending_bbro_reward is also zero.\nRemediation plan:\nSOLVED: The issue was fixed in commit f9bbc72a85ff872b36691c4992d7a86439a4bba2.\n19\nFINDINGS & TECH DETAILS\n\n3.3 (HAL-03) BBRO REWARDS SCHEMA\nCOULD PRODUCE UNFAIR ADVANTAGES -\nHIGH\nDescription:\nWhen users stake, the compute_normal_bbro_reward function is called\nto calculate the bBRO rewards accrued. Because of the calcu-\nlation of bbro_reward value depends on the subtraction between\nlast_distribution_block and last_balance_update, it is possible the\nfollowing attack scenario:\nAttack scenario :\n1. Just after a reward distribution, an attacker stakes 10_000000 BRO\n(Block height: 200).\n2. Attacker waits until there is another reward distribution and he\nfront-runs the transaction to additionally stake 80_000000 BRO be-\nfore the distribution of BRO tokens (Block height: 700).\n3. The attacker unstakes 80_000000 BRO just after the reward distribu-\ntion (could be even in the same block!).\n4. The calculation of his bBRO reward will consider that 90_000000 BRO\nhas"
+   },
+   {
+    "line": 483,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nUpdate the logic of compute_normal_bbro_reward function to consider the\nblock height of each stake when calculating the bBRO rewards.\nRemediation plan:\nPARTIALLY SOLVED: The Brokkr team claimed that contracts will be launched\nto mainnet with the following parameters:\n\u2022 epoch = 17,280 blocks (1 day)\n\u2022 unstake_period_blocks = 241,920 blocks (14 days)\n21\nFINDINGS & TECH DETAILS\n\nBecause of this setup, the attack vector mentioned above is not prof-\nitable unless the rewards are distributed after 14 days, which is highly\nunlikely, especially with the use of an off-chain trigger (out-of-scope\nof this audit).\nIf the above-mentioned parameters are subsequently incorrectly changed\nwith the update_config function, this security issue could arise again,\nso it has been marked as \"Partially Solved\".\n22\nFINDINGS & TECH DETAILS\n\n3.4 (HAL-04) PRICES FROM TWAP\nORACLE CAN BECOME STALE - MEDIUM\nDescription:\nconsult_price function in contracts/oracle/src/queries.rs calculates the\nreturn value using the price_average stored in oracle contract\u2019s storage\n(PRICE_LAST). However, the function does not previously validate if the\nprice has been updated within a reasonable timeframe.\nAs a conse"
+   },
+   {
+    "line": 549,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to apply one of the following oracle strategies:\n\u2022 Update the logic of consult_price function to throw an error message\nif price_average has not been updated within a reasonable timeframe\ndefined in the contract.\n\u2022 If data freshness is more important for Brokkr protocol, an oracle\nwith moving averages can be used instead, in which the cumulative\nprice variable is measured more often than once per period. See the\nfollowing reference for more details.\nRemediation plan:\nSOLVED: The issue was fixed in commit 44a54bddf48a4e28b711449ddcb13d9bf31afdb9.\n24\nFINDINGS & TECH DETAILS\n\n3.5 (HAL-05) PRIVILEGED ADDRESS CAN\nBE TRANSFERRED WITHOUT\nCONFIRMATION - MEDIUM\nDescription:\nAn incorrect use of the update_config function in contracts can set owner\nto an invalid address and inadvertently lose control of the contracts,\nwhich cannot be undone in any way. Currently, the owner of the contracts\ncan change owner address using the aforementioned function in a single\ntransaction and without confirmation from the new address.\nThe affected smart contracts are the following:\n\u2022 airdrop\n\u2022 bonding-v1\n\u2022 oracle\n\u2022 staking-v1\n\u2022 vesting\nCode Location:\nListing 9: contracts/airdr"
+   },
+   {
+    "line": 656,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to split owner transfer functionality into set_owner\nand accept_ownership functions. The latter function allows the transfer\nto be completed by the recipient.\nRemediation plan:\nSOLVED: The issue was fixed in commit 79549c38936e99a89a1fa7aa7e38456032f47389.\n27\nFINDINGS & TECH DETAILS\n\n3.6 (HAL-06) MISSING VALIDATION FOR\nBASE RATE AND GROWTH PARAMETERS -\nLOW\nDescription:\ninstantiate and update_config functions in staking-v1 contract do not\nvalidate that values of base_rate, linear_growth or exponential_growth\nare less or equal than a threshold (e.g.: 0.1) predefined in the contract.\nThe aforementioned values are used to calculate premium bBRO rewards. If\nthose values are not correctly set, the premium bBRO rewards for users\ncould be much higher than expected.\nCode Location:\ninstantiate function does not validate that base_rate, linear_growth or\nexponential_growth are less or equal than a predefined threshold:\nListing 14: contracts/staking-v1/src/contract.rs (Lines 59-61)\n45 store_config (\n46 deps . storage ,\n47 & Config {\n48 owner : deps . api . add r_ ca no nic al iz e (& msg . owner ) ? ,\n49 paused : false ,\n50 bro_token : deps . api . add r_ ca no"
+   },
+   {
+    "line": 722,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nAdd a validation routine inside instantiate and update_config functions\nto ensure that values of base_rate, linear_growth and exponential_growth\nare less or equal than a threshold predefined in the contract.\nRemediation plan:\nSOLVED: The issue was fixed in commit 032d729b4cddd49c990fdb5d9e78c608d21f0d25.\n29\nFINDINGS & TECH DETAILS\n\n3.7 (HAL-07) MISSING VALIDATION FOR\nBONDING DISCOUNTS AND REWARD\nRATIO - LOW\nDescription:\ninstantiate and update_config functions in bonding-v1 contract do not\nvalidate that values of ust_bonding_reward_ratio, ust_bonding_discount\nor lp_bonding_discount are less or equal than 1.\nThe aforementioned values are used to calculate rewards distribution and\namounts of BRO tokens to claim. If those values are not correctly set,\noperations will throw error messages and won\u2019t allow legitimate users to\nclaim their rewards, thus generating a denial of service (DoS) in Brokkr\nprotocol.\nCode Location:\ninstantiate function does not validate that ust_bonding_discount or\nlp_bonding_discount are less or equal than 1:\nListing 16: contracts/bonding-v1/src/contract.rs (Lines 63-64)\n46 if msg . u s t _ b o n d i n g _ r e w a r d _ r a t i o> Decimal :: from_s"
+   },
+   {
+    "line": 798,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nAdd a validation routine inside instantiate and update_config functions\nto ensure that values of ust_bonding_reward_ratio, ust_bonding_discount\nand lp_bonding_discount are less or equal than 1.\nRemediation plan:\nSOLVED: The issue was fixed in commit e80b7dc97ff20b683cd27d7a4cdaa6d7d60c1076.\n32\nFINDINGS & TECH DETAILS\n\n3.8 (HAL-08) MISSING VALIDATION FOR\nMIN AND MAX VALUES OF LOCKUP\nPERIOD - LOW\nDescription:\ninstantiate and update_config functions in staking-v1 contract do not\nvalidate that min_lockup_period_epochs is less than max_lockup_peri\nod_epochs.\nThe aforementioned values are used to validate the lockup period when\nstaking locked BRO tokens or locking a previous staked amount. If those\nvalues are not correctly set, operations will throw error messages and\nwon\u2019t allow legitimate users to stake or lock BRO tokens, thus generating\na denial of service (DoS) in Brokkr protocol.\nCode Location:\ninstantiate function does not validate that min_lockup_period_epochs is\nless than max_lockup_period_epochs:\nListing 18: contracts/staking-v1/src/contract.rs (Lines 57-58)\n45 store_config (\n46 deps . storage ,\n47 & Config {\n48 owner : deps . api . add r_ ca no nic al iz e (& m"
+   },
+   {
+    "line": 864,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nAdd a validation routine inside instantiate and update_config functions\nto ensure that min_lockup_period_epochs is less than max_lockup_peri\nod_epochs.\nRemediation plan:\nSOLVED: The issue was fixed in commit b9c1e4ad60fa79e030737e5374a8b027c147d091.\n34\nFINDINGS & TECH DETAILS\n\n3.9 (HAL-09) VESTING SCHEDULES COULD\nBE UNCLAIMABLE - INFORMATIONAL\nDescription:\nWhen registering new vesting accounts, the vesting contract sets the\nlast claimed time to the configured genesis time. That parameter could\nbe greater than the expiration date of some vesting schedules, such\nthat vesting_info.last_claim_time > vesting_info.end_time, which makes\nit unclaimable. However, it is possible for the administrator to update\ngenesis time and set new vesting schedules.\nCode Location:\nListing 20: packages/services/src/vesting.rs, (Line 101)\n101 if current_time > schedule . end_time && self . last_claim_time <\n\u00eb schedule . end_time {\n102 claimabl e_amount += schedule . bro_amount ;\n103 }\nRisk Level:\nLikelihood - 1\nImpact - 2"
+   },
+   {
+    "line": 891,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nWhen registering vesting schedules, it is recommended to verify that the\nend time of that schedule is greater than the genesis time.\nRemediation plan:\nACKNOWLEDGED: The Brokkr team acknowledged this finding.\n35\nFINDINGS & TECH DETAILS\n\n3.10 (HAL-10) SLIGHT ROUNDING\nISSUES WHEN PROVIDING LP TOKENS -\nINFORMATIONAL\nDescription:\nWhen calculating the return values in get_share_in_assets function every\ntime users provide LP tokens to bonding-v1 contract, the \u201cmultiply before\ndivide\u201d principle is not followed, which could generate slight rounding\nissues in some edge scenarios.\nCode Location:\nListing 21: contracts/bonding-v1/src/commands.rs (Lines 412,414)\n404 fn g e t _ s h a r e _ i n _ a s s e t s(\n405 querier : & QuerierWrapper ,\n406 bro_pool : & Asset ,\n407 ust_pool : & Asset ,\n408 lp_amount : Uint128 ,\n409 lp_token_addr : Addr ,\n410 ) -> StdResult <( Uint128 , Uint128 ) > {\n411 let total_share = query_supply ( querier , lp_token_addr ) ?;\n412 let share_ratio = Decimal :: from_ratio ( lp_amount , total_share ) ;\n413\n414 Ok (( bro_pool . amount * share_ratio , ust_pool . amount *\n\u00eb share_ratio ) )\n415 }\nRisk Level:\nLikelihood - 2\nImpact - 1\n36\nFINDINGS & TECH DETAILS"
+   },
+   {
+    "line": 928,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nReturn values in get_share_in_assets function should be calculated fol-\nlowing the \u201cmultiply before divide\u201d principle to reduce rounding issues.\nRemediation plan:\nACKNOWLEDGED: The Brokkr team acknowledged this finding.\n37\nFINDINGS & TECH DETAILS\n\n3.11 (HAL-11) OVERFLOW CHECKS NOT\nSET FOR PROFILE RELEASE -\nINFORMATIONAL\nDescription:\nWhile the overflow-checks parameter is set to true in profile.release\nsection in Cargo.toml file for each individual contract and package, it\nis not explicitly enabled in Cargo.toml file from root workspace, which\ncould lead to unexpected consequences if the project is refactored.\nCode Location:\nListing 22: Cargo.toml file from root workspace\n1 [ workspace ]\n2 members = [\" packages /*\" , \" contracts /*\"]\nRisk Level:\nLikelihood - 1\nImpact - 1"
+   },
+   {
+    "line": 951,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nIt is recommended to enable overflow checks explicitly in Cargo.toml file\nfrom root workspace. That measure helps when the project is refactored\nto prevent unintended consequences.\nRemediation plan:\nSOLVED: The issue was fixed in commit 2cecb7ba9a75b642883f009f360a28a9551e07ff.\nThe Brokkr team also discovered this security issue while security audit\nwas ongoing and solved it on time.\n38\nFINDINGS & TECH DETAILS\n\nTHANK YOU FOR CHOOSING"
+   }
+  ]
+ },
+ {
+  "file": "publications-cosmos-sdk-liquid-stake-module-zellic-audit-report-pdf.md",
+  "findings": [
+   {
+    "line": 140,
+    "severity": "informational",
+    "title": "Informational.",
+    "excerpt": "Informational.\nZellic organizes its reports such that the most important findings come first in the document, rather\nthan being strictly ordered on impact alone. Thus, we may sometimes emphasize an \"Informational\"\nfinding higher than a \"Low\" finding. The key distinction is that although certain findings may have the\nsame impact rating, their importance may differ. This varies based on various soft factors, like our\nclients\u2019 threat models, their business needs, and so on. We aim to provide useful and actionable\nadvice to our partners considering their long-term goals, rather than a simple list of security issues\nat present.\nFinally, Zellic provides a list of miscellaneous observations that do not have security impact or are\nnot directly related to the scoped modules itself. These observations \u2014 found in the Discussion\n(4. \u2197) section of the document \u2014 may include suggestions for improving the codebase, or general\nrecommendations, but do not necessarily convey that we suggest a code change.\nZellic \u00a9 2024 \u2190 Back to Contents Page 8 of 24\n\nCosmos SDK Liquid Stake Module Cosmos Application Security Assessment November 27, 2024\n2.3. Scope\nThe engagement involved a review of the following t"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-persistence-2022-01-20-audit-report-persistence-bridge-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 444,
+    "severity": "informational",
+    "title": "Informational notes do not have a status, since we consider them optional recommendations.",
+    "excerpt": "Informational notes do not have a status, since we consider them optional recommendations.\n8\n\nProject Risk Analysis\nAudits\nare\nan\nimportant\nstep\nto\nimprove\nthe\nsecurity\nof\nsmart\ncontracts\nand\ncan\n\ufb01nd\nmany\nissues.\nHowever,\nauditing\ncomplex\ncodebases\nhas\nits\nlimits\nand\na\nremaining\nrisk\nis\npresent\n(see disclaimer).\nThis\nsection\nis\nmeant\nto"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-comdex-2022-11-23-audit-report-comdex-lend-and-liquidation-modules-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 39,
+    "severity": "gas",
+    "title": "1. Gas is not consumed if the transaction returns an error",
+    "excerpt": "1. Gas is not consumed if the transaction returns an error\n11\n2.\nInput-dependent\niteration\nin\nLend\nmodule\u2019s\nBeginBlocker\nmay\nslow\ndown\nor\nstop\nblock production\n12\n3.\nBatch\nmechanism\nin\nLiquidation\nmodule\u2019s\nBeginBlocker\nmay\nallow\nmalicious\nmanipulations\n12\n4. Error raised in BeginBlocker could lead to state corruption\n13\n5. Incorrect conditions when rebalancing stable rates\n13\n6.\nFundModAcc\nallows\nfunds\nto\nbe\nsent\nto"
+   },
+   {
+    "line": 741,
+    "severity": "low",
+    "title": "Low-Medium",
+    "excerpt": "Low-Medium\nInconsistent and incorrect naming\nconventions impair the code\nreadability and clarity. The code also\nlacks consistent commenting.\nLevel of documentation\nMedium\n-\nTest coverage\nLow\n20.5% test coverage for the\nLend\nmodule.\nThe\nLiquidation\nmodule\ncontains failing tests.\n10\n\nDetailed Findings\n1."
+   },
+   {
+    "line": 762,
+    "severity": "gas",
+    "title": "Gas is not consumed if the transaction returns an error",
+    "excerpt": "Gas is not consumed if the transaction returns an error\nSeverity: Critical\nThe\nConsumeGas\nfunction\nis\nused\nin\nthe\nlend\nmodule\nto\nincrease\nthe\nGasMeter\n\u2019s\nconsumed\ngas\nby\na\nset\namount.\nWithin\nthe\nComdex\nappchain,\nthese\namounts\nare\npre-de\ufb01ned\nbased\non\nanticipated\nvalues.\nThis\nmethod\nis\nproblematic\nbecause\ngas"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-mars-2024-12-04-audit-report-mars-perps-v1-0-pdf.md",
+  "findings": []
+ },
+ {
+  "file": "audit-reports-thorchain-2024-12-16-audit-report-validator-scheduled-standard-cosmos-hard-fork-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 1940,
+    "severity": "low",
+    "title": "Low-Medium",
+    "excerpt": "Low-Medium\n \n-\n \nCode\n \nreadability\n \nand\n \nclarity\n \n \nMedium\n \n-\n \nLevel\n \nof\n \ndocumentation"
+   },
+   {
+    "line": 1964,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n \nDetailed\n \ndocumentation\n \nis\n \navailable\n \nin\n \nthe\n \nmerge\n \nrequest.\n \nAdditionally,\n \nextensive\n \ncomments\n \nare\n \npresent\n \nexplaining\n \nmost\n \nof\n \nthe\n \ncritical\n \nfunctions"
+   },
+   {
+    "line": 2012,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n \n-\n \n \n9\n \n\n \nSummary\n \nof\n \nFindings\n \n \nNo\n \nDescription\n \nSeverity\n \nStatus\n \n1\n \nUnrestricted\n \nproposal\n \ncreation\n \ncould\n \nlead\n \nto\n \nDenial"
+   }
+  ]
+ },
+ {
+  "file": "publicreports-cosmwasm-smart-contract-audits-sienna-network-amm-protocol-updated-code-cosmwasm-smart-contract-security-audit-report-halborn-final-pdf.md",
+  "findings": [
+   {
+    "line": 30,
+    "severity": "informational",
+    "title": "Recommendation 14",
+    "excerpt": "Recommendation 14\nRemediation plan 14\n3.2 (HAL-02) EXCHANGE SWAP FEES ARE NOT STABLE - LOW 15\nDescription 15\nCode Location 16\nRisk Level 16"
+   },
+   {
+    "line": 36,
+    "severity": "informational",
+    "title": "Recommendation 16",
+    "excerpt": "Recommendation 16\nRemediation plan 17\n3.3 (HAL-03) DATA LEAKAGE ATTACKS BY ANALYZING METADATA OF CONTRACTS\nUSAGE - INFORMATIONAL 18\n1\n\nDescription 18\nCode Location 18\nRisk Level 19"
+   },
+   {
+    "line": 45,
+    "severity": "informational",
+    "title": "Recommendation 19",
+    "excerpt": "Recommendation 19\nRemediation plan 19\n3.4 (HAL-04) MISMATCH BETWEEN ASSERTION AND ERROR DESCRIPTION -\nINFORMATIONAL 20\nDescription 20\nCode Location 20\nRisk Level 20"
+   },
+   {
+    "line": 52,
+    "severity": "informational",
+    "title": "Recommendation 21",
+    "excerpt": "Recommendation 21\nRemediation plan 21\n4 AUTOMATED TESTING 22\n4.1 AUTOMATED ANALYSIS 23\nDescription 23\n2\n\nDOCUMENT REVISION HISTORY\nVERSION MODIFICATION DATE AUTHOR\n0.1 Document Creation 02/07/2022 Alexis Fabre\n0.2 Document Updates 02/15/2022 Alexis Fabre\n0.3 Draft Version 02/16/2022 Luis Quispe Gonzales\n0.4 Draft Review 02/17/2022 Gabi Urrutia\n1.0 Remediation Plan 02/18/2022 Alexis Fabre\n1.1 Remediation Plan Review 02/18/2022 Gabi Urrutia\n3\n\nCONTACTS\nCONTACT COMPANY EMAIL\nRob Behnke Halborn Rob.Behnke@halborn.com\nSteven Walbroehl Halborn Steven.Walbroehl@halborn.com\nGabi Urrutia Halborn Gabi.Urrutia@halborn.com\nLuis Quispe\nGonzales Halborn Luis.QuispeGonzales@halborn.com\nAlexis Fabre Halborn Alexis.Fabre@halborn.com\n4\n\n5\nEXECUTIVE OVERVIEW\n\n1.1 INTRODUCTION\nSienna.Network engaged Halborn to conduct a security audit on their smart\ncontracts beginning on February 7th, 2022 and ending on February 16th,\n2022. The security assessment was scoped to the smart contracts provided\nto the Halborn team.\n1.2 AUDIT SUMMARY\nThe team at Halborn was provided 1 week for the engagement and assigned a\nfull-time security engineer to audit the security of the smart contract.\nThe security engineer is a b"
+   },
+   {
+    "line": 196,
+    "severity": "informational",
+    "title": "Informational ACKNOWLEDGED",
+    "excerpt": "Informational ACKNOWLEDGED\n(HAL-04) MISMATCH BETWEEN ASSERTION\nAND ERROR DESCRIPTION Informational ACKNOWLEDGED\n11\nEXECUTIVE OVERVIEW\n\n12\nFINDINGS & TECH\nDETAILS\n\n3.1 (HAL-01) POSSIBILITY TO CREATE\nPOOLS WITH THE SAME PAIR - HIGH\nDescription:\nThe AMM module allow users to create pairs (called exchanges) from native\nor custom assets by calling create_exchange function on factory contract.\nIt relies on the token_type PartialEq implementation, that allows users\nto pair the same asset twice, which generates unexpected situations,\ne.g.: a user could withdraw more tokens than his fair share and affect\nother users in the pool.\nThe verification asserts that both tokens addresses are not exactly equal,\nbut a lowercase version of the address will be considered different from\nthe uppercase one.\nCode Location:\nListing 1: libraries/amm-shared/src/token_type.rs (Line 32)\n26 impl <A : PartialEq > PartialEq for TokenType <A > {\n27 fn eq (& self , other : & Self ) -> bool {\n28 match ( self , other ) {\n29 (\n30 Self :: CustomToken { contract_addr : l_contract_addr\n, .. } ,\n31 Self :: CustomToken { contract_addr : r_contract_addr\n, .. }\n32 ) = > l_contract_addr == r_contract_addr ,\n33 (\n34 Self :: Nat"
+   },
+   {
+    "line": 243,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nThe PartialEq implementation for TokenType must be able to compare custom\ntokens correctly, taking the case into account.\nRemediation plan:\nRISK ACCEPTED: The Sienna.Network team accepted the risk for this finding.\n14\nFINDINGS & TECH DETAILS\n\n3.2 (HAL-02) EXCHANGE SWAP FEES ARE\nNOT STABLE - LOW\nDescription:\nThe exchange contract allows users to perform swaps between different\nassets, and comes with a predefined swap fee that capture part of the\ninput amount and leaves it in the pool. However, that captured amount\nis not considered when performing the swap. To better explain this\nsituation, we take a scenario with little liquidity:\n\u2022 Alice offers 1000 A to a (1000 A; 1000 B) pool with 0.3% swap fees.\n\u2022 3 A are captured from the offer, and the swap is performed on the\n(1000 A; 1000 B) pool with 997 A instead of a (1003 A; 1000 B) pool.\nThis realizes the swap on a 1997 total A pool instead of 2000 A pool:\n1) Without fee:\n\u2022 returned = 1000 B - (1000 A * 1000 B)/ (1000 A + 1000 A)= 500 B\n\u2022 balance after swap: 2000A, 500B\n2) Excluding the fee from the pool (current scenario):\n\u2022 returned = 1000 B - (1000 A * 1000 B)/ (1000 A + 997 A)= 499.25 B\n\u2022 balance after swap: 2000A, "
+   },
+   {
+    "line": 300,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nInclude the retained commission within the offer_pool of swap computation,\nor only apply the fee on the returned amount.\n16\nFINDINGS & TECH DETAILS\n\nRemediation plan:\nRISK ACCEPTED: The Sienna.Network team accepted the risk of this finding\nand also stated that fees should be deducted from the input amount as a\nbusiness decision.\n17\nFINDINGS & TECH DETAILS\n\n3.3 (HAL-03) DATA LEAKAGE ATTACKS\nBY ANALYZING METADATA OF CONTRACTS\nUSAGE - INFORMATIONAL\nDescription:\nDepending on a contract\u2019s implementation, an attacker could deanonymize\ninformation about the contract and its clients. In all the following\nscenarios, assume that an attacker has a local full node in its control.\nFor example, it is possible for an attacker to create a list of every\naccount that performs a swap. This attack is based on the length of the\n(encrypted) message sent to the attacker\u2019s node: there is a significant\ndifference of size between the only two queries. On one side, pair_info is\nshort and doesn\u2019t take any parameter. On the other side, swap_simulation\nis longer and takes a parameter.\nThis means that the inputs for queries on this contract would look like:\n\"pair_info\"\n{\"swap_simulation\": {\" offe"
+   },
+   {
+    "line": 371,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nConsider applying remediation from the SCRT privacy model (same length\nin function names, outputs, same state accessing orders. . . )\nRemediation plan:\nACKNOWLEDGED: The Sienna.Network team acknowledged this finding.\n19\nFINDINGS & TECH DETAILS\n\n3.4 (HAL-04) MISMATCH BETWEEN\nASSERTION AND ERROR DESCRIPTION -\nINFORMATIONAL\nDescription:\nIn the exchange contract, the description of the slippage check and the\ncode do not match:\n\u2022 Description explains that slippage tolerance must be bewteen 0.1 and\n0.9.\n\u2022 Verification ensures that slippage is contained between 0 and 1\nexcluded.\nThe confusion between the code and the description could confuse users\ninteracting with the contract.\nCode Location:\nListing 4: contracts/amm/exchange/src/contract.rs (Lines 741,743)\n741 if slippage . is_zero () || slippage >= Decimal256 :: one () {\n742 return Err ( StdError :: generic_err (\n743 format! (\" Slippage tolerance must be between 0.1 and 0.9 ,\ngot : {} \" , slippage ) )\n744 ) ;\n745 }\nRisk Level:\nLikelihood - 1\nImpact - 1\n20\nFINDINGS & TECH DETAILS"
+   },
+   {
+    "line": 405,
+    "severity": "informational",
+    "title": "Recommendation:",
+    "excerpt": "Recommendation:\nEither change the code, or the error description, so that both are\nmatching.\nRemediation plan:\nACKNOWLEDGED: The Sienna team acknowledged this finding and also stated\nthat if a mistake is made for whatever reason, it can quickly be corrected.\n21\nFINDINGS & TECH DETAILS\n\n22\nAUTOMATED TESTING\n\n4.1 AUTOMATED ANALYSIS\nDescription:\nHalborn used automated security scanners to assist with detection of\nwell-known security issues and vulnerabilities. Among the tools used\nwas cargo audit, a security scanner for vulnerabilities reported to the\nRustSec Advisory Database. All vulnerabilities published in https://\ncrates.io are stored in a repository named The RustSec Advisory Database.\ncargo audit is a human-readable version of the advisory database which\nperforms a scanning on Cargo.lock. Security Detections are only in\nscope. All vulnerabilities shown here were already disclosed in the above\nreport. However, to better assist the developers maintaining this code,\nthe auditors are including the output with the dependencies tree, and\nthis is included in the cargo audit output to better know the dependencies\naffected by unmaintained and vulnerable crates.\nID package Short Descript"
+   }
+  ]
+ },
+ {
+  "file": "audit-reports-astroport-2024-01-29-audit-report-astroport-on-osmosis-v1-0-pdf.md",
+  "findings": [
+   {
+    "line": 817,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\nThe\ncomplexity\nincreases\ndue\nto\nintegration\nwith\nOsmosis\u2019s\ncosmwasmpool\nmodule.\nCode\nreadability\nand\nclarity"
+   },
+   {
+    "line": 832,
+    "severity": "medium",
+    "title": "Medium-High",
+    "excerpt": "Medium-High\n-\nLevel\nof\ndocumentation\nMedium\nDocumentation\nis\navailable\nat\ncontracts/pair_concentrat\ned/src/README.md\n.\nTest\ncoverage\nHigh\ncargo\ntarpaulin\nreports\na\ntest\ncoverage\nof\n95.38%\n.\nFor\nmore\ninformation\non\nhow\nwe\ncompute\nthe\ncoverage,\nplease\nsee\nthis\nsection\nin\nthe"
+   },
+   {
+    "line": 1093,
+    "severity": "low",
+    "title": "low-value",
+    "excerpt": "low-value\nnative\ntokens\nto\nswap\nfor\nother\nassets\nin\nthe\npool.\nConsequently,\nan\nattacker\ncan\ncreate\nand\nmint\na\nlarge\namount\nof\na\ntoken\nfactory\ndenom\nand\ncall\nSwapExactAmountOut\non\nthe\npoolmanager\nmodule\nto\ntrade\nany\ntoken\nfor\npool\nassets,"
+   }
+  ]
+ }
+]

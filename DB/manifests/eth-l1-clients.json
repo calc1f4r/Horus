@@ -1,0 +1,5458 @@
+{
+  "meta": {
+    "category": "eth-l1-clients",
+    "description": "Pattern-level index for eth-l1-clients vulnerabilities",
+    "fileCount": 10,
+    "totalPatterns": 46,
+    "usage": "Use patterns[].lineStart/lineEnd to read exact sections with read_file tool"
+  },
+  "files": [
+    {
+      "file": "DB/eth-l1-clients/crypto/kzg-blob-validation.md",
+      "totalLines": 194,
+      "frontmatter": {
+        "vulnerability_class": "kzg_blob_validation",
+        "title": "KZG / Blob Validation: binding panics, point deserialization, param-length and proof checks",
+        "protocol": "eth-l1-clients",
+        "category": "Cryptography / EIP-4844",
+        "vulnerability_type": "input_validation",
+        "attack_type": "panic_crash|invalid_proof_acceptance|gas_underflow|trusted_setup_misuse",
+        "affected_component": "kzg_bindings|blob_tx_validation|precompile_0x0a|trusted_setup",
+        "chain": "ethereum",
+        "severity": "medium",
+        "impact": "remote_crash|consensus_divergence|invalid_blob_acceptance",
+        "severity_range": "LOW to MEDIUM (HIGH if proof verification bypassed)",
+        "source": "Sigma Prime c-kzg-4844/go-kzg-4844 reviews + Immunefi Attackathon",
+        "primitives": [
+          "panic_on_malformed_hex_or_text_input_in_bindings",
+          "bls12_381_point_deserialization_not_validated",
+          "parameter_length_not_validated",
+          "newdomain_panic_on_certain_input",
+          "trusted_setup_loading_panics",
+          "random_oracle_batch_proof_may_be_zero",
+          "modexp_precompile_gas_overflow_in_eels_reference"
+        ],
+        "affected_components": [
+          "c-kzg-4844 / go-kzg-4844 bindings (from_hex, UnmarshalText)",
+          "blob transaction validation (proofs, commitments, versioned hashes)",
+          "KZG precompile (0x0a)",
+          "trusted setup loading"
+        ],
+        "tags": [
+          "kzg",
+          "blob",
+          "eip-4844",
+          "cryptography",
+          "c-kzg",
+          "go-kzg",
+          "panic",
+          "trusted_setup",
+          "sigp",
+          "attackathon"
+        ],
+        "total_reports_analyzed": 5,
+        "root_cause_family": "unsafe_input_handling_in_crypto_bindings",
+        "pattern_key": "kzg_validation_gap | binding_panics_point_deserialization | remote_crash_or_invalid_acceptance",
+        "interaction_scope": "network_facing_crypto_validation",
+        "code_keywords": [
+          "from_hex",
+          "UnmarshalText",
+          "blob_to_kzg_commitment",
+          "verify_blob_kzg_proof",
+          "verify_blob_kzg_proof_batch",
+          "compute_cells",
+          "NewDomain",
+          "TrustedSetup",
+          "load_trusted_setup",
+          "deserialize",
+          "G1Point / G2Point",
+          "modexp"
+        ]
+      },
+      "patternCount": 4,
+      "patterns": [
+        {
+          "id": "eth-l1-clients-kzg-blob-validation-overview-000",
+          "title": "Overview",
+          "lineStart": 69,
+          "lineEnd": 130,
+          "lineCount": 62,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "FromString",
+            "NewDomain",
+            "Result",
+            "TrustedSetup",
+            "UnmarshalText",
+            "blob_tx_validation",
+            "consensus_divergence",
+            "error",
+            "from_hex",
+            "high",
+            "kzg_bindings",
+            "network_facing_crypto_validation",
+            "remote_crash",
+            "unwrap",
+            "verify_blob_kzg_proof",
+            "blob_to_kzg_commitment",
+            "verify_blob_kzg_proof_batch",
+            "compute_cells",
+            "load_trusted_setup",
+            "deserialize"
+          ],
+          "searchKeywords": [
+            "from_hex",
+            "from hex",
+            "unmarshaltext",
+            "unmarshal text",
+            "blob_to_kzg_commitment",
+            "blob to kzg commitment",
+            "verify_blob_kzg_proof",
+            "verify blob kzg proof",
+            "verify_blob_kzg_proof_batch",
+            "verify blob kzg proof batch",
+            "compute_cells",
+            "compute cells",
+            "newdomain",
+            "new domain",
+            "trustedsetup",
+            "trusted setup",
+            "load_trusted_setup",
+            "load trusted setup",
+            "deserialize",
+            "g1point / g2point",
+            "g1 point g2 point",
+            "modexp",
+            "panic_on_malformed_hex_or_text_input_in_bindings",
+            "panic on malformed hex or text input in bindings",
+            "bls12_381_point_deserialization_not_validated",
+            "bls12 381 point deserialization not validated",
+            "parameter_length_not_validated",
+            "parameter length not validated",
+            "newdomain_panic_on_certain_input",
+            "newdomain panic on certain input",
+            "trusted_setup_loading_panics",
+            "trusted setup loading panics"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 22,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/eth-c-kzg-libs-sigp.md",
+              "reports/eth-l1-clients_findings/eth-kzg-libs-sigp.md",
+              "reports/eth-l1-clients_findings/38958-bc-low-eels-cant-handle-overflow-gas-calculation-in-modexp-precompile.md",
+              "reports/eth-l1-clients_findings/38766-bc-insight-nil-pointer-dereference-panics-in-encodepayload-of-blob-txs-encoding.md",
+              "reports/eth-l1-clients_findings/public-audits-reports-ethereum-foundation-c-kzg-review-pdf.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "unsafe input handling in crypto bindings",
+              "panic crash",
+              "invalid proof acceptance",
+              "gas underflow",
+              "trusted setup misuse"
+            ],
+            "commonlyComposesWith": [
+              "panic on malformed hex or text input in bindings",
+              "bls12 381 point deserialization not validated",
+              "parameter length not validated",
+              "newdomain panic on certain input",
+              "trusted setup loading panics"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-kzg-blob-validation-real-reports-001",
+          "title": "Real Reports",
+          "lineStart": 131,
+          "lineEnd": 160,
+          "lineCount": 30,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "from_hex",
+            "UnmarshalText",
+            "blob_to_kzg_commitment",
+            "verify_blob_kzg_proof",
+            "verify_blob_kzg_proof_batch",
+            "compute_cells",
+            "NewDomain",
+            "TrustedSetup",
+            "load_trusted_setup",
+            "deserialize",
+            "modexp",
+            "panic_on_malformed_hex_or_text_input_in_bindings",
+            "bls12_381_point_deserialization_not_validated",
+            "parameter_length_not_validated",
+            "newdomain_panic_on_certain_input",
+            "trusted_setup_loading_panics",
+            "random_oracle_batch_proof_may_be_zero",
+            "modexp_precompile_gas_overflow_in_eels_reference",
+            "kzg_bindings",
+            "blob_tx_validation"
+          ],
+          "searchKeywords": [
+            "reports",
+            "sigma",
+            "prime",
+            "kzg",
+            "security",
+            "assessment",
+            "sigma prime kzg kzg security assessment",
+            "sigma prime",
+            "prime kzg",
+            "kzg kzg",
+            "kzg security",
+            "security assessment",
+            "powers",
+            "tau",
+            "ceremony",
+            "review",
+            "immunefi",
+            "eels",
+            "can",
+            "handle",
+            "overflow",
+            "gas",
+            "calculation",
+            "modexp",
+            "precompile",
+            "related",
+            "blob",
+            "encoding",
+            "crash",
+            "erigon",
+            "nil",
+            "pointer"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "1. Sigma Prime — c-kzg & go-kzg Security Assessment v2.0 (Ethereum Foundation)",
+              "lineStart": 133,
+              "lineEnd": 139,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "sigma",
+                "prime",
+                "kzg",
+                "security",
+                "assessment",
+                "sigma prime kzg kzg security assessment",
+                "sigma prime",
+                "prime kzg",
+                "kzg kzg",
+                "kzg security",
+                "security assessment"
+              ]
+            },
+            {
+              "title": "2. Sigma Prime — KZG Powers Of Tau Ceremony Review v3.0",
+              "lineStart": 140,
+              "lineEnd": 144,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "sigma",
+                "prime",
+                "kzg",
+                "powers",
+                "tau",
+                "ceremony",
+                "review"
+              ]
+            },
+            {
+              "title": "3. Immunefi #38958 [BC-Low] — EELS can't handle overflow gas calculation in modexp precompile",
+              "lineStart": 145,
+              "lineEnd": 150,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "immunefi",
+                "eels",
+                "can",
+                "handle",
+                "overflow",
+                "gas",
+                "calculation",
+                "modexp",
+                "precompile"
+              ]
+            },
+            {
+              "title": "4. Related blob-encoding crash: Immunefi #38766 [BC-Insight] — erigon nil-pointer panic in encodePayload() of blob tx encoding",
+              "lineStart": 151,
+              "lineEnd": 155,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "related",
+                "blob",
+                "encoding",
+                "crash",
+                "immunefi",
+                "erigon",
+                "nil",
+                "pointer",
+                "panic",
+                "encode",
+                "payload"
+              ]
+            },
+            {
+              "title": "5. Upstream EF reviews (reference corpus)",
+              "lineStart": 156,
+              "lineEnd": 160,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "upstream",
+                "reviews",
+                "upstream reviews"
+              ]
+            }
+          ],
+          "reportEvidence": {
+            "count": 6,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/eth-c-kzg-libs-sigp.md",
+              "reports/eth-l1-clients_findings/eth-kzg-libs-sigp.md",
+              "reports/eth-l1-clients_findings/38958-bc-low-eels-cant-handle-overflow-gas-calculation-in-modexp-precompile.md",
+              "reports/eth-l1-clients_findings/38766-bc-insight-nil-pointer-dereference-panics-in-encodepayload-of-blob-txs-encoding.md",
+              "reports/eth-l1-clients_findings/public-audits-reports-ethereum-foundation-c-kzg-review-pdf.md"
+            ],
+            "scope": "section",
+            "support": "explicit"
+          },
+          "graphHints": {
+            "variants": [
+              "unsafe input handling in crypto bindings",
+              "panic crash",
+              "invalid proof acceptance",
+              "gas underflow",
+              "trusted setup misuse"
+            ],
+            "commonlyComposesWith": [
+              "panic on malformed hex or text input in bindings",
+              "bls12 381 point deserialization not validated",
+              "parameter length not validated",
+              "newdomain panic on certain input",
+              "trusted setup loading panics"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-kzg-blob-validation-vulnerable-code-pattern-generi-002",
+          "title": "Vulnerable Code Pattern (generic)",
+          "lineStart": 161,
+          "lineEnd": 172,
+          "lineCount": 12,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "from_hex",
+            "UnmarshalText",
+            "blob_to_kzg_commitment",
+            "verify_blob_kzg_proof",
+            "verify_blob_kzg_proof_batch",
+            "compute_cells",
+            "NewDomain",
+            "TrustedSetup",
+            "load_trusted_setup",
+            "deserialize",
+            "modexp",
+            "panic_on_malformed_hex_or_text_input_in_bindings",
+            "bls12_381_point_deserialization_not_validated",
+            "parameter_length_not_validated",
+            "newdomain_panic_on_certain_input",
+            "trusted_setup_loading_panics",
+            "random_oracle_batch_proof_may_be_zero",
+            "modexp_precompile_gas_overflow_in_eels_reference",
+            "kzg_bindings",
+            "blob_tx_validation"
+          ],
+          "searchKeywords": [
+            "vulnerable",
+            "code",
+            "vulnerable code",
+            "from_hex",
+            "from hex",
+            "unmarshaltext",
+            "unmarshal text",
+            "blob_to_kzg_commitment",
+            "blob to kzg commitment",
+            "verify_blob_kzg_proof",
+            "verify blob kzg proof",
+            "verify_blob_kzg_proof_batch",
+            "verify blob kzg proof batch",
+            "compute_cells",
+            "compute cells",
+            "newdomain",
+            "new domain",
+            "trustedsetup",
+            "trusted setup",
+            "load_trusted_setup",
+            "load trusted setup",
+            "deserialize",
+            "g1point / g2point",
+            "g1 point g2 point",
+            "modexp",
+            "panic_on_malformed_hex_or_text_input_in_bindings",
+            "panic on malformed hex or text input in bindings",
+            "bls12_381_point_deserialization_not_validated",
+            "bls12 381 point deserialization not validated",
+            "parameter_length_not_validated",
+            "parameter length not validated",
+            "newdomain_panic_on_certain_input"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 22,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/eth-c-kzg-libs-sigp.md",
+              "reports/eth-l1-clients_findings/eth-kzg-libs-sigp.md",
+              "reports/eth-l1-clients_findings/38958-bc-low-eels-cant-handle-overflow-gas-calculation-in-modexp-precompile.md",
+              "reports/eth-l1-clients_findings/38766-bc-insight-nil-pointer-dereference-panics-in-encodepayload-of-blob-txs-encoding.md",
+              "reports/eth-l1-clients_findings/public-audits-reports-ethereum-foundation-c-kzg-review-pdf.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "unsafe input handling in crypto bindings",
+              "panic crash",
+              "invalid proof acceptance",
+              "gas underflow",
+              "trusted setup misuse"
+            ],
+            "commonlyComposesWith": [
+              "panic on malformed hex or text input in bindings",
+              "bls12 381 point deserialization not validated",
+              "parameter length not validated",
+              "newdomain panic on certain input",
+              "trusted setup loading panics"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-kzg-blob-validation-detection-hunt-strategy-003",
+          "title": "Detection & Hunt Strategy",
+          "lineStart": 173,
+          "lineEnd": 182,
+          "lineCount": 10,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "CheckG1",
+            "CheckG2",
+            "NewDomain",
+            "SubgroupCheck",
+            "load_trusted_setup",
+            "from_hex",
+            "UnmarshalText",
+            "blob_to_kzg_commitment",
+            "verify_blob_kzg_proof",
+            "verify_blob_kzg_proof_batch",
+            "compute_cells",
+            "TrustedSetup",
+            "deserialize",
+            "modexp",
+            "panic_on_malformed_hex_or_text_input_in_bindings",
+            "bls12_381_point_deserialization_not_validated",
+            "parameter_length_not_validated",
+            "newdomain_panic_on_certain_input",
+            "trusted_setup_loading_panics",
+            "random_oracle_batch_proof_may_be_zero"
+          ],
+          "searchKeywords": [
+            "detection",
+            "hunt",
+            "strategy",
+            "detection hunt strategy",
+            "detection hunt",
+            "hunt strategy",
+            "from_hex",
+            "from hex",
+            "unmarshaltext",
+            "unmarshal text",
+            "blob_to_kzg_commitment",
+            "blob to kzg commitment",
+            "verify_blob_kzg_proof",
+            "verify blob kzg proof",
+            "verify_blob_kzg_proof_batch",
+            "verify blob kzg proof batch",
+            "compute_cells",
+            "compute cells",
+            "newdomain",
+            "new domain",
+            "trustedsetup",
+            "trusted setup",
+            "load_trusted_setup",
+            "load trusted setup",
+            "deserialize",
+            "g1point / g2point",
+            "g1 point g2 point",
+            "modexp",
+            "panic_on_malformed_hex_or_text_input_in_bindings",
+            "panic on malformed hex or text input in bindings",
+            "bls12_381_point_deserialization_not_validated",
+            "bls12 381 point deserialization not validated"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 22,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/eth-c-kzg-libs-sigp.md",
+              "reports/eth-l1-clients_findings/eth-kzg-libs-sigp.md",
+              "reports/eth-l1-clients_findings/38958-bc-low-eels-cant-handle-overflow-gas-calculation-in-modexp-precompile.md",
+              "reports/eth-l1-clients_findings/38766-bc-insight-nil-pointer-dereference-panics-in-encodepayload-of-blob-txs-encoding.md",
+              "reports/eth-l1-clients_findings/public-audits-reports-ethereum-foundation-c-kzg-review-pdf.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "unsafe input handling in crypto bindings",
+              "panic crash",
+              "invalid proof acceptance",
+              "gas underflow",
+              "trusted setup misuse"
+            ],
+            "commonlyComposesWith": [
+              "panic on malformed hex or text input in bindings",
+              "bls12 381 point deserialization not validated",
+              "parameter length not validated",
+              "newdomain panic on certain input",
+              "trusted setup loading panics"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/eth-l1-clients/execution/client-gas-divergence-geth-nethermind.md",
+      "totalLines": 192,
+      "frontmatter": {
+        "vulnerability_class": "cross_client_gas_divergence",
+        "title": "Cross-Client Gas Divergence: geth vs Nethermind (memory-expansion word cap, 30M edge)",
+        "protocol": "eth-l1-clients",
+        "category": "Execution / Gas Metering",
+        "vulnerability_type": "spec_divergence",
+        "attack_type": "edge_case_gas_mismatch|chain_split_via_gas_limit_raise|trace_divergence",
+        "affected_component": "memory_expansion_gas|gas_calculation|uint_casts",
+        "chain": "ethereum",
+        "severity": "medium",
+        "impact": "consensus_divergence|chain_split|trace_divergence",
+        "severity_range": "LOW to HIGH (active when gas limit > 30M)",
+        "source": "Immunefi Ethereum Protocol Attackathon 2024-2025",
+        "primitives": [
+          "memory_word_cap_int32_vs_uint32",
+          "edge_case_memory_expansion_gas_mismatch",
+          "eof_push_opcode_trace_discrepancy",
+          "push0_missing_in_ispush"
+        ],
+        "affected_components": [
+          "EVM memory expansion gas calculators",
+          "uint width casts in gas math",
+          "trace/debug output generation"
+        ],
+        "tags": [
+          "gas",
+          "divergence",
+          "geth",
+          "nethermind",
+          "evm",
+          "memory_expansion",
+          "consensus",
+          "attackathon"
+        ],
+        "total_reports_analyzed": 4,
+        "root_cause_family": "integer_width_or_bound_mismatch_in_gas_math",
+        "pattern_key": "gas_divergence | memory_word_cap_int32_uint32 | chain_split_on_gas_limit_raise",
+        "interaction_scope": "consensus_math",
+        "code_keywords": [
+          "memoryExpansion",
+          "toWordSize",
+          "uint32",
+          "int32",
+          "0x1FFFFFFFE",
+          "memoryGas",
+          "gasLimit",
+          "30M / 30000000",
+          "PUSH0",
+          "IsPush",
+          "EOF"
+        ]
+      },
+      "patternCount": 4,
+      "patterns": [
+        {
+          "id": "eth-l1-clients-client-gas-divergence-geth-nethermind-overview-000",
+          "title": "Overview",
+          "lineStart": 62,
+          "lineEnd": 119,
+          "lineCount": 58,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "chain_split",
+            "consensus_divergence",
+            "consensus_math",
+            "high",
+            "i32",
+            "int32",
+            "int32.MaxValue",
+            "memoryExpansion",
+            "memory_expansion_gas",
+            "toWordSize",
+            "uint32",
+            "0x1FFFFFFFE",
+            "memoryGas",
+            "gasLimit",
+            "PUSH0",
+            "IsPush",
+            "EOF",
+            "memory_word_cap_int32_vs_uint32",
+            "edge_case_memory_expansion_gas_mismatch",
+            "eof_push_opcode_trace_discrepancy"
+          ],
+          "searchKeywords": [
+            "memoryexpansion",
+            "memory expansion",
+            "towordsize",
+            "to word size",
+            "uint32",
+            "int32",
+            "0x1fffffffe",
+            "0x1 fffffffe",
+            "memorygas",
+            "memory gas",
+            "gaslimit",
+            "gas limit",
+            "30m / 30000000",
+            "30 m 30000000",
+            "push0",
+            "ispush",
+            "is push",
+            "eof",
+            "memory_word_cap_int32_vs_uint32",
+            "memory word cap int32 vs uint32",
+            "edge_case_memory_expansion_gas_mismatch",
+            "edge case memory expansion gas mismatch",
+            "eof_push_opcode_trace_discrepancy",
+            "eof push opcode trace discrepancy",
+            "push0_missing_in_ispush",
+            "push0 missing in ispush",
+            "memory_expansion_gas",
+            "memory expansion gas",
+            "gas_calculation",
+            "gas calculation",
+            "uint_casts",
+            "uint casts"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 35,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38319-bc-insight-edge-case-difference-for-geth-and-nethermind-when-calculating-memory-expansion-gas.md",
+              "reports/eth-l1-clients_findings/37483-bc-insight-there-is-a-trace-discrepancy-for-nethermind-when-handling-eof-from-push-opcode.md",
+              "reports/eth-l1-clients_findings/38557-bc-insight-function-ispush-misses-opcode-push0.md",
+              "reports/eth-l1-clients_findings/38958-bc-low-eels-cant-handle-overflow-gas-calculation-in-modexp-precompile.md",
+              "reports/eth-l1-clients_findings/berachain-reth-geth-sigp-2025.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "integer width or bound mismatch in gas math",
+              "edge case gas mismatch",
+              "chain split via gas limit raise",
+              "trace divergence",
+              "gas divergence"
+            ],
+            "commonlyComposesWith": [
+              "memory word cap int32 vs uint32",
+              "edge case memory expansion gas mismatch",
+              "eof push opcode trace discrepancy",
+              "push0 missing in ispush",
+              "memory expansion gas"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-client-gas-divergence-geth-nethermind-real-reports-001",
+          "title": "Real Reports",
+          "lineStart": 120,
+          "lineEnd": 149,
+          "lineCount": 30,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "memoryExpansion",
+            "toWordSize",
+            "uint32",
+            "int32",
+            "0x1FFFFFFFE",
+            "memoryGas",
+            "gasLimit",
+            "PUSH0",
+            "IsPush",
+            "EOF",
+            "memory_word_cap_int32_vs_uint32",
+            "edge_case_memory_expansion_gas_mismatch",
+            "eof_push_opcode_trace_discrepancy",
+            "push0_missing_in_ispush",
+            "memory_expansion_gas",
+            "gas_calculation",
+            "uint_casts"
+          ],
+          "searchKeywords": [
+            "reports",
+            "immunefi",
+            "edge",
+            "case",
+            "difference",
+            "geth",
+            "nethermind",
+            "when",
+            "calculating",
+            "memory",
+            "expansion",
+            "gas",
+            "trace",
+            "discrepancy",
+            "handling",
+            "eof",
+            "push",
+            "opcode",
+            "function",
+            "misses",
+            "push0",
+            "immunefi function push misses opcode push0",
+            "immunefi function",
+            "function push",
+            "push misses",
+            "misses opcode",
+            "opcode push0",
+            "eels",
+            "can",
+            "handle",
+            "overflow",
+            "calculation"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "1. Immunefi #38319 [BC-Insight] — Edge case difference for GETH and NETHERMIND when calculating memory expansion gas",
+              "lineStart": 122,
+              "lineEnd": 127,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "immunefi",
+                "edge",
+                "case",
+                "difference",
+                "geth",
+                "nethermind",
+                "when",
+                "calculating",
+                "memory",
+                "expansion",
+                "gas"
+              ]
+            },
+            {
+              "title": "2. Immunefi #37483 [BC-Insight] — Trace discrepancy for Nethermind when handling EOF from PUSH opcode",
+              "lineStart": 128,
+              "lineEnd": 132,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "immunefi",
+                "trace",
+                "discrepancy",
+                "nethermind",
+                "when",
+                "handling",
+                "eof",
+                "push",
+                "opcode"
+              ]
+            },
+            {
+              "title": "3. Immunefi #38557 [BC-Insight] — Function IsPush() misses opcode PUSH0",
+              "lineStart": 133,
+              "lineEnd": 137,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "immunefi",
+                "function",
+                "push",
+                "misses",
+                "opcode",
+                "push0",
+                "immunefi function push misses opcode push0",
+                "immunefi function",
+                "function push",
+                "push misses",
+                "misses opcode",
+                "opcode push0"
+              ]
+            },
+            {
+              "title": "4. Immunefi #38958 [BC-Low] — EELS can't handle overflow gas calculation in modexp precompile",
+              "lineStart": 138,
+              "lineEnd": 143,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "immunefi",
+                "eels",
+                "can",
+                "handle",
+                "overflow",
+                "gas",
+                "calculation",
+                "modexp",
+                "precompile"
+              ]
+            },
+            {
+              "title": "Related: Berachain PoL gas consensus mismatch (Sigma Prime)",
+              "lineStart": 144,
+              "lineEnd": 149,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "related",
+                "berachain",
+                "gas",
+                "consensus",
+                "mismatch",
+                "related berachain gas consensus mismatch",
+                "related berachain",
+                "berachain gas",
+                "gas consensus",
+                "consensus mismatch"
+              ]
+            }
+          ],
+          "reportEvidence": {
+            "count": 5,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38319-bc-insight-edge-case-difference-for-geth-and-nethermind-when-calculating-memory-expansion-gas.md",
+              "reports/eth-l1-clients_findings/37483-bc-insight-there-is-a-trace-discrepancy-for-nethermind-when-handling-eof-from-push-opcode.md",
+              "reports/eth-l1-clients_findings/38557-bc-insight-function-ispush-misses-opcode-push0.md",
+              "reports/eth-l1-clients_findings/38958-bc-low-eels-cant-handle-overflow-gas-calculation-in-modexp-precompile.md",
+              "reports/eth-l1-clients_findings/berachain-reth-geth-sigp-2025.md"
+            ],
+            "scope": "section",
+            "support": "explicit"
+          },
+          "graphHints": {
+            "variants": [
+              "integer width or bound mismatch in gas math",
+              "edge case gas mismatch",
+              "chain split via gas limit raise",
+              "trace divergence",
+              "gas divergence"
+            ],
+            "commonlyComposesWith": [
+              "memory word cap int32 vs uint32",
+              "edge case memory expansion gas mismatch",
+              "eof push opcode trace discrepancy",
+              "push0 missing in ispush",
+              "memory expansion gas"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-client-gas-divergence-geth-nethermind-vulnerable-code-pattern-generi-002",
+          "title": "Vulnerable Code Pattern (generic)",
+          "lineStart": 150,
+          "lineEnd": 166,
+          "lineCount": 17,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "memoryExpansion",
+            "toWordSize",
+            "uint32",
+            "int32",
+            "0x1FFFFFFFE",
+            "memoryGas",
+            "gasLimit",
+            "PUSH0",
+            "IsPush",
+            "EOF",
+            "memory_word_cap_int32_vs_uint32",
+            "edge_case_memory_expansion_gas_mismatch",
+            "eof_push_opcode_trace_discrepancy",
+            "push0_missing_in_ispush",
+            "memory_expansion_gas",
+            "gas_calculation",
+            "uint_casts"
+          ],
+          "searchKeywords": [
+            "vulnerable",
+            "code",
+            "vulnerable code",
+            "memoryexpansion",
+            "memory expansion",
+            "towordsize",
+            "to word size",
+            "uint32",
+            "int32",
+            "0x1fffffffe",
+            "0x1 fffffffe",
+            "memorygas",
+            "memory gas",
+            "gaslimit",
+            "gas limit",
+            "30m / 30000000",
+            "30 m 30000000",
+            "push0",
+            "ispush",
+            "is push",
+            "eof",
+            "memory_word_cap_int32_vs_uint32",
+            "memory word cap int32 vs uint32",
+            "edge_case_memory_expansion_gas_mismatch",
+            "edge case memory expansion gas mismatch",
+            "eof_push_opcode_trace_discrepancy",
+            "eof push opcode trace discrepancy",
+            "push0_missing_in_ispush",
+            "push0 missing in ispush",
+            "memory_expansion_gas",
+            "memory expansion gas",
+            "gas_calculation"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 35,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38319-bc-insight-edge-case-difference-for-geth-and-nethermind-when-calculating-memory-expansion-gas.md",
+              "reports/eth-l1-clients_findings/37483-bc-insight-there-is-a-trace-discrepancy-for-nethermind-when-handling-eof-from-push-opcode.md",
+              "reports/eth-l1-clients_findings/38557-bc-insight-function-ispush-misses-opcode-push0.md",
+              "reports/eth-l1-clients_findings/38958-bc-low-eels-cant-handle-overflow-gas-calculation-in-modexp-precompile.md",
+              "reports/eth-l1-clients_findings/berachain-reth-geth-sigp-2025.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "integer width or bound mismatch in gas math",
+              "edge case gas mismatch",
+              "chain split via gas limit raise",
+              "trace divergence",
+              "gas divergence"
+            ],
+            "commonlyComposesWith": [
+              "memory word cap int32 vs uint32",
+              "edge case memory expansion gas mismatch",
+              "eof push opcode trace discrepancy",
+              "push0 missing in ispush",
+              "memory expansion gas"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-client-gas-divergence-geth-nethermind-detection-hunt-strategy-003",
+          "title": "Detection & Hunt Strategy",
+          "lineStart": 167,
+          "lineEnd": 181,
+          "lineCount": 15,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "i32",
+            "int32",
+            "to_int",
+            "memoryExpansion",
+            "toWordSize",
+            "uint32",
+            "0x1FFFFFFFE",
+            "memoryGas",
+            "gasLimit",
+            "PUSH0",
+            "IsPush",
+            "EOF",
+            "memory_word_cap_int32_vs_uint32",
+            "edge_case_memory_expansion_gas_mismatch",
+            "eof_push_opcode_trace_discrepancy",
+            "push0_missing_in_ispush",
+            "memory_expansion_gas",
+            "gas_calculation",
+            "uint_casts"
+          ],
+          "searchKeywords": [
+            "detection",
+            "hunt",
+            "strategy",
+            "detection hunt strategy",
+            "detection hunt",
+            "hunt strategy",
+            "memoryexpansion",
+            "memory expansion",
+            "towordsize",
+            "to word size",
+            "uint32",
+            "int32",
+            "0x1fffffffe",
+            "0x1 fffffffe",
+            "memorygas",
+            "memory gas",
+            "gaslimit",
+            "gas limit",
+            "30m / 30000000",
+            "30 m 30000000",
+            "push0",
+            "ispush",
+            "is push",
+            "eof",
+            "memory_word_cap_int32_vs_uint32",
+            "memory word cap int32 vs uint32",
+            "edge_case_memory_expansion_gas_mismatch",
+            "edge case memory expansion gas mismatch",
+            "eof_push_opcode_trace_discrepancy",
+            "eof push opcode trace discrepancy",
+            "push0_missing_in_ispush",
+            "push0 missing in ispush"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 35,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38319-bc-insight-edge-case-difference-for-geth-and-nethermind-when-calculating-memory-expansion-gas.md",
+              "reports/eth-l1-clients_findings/37483-bc-insight-there-is-a-trace-discrepancy-for-nethermind-when-handling-eof-from-push-opcode.md",
+              "reports/eth-l1-clients_findings/38557-bc-insight-function-ispush-misses-opcode-push0.md",
+              "reports/eth-l1-clients_findings/38958-bc-low-eels-cant-handle-overflow-gas-calculation-in-modexp-precompile.md",
+              "reports/eth-l1-clients_findings/berachain-reth-geth-sigp-2025.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "integer width or bound mismatch in gas math",
+              "edge case gas mismatch",
+              "chain split via gas limit raise",
+              "trace divergence",
+              "gas divergence"
+            ],
+            "commonlyComposesWith": [
+              "memory word cap int32 vs uint32",
+              "edge case memory expansion gas mismatch",
+              "eof push opcode trace discrepancy",
+              "push0 missing in ispush",
+              "memory expansion gas"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/eth-l1-clients/execution/rlp-decoding-lenient-parsing.md",
+      "totalLines": 235,
+      "frontmatter": {
+        "vulnerability_class": "rlp_decoding_lenient_parsing",
+        "title": "RLP Decoding: Lenient Parsing / Missing Validation (trailing bytes, single-byte, non-canonical encodings)",
+        "protocol": "eth-l1-clients",
+        "category": "Execution / Serialization",
+        "vulnerability_type": "input_validation",
+        "attack_type": "lenient_decoding|non_canonical_encoding_acceptance|consensus_divergence",
+        "affected_component": "rlp_decoders|transaction_decoding|p2p_message_decoding",
+        "chain": "ethereum",
+        "severity": "critical",
+        "impact": "consensus_divergence|chain_split|remote_crash|node_halt",
+        "severity_range": "LOW to CRITICAL",
+        "source": "Immunefi Ethereum Protocol Attackathon 2024-2025 + Sigma Prime reth 2024",
+        "primitives": [
+          "trailing_bytes_accepted_after_rlp_payload",
+          "single_byte_prefix_returns_full_input",
+          "create_tx_accepted_for_eip4844_blob_type",
+          "rlp_list_header_not_validated",
+          "nil_pointer_deref_on_nil_to_field"
+        ],
+        "affected_components": [
+          "core/types transaction decoders",
+          "p2p eth protocol message decoders",
+          "txpool serialization validation",
+          "RPC SendRawTransaction entrypoints"
+        ],
+        "tags": [
+          "rlp",
+          "decoding",
+          "consensus",
+          "eip-4844",
+          "erigon",
+          "besu",
+          "reth",
+          "trailing_bytes",
+          "non_canonical",
+          "attackathon"
+        ],
+        "total_reports_analyzed": 6,
+        "client_coverage": "erigon, besu, reth, bera-reth",
+        "root_cause_family": "missing_input_validation_in_decoder",
+        "pattern_key": "rlp_lenient_decoding | trailing_bytes_single_byte_create4844 | consensus_divergence",
+        "interaction_scope": "network_facing_decoder",
+        "code_keywords": [
+          "DecodeRLPTransaction",
+          "UnmarshalTransactionFromBinary",
+          "s.Remaining()",
+          "rlp.List",
+          "DecodeRLP",
+          "decodeOne",
+          "BYTE_ELEMENT",
+          "Kind.of(prefix)",
+          "TxEip4844",
+          "TransactionKind",
+          "encodePayload",
+          "rlp.EncodeToBytes",
+          "rlp.ListHeader",
+          "payloadSize"
+        ]
+      },
+      "patternCount": 4,
+      "patterns": [
+        {
+          "id": "eth-l1-clients-rlp-decoding-lenient-parsing-overview-000",
+          "title": "Overview",
+          "lineStart": 70,
+          "lineEnd": 122,
+          "lineCount": 53,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "DecodeRLPTransaction",
+            "TxEip4844",
+            "consensus_divergence",
+            "decodeOne",
+            "encodePayload",
+            "eth_sendRawTransaction",
+            "high",
+            "network_facing_decoder",
+            "rlp.Decode",
+            "rlp_decoders",
+            "s.Remaining",
+            "transaction_decoding",
+            "UnmarshalTransactionFromBinary",
+            "s.Remaining()",
+            "rlp.List",
+            "DecodeRLP",
+            "BYTE_ELEMENT",
+            "Kind.of(prefix)",
+            "TransactionKind",
+            "rlp.EncodeToBytes"
+          ],
+          "searchKeywords": [
+            "decoderlptransaction",
+            "decode rlptransaction",
+            "unmarshaltransactionfrombinary",
+            "unmarshal transaction from binary",
+            "s.remaining()",
+            "s remaining()",
+            "rlp.list",
+            "rlp list",
+            "decoderlp",
+            "decode rlp",
+            "decodeone",
+            "decode one",
+            "byte_element",
+            "byte element",
+            "kind.of(prefix)",
+            "kind of(prefix)",
+            "txeip4844",
+            "tx eip4844",
+            "transactionkind",
+            "transaction kind",
+            "encodepayload",
+            "encode payload",
+            "rlp.encodetobytes",
+            "rlp encode to bytes",
+            "rlp.listheader",
+            "rlp list header",
+            "payloadsize",
+            "payload size",
+            "trailing_bytes_accepted_after_rlp_payload",
+            "trailing bytes accepted after rlp payload",
+            "single_byte_prefix_returns_full_input",
+            "single byte prefix returns full input"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38828-bc-low-decode-rlp-of-legacy-transaction-allows-tailing-bytes.md",
+              "reports/eth-l1-clients_findings/37462-bc-low-invalid-rlp-decoding-for-single-bytes.md",
+              "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+              "reports/eth-l1-clients_findings/38766-bc-insight-nil-pointer-dereference-panics-in-encodepayload-of-blob-txs-encoding.md",
+              "reports/eth-l1-clients_findings/berachain-reth-geth-sigp-2025.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing input validation in decoder",
+              "lenient decoding",
+              "non canonical encoding acceptance",
+              "consensus divergence",
+              "rlp lenient decoding"
+            ],
+            "commonlyComposesWith": [
+              "trailing bytes accepted after rlp payload",
+              "single byte prefix returns full input",
+              "create tx accepted for eip4844 blob type",
+              "rlp list header not validated",
+              "nil pointer deref on nil to field"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-rlp-decoding-lenient-parsing-vulnerable-code-patterns-gener-001",
+          "title": "Vulnerable Code Patterns (generic)",
+          "lineStart": 180,
+          "lineEnd": 204,
+          "lineCount": 25,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "DecodeRLPTransaction",
+            "UnmarshalTransactionFromBinary",
+            "s.Remaining()",
+            "rlp.List",
+            "DecodeRLP",
+            "decodeOne",
+            "BYTE_ELEMENT",
+            "Kind.of(prefix)",
+            "TxEip4844",
+            "TransactionKind",
+            "encodePayload",
+            "rlp.EncodeToBytes",
+            "rlp.ListHeader",
+            "payloadSize",
+            "trailing_bytes_accepted_after_rlp_payload",
+            "single_byte_prefix_returns_full_input",
+            "create_tx_accepted_for_eip4844_blob_type",
+            "rlp_list_header_not_validated",
+            "nil_pointer_deref_on_nil_to_field",
+            "rlp_decoders"
+          ],
+          "searchKeywords": [
+            "vulnerable",
+            "code",
+            "vulnerable code",
+            "decoderlptransaction",
+            "decode rlptransaction",
+            "unmarshaltransactionfrombinary",
+            "unmarshal transaction from binary",
+            "s.remaining()",
+            "s remaining()",
+            "rlp.list",
+            "rlp list",
+            "decoderlp",
+            "decode rlp",
+            "decodeone",
+            "decode one",
+            "byte_element",
+            "byte element",
+            "kind.of(prefix)",
+            "kind of(prefix)",
+            "txeip4844",
+            "tx eip4844",
+            "transactionkind",
+            "transaction kind",
+            "encodepayload",
+            "encode payload",
+            "rlp.encodetobytes",
+            "rlp encode to bytes",
+            "rlp.listheader",
+            "rlp list header",
+            "payloadsize",
+            "payload size",
+            "trailing_bytes_accepted_after_rlp_payload"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38828-bc-low-decode-rlp-of-legacy-transaction-allows-tailing-bytes.md",
+              "reports/eth-l1-clients_findings/37462-bc-low-invalid-rlp-decoding-for-single-bytes.md",
+              "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+              "reports/eth-l1-clients_findings/38766-bc-insight-nil-pointer-dereference-panics-in-encodepayload-of-blob-txs-encoding.md",
+              "reports/eth-l1-clients_findings/berachain-reth-geth-sigp-2025.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing input validation in decoder",
+              "lenient decoding",
+              "non canonical encoding acceptance",
+              "consensus divergence",
+              "rlp lenient decoding"
+            ],
+            "commonlyComposesWith": [
+              "trailing bytes accepted after rlp payload",
+              "single byte prefix returns full input",
+              "create tx accepted for eip4844 blob type",
+              "rlp list header not validated",
+              "nil pointer deref on nil to field"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-rlp-decoding-lenient-parsing-similar-reports-002",
+          "title": "Similar Reports",
+          "lineStart": 205,
+          "lineEnd": 215,
+          "lineCount": 11,
+          "severity": [
+            "CRITICAL",
+            "LOW"
+          ],
+          "codeKeywords": [
+            "DecodeRLPTransaction",
+            "UnmarshalTransactionFromBinary",
+            "s.Remaining()",
+            "rlp.List",
+            "DecodeRLP",
+            "decodeOne",
+            "BYTE_ELEMENT",
+            "Kind.of(prefix)",
+            "TxEip4844",
+            "TransactionKind",
+            "encodePayload",
+            "rlp.EncodeToBytes",
+            "rlp.ListHeader",
+            "payloadSize",
+            "trailing_bytes_accepted_after_rlp_payload",
+            "single_byte_prefix_returns_full_input",
+            "create_tx_accepted_for_eip4844_blob_type",
+            "rlp_list_header_not_validated",
+            "nil_pointer_deref_on_nil_to_field",
+            "rlp_decoders"
+          ],
+          "searchKeywords": [
+            "similar",
+            "reports",
+            "similar reports",
+            "decoderlptransaction",
+            "decode rlptransaction",
+            "unmarshaltransactionfrombinary",
+            "unmarshal transaction from binary",
+            "s.remaining()",
+            "s remaining()",
+            "rlp.list",
+            "rlp list",
+            "decoderlp",
+            "decode rlp",
+            "decodeone",
+            "decode one",
+            "byte_element",
+            "byte element",
+            "kind.of(prefix)",
+            "kind of(prefix)",
+            "txeip4844",
+            "tx eip4844",
+            "transactionkind",
+            "transaction kind",
+            "encodepayload",
+            "encode payload",
+            "rlp.encodetobytes",
+            "rlp encode to bytes",
+            "rlp.listheader",
+            "rlp list header",
+            "payloadsize",
+            "payload size",
+            "trailing_bytes_accepted_after_rlp_payload"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38828-bc-low-decode-rlp-of-legacy-transaction-allows-tailing-bytes.md",
+              "reports/eth-l1-clients_findings/37462-bc-low-invalid-rlp-decoding-for-single-bytes.md",
+              "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+              "reports/eth-l1-clients_findings/38766-bc-insight-nil-pointer-dereference-panics-in-encodepayload-of-blob-txs-encoding.md",
+              "reports/eth-l1-clients_findings/berachain-reth-geth-sigp-2025.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing input validation in decoder",
+              "lenient decoding",
+              "non canonical encoding acceptance",
+              "consensus divergence",
+              "rlp lenient decoding"
+            ],
+            "commonlyComposesWith": [
+              "trailing bytes accepted after rlp payload",
+              "single byte prefix returns full input",
+              "create tx accepted for eip4844 blob type",
+              "rlp list header not validated",
+              "nil pointer deref on nil to field"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-rlp-decoding-lenient-parsing-detection-hunt-strategy-003",
+          "title": "Detection & Hunt Strategy",
+          "lineStart": 216,
+          "lineEnd": 223,
+          "lineCount": 8,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "decodeOne",
+            "rlp",
+            "DecodeRLPTransaction",
+            "UnmarshalTransactionFromBinary",
+            "s.Remaining()",
+            "rlp.List",
+            "DecodeRLP",
+            "BYTE_ELEMENT",
+            "Kind.of(prefix)",
+            "TxEip4844",
+            "TransactionKind",
+            "encodePayload",
+            "rlp.EncodeToBytes",
+            "rlp.ListHeader",
+            "payloadSize",
+            "trailing_bytes_accepted_after_rlp_payload",
+            "single_byte_prefix_returns_full_input",
+            "create_tx_accepted_for_eip4844_blob_type",
+            "rlp_list_header_not_validated",
+            "nil_pointer_deref_on_nil_to_field"
+          ],
+          "searchKeywords": [
+            "detection",
+            "hunt",
+            "strategy",
+            "detection hunt strategy",
+            "detection hunt",
+            "hunt strategy",
+            "decoderlptransaction",
+            "decode rlptransaction",
+            "unmarshaltransactionfrombinary",
+            "unmarshal transaction from binary",
+            "s.remaining()",
+            "s remaining()",
+            "rlp.list",
+            "rlp list",
+            "decoderlp",
+            "decode rlp",
+            "decodeone",
+            "decode one",
+            "byte_element",
+            "byte element",
+            "kind.of(prefix)",
+            "kind of(prefix)",
+            "txeip4844",
+            "tx eip4844",
+            "transactionkind",
+            "transaction kind",
+            "encodepayload",
+            "encode payload",
+            "rlp.encodetobytes",
+            "rlp encode to bytes",
+            "rlp.listheader",
+            "rlp list header"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 13,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38828-bc-low-decode-rlp-of-legacy-transaction-allows-tailing-bytes.md",
+              "reports/eth-l1-clients_findings/37462-bc-low-invalid-rlp-decoding-for-single-bytes.md",
+              "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+              "reports/eth-l1-clients_findings/38766-bc-insight-nil-pointer-dereference-panics-in-encodepayload-of-blob-txs-encoding.md",
+              "reports/eth-l1-clients_findings/berachain-reth-geth-sigp-2025.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing input validation in decoder",
+              "lenient decoding",
+              "non canonical encoding acceptance",
+              "consensus divergence",
+              "rlp lenient decoding"
+            ],
+            "commonlyComposesWith": [
+              "trailing bytes accepted after rlp payload",
+              "single byte prefix returns full input",
+              "create tx accepted for eip4844 blob type",
+              "rlp list header not validated",
+              "nil pointer deref on nil to field"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/eth-l1-clients/execution/rpc-dns-rebinding.md",
+      "totalLines": 173,
+      "frontmatter": {
+        "vulnerability_class": "rpc_dns_rebinding",
+        "title": "RPC Interface DNS Rebinding: missing Host-header origin check (reth)",
+        "protocol": "eth-l1-clients",
+        "category": "RPC / Interface Security",
+        "vulnerability_type": "missing_origin_validation",
+        "attack_type": "dns_rebinding|same_origin_bypass|unauthenticated_rpc",
+        "affected_component": "rpc_http_server|middleware|host_allowlist",
+        "chain": "ethereum",
+        "severity": "medium",
+        "impact": "node_control|peer_manipulation|debug_endpoint_abuse|eclipse_facilitation",
+        "severity_range": "MEDIUM",
+        "source": "Immunefi Ethereum Protocol Attackathon 2024-2025",
+        "primitives": [
+          "no_host_header_check_on_rpc_requests",
+          "dns_rebind_localhost_bypass",
+          "browser_same_origin_policy_bypass",
+          "debug_api_remote_abuse"
+        ],
+        "affected_components": [
+          "rpc-builder (rpc-server middleware chain)",
+          "HTTP/WS transports",
+          "debug/admin namespaces"
+        ],
+        "tags": [
+          "rpc",
+          "dns_rebinding",
+          "host_header",
+          "reth",
+          "cors_bypass",
+          "browser",
+          "local_node",
+          "attackathon"
+        ],
+        "total_reports_analyzed": "1 (+geth precedent)",
+        "root_cause_family": "missing_origin_check_on_local_service",
+        "pattern_key": "rpc_host_header_gap | dns_rebinding_local_bypass | unauthenticated_rpc_control",
+        "interaction_scope": "local_service_browser_boundary",
+        "code_keywords": [
+          "Host",
+          "host_header",
+          "http.addr",
+          "allowed_hosts",
+          "tower_allowed_hosts",
+          "virtualhost",
+          "VIRTUALHOST",
+          "SameOrigin",
+          "127.0.0.1",
+          "rpc-builder"
+        ]
+      },
+      "patternCount": 4,
+      "patterns": [
+        {
+          "id": "eth-l1-clients-rpc-dns-rebinding-overview-000",
+          "title": "Overview",
+          "lineStart": 61,
+          "lineEnd": 120,
+          "lineCount": 60,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "Host",
+            "admin",
+            "allowed_hosts",
+            "attacker.com",
+            "debug",
+            "eclipse_facilitation",
+            "high",
+            "local_service_browser_boundary",
+            "net",
+            "node_control",
+            "rpc_http_server",
+            "tower_allowed_hosts",
+            "virtualhost",
+            "host_header",
+            "http.addr",
+            "SameOrigin",
+            "127.0.0.1",
+            "rpc-builder",
+            "no_host_header_check_on_rpc_requests",
+            "dns_rebind_localhost_bypass"
+          ],
+          "searchKeywords": [
+            "host",
+            "host_header",
+            "host header",
+            "http.addr",
+            "http addr",
+            "allowed_hosts",
+            "allowed hosts",
+            "tower_allowed_hosts",
+            "tower allowed hosts",
+            "virtualhost",
+            "sameorigin",
+            "same origin",
+            "127.0.0.1",
+            "127 0 0 1",
+            "rpc-builder",
+            "rpc builder",
+            "no_host_header_check_on_rpc_requests",
+            "no host header check on rpc requests",
+            "dns_rebind_localhost_bypass",
+            "dns rebind localhost bypass",
+            "browser_same_origin_policy_bypass",
+            "browser same origin policy bypass",
+            "debug_api_remote_abuse",
+            "debug api remote abuse",
+            "rpc_http_server",
+            "rpc http server",
+            "middleware",
+            "host_allowlist",
+            "host allowlist",
+            "missing_origin_validation",
+            "missing origin validation",
+            "missing_origin_check_on_local_service"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/37104-bc-insight-reth-rpc-is-vulnerable-to-dns-rebinding-attacks.md"
+            ],
+            "scope": "section",
+            "support": "explicit"
+          },
+          "graphHints": {
+            "variants": [
+              "missing origin check on local service",
+              "dns rebinding",
+              "same origin bypass",
+              "unauthenticated rpc",
+              "rpc host header gap"
+            ],
+            "commonlyComposesWith": [
+              "no host header check on rpc requests",
+              "dns rebind localhost bypass",
+              "browser same origin policy bypass",
+              "debug api remote abuse",
+              "rpc http server"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-rpc-dns-rebinding-related-files-in-corpus-l2-get-001",
+          "title": "Related files in corpus (L2 geth forks — same class check)",
+          "lineStart": 128,
+          "lineEnd": 137,
+          "lineCount": 10,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "node",
+            "Host",
+            "host_header",
+            "http.addr",
+            "allowed_hosts",
+            "tower_allowed_hosts",
+            "virtualhost",
+            "SameOrigin",
+            "127.0.0.1",
+            "rpc-builder",
+            "no_host_header_check_on_rpc_requests",
+            "dns_rebind_localhost_bypass",
+            "browser_same_origin_policy_bypass",
+            "debug_api_remote_abuse",
+            "rpc_http_server",
+            "middleware",
+            "host_allowlist"
+          ],
+          "searchKeywords": [
+            "related",
+            "files",
+            "corpus",
+            "related files corpus",
+            "related files",
+            "files corpus",
+            "host",
+            "host_header",
+            "host header",
+            "http.addr",
+            "http addr",
+            "allowed_hosts",
+            "allowed hosts",
+            "tower_allowed_hosts",
+            "tower allowed hosts",
+            "virtualhost",
+            "sameorigin",
+            "same origin",
+            "127.0.0.1",
+            "127 0 0 1",
+            "rpc-builder",
+            "rpc builder",
+            "no_host_header_check_on_rpc_requests",
+            "no host header check on rpc requests",
+            "dns_rebind_localhost_bypass",
+            "dns rebind localhost bypass",
+            "browser_same_origin_policy_bypass",
+            "browser same origin policy bypass",
+            "debug_api_remote_abuse",
+            "debug api remote abuse",
+            "rpc_http_server",
+            "rpc http server"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/publications-astria-geth-zellic-audit-report-pdf.md",
+              "reports/eth-l1-clients_findings/publications-facet-geth-zellic-audit-report-pdf.md",
+              "reports/eth-l1-clients_findings/publications-reviews-2025-03-offchain-geth-14-4-securityreview-pdf.md",
+              "reports/eth-l1-clients_findings/go-ethereum-security-md.md"
+            ],
+            "scope": "section",
+            "support": "explicit"
+          },
+          "graphHints": {
+            "variants": [
+              "missing origin check on local service",
+              "dns rebinding",
+              "same origin bypass",
+              "unauthenticated rpc",
+              "rpc host header gap"
+            ],
+            "commonlyComposesWith": [
+              "no host header check on rpc requests",
+              "dns rebind localhost bypass",
+              "browser same origin policy bypass",
+              "debug api remote abuse",
+              "rpc http server"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-rpc-dns-rebinding-vulnerable-code-pattern-generi-002",
+          "title": "Vulnerable Code Pattern (generic)",
+          "lineStart": 138,
+          "lineEnd": 152,
+          "lineCount": 15,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "Host",
+            "host_header",
+            "http.addr",
+            "allowed_hosts",
+            "tower_allowed_hosts",
+            "virtualhost",
+            "SameOrigin",
+            "127.0.0.1",
+            "rpc-builder",
+            "no_host_header_check_on_rpc_requests",
+            "dns_rebind_localhost_bypass",
+            "browser_same_origin_policy_bypass",
+            "debug_api_remote_abuse",
+            "rpc_http_server",
+            "middleware",
+            "host_allowlist"
+          ],
+          "searchKeywords": [
+            "vulnerable",
+            "code",
+            "vulnerable code",
+            "host",
+            "host_header",
+            "host header",
+            "http.addr",
+            "http addr",
+            "allowed_hosts",
+            "allowed hosts",
+            "tower_allowed_hosts",
+            "tower allowed hosts",
+            "virtualhost",
+            "sameorigin",
+            "same origin",
+            "127.0.0.1",
+            "127 0 0 1",
+            "rpc-builder",
+            "rpc builder",
+            "no_host_header_check_on_rpc_requests",
+            "no host header check on rpc requests",
+            "dns_rebind_localhost_bypass",
+            "dns rebind localhost bypass",
+            "browser_same_origin_policy_bypass",
+            "browser same origin policy bypass",
+            "debug_api_remote_abuse",
+            "debug api remote abuse",
+            "rpc_http_server",
+            "rpc http server",
+            "middleware",
+            "host_allowlist",
+            "host allowlist"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 15,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/37104-bc-insight-reth-rpc-is-vulnerable-to-dns-rebinding-attacks.md",
+              "reports/eth-l1-clients_findings/publications-astria-geth-zellic-audit-report-pdf.md",
+              "reports/eth-l1-clients_findings/publications-facet-geth-zellic-audit-report-pdf.md",
+              "reports/eth-l1-clients_findings/publications-reviews-2025-03-offchain-geth-14-4-securityreview-pdf.md",
+              "reports/eth-l1-clients_findings/go-ethereum-security-md.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing origin check on local service",
+              "dns rebinding",
+              "same origin bypass",
+              "unauthenticated rpc",
+              "rpc host header gap"
+            ],
+            "commonlyComposesWith": [
+              "no host header check on rpc requests",
+              "dns rebind localhost bypass",
+              "browser same origin policy bypass",
+              "debug api remote abuse",
+              "rpc http server"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-rpc-dns-rebinding-detection-hunt-strategy-003",
+          "title": "Detection & Hunt Strategy",
+          "lineStart": 153,
+          "lineEnd": 162,
+          "lineCount": 10,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "graphql",
+            "http",
+            "Host",
+            "host_header",
+            "http.addr",
+            "allowed_hosts",
+            "tower_allowed_hosts",
+            "virtualhost",
+            "SameOrigin",
+            "127.0.0.1",
+            "rpc-builder",
+            "no_host_header_check_on_rpc_requests",
+            "dns_rebind_localhost_bypass",
+            "browser_same_origin_policy_bypass",
+            "debug_api_remote_abuse",
+            "rpc_http_server",
+            "middleware",
+            "host_allowlist"
+          ],
+          "searchKeywords": [
+            "detection",
+            "hunt",
+            "strategy",
+            "detection hunt strategy",
+            "detection hunt",
+            "hunt strategy",
+            "host",
+            "host_header",
+            "host header",
+            "http.addr",
+            "http addr",
+            "allowed_hosts",
+            "allowed hosts",
+            "tower_allowed_hosts",
+            "tower allowed hosts",
+            "virtualhost",
+            "sameorigin",
+            "same origin",
+            "127.0.0.1",
+            "127 0 0 1",
+            "rpc-builder",
+            "rpc builder",
+            "no_host_header_check_on_rpc_requests",
+            "no host header check on rpc requests",
+            "dns_rebind_localhost_bypass",
+            "dns rebind localhost bypass",
+            "browser_same_origin_policy_bypass",
+            "browser same origin policy bypass",
+            "debug_api_remote_abuse",
+            "debug api remote abuse",
+            "rpc_http_server",
+            "rpc http server"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 15,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/37104-bc-insight-reth-rpc-is-vulnerable-to-dns-rebinding-attacks.md",
+              "reports/eth-l1-clients_findings/publications-astria-geth-zellic-audit-report-pdf.md",
+              "reports/eth-l1-clients_findings/publications-facet-geth-zellic-audit-report-pdf.md",
+              "reports/eth-l1-clients_findings/publications-reviews-2025-03-offchain-geth-14-4-securityreview-pdf.md",
+              "reports/eth-l1-clients_findings/go-ethereum-security-md.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing origin check on local service",
+              "dns rebinding",
+              "same origin bypass",
+              "unauthenticated rpc",
+              "rpc host header gap"
+            ],
+            "commonlyComposesWith": [
+              "no host header check on rpc requests",
+              "dns rebind localhost bypass",
+              "browser same origin policy bypass",
+              "debug api remote abuse",
+              "rpc http server"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/eth-l1-clients/execution/state-root-fork-choice-mismatch.md",
+      "totalLines": 189,
+      "frontmatter": {
+        "vulnerability_class": "state_root_fork_choice_mismatch",
+        "title": "State-Root & Fork-Choice Integrity Gaps: buffered blocks skip validation, stale trie updates, side-chain hashes",
+        "protocol": "eth-l1-clients",
+        "category": "Consensus / Blockchain Tree",
+        "vulnerability_type": "validation_bypass",
+        "attack_type": "state_root_skip|sidechain_hash_corruption|fork_choice_accounting_bug|chain_split",
+        "affected_component": "blockchain_tree|fork_choice|state_providers|trie_updates",
+        "chain": "ethereum",
+        "severity": "critical",
+        "impact": "chain_split|wrong_state_served|consensus_divergence",
+        "severity_range": "HIGH to CRITICAL",
+        "source": "Sigma Prime reth 2024 + Immunefi Ethereum Protocol Attackathon 2024-2025",
+        "primitives": [
+          "buffered_blocks_skip_state_root_validation",
+          "side_chain_hashes_invalid_for_state_provider",
+          "trieupdates_flush_reorders_operations",
+          "trie_updates_not_removed_for_all_chains_on_fork_choice_updated",
+          "shallow_copy_of_byte_slice_fork",
+          "engineapi_error_hash_mismatch"
+        ],
+        "affected_components": [
+          "blockchain tree (block buffering, canonical chain commit)",
+          "fork-choice update handling (engine API)",
+          "trie update queues / state providers",
+          "historical block hash machinery"
+        ],
+        "tags": [
+          "state_root",
+          "fork_choice",
+          "blockchain_tree",
+          "reth",
+          "erigon",
+          "engine_api",
+          "consensus",
+          "chain_split",
+          "sigp"
+        ],
+        "total_reports_analyzed": 6,
+        "root_cause_family": "consensus_pipeline_validation_gap",
+        "pattern_key": "state_root_fork_choice_gap | buffered_sidechain_trie_accounting | chain_split",
+        "interaction_scope": "consensus_pipeline",
+        "code_keywords": [
+          "try_connect_buffered_blocks",
+          "state_root",
+          "canonical_chain",
+          "fork_choice_updated",
+          "TrieUpdates",
+          "flush()",
+          "side_chain",
+          "latest_valid_hash",
+          "BufferedBlocks",
+          "new_chain_fork",
+          "dataCopy"
+        ]
+      },
+      "patternCount": 4,
+      "patterns": [
+        {
+          "id": "eth-l1-clients-state-root-fork-choice-mismatch-overview-000",
+          "title": "Overview",
+          "lineStart": 66,
+          "lineEnd": 127,
+          "lineCount": 62,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "TrieUpdates",
+            "TrieUpdates::flush",
+            "append",
+            "block.state_root",
+            "blockchain_tree",
+            "chain_split",
+            "connect",
+            "consensus_pipeline",
+            "dataCopy",
+            "flush",
+            "fork_choice",
+            "fork_choice_updated",
+            "forkchoiceUpdated",
+            "high",
+            "insert",
+            "try_connect_buffered_blocks",
+            "state_root",
+            "canonical_chain",
+            "flush()",
+            "side_chain"
+          ],
+          "searchKeywords": [
+            "try_connect_buffered_blocks",
+            "try connect buffered blocks",
+            "state_root",
+            "state root",
+            "canonical_chain",
+            "canonical chain",
+            "fork_choice_updated",
+            "fork choice updated",
+            "trieupdates",
+            "trie updates",
+            "flush()",
+            "side_chain",
+            "side chain",
+            "latest_valid_hash",
+            "latest valid hash",
+            "bufferedblocks",
+            "buffered blocks",
+            "new_chain_fork",
+            "new chain fork",
+            "datacopy",
+            "data copy",
+            "buffered_blocks_skip_state_root_validation",
+            "buffered blocks skip state root validation",
+            "side_chain_hashes_invalid_for_state_provider",
+            "side chain hashes invalid for state provider",
+            "trieupdates_flush_reorders_operations",
+            "trieupdates flush reorders operations",
+            "trie_updates_not_removed_for_all_chains_on_fork_choice_updated",
+            "trie updates not removed for all chains on fork choice updated",
+            "shallow_copy_of_byte_slice_fork",
+            "shallow copy of byte slice fork",
+            "engineapi_error_hash_mismatch"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 22,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+              "reports/eth-l1-clients_findings/37199-bc-low-potential-chain-fork-due-to-shallow-copy-of-byte-slice.md",
+              "reports/eth-l1-clients_findings/audit-reports-anoma-2023-03-28-audit-report-namada-ethereum-bridge-v1-0-pdf.md",
+              "reports/eth-l1-clients_findings/chainsafe-gossamer-sigp.md",
+              "reports/eth-l1-clients_findings/ef-pectra-sigp.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "consensus pipeline validation gap",
+              "state root skip",
+              "sidechain hash corruption",
+              "fork choice accounting bug",
+              "chain split"
+            ],
+            "commonlyComposesWith": [
+              "buffered blocks skip state root validation",
+              "side chain hashes invalid for state provider",
+              "trieupdates flush reorders operations",
+              "trie updates not removed for all chains on fork choice updated",
+              "shallow copy of byte slice fork"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-state-root-fork-choice-mismatch-real-reports-001",
+          "title": "Real Reports",
+          "lineStart": 128,
+          "lineEnd": 149,
+          "lineCount": 22,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "BlockNumHash",
+            "blockchain_tree",
+            "dataCopy",
+            "try_connect_buffered_blocks",
+            "state_root",
+            "canonical_chain",
+            "fork_choice_updated",
+            "TrieUpdates",
+            "flush()",
+            "side_chain",
+            "latest_valid_hash",
+            "BufferedBlocks",
+            "new_chain_fork",
+            "buffered_blocks_skip_state_root_validation",
+            "side_chain_hashes_invalid_for_state_provider",
+            "trieupdates_flush_reorders_operations",
+            "trie_updates_not_removed_for_all_chains_on_fork_choice_updated",
+            "shallow_copy_of_byte_slice_fork",
+            "engineapi_error_hash_mismatch",
+            "fork_choice"
+          ],
+          "searchKeywords": [
+            "reports",
+            "sigma",
+            "prime",
+            "reth",
+            "state",
+            "roots",
+            "may",
+            "not",
+            "checked",
+            "buffered",
+            "blocks",
+            "immunefi",
+            "potential",
+            "chain",
+            "fork",
+            "due",
+            "shallow",
+            "copy",
+            "byte",
+            "slice",
+            "try_connect_buffered_blocks",
+            "try connect buffered blocks",
+            "state_root",
+            "state root",
+            "canonical_chain",
+            "canonical chain",
+            "fork_choice_updated",
+            "fork choice updated",
+            "trieupdates",
+            "trie updates",
+            "flush()",
+            "side_chain"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "1. Sigma Prime reth 2024 — RETH-05 (High, Open): State Roots May Not Be Checked For Buffered Blocks",
+              "lineStart": 130,
+              "lineEnd": 135,
+              "severity": [],
+              "codeKeywords": [
+                "BlockNumHash",
+                "blockchain_tree",
+                "try_connect_buffered_blocks"
+              ],
+              "searchKeywords": [
+                "sigma",
+                "prime",
+                "reth",
+                "state",
+                "roots",
+                "may",
+                "not",
+                "checked",
+                "buffered",
+                "blocks"
+              ]
+            },
+            {
+              "title": "4. Immunefi #37199 [BC-Low] — Potential chain fork due to shallow copy of byte slice (erigon)",
+              "lineStart": 144,
+              "lineEnd": 149,
+              "severity": [],
+              "codeKeywords": [
+                "dataCopy"
+              ],
+              "searchKeywords": [
+                "immunefi",
+                "potential",
+                "chain",
+                "fork",
+                "due",
+                "shallow",
+                "copy",
+                "byte",
+                "slice"
+              ]
+            }
+          ],
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+              "reports/eth-l1-clients_findings/37199-bc-low-potential-chain-fork-due-to-shallow-copy-of-byte-slice.md"
+            ],
+            "scope": "section",
+            "support": "explicit"
+          },
+          "graphHints": {
+            "variants": [
+              "consensus pipeline validation gap",
+              "state root skip",
+              "sidechain hash corruption",
+              "fork choice accounting bug",
+              "chain split"
+            ],
+            "commonlyComposesWith": [
+              "buffered blocks skip state root validation",
+              "side chain hashes invalid for state provider",
+              "trieupdates flush reorders operations",
+              "trie updates not removed for all chains on fork choice updated",
+              "shallow copy of byte slice fork"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-state-root-fork-choice-mismatch-vulnerable-code-pattern-generi-002",
+          "title": "Vulnerable Code Pattern (generic)",
+          "lineStart": 150,
+          "lineEnd": 168,
+          "lineCount": 19,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "try_connect_buffered_blocks",
+            "state_root",
+            "canonical_chain",
+            "fork_choice_updated",
+            "TrieUpdates",
+            "flush()",
+            "side_chain",
+            "latest_valid_hash",
+            "BufferedBlocks",
+            "new_chain_fork",
+            "dataCopy",
+            "buffered_blocks_skip_state_root_validation",
+            "side_chain_hashes_invalid_for_state_provider",
+            "trieupdates_flush_reorders_operations",
+            "trie_updates_not_removed_for_all_chains_on_fork_choice_updated",
+            "shallow_copy_of_byte_slice_fork",
+            "engineapi_error_hash_mismatch",
+            "blockchain_tree",
+            "fork_choice",
+            "state_providers"
+          ],
+          "searchKeywords": [
+            "vulnerable",
+            "code",
+            "vulnerable code",
+            "try_connect_buffered_blocks",
+            "try connect buffered blocks",
+            "state_root",
+            "state root",
+            "canonical_chain",
+            "canonical chain",
+            "fork_choice_updated",
+            "fork choice updated",
+            "trieupdates",
+            "trie updates",
+            "flush()",
+            "side_chain",
+            "side chain",
+            "latest_valid_hash",
+            "latest valid hash",
+            "bufferedblocks",
+            "buffered blocks",
+            "new_chain_fork",
+            "new chain fork",
+            "datacopy",
+            "data copy",
+            "buffered_blocks_skip_state_root_validation",
+            "buffered blocks skip state root validation",
+            "side_chain_hashes_invalid_for_state_provider",
+            "side chain hashes invalid for state provider",
+            "trieupdates_flush_reorders_operations",
+            "trieupdates flush reorders operations",
+            "trie_updates_not_removed_for_all_chains_on_fork_choice_updated",
+            "trie updates not removed for all chains on fork choice updated"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 22,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+              "reports/eth-l1-clients_findings/37199-bc-low-potential-chain-fork-due-to-shallow-copy-of-byte-slice.md",
+              "reports/eth-l1-clients_findings/audit-reports-anoma-2023-03-28-audit-report-namada-ethereum-bridge-v1-0-pdf.md",
+              "reports/eth-l1-clients_findings/chainsafe-gossamer-sigp.md",
+              "reports/eth-l1-clients_findings/ef-pectra-sigp.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "consensus pipeline validation gap",
+              "state root skip",
+              "sidechain hash corruption",
+              "fork choice accounting bug",
+              "chain split"
+            ],
+            "commonlyComposesWith": [
+              "buffered blocks skip state root validation",
+              "side chain hashes invalid for state provider",
+              "trieupdates flush reorders operations",
+              "trie updates not removed for all chains on fork choice updated",
+              "shallow copy of byte slice fork"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-state-root-fork-choice-mismatch-detection-hunt-strategy-003",
+          "title": "Detection & Hunt Strategy",
+          "lineStart": 169,
+          "lineEnd": 181,
+          "lineCount": 13,
+          "severity": [
+            "CRITICAL"
+          ],
+          "codeKeywords": [
+            "copy",
+            "fork_choice_updated",
+            "latestValidHash",
+            "try_connect_buffered_blocks",
+            "state_root",
+            "canonical_chain",
+            "TrieUpdates",
+            "flush()",
+            "side_chain",
+            "latest_valid_hash",
+            "BufferedBlocks",
+            "new_chain_fork",
+            "dataCopy",
+            "buffered_blocks_skip_state_root_validation",
+            "side_chain_hashes_invalid_for_state_provider",
+            "trieupdates_flush_reorders_operations",
+            "trie_updates_not_removed_for_all_chains_on_fork_choice_updated",
+            "shallow_copy_of_byte_slice_fork",
+            "engineapi_error_hash_mismatch",
+            "blockchain_tree"
+          ],
+          "searchKeywords": [
+            "detection",
+            "hunt",
+            "strategy",
+            "detection hunt strategy",
+            "detection hunt",
+            "hunt strategy",
+            "try_connect_buffered_blocks",
+            "try connect buffered blocks",
+            "state_root",
+            "state root",
+            "canonical_chain",
+            "canonical chain",
+            "fork_choice_updated",
+            "fork choice updated",
+            "trieupdates",
+            "trie updates",
+            "flush()",
+            "side_chain",
+            "side chain",
+            "latest_valid_hash",
+            "latest valid hash",
+            "bufferedblocks",
+            "buffered blocks",
+            "new_chain_fork",
+            "new chain fork",
+            "datacopy",
+            "data copy",
+            "buffered_blocks_skip_state_root_validation",
+            "buffered blocks skip state root validation",
+            "side_chain_hashes_invalid_for_state_provider",
+            "side chain hashes invalid for state provider",
+            "trieupdates_flush_reorders_operations"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 22,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+              "reports/eth-l1-clients_findings/37199-bc-low-potential-chain-fork-due-to-shallow-copy-of-byte-slice.md",
+              "reports/eth-l1-clients_findings/audit-reports-anoma-2023-03-28-audit-report-namada-ethereum-bridge-v1-0-pdf.md",
+              "reports/eth-l1-clients_findings/chainsafe-gossamer-sigp.md",
+              "reports/eth-l1-clients_findings/ef-pectra-sigp.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "consensus pipeline validation gap",
+              "state root skip",
+              "sidechain hash corruption",
+              "fork choice accounting bug",
+              "chain split"
+            ],
+            "commonlyComposesWith": [
+              "buffered blocks skip state root validation",
+              "side chain hashes invalid for state provider",
+              "trieupdates flush reorders operations",
+              "trie updates not removed for all chains on fork choice updated",
+              "shallow copy of byte slice fork"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/eth-l1-clients/p2p/discv4-discv5-endpoint-proof-ENR.md",
+      "totalLines": 199,
+      "frontmatter": {
+        "vulnerability_class": "discovery_endpoint_proof_enr_gaps",
+        "title": "discv4/discv5 Discovery: endpoint-proof, packet-expiration, and ENR validation gaps",
+        "protocol": "eth-l1-clients",
+        "category": "P2P Networking / Discovery",
+        "vulnerability_type": "input_validation",
+        "attack_type": "packet_replay|endpoint_proof_bypass|enr_oversize|neighbor_flood",
+        "affected_component": "discv4_packets|discv5_messages|enr_records|bonding_state",
+        "chain": "ethereum",
+        "severity": "medium",
+        "impact": "resource_exhaustion|eclipse_facilitation|peer_table_pollution|spec_divergence",
+        "severity_range": "LOW to HIGH",
+        "source": "Immunefi Ethereum Protocol Attackathon 2024-2025 + Sigma Prime reth 2024 + LatticeFlow discv5 review",
+        "primitives": [
+          "pong_neighbors_expiration_not_checked",
+          "endpoint_proof_never_refresh_bonding",
+          "respond_closest_shares_all_neighbours",
+          "find_node_invalid_endpoint",
+          "enr_response_max_size_unchecked",
+          "enr_responses_not_validated",
+          "udp_spam_dos",
+          "kdf_index_out_of_bounds"
+        ],
+        "affected_components": [
+          "discv4 packet handlers (Ping/Pong/FindNode/Neighbors/ENRRequest/ENRResponse)",
+          "discv5 message handlers (FindNode/Nodes/TalkReq/PING/PONG)",
+          "node table / k-buckets",
+          "bonding state machine"
+        ],
+        "tags": [
+          "discv4",
+          "discv5",
+          "discovery",
+          "enr",
+          "endpoint_proof",
+          "besu",
+          "reth",
+          "eclipse",
+          "attackathon"
+        ],
+        "total_reports_analyzed": 8,
+        "root_cause_family": "discovery_protocol_validation_gap",
+        "pattern_key": "discovery_enr_gap | expiration_proof_size_bypass | peer_table_pollution",
+        "interaction_scope": "network_facing_udp_service",
+        "code_keywords": [
+          "expiration",
+          "Pong",
+          "Neighbors",
+          "pingHash",
+          "bond",
+          "ENRRequest",
+          "ENRResponse",
+          "respond_closest",
+          "find_node",
+          "Nodes",
+          "kbucket",
+          "maxPacketSize"
+        ]
+      },
+      "patternCount": 4,
+      "patterns": [
+        {
+          "id": "eth-l1-clients-discv4-discv5-endpoint-proof-enr-overview-000",
+          "title": "Overview",
+          "lineStart": 69,
+          "lineEnd": 126,
+          "lineCount": 58,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "ENRResponse",
+            "Neighbors",
+            "Pong",
+            "bond",
+            "discv4_packets",
+            "discv5_messages",
+            "eclipse_facilitation",
+            "expiration",
+            "find_node",
+            "high",
+            "network_facing_udp_service",
+            "peer_table_pollution",
+            "respond_closest",
+            "pingHash",
+            "ENRRequest",
+            "Nodes",
+            "kbucket",
+            "maxPacketSize",
+            "pong_neighbors_expiration_not_checked",
+            "endpoint_proof_never_refresh_bonding"
+          ],
+          "searchKeywords": [
+            "expiration",
+            "pong",
+            "neighbors",
+            "pinghash",
+            "ping hash",
+            "bond",
+            "enrrequest",
+            "enrresponse",
+            "respond_closest",
+            "respond closest",
+            "find_node",
+            "find node",
+            "nodes",
+            "kbucket",
+            "maxpacketsize",
+            "max packet size",
+            "pong_neighbors_expiration_not_checked",
+            "pong neighbors expiration not checked",
+            "endpoint_proof_never_refresh_bonding",
+            "endpoint proof never refresh bonding",
+            "respond_closest_shares_all_neighbours",
+            "respond closest shares all neighbours",
+            "find_node_invalid_endpoint",
+            "find node invalid endpoint",
+            "enr_response_max_size_unchecked",
+            "enr response max size unchecked",
+            "enr_responses_not_validated",
+            "enr responses not validated",
+            "udp_spam_dos",
+            "udp spam dos",
+            "kdf_index_out_of_bounds",
+            "kdf index out of bounds"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 5,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38894-bc-low-missing-expiration-check-for-pong-and-neighbors-packets-and-not-refreshing-the-endpoint.md",
+              "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+              "reports/eth-l1-clients_findings/38902-bc-low-no-check-on-the-maximum-size-of-the-encoded-enr-on-enr.md",
+              "reports/eth-l1-clients_findings/eth-node-discovery-la.md",
+              "reports/eth-l1-clients_findings/37352-bc-insight-missing-liveness-check-in-collecttablenodes.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "discovery protocol validation gap",
+              "packet replay",
+              "endpoint proof bypass",
+              "enr oversize",
+              "neighbor flood"
+            ],
+            "commonlyComposesWith": [
+              "pong neighbors expiration not checked",
+              "endpoint proof never refresh bonding",
+              "respond closest shares all neighbours",
+              "find node invalid endpoint",
+              "enr response max size unchecked"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-discv4-discv5-endpoint-proof-enr-real-reports-001",
+          "title": "Real Reports",
+          "lineStart": 127,
+          "lineEnd": 162,
+          "lineCount": 36,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "expiration",
+            "Pong",
+            "Neighbors",
+            "pingHash",
+            "bond",
+            "ENRRequest",
+            "ENRResponse",
+            "respond_closest",
+            "find_node",
+            "Nodes",
+            "kbucket",
+            "maxPacketSize",
+            "pong_neighbors_expiration_not_checked",
+            "endpoint_proof_never_refresh_bonding",
+            "respond_closest_shares_all_neighbours",
+            "find_node_invalid_endpoint",
+            "enr_response_max_size_unchecked",
+            "enr_responses_not_validated",
+            "udp_spam_dos",
+            "kdf_index_out_of_bounds"
+          ],
+          "searchKeywords": [
+            "reports",
+            "immunefi",
+            "missing",
+            "expiration",
+            "check",
+            "pong",
+            "neighbors",
+            "packets",
+            "not",
+            "refreshing",
+            "endpoint",
+            "proof",
+            "sigma",
+            "prime",
+            "reth",
+            "respond",
+            "closest",
+            "shares",
+            "all",
+            "neighbours",
+            "maximum",
+            "size",
+            "encoded",
+            "enr",
+            "response",
+            "packet",
+            "protocol",
+            "level",
+            "discv5",
+            "final",
+            "review",
+            "protocol level discv5 final review"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "1. Immunefi #38894 [BC-Low] — Missing expiration check for Pong and Neighbors packets and not refreshing the endpoint proof (Franfran, Besu)",
+              "lineStart": 129,
+              "lineEnd": 136,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "immunefi",
+                "missing",
+                "expiration",
+                "check",
+                "pong",
+                "neighbors",
+                "packets",
+                "not",
+                "refreshing",
+                "endpoint",
+                "proof"
+              ]
+            },
+            {
+              "title": "2. Sigma Prime reth 2024 — RETH-06 (High): respond_closest() Shares All Neighbours",
+              "lineStart": 137,
+              "lineEnd": 143,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "sigma",
+                "prime",
+                "reth",
+                "respond",
+                "closest",
+                "shares",
+                "all",
+                "neighbours"
+              ]
+            },
+            {
+              "title": "4. Immunefi #38902 [BC-Low] — No check on the maximum size of the encoded ENR on ENR_RESPONSE packet",
+              "lineStart": 148,
+              "lineEnd": 153,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "immunefi",
+                "check",
+                "maximum",
+                "size",
+                "encoded",
+                "enr",
+                "response",
+                "packet"
+              ]
+            },
+            {
+              "title": "6. Protocol-level reference: discv5 final review",
+              "lineStart": 158,
+              "lineEnd": 162,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "protocol",
+                "level",
+                "discv5",
+                "final",
+                "review",
+                "protocol level discv5 final review",
+                "protocol level",
+                "level discv5",
+                "discv5 final",
+                "final review"
+              ]
+            }
+          ],
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38894-bc-low-missing-expiration-check-for-pong-and-neighbors-packets-and-not-refreshing-the-endpoint.md",
+              "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+              "reports/eth-l1-clients_findings/38902-bc-low-no-check-on-the-maximum-size-of-the-encoded-enr-on-enr.md",
+              "reports/eth-l1-clients_findings/eth-node-discovery-la.md"
+            ],
+            "scope": "section",
+            "support": "explicit"
+          },
+          "graphHints": {
+            "variants": [
+              "discovery protocol validation gap",
+              "packet replay",
+              "endpoint proof bypass",
+              "enr oversize",
+              "neighbor flood"
+            ],
+            "commonlyComposesWith": [
+              "pong neighbors expiration not checked",
+              "endpoint proof never refresh bonding",
+              "respond closest shares all neighbours",
+              "find node invalid endpoint",
+              "enr response max size unchecked"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-discv4-discv5-endpoint-proof-enr-vulnerable-code-pattern-generi-002",
+          "title": "Vulnerable Code Pattern (generic)",
+          "lineStart": 163,
+          "lineEnd": 180,
+          "lineCount": 18,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "expiration",
+            "Pong",
+            "Neighbors",
+            "pingHash",
+            "bond",
+            "ENRRequest",
+            "ENRResponse",
+            "respond_closest",
+            "find_node",
+            "Nodes",
+            "kbucket",
+            "maxPacketSize",
+            "pong_neighbors_expiration_not_checked",
+            "endpoint_proof_never_refresh_bonding",
+            "respond_closest_shares_all_neighbours",
+            "find_node_invalid_endpoint",
+            "enr_response_max_size_unchecked",
+            "enr_responses_not_validated",
+            "udp_spam_dos",
+            "kdf_index_out_of_bounds"
+          ],
+          "searchKeywords": [
+            "vulnerable",
+            "code",
+            "vulnerable code",
+            "expiration",
+            "pong",
+            "neighbors",
+            "pinghash",
+            "ping hash",
+            "bond",
+            "enrrequest",
+            "enrresponse",
+            "respond_closest",
+            "respond closest",
+            "find_node",
+            "find node",
+            "nodes",
+            "kbucket",
+            "maxpacketsize",
+            "max packet size",
+            "pong_neighbors_expiration_not_checked",
+            "pong neighbors expiration not checked",
+            "endpoint_proof_never_refresh_bonding",
+            "endpoint proof never refresh bonding",
+            "respond_closest_shares_all_neighbours",
+            "respond closest shares all neighbours",
+            "find_node_invalid_endpoint",
+            "find node invalid endpoint",
+            "enr_response_max_size_unchecked",
+            "enr response max size unchecked",
+            "enr_responses_not_validated",
+            "enr responses not validated",
+            "udp_spam_dos"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 5,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38894-bc-low-missing-expiration-check-for-pong-and-neighbors-packets-and-not-refreshing-the-endpoint.md",
+              "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+              "reports/eth-l1-clients_findings/38902-bc-low-no-check-on-the-maximum-size-of-the-encoded-enr-on-enr.md",
+              "reports/eth-l1-clients_findings/eth-node-discovery-la.md",
+              "reports/eth-l1-clients_findings/37352-bc-insight-missing-liveness-check-in-collecttablenodes.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "discovery protocol validation gap",
+              "packet replay",
+              "endpoint proof bypass",
+              "enr oversize",
+              "neighbor flood"
+            ],
+            "commonlyComposesWith": [
+              "pong neighbors expiration not checked",
+              "endpoint proof never refresh bonding",
+              "respond closest shares all neighbours",
+              "find node invalid endpoint",
+              "enr response max size unchecked"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-discv4-discv5-endpoint-proof-enr-detection-hunt-strategy-003",
+          "title": "Detection & Hunt Strategy",
+          "lineStart": 181,
+          "lineEnd": 191,
+          "lineCount": 11,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "expiration",
+            "Pong",
+            "Neighbors",
+            "pingHash",
+            "bond",
+            "ENRRequest",
+            "ENRResponse",
+            "respond_closest",
+            "find_node",
+            "Nodes",
+            "kbucket",
+            "maxPacketSize",
+            "pong_neighbors_expiration_not_checked",
+            "endpoint_proof_never_refresh_bonding",
+            "respond_closest_shares_all_neighbours",
+            "find_node_invalid_endpoint",
+            "enr_response_max_size_unchecked",
+            "enr_responses_not_validated",
+            "udp_spam_dos",
+            "kdf_index_out_of_bounds"
+          ],
+          "searchKeywords": [
+            "detection",
+            "hunt",
+            "strategy",
+            "detection hunt strategy",
+            "detection hunt",
+            "hunt strategy",
+            "expiration",
+            "pong",
+            "neighbors",
+            "pinghash",
+            "ping hash",
+            "bond",
+            "enrrequest",
+            "enrresponse",
+            "respond_closest",
+            "respond closest",
+            "find_node",
+            "find node",
+            "nodes",
+            "kbucket",
+            "maxpacketsize",
+            "max packet size",
+            "pong_neighbors_expiration_not_checked",
+            "pong neighbors expiration not checked",
+            "endpoint_proof_never_refresh_bonding",
+            "endpoint proof never refresh bonding",
+            "respond_closest_shares_all_neighbours",
+            "respond closest shares all neighbours",
+            "find_node_invalid_endpoint",
+            "find node invalid endpoint",
+            "enr_response_max_size_unchecked",
+            "enr response max size unchecked"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 5,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38894-bc-low-missing-expiration-check-for-pong-and-neighbors-packets-and-not-refreshing-the-endpoint.md",
+              "reports/eth-l1-clients_findings/reth-sigp-2024.md",
+              "reports/eth-l1-clients_findings/38902-bc-low-no-check-on-the-maximum-size-of-the-encoded-enr-on-enr.md",
+              "reports/eth-l1-clients_findings/eth-node-discovery-la.md",
+              "reports/eth-l1-clients_findings/37352-bc-insight-missing-liveness-check-in-collecttablenodes.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "discovery protocol validation gap",
+              "packet replay",
+              "endpoint proof bypass",
+              "enr oversize",
+              "neighbor flood"
+            ],
+            "commonlyComposesWith": [
+              "pong neighbors expiration not checked",
+              "endpoint proof never refresh bonding",
+              "respond closest shares all neighbours",
+              "find node invalid endpoint",
+              "enr response max size unchecked"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/eth-l1-clients/p2p/gossipsub-malformed-message.md",
+      "totalLines": 154,
+      "frontmatter": {
+        "vulnerability_class": "gossipsub_malformed_message",
+        "title": "Gossipsub Malformed Messages: zero topic weight disables peer penalties (nimbus-eth2)",
+        "protocol": "eth-l1-clients",
+        "category": "P2P Networking / PubSub",
+        "vulnerability_type": "peer_scoring_misconfiguration",
+        "attack_type": "penalty_bypass|invalid_message_spam|resource_exhaustion",
+        "affected_component": "gossipsub_topic_params|peer_scoring|invalid_message_handling",
+        "chain": "ethereum",
+        "severity": "low",
+        "impact": "wasted_compute_bandwidth|degraded_attestation_flow|node_desync",
+        "severity_range": "LOW to MEDIUM",
+        "source": "Immunefi Ethereum Protocol Attackathon 2024-2025",
+        "primitives": [
+          "topic_weight_zero_invalid_messages_unpenalized",
+          "malformed_snappy_ssz_gossip_survives_scoring",
+          "waste_compute_deserializing_undecodable_messages"
+        ],
+        "affected_components": [
+          "gossipsub topic params (topic_params.nim)",
+          "libp2p peer scoring (scoring.nim)",
+          "beacon block/attestation gossip pipelines"
+        ],
+        "tags": [
+          "gossipsub",
+          "libp2p",
+          "peer_scoring",
+          "nimbus",
+          "spam",
+          "dos",
+          "attackathon"
+        ],
+        "total_reports_analyzed": "1 (+1 related)",
+        "root_cause_family": "scoring_misconfiguration_zero_default_weight",
+        "pattern_key": "gossipsub_penalty_bypass | zero_topic_weight_invalid_message | spam_enabler",
+        "interaction_scope": "network_facing_pubsub",
+        "code_keywords": [
+          "basicParams",
+          "TopicParam.init",
+          "topic_weight",
+          "invalidMessageDeliveries",
+          "penalties",
+          "scoring.nim",
+          "gossipsub",
+          "validate"
+        ]
+      },
+      "patternCount": 3,
+      "patterns": [
+        {
+          "id": "eth-l1-clients-gossipsub-malformed-message-overview-000",
+          "title": "Overview",
+          "lineStart": 57,
+          "lineEnd": 106,
+          "lineCount": 50,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "AggregateAndProofsTopic",
+            "BeaconBlocksTopic",
+            "TopicParam.init",
+            "basicParams",
+            "gossipsub_topic_params",
+            "high",
+            "invalidMessageDeliveries",
+            "network_facing_pubsub",
+            "peer_scoring",
+            "topic_weight",
+            "wasted_compute_bandwidth",
+            "penalties",
+            "scoring.nim",
+            "gossipsub",
+            "validate",
+            "topic_weight_zero_invalid_messages_unpenalized",
+            "malformed_snappy_ssz_gossip_survives_scoring",
+            "waste_compute_deserializing_undecodable_messages",
+            "invalid_message_handling"
+          ],
+          "searchKeywords": [
+            "basicparams",
+            "basic params",
+            "topicparam.init",
+            "topic param init",
+            "topic_weight",
+            "topic weight",
+            "invalidmessagedeliveries",
+            "invalid message deliveries",
+            "penalties",
+            "scoring.nim",
+            "scoring nim",
+            "gossipsub",
+            "validate",
+            "topic_weight_zero_invalid_messages_unpenalized",
+            "topic weight zero invalid messages unpenalized",
+            "malformed_snappy_ssz_gossip_survives_scoring",
+            "malformed snappy ssz gossip survives scoring",
+            "waste_compute_deserializing_undecodable_messages",
+            "waste compute deserializing undecodable messages",
+            "gossipsub_topic_params",
+            "gossipsub topic params",
+            "peer_scoring",
+            "peer scoring",
+            "invalid_message_handling",
+            "invalid message handling",
+            "peer_scoring_misconfiguration",
+            "peer scoring misconfiguration",
+            "scoring_misconfiguration_zero_default_weight",
+            "scoring misconfiguration zero default weight",
+            "gossipsub_penalty_bypass",
+            "gossipsub penalty bypass",
+            "zero_topic_weight_invalid_message"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38318-bc-low-nimbus-eth2-gossipsub-misconfiguration-allows-malicious-peers-gossip-malformed-data-wit.md",
+              "reports/eth-l1-clients_findings/38146-bc-medium-nimbus-eth2-remote-crash.md",
+              "reports/eth-l1-clients_findings/38733-bc-medium-nibmus-eth2-remote-crash.md",
+              "reports/eth-l1-clients_findings/37351-bc-insight-resubscribe-deadlocks-when-unsubscribing-within-an-unblock-channel.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "scoring misconfiguration zero default weight",
+              "penalty bypass",
+              "invalid message spam",
+              "resource exhaustion",
+              "gossipsub penalty bypass"
+            ],
+            "commonlyComposesWith": [
+              "topic weight zero invalid messages unpenalized",
+              "malformed snappy ssz gossip survives scoring",
+              "waste compute deserializing undecodable messages",
+              "gossipsub topic params",
+              "peer scoring"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-gossipsub-malformed-message-real-report-001",
+          "title": "Real Report",
+          "lineStart": 107,
+          "lineEnd": 126,
+          "lineCount": 20,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "AggregateAndProofsTopic",
+            "BeaconBlocksTopic",
+            "TopicParam.init",
+            "basicParams",
+            "topic_weight",
+            "invalidMessageDeliveries",
+            "penalties",
+            "scoring.nim",
+            "gossipsub",
+            "validate",
+            "topic_weight_zero_invalid_messages_unpenalized",
+            "malformed_snappy_ssz_gossip_survives_scoring",
+            "waste_compute_deserializing_undecodable_messages",
+            "gossipsub_topic_params",
+            "peer_scoring",
+            "invalid_message_handling"
+          ],
+          "searchKeywords": [
+            "report",
+            "immunefi",
+            "nimbus",
+            "eth2",
+            "gossipsub",
+            "misconfiguration",
+            "allows",
+            "malicious",
+            "peers",
+            "gossip",
+            "malformed",
+            "data",
+            "without",
+            "penalization",
+            "related",
+            "reports",
+            "related reports",
+            "basicparams",
+            "basic params",
+            "topicparam.init",
+            "topic param init",
+            "topic_weight",
+            "topic weight",
+            "invalidmessagedeliveries",
+            "invalid message deliveries",
+            "penalties",
+            "scoring.nim",
+            "scoring nim",
+            "validate",
+            "topic_weight_zero_invalid_messages_unpenalized",
+            "topic weight zero invalid messages unpenalized",
+            "malformed_snappy_ssz_gossip_survives_scoring"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "Immunefi #38318 [BC-Low] — nimbus-eth2: Gossipsub misconfiguration allows malicious peers gossip malformed data without penalization (alpharush)",
+              "lineStart": 109,
+              "lineEnd": 120,
+              "severity": [],
+              "codeKeywords": [
+                "AggregateAndProofsTopic",
+                "BeaconBlocksTopic",
+                "TopicParam.init",
+                "basicParams"
+              ],
+              "searchKeywords": [
+                "immunefi",
+                "nimbus",
+                "eth2",
+                "gossipsub",
+                "misconfiguration",
+                "allows",
+                "malicious",
+                "peers",
+                "gossip",
+                "malformed",
+                "data",
+                "without"
+              ]
+            },
+            {
+              "title": "Related reports (compounding)",
+              "lineStart": 121,
+              "lineEnd": 126,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "related",
+                "reports",
+                "related reports"
+              ]
+            }
+          ],
+          "reportEvidence": {
+            "count": 3,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38318-bc-low-nimbus-eth2-gossipsub-misconfiguration-allows-malicious-peers-gossip-malformed-data-wit.md",
+              "reports/eth-l1-clients_findings/38146-bc-medium-nimbus-eth2-remote-crash.md",
+              "reports/eth-l1-clients_findings/38733-bc-medium-nibmus-eth2-remote-crash.md"
+            ],
+            "scope": "section",
+            "support": "explicit"
+          },
+          "graphHints": {
+            "variants": [
+              "scoring misconfiguration zero default weight",
+              "penalty bypass",
+              "invalid message spam",
+              "resource exhaustion",
+              "gossipsub penalty bypass"
+            ],
+            "commonlyComposesWith": [
+              "topic weight zero invalid messages unpenalized",
+              "malformed snappy ssz gossip survives scoring",
+              "waste compute deserializing undecodable messages",
+              "gossipsub topic params",
+              "peer scoring"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-gossipsub-malformed-message-detection-hunt-strategy-002",
+          "title": "Detection & Hunt Strategy",
+          "lineStart": 137,
+          "lineEnd": 147,
+          "lineCount": 11,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "TopicParam",
+            "invalidMessageDeliveries",
+            "basicParams",
+            "TopicParam.init",
+            "topic_weight",
+            "penalties",
+            "scoring.nim",
+            "gossipsub",
+            "validate",
+            "topic_weight_zero_invalid_messages_unpenalized",
+            "malformed_snappy_ssz_gossip_survives_scoring",
+            "waste_compute_deserializing_undecodable_messages",
+            "gossipsub_topic_params",
+            "peer_scoring",
+            "invalid_message_handling"
+          ],
+          "searchKeywords": [
+            "detection",
+            "hunt",
+            "strategy",
+            "detection hunt strategy",
+            "detection hunt",
+            "hunt strategy",
+            "basicparams",
+            "basic params",
+            "topicparam.init",
+            "topic param init",
+            "topic_weight",
+            "topic weight",
+            "invalidmessagedeliveries",
+            "invalid message deliveries",
+            "penalties",
+            "scoring.nim",
+            "scoring nim",
+            "gossipsub",
+            "validate",
+            "topic_weight_zero_invalid_messages_unpenalized",
+            "topic weight zero invalid messages unpenalized",
+            "malformed_snappy_ssz_gossip_survives_scoring",
+            "malformed snappy ssz gossip survives scoring",
+            "waste_compute_deserializing_undecodable_messages",
+            "waste compute deserializing undecodable messages",
+            "gossipsub_topic_params",
+            "gossipsub topic params",
+            "peer_scoring",
+            "peer scoring",
+            "invalid_message_handling",
+            "invalid message handling",
+            "peer_scoring_misconfiguration"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38318-bc-low-nimbus-eth2-gossipsub-misconfiguration-allows-malicious-peers-gossip-malformed-data-wit.md",
+              "reports/eth-l1-clients_findings/38146-bc-medium-nimbus-eth2-remote-crash.md",
+              "reports/eth-l1-clients_findings/38733-bc-medium-nibmus-eth2-remote-crash.md",
+              "reports/eth-l1-clients_findings/37351-bc-insight-resubscribe-deadlocks-when-unsubscribing-within-an-unblock-channel.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "scoring misconfiguration zero default weight",
+              "penalty bypass",
+              "invalid message spam",
+              "resource exhaustion",
+              "gossipsub penalty bypass"
+            ],
+            "commonlyComposesWith": [
+              "topic weight zero invalid messages unpenalized",
+              "malformed snappy ssz gossip survives scoring",
+              "waste compute deserializing undecodable messages",
+              "gossipsub topic params",
+              "peer scoring"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/eth-l1-clients/p2p/p2p-remote-dos-oom.md",
+      "totalLines": 244,
+      "frontmatter": {
+        "vulnerability_class": "p2p_remote_dos_oom",
+        "title": "P2P Remote DoS / OOM: unbounded request serving, handshake floods, rate-limit gaps",
+        "protocol": "eth-l1-clients",
+        "category": "P2P Networking",
+        "vulnerability_type": "denial_of_service",
+        "attack_type": "resource_exhaustion|oom_crash|connection_flood|request_amplification",
+        "affected_component": "p2p_request_handlers|connection_setup|rate_limiting|peer_management",
+        "chain": "ethereum",
+        "severity": "high",
+        "impact": "node_crash|network_partition|resource_exhaustion",
+        "severity_range": "LOW to MEDIUM (network-partition scoped HIGH)",
+        "source": "Immunefi Ethereum Protocol Attackathon 2024-2025 + Sigma Prime reth 2024",
+        "primitives": [
+          "getblockheaders_large_range_oom",
+          "getreceiptsmsg_amplification",
+          "handshake_tcp_flood_no_ip_ratelimit",
+          "evil_client_fast_crash_via_unthrottled_requests",
+          "ping_spamming_deskew",
+          "missing_handshake_timeout_holding_sockets",
+          "ban_logic_incoming_peer_count_exhaustion",
+          "pending_peer_subtraction_overflow"
+        ],
+        "affected_components": [
+          "eth/66-68 request serving loop",
+          "RLPx / libp2p connection acceptance",
+          "peer scoring / ban lists",
+          "pending-peer accounting"
+        ],
+        "tags": [
+          "p2p",
+          "dos",
+          "oom",
+          "reth",
+          "nethermind",
+          "geth",
+          "besu",
+          "rate_limiting",
+          "netsplit",
+          "attackathon"
+        ],
+        "total_reports_analyzed": 10,
+        "client_coverage": "reth, nethermind, geth, besu, erigon (Caplin), teku",
+        "root_cause_family": "unbounded_remote_work_without_rate_limit",
+        "pattern_key": "p2p_remote_dos | request_serving_handshake_flood_oom | node_crash_network_partition",
+        "interaction_scope": "network_facing_service",
+        "code_keywords": [
+          "GetBlockHeaders",
+          "GetReceiptsMsg",
+          "handle_request",
+          "serve_",
+          "dial / handshake",
+          "Handshake",
+          "ping",
+          "ratelimit",
+          "incoming_peers",
+          "ban",
+          "pending_peers",
+          "max_peers",
+          "Buffer",
+          "spawn"
+        ]
+      },
+      "patternCount": 11,
+      "patterns": [
+        {
+          "id": "eth-l1-clients-p2p-remote-dos-oom-overview-000",
+          "title": "Overview",
+          "lineStart": 73,
+          "lineEnd": 125,
+          "lineCount": 53,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "GetBlockHeaders",
+            "GetReceiptsMsg",
+            "checked_sub",
+            "connection_setup",
+            "count",
+            "handshake",
+            "high",
+            "incoming_peers",
+            "limit",
+            "network_facing_service",
+            "network_partition",
+            "node_crash",
+            "p2p_request_handlers",
+            "ratelimit",
+            "handle_request",
+            "serve_",
+            "ping",
+            "ban",
+            "pending_peers",
+            "max_peers"
+          ],
+          "searchKeywords": [
+            "getblockheaders",
+            "get block headers",
+            "getreceiptsmsg",
+            "get receipts msg",
+            "handle_request",
+            "handle request",
+            "serve_",
+            "serve",
+            "dial / handshake",
+            "dial handshake",
+            "handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "incoming peers",
+            "ban",
+            "pending_peers",
+            "pending peers",
+            "max_peers",
+            "max peers",
+            "buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getblockheaders large range oom",
+            "getreceiptsmsg_amplification",
+            "getreceiptsmsg amplification",
+            "handshake_tcp_flood_no_ip_ratelimit",
+            "handshake tcp flood no ip ratelimit",
+            "evil_client_fast_crash_via_unthrottled_requests",
+            "evil client fast crash via unthrottled requests",
+            "ping_spamming_deskew",
+            "ping spamming deskew"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 18,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38850-bc-low-remote-p2p-oom-crash-getblockheaders-reth.md",
+              "reports/eth-l1-clients_findings/37466-bc-medium-evil-client-oom-crash-fast-p2p-crash.md",
+              "reports/eth-l1-clients_findings/37120-bc-insight-remote-handshake-based-tcp-30303-flooding-leads-to-an-out-of-memory-crash.md",
+              "reports/eth-l1-clients_findings/38598-bc-insight-getreceiptsmsg-abuse-leads-to-the-dos-and-or-crash-of-every-el-client-in-the-ethere.md",
+              "reports/eth-l1-clients_findings/38807-bc-low-dos-any-reth-node-via-ban-logic-exploit.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "unbounded remote work without rate limit",
+              "resource exhaustion",
+              "oom crash",
+              "connection flood",
+              "request amplification"
+            ],
+            "commonlyComposesWith": [
+              "getblockheaders large range oom",
+              "getreceiptsmsg amplification",
+              "handshake tcp flood no ip ratelimit",
+              "evil client fast crash via unthrottled requests",
+              "ping spamming deskew"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-p2p-remote-dos-oom-category-1-getblockheaders-ran-001",
+          "title": "Category 1: GetBlockHeaders Range OOM (reth) [LOW per report, netsplit if scaled]",
+          "lineStart": 128,
+          "lineEnd": 136,
+          "lineCount": 9,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "GetBlockHeaders",
+            "GetReceiptsMsg",
+            "handle_request",
+            "serve_",
+            "Handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "ban",
+            "pending_peers",
+            "max_peers",
+            "Buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getreceiptsmsg_amplification",
+            "handshake_tcp_flood_no_ip_ratelimit",
+            "evil_client_fast_crash_via_unthrottled_requests",
+            "ping_spamming_deskew",
+            "missing_handshake_timeout_holding_sockets",
+            "ban_logic_incoming_peer_count_exhaustion"
+          ],
+          "searchKeywords": [
+            "get",
+            "block",
+            "headers",
+            "range",
+            "oom",
+            "get block headers range oom",
+            "get block",
+            "block headers",
+            "headers range",
+            "range oom",
+            "getblockheaders",
+            "get block headers",
+            "getreceiptsmsg",
+            "get receipts msg",
+            "handle_request",
+            "handle request",
+            "serve_",
+            "serve",
+            "dial / handshake",
+            "dial handshake",
+            "handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "incoming peers",
+            "ban",
+            "pending_peers",
+            "pending peers",
+            "max_peers",
+            "max peers",
+            "buffer",
+            "spawn"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38850-bc-low-remote-p2p-oom-crash-getblockheaders-reth.md"
+            ],
+            "scope": "section",
+            "support": "explicit"
+          },
+          "graphHints": {
+            "variants": [
+              "unbounded remote work without rate limit",
+              "resource exhaustion",
+              "oom crash",
+              "connection flood",
+              "request amplification"
+            ],
+            "commonlyComposesWith": [
+              "getblockheaders large range oom",
+              "getreceiptsmsg amplification",
+              "handshake tcp flood no ip ratelimit",
+              "evil client fast crash via unthrottled requests",
+              "ping spamming deskew"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-p2p-remote-dos-oom-category-2-evil-client-fast-oo-002",
+          "title": "Category 2: Evil-Client Fast OOM via Unthrottled Receipts (nethermind) [MEDIUM]",
+          "lineStart": 137,
+          "lineEnd": 145,
+          "lineCount": 9,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "GetBlockHeaders",
+            "GetReceiptsMsg",
+            "handle_request",
+            "serve_",
+            "Handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "ban",
+            "pending_peers",
+            "max_peers",
+            "Buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getreceiptsmsg_amplification",
+            "handshake_tcp_flood_no_ip_ratelimit",
+            "evil_client_fast_crash_via_unthrottled_requests",
+            "ping_spamming_deskew",
+            "missing_handshake_timeout_holding_sockets",
+            "ban_logic_incoming_peer_count_exhaustion"
+          ],
+          "searchKeywords": [
+            "evil",
+            "client",
+            "fast",
+            "oom",
+            "via",
+            "unthrottled",
+            "receipts",
+            "getblockheaders",
+            "get block headers",
+            "getreceiptsmsg",
+            "get receipts msg",
+            "handle_request",
+            "handle request",
+            "serve_",
+            "serve",
+            "dial / handshake",
+            "dial handshake",
+            "handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "incoming peers",
+            "ban",
+            "pending_peers",
+            "pending peers",
+            "max_peers",
+            "max peers",
+            "buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getblockheaders large range oom",
+            "getreceiptsmsg_amplification"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/37466-bc-medium-evil-client-oom-crash-fast-p2p-crash.md"
+            ],
+            "scope": "section",
+            "support": "explicit"
+          },
+          "graphHints": {
+            "variants": [
+              "unbounded remote work without rate limit",
+              "resource exhaustion",
+              "oom crash",
+              "connection flood",
+              "request amplification"
+            ],
+            "commonlyComposesWith": [
+              "getblockheaders large range oom",
+              "getreceiptsmsg amplification",
+              "handshake tcp flood no ip ratelimit",
+              "evil client fast crash via unthrottled requests",
+              "ping spamming deskew"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-p2p-remote-dos-oom-category-3-handshake-tcp-30303-003",
+          "title": "Category 3: Handshake TCP/30303 Flood OOM (nethermind) [INSIGHT]",
+          "lineStart": 146,
+          "lineEnd": 153,
+          "lineCount": 8,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "GetBlockHeaders",
+            "GetReceiptsMsg",
+            "handle_request",
+            "serve_",
+            "Handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "ban",
+            "pending_peers",
+            "max_peers",
+            "Buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getreceiptsmsg_amplification",
+            "handshake_tcp_flood_no_ip_ratelimit",
+            "evil_client_fast_crash_via_unthrottled_requests",
+            "ping_spamming_deskew",
+            "missing_handshake_timeout_holding_sockets",
+            "ban_logic_incoming_peer_count_exhaustion"
+          ],
+          "searchKeywords": [
+            "handshake",
+            "tcp",
+            "flood",
+            "oom",
+            "handshake tcp flood oom",
+            "handshake tcp",
+            "tcp flood",
+            "flood oom",
+            "getblockheaders",
+            "get block headers",
+            "getreceiptsmsg",
+            "get receipts msg",
+            "handle_request",
+            "handle request",
+            "serve_",
+            "serve",
+            "dial / handshake",
+            "dial handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "incoming peers",
+            "ban",
+            "pending_peers",
+            "pending peers",
+            "max_peers",
+            "max peers",
+            "buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getblockheaders large range oom",
+            "getreceiptsmsg_amplification"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/37120-bc-insight-remote-handshake-based-tcp-30303-flooding-leads-to-an-out-of-memory-crash.md"
+            ],
+            "scope": "section",
+            "support": "explicit"
+          },
+          "graphHints": {
+            "variants": [
+              "unbounded remote work without rate limit",
+              "resource exhaustion",
+              "oom crash",
+              "connection flood",
+              "request amplification"
+            ],
+            "commonlyComposesWith": [
+              "getblockheaders large range oom",
+              "getreceiptsmsg amplification",
+              "handshake tcp flood no ip ratelimit",
+              "evil client fast crash via unthrottled requests",
+              "ping spamming deskew"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-p2p-remote-dos-oom-category-4-getreceiptsmsg-abus-004",
+          "title": "Category 4: GetReceiptsMsg Abuse Across EL Clients [INSIGHT]",
+          "lineStart": 154,
+          "lineEnd": 161,
+          "lineCount": 8,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "GetBlockHeaders",
+            "GetReceiptsMsg",
+            "handle_request",
+            "serve_",
+            "Handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "ban",
+            "pending_peers",
+            "max_peers",
+            "Buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getreceiptsmsg_amplification",
+            "handshake_tcp_flood_no_ip_ratelimit",
+            "evil_client_fast_crash_via_unthrottled_requests",
+            "ping_spamming_deskew",
+            "missing_handshake_timeout_holding_sockets",
+            "ban_logic_incoming_peer_count_exhaustion"
+          ],
+          "searchKeywords": [
+            "get",
+            "receipts",
+            "msg",
+            "abuse",
+            "across",
+            "clients",
+            "get receipts msg abuse across clients",
+            "get receipts",
+            "receipts msg",
+            "msg abuse",
+            "abuse across",
+            "across clients",
+            "getblockheaders",
+            "get block headers",
+            "getreceiptsmsg",
+            "get receipts msg",
+            "handle_request",
+            "handle request",
+            "serve_",
+            "serve",
+            "dial / handshake",
+            "dial handshake",
+            "handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "incoming peers",
+            "ban",
+            "pending_peers",
+            "pending peers",
+            "max_peers",
+            "max peers"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38598-bc-insight-getreceiptsmsg-abuse-leads-to-the-dos-and-or-crash-of-every-el-client-in-the-ethere.md"
+            ],
+            "scope": "section",
+            "support": "explicit"
+          },
+          "graphHints": {
+            "variants": [
+              "unbounded remote work without rate limit",
+              "resource exhaustion",
+              "oom crash",
+              "connection flood",
+              "request amplification"
+            ],
+            "commonlyComposesWith": [
+              "getblockheaders large range oom",
+              "getreceiptsmsg amplification",
+              "handshake tcp flood no ip ratelimit",
+              "evil client fast crash via unthrottled requests",
+              "ping spamming deskew"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-p2p-remote-dos-oom-category-5-peer-ban-accounting-005",
+          "title": "Category 5: Peer/Ban Accounting Exhaustion (reth) [LOW]",
+          "lineStart": 162,
+          "lineEnd": 172,
+          "lineCount": 11,
+          "severity": [
+            "LOW"
+          ],
+          "codeKeywords": [
+            "GetBlockHeaders",
+            "GetReceiptsMsg",
+            "handle_request",
+            "serve_",
+            "Handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "ban",
+            "pending_peers",
+            "max_peers",
+            "Buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getreceiptsmsg_amplification",
+            "handshake_tcp_flood_no_ip_ratelimit",
+            "evil_client_fast_crash_via_unthrottled_requests",
+            "ping_spamming_deskew",
+            "missing_handshake_timeout_holding_sockets",
+            "ban_logic_incoming_peer_count_exhaustion"
+          ],
+          "searchKeywords": [
+            "peer",
+            "ban",
+            "accounting",
+            "exhaustion",
+            "peer ban accounting exhaustion",
+            "peer ban",
+            "ban accounting",
+            "accounting exhaustion",
+            "getblockheaders",
+            "get block headers",
+            "getreceiptsmsg",
+            "get receipts msg",
+            "handle_request",
+            "handle request",
+            "serve_",
+            "serve",
+            "dial / handshake",
+            "dial handshake",
+            "handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "incoming peers",
+            "pending_peers",
+            "pending peers",
+            "max_peers",
+            "max peers",
+            "buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getblockheaders large range oom",
+            "getreceiptsmsg_amplification"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38807-bc-low-dos-any-reth-node-via-ban-logic-exploit.md",
+              "reports/eth-l1-clients_findings/38686-bc-low-nodes-with-trusted-peers-vulnerable-to-pending-peer-flooding-and-dos.md"
+            ],
+            "scope": "section",
+            "support": "explicit"
+          },
+          "graphHints": {
+            "variants": [
+              "unbounded remote work without rate limit",
+              "resource exhaustion",
+              "oom crash",
+              "connection flood",
+              "request amplification"
+            ],
+            "commonlyComposesWith": [
+              "getblockheaders large range oom",
+              "getreceiptsmsg amplification",
+              "handshake tcp flood no ip ratelimit",
+              "evil client fast crash via unthrottled requests",
+              "ping spamming deskew"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-p2p-remote-dos-oom-category-6-cl-side-variants-te-006",
+          "title": "Category 6: CL-side variants (teku/lighthouse/nimbus/erigon-Caplin)",
+          "lineStart": 173,
+          "lineEnd": 179,
+          "lineCount": 7,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "GetBlockHeaders",
+            "GetReceiptsMsg",
+            "handle_request",
+            "serve_",
+            "Handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "ban",
+            "pending_peers",
+            "max_peers",
+            "Buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getreceiptsmsg_amplification",
+            "handshake_tcp_flood_no_ip_ratelimit",
+            "evil_client_fast_crash_via_unthrottled_requests",
+            "ping_spamming_deskew",
+            "missing_handshake_timeout_holding_sockets",
+            "ban_logic_incoming_peer_count_exhaustion"
+          ],
+          "searchKeywords": [
+            "side",
+            "variants",
+            "side variants",
+            "getblockheaders",
+            "get block headers",
+            "getreceiptsmsg",
+            "get receipts msg",
+            "handle_request",
+            "handle request",
+            "serve_",
+            "serve",
+            "dial / handshake",
+            "dial handshake",
+            "handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "incoming peers",
+            "ban",
+            "pending_peers",
+            "pending peers",
+            "max_peers",
+            "max peers",
+            "buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getblockheaders large range oom",
+            "getreceiptsmsg_amplification",
+            "getreceiptsmsg amplification",
+            "handshake_tcp_flood_no_ip_ratelimit",
+            "handshake tcp flood no ip ratelimit",
+            "evil_client_fast_crash_via_unthrottled_requests"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 4,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38920-bc-medium-teku-remote-dos.md",
+              "reports/eth-l1-clients_findings/38948-bc-low-lighthouse-remote-dos.md",
+              "reports/eth-l1-clients_findings/37505-bc-insight-remotely-spamming-1-byte-leads-to-full-peer-removal-and-desync-in-both-execution-an.md",
+              "reports/eth-l1-clients_findings/38459-bc-low-erigon-remote-dos.md"
+            ],
+            "scope": "section",
+            "support": "explicit"
+          },
+          "graphHints": {
+            "variants": [
+              "variants",
+              "side variants",
+              "unbounded remote work without rate limit",
+              "resource exhaustion",
+              "oom crash"
+            ],
+            "commonlyComposesWith": [
+              "getblockheaders large range oom",
+              "getreceiptsmsg amplification",
+              "handshake tcp flood no ip ratelimit",
+              "evil client fast crash via unthrottled requests",
+              "ping spamming deskew"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-p2p-remote-dos-oom-category-7-sigma-prime-reth-20-007",
+          "title": "Category 7: Sigma Prime reth 2024 audit anchors",
+          "lineStart": 180,
+          "lineEnd": 186,
+          "lineCount": 7,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "GetBlockHeaders",
+            "GetReceiptsMsg",
+            "handle_request",
+            "serve_",
+            "Handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "ban",
+            "pending_peers",
+            "max_peers",
+            "Buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getreceiptsmsg_amplification",
+            "handshake_tcp_flood_no_ip_ratelimit",
+            "evil_client_fast_crash_via_unthrottled_requests",
+            "ping_spamming_deskew",
+            "missing_handshake_timeout_holding_sockets",
+            "ban_logic_incoming_peer_count_exhaustion"
+          ],
+          "searchKeywords": [
+            "sigma",
+            "prime",
+            "reth",
+            "audit",
+            "anchors",
+            "sigma prime reth audit anchors",
+            "sigma prime",
+            "prime reth",
+            "reth audit",
+            "audit anchors",
+            "getblockheaders",
+            "get block headers",
+            "getreceiptsmsg",
+            "get receipts msg",
+            "handle_request",
+            "handle request",
+            "serve_",
+            "serve",
+            "dial / handshake",
+            "dial handshake",
+            "handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "incoming peers",
+            "ban",
+            "pending_peers",
+            "pending peers",
+            "max_peers",
+            "max peers",
+            "buffer",
+            "spawn"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 1,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/reth-sigp-2024.md"
+            ],
+            "scope": "section",
+            "support": "explicit"
+          },
+          "graphHints": {
+            "variants": [
+              "unbounded remote work without rate limit",
+              "resource exhaustion",
+              "oom crash",
+              "connection flood",
+              "request amplification"
+            ],
+            "commonlyComposesWith": [
+              "getblockheaders large range oom",
+              "getreceiptsmsg amplification",
+              "handshake tcp flood no ip ratelimit",
+              "evil client fast crash via unthrottled requests",
+              "ping spamming deskew"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-p2p-remote-dos-oom-vulnerable-code-pattern-generi-008",
+          "title": "Vulnerable Code Pattern (generic)",
+          "lineStart": 187,
+          "lineEnd": 201,
+          "lineCount": 15,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "GetBlockHeaders",
+            "GetReceiptsMsg",
+            "handle_request",
+            "serve_",
+            "Handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "ban",
+            "pending_peers",
+            "max_peers",
+            "Buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getreceiptsmsg_amplification",
+            "handshake_tcp_flood_no_ip_ratelimit",
+            "evil_client_fast_crash_via_unthrottled_requests",
+            "ping_spamming_deskew",
+            "missing_handshake_timeout_holding_sockets",
+            "ban_logic_incoming_peer_count_exhaustion"
+          ],
+          "searchKeywords": [
+            "vulnerable",
+            "code",
+            "vulnerable code",
+            "getblockheaders",
+            "get block headers",
+            "getreceiptsmsg",
+            "get receipts msg",
+            "handle_request",
+            "handle request",
+            "serve_",
+            "serve",
+            "dial / handshake",
+            "dial handshake",
+            "handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "incoming peers",
+            "ban",
+            "pending_peers",
+            "pending peers",
+            "max_peers",
+            "max peers",
+            "buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getblockheaders large range oom",
+            "getreceiptsmsg_amplification",
+            "getreceiptsmsg amplification",
+            "handshake_tcp_flood_no_ip_ratelimit",
+            "handshake tcp flood no ip ratelimit",
+            "evil_client_fast_crash_via_unthrottled_requests"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 18,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38850-bc-low-remote-p2p-oom-crash-getblockheaders-reth.md",
+              "reports/eth-l1-clients_findings/37466-bc-medium-evil-client-oom-crash-fast-p2p-crash.md",
+              "reports/eth-l1-clients_findings/37120-bc-insight-remote-handshake-based-tcp-30303-flooding-leads-to-an-out-of-memory-crash.md",
+              "reports/eth-l1-clients_findings/38598-bc-insight-getreceiptsmsg-abuse-leads-to-the-dos-and-or-crash-of-every-el-client-in-the-ethere.md",
+              "reports/eth-l1-clients_findings/38807-bc-low-dos-any-reth-node-via-ban-logic-exploit.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "unbounded remote work without rate limit",
+              "resource exhaustion",
+              "oom crash",
+              "connection flood",
+              "request amplification"
+            ],
+            "commonlyComposesWith": [
+              "getblockheaders large range oom",
+              "getreceiptsmsg amplification",
+              "handshake tcp flood no ip ratelimit",
+              "evil client fast crash via unthrottled requests",
+              "ping spamming deskew"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-p2p-remote-dos-oom-similar-reports-009",
+          "title": "Similar Reports",
+          "lineStart": 202,
+          "lineEnd": 218,
+          "lineCount": 17,
+          "severity": [
+            "LOW",
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "GetBlockHeaders",
+            "GetReceiptsMsg",
+            "handle_request",
+            "serve_",
+            "Handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "ban",
+            "pending_peers",
+            "max_peers",
+            "Buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getreceiptsmsg_amplification",
+            "handshake_tcp_flood_no_ip_ratelimit",
+            "evil_client_fast_crash_via_unthrottled_requests",
+            "ping_spamming_deskew",
+            "missing_handshake_timeout_holding_sockets",
+            "ban_logic_incoming_peer_count_exhaustion"
+          ],
+          "searchKeywords": [
+            "similar",
+            "reports",
+            "similar reports",
+            "getblockheaders",
+            "get block headers",
+            "getreceiptsmsg",
+            "get receipts msg",
+            "handle_request",
+            "handle request",
+            "serve_",
+            "serve",
+            "dial / handshake",
+            "dial handshake",
+            "handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "incoming peers",
+            "ban",
+            "pending_peers",
+            "pending peers",
+            "max_peers",
+            "max peers",
+            "buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getblockheaders large range oom",
+            "getreceiptsmsg_amplification",
+            "getreceiptsmsg amplification",
+            "handshake_tcp_flood_no_ip_ratelimit",
+            "handshake tcp flood no ip ratelimit",
+            "evil_client_fast_crash_via_unthrottled_requests"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 18,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38850-bc-low-remote-p2p-oom-crash-getblockheaders-reth.md",
+              "reports/eth-l1-clients_findings/37466-bc-medium-evil-client-oom-crash-fast-p2p-crash.md",
+              "reports/eth-l1-clients_findings/37120-bc-insight-remote-handshake-based-tcp-30303-flooding-leads-to-an-out-of-memory-crash.md",
+              "reports/eth-l1-clients_findings/38598-bc-insight-getreceiptsmsg-abuse-leads-to-the-dos-and-or-crash-of-every-el-client-in-the-ethere.md",
+              "reports/eth-l1-clients_findings/38807-bc-low-dos-any-reth-node-via-ban-logic-exploit.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "unbounded remote work without rate limit",
+              "resource exhaustion",
+              "oom crash",
+              "connection flood",
+              "request amplification"
+            ],
+            "commonlyComposesWith": [
+              "getblockheaders large range oom",
+              "getreceiptsmsg amplification",
+              "handshake tcp flood no ip ratelimit",
+              "evil client fast crash via unthrottled requests",
+              "ping spamming deskew"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-p2p-remote-dos-oom-detection-hunt-strategy-010",
+          "title": "Detection & Hunt Strategy",
+          "lineStart": 219,
+          "lineEnd": 227,
+          "lineCount": 9,
+          "severity": [
+            "HIGH"
+          ],
+          "codeKeywords": [
+            "checked_sub",
+            "dialer",
+            "setupIncomingPeers",
+            "GetBlockHeaders",
+            "GetReceiptsMsg",
+            "handle_request",
+            "serve_",
+            "Handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "ban",
+            "pending_peers",
+            "max_peers",
+            "Buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getreceiptsmsg_amplification",
+            "handshake_tcp_flood_no_ip_ratelimit",
+            "evil_client_fast_crash_via_unthrottled_requests"
+          ],
+          "searchKeywords": [
+            "detection",
+            "hunt",
+            "strategy",
+            "detection hunt strategy",
+            "detection hunt",
+            "hunt strategy",
+            "getblockheaders",
+            "get block headers",
+            "getreceiptsmsg",
+            "get receipts msg",
+            "handle_request",
+            "handle request",
+            "serve_",
+            "serve",
+            "dial / handshake",
+            "dial handshake",
+            "handshake",
+            "ping",
+            "ratelimit",
+            "incoming_peers",
+            "incoming peers",
+            "ban",
+            "pending_peers",
+            "pending peers",
+            "max_peers",
+            "max peers",
+            "buffer",
+            "spawn",
+            "getblockheaders_large_range_oom",
+            "getblockheaders large range oom",
+            "getreceiptsmsg_amplification",
+            "getreceiptsmsg amplification"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 18,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38850-bc-low-remote-p2p-oom-crash-getblockheaders-reth.md",
+              "reports/eth-l1-clients_findings/37466-bc-medium-evil-client-oom-crash-fast-p2p-crash.md",
+              "reports/eth-l1-clients_findings/37120-bc-insight-remote-handshake-based-tcp-30303-flooding-leads-to-an-out-of-memory-crash.md",
+              "reports/eth-l1-clients_findings/38598-bc-insight-getreceiptsmsg-abuse-leads-to-the-dos-and-or-crash-of-every-el-client-in-the-ethere.md",
+              "reports/eth-l1-clients_findings/38807-bc-low-dos-any-reth-node-via-ban-logic-exploit.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "unbounded remote work without rate limit",
+              "resource exhaustion",
+              "oom crash",
+              "connection flood",
+              "request amplification"
+            ],
+            "commonlyComposesWith": [
+              "getblockheaders large range oom",
+              "getreceiptsmsg amplification",
+              "handshake tcp flood no ip ratelimit",
+              "evil client fast crash via unthrottled requests",
+              "ping spamming deskew"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/eth-l1-clients/p2p/snappy-decompression-DoS.md",
+      "totalLines": 164,
+      "frontmatter": {
+        "vulnerability_class": "snappy_decompression_dos",
+        "title": "Snappy Compression/Framing: checksum skipping and non-minimal-length divergence (Lodestar / Nimbus)",
+        "protocol": "eth-l1-clients",
+        "category": "P2P Networking / Compression",
+        "vulnerability_type": "input_validation",
+        "attack_type": "integrity_check_bypass|spec_divergence|resource_waste",
+        "affected_component": "reqresp_encoding|gossip_decoding|snappy_framing",
+        "chain": "ethereum",
+        "severity": "medium",
+        "impact": "corrupted_message_acceptance|peer_eclipse|wasted_compute|network_partition",
+        "severity_range": "LOW to MEDIUM",
+        "source": "Immunefi Ethereum Protocol Attackathon 2024-2025",
+        "primitives": [
+          "uncompressed_chunk_checksum_not_verified",
+          "non_minimal_varint_length_accepted_or_rejected",
+          "corrupted_gossip_deserialization_cost"
+        ],
+        "affected_components": [
+          "ssz_snappy req/resp encoding strategies",
+          "gossipsub message decoders",
+          "snappy frame reader"
+        ],
+        "tags": [
+          "snappy",
+          "compression",
+          "lodestar",
+          "nimbus",
+          "consensus",
+          "p2p",
+          "integrity",
+          "attackathon"
+        ],
+        "total_reports_analyzed": 2,
+        "root_cause_family": "missing_integrity_check_in_decoder",
+        "pattern_key": "snappy_framing_gap | checksum_or_canonical_length_gap | corrupted_message_acceptance",
+        "interaction_scope": "network_facing_decoder",
+        "code_keywords": [
+          "uncompress",
+          "getChunkType",
+          "getFrameSize",
+          "checksumSize",
+          "crc",
+          "chunkTypeUncompressedData",
+          "varint",
+          "minEnc",
+          "decodeFramed"
+        ]
+      },
+      "patternCount": 4,
+      "patterns": [
+        {
+          "id": "eth-l1-clients-snappy-decompression-dos-overview-000",
+          "title": "Overview",
+          "lineStart": 59,
+          "lineEnd": 111,
+          "lineCount": 53,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "chunkTypeUncompressedData",
+            "corrupted_message_acceptance",
+            "crc",
+            "crc(decoded",
+            "gossip_decoding",
+            "high",
+            "network_facing_decoder",
+            "reqresp_encoding",
+            "spurious_disconnect",
+            "uncompress",
+            "varint",
+            "getChunkType",
+            "getFrameSize",
+            "checksumSize",
+            "minEnc",
+            "decodeFramed",
+            "uncompressed_chunk_checksum_not_verified",
+            "non_minimal_varint_length_accepted_or_rejected",
+            "corrupted_gossip_deserialization_cost",
+            "snappy_framing"
+          ],
+          "searchKeywords": [
+            "uncompress",
+            "getchunktype",
+            "get chunk type",
+            "getframesize",
+            "get frame size",
+            "checksumsize",
+            "checksum size",
+            "crc",
+            "chunktypeuncompresseddata",
+            "chunk type uncompressed data",
+            "varint",
+            "minenc",
+            "min enc",
+            "decodeframed",
+            "decode framed",
+            "uncompressed_chunk_checksum_not_verified",
+            "uncompressed chunk checksum not verified",
+            "non_minimal_varint_length_accepted_or_rejected",
+            "non minimal varint length accepted or rejected",
+            "corrupted_gossip_deserialization_cost",
+            "corrupted gossip deserialization cost",
+            "reqresp_encoding",
+            "reqresp encoding",
+            "gossip_decoding",
+            "gossip decoding",
+            "snappy_framing",
+            "snappy framing",
+            "input_validation",
+            "input validation",
+            "missing_integrity_check_in_decoder",
+            "missing integrity check in decoder",
+            "snappy_framing_gap"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/37246-bc-low-lodestar-snappy-checksum-issue.md",
+              "reports/eth-l1-clients_findings/37594-sc-insight-nimbus-incorrectly-rejects-non-minimally-encoded-snappy-data-lengths-due-to-spec.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing integrity check in decoder",
+              "integrity check bypass",
+              "spec divergence",
+              "resource waste",
+              "snappy framing gap"
+            ],
+            "commonlyComposesWith": [
+              "uncompressed chunk checksum not verified",
+              "non minimal varint length accepted or rejected",
+              "corrupted gossip deserialization cost",
+              "reqresp encoding",
+              "gossip decoding"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-snappy-decompression-dos-real-reports-001",
+          "title": "Real Reports",
+          "lineStart": 112,
+          "lineEnd": 135,
+          "lineCount": 24,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "ErrCorrupt",
+            "uncompress",
+            "getChunkType",
+            "getFrameSize",
+            "checksumSize",
+            "crc",
+            "chunkTypeUncompressedData",
+            "varint",
+            "minEnc",
+            "decodeFramed",
+            "uncompressed_chunk_checksum_not_verified",
+            "non_minimal_varint_length_accepted_or_rejected",
+            "corrupted_gossip_deserialization_cost",
+            "reqresp_encoding",
+            "gossip_decoding",
+            "snappy_framing"
+          ],
+          "searchKeywords": [
+            "reports",
+            "immunefi",
+            "lodestar",
+            "snappy",
+            "checksum",
+            "issue",
+            "immunefi lodestar snappy checksum issue",
+            "immunefi lodestar",
+            "lodestar snappy",
+            "snappy checksum",
+            "checksum issue",
+            "nimbus",
+            "incorrectly",
+            "rejects",
+            "non",
+            "minimally",
+            "encoded",
+            "data",
+            "lengths",
+            "related",
+            "uncompress",
+            "getchunktype",
+            "get chunk type",
+            "getframesize",
+            "get frame size",
+            "checksumsize",
+            "checksum size",
+            "crc",
+            "chunktypeuncompresseddata",
+            "chunk type uncompressed data",
+            "varint",
+            "minenc"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "1. Immunefi #37246 [BC-Low] — lodestar snappy checksum issue (gln)",
+              "lineStart": 114,
+              "lineEnd": 123,
+              "severity": [],
+              "codeKeywords": [
+                "ErrCorrupt",
+                "uncompress"
+              ],
+              "searchKeywords": [
+                "immunefi",
+                "lodestar",
+                "snappy",
+                "checksum",
+                "issue",
+                "immunefi lodestar snappy checksum issue",
+                "immunefi lodestar",
+                "lodestar snappy",
+                "snappy checksum",
+                "checksum issue"
+              ]
+            },
+            {
+              "title": "2. Immunefi #37594 [SC-Insight] — Nimbus incorrectly rejects non-minimally encoded snappy data lengths (spec ambiguity)",
+              "lineStart": 124,
+              "lineEnd": 130,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "immunefi",
+                "nimbus",
+                "incorrectly",
+                "rejects",
+                "non",
+                "minimally",
+                "encoded",
+                "snappy",
+                "data",
+                "lengths"
+              ]
+            },
+            {
+              "title": "Related (decode-cost amplifier)",
+              "lineStart": 131,
+              "lineEnd": 135,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "related"
+              ]
+            }
+          ],
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/37246-bc-low-lodestar-snappy-checksum-issue.md",
+              "reports/eth-l1-clients_findings/37594-sc-insight-nimbus-incorrectly-rejects-non-minimally-encoded-snappy-data-lengths-due-to-spec.md"
+            ],
+            "scope": "section",
+            "support": "explicit"
+          },
+          "graphHints": {
+            "variants": [
+              "missing integrity check in decoder",
+              "integrity check bypass",
+              "spec divergence",
+              "resource waste",
+              "snappy framing gap"
+            ],
+            "commonlyComposesWith": [
+              "uncompressed chunk checksum not verified",
+              "non minimal varint length accepted or rejected",
+              "corrupted gossip deserialization cost",
+              "reqresp encoding",
+              "gossip decoding"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-snappy-decompression-dos-vulnerable-code-pattern-generi-002",
+          "title": "Vulnerable Code Pattern (generic)",
+          "lineStart": 136,
+          "lineEnd": 149,
+          "lineCount": 14,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "uncompress",
+            "getChunkType",
+            "getFrameSize",
+            "checksumSize",
+            "crc",
+            "chunkTypeUncompressedData",
+            "varint",
+            "minEnc",
+            "decodeFramed",
+            "uncompressed_chunk_checksum_not_verified",
+            "non_minimal_varint_length_accepted_or_rejected",
+            "corrupted_gossip_deserialization_cost",
+            "reqresp_encoding",
+            "gossip_decoding",
+            "snappy_framing"
+          ],
+          "searchKeywords": [
+            "vulnerable",
+            "code",
+            "vulnerable code",
+            "uncompress",
+            "getchunktype",
+            "get chunk type",
+            "getframesize",
+            "get frame size",
+            "checksumsize",
+            "checksum size",
+            "crc",
+            "chunktypeuncompresseddata",
+            "chunk type uncompressed data",
+            "varint",
+            "minenc",
+            "min enc",
+            "decodeframed",
+            "decode framed",
+            "uncompressed_chunk_checksum_not_verified",
+            "uncompressed chunk checksum not verified",
+            "non_minimal_varint_length_accepted_or_rejected",
+            "non minimal varint length accepted or rejected",
+            "corrupted_gossip_deserialization_cost",
+            "corrupted gossip deserialization cost",
+            "reqresp_encoding",
+            "reqresp encoding",
+            "gossip_decoding",
+            "gossip decoding",
+            "snappy_framing",
+            "snappy framing",
+            "input_validation",
+            "input validation"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/37246-bc-low-lodestar-snappy-checksum-issue.md",
+              "reports/eth-l1-clients_findings/37594-sc-insight-nimbus-incorrectly-rejects-non-minimally-encoded-snappy-data-lengths-due-to-spec.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing integrity check in decoder",
+              "integrity check bypass",
+              "spec divergence",
+              "resource waste",
+              "snappy framing gap"
+            ],
+            "commonlyComposesWith": [
+              "uncompressed chunk checksum not verified",
+              "non minimal varint length accepted or rejected",
+              "corrupted gossip deserialization cost",
+              "reqresp encoding",
+              "gossip decoding"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-snappy-decompression-dos-detection-hunt-strategy-003",
+          "title": "Detection & Hunt Strategy",
+          "lineStart": 150,
+          "lineEnd": 158,
+          "lineCount": 9,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "uncompress",
+            "getChunkType",
+            "getFrameSize",
+            "checksumSize",
+            "crc",
+            "chunkTypeUncompressedData",
+            "varint",
+            "minEnc",
+            "decodeFramed",
+            "uncompressed_chunk_checksum_not_verified",
+            "non_minimal_varint_length_accepted_or_rejected",
+            "corrupted_gossip_deserialization_cost",
+            "reqresp_encoding",
+            "gossip_decoding",
+            "snappy_framing"
+          ],
+          "searchKeywords": [
+            "detection",
+            "hunt",
+            "strategy",
+            "detection hunt strategy",
+            "detection hunt",
+            "hunt strategy",
+            "uncompress",
+            "getchunktype",
+            "get chunk type",
+            "getframesize",
+            "get frame size",
+            "checksumsize",
+            "checksum size",
+            "crc",
+            "chunktypeuncompresseddata",
+            "chunk type uncompressed data",
+            "varint",
+            "minenc",
+            "min enc",
+            "decodeframed",
+            "decode framed",
+            "uncompressed_chunk_checksum_not_verified",
+            "uncompressed chunk checksum not verified",
+            "non_minimal_varint_length_accepted_or_rejected",
+            "non minimal varint length accepted or rejected",
+            "corrupted_gossip_deserialization_cost",
+            "corrupted gossip deserialization cost",
+            "reqresp_encoding",
+            "reqresp encoding",
+            "gossip_decoding",
+            "gossip decoding",
+            "snappy_framing"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 2,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/37246-bc-low-lodestar-snappy-checksum-issue.md",
+              "reports/eth-l1-clients_findings/37594-sc-insight-nimbus-incorrectly-rejects-non-minimally-encoded-snappy-data-lengths-due-to-spec.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "missing integrity check in decoder",
+              "integrity check bypass",
+              "spec divergence",
+              "resource waste",
+              "snappy framing gap"
+            ],
+            "commonlyComposesWith": [
+              "uncompressed chunk checksum not verified",
+              "non minimal varint length accepted or rejected",
+              "corrupted gossip deserialization cost",
+              "reqresp encoding",
+              "gossip decoding"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "DB/eth-l1-clients/txpool/txpool-gas-nonce-validation-divergence.md",
+      "totalLines": 208,
+      "frontmatter": {
+        "vulnerability_class": "txpool_validation_divergence",
+        "title": "Txpool Validation Divergence: gas/nonce/fee checks weaker than execution (mempool DoS & consensus drift)",
+        "protocol": "eth-l1-clients",
+        "category": "Transaction Pool",
+        "vulnerability_type": "validation_mismatch",
+        "attack_type": "spam_tx_acceptance|mempool_dos|eip_violation|state_root_divergence",
+        "affected_component": "txpool_validation|intrinsic_gas|nonce_checks|fee_caps",
+        "chain": "ethereum",
+        "severity": "medium",
+        "impact": "mempool_dos|chain_split|consensus_divergence|node_halt",
+        "severity_range": "LOW to HIGH",
+        "source": "Immunefi Ethereum Protocol Attackathon 2024-2025 + Sigma Prime",
+        "primitives": [
+          "intrinsic_gas_txpool_vs_evm_mismatch",
+          "missing_block_gas_limit_check_in_txpool",
+          "sendrawtransaction_fee_check_bypass",
+          "eip2681_nonce_upper_bound_violation",
+          "wrong_nonce_execution_state_root_mismatch",
+          "pending_pool_subtraction_overflow_infinite_loop"
+        ],
+        "affected_components": [
+          "txpool validateTx / senders",
+          "intrinsic gas calculators (txpool copy vs EVM copy)",
+          "RPC eth_sendRawTransaction fee checks",
+          "nonce increment logic in state transition"
+        ],
+        "tags": [
+          "txpool",
+          "mempool",
+          "gas",
+          "nonce",
+          "erigon",
+          "nethermind",
+          "reth",
+          "eip-2681",
+          "consensus",
+          "attackathon"
+        ],
+        "total_reports_analyzed": 6,
+        "root_cause_family": "validation_logic_duplicated_and_diverged",
+        "pattern_key": "txpool_validation_gap | gas_nonce_fee_check_mismatch | mempool_dos_consensus_drift",
+        "interaction_scope": "external_entrypoint_to_consensus",
+        "code_keywords": [
+          "validateTx",
+          "ValidateSerializedTxn",
+          "intrinsicGas",
+          "calcIntrinsicGas",
+          "IntrinsicGas",
+          "gasLimit",
+          "blockGasLimit",
+          "maxFeeCap",
+          "SendRawTransaction",
+          "nonce",
+          "SetNonce",
+          "0xffffffffffffffff",
+          "pendingPool",
+          "sub / checked_sub"
+        ]
+      },
+      "patternCount": 4,
+      "patterns": [
+        {
+          "id": "eth-l1-clients-txpool-gas-nonce-validation-divergence-overview-000",
+          "title": "Overview",
+          "lineStart": 70,
+          "lineEnd": 131,
+          "lineCount": 62,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "SendRawTransaction",
+            "blobFeeCap",
+            "blockGasLimit",
+            "chain_split",
+            "eth_sendRawTransaction",
+            "external_entrypoint_to_consensus",
+            "high",
+            "intrinsicGas",
+            "intrinsic_gas",
+            "maxFeeCap",
+            "mempool_dos",
+            "nonce",
+            "txpool_validation",
+            "validateTx",
+            "ValidateSerializedTxn",
+            "calcIntrinsicGas",
+            "gasLimit",
+            "SetNonce",
+            "0xffffffffffffffff",
+            "pendingPool"
+          ],
+          "searchKeywords": [
+            "validatetx",
+            "validate tx",
+            "validateserializedtxn",
+            "validate serialized txn",
+            "intrinsicgas",
+            "intrinsic gas",
+            "calcintrinsicgas",
+            "calc intrinsic gas",
+            "gaslimit",
+            "gas limit",
+            "blockgaslimit",
+            "block gas limit",
+            "maxfeecap",
+            "max fee cap",
+            "sendrawtransaction",
+            "send raw transaction",
+            "nonce",
+            "setnonce",
+            "set nonce",
+            "0xffffffffffffffff",
+            "pendingpool",
+            "pending pool",
+            "sub / checked_sub",
+            "sub checked sub",
+            "intrinsic_gas_txpool_vs_evm_mismatch",
+            "intrinsic gas txpool vs evm mismatch",
+            "missing_block_gas_limit_check_in_txpool",
+            "missing block gas limit check in txpool",
+            "sendrawtransaction_fee_check_bypass",
+            "sendrawtransaction fee check bypass",
+            "eip2681_nonce_upper_bound_violation",
+            "eip2681 nonce upper bound violation"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 10,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38427-bc-low-discrepancy-in-intrinsic-gas-calculation-between-txpool-and-evm-execution.md",
+              "reports/eth-l1-clients_findings/38278-bc-low-potential-dos-to-mempool-due-to-missing-gas-limit-check.md",
+              "reports/eth-l1-clients_findings/38554-bc-low-incorrect-transaction-fee-check-in-sendrawtransaction.md",
+              "reports/eth-l1-clients_findings/38015-bc-insight-violation-of-eip-2681-in-create-transaction.md",
+              "reports/eth-l1-clients_findings/37695-bc-insight-executing-transaction-that-has-a-wrong-nonce-might-triggered-a-chain-split-due-to-m.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "validation logic duplicated and diverged",
+              "spam tx acceptance",
+              "mempool dos",
+              "eip violation",
+              "state root divergence"
+            ],
+            "commonlyComposesWith": [
+              "intrinsic gas txpool vs evm mismatch",
+              "missing block gas limit check in txpool",
+              "sendrawtransaction fee check bypass",
+              "eip2681 nonce upper bound violation",
+              "wrong nonce execution state root mismatch"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-txpool-gas-nonce-validation-divergence-real-reports-001",
+          "title": "Real Reports",
+          "lineStart": 132,
+          "lineEnd": 168,
+          "lineCount": 37,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "ParseTransaction",
+            "ValidateSerializedTxn",
+            "ValidateTx",
+            "intrinsicGas",
+            "calcIntrinsicGas",
+            "gasLimit",
+            "blockGasLimit",
+            "maxFeeCap",
+            "SendRawTransaction",
+            "nonce",
+            "SetNonce",
+            "0xffffffffffffffff",
+            "pendingPool",
+            "intrinsic_gas_txpool_vs_evm_mismatch",
+            "missing_block_gas_limit_check_in_txpool",
+            "sendrawtransaction_fee_check_bypass",
+            "eip2681_nonce_upper_bound_violation",
+            "wrong_nonce_execution_state_root_mismatch",
+            "pending_pool_subtraction_overflow_infinite_loop",
+            "txpool_validation"
+          ],
+          "searchKeywords": [
+            "reports",
+            "immunefi",
+            "discrepancy",
+            "intrinsic",
+            "gas",
+            "calculation",
+            "between",
+            "txpool",
+            "evm",
+            "execution",
+            "potential",
+            "mempool",
+            "due",
+            "missing",
+            "limit",
+            "check",
+            "violation",
+            "eip",
+            "create",
+            "transaction",
+            "immunefi violation eip create transaction",
+            "immunefi violation",
+            "violation eip",
+            "eip create",
+            "create transaction",
+            "executing",
+            "wrong",
+            "nonce",
+            "chain",
+            "split",
+            "via",
+            "mismatched"
+          ],
+          "rootCause": null,
+          "subsections": [
+            {
+              "title": "1. Immunefi #38427 [BC-Low] — Discrepancy in Intrinsic Gas Calculation between Txpool and EVM Execution (CertiK, erigon)",
+              "lineStart": 134,
+              "lineEnd": 139,
+              "severity": [],
+              "codeKeywords": [
+                "validateTx"
+              ],
+              "searchKeywords": [
+                "immunefi",
+                "discrepancy",
+                "intrinsic",
+                "gas",
+                "calculation",
+                "between",
+                "txpool",
+                "evm",
+                "execution"
+              ]
+            },
+            {
+              "title": "2. Immunefi #38278 [BC-Low] — Potential DoS to Mempool Due to Missing Gas Limit Check (CertiK, erigon)",
+              "lineStart": 140,
+              "lineEnd": 144,
+              "severity": [],
+              "codeKeywords": [
+                "ParseTransaction",
+                "ValidateSerializedTxn",
+                "ValidateTx"
+              ],
+              "searchKeywords": [
+                "immunefi",
+                "potential",
+                "mempool",
+                "due",
+                "missing",
+                "gas",
+                "limit",
+                "check"
+              ]
+            },
+            {
+              "title": "4. Immunefi #38015 [BC-Insight] — Violation of EIP-2681 in CREATE transaction (nethermind)",
+              "lineStart": 149,
+              "lineEnd": 153,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "immunefi",
+                "violation",
+                "eip",
+                "create",
+                "transaction",
+                "immunefi violation eip create transaction",
+                "immunefi violation",
+                "violation eip",
+                "eip create",
+                "create transaction"
+              ]
+            },
+            {
+              "title": "5. Immunefi #37695 [BC-Insight] — Executing transaction with wrong nonce → chain split via mismatched state root (Omik, nethermind)",
+              "lineStart": 154,
+              "lineEnd": 158,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "immunefi",
+                "executing",
+                "transaction",
+                "wrong",
+                "nonce",
+                "chain",
+                "split",
+                "via",
+                "mismatched",
+                "state",
+                "root"
+              ]
+            },
+            {
+              "title": "6. Immunefi #38502 [BC-Low] — Pending pool subtraction overflow causes node halt/shutdown (reth)",
+              "lineStart": 159,
+              "lineEnd": 164,
+              "severity": [],
+              "codeKeywords": [],
+              "searchKeywords": [
+                "immunefi",
+                "pending",
+                "pool",
+                "subtraction",
+                "overflow",
+                "causes",
+                "node",
+                "halt",
+                "shutdown"
+              ]
+            }
+          ],
+          "reportEvidence": {
+            "count": 7,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38427-bc-low-discrepancy-in-intrinsic-gas-calculation-between-txpool-and-evm-execution.md",
+              "reports/eth-l1-clients_findings/38278-bc-low-potential-dos-to-mempool-due-to-missing-gas-limit-check.md",
+              "reports/eth-l1-clients_findings/38554-bc-low-incorrect-transaction-fee-check-in-sendrawtransaction.md",
+              "reports/eth-l1-clients_findings/38015-bc-insight-violation-of-eip-2681-in-create-transaction.md",
+              "reports/eth-l1-clients_findings/37695-bc-insight-executing-transaction-that-has-a-wrong-nonce-might-triggered-a-chain-split-due-to-m.md"
+            ],
+            "scope": "section",
+            "support": "explicit"
+          },
+          "graphHints": {
+            "variants": [
+              "validation logic duplicated and diverged",
+              "spam tx acceptance",
+              "mempool dos",
+              "eip violation",
+              "state root divergence"
+            ],
+            "commonlyComposesWith": [
+              "intrinsic gas txpool vs evm mismatch",
+              "missing block gas limit check in txpool",
+              "sendrawtransaction fee check bypass",
+              "eip2681 nonce upper bound violation",
+              "wrong nonce execution state root mismatch"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-txpool-gas-nonce-validation-divergence-vulnerable-code-pattern-generi-002",
+          "title": "Vulnerable Code Pattern (generic)",
+          "lineStart": 169,
+          "lineEnd": 181,
+          "lineCount": 13,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "validateTx",
+            "ValidateSerializedTxn",
+            "intrinsicGas",
+            "calcIntrinsicGas",
+            "gasLimit",
+            "blockGasLimit",
+            "maxFeeCap",
+            "SendRawTransaction",
+            "nonce",
+            "SetNonce",
+            "0xffffffffffffffff",
+            "pendingPool",
+            "intrinsic_gas_txpool_vs_evm_mismatch",
+            "missing_block_gas_limit_check_in_txpool",
+            "sendrawtransaction_fee_check_bypass",
+            "eip2681_nonce_upper_bound_violation",
+            "wrong_nonce_execution_state_root_mismatch",
+            "pending_pool_subtraction_overflow_infinite_loop",
+            "txpool_validation",
+            "intrinsic_gas"
+          ],
+          "searchKeywords": [
+            "vulnerable",
+            "code",
+            "vulnerable code",
+            "validatetx",
+            "validate tx",
+            "validateserializedtxn",
+            "validate serialized txn",
+            "intrinsicgas",
+            "intrinsic gas",
+            "calcintrinsicgas",
+            "calc intrinsic gas",
+            "gaslimit",
+            "gas limit",
+            "blockgaslimit",
+            "block gas limit",
+            "maxfeecap",
+            "max fee cap",
+            "sendrawtransaction",
+            "send raw transaction",
+            "nonce",
+            "setnonce",
+            "set nonce",
+            "0xffffffffffffffff",
+            "pendingpool",
+            "pending pool",
+            "sub / checked_sub",
+            "sub checked sub",
+            "intrinsic_gas_txpool_vs_evm_mismatch",
+            "intrinsic gas txpool vs evm mismatch",
+            "missing_block_gas_limit_check_in_txpool",
+            "missing block gas limit check in txpool",
+            "sendrawtransaction_fee_check_bypass"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 10,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38427-bc-low-discrepancy-in-intrinsic-gas-calculation-between-txpool-and-evm-execution.md",
+              "reports/eth-l1-clients_findings/38278-bc-low-potential-dos-to-mempool-due-to-missing-gas-limit-check.md",
+              "reports/eth-l1-clients_findings/38554-bc-low-incorrect-transaction-fee-check-in-sendrawtransaction.md",
+              "reports/eth-l1-clients_findings/38015-bc-insight-violation-of-eip-2681-in-create-transaction.md",
+              "reports/eth-l1-clients_findings/37695-bc-insight-executing-transaction-that-has-a-wrong-nonce-might-triggered-a-chain-split-due-to-m.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "validation logic duplicated and diverged",
+              "spam tx acceptance",
+              "mempool dos",
+              "eip violation",
+              "state root divergence"
+            ],
+            "commonlyComposesWith": [
+              "intrinsic gas txpool vs evm mismatch",
+              "missing block gas limit check in txpool",
+              "sendrawtransaction fee check bypass",
+              "eip2681 nonce upper bound violation",
+              "wrong nonce execution state root mismatch"
+            ]
+          }
+        },
+        {
+          "id": "eth-l1-clients-txpool-gas-nonce-validation-divergence-detection-hunt-strategy-003",
+          "title": "Detection & Hunt Strategy",
+          "lineStart": 186,
+          "lineEnd": 197,
+          "lineCount": 12,
+          "severity": [
+            "MEDIUM"
+          ],
+          "codeKeywords": [
+            "validateTx",
+            "ValidateSerializedTxn",
+            "intrinsicGas",
+            "calcIntrinsicGas",
+            "gasLimit",
+            "blockGasLimit",
+            "maxFeeCap",
+            "SendRawTransaction",
+            "nonce",
+            "SetNonce",
+            "0xffffffffffffffff",
+            "pendingPool",
+            "intrinsic_gas_txpool_vs_evm_mismatch",
+            "missing_block_gas_limit_check_in_txpool",
+            "sendrawtransaction_fee_check_bypass",
+            "eip2681_nonce_upper_bound_violation",
+            "wrong_nonce_execution_state_root_mismatch",
+            "pending_pool_subtraction_overflow_infinite_loop",
+            "txpool_validation",
+            "intrinsic_gas"
+          ],
+          "searchKeywords": [
+            "detection",
+            "hunt",
+            "strategy",
+            "detection hunt strategy",
+            "detection hunt",
+            "hunt strategy",
+            "validatetx",
+            "validate tx",
+            "validateserializedtxn",
+            "validate serialized txn",
+            "intrinsicgas",
+            "intrinsic gas",
+            "calcintrinsicgas",
+            "calc intrinsic gas",
+            "gaslimit",
+            "gas limit",
+            "blockgaslimit",
+            "block gas limit",
+            "maxfeecap",
+            "max fee cap",
+            "sendrawtransaction",
+            "send raw transaction",
+            "nonce",
+            "setnonce",
+            "set nonce",
+            "0xffffffffffffffff",
+            "pendingpool",
+            "pending pool",
+            "sub / checked_sub",
+            "sub checked sub",
+            "intrinsic_gas_txpool_vs_evm_mismatch",
+            "intrinsic gas txpool vs evm mismatch"
+          ],
+          "rootCause": null,
+          "subsections": null,
+          "reportEvidence": {
+            "count": 10,
+            "sampleReports": [
+              "reports/eth-l1-clients_findings/38427-bc-low-discrepancy-in-intrinsic-gas-calculation-between-txpool-and-evm-execution.md",
+              "reports/eth-l1-clients_findings/38278-bc-low-potential-dos-to-mempool-due-to-missing-gas-limit-check.md",
+              "reports/eth-l1-clients_findings/38554-bc-low-incorrect-transaction-fee-check-in-sendrawtransaction.md",
+              "reports/eth-l1-clients_findings/38015-bc-insight-violation-of-eip-2681-in-create-transaction.md",
+              "reports/eth-l1-clients_findings/37695-bc-insight-executing-transaction-that-has-a-wrong-nonce-might-triggered-a-chain-split-due-to-m.md"
+            ],
+            "scope": "file",
+            "support": "context_only"
+          },
+          "graphHints": {
+            "variants": [
+              "validation logic duplicated and diverged",
+              "spam tx acceptance",
+              "mempool dos",
+              "eip violation",
+              "state root divergence"
+            ],
+            "commonlyComposesWith": [
+              "intrinsic gas txpool vs evm mismatch",
+              "missing block gas limit check in txpool",
+              "sendrawtransaction fee check bypass",
+              "eip2681 nonce upper bound violation",
+              "wrong nonce execution state root mismatch"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
