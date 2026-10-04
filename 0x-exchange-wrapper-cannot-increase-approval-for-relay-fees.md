@@ -1,0 +1,126 @@
+---
+# Core Classification
+protocol: Set Protocol
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 17297
+audit_firm: TrailOfBits
+contest_link: https://github.com/trailofbits/publications/blob/master/reviews/setprotocol.pdf
+source_link: https://github.com/trailofbits/publications/blob/master/reviews/setprotocol.pdf
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - Robert Tonic | ​Trail of Bits Michael Colburn | ​Trail of Bits Gustavo Grieco | ​Trail of Bits JP Smith | ​Trail of Bits
+---
+
+## Vulnerability Title
+
+0x exchange wrapper cannot increase approval for relay fees
+
+### Overview
+
+
+This bug report is about a vulnerability in the ZeroExExchangeWrapper contract, which is used to transfer the _zeroExToken balance in the event of 0x exchange order relay fees. The problem is that there is no way to increase the approval of the contract, which could eventually lead to the contract's balance being depleted and funds becoming trapped. 
+
+To address the issue, it is recommended that a method for increasing the approval of the 0x exchange wrapper is implemented in the short term. In the long term, care should be taken to ensure that the balance of the 0x exchange wrapper can be managed appropriately.
+
+### Original Finding Content
+
+## Access Controls
+
+## Target: Set Protocol Governance
+
+### Difficulty: Low
+
+### Description
+
+The `ZeroExExchangeWrapper` transfers the `_zeroExToken` balance in the event of 0x exchange order relay fees. However, there is no method to later increase this approval, resulting in a finite amount of transfers which could eventually be depleted by system use and result in trapped funds.
+
+The constructor approves of the `_zeroExProxy` on behalf of the `ZeroExExchangeWrapper` address to the contract, allowing:
+
+```solidity
+/**
+ * Initialize exchange wrapper with required addresses to facilitate 0x orders
+ *
+ * @param _core                 Deployed Core contract
+ * @param _zeroExExchange       0x Exchange contract for filling orders
+ * @param _zeroExProxy          0x Proxy contract for transferring
+ * @param _zeroExToken          ZRX token contract addressed used for 0x relayer fees
+ * @param _setTransferProxy     Set Protocol transfer proxy contract
+ */
+constructor(
+    address _core,
+    address _zeroExExchange,
+    address _zeroExProxy,
+    address _zeroExToken,
+    address _setTransferProxy
+) public {
+    core = _core;
+    zeroExExchange = _zeroExExchange;
+    zeroExProxy = _zeroExProxy;
+    zeroExToken = _zeroExToken;
+    setTransferProxy = _setTransferProxy;
+
+    // Approve transfer of 0x token from this wrapper in the event of zeroExOrder relayer fees
+    ERC20.approve(_zeroExToken, _zeroExProxy, CommonMath.maxUInt256());
+}
+```
+
+*Figure 1: The constructor of the `ZeroExExchangeWrapper` contract*
+
+### Exploit Scenario
+
+The `ZeroExExchangeWrapper` contract is deployed successfully. Over time, the contract’s approval is depleted through use. No further transfers are possible due to an inability to increase approval.
+
+### Recommendation
+
+**Short term:** Ensure there is a method to increase the approval of the 0x exchange wrapper. Without this, funds may become trapped.
+
+**Long term:** Care should be taken to ensure balances of the 0x exchange wrapper can be appropriately managed.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | TrailOfBits |
+| Protocol | Set Protocol |
+| Report Date | N/A |
+| Finders | Robert Tonic | ​Trail of Bits Michael Colburn | ​Trail of Bits Gustavo Grieco | ​Trail of Bits JP Smith | ​Trail of Bits |
+
+### Source Links
+
+- **Source**: https://github.com/trailofbits/publications/blob/master/reviews/setprotocol.pdf
+- **GitHub**: N/A
+- **Contest**: https://github.com/trailofbits/publications/blob/master/reviews/setprotocol.pdf
+
+### Keywords for Search
+
+`vulnerability`
+

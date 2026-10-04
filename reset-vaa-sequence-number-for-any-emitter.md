@@ -1,0 +1,109 @@
+---
+# Core Classification
+protocol: Wormhole Near
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 48664
+audit_firm: OtterSec
+contest_link: https://wormhole.com/
+source_link: https://wormhole.com/
+github_link: github.com/wormhole-foundation/wormhole.
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - Harrison Green
+  - OtterSec
+---
+
+## Vulnerability Title
+
+Reset VAA sequence number for any emitter . . . . . . . . .
+
+### Overview
+
+The register_emitter function in the wormhole/src/lib.rs file allows anyone to reset their sequence number, which goes against the intended purpose of the field. This could potentially cause issues for cross-chain applications built on top of wormhole. The issue has been fixed in version a752e13 by checking if the emitter is already present before inserting it into the self.emitters LookupMap.
+
+### Original Finding Content
+
+## Wormhole NEAR Audit 04 | Vulnerabilities
+
+We found that the `register_emitter` function allows anyone to reset their supposedly monotonically increasing sequence number. This means that the `seq` field inside the VAA can be reset for any message publisher (on NEAR) by anyone. This breaks the purpose of the `seq` field inside the published VAAs.
+
+This snippet shows the counter getting reset even if the emitter was already present.
+
+```rust
+// wormhole/src/lib.rs
+#[payable]
+pub fn register_emitter(&mut self, emitter: String) -> PromiseOrValue<bool> {
+    let storage_used = env::storage_usage();
+    self.emitters.insert(&emitter, &1);
+```
+
+We’ve not been able to identify any direct impact that could be caused by this broken invariant. However, it could’ve caused problems for downstream cross-chain applications built on top of Wormhole, which might rely on this field being monotonic.
+
+## Remediation
+
+Check whether the emitter is already present inside the `self.emitters` `LookupMap`.
+
+## Patch
+
+It is now checked whether the emitter is already present inside `self.emitters`. Fixed in commit a752e13.
+
+```rust
+// wormhole/src/lib.rs
+#[payable]
+pub fn register_emitter(&mut self, emitter: String) -> PromiseOrValue<bool> {
+    + if self.emitters.contains_key(&emitter) {
+    +     env::panic_str("AlreadyRegistered");
+    + }
+    let storage_used = env::storage_usage();
+    self.emitters.insert(&emitter, &1);
+```
+
+© 2022 OtterSec LLC. All Rights Reserved.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | OtterSec |
+| Protocol | Wormhole Near |
+| Report Date | N/A |
+| Finders | Harrison Green, OtterSec |
+
+### Source Links
+
+- **Source**: https://wormhole.com/
+- **GitHub**: github.com/wormhole-foundation/wormhole.
+- **Contest**: https://wormhole.com/
+
+### Keywords for Search
+
+`vulnerability`
+

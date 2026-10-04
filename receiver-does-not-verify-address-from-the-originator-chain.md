@@ -1,0 +1,130 @@
+---
+# Core Classification
+protocol: LI.FI
+chain: everychain
+category: logic
+vulnerability_type: validation
+
+# Attack Vector Details
+attack_type: validation
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 15929
+audit_firm: Spearbit
+contest_link: https://github.com/spearbit/portfolio/blob/master/pdfs/LIFI-retainer1-Spearbit-Security-Review.pdf
+source_link: https://github.com/spearbit/portfolio/blob/master/pdfs/LIFI-retainer1-Spearbit-Security-Review.pdf
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+  - validation
+
+protocol_categories:
+  - dexes
+  - bridge
+  - services
+  - cross_chain
+  - liquidity_manager
+
+# Audit Details
+report_date: unknown
+finders_count: 4
+finders:
+  - Jonah1005
+  - DefSec
+  - Blockdev
+  - Gerard Persoon
+---
+
+## Vulnerability Title
+
+Receiver does not verify address from the originator chain
+
+### Overview
+
+
+The bug report is about a vulnerability in the Receiver contract, which is designed to receive cross-chain calls from libDiamond address on the destination chain. The vulnerability is that the Receiver contract does not verify the source chain address, which could allow an attacker to build a malicious callData and steal funds if there are left tokens and allowances to the Executor. To fix this issue, it is recommended to solve the related issues, especially making sure to clear the allowance. For Amarok, the sender address would be address(0) if this is a fast path, but reverting such transactions would impact user experience. The bug has been solved for LiFi and verified for Spearbit.
+
+### Original Finding Content
+
+## Severity: Medium Risk
+
+## Context
+- `Receiver.sol#L254`
+- `Receiver.sol#L282`
+
+## Description
+The Receiver contract is designed to receive the cross-chain call from the `libDiamond` address on the destination chain. However, it does not verify the source chain address. An attacker can build a malicious `_callData`. An attacker can steal funds if there are left tokens and there are allowances to the `Executor`. 
+
+Note that the tokens may be lost in the issue: "Arithmetic underflow leading to unexpected revert and loss of funds in the Receiver contract". Additionally, there may be allowances to the `Executor` in the issue "Receiver doesn't always reset allowance".
+
+## Recommendation
+This is a tricky issue. It is recommended to fix other issues, especially ensuring to clear the allowance. 
+
+The bridges we're integrating do not always allow users to verify the source address. For example, take Amarok. Technically, we can verify the sender's address:
+
+```solidity
+/// @notice Completes a cross-chain transaction with calldata via Amarok facet on the receiving chain.
+/// @dev This function is called from Amarok Router.
+/// @param _transferId The unique ID of this transaction (assigned by Amarok)
+/// @param _amount the amount of bridged tokens
+/// @param _asset the address of the bridged token
+/// @param * (unused) the sender of the transaction
+/// @param * (unused) the domain ID of the src chain
+/// @param _callData The data to execute
+function xReceive(
+    bytes32 _transferId,
+    uint256 _amount,
+    address _asset,
+    address _sender,
+    uint32,
+    bytes memory _callData
+) external nonReentrant onlyAmarokRouter {
+    if (_sender != address(diamond)) {
+        revert UnAuthorized();
+    }
+}
+```
+
+However, there's a special feature of Amarok. The `_sender` address would be `address(0)` if this is a fast path. If we revert such transactions, all the cross-chain transfers through Amarok would take about 30 minutes, impacting user experience (UX).
+
+## LiFi
+- Solved by addressing related issues.
+
+## Spearbit
+- Verified.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Spearbit |
+| Protocol | LI.FI |
+| Report Date | N/A |
+| Finders | Jonah1005, DefSec, Blockdev, Gerard Persoon |
+
+### Source Links
+
+- **Source**: https://github.com/spearbit/portfolio/blob/master/pdfs/LIFI-retainer1-Spearbit-Security-Review.pdf
+- **GitHub**: N/A
+- **Contest**: https://github.com/spearbit/portfolio/blob/master/pdfs/LIFI-retainer1-Spearbit-Security-Review.pdf
+
+### Keywords for Search
+
+`Validation`
+
