@@ -1,0 +1,136 @@
+---
+# Core Classification
+protocol: Goat Tech
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 54277
+audit_firm: Cantina
+contest_link: https://cantina.xyz/portfolio/404911dd-3a50-4b63-90d4-e0b9164a34a5
+source_link: https://cdn.cantina.xyz/reports/cantina_competition_goat_mar2024.pdf
+github_link: none
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - cccz
+  - Tripathi
+---
+
+## Vulnerability Title
+
+Updating sponsor can be front run 
+
+### Overview
+
+
+The bug report is about a function called `_updateSponsor` in the Controller.sol file that can be exploited by a current sponsor. This can happen when someone tries to become the sponsor for a pool, but a current sponsor sees their transaction and quickly stakes more, preventing the new person from becoming the sponsor. This can result in the new person's funds being locked and facing penalties if they try to withdraw them before the locking period ends. The report suggests that there is a flaw in the function that does not protect against this type of front-running, similar to providing liquidity to a Uniswap pool without slippage protection. The bug has been fixed.
+
+### Original Finding Content
+
+## Context: Controller.sol#L368
+
+The `_updateSponsor` function can be front-run by the current sponsor. 
+
+## Scenario
+Alice wants to be the sponsor for XYZ's pool, which currently has an active sponsor, Bob. Alice has calculated the ETH amount and duration she needs to stake to become the sponsor, and she calls the `Controller.sol#L413` function.
+
+Bob sees Alice's transaction in the public mempool and front-runs it by staking more, preventing Alice from becoming the new sponsor. As a result, Alice's stake will execute, she will be a staker, her funds will be locked for the duration, and she won't be able to be a sponsor.
+
+When Alice wants to recover her funds, she will face a penalty for withdrawing before the locking period ends.
+
+## Mechanism
+The `minSPercent_` parameter exists to ensure that there are no front-running transactions that change the sponsor reward rate before the transaction is processed. However, there is no protection for the issue mentioned above, ensuring that Alice will get a certain percentage of the total active supply for her staked ETH.
+
+This situation is analogous to providing liquidity to a Uniswap pool without slippage protection:
+
+```solidity
+function _updateSponsor(
+    address payable poolOwner_,
+    address staker_,
+    uint minSPercent_
+) internal {
+    if (poolOwner_ == staker_) {
+        return;
+    }
+
+    IProfile.SProfile memory profile = _profileC.profileOf(poolOwner_);
+
+    if (profile.sponsor == staker_) {
+        return;
+    }
+
+    require(profile.nextSPercent >= minSPercent_, "profile rate changed");
+
+    IPoolFactory.SPool memory pool = _poolFactory.getPool(poolOwner_);
+    IDToken p2UDtoken = IDToken(pool.dToken);
+    
+    uint timeDiff = block.timestamp - profile.updatedAt;
+    if (timeDiff > _maxSponsorAfter) {
+        timeDiff = _maxSponsorAfter;
+    }
+
+    uint sponsorDTokenBalance = p2UDtoken.balanceOf(profile.sponsor);
+    uint stakerDTokenBalance = p2UDtoken.balanceOf(staker_);
+    uint sponsorBonus = (sponsorDTokenBalance * (_maxSponsorAdv - 1) * timeDiff) / _maxSponsorAfter;
+
+    uint sponsorPower = sponsorDTokenBalance + sponsorBonus;
+
+    if (stakerDTokenBalance > sponsorPower || poolOwner_ == profile.sponsor) {
+        address[] memory pools = new address[](1);
+        pools[0] = poolOwner_;
+        earningPulls(poolOwner_, pools, poolOwner_);
+        _profileC.updateSponsor(poolOwner_, staker_);
+    }
+}
+```
+
+Bob will stake more to increase his sponsor power, locking Alice's funds without her being able to become a sponsor.
+
+---
+
+**Goat:** Fixed.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Cantina |
+| Protocol | Goat Tech |
+| Report Date | N/A |
+| Finders | cccz, Tripathi |
+
+### Source Links
+
+- **Source**: https://cdn.cantina.xyz/reports/cantina_competition_goat_mar2024.pdf
+- **GitHub**: N/A
+- **Contest**: https://cantina.xyz/portfolio/404911dd-3a50-4b63-90d4-e0b9164a34a5
+
+### Keywords for Search
+
+`vulnerability`
+
