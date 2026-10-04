@@ -1,0 +1,137 @@
+---
+# Core Classification
+protocol: Core Contracts
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 57383
+audit_firm: Codehawks
+contest_link: https://codehawks.cyfrin.io/c/cm5vbyum90000ffs0xblmb4gj
+source_link: none
+github_link: https://github.com/Cyfrin/2025-02-raac
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - anonymousjoe
+---
+
+## Vulnerability Title
+
+reserve.totalUsage not updated correctly causes incorrect Rtoken minting/burning
+
+### Overview
+
+
+The bug report describes a problem where the reserve.totalUsage is not being updated correctly, which can lead to incorrect minting and burning of Rtokens. This is a high-risk issue that affects the total amount of debt owed by borrowers, including interest. The report suggests that the totalUsage should be updated whenever the usageIndex changes, but this is not currently happening in the code. This can cause errors in interest calculations and other issues. The report recommends synchronizing the reserve.totalUsage with the totalSupply of the debtToken, or deprecating the reserve.totalUsage altogether. 
+
+### Original Finding Content
+
+## Summary
+
+Not updating the reserve.totalUsage correctly
+
+## Vulnerability Details
+
+Firstly, the reserve.totalUsage is the total amount of debt owed by the borrowers including the interest accrued. This can be seen by noticing when the totalUsage is updated(it is updated after a repay/borrow etc is done) with the totalSupply of the debtToken (which obviously contains the interest + principal of borrowers).
+
+Secondly, the totalSupply of the debtToken changes whenever the usageIndex changes(or if burning/minting is done). But mainly when the usageIndex changes, it means that some interest has been accrued. 
+
+Thus it should make sense that whenever the usage Index changes the reserve.totalUsage should be updated, else the value stored in the reserve.totalUsage accounts for stale principal + interest. 
+
+In the `updateReserveInterests ` function in the ReserveLibrary.sol it can be seen that the usageIndex changes, and thus the reserve.totalUsage should have also been updated which is not being done. 
+
+This become an issue in cases where the reserve.totalUsage is not updated separately (like in borrow/repay). During withdraw the usage index changes, which inturn (should) changes the totalUsage which will change the utilization rate, which should inturn change the liquidity Index and thus by extension the amount of Rtoken minted.
+
+There are many impacts of this missing updation. But it feel that the incorrect minting of RToken should be enough to warrant a high severity.
+
+```Solidity
+    function updateReserveInterests(ReserveData storage reserve,ReserveRateData storage rateData) internal {
+        uint256 timeDelta = block.timestamp - uint256(reserve.lastUpdateTimestamp);
+        if (timeDelta < 1) {
+            return;
+        }
+
+        uint256 oldLiquidityIndex = reserve.liquidityIndex;
+        if (oldLiquidityIndex < 1) revert LiquidityIndexIsZero();
+
+        // Update liquidity index using linear interest
+        reserve.liquidityIndex = calculateLiquidityIndex(
+            rateData.currentLiquidityRate,
+            timeDelta,
+            reserve.liquidityIndex
+        );
+
+    => // usageIndex has changed (because there is a time delta)
+        // Update usage index (debt index) using compounded interest
+        reserve.usageIndex = calculateUsageIndex(
+            rateData.currentUsageRate,
+            timeDelta,
+            reserve.usageIndex
+        );
+
+      
+        // Update the last update timestamp
+        reserve.lastUpdateTimestamp = uint40(block.timestamp);
+        
+        emit ReserveInterestsUpdated(reserve.liquidityIndex, reserve.usageIndex);
+    }
+```
+
+
+
+## Impact
+
+Among others, the incorrect minting/burning of RTokens. (for example: errors in interest calculation also come up)
+
+## Tools Used
+
+manual review
+
+## Recommendations
+
+Synchronize the reserve.totalUsage with the totalSupply of the debtToken, or use the totalSupply of the debtToken and deprecate the reserve.totalUsage.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Codehawks |
+| Protocol | Core Contracts |
+| Report Date | N/A |
+| Finders | anonymousjoe |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/Cyfrin/2025-02-raac
+- **Contest**: https://codehawks.cyfrin.io/c/cm5vbyum90000ffs0xblmb4gj
+
+### Keywords for Search
+
+`vulnerability`
+

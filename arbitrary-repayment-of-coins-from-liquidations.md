@@ -1,0 +1,125 @@
+---
+# Core Classification
+protocol: Protocol
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 51155
+audit_firm: Halborn
+contest_link: https://www.halborn.com/audits/kryptonite/protocol-cosmwasm-smart-contract-security-assessment
+source_link: https://www.halborn.com/audits/kryptonite/protocol-cosmwasm-smart-contract-security-assessment
+github_link: none
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - Halborn
+---
+
+## Vulnerability Title
+
+ARBITRARY REPAYMENT OF COINS FROM LIQUIDATIONS
+
+### Overview
+
+
+This bug report describes a vulnerability in the `repay_stable_from_liquidation` function of the `krp-cdp-contracts/stable_pool` contract. This function does not have proper validation to ensure that the caller is the `krp-cdp-contracts/central_control` contract. This could allow an attacker to repay coins to themselves after liquidating other users' loans. The report includes an example of how an attacker could exploit this vulnerability. The code location of the function is also provided. The report also includes a BVSS (Base Vulnerability Severity Score) rating and a recommendation. The Kryptonite team has solved this issue in a recent commit. 
+
+### Original Finding Content
+
+##### Description
+
+In the `repay_stable_from_liquidation` function from the **krp-cdp-contracts/stable\_pool** contract, there is no validation that `info.sender` is the **krp-cdp-contracts/central\_control** contract. As a consequence, an attacker could repay coins to himself after liquidating other users' loans, as shown in the following example:
+
+1. The attacker gets an extremely low loan.
+2. The attacker liquidates some users and forces the transfer of coins to the **stable\_pool** contract, as described in the vulnerability \vulnref{ARBITRARY REPAYMENT OF COINS FROM LIQUIDATIONS}.
+3. The attacker calls `repay_stable_from_liquidation` function from the **stable\_pool** contract using `pre_balance` = 0 and `minter` = .
+4. Because the loan for the attacker is extremely low, almost all the coins will be transferred from the **stable\_pool** contract to the attacker address.
+
+Code Location
+-------------
+
+There is no access control in the `repay_stable_from_liquidation` function:
+
+#### krp-cdp-contracts/contracts/stable\_pool/src/contract.rs
+
+```
+pub fn repay_stable_from_liquidation(
+ deps: DepsMut,
+ env: Env,
+ info: MessageInfo,
+ minter: Addr,
+ pre_balance: Uint256,
+) -> Result<Response<SeiMsg>, ContractError> {
+ let config = read_config(deps.storage)?;
+
+ let cur_balance: Uint256 = query_balance(
+  deps.as_ref(),
+  env.contract.address.clone(),
+  config.stable_denom.to_string(),
+ )?;
+
+ let mut info = info;
+ info.sender = minter;
+
+ info.funds = vec![Coin {
+  denom: config.stable_denom,
+  amount: (cur_balance - pre_balance).into(),
+ }];
+
+ repay_stable_coin(deps, info)
+}
+
+```
+
+##### BVSS
+
+[AO:A/AC:L/AX:L/C:N/I:N/A:N/D:C/Y:N/R:N/S:U (10.0)](/bvss?q=AO:A/AC:L/AX:L/C:N/I:N/A:N/D:C/Y:N/R:N/S:U)
+
+##### Recommendation
+
+**SOLVED**: The `Kryptonite team` solved this issue in commit [41ae7eb](https://github.com/KryptoniteDAO/krp-cdp-contracts/pull/23/commits/41ae7ebdf8b884fdd7853ba5663baf0607fa2d61).
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Halborn |
+| Protocol | Protocol |
+| Report Date | N/A |
+| Finders | Halborn |
+
+### Source Links
+
+- **Source**: https://www.halborn.com/audits/kryptonite/protocol-cosmwasm-smart-contract-security-assessment
+- **GitHub**: N/A
+- **Contest**: https://www.halborn.com/audits/kryptonite/protocol-cosmwasm-smart-contract-security-assessment
+
+### Keywords for Search
+
+`vulnerability`
+

@@ -1,0 +1,163 @@
+---
+# Core Classification
+protocol: Plaza Finance
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 49238
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/682
+source_link: none
+github_link: https://github.com/sherlock-audit/2024-12-plaza-finance-judging/issues/895
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 4
+finders:
+  - werulez99
+  - KupiaSec
+  - makeWeb3safe
+  - zraxx
+---
+
+## Vulnerability Title
+
+H-9: `COLLATERAL_THRESHOLD` should be set to `125%` instead of `120%`.
+
+### Overview
+
+
+The bug report describes an issue with the `COLLATERAL_THRESHOLD` setting in the Plaza Finance Judging project. Currently, the threshold is set to `120%`, which can cause a sudden change in the price of `BondToken` when the `collateralLevel` reaches this threshold. This can result in significant losses for `LeverageToken` holders, even as the total value of the assets in the pool increases. The root cause of this issue is the `getRedeemAmount()` function, which calculates the `redeemRate` based on the `collateralLevel`. To fix this issue, the report recommends changing the `COLLATERAL_THRESHOLD` to `125%` to ensure continuity in the price curve. 
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2024-12-plaza-finance-judging/issues/895 
+
+## Found by 
+KupiaSec, makeWeb3safe, werulez99, zraxx
+
+### Summary
+
+The price of `BondToken` depends on whether the `collateralLevel` is above or below `120%`.
+
+- If `collateralLevel <= 120%`:
+
+  `80%` of TVL is allocated for `BondToken`, so the price of `BondToken` is less than `120 * 80% = 96`.
+- If `collateralLevel > 120%`:
+
+  The price of `BondToken` is set to 100.
+
+As you can see, when the `collateralLevel` moves from below to above `120%`, the price of `BondToken` changes from `<= 96` to `100`, indicating that the price curve is not continuous.
+
+To ensure continuity, `125%` should be used instead of `120%`.
+
+### Root Cause
+
+The [getRedeemAmount()](https://github.com/sherlock-audit/2024-12-plaza-finance/tree/main/plaza-evm/src/Pool.sol#L511-L518) function calculates the `redeemRate` based on whether the `collateralLevel` is above or below `120%`.
+
+- If `collateralLevel <= 120%`:
+  ```solidity
+    redeemRate = (tvl * multiplier) / assetSupply
+  ```
+  Here, `multiplier` is `80%`, and `assetSupply` is the total supply of `BondToken`. Since the `collateralLevel` is less than `120%`, the `redeemRate` will be less than `120 * 80% = 96`.
+- If `collateralLevel > 120%`:
+  ```solidity
+    redeemRate = 100
+  ```
+As observed, when the `collateralLevel` moves from below to above `120%`, the `redeemRate` is not continuous, moves from `96` to `100` suddenly.
+
+This means that when the `collateralLevel` is around `120%`, a minor increase in TVL can lead to a significant price increase of `BondToken`, resulting in substantial losses for `LeverageToken` holders, even as the TVL increases.
+
+```solidity
+      function getRedeemAmount(
+        ...
+        
+        uint256 redeemRate;
+511     if (collateralLevel <= COLLATERAL_THRESHOLD) {
+          redeemRate = ((tvl * multiplier) / assetSupply);
+        } else if (tokenType == TokenType.LEVERAGE) {
+          redeemRate = ((tvl - (bondSupply * BOND_TARGET_PRICE)) / assetSupply) * PRECISION;
+515     } else {
+          redeemRate = BOND_TARGET_PRICE * PRECISION;
+        }
+        
+        // Calculate and return the final redeem amount
+        return ((depositAmount * redeemRate).fromBaseUnit(oracleDecimals) / ethPrice) / PRECISION;
+      }
+```
+
+### Internal pre-conditions
+
+### External pre-conditions
+
+### Attack Path
+
+Let's consider the following scenario:
+
+1. Current State of the Pool:
+    - `TVL`: 1190
+    - `bondSupply`: 10
+    - `collaterlLevel`: 119%
+    - TVL for `BondToken`: 1190 * 0.8 = 952
+    - TVL for `LeverageToken`: 1190 * 0.2 = 238
+2. Price of Underlying Rises:
+    - `TVL`: 1210 (due to price increase)
+    - `bondSupply`: 10
+    - `collaterlLevel`: 121%
+    - TVL for `BondToken`: 100 * 10 = 1000
+    - TVL for `LeverageToken`: 1210 - 100 = 210
+
+As you can see, `LeverageToken` holders incur a loss of `238 - 210 = 28`, even though the underlying price has increased.
+
+### Impact
+
+Even though the price of the underlying increases, `LeverageToken` holders incur a loss.
+
+### PoC
+
+### Mitigation
+
+For `COLLATERAL_THRESHOLD`, use `125%` instead of `120%`.
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Sherlock |
+| Protocol | Plaza Finance |
+| Report Date | N/A |
+| Finders | werulez99, KupiaSec, makeWeb3safe, zraxx |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2024-12-plaza-finance-judging/issues/895
+- **Contest**: https://app.sherlock.xyz/audits/contests/682
+
+### Keywords for Search
+
+`vulnerability`
+

@@ -1,0 +1,124 @@
+---
+# Core Classification
+protocol: Revert Lend
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 32275
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2024-03-revert-lend
+source_link: https://code4rena.com/reports/2024-03-revert-lend
+github_link: https://github.com/code-423n4/2024-03-revert-lend-findings/issues/389
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 2
+finders:
+  - Giorgio
+  - thank\_you
+---
+
+## Vulnerability Title
+
+[M-09] Liquidation reward sent to msg.sender instead of recipient
+
+### Overview
+
+
+This bug report discusses a vulnerability in the `V3Vault.sol` file of the `2024-03-revert-lend` repository on GitHub. The issue occurs when performing liquidation and the liquidator will send the rewards to the wrong address, `msg.sender`, instead of the intended recipient. This can affect the protocol's composability and external logic that relies on the rewards being sent to the recipient. The recommended mitigation is to use `params.recipient` instead of `msg.sender` for the specific call. The vulnerability has been confirmed and mitigated by the team. 
+
+### Original Finding Content
+
+
+<https://github.com/code-423n4/2024-03-revert-lend/blob/435b054f9ad2404173f36f0f74a5096c894b12b7/src/V3Vault.sol#L1078-L1080>
+
+### Vulnerability details
+
+When performing liquidation the liquidator will fill the `LiquidateParams` containing the liquidation details. The issue here is that instead of sending the liquidation rewards to the `LiquidateParams.recipient`, the rewards will be sent to `msg.sender`.
+
+### Impact
+
+The liquidation rewards will be sent to `msg.sender` instead of the recipient, any external logic that relies on the fact that the liquidation rewards will be sent to recipient won't hold; this will influence the protocol's composability.
+
+### Proof of Concept
+
+In order to keep the system safe the liquidator can and is incentivised to liquidate unhealthy positions. To do so the `liquidate()` function will be fired with the appropriate parameters.
+One of those parameters is the `address recipient;`; the name is quite intuitive for this one, this is where the liquidation rewards are expected to sent.
+
+But if we follow the `liquidation()` function logic, the rewards will not be sent to recipient address. This [piece of code](https://github.com/code-423n4/2024-03-revert-lend/blob/435b054f9ad2404173f36f0f74a5096c894b12b7/src/V3Vault.sol#L741-L742) handles the reward distribution.
+
+    (amount0, amount1) =
+                _sendPositionValue(params.tokenId, state.liquidationValue, 
+    @>  state.fullValue, state.feeValue, msg.sender); 
+
+We can see that `msg.sender` is being used instead of `params.recipient`.
+
+### Recommended Mitigation Steps
+
+The mitigation is straight forward. Use `params.recipient` instead of `msg.sender` for that specific call.
+
+```diff
+
+     (amount0, amount1) =
+            _sendPositionValue(params.tokenId, state.liquidationValue, 
+ --    state.fullValue, state.feeValue, msg.sender); 
+ ++    state.fullValue, state.feeValue, params.recipient); 
+```
+
+### Assessed type
+
+Context
+
+**[kalinbas (Revert) confirmed](https://github.com/code-423n4/2024-03-revert-lend-findings/issues/389#issuecomment-2030514150)**
+
+**[Revert mitigated](https://github.com/code-423n4/2024-04-revert-mitigation?tab=readme-ov-file#scope):**
+> Fixed [here](https://github.com/revert-finance/lend/pull/20).
+
+**Status:** Mitigation confirmed. Full details in reports from [b0g0](https://github.com/code-423n4/2024-04-revert-mitigation-findings/issues/31), [thank_you](https://github.com/code-423n4/2024-04-revert-mitigation-findings/issues/86) and [ktg](https://github.com/code-423n4/2024-04-revert-mitigation-findings/issues/15).
+
+***
+
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Revert Lend |
+| Report Date | N/A |
+| Finders | Giorgio, thank\_you |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2024-03-revert-lend
+- **GitHub**: https://github.com/code-423n4/2024-03-revert-lend-findings/issues/389
+- **Contest**: https://code4rena.com/reports/2024-03-revert-lend
+
+### Keywords for Search
+
+`vulnerability`
+

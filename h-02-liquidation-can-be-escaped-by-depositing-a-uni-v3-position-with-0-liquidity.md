@@ -1,0 +1,122 @@
+---
+# Core Classification
+protocol: Wild Credit
+chain: everychain
+category: uncategorized
+vulnerability_type: liquidation
+
+# Attack Vector Details
+attack_type: liquidation
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 839
+audit_firm: Code4rena
+contest_link: https://code4rena.com/contests/2021-09-wild-credit-contest
+source_link: https://code4rena.com/reports/2021-09-wildcredit
+github_link: https://github.com/code-423n4/2021-09-wildcredit-findings/issues/30
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+  - liquidation
+  - uniswap
+
+protocol_categories:
+  - dexes
+  - cdp
+  - cross_chain
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - WatchPug.
+---
+
+## Vulnerability Title
+
+[H-02] Liquidation can be escaped by depositing a Uni v3 position with 0 liquidity
+
+### Overview
+
+
+This bug report is about a vulnerability in a liquidation process that can be exploited by malicious users. When a liquidator is trying to liquidate an undercollateralized loan, it calls a function called `_unwrapUniPosition()` which is supposed to decrease the liquidity of a Uni v3 position. However, if the position has 0 liquidity, the function `positionManager.decreaseLiquidity()` will fail, allowing the malicious user to escape liquidation. This can lead to bad debts for the protocol, as the malicious user can take advantage of the situation by creating long positions on the collateral assets, and taking out more debt from the protocol when the price goes down, while the debt cannot be liquidated. The proof of concept for this vulnerability is that a malicious user deposits some collateral assets and borrows the maximum amount of debt, then deposits a Uni v3 position with 0 liquidity. When the market value of the collateral assets decreases, the liquidation will fail. The recommendation for this bug is to check if liquidity is greater than 0 when removing liquidity.
+
+### Original Finding Content
+
+_Submitted by WatchPug_.
+
+When the liquidator is trying to liquidate a undercolldarezed loan by calling `liquidateAccount()`, it calls `_unwrapUniPosition()` -> `uniV3Helper.removeLiquidity()` -> `positionManager.decreaseLiquidity()`.
+
+However, when the Uni v3 position has 0 liquidity, `positionManager.decreaseLiquidity()` will fail.
+
+See: <https://github.com/Uniswap/v3-periphery/blob/main/contracts/NonfungiblePositionManager.sol#L265>
+
+Based on this, a malicious user can escaped liquidation by depositing a Uni v3 position with 0 liquidity.
+
+##### Impact
+
+Undercollateralized debts cannot be liquidated and it leads to bad debts to the protocol.
+
+A malicious user can take advantage of this by creating long positions on the collateral assets and take profit on the way up, and keep taking more debt out of the protocol, while when the price goes down, the debt can not be liquidated and the risks of bad debt are paid by the protocol.
+
+##### Proof of Concept
+
+1.  A malicious user deposits some collateral assets and borrow the max amount of debt;
+2.  The user deposits a Uni v3 position with 0 liquidity;
+3.  When the market value of the collateral assets decreases, the liquadation will fail as `positionManager.decreaseLiquidity()` reverts.
+
+##### Recommendation
+
+Check if liquidity > 0 when removeLiquidity.
+
+**[talegift (Wild Credit) confirmed](https://github.com/code-423n4/2021-09-wildcredit-findings/issues/30#issuecomment-932861833):**
+ > Valid issue. Good catch.
+> 
+> Severity should be lowered to 2 as it doesn't allow direct theft of funds and the loss would only occur under specific external conditions.
+> 
+> _2 — Med: Assets not at direct risk, but the function of the protocol or its availability could be impacted, or leak value with a hypothetical attack path with stated assumptions, but external requirements_
+> 
+> https://docs.code4rena.com/roles/wardens/judging-criteria#estimating-risk-tl-dr
+
+**[ghoul-sol (judge) commented](https://github.com/code-423n4/2021-09-wildcredit-findings/issues/30#issuecomment-940647789):**
+ > To my understanding, bad position would affect the whole protocol and a loss would have to be paid by other participans which means funds can be drained. For that reason, I'm keeping high risk.
+
+
+
+ 
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Wild Credit |
+| Report Date | N/A |
+| Finders | WatchPug. |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2021-09-wildcredit
+- **GitHub**: https://github.com/code-423n4/2021-09-wildcredit-findings/issues/30
+- **Contest**: https://code4rena.com/contests/2021-09-wild-credit-contest
+
+### Keywords for Search
+
+`Liquidation, Uniswap`
+

@@ -1,0 +1,125 @@
+---
+# Core Classification
+protocol: Surge
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 6709
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/51
+source_link: none
+github_link: https://github.com/sherlock-audit/2023-02-surge-judging/issues/109
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.80
+financial_impact: medium
+
+# Scoring
+quality_score: 4
+rarity_score: 3
+
+# Context Tags
+tags:
+
+protocol_categories:
+  - liquid_staking
+  - cdp
+  - yield
+  - services
+  - cross_chain
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - usmannk
+---
+
+## Vulnerability Title
+
+M-7: Attackers can force surge to never update the collateralization ratio
+
+### Overview
+
+
+This bug report is about an issue (M-7) found by usmannk in the Surge protocol, which is meant to be deployed on various EVM chains. The issue is that certain parameter choices can make it feasible to block updates to the collateralization ratio, which is calculated as `uint change = timeDelta * _maxCollateralRatioMantissa / _collateralRatioRecoveryDuration;`. With quick refreshes or a `_collateralRatioRecoveryDuration` that is greater than `_maxCollateralRatioMantissa`, this change may be zero every iteration, halting the entire adaptive pricing scheme of the Surge protocol and allowing borrows at the current rate. This exploit is especially attractive on Layer 2s due to cheap/free execution and low block times. The impact of this exploit is loss of funds for depositors as the price becomes stale and the collateralization rate, and thus pool exchange rate, of the Surge pool would no longer update. The recommendation to prevent this exploit is to ensure that `_collateralRatioRecoveryDuration < _maxCollateralRatioMantissa`, which would preclude some pools from existing but save funds from being stolen.
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2023-02-surge-judging/issues/109 
+
+## Found by 
+usmannk
+
+## Summary
+
+Certain parameter choices make it feasible to block updates to the  collateralization ratio. Collaterization ratio updates are calculated as `uint change = timeDelta * _maxCollateralRatioMantissa / _collateralRatioRecoveryDuration; `. However, with quick refreshes or a `_collateralRatioRecoveryDuration` that is greater than `_maxCollateralRatioMantissa`, this change may be zero every iteration.
+
+## Vulnerability Detail
+
+https://github.com/sherlock-audit/2023-02-surge/blob/main/surge-protocol-v1/src/Pool.sol#L216-L263
+
+The `getCollateralRatioMantissa` function calculates the collateralization ratio by linearly updating along `_maxCollateralRatioMantissa / _collateralRatioRecoveryDuration`. However, these updates may be forced to zero in certain situations.
+
+Consider a pool where the loan token is WBTC and the collateral token is DAI. Given a BTC price of $20,000 it is reasonable to only allow 1/10000 BTC to be borrowed per DAI (for a max rate of $10,000 per BTC).
+
+The `_maxCollateralRatioMantissa` in this case would be `1e14`. In the Surge tests, a `_collateralRatioRecoveryDuration` of `1e15` is used. If an attacker does a tiny deposit of 1wei WBTC more often than once every 10 seconds, the `change` of the max collateralization ratio will always be zero no matter what the current utilization is because `(timeDelta * _maxCollateralRatioMantissa)` is less than `_collateralRatioRecoveryDuration`.
+
+This would halt the entire adaptive pricing scheme of the Surge protocol while still allowing borrows at the current rate.
+
+The README specifies that Surge is meant to be deployed on `DEPLOYMENT: Mainnet, Optimism, Arbitrum, Fantom, Avalanche, Polygon, BNB Chain and other EVM chains`. This exploit is especially attractive on L2s because of cheap/free execution (e.g. Optimism) and very low block times (thus low `timeDelta`).
+
+## Impact
+
+Loss of funds for depositors as the price becomes stale and the collateralization rate, and thus pool exchange rate, of the Surge pool would no longer update.
+
+## Code Snippet
+
+## Tool used
+
+Manual Review
+
+## Recommendation
+
+Ensure that `_collateralRatioRecoveryDuration < _maxCollateralRatioMantissa`. This would preclude some pools from existing, but save funds from being stolen.
+
+## Discussion
+
+**hrishibhat**
+
+Given the unlikely edge case of having a pool with an edge case mentioned by the Sponsor:
+>  a legit pool might have recovery duration set to max uint in case lenders wouldn't want the collateral factor to ever rise back up after falling
+
+Considering this issue as a valid medium
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 4/5 |
+| Rarity Score | 3/5 |
+| Audit Firm | Sherlock |
+| Protocol | Surge |
+| Report Date | N/A |
+| Finders | usmannk |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2023-02-surge-judging/issues/109
+- **Contest**: https://app.sherlock.xyz/audits/contests/51
+
+### Keywords for Search
+
+`vulnerability`
+
