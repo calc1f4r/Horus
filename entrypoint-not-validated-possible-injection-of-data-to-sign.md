@@ -1,0 +1,114 @@
+---
+# Core Classification
+protocol: Tezori (T2)
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 16876
+audit_firm: TrailOfBits
+contest_link: https://github.com/trailofbits/publications/blob/master/reviews/Tezori.pdf
+source_link: https://github.com/trailofbits/publications/blob/master/reviews/Tezori.pdf
+github_link: none
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 4
+finders:
+  - Paweł Płatek
+  - Will Song
+  - Artur Cygan
+  - Kristin Mayo
+---
+
+## Vulnerability Title
+
+Entrypoint not validated, possible injection of data to sign
+
+### Overview
+
+
+This bug report is about data validation in the ConseilJS library. It states that in the function encodeTransaction, the length of the transaction.parameters.entrypoint is not validated which could lead to injection of excessive data into encoded operations. An attacker could control the vulnerable parameter, which is the smart contract's function name, and add new operations that the user would sign. This is because the length of entrypoint is encoded as 1 byte, and if it is longer than 255 bytes, the length will be truncated in the encoding process.
+
+The recommendation is to validate the entrypoint length before encoding in the short term, and in the long term, to apply validation to all arguments that may come from untrusted input. Data formatting should also be enforced to comply with documentation, with special attention to data length and allowed bytes.
+
+References to Protocol 005 - entrypoint, P2P message format - named entrypoint, Michelson constants - strings, and How to find vulnerabilities? - 3. Documentation research are provided.
+
+### Original Finding Content
+
+## Data Validation Report
+
+**Type:** Data Validation  
+**Target:** ConseilJS  
+
+**Difficulty:** High  
+
+## Description
+In the function `encodeTransaction`, the length of `transaction.parameters.entrypoint` is not validated, which may lead to injection of excessive data into encoded operations. An attacker controlling the vulnerable parameter, which is the smart contract’s function name, may add new operations that the user will sign. 
+
+The issue arises from the fact that entrypoint length is encoded as 1 byte. If it’s longer than 255 bytes, the length will be truncated in the encoding process. However, the whole entrypoint will be appended to the result. Code with the bug is presented in Figure 13.1.
+
+```javascript
+hex += 'ff'
+  + ('0' + composite.entrypoint.length.toString(16)).slice(-2)
+  + composite.entrypoint.split('').map(c => c.charCodeAt(0).toString(16)).join('');
+```
+
+**Figure 13.1:** ConseilJS/src/chain/tezos/TezosMessageCodec.ts lines 440 - 442
+
+Note that there is a comment in the function’s docstring warning about the expected entrypoint format, but it should be explicitly validated in the code.  
+
+## Exploit Scenario
+An attacker tricks a wallet user into copy-pasting specially crafted data into the Entry Point text box in the Invoke tab. The user thinks he will only call a smart contract’s function, but he will also perform a transaction.  
+
+## Recommendation
+- **Short term:** Validate the entrypoint length before encoding.
+- **Long term:** Apply validation to all arguments that may come from untrusted input. Enforce data formatting that complies with documentation. Take special care of data length and allowed bytes - for example, Michelson strings are restricted to a printable subset of 7-bit ASCII.  
+
+## References
+- Protocol 005 - entrypoint
+- P2P message format - named entrypoint
+- Michelson constants - strings
+- How to find vulnerabilities? - 3. Documentation research
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | TrailOfBits |
+| Protocol | Tezori (T2) |
+| Report Date | N/A |
+| Finders | Paweł Płatek, Will Song, Artur Cygan, Kristin Mayo |
+
+### Source Links
+
+- **Source**: https://github.com/trailofbits/publications/blob/master/reviews/Tezori.pdf
+- **GitHub**: N/A
+- **Contest**: https://github.com/trailofbits/publications/blob/master/reviews/Tezori.pdf
+
+### Keywords for Search
+
+`vulnerability`
+

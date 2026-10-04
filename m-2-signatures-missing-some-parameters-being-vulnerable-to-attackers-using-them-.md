@@ -1,0 +1,126 @@
+---
+# Core Classification
+protocol: Crestal Network
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 55094
+audit_firm: Sherlock
+contest_link: https://app.sherlock.xyz/audits/contests/755
+source_link: none
+github_link: https://github.com/sherlock-audit/2025-03-crestal-network-judging/issues/225
+
+# Impact Classification
+severity: medium
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: medium
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 1
+finders:
+  - 0x73696d616f
+---
+
+## Vulnerability Title
+
+M-2: Signatures missing some parameters being vulnerable to attackers using them coupled with malicious parameters
+
+### Overview
+
+
+This bug report discusses a vulnerability in the Crestal Network protocol, specifically in the `createAgentWithSigWithNFT()` function. The function signs certain parameters, but does not sign `privateWorkerAddress` or `tokenId`, leaving it vulnerable to attacks where malicious parameters can be used. This could result in users being forced to use invalid worker addresses or pay more fees than intended. The root cause of this issue is that these parameters are not signed in the function. There are no internal or external pre-conditions necessary for this attack to occur. The attack path involves an attacker picking up a signature from the mempool and submitting it with malicious inputs. The impact of this vulnerability could result in worker censorship, user DoS attacks, illegitimate fees for the attacker, or the theft of tokens. A proof of concept for this attack is provided, where the attacker can become a bundler and listen to the mempool to perform the attack. The suggested mitigation for this issue is to sign all parameters. The protocol team has already fixed this issue in their code.
+
+### Original Finding Content
+
+Source: https://github.com/sherlock-audit/2025-03-crestal-network-judging/issues/225 
+
+## Found by 
+0x73696d616f
+
+### Summary
+
+[`createAgentWithSigWithNFT()`](https://github.com/sherlock-audit/2025-03-crestal-network/blob/main/crestal-omni-contracts/src/BlueprintCore.sol#L566) for example signs `projectId, base64RecParam, serverURL`. However, it does not sign `privateWorkerAddress` or tokenId. This is an issue because although Base has a private mempool, the protocol integrates with Biconomy, which leverages ERC4337 and has a mempool for bundlers. Hence, the signatures will be available in the mempool and anyone can fetch them and submit it directly to base with other malicious `tokenId` or `privateWorkerAddress`. 
+
+Thus, users can be forced to create agents with token ids they didn't intend to use or use invalid worker addresses, DoSing them. Workers have incentive to do this as they can censor other workers this way from using other workers and only they will be able to make the deployments, censoring other workers. The protocol intends to benefit workers from their work, so they have incentive to do so.
+
+If `[createAgentWithTokenWithSig()](https://github.com/sherlock-audit/2025-03-crestal-network/blob/main/crestal-omni-contracts/src/BlueprintCore.sol#L491)`, the token address used can be another one that has a bigger cost and users end up paying more.
+
+### Root Cause
+
+In `createAgentWithSigWithNFT()` and similar, `tokenAddress`, `tokenId`, `privateWorkerAddress` are not signed.
+
+### Internal Pre-conditions
+
+None.
+
+### External Pre-conditions
+
+None.
+
+### Attack Path
+
+1. User sends signature to be used on `createAgentWithSigWithNFT()` or `createAgentWithTokenWithSig()` to the offchain protocol, which forwards it to Biconomy, adding the user operation to the mempool.
+2. Attacker picks up the signature from the eip4337 mempool and submits the onchain transaction with other malicious inputs.
+
+### Impact
+
+Worker censors other workers, DoSes users, makes them pay fees without getting services and ultimately forces users to use the attacker worker's services, who gets illegitimate fees.
+Or, attacker steals tokens from users by specifying a different token address.
+Or, another token id ownership is used.
+
+### PoC
+
+[Here](https://docs.biconomy.io/smartAccountsV2/bundler#bundler) is how the biconomy bundler works (which is the same as the typical bundler):
+> Aggregating userOps in an alternative mempool to normal Ethereum Transactions
+
+Attacker can become a bundler and listen to the same mempool and perform the attack.
+
+### Mitigation
+
+Sign all parameters.
+
+## Discussion
+
+**sherlock-admin2**
+
+The protocol team fixed this issue in the following PRs/commits:
+https://github.com/crestalnetwork/crestal-omni-contracts/pull/18
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | MEDIUM |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Sherlock |
+| Protocol | Crestal Network |
+| Report Date | N/A |
+| Finders | 0x73696d616f |
+
+### Source Links
+
+- **Source**: N/A
+- **GitHub**: https://github.com/sherlock-audit/2025-03-crestal-network-judging/issues/225
+- **Contest**: https://app.sherlock.xyz/audits/contests/755
+
+### Keywords for Search
+
+`vulnerability`
+
