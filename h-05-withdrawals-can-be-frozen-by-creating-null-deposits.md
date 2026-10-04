@@ -1,0 +1,166 @@
+---
+# Core Classification
+protocol: Olas
+chain: everychain
+category: uncategorized
+vulnerability_type: unknown
+
+# Attack Vector Details
+attack_type: unknown
+affected_component: smart_contract
+
+# Source Information
+source: solodit
+solodit_id: 30026
+audit_firm: Code4rena
+contest_link: https://code4rena.com/reports/2023-12-autonolas
+source_link: https://code4rena.com/reports/2023-12-autonolas
+github_link: https://github.com/code-423n4/2023-12-autonolas-findings/issues/341
+
+# Impact Classification
+severity: high
+impact: security_vulnerability
+exploitability: 0.00
+financial_impact: high
+
+# Scoring
+quality_score: 0
+rarity_score: 0
+
+# Context Tags
+tags:
+
+# Audit Details
+report_date: unknown
+finders_count: 3
+finders:
+  - hash
+  - erebus
+  - BugzyVonBuggernaut
+---
+
+## Vulnerability Title
+
+[H-05] Withdrawals can be frozen by creating null deposits
+
+### Overview
+
+
+The report discusses a bug where withdrawing LP tokens is not possible after depositing $0$ liquidity. This is because the code does not check for the existence of a position when making a deposit, allowing for positions with $0$ liquidity to be created. When trying to withdraw, the code loops through all positions and checks for their existence, causing the transaction to fail when it reaches the flawed position. The recommended mitigation is to add a check for the supplied liquidity to not be $0$ when creating a position.
+
+### Original Finding Content
+
+
+It won't be possible to withdraw any LP token after doing a deposit of $0$ liquidity, leading to withdrawals being effectively freezed.
+
+### Proof of Concept
+
+In [**liquidity_lockbox, function withdraw**](https://github.com/code-423n4/2023-12-autonolas/blob/2a095eb1f8359be349d23af67089795fb0be4ed1/lockbox-solana/solidity/liquidity_lockbox.sol#L221C1-L225C10)
+
+```solidity
+        ...
+
+        uint64 positionLiquidity = mapPositionAccountLiquidity[positionAddress];
+        // Check that the token account exists
+        if (positionLiquidity == 0) {
+            revert("No liquidity on a provided token account");
+        }
+
+        ...
+```
+
+The code checks for the existence of a position via the recorded liquidity. This is a clever idea, as querying a non-existant value from a mapping will return $0$. However, in `deposit`, due to a flawed input validation, it is possible to make positions with $0$ liquidity as the only check being done is for liquidity to not be higher than `type(uint64).max`:
+
+[**liquidity_lockbox, function \_getPositionData**](https://github.com/code-423n4/2023-12-autonolas/blob/2a095eb1f8359be349d23af67089795fb0be4ed1/lockbox-solana/solidity/liquidity_lockbox.sol#L94C1-L97C10)
+
+```solidity
+        ...
+
+        // Check that the liquidity is within uint64 bounds
+        if (positionData.liquidity > type(uint64).max) {
+            revert("Liquidity overflow");
+        }
+
+        ...
+```
+
+As it will pass the input validation inside `_getPositionData`, the only way for such a tx to revert is in the [transfer](https://github.com/code-423n4/2023-12-autonolas/blob/2a095eb1f8359be349d23af67089795fb0be4ed1/lockbox-solana/solidity/liquidity_lockbox.sol#L164)/[mint](https://github.com/code-423n4/2023-12-autonolas/blob/2a095eb1f8359be349d23af67089795fb0be4ed1/lockbox-solana/solidity/liquidity_lockbox.sol#L171), which are low-level calls with no checks for success, as stated in my report `Missing checks for failed calls to the token program will corrupt user's positions`.
+
+Due to the reasons above, this deposit with $0$ liquidity will be treated as a valid one and will be stored inside the `mapPositionAccountLiquidity` and `positionAccounts` arrays. If we add the fact that withdrawals are done by looping **LINEARLY** through `positionAccounts`:
+
+[**liquidity_lockbox, function withdraw**](https://github.com/code-423n4/2023-12-autonolas/blob/2a095eb1f8359be349d23af67089795fb0be4ed1/lockbox-solana/solidity/liquidity_lockbox.sol#L192C1-L323C6)
+
+```solidity
+    function withdraw(uint64 amount) external {
+        address positionAddress = positionAccounts[firstAvailablePositionAccountIndex]; // @audit linear loop
+        
+        ...
+
+        uint64 positionLiquidity = mapPositionAccountLiquidity[positionAddress];
+        // Check that the token account exists
+        if (positionLiquidity == 0) { // @audit it will revert here once it reaches the flawed position
+            revert("No liquidity on a provided token account");
+        }
+
+        ...
+
+        if (remainder == 0) { // @audit if the liquidity after the orca call is 0, close the position and ++ the index
+            ...
+
+            // Increase the first available position account index
+            firstAvailablePositionAccountIndex++; // @audit it won't reach here as the revert above will roll-back the whole tx
+        }
+    }
+```
+
+It can be seen that once it encounters such a *"fake"* deposit with $0$ liquidity provided, it will always revert due to the existence check. As there is no other way to update `firstAvailablePositionAccountIndex` to bypass the flawed position, withdrawals will be completely freezed.
+
+### Recommended Mitigation Steps
+
+Just check for the supplied liquidity to not be $0$ in
+
+[**liquidity_lockbox, function \_getPositionData**](https://github.com/code-423n4/2023-12-autonolas/blob/2a095eb1f8359be349d23af67089795fb0be4ed1/lockbox-solana/solidity/liquidity_lockbox.sol#L94C1-L97C10)
+
+```diff
+        ...
++       // Check that the liquidity > 0
++       if (positionData.liquidity == 0) {
++           revert("Liquidity cannot be 0");
++       }
+
+        // Check that the liquidity is within uint64 bounds
+        if (positionData.liquidity > type(uint64).max) {
+            revert("Liquidity overflow");
+        }
+
+        ...
+```
+
+**[mariapiamo (Olas) confirmed](https://github.com/code-423n4/2023-12-autonolas-findings/issues/341#issuecomment-1892165566)**
+
+***
+ 
+
+
+### Metadata
+
+| Field | Value |
+|-------|-------|
+| Impact | HIGH |
+| Quality Score | 0/5 |
+| Rarity Score | 0/5 |
+| Audit Firm | Code4rena |
+| Protocol | Olas |
+| Report Date | N/A |
+| Finders | hash, erebus, BugzyVonBuggernaut |
+
+### Source Links
+
+- **Source**: https://code4rena.com/reports/2023-12-autonolas
+- **GitHub**: https://github.com/code-423n4/2023-12-autonolas-findings/issues/341
+- **Contest**: https://code4rena.com/reports/2023-12-autonolas
+
+### Keywords for Search
+
+`vulnerability`
+
