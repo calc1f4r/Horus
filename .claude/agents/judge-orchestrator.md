@@ -341,23 +341,30 @@ Before consensus, run this calibration check:
 
 ## Step 7: Synthesize Consensus
 
-Build the final consensus verdict:
+Use the shared [review-integrity contract](.claude/resources/review-integrity.md).
+Record technical support independently of each venue's eligibility/severity.
+Each real reviewer supplies component evidence review, input provenance and the
+claim/source digest in `audit-output/review-records.json`; never create absent
+votes or convert a venue cap into a technical rejection.
 
-```
-Consensus Algorithm:
-  IF majority verdicts are speculative or low-confidence:
-    → NEEDS-EVIDENCE — severity must not exceed INFO/QA/INVALID until proof improves
-  IF intentionality_gate triggered across platforms AND no distinct unintended impact:
-    → NON-EXPLOIT CONSENSUS — severity must stay INVALID/INFO/QA (never MEDIUM/HIGH)
-  IF all platforms agree on validity AND severity tier:
-    → FULL CONSENSUS — use agreed verdict
-  ELIF majority (2/3) agree:
-    → MAJORITY CONSENSUS — use majority verdict, note dissent
-  ELIF divergence is rule_difference (documented):
-    → PLATFORM SPLIT — report per-platform, recommend based on --primary
-  ELSE:
-    → CONTESTED — report all verdicts, flag for human review
-```
+Run `python3 scripts/review_integrity.py tally audit-output/review-records.json`
+and save the computed JSON as `review-tally.json`. The versioned declared panel
+and strict-majority threshold own technical-support tallying. Missing reviewers
+remain incomplete and deferred unless a real disagreement or explicit contest
+is recorded; duplicate or unknown voters fail. If a prior saved result
+exists, put its IDs in `recorded_supported_ids` and require exact reconciliation.
+A tally mismatch is a hard stop for the decision handoff. It is not permission
+to reword votes until they agree.
+
+Keep per-venue decisions as a vector. Rule differences are reported explicitly;
+do not take the minimum, maximum or majority of different venues' severity
+labels. Use the selected venue's attributable decision when publishing there.
+Weak or unresolved component evidence stays NEEDS-EVIDENCE, not automatically
+INFO/QA. A supported advisory needs its own supported claim.
+
+Run the evidence-aware `check` command before treating a result as supported.
+Tallying alone establishes arithmetic, not validity. Existing intentionality,
+speculation and substantive-review requirements still apply.
 
 **Best-platform recommendation:**
 Based on severity outcomes, if `--primary` is not set, recommend:

@@ -199,6 +199,14 @@ The "Do Not Re-attack" list is as important as the target list — it is what st
 
 Before Phase 5. Percentages are honest and always carry their denominator:
 
+These are exposure/activity metrics, not correctness coverage. Include the
+read-only disposition summary from `review_integrity.py ledger` and the shared
+[review-integrity contract](resources/review-integrity.md): open, deferred,
+stale, unsupported closures and closed-with-reference items. Record the basis
+and revision of existing conclusions, including items without candidates.
+Never equate a read, a DEAD_END label or 100% unit exposure with verified
+correctness. This sidecar records dispositions; it creates no new targets.
+
 ```markdown
 # Attack Coverage Report
 

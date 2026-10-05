@@ -370,7 +370,11 @@ Post-discovery: `attack-graph-synthesizer` walks the codebase graph against the 
 6. **Assign stable IDs**: F-001, F-002, ... — these persist through ALL remaining phases
 7. **Write** `05-findings-triaged.md` per the inter-agent Finding Schema with merged evidence, reporter list, falsification verdict, and `unaccounted: 0`
 
-**Phase gate**: `05-findings-triaged.md` exists and finding-merger reports unaccounted = 0.
+**Phase gate**: `05-findings-triaged.md` and the decision sidecar exist. Use the shared
+[review-integrity contract](review-integrity.md) to check actual raw-input lineage;
+unresolved candidates retain their IDs and missing evidence. A narrated count
+does not replace reconciliation. Final publication also requires its `gate`
+command; failures retain an explicitly unconfirmed draft.
 
 ---
 
@@ -561,12 +565,12 @@ Closes the loop: every audit's judge-confirmed findings become next audit's DB h
 | 7 | FV execution fails | Record error; FV artifacts still useful as specs |
 | 7 | Skipped (static-only) | Normal — log SKIPPED |
 | 8 | Judge fails | Retry once; if single-judge mode, try alternate judge as fallback |
-| 8 | 2+ judges fail (triple mode) | Use remaining judge + orchestrator self-assessment |
+| 8 | 2+ judges fail (triple mode) | Preserve missing votes as contested; do not silently shrink the declared panel or self-approve |
 | 9 | Issue writer fails | Use raw finding description instead |
 | 10 | Judge fails | Same recovery as Phase 8 |
 | 10 | NEEDS-REVISION verdict | Re-run issue-writer with feedback, re-judge (max 1 retry) |
 | 10b | remediation-safety-checker fails | Gate degrades open with warning; UNSAFE cannot be asserted |
-| 11 | Any missing artifact | Note gap in report; proceed with available data |
+| 11 | Any missing artifact | Note gap in a draft; missing/failed decision integrity gate prevents confirmed publication |
 | 12 | Quality check fails after entry writes | Do not commit; report failure honestly |
 
 ---

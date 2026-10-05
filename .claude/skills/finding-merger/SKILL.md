@@ -25,6 +25,7 @@ Every input finding lands in exactly one cluster **or** in Excluded Findings wit
 ## Output
 
 - `audit-output/05-findings-triaged.md`
+- `audit-output/review-records.json` — lifecycle/evidence/lineage under the shared [review-integrity contract](.claude/resources/review-integrity.md); run its `check` command. Preserve unresolved items rather than labeling them VALID/LOW.
 
 ## Related skills
 

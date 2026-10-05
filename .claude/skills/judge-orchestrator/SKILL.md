@@ -37,6 +37,13 @@ Run all three platform judges against the finding at `$ARGUMENTS`, synthesize th
 
 ## Output locations
 
+Use the shared [review-integrity contract](.claude/resources/review-integrity.md)
+and `audit-output/review-records.json`. Record actual reviewer decisions and
+run `review_integrity.py tally`; lineage/report ID conservation is mandatory,
+and saved-result reconciliation is required when a previous consensus exists.
+Technical support, venue eligibility and venue severity remain separate axes.
+Tally correctness is not semantic confirmation; run evidence-aware `check` too.
+
 ```
 judge-memory/
   active-session.md    — Round 1 + Round 2 communication log (current session)

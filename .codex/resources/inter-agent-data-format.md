@@ -465,6 +465,12 @@ Step N: State is now S_vulnerable
 
 ## Finding Schema (Phases 3-6)
 
+The shared [review-integrity contract](review-integrity.md) adds the machine-readable
+`audit-output/review-records.json` sidecar: honest lifecycle, per-component evidence,
+review provenance, declared-policy tally, raw-input lineage and dispositions.
+Markdown remains the human-readable view. Unresolved evidence is not VALID with
+low confidence, and a narrated conservation count does not replace the checker.
+
 Every finding across all phases MUST use this format:
 
 ```markdown

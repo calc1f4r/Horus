@@ -63,21 +63,29 @@ Accepts a path to a directory or file containing findings. Each finding must hav
 2. Filter to **CONFIRMED** findings only (from deep review verdicts)
 3. Include **DEMOTED** findings in Appendix A
 4. Include **DISPUTED** findings in Appendix B (PoC passes but judges disagree)
-5. Exclude **REJECTED** findings entirely
+5. Retain **REJECTED** candidates in the disposition appendix with reasons;
+   keep unresolved/unreviewed candidates deferred. Only supported published
+   records enter the verified-finding body. Do not assign publication severity
+   to unpublished dispositions.
 
 ### Step 2: Resolve Severity Consensus
 
-For each confirmed finding, apply the severity reconciliation rules:
+Consume the shared [review-integrity contract](resources/review-integrity.md)
+and `audit-output/review-records.json`. Do not synthesize another severity vote.
+Technical support and venue eligibility are separate. Preserve per-venue
+ratings; use the selected venue's attributable eligible decision and report
+dissent. With no selected venue, report the vector without a universal severity.
+Any severity correction needs new evidence and a fresh substantive decision.
 
-**Full judge mode** (3 judges):
-| Scenario | Rule |
-|----------|------|
-| All 3 agree | Use agreed severity |
-| 2 agree, 1 differs | Use the 2-judge consensus |
-| All 3 differ | Use LOWEST (conservative) |
-
-**Single-judge mode**:
-Use the judge's severity directly.
+Before final assembly, list every candidate once in `report_dispositions`,
+including unresolved/deferred/rejected/contested items with reasons. Keep these
+in a limitations/disposition appendix rather than silently excluding them.
+Run `python3 scripts/review_integrity.py gate audit-output/review-records.json --evidence-root <snapshot-root>`
+and save the JSON to `audit-output/review-gate.json`. Nonzero exit is a hard stop:
+repair structure/evidence or retain a visible draft. Never label that draft
+CONFIRMED. Supported advisories remain separate; uncertainty is not QA.
+The prose report's IDs and claims must match the sidecar; the checker validates
+JSON dispositions, not arbitrary report prose. Preserve the sidecar with the report.
 
 ### Step 3: Verify All Code Citations
 
@@ -87,7 +95,10 @@ For every finding, verify code citations against the actual codebase:
 
 1. **Read the affected file** at the cited line range using `Read`
 2. **Verify the code at those lines** matches what the finding describes
-3. **Fix misaligned line numbers** — if the content has shifted, grep for the vulnerable pattern and update the line range
+3. **Reconcile misaligned line numbers** — retain the pinned snapshot. If a cited
+   snapshot/range must change, update the structured source and obtain fresh
+   substantive reviews bound to its new digest before publication. A prose-only
+   citation correction cannot silently change the reviewed evidence.
 4. **Generate GitHub permalink** if a repo URL is available (keep the target's real file extension — `.sol`, `.rs`, `.go`, `.cpp`, `.move`, `.cairo`):
    ```
    [`file.rs:L42-L55`](https://github.com/org/repo/blob/<commit>/src/file.rs#L42-L55)
@@ -148,12 +159,19 @@ In [`file.sol:42`](https://github.com/org/repo/blob/<commit>/src/file.sol#L42), 
 
 Fill in the Executive Summary table:
 
-| Severity | Confirmed | Demoted | Disputed | Rejected |
-|----------|-----------|---------|----------|----------|
-| Critical | N | N | N | N |
-| High | N | N | N | N |
-| Medium | N | N | N | N |
-| Low | N | N | N | N |
+| Selected venue severity | Published supported records |
+|-------------------------|-----------------------------|
+| Critical | N |
+| High | N |
+| Medium | N |
+| Low | N |
+
+Count unpublished records separately by final disposition: deferred, contested
+and rejected. Do not assign those dispositions publication severity. Legacy
+labels are inputs, not state transitions: CONFIRMED can publish only after the
+shared gate passes; DEMOTED requires a fresh attributable rating before any
+publication; DISPUTED maps to contested only when an actual contest exists,
+otherwise deferred; REJECTED requires the recorded rejection policy.
 
 ### Step 6: Write Final Report
 
@@ -185,9 +203,9 @@ FOR each finding:
     2. IF content matches finding description:
          → Keep citation, generate permalink
     3. ELSE:
-         → Grep(pattern=<vulnerable_pattern>, path=file)
-         → Update line numbers to actual location
-         → Re-verify with Read
+         → Preserve the reviewed snapshot and record the citation discrepancy
+         → If a source path or line range must change, update the structured source
+         → Obtain fresh digest-bound reviews before publishing the changed citation
     4. IF code no longer exists:
          → Flag finding for manual review
          → Add note: "Code may have been modified since analysis"
@@ -208,11 +226,11 @@ FOR each finding:
 
 | Error | Recovery |
 |-------|----------|
-| Finding references non-existent file | Search for the file elsewhere; if truly gone, flag for manual review |
-| Line numbers don't match expected code | Grep for the pattern and update line numbers |
+| Finding references non-existent file | Preserve the pinned source and flag the discrepancy for manual review; a replacement structured source requires fresh digest-bound reviews |
+| Line numbers don't match expected code | Record the mismatch against the pinned snapshot; a changed structured range requires fresh digest-bound reviews |
 | No GitHub repo URL available | Use `file:LNNN` format instead of permalinks |
 | PoC file missing | Note "PoC not generated" in the finding |
-| Conflicting judge verdicts | Apply severity reconciliation rules; note disagreement |
+| Conflicting judge verdicts | Preserve attributed per-venue decisions and dissent; defer any unresolved publication rating |
 
 ---
 

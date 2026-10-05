@@ -312,7 +312,7 @@ This file is created in Phase 1 and updated after EVERY phase. It is the single 
 | "This finding is obvious" | Obvious to you != obvious to the reader | Document fully with code references and root cause |
 | "PoC failed so the finding is invalid" | PoC might have a bug, not the finding | Debug the PoC; if still fails after 2 attempts, demote confidence but keep finding |
 | "FV is overkill for this" | FV catches what PoCs miss (edge cases, all paths) | Generate FV for every invariant; execute what compiles |
-| "Two judges disagreed, pick the higher" | Conservative = credible | Use 2-of-3 consensus; tie-break with LOWER severity |
+| "Two judges disagreed, pick the higher" | A different venue policy is not a technical-support vote | Replay the declared technical-support policy; preserve selected-venue severity and dissent |
 | "The multi-persona round is redundant" | Different angles find different root causes | Always run; unique findings from personas are common |
 | "Static mode is enough for this codebase" | Static misses runtime state and integration bugs | Only use static-only when explicitly requested by user; default is full pipeline |
 | "One judge is enough" | Each judge has different criteria and blind spots | Only use single-judge when explicitly requested; default is triple-judge |
@@ -1976,13 +1976,13 @@ A finding is **CONFIRMED** if:
 1. Passed Phase 8 pre-judging (consensus threshold met)
 2. Passed Phase 10 deep review (consensus threshold met — CONFIRMED or CONFIRMED-DOWNGRADED)
 3. Has execution evidence: PoC PASS or FV VIOLATED
-4. Final severity = minimum of agreeing judges' deep-review ratings
+4. Final severity preserves the selected venue's attributable deep-review decision; retain other venue ratings as a vector
 
 **Static-only mode** (`--static-only`):
 1. Passed Phase 8 pre-judging (consensus threshold met)
 2. Passed Phase 10 deep review (consensus threshold met)
 3. Execution evidence NOT required (no PoC/FV was generated)
-4. Final severity = minimum of agreeing judges' deep-review ratings
+4. Final severity preserves the selected venue's attributable deep-review decision; retain other venue ratings as a vector
 
 **Single-judge mode** (`--judge=X`):
 - Same criteria as above but consensus = 1/1 (single judge must say CONFIRMED in both rounds)
@@ -1994,7 +1994,7 @@ A finding is **CONFIRMED** if:
 | Pre-judge VALID but deep-review REJECTED | **REJECTED** — polishing revealed issues not visible in raw form |
 | Deep-review CONFIRMED but no execution evidence (full mode) | **DEMOTED** to "Likely Valid — Unverified" |
 | Deep-review NEEDS-REVISION | Re-run issue-writer with judge feedback, then re-judge (max 1 retry) |
-| All judges disagree on severity in deep review | Use LOWEST valid severity |
+| All judges disagree on severity in deep review | Preserve venue-specific decisions and dissent; do not invent a fused severity |
 | Judge says CONFIRMED-DOWNGRADED | Use the downgraded severity if consensus supports it |
 
 Update `pipeline-state.md` Finding Tracker: Deep-Review and Confirmed columns.
@@ -2033,6 +2033,14 @@ The finding itself is never dropped by this gate; only its remediation text chan
 ---
 
 ## Phase 11: Final Report Assembly
+
+**Decision integrity hard gate:** Use the shared [review-integrity contract](.claude/resources/review-integrity.md).
+The final `review-records.json` must retain every raw input/candidate disposition,
+actual component-level review evidence and any unresolved contradiction. Run
+`python3 scripts/review_integrity.py gate audit-output/review-records.json --evidence-root <snapshot-root>`
+and save `review-gate.json`. A failed or missing gate keeps the report a draft;
+do not substitute prose assurances or a CONFIRMED label. Keep per-venue severity
+decisions, explicit uncertainty and the disposition summary with the report.
 
 **Agent**: Self (no sub-agent)
 **Output**: `audit-output/CONFIRMED-REPORT.md`
@@ -2097,7 +2105,8 @@ Final Verification:
 - [ ] In full mode: every CONFIRMED finding has execution evidence (PoC PASS or FV VIOLATED)
 - [ ] In static-only mode: execution evidence fields correctly marked N/A
 - [ ] Judge consensus threshold correctly applied (<1/1 or 2/3> as configured)
-- [ ] Final severity = minimum of agreeing judges' deep-review ratings
+- [ ] Final severity preserves the selected venue's attributable decision; no cross-venue minimum/majority rating
+- [ ] review-records.json and review-gate.json reconcile every candidate and the gate exits 0
 - [ ] Discovery rounds ran correctly (<N> rounds with cross-pollination state files)
 - [ ] Executive summary statistics match actual confirmed finding count
 - [ ] No hallucinated file paths — every path verified via read_file
@@ -2173,7 +2182,7 @@ This phase changes the Horus repository, not the audited target. It is never run
 11. **Graceful degradation**: Sub-agent failures don't stop the pipeline — recover and continue
 12. **Pipeline bus**: All agents communicate through `audit-output/` files — no side channels
 13. **Honest PoCs**: Never weaken assertions to make a PoC pass — an honest failure is valuable
-14. **Consensus-gated**: Severity = minimum of agreeing judges' ratings; tie-break with LOWER severity
+14. **Decision integrity**: Script the declared technical-support policy and exact ID reconciliation; preserve selected-venue severity and unresolved evidence
 
 ---
 
@@ -2291,7 +2300,7 @@ Findings Quality:
 - [ ] Finding Tracker has complete data for every finding
 - [ ] Every CONFIRMED finding passed both pre-judge AND deep-review
 - [ ] Consensus threshold correctly applied (1/1 or 2/3 as configured)
-- [ ] Final severity = minimum of agreeing judges' ratings
+- [ ] Final severity preserves the selected venue's attributable decision, with dissent visible
 
 Execution Evidence (full mode only):
 - [ ] Every CONFIRMED HIGH/CRITICAL finding has PoC PASS or FV VIOLATED

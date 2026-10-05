@@ -115,6 +115,11 @@ Anti-patterns, both fatal:
 
 Assign each cluster a stable ID `F-NNN`, ordered by severity after Phase 5. These IDs persist through every remaining phase — never renumber them later.
 
+Merged raw shard artifacts use intermediate `M-NNN` IDs. Emit an explicit
+intermediate-to-final map through `review_integrity.py remap`; retain original
+input IDs, hashes and member ratings. Never import intermediate routes as if
+their numeric suffixes already identified final triage clusters.
+
 ## Phase 3: Falsification Pass
 
 For every cluster, **re-read the actual code at the cited ranges** — the reporter's quote is a claim, not evidence. Then attempt to disprove it:
@@ -131,11 +136,11 @@ For every cluster, **re-read the actual code at the cited ranges** — the repor
 
 Verdicts:
 
-- **VALID** — survived all seven routes. Record which routes were checked.
-- **INVALID** — one route disproves it. **The disproof must be concrete**: file, line, and why the path is unreachable. "Probably guarded somewhere" is not a disproof; if you cannot cite the guard, the finding stays VALID with lowered confidence.
-- **NEEDS-EVIDENCE** — cannot be resolved from source alone (depends on deploy config, market state, or an external contract). Keep as VALID with LOW confidence and name the missing evidence; route economic questions to `economic-attack-simulator`.
+- **SUPPORTED CANDIDATE** — affirmative evidence supports the mechanism, relevant contract and impact; record which routes were checked. This is an input to substantive review, not final confirmation.
+- **REJECTED CANDIDATE** — a concrete disproof identifies the file, line and contradicted premise. "Probably guarded somewhere" is not a disproof. If neither support nor disproof is established, retain the candidate as unresolved.
+- **NEEDS-EVIDENCE / UNRESOLVED** — source/configuration/dependency evidence cannot settle a material premise. Name the missing evidence and preserve the ID. Do not keep this as VALID with LOW confidence and do not turn it into QA by default.
 
-Never mark INVALID on the strength of an assumption. An unfalsifiable-from-source finding is a low-confidence finding, not an invalid one.
+Never reject on an assumption or treat failure to disprove as affirmative support. Use the shared [review-integrity contract](../resources/review-integrity.md): emit `audit-output/review-records.json` with source snapshots, component evidence, explicit assumptions and raw-input lineage. Reviews remain empty until actual reviewers return their decisions. Run `python3 scripts/review_integrity.py check audit-output/review-records.json --evidence-root <snapshot-root>` and save its JSON output. Missing evidence remains visible and cannot be published as verified.
 
 ## Phase 4: Evidence Composition
 
@@ -168,7 +173,7 @@ Cross-lane correlation raises confidence by at most one step, and only when the 
 
 ## Phase 6: Emit + Conservation Check
 
-Write `audit-output/05-findings-triaged.md` in the Triage Output format: summary table, cluster→reporter correlation table, all VALID findings in the Finding Schema ordered by severity, then Excluded Findings with per-item reasons.
+Write `audit-output/05-findings-triaged.md` in the Triage Output format: summary table, cluster→reporter correlation table, supported candidates, an explicit Unresolved section, then Excluded Findings with per-item reasons. Preserve every ID in the decision sidecar. The JSON lineage check, not a narrated count, owns conservation; explicit splits retain the raw input's memberships in all resulting candidates.
 
 **Conservation check — the acceptance criterion for this agent.** Every row of the Phase 1 input ledger must resolve to exactly one of:
 

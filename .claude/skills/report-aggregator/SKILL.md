@@ -11,7 +11,7 @@ Aggregate findings into a Sherlock-format report from `$ARGUMENTS`.
 ## What this does
 
 1. **Collects** all CONFIRMED findings from the judging phase
-2. **Resolves** severity consensus across judges (2-of-3 rule)
+2. **Consumes** the declared technical-support tally and selected venue decision without creating a cross-venue severity
 3. **Verifies** every code citation against the actual codebase — fixes stale line numbers
 4. **Generates** GitHub permalinks for all in-repo code references
 5. **Assembles** the final report in Sherlock submission format
@@ -58,6 +58,7 @@ In [`file.sol:42`](https://github.com/org/repo/blob/<commit>/src/file.sol#L42), 
 ## Output
 
 - `audit-output/CONFIRMED-REPORT.md` — Final publication-quality report
+- `audit-output/review-records.json` and `review-gate.json` — preserve all candidate dispositions. Follow the shared [review-integrity contract](.claude/resources/review-integrity.md) and require `review_integrity.py gate` to pass before labeling the report confirmed. A failed gate leaves a visible draft with unresolved items, not a confirmed report.
 
 ## Related skills
 
